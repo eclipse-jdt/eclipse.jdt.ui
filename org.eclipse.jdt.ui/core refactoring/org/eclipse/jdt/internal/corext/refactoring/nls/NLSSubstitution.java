@@ -225,7 +225,7 @@ public class NLSSubstitution {
 				NLSSubstitution substitution= substitutions[i];
 				if (substitution != this && substitution.getState() == EXTERNALIZED) {
 					// same key but different value
-					if (currKey.equals(substitution.getKey()) && !currValue.equals(substitution.getValue())) {
+					if (currKey.equals(substitution.getKey()) && !currValue.equals(substitution.getValueNonEmpty())) {
 						return true;
 					}
 				}
@@ -265,8 +265,6 @@ public class NLSSubstitution {
 		}
 	}
 
-
-
 	public void revert() {
 		fState= fInitialState;
 		fKey= fInitialKey;
@@ -276,9 +274,5 @@ public class NLSSubstitution {
 	private String createKey(int counter) {
 		return String.valueOf(counter);
 	}
-
-
-
-
 
 }

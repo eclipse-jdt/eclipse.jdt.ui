@@ -138,8 +138,13 @@ public class NLSHintHelper {
 			container= (IClassFile)openable;
 		else
 			Assert.isLegal(false);
-
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(container, ASTProvider.WAIT_YES, null);
+	
+		return getResourceBundleName(accessorClassBinding, astRoot);
+	}
+	
+	public static String getResourceBundleName(ITypeBinding accessorClassBinding, CompilationUnit astRoot) throws JavaModelException {
+
 		if (astRoot == null)
 			return null;
 		

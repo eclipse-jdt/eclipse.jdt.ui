@@ -71,7 +71,8 @@ public class NLSScanner {
 					                value, 
 					                scanner.getCurrentTokenStartPosition(), 
 					                scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
-					                nlsElementIndex++));
+					                nlsElementIndex++,
+					                false));
 					break;
 				case ITerminalSymbols.TokenNameCOMMENT_LINE:
 					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))

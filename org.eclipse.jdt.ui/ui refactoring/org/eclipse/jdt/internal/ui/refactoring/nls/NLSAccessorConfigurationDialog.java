@@ -13,10 +13,11 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -44,9 +45,10 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -190,6 +192,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
 		LayoutUtil.setWidthHint(fSubstitutionPattern.getTextControl(null), convertWidthInCharsToPixels(60));
+		
+		fSubstitutionPattern.setEnabled(!fRefactoring.isEclipseNLS());
 	}
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
@@ -409,15 +413,16 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 
 
 	void updateRefactoring() {
-		NLSRefactoring refactoring= fRefactoring;
+		fRefactoring.setAccessorClassPackage(fAccessorPackage.getSelected());
+		fRefactoring.setAccessorClassName(fAccessorClassName.getText());
 
-		refactoring.setAccessorClassPackage(fAccessorPackage.getSelected());
-		refactoring.setAccessorClassName(fAccessorClassName.getText());
+		fRefactoring.setResourceBundleName(fResourceBundleFile.getText());
+		fRefactoring.setResourceBundlePackage(fResourceBundlePackage.getSelected());
 
-		refactoring.setResourceBundleName(fResourceBundleFile.getText());
-		refactoring.setResourceBundlePackage(fResourceBundlePackage.getSelected());
-
-		refactoring.setSubstitutionPattern(fSubstitutionPattern.getText());
+		if (!fRefactoring.isEclipseNLS())
+			fRefactoring.setSubstitutionPattern(fSubstitutionPattern.getText());
+		
+		fRefactoring.setIsEclipseNLS(fRefactoring.detectIsEclipseNLS());
 	}
 
 	private StringDialogField createStringField(String label, AccessorAdapter updateListener) {
@@ -434,6 +439,5 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		field.setButtonLabel(button);
 		return field;
 	}
-
 
 }

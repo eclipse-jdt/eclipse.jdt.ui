@@ -17,63 +17,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.FontRegistry;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLayoutData;
-import org.eclipse.jface.viewers.ColumnPixelData;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.IFontProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerFilter;
-import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardPage;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.ModifyEvent;
@@ -101,7 +48,70 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.FontRegistry;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLayoutData;
+import org.eclipse.jface.viewers.ColumnPixelData;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IFontProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.IWizardPage;
+
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -245,10 +255,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		private Image getNLSImage(NLSSubstitution sub) {
 			if ((sub.getValue() == null) && (sub.getKey() != null)) {
-				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
+				// Missing keys
+				JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE);
 				return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 			} else
-				if (sub.isConflicting(fSubstitutions)) {
+				if (sub.isConflicting(fSubstitutions) || !isKeyValid(sub)) {
 					JavaElementImageDescriptor imageDescriptor= new JavaElementImageDescriptor(getNLSImageDescriptor(sub.getState()), JavaElementImageDescriptor.ERROR, JavaElementImageProvider.SMALL_SIZE);
 					return JavaPlugin.getImageDescriptorRegistry().get(imageDescriptor);
 				} else {
@@ -476,6 +487,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	private static final int SETTINGS_MAX_ENTRIES= 5;
 	
 	private Text fPrefixField;
+	private Button fIsEclipseNLS;
 	private Table fTable;
 	private TableViewer fTableViewer;
 	private SourceViewer fSourceViewer;
@@ -513,6 +525,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Composite supercomposite= new Composite(parent, SWT.NONE);
 		supercomposite.setLayout(new GridLayout());
 
+		createIsEclipseNLSCheckbox(supercomposite);
+		
 		createKeyPrefixField(supercomposite);
 
 		SashForm composite= new SashForm(supercomposite, SWT.VERTICAL);
@@ -599,9 +613,21 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fNLSRefactoring.setAccessorClassPackage(selected.getAccessorClassPackage());
 			fNLSRefactoring.setResourceBundleName(selected.getResourceBundleName());
 			fNLSRefactoring.setResourceBundlePackage(selected.getResourceBundlePackage());
+			fNLSRefactoring.setIsEclipseNLS(fNLSRefactoring.detectIsEclipseNLS());
 			
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
+			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
 			fTableViewer.refresh(true);
+			validateKeys();
+		}
+	}
+	
+	private boolean willCreateAccessorClass() {
+		try {
+			return fNLSRefactoring.willCreateAccessorClass();
+		} catch (JavaModelException e) {
+			return false;
 		}
 	}
 
@@ -681,7 +707,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		NLSAccessorConfigurationDialog dialog= new NLSAccessorConfigurationDialog(getShell(), fNLSRefactoring);
 		if (dialog.open() == Window.OK) {
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
+			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
 			fTableViewer.refresh(true);
+			validateKeys();
 			updateAccessorChoices();
 		}
 	}
@@ -845,17 +874,58 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			public void modifyText(ModifyEvent e) {
 				fNLSRefactoring.setPrefix(fPrefixField.getText());
 				fTableViewer.refresh(true);
+				validateKeys();
+			}
+		});
+	}
+	
+	private void createIsEclipseNLSCheckbox(Composite parent) {
+		fIsEclipseNLS= new Button(parent, SWT.CHECK);
+		fIsEclipseNLS.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fIsEclipseNLS.setText(NLSUIMessages.getString("ExternalizeWizardPage.isEclipseNLSCheckbox")); //$NON-NLS-1$
+		fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+		fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+		fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				super.widgetDefaultSelected(e);
+				fNLSRefactoring.setIsEclipseNLS(fIsEclipseNLS.getSelection());
+				validateKeys();
 			}
 		});
 	}
 
 	private void validateKeys() {
 		RefactoringStatus status= new RefactoringStatus();
+		checkInvalidKeys(status);
 		checkDuplicateKeys(status);
 		checkMissingKeys(status);
 		setPageComplete(status);
 	}
 
+	private void checkInvalidKeys(RefactoringStatus status) {
+		for (int i= 0; i < fSubstitutions.length; i++) {
+			if (!isKeyValid(fSubstitutions[i])) {
+				status.addFatalError(NLSUIMessages.getString("ExternalizeWizardPage.warning.keyInvalid")); //$NON-NLS-1$
+				return;
+			}
+		}
+	}
+	
+	private boolean isKeyValid(NLSSubstitution substitution) {
+		if (!fNLSRefactoring.isEclipseNLS())
+			return true;
+		
+		String key= substitution.getKey();
+		if (!Character.isJavaIdentifierStart(key.charAt(0)))
+			return false;
+		
+		for (int i= 1, length= key.length(); i < length; i++)
+			if (!Character.isJavaIdentifierPart(key.charAt(i)))
+				return false;
+		
+		return true;
+	}
+	
 	private void checkDuplicateKeys(RefactoringStatus status) {
 		for (int i= 0; i < fSubstitutions.length; i++) {
 			NLSSubstitution substitution= fSubstitutions[i];
@@ -895,13 +965,13 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Label l= new Label(comp, SWT.NONE);
 		l.setText(NLSUIMessages.getString("ExternalizeWizardPage.strings_to_externalize")); //$NON-NLS-1$
 		FormData formData = new FormData();
-		formData.left = new FormAttachment(0,0);
+		formData.left = new FormAttachment(0, 0);
 		l.setLayoutData(formData);
 		
 		Control tableControl= createTable(comp);
 		formData = new FormData();
 		formData.top = new FormAttachment(l, 5);
-		formData.left = new FormAttachment(0,0);
+		formData.left = new FormAttachment(0, 0);
 		formData.right = new FormAttachment(100,0);
 		formData.bottom = new FormAttachment(100,0);
 		tableControl.setLayoutData(formData);

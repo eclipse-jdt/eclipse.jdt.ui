@@ -11,10 +11,24 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -23,9 +37,14 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * calculates hints for the nls-refactoring out of a compilation unit.
@@ -54,20 +73,36 @@ public class NLSHint {
 		IJavaProject project= cu.getJavaProject();
 		NLSLine[] lines= createRawLines(cu);
 		
-		AccessorClassReference firstAccessInfo= findFirstAccessorReference(lines, astRoot);
+		AccessorClassReference accessClassRef= findFirstAccessorReference(lines, astRoot);
+		
+		if (accessClassRef == null) {
+			// Look for Eclipse NLS approach
+			List eclipseNLSLines= new ArrayList();
+			accessClassRef= createEclipseNLSLines(getDocument(cu), astRoot, eclipseNLSLines);
+			if (!eclipseNLSLines.isEmpty()) {
+				NLSLine[] rawLines= lines;
+				int rawLinesLength= rawLines.length;
+				int eclipseLinesLength= eclipseNLSLines.size();
+				lines= new NLSLine[rawLinesLength + eclipseLinesLength];
+				for (int i= 0; i < rawLinesLength; i++)
+					lines[i]= rawLines[i];
+				for (int i= 0; i < eclipseLinesLength; i++)
+					lines[i+rawLinesLength]= (NLSLine)eclipseNLSLines.get(i);
+			}
+		}
 		
 		Properties props= null;
-		if (firstAccessInfo != null)
-			props= NLSHintHelper.getProperties(project, firstAccessInfo);
+		if (accessClassRef != null)
+			props= NLSHintHelper.getProperties(project, accessClassRef);
 		
 		if (props == null)
 			props= new Properties();
 		
 		fSubstitutions= createSubstitutions(lines, props, astRoot);
 		
-		if (firstAccessInfo != null) {
-			fAccessorName= firstAccessInfo.getName();
-			ITypeBinding accessorClassBinding= firstAccessInfo.getBinding();
+		if (accessClassRef != null) {
+			fAccessorName= accessClassRef.getName();
+			ITypeBinding accessorClassBinding= accessClassRef.getBinding();
 			
 			try {
 				IPackageFragment accessorPack= NLSHintHelper.getPackageOfAccessorClass(project, accessorClassBinding);
@@ -75,7 +110,7 @@ public class NLSHint {
 					fAccessorPackage= accessorPack;
 				}
 				
-				String fullBundleName= firstAccessInfo.getResourceBundleName();
+				String fullBundleName= accessClassRef.getResourceBundleName();
 				if (fullBundleName != null) {
 					fResourceBundleName= Signature.getSimpleName(fullBundleName) + NLSRefactoring.PROPERTY_FILE_EXT;
 					String packName= Signature.getQualifier(fullBundleName);
@@ -90,6 +125,87 @@ public class NLSHint {
 		}
 	}
 	
+	private AccessorClassReference createEclipseNLSLines(final IDocument document, CompilationUnit astRoot, List nlsLines) {
+		
+		final AccessorClassReference[] firstAccessor= new AccessorClassReference[1];
+		final Map lineToNLSLine= new HashMap();
+		
+		astRoot.accept(new ASTVisitor() {
+			
+			private ICompilationUnit fCache_CU;
+			private CompilationUnit fCache_AST;
+
+			public boolean visit(QualifiedName node) {
+				ITypeBinding type= node.getQualifier().resolveTypeBinding();
+				if (type != null) {
+					ITypeBinding superType= type.getSuperclass();
+					if (superType != null && NLS.class.getName().equals(superType.getQualifiedName())) {
+						Integer line;
+						try {
+							line = new Integer(document.getLineOfOffset(node.getStartPosition()));
+						} catch (BadLocationException e) {
+							return true; // ignore and continue
+						}
+						NLSLine nlsLine= (NLSLine)lineToNLSLine.get(line);
+						if (nlsLine == null) {
+							nlsLine=  new NLSLine(line.intValue());
+							lineToNLSLine.put(line, nlsLine);
+						}
+						SimpleName name= node.getName();
+						NLSElement element= new NLSElement(node.getName().getIdentifier(), name.getStartPosition(), 
+				                name.getLength(), nlsLine.size() - 1, true);
+						nlsLine.add(element);
+						String bundleName;
+						try {
+							ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT); 
+							if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
+								fCache_CU= bundleCU;
+								fCache_AST=	JavaPlugin.getDefault().getASTProvider().getAST(fCache_CU, ASTProvider.WAIT_YES, null);
+							}
+							bundleName = NLSHintHelper.getResourceBundleName(type, fCache_AST);
+						} catch (JavaModelException e) {
+							return true; // ignore this accessor and continue
+						}
+						element.setAccessorClassReference(new AccessorClassReference(type, bundleName, new Region(node.getStartPosition(), node.getLength())));
+						
+						if (firstAccessor[0] == null)
+							firstAccessor[0]= element.getAccessorClassReference();
+						
+					}
+				}
+				return true;
+			}
+		});
+		
+		nlsLines.addAll(lineToNLSLine.values());
+		return firstAccessor[0];
+	}
+	
+	private IDocument getDocument(ICompilationUnit cu) {
+		IPath path= cu.getPath();
+		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+		try {
+			manager.connect(path, null);
+		} catch (CoreException e) {
+			return null;
+		}
+		
+		try {
+			if (manager != null) {
+				ITextFileBuffer buffer= manager.getTextFileBuffer(path);
+				if (buffer != null)
+					return buffer.getDocument();
+			}
+		} finally {
+			try {
+				manager.disconnect(path, null);
+			} catch (CoreException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
 	private NLSSubstitution[] createSubstitutions(NLSLine[] lines, Properties props, CompilationUnit astRoot) {
 		List result= new ArrayList();
 		
@@ -107,6 +223,9 @@ public class NLSHint {
 						String value= props.getProperty(key);
 						result.add(new NLSSubstitution(NLSSubstitution.EXTERNALIZED, key, value, nlsElement, accessorClassReference));
 					}
+				} else if (nlsElement.isEclipseNLS()) {
+					String key= nlsElement.getValue();
+					result.add(new NLSSubstitution(NLSSubstitution.EXTERNALIZED, key, props.getProperty(key), nlsElement, nlsElement.getAccessorClassReference()));
 				} else {
 					result.add(new NLSSubstitution(NLSSubstitution.INTERNALIZED, stripQuotes(nlsElement.getValue()), nlsElement));
 				}
@@ -163,6 +282,10 @@ public class NLSHint {
 	public String getAccessorClassName() {
 		return fAccessorName;
 	}
+	
+//	public boolean isEclipseNLS() {
+//		return fIsEclipseNLS;
+//	}
 
 	public IPackageFragment getAccessorClassPackage() {
 		return fAccessorPackage;

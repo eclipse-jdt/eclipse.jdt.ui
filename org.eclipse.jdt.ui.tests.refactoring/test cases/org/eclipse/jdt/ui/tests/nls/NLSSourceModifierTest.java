@@ -79,7 +79,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -107,7 +107,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -139,7 +139,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -167,7 +167,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -212,7 +212,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -253,7 +253,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);
@@ -291,7 +291,7 @@ public class NLSSourceModifierTest extends TestCase {
         nlsSubstitutions[0].setKey("nls.0");        
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
-        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor");
+        TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
         
         Document doc = new Document(klazz);
         change.getEdit().apply(doc);

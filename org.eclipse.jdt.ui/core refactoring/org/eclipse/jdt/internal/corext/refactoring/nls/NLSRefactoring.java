@@ -27,9 +27,11 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -65,25 +67,33 @@ public class NLSRefactoring extends Refactoring {
 	private NLSSubstitution[] fSubstitutions;
 	
 	private String fPrefix;
+	
+	/**
+	 * <code>true</code> if the standard resource bundle mechanism
+	 * is used and <code>false</code> NLSing is done the Eclipse way. 
+	 */
+	private boolean fIsEclipseNLS;
 
 	private NLSRefactoring(ICompilationUnit cu) {
 		Assert.isNotNull(cu);
-
 		fCu= cu;
-		
-		String cuName= cu.getElementName();
-		setPrefix(cuName.substring(0, cuName.length() - 4)); // A.java -> A. 
 
-		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, null);
-		NLSHint nlsHint= new NLSHint(cu, astRoot);
+		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCu, ASTProvider.WAIT_YES, null);
+		NLSHint nlsHint= new NLSHint(fCu, astRoot);
 
 		fSubstitutions= nlsHint.getSubstitutions();
 		setAccessorClassName(nlsHint.getAccessorClassName());
 		setAccessorClassPackage(nlsHint.getAccessorClassPackage());
+		setIsEclipseNLS(detectIsEclipseNLS());
 		setResourceBundleName(nlsHint.getResourceBundleName());
 		setResourceBundlePackage(nlsHint.getResourceBundlePackage());
+		setSubstitutionPattern(DEFAULT_SUBST_PATTERN);
 		
-		fSubstitutionPattern= DEFAULT_SUBST_PATTERN;
+		String cuName= fCu.getElementName();
+		if (fIsEclipseNLS)
+			setPrefix(cuName.substring(0, cuName.length() - 5) + "_"); // A.java -> A_ //$NON-NLS-1$
+		else
+			setPrefix(cuName.substring(0, cuName.length() - 4)); // A.java -> A.
 	}
 
 	public static NLSRefactoring create(ICompilationUnit cu) {
@@ -110,7 +120,10 @@ public class NLSRefactoring extends Refactoring {
 	 * to show the pattern in the UI
 	 */
 	public String getSubstitutionPattern() {
-		return fSubstitutionPattern;
+		if (fIsEclipseNLS)
+			return KEY;
+		else
+			return fSubstitutionPattern;
 	}
 
 	public ICompilationUnit getCu() {
@@ -184,18 +197,21 @@ public class NLSRefactoring extends Refactoring {
 
 			final DynamicValidationStateChange result= new DynamicValidationStateChange("NLS Refactoring"); //$NON-NLS-1$
 
-			if (willCreateAccessorClass()) {
-				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), new SubProgressMonitor(pm, 1)));
+			boolean createAccessorClass= willCreateAccessorClass();
+			if (createAccessorClass) {
+				result.add(AccessorClassCreator.create(fCu, fAccessorClassName, getAccessorCUPath(), fAccessorClassPackage, getPropertyFilePath(), fIsEclipseNLS, fSubstitutions, new SubProgressMonitor(pm, 1)));
 			}
 			pm.worked(1);
 
 			if (willModifySource()) {
-				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, fSubstitutionPattern, fAccessorClassPackage, fAccessorClassName));
+				result.add(NLSSourceModifier.create(getCu(), fSubstitutions, getSubstitutionPattern(), fAccessorClassPackage, fAccessorClassName, fIsEclipseNLS));
 			}
 			pm.worked(1);
 
 			if (willModifyPropertyFile()) {
 				result.add(NLSPropertyFileModifier.create(fSubstitutions, getPropertyFilePath()));
+				if (isEclipseNLS() && !createAccessorClass)
+					result.add(AccessorClassModifier.create(getAccessorCu(), fSubstitutions));
 			}
 			pm.worked(1);
 
@@ -211,7 +227,7 @@ public class NLSRefactoring extends Refactoring {
 
 		// these values have defaults ...
 		Assert.isNotNull(fAccessorClassName);
-		Assert.isNotNull(fSubstitutionPattern);
+		Assert.isNotNull(getSubstitutionPattern());
 	}
 
 	private IFile[] getAllFilesToModify() {
@@ -325,7 +341,7 @@ public class NLSRefactoring extends Refactoring {
 		return result;
 	}
 
-	private boolean willCreateAccessorClass() throws JavaModelException {
+	public boolean willCreateAccessorClass() throws JavaModelException {
 
 		NLSSubstitution[] subs= fSubstitutions;
 		if (NLSSubstitution.countItems(subs, NLSSubstitution.EXTERNALIZED) == 0) {
@@ -403,6 +419,18 @@ public class NLSRefactoring extends Refactoring {
 		Assert.isNotNull(packageFragment);
 		fAccessorClassPackage= packageFragment;
 	}
+	
+	/**
+	 * Sets whether the Eclipse NLSing mechanism or
+	 * standard resource bundle mechanism is used.
+	 * 
+	 * @param isEclipseNLS	<code>true</code> if NLSing is done the Eclipse way
+	 * 						and <code>false</code> if the standard resource bundle mechanism is used
+	 * @since 3.1 
+	 */
+	public void setIsEclipseNLS(boolean isEclipseNLS) {
+		fIsEclipseNLS= isEclipseNLS;
+	}
 
 	public void setResourceBundlePackage(IPackageFragment resourceBundlePackage) {
 		Assert.isNotNull(resourceBundlePackage);
@@ -416,6 +444,44 @@ public class NLSRefactoring extends Refactoring {
 
 	public IPackageFragment getAccessorClassPackage() {
 		return fAccessorClassPackage;
+	}
+	
+	/**
+	 * Computes whether the Eclipse NLSing mechanism is used.
+	 * 
+	 * @return		<code>true</code> if NLSing is done the Eclipse way
+	 * 				and <code>false</code> if the standard resource bundle mechanism is used
+	 * @since 3.1 
+	 */
+	public boolean detectIsEclipseNLS() {
+		if (getAccessorClassPackage() != null) {
+			ICompilationUnit accessorCU= getAccessorClassPackage().getCompilationUnit(getAccessorClassName() + ".java"); //$NON-NLS-1$
+			IType type= accessorCU.getType(getAccessorClassName());
+			if (type.exists()) {
+				try {
+					String superclassName= type.getSuperclassName();
+					if (!"NLS".equals(superclassName) && !NLS.class.getName().equals(superclassName)) //$NON-NLS-1$
+						return false;
+					IType superclass= type.newSupertypeHierarchy(null).getSuperclass(type);
+					return NLS.class.getName().equals(superclass.getFullyQualifiedName());
+				} catch (JavaModelException e) {
+					return false;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns whether the Eclipse NLSing mechanism or
+	 * the standard resource bundle mechanism is used.
+	 * 
+	 * @return		<code>true</code> if NLSing is done the Eclipse way
+	 * 				and <code>false</code> if the standard resource bundle mechanism is used
+	 * @since 3.1 
+	 */
+	public boolean isEclipseNLS() {
+		return fIsEclipseNLS;
 	}
 
 	public IPackageFragment getResourceBundlePackage() {

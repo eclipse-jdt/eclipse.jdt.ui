@@ -30,15 +30,18 @@ public class NLSElement {
 
 	/** Index of the Element in an NLSLine */
 	private int fIndex;
+	private boolean fIsEclipseNLS;
+	private AccessorClassReference fAccessorClassReference;
 
 	/**
 	 * Creates a new NLS element for the given string and position.
 	 */
-	public NLSElement(String value, int start, int length, int index) {
+	public NLSElement(String value, int start, int length, int index, boolean isEclipseNLS) {
 		fValue= value;
 		fIndex= index;
 		Assert.isNotNull(fValue);
 		fPosition= new Region(start, length);
+		fIsEclipseNLS= isEclipseNLS;
 	}
 
 	/**
@@ -80,7 +83,7 @@ public class NLSElement {
 	}
 
 	/**
-	 * Returns <code>true</code> if the NLS element has an assicated $NON-NLS-*$ tag. 
+	 * Returns <code>true</code> if the NLS element has an asscociated $NON-NLS-*$ tag. 
 	 * Otherwise <code>false</code> is returned.
 	 */
 	public boolean hasTag() {
@@ -102,6 +105,50 @@ public class NLSElement {
 	public String toString() {
 		return fPosition + ": " + fValue + "    Tag position: " + //$NON-NLS-2$ //$NON-NLS-1$
 				(hasTag() ? fTagPosition.toString() : "no tag found"); //$NON-NLS-1$
+	}
+
+	//--------------- Eclipse NLS mechanism support ---------------
+	
+	/**
+	 * Returns whether the standard resource bundle mechanism or
+	 * the Eclipse NLSing mechanism is used.
+	 * 
+	 * @return		<code>true</code> if the standard resource bundle mechanism
+	 * 				is used and <code>false</code> NLSing is done the Eclipse way
+	 * @since 3.1 
+	 */
+	public boolean isEclipseNLS() {
+		return fIsEclipseNLS;
+	}
+	
+	/**
+	 * Sets the accessor class reference for this element.
+	 * <p>
+	 * Note: this call is only valid when the element is
+	 * using the Eclipse NLS mechanism.
+	 * </p>
+	 * 
+	 * @param accessorClassRef the accessor class reference
+	 * @since 3.1 
+	 */
+	public void setAccessorClassReference(AccessorClassReference accessorClassRef) {
+		Assert.isTrue(fIsEclipseNLS);
+		fAccessorClassReference= accessorClassRef;
+	}
+
+	/**
+	 * Returns the accessor class reference for this element.
+	 * <p>
+	 * Note: this call is only valid when the element is
+	 * using the Eclipse NLS mechanism.
+	 * </p>
+	 * 
+	 * @return the accessor class reference
+	 * @since 3.1 
+	 */
+	public AccessorClassReference getAccessorClassReference() {
+		Assert.isTrue(fIsEclipseNLS);
+		return fAccessorClassReference;
 	}
 }
 
