@@ -49,19 +49,31 @@ public class NewNameQueries implements INewNameQueries {
 
 	private static final String INVALID_NAME_NO_MESSAGE= "";//$NON-NLS-1$
 	private final Wizard fWizard;
+	private final Shell fShell;
 
 	public NewNameQueries() {
-		this(null);
+		fShell= null;
+		fWizard= null;
 	}
 	
 	public NewNameQueries(Wizard wizard) {
 		fWizard= wizard;
+		fShell= null;
+	}
+	
+	public NewNameQueries(Shell shell) {
+		fShell = shell;
+		fWizard= null;
 	}
 
 	private Shell getShell() {
-		if (fWizard == null)
-			return JavaPlugin.getActiveWorkbenchShell();
-		return fWizard.getContainer().getShell();
+		Assert.isTrue(fWizard == null || fShell == null);
+		if (fWizard != null)
+			return fWizard.getContainer().getShell();
+			
+		if (fShell != null)
+			return fShell;
+		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
 	private static String removeTrailingJava(String name) {
