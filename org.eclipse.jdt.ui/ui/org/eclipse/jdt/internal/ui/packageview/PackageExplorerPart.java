@@ -936,12 +936,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void initKeyListener() {
 		fViewer.getControl().addKeyListener(new KeyAdapter() {
 			public void keyReleased(KeyEvent event) {
-				doKeyPressed(event.keyCode);
+				doKeyPressed(event);
 			}
 		});
 	}
 
-	private void doKeyPressed(int key) {
+	private void doKeyPressed(KeyEvent event) {
+		if (event.stateMask != 0) 
+			return;		
+		
+		int key= event.keyCode;
 		if (key == SWT.F5) {
 			fRefreshAction.selectionChanged(
 				(IStructuredSelection) fViewer.getSelection());
