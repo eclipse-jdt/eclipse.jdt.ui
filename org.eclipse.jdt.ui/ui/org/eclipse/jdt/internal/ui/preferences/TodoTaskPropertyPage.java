@@ -49,6 +49,8 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	
 
 	public TodoTaskPropertyPage() {
+		setDescription(PreferencesMessages.getString("TodoTaskPropertyPage.description")); //$NON-NLS-1$
+		
 		fBlockStatus= new StatusInfo();
 		IDialogFieldListener listener= new IDialogFieldListener() {
 			public void dialogFieldChanged(DialogField field) {

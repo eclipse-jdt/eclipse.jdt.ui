@@ -16,15 +16,22 @@ import java.util.List;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -34,7 +41,6 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
@@ -59,8 +65,14 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		public String priority;
 	}
 	
-	private static class TodoTaskLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private class TodoTaskLabelProvider extends LabelProvider implements ITableLabelProvider, IFontProvider {
 	
+		private Font fBold;
+
+		public TodoTaskLabelProvider() {
+			fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+		}
+		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getImage(java.lang.Object)
 		 */
@@ -87,7 +99,11 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		public String getColumnText(Object element, int columnIndex) {
 			TodoTask task= (TodoTask) element;
 			if (columnIndex == 0) {
-				return task.name;
+				String name= task.name;
+				if (isDefaultTask(task)) {
+					name= name + " (default)"; //$NON-NLS-1$
+				}
+				return name;
 			} else {
 				if (PRIORITY_HIGH.equals(task.priority)) {
 					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.high.priority"); //$NON-NLS-1$
@@ -100,15 +116,32 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			}	
 		}
 
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.IFontProvider#getFont(java.lang.Object)
+		 */
+		public Font getFont(Object element) {
+			if (isDefaultTask((TodoTask) element)) {
+				return fBold;
+			}
+			return null;
+		}
+	}
+	
+	private static class TodoTaskSorter extends ViewerSorter {
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			return collator.compare(((TodoTask) e1).name, ((TodoTask) e2).name);
+		}
 	}
 	
 	private static final int IDX_ADD= 0;
 	private static final int IDX_EDIT= 1;
 	private static final int IDX_REMOVE= 2;
+	private static final int IDX_DEFAULT= 4;
 	
 	private IStatus fTaskTagsStatus;
 	private ListDialogField fTodoTasksList;
 	private SelectionButtonDialogField fCaseSensitiveCheckBox;
+
 
 	public TodoTaskConfigurationBlock(IStatusChangeListener context, IJavaProject project) {
 		super(context, project, getKeys());
@@ -118,11 +151,11 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			/* 0 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.add.button"), //$NON-NLS-1$
 			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"), //$NON-NLS-1$
 			/* 2 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"), //$NON-NLS-1$
-			
+			null,
+			/* 4 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.setdefault.button"), //$NON-NLS-1$		
 		};
 		fTodoTasksList= new ListDialogField(adapter, buttons, new TodoTaskLabelProvider());
 		fTodoTasksList.setDialogFieldListener(adapter);
-		fTodoTasksList.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.label")); //$NON-NLS-1$
 		fTodoTasksList.setRemoveButtonIndex(IDX_REMOVE);
 		
 		String[] columnsHeaders= new String[] {
@@ -131,6 +164,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
+		fTodoTasksList.setViewerSorter(new TodoTaskSorter());
+		
 		
 		fCaseSensitiveCheckBox= new SelectionButtonDialogField(SWT.CHECK);
 		fCaseSensitiveCheckBox.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.casesensitive.label")); //$NON-NLS-1$
@@ -140,6 +175,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 			fTodoTasksList.selectFirstElement();
 		} else {
 			fTodoTasksList.enableButton(IDX_EDIT, false);
+			fTodoTasksList.enableButton(IDX_DEFAULT, false);
 		}
 		
 		fTaskTagsStatus= new StatusInfo();		
@@ -148,7 +184,18 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	public void setEnabled(boolean isEnabled) {
 		fTodoTasksList.setEnabled(isEnabled);
 		fCaseSensitiveCheckBox.setEnabled(isEnabled);
-		
+	}
+	
+	final boolean isDefaultTask(TodoTask task) {
+		return fTodoTasksList.getIndexOfElement(task) == 0;
+	}
+	
+	private void setToDefaultTask(TodoTask task) {
+		List elements= fTodoTasksList.getElements();
+		elements.remove(task);
+		elements.add(0, task);
+		fTodoTasksList.setElements(elements);
+		fTodoTasksList.enableButton(IDX_DEFAULT, false);
 	}
 	
 	private static String[] getKeys() {
@@ -159,8 +206,12 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	
 	public class TaskTagAdapter implements IListAdapter, IDialogFieldListener {
 
-		private boolean canEdit(ListDialogField field) {
-			return field.getSelectedElements().size() == 1;
+		private boolean canEdit(List selectedElements) {
+			return selectedElements.size() == 1;
+		}
+		
+		private boolean canSetToDefault(List selectedElements) {
+			return selectedElements.size() == 1 && !isDefaultTask((TodoTask) selectedElements.get(0));
 		}
 
 		public void customButtonPressed(ListDialogField field, int index) {
@@ -168,11 +219,13 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		public void selectionChanged(ListDialogField field) {
-			field.enableButton(IDX_EDIT, canEdit(field));
+			List selectedElements= field.getSelectedElements();
+			field.enableButton(IDX_EDIT, canEdit(selectedElements));
+			field.enableButton(IDX_DEFAULT, canSetToDefault(selectedElements));
 		}
 			
 		public void doubleClicked(ListDialogField field) {
-			if (canEdit(field)) {
+			if (canEdit(field.getSelectedElements())) {
 				doTodoButtonPressed(IDX_EDIT);
 			}
 		}
@@ -194,7 +247,6 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private Composite createMarkersTabContent(Composite folder) {
-		
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
@@ -202,15 +254,12 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 		Composite markersComposite= new Composite(folder, SWT.NULL);
 		markersComposite.setLayout(layout);
-		
-		fTodoTasksList.doFillIntoGrid(markersComposite, 3);
-		LayoutUtil.setHorizontalSpan(fTodoTasksList.getLabelControl(null), 2);
-		
-		GridData data= (GridData)fTodoTasksList.getListControl(null).getLayoutData();
-		data.grabExcessHorizontalSpace= true;
-		data.grabExcessVerticalSpace= true;
-		data.verticalAlignment= GridData.FILL;
-		//data.heightHint= SWTUtil.getTableHeightHint(table, 6);
+			
+		Control listControl= fTodoTasksList.getListControl(markersComposite);
+		listControl.setLayoutData(new GridData(GridData.FILL_BOTH));
+
+		Control buttonsControl= fTodoTasksList.getButtonBox(markersComposite);
+		buttonsControl.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_BEGINNING));
 		
 		fCaseSensitiveCheckBox.doFillIntoGrid(markersComposite, 2);
 
@@ -306,14 +355,17 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		if (index != IDX_ADD) {
 			edited= (TodoTask) fTodoTasksList.getSelectedElements().get(0);
 		}
-		
-		TodoTaskInputDialog dialog= new TodoTaskInputDialog(getShell(), edited, fTodoTasksList.getElements());
-		if (dialog.open() == Window.OK) {
-			if (edited != null) {
-				fTodoTasksList.replaceElement(edited, dialog.getResult());
-			} else {
-				fTodoTasksList.addElement(dialog.getResult());
+		if (index == IDX_ADD || index == IDX_EDIT) {
+			TodoTaskInputDialog dialog= new TodoTaskInputDialog(getShell(), edited, fTodoTasksList.getElements());
+			if (dialog.open() == Window.OK) {
+				if (edited != null) {
+					fTodoTasksList.replaceElement(edited, dialog.getResult());
+				} else {
+					fTodoTasksList.addElement(dialog.getResult());
+				}
 			}
+		} else if (index == IDX_DEFAULT) {
+			setToDefaultTask(edited);
 		}
 	}
 
