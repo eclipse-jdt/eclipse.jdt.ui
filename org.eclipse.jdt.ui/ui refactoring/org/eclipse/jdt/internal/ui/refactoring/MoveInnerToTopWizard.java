@@ -23,14 +23,18 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		try{			
 			//no input page if the type is static
 			if (! JdtFlags.isStatic(getMoveRefactoring().getInputType()))
-				addPage(new MoveInnerToToplnputPage());
+				addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance()));
 			else
 				setChangeCreationCancelable(false);
 		} catch (JavaModelException e){
 			//log and try anyway
 			JavaPlugin.log(e);
-			addPage(new MoveInnerToToplnputPage()); 
+			addPage(new MoveInnerToToplnputPage(getInitialNameForEnclosingInstance())); 
 		}		
+	}
+
+	private String getInitialNameForEnclosingInstance() {
+		return getMoveRefactoring().getEnclosingInstanceName();
 	}
 
 	private MoveInnerToTopRefactoring getMoveRefactoring() {
