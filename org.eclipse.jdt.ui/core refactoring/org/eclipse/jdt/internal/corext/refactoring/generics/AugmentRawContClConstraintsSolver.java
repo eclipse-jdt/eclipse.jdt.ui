@@ -84,7 +84,7 @@ public class AugmentRawContClConstraintsSolver {
 				//TODO: not necessary for types that are not used in a TypeConstraint but only as type in CollectionElementVariable
 				setTypeEstimate(cv, TypeSet.create(typeConstraintCv.getTypeBinding()));
 			} else if (cv instanceof CollectionElementVariable2) {
-				setTypeEstimate(cv, TypeSet.getUniverse());
+//				setTypeEstimate(cv, TypeSet.getUniverse());
 			}
 		}
 	}
@@ -158,7 +158,10 @@ public class AugmentRawContClConstraintsSolver {
 				rightRep.setTypeEstimate(newRightEstimate);
 				fWorkList.addAll(Arrays.asList(rightRep.getElements()));
 			}
+		} else {
+			throw new IllegalStateException();
 		}
+		
 	}
 
 	private boolean isConstantConstraint(SimpleTypeConstraint2 stc) {

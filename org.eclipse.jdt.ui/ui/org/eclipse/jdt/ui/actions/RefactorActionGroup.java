@@ -242,13 +242,11 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("UseSupertype", fUseSupertypeAction); //$NON-NLS-1$
 		fEditorActions.add(fUseSupertypeAction);
 		
-		if (isAugmentRawRefactoringEnabled()) {
-			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(editor);
-//			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
-			fAugmentRawContainerClients.update(selection);
-			editor.setAction("AugmentRawContainerClients", fAugmentRawContainerClients); //$NON-NLS-1$
-			fEditorActions.add(fAugmentRawContainerClients);
-		}
+		fAugmentRawContainerClients= new AugmentRawContainerClientsAction(editor);
+//		fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
+		fAugmentRawContainerClients.update(selection);
+		editor.setAction("AugmentRawContainerClients", fAugmentRawContainerClients); //$NON-NLS-1$
+		fEditorActions.add(fAugmentRawContainerClients);
 		
 		fInlineAction= new InlineAction(editor);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
@@ -348,11 +346,9 @@ public class RefactorActionGroup extends ActionGroup {
 		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		initAction(fUseSupertypeAction, provider, selection);
 		
-		if (isAugmentRawRefactoringEnabled()) {
-			fAugmentRawContainerClients= new AugmentRawContainerClientsAction(fSite);
-//			fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
-			initAction(fAugmentRawContainerClients, provider, selection);
-		}
+		fAugmentRawContainerClients= new AugmentRawContainerClientsAction(fSite);
+//		fAugmentRawContainerClients.setActionDefinitionId(AUGMENT_RAW_CONTAINER_CLIENTS_ACTION);
+		initAction(fAugmentRawContainerClients, provider, selection);
 		
 		fInlineAction= new InlineAction(fSite);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);

@@ -61,7 +61,7 @@ public class AugmentRawContainerClientsAnalyzer {
 	}
 
 	public void analyzeContainerReferences(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
-		pm.beginTask("", 10); //$NON-NLS-1$
+		pm.beginTask("", 4); //$NON-NLS-1$
 		
 		IJavaProject project= fElements[0].getJavaProject();
 		fTypeConstraintFactory= new AugmentRawContainerClientsTCModel(project);
@@ -75,7 +75,7 @@ public class AugmentRawContainerClientsAnalyzer {
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(fElements, IJavaSearchScope.SOURCES);
 
 if (false) { //TODO: doesn't work yet.
-		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 9), result);
+		analyzeInCompilerLoop(project, searchScope, pattern, new SubProgressMonitor(pm, 3), result);
 } else {
 		SearchParticipant[] participants= SearchUtils.getDefaultSearchParticipants();
 		SearchRequestor requestor= new SearchRequestor() {
@@ -100,10 +100,11 @@ if (false) { //TODO: doesn't work yet.
 				unitAST.accept(unitCollector);
 				ITypeConstraint2[] unitConstraints= fTypeConstraintFactory.getNewTypeConstraints();
 				//TODO: add required methods/cus to "toscan" list
+				fTypeConstraintFactory.newCu();
 				fProcessedCus.add(cu);
 			}
 		};
-		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 9));
+		new SearchEngine().search(pattern, participants, searchScope, requestor, new SubProgressMonitor(pm, 3));
 }
 		
 		fTypeConstraintFactory.newCu();

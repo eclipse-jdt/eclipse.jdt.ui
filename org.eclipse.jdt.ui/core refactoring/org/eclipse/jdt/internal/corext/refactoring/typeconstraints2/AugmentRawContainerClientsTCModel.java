@@ -175,8 +175,12 @@ public class AugmentRawContainerClientsTCModel {
 		if ((cv1 == null || cv2 == null))
 			return false;
 		
-		if (cv1 == cv2 || cv1.isSameAs(cv2))
-			Assert.isTrue(false);
+		if (cv1.isSameAs(cv2)) {
+			if (cv1 == cv2)
+				return false;
+			else
+				Assert.isTrue(false);
+		}
 		
 		if (cv1 instanceof CollectionElementVariable2 || cv2 instanceof CollectionElementVariable2)
 			return true;
@@ -422,6 +426,8 @@ public class AugmentRawContainerClientsTCModel {
 			if (rightRep == null) {
 				leftRep.add(rightElement);
 				rightElement.setRepresentative(leftRep);
+			} else if (leftRep == rightRep) {
+				return;
 			} else {
 				CollectionElementVariable2[] rightElements= rightRep.getElements();
 				leftRep.addAll(rightElements);
@@ -508,6 +514,8 @@ public class AugmentRawContainerClientsTCModel {
 	 */
 	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
 		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
+		if (cv == null)
+			return null;
 		ParameterTypeVariable2 storedCv= (ParameterTypeVariable2) registerDeclaredVariable(cv, cu);
 		//TODO: spread such checks:
 		if (methodBinding.getDeclaringClass().isLocal() || Modifier.isPrivate(methodBinding.getModifiers()))
@@ -543,6 +551,8 @@ public class AugmentRawContainerClientsTCModel {
 	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit unit) {
 		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
 		ReturnTypeVariable2 storedCv= (ReturnTypeVariable2) registerDeclaredVariable(cv, unit);
+		if (cv == null)
+			return null;
 		if (methodBinding.getDeclaringClass().isLocal())
 			fCuScopedConstraintVariables.add(storedCv);
 		return storedCv;
@@ -574,6 +584,9 @@ public class AugmentRawContainerClientsTCModel {
 	
 	public CollectionElementVariable2 makeElementVariable(TypeConstraintVariable2 expressionCv) {
 		//TODO: unhack!!!
+		if (expressionCv == null)
+			return null;
+		
 		CollectionElementVariable2 storedElementVariable= getElementVariable(expressionCv);
 		if (storedElementVariable != null)
 			return storedElementVariable;
@@ -592,8 +605,9 @@ public class AugmentRawContainerClientsTCModel {
 
 	public boolean isACollectionType(ITypeBinding typeBinding) {
 		return TypeBindings.isSuperType(getCollectionType(), typeBinding)
-				|| TypeBindings.isSuperType(getIteratorType(), typeBinding);
-		//TODO: Enumeration, ...
+				|| TypeBindings.isSuperType(getIteratorType(), typeBinding)
+				|| TypeBindings.isSuperType(getEnumerationType(), typeBinding);
+		//TODO: other top level types?
 	}
 
 	public void makeCastVariable(CastExpression castExpression, CollectionElementVariable2 expressionCv) {

@@ -133,12 +133,24 @@ public class TypeBindings {
 				}
 			}				
 		}
-		// per construction, first non-null supertype is most specific common supertype
+//		// per construction, first non-null supertype is most specific common supertype
+//		for (int i = 0; i < superLength; i++) {
+//			ITypeBinding superType = superTypes[i];
+//			if (superType != null) return superType;
+//		}
+		//TODO: should often not be Object when Object and IInterface are available.
+		// Need to count possible removable casts for each choice to decide for best choice.
+		ITypeBinding object= null;
 		for (int i = 0; i < superLength; i++) {
 			ITypeBinding superType = superTypes[i];
-			if (superType != null) return superType;
+			if (superType != null) {
+				if (object == null && TypeRules.isJavaLangObject(superType))
+					object= superType;
+				else
+					return superType;
+			}
 		}
-		return null;
+		return object;
 	}
 
 //	public ITypeBinding lowerUpperBound(ITypeBinding[] types) {

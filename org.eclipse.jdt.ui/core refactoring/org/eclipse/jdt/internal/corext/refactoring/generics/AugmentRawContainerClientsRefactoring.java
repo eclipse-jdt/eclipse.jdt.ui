@@ -192,7 +192,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			TextBuffer buffer= null;
 			try {
 				buffer= TextBuffer.acquire((IFile) cu.getResource());
-				TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), declarationsToUpdate);
+				TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), null);
 				CompilationUnitChange change= new CompilationUnitChange(cu.getElementName(), cu);
 				change.setEdit(edit);
 				fChangeManager.manage(cu, change);

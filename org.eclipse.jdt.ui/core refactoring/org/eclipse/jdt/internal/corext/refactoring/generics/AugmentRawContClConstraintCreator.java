@@ -117,6 +117,8 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		
 		ConstraintVariable2 left= getConstraintVariable(lhs);
 		ConstraintVariable2 right= getConstraintVariable(rhs);
+		if (left == null || right == null)
+			return;
 		
 		Assignment.Operator op= node.getOperator();
 		if (op == Assignment.Operator.PLUS_ASSIGN && TypeBindings.equals(lhs.resolveTypeBinding(), fTCModel.getStringType())) {
@@ -283,18 +285,14 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		fTCModel.createEqualsConstraint(returnTypeElementCv, expressionElementCv);
 	}
 	
-	public void endVisit(FieldDeclaration node) {
-		// No need to tie the VariableDeclarationFragments together.
-		// The FieldDeclaration can be split up when fragments get different types.
-	}
-	
-	
 	public void endVisit(VariableDeclarationExpression node) {
 		// Constrain the types of the child VariableDeclarationFragments to be equal to one
 		// another, since the initializers in a 'for' statement can only have one type.
 		// Pairwise constraints between adjacent variables is enough.
 		Type type= node.getType();
 		ConstraintVariable2 typeCv= getConstraintVariable(type);
+		if (typeCv == null)
+			return;
 		CollectionElementVariable2 typeElement= fTCModel.getElementVariable(typeCv);
 		if (typeElement == null)
 			return;
@@ -315,15 +313,25 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		// TODO: in principle, no need to tie the VariableDeclarationFragments together.
 		// The VariableDeclarationExpression can be split up when fragments get different types.
 		// Warning: still need to connect fragments with type!
-		ConstraintVariable2 typeCv= getConstraintVariable(node.getType());
+		endVisitFieldVariableDeclaration(node.getType(), node.fragments());
+	}
+
+	public void endVisit(FieldDeclaration node) {
+		// TODO: in principle, no need to tie the VariableDeclarationFragments together.
+		// The FieldDeclaration can be split up when fragments get different types.
+		// Warning: still need to connect fragments with type!
+		endVisitFieldVariableDeclaration(node.getType(), node.fragments());
+	}
+	
+	private void endVisitFieldVariableDeclaration(Type type, List variableDeclarationFragments) {
+		ConstraintVariable2 typeCv= getConstraintVariable(type);
 		if (typeCv == null)
 			return;
 		CollectionElementVariable2 typeElement= fTCModel.getElementVariable(typeCv);
 		if (typeElement == null)
 			return;
 		
-		List fragments= node.fragments();
-		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+		for (Iterator iter= variableDeclarationFragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 			ConstraintVariable2 fragmentCv= getConstraintVariable(fragment);
 			CollectionElementVariable2 fragmentElement= fTCModel.getElementVariable(fragmentCv);
