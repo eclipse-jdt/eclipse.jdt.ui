@@ -17,14 +17,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
-
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
@@ -33,6 +27,12 @@ import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
@@ -45,56 +45,39 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	protected static final int INVALID_SELECTION=   2;
 	protected static final int COMPARE_WITH_OUTPUT= 3;
 	
+	private boolean fIgnoreSelectionMarker;
+	private int[] fSelection;
+	
 	public AbstractSelectionTestCase(String name) {
-		super(name);
+		this(name, false);
 	}
 
-	protected int[] getSelection(String source) {
-		int start= -1;
-		int end= -1;
-		int includingStart= source.indexOf(SQUARE_BRACKET_OPEN);
-		int excludingStart= source.indexOf(SQUARE_BRACKET_CLOSE);
-		int includingEnd= source.lastIndexOf(SQUARE_BRACKET_CLOSE);
-		int excludingEnd= source.lastIndexOf(SQUARE_BRACKET_OPEN);
+	public AbstractSelectionTestCase(String name, boolean ignoreSelectionMarker) {
+		super(name);
+		fIgnoreSelectionMarker= ignoreSelectionMarker;
+	}
 
-		if (includingStart > excludingStart && excludingStart != -1) {
-			includingStart= -1;
-		} else if (excludingStart > includingStart && includingStart != -1) {
-			excludingStart= -1;
-		}
-		
-		if (includingEnd < excludingEnd) {
-			includingEnd= -1;
-		} else if (excludingEnd < includingEnd) {
-			excludingEnd= -1;
-		}
-		
-		if (includingStart != -1) {
-			start= includingStart;
-		} else {
-			start= excludingStart + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		if (excludingEnd != -1) {
-			end= excludingEnd;
-		} else {
-			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
-		}
-		
-		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
-		
-		int[] result= new int[] { start, end - start }; 
-		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
-		return result;
+	protected int[] getSelection() {
+		return fSelection;
 	}
 	
-	protected ITextSelection getTextSelection(String source) {
-		int[] s= getSelection(source);
+	protected ITextSelection getTextSelection() {
+		int[] s= getSelection();
 		return new TextSelection(s[0], s[1]);
 	}
 	
 	protected InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
+	}
+	
+	protected String getFileContents(InputStream in) throws IOException {
+		String result= super.getFileContents(in);
+		initializeSelection(result);
+		if (fIgnoreSelectionMarker) {
+			result= result.replaceAll("/\\*\\[\\*/", "");
+			result= result.replaceAll("/\\*\\]\\*/", "");
+		}
+		return result;
 	}
 	
 	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, int mode, final String out, boolean doUndo) throws Exception {
@@ -140,5 +123,46 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	
 	protected int getCheckingStyle() {
 		return CheckConditionsOperation.ALL_CONDITIONS;
+	}
+	
+	private void initializeSelection(String source) {
+		int start= -1;
+		int end= -1;
+		int includingStart= source.indexOf(SQUARE_BRACKET_OPEN);
+		int excludingStart= source.indexOf(SQUARE_BRACKET_CLOSE);
+		int includingEnd= source.lastIndexOf(SQUARE_BRACKET_CLOSE);
+		int excludingEnd= source.lastIndexOf(SQUARE_BRACKET_OPEN);
+
+		if (includingStart > excludingStart && excludingStart != -1) {
+			includingStart= -1;
+		} else if (excludingStart > includingStart && includingStart != -1) {
+			excludingStart= -1;
+		}
+		
+		if (includingEnd < excludingEnd) {
+			includingEnd= -1;
+		} else if (excludingEnd < includingEnd) {
+			excludingEnd= -1;
+		}
+		
+		if (includingStart != -1) {
+			start= includingStart;
+		} else {
+			start= excludingStart + SQUARE_BRACKET_CLOSE_LENGTH;
+		}
+		
+		if (excludingEnd != -1) {
+			end= excludingEnd;
+		} else {
+			end= includingEnd + SQUARE_BRACKET_CLOSE_LENGTH;
+		}
+		
+		assertTrue("Selection invalid", start >= 0 && end >= 0 && end >= start);
+		
+		fSelection= new int[] { 
+			start - (fIgnoreSelectionMarker ? SQUARE_BRACKET_CLOSE_LENGTH : 0),
+			end - start
+		}; 
+		// System.out.println("|"+ source.substring(result[0], result[0] + result[1]) + "|");
 	}
 }

@@ -9,7 +9,7 @@ class SuperClass1<T, E> {
 
 public class TestSubClass1<A, B> extends SuperClass1<A, B> {
 	void bar() {
-		/*[*/foo()/*]*/;
+		/*]*/foo()/*[*/;
 	}
 }
 

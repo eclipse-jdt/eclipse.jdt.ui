@@ -56,8 +56,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	protected void selectionTest(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit unit= createCU(getSelectionPackage(), "A");
-		String source= unit.getSource();
-		int[] selection= getSelection(source);
+		int[] selection= getSelection();
 		ISourceRange expected= TextRangeUtil.getSelection(unit, startLine, startColumn, endLine, endColumn);
 		assertEquals(expected.getOffset(), selection[0]);
 		assertEquals(expected.getLength(), selection[1]);
@@ -73,8 +72,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
-		String source= unit.getSource();
-		int[] selection= getSelection(source);
+		int[] selection= getSelection();
 		ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);

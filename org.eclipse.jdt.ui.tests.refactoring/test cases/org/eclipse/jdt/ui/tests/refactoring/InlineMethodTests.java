@@ -40,7 +40,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	private static final boolean BUG_82166= true;
 	
 	public InlineMethodTests(String name) {
-		super(name);
+		super(name, true);
 	}
 
 	public static Test suite() {
@@ -63,8 +63,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	protected void performTestInlineCall(IPackageFragment packageFragment, String id, int mode, String outputFolder) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
-		String source= unit.getSource();
-		int[] selection= getSelection(source);
+		int[] selection= getSelection();
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			unit, selection[0], selection[1]);
 		String out= null;

@@ -5,7 +5,7 @@ public class TestCatchClause {
 		int i= 0;
 		switch(i) {
 			case 10:
-				return /*[*/bar()/*]*/;
+				return /*]*/bar()/*[*/;
 			case 20:
 				return bar();
 		}

@@ -7,6 +7,6 @@ public class TestArray {
 	}
 	
 	public void main() {
-		int i= /*[*/bar(new int[] {1})/*]*/;
+		int i= /*]*/bar(new int[] {1})/*[*/;
 	}
 }

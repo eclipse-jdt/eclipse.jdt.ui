@@ -7,6 +7,6 @@ public class TestVarargs2 {
 	}
 	
 	public void main() {
-		/*[*/bar(1, "Hello", "Eclipse");/*]*/
+		/*]*/bar(1, "Hello", "Eclipse");/*[*/
 	}
 }

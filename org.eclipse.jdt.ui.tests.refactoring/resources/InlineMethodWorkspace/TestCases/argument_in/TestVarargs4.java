@@ -10,6 +10,6 @@ public class TestVarargs4 {
 	
 	public void main() {
 		String[] strings= {"Hello", "Eclipse"};
-		/*[*/bar(strings);/*]*/
+		/*]*/bar(strings);/*[*/
 	}
 }

@@ -9,6 +9,6 @@ public class TestVarargs3 {
 	}
 	
 	public void main() {
-		/*[*/bar();/*]*/
+		/*]*/bar();/*[*/
 	}
 }

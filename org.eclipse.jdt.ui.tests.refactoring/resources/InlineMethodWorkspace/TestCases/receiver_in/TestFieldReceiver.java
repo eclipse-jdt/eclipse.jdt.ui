@@ -9,6 +9,6 @@ public class TestFieldReceiver {
 class Client2 {
     void test() {
     	TestFieldReceiver r= new TestFieldReceiver();
-        Object o= /*[*/r.getObject()/*]*/;
+        Object o= /*]*/r.getObject()/*[*/;
     }
 }

@@ -94,6 +94,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.util.NoCommentSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -228,6 +229,7 @@ public class CallInliner {
 		fImportEdit= new ImportRewrite(fCUnit);
 		fLocals= new ArrayList(3);
 		fRewrite= ASTRewrite.create(ast);
+		fRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		fTypeEnvironment= new TypeEnvironment();
 	}
 

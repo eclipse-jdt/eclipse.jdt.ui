@@ -4,7 +4,7 @@ public enum TestBasic {
 	A, B;
 	
 	void foo() {
-		/*[*/bar()/*]*/;
+		/*]*/bar()/*[*/;
 	}
 	void bar() {
 		System.out.println("Hello Eclipse");

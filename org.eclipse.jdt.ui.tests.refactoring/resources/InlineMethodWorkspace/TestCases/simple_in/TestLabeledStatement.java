@@ -3,7 +3,7 @@ package simple_in;
 public class TestLabeledStatement {
 
 	public static void main() {
-		/*[*/foo();/*]*/
+		/*]*/foo();/*[*/
 	}
 
 	public static void foo() {
