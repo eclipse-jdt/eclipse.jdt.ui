@@ -1,38 +1,40 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
+
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public abstract class OpenRefactoringWizardAction extends RefactoringAction {
-	
+public abstract class OpenRefactoringWizardAction extends SelectionDispatchAction {
+
 	private Class fActivationType;
 	private Refactoring fRefactoring;
 	
-	public OpenRefactoringWizardAction(String label, StructuredSelectionProvider provider, Class activatedOnType) {
-		super(label, provider);
-		Assert.isNotNull(activatedOnType);
+	protected OpenRefactoringWizardAction(String label, UnifiedSite site, Class activatedOnType) {
+		super(site);
+		setText(label);
 		fActivationType= activatedOnType;
 	}
-	
-	/* non java-doc
-	 * @see IRefactoringAction#canOperateOn(IStructuredSelection)
+
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
-	public boolean canOperateOn(IStructuredSelection selection){
+	protected void selectionChanged(IStructuredSelection selection) {
+		setEnabled(canOperateOn(selection));
+	}
+
+	protected boolean canOperateOn(IStructuredSelection selection){
 		if (selection.isEmpty())
 			return canOperateOnEmptySelection();
 		
@@ -57,10 +59,10 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 		return false;
 	}
 		
-	/* non java-doc
-	 * @see Action#run()
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
-	public void run() {
+	public void run(IStructuredSelection selection) {
 		Assert.isNotNull(fRefactoring);
 		try{
 			new RefactoringStarter().activate(fRefactoring, createWizard(fRefactoring), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
@@ -95,6 +97,5 @@ public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 		}	
 	}
 	
-	abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
+	protected abstract boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException;
 }
-
