@@ -1502,9 +1502,17 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @since 3.0
 	 */
 	public void aboutToBeReconciled() {
+
 		// Notify AST provider
 		if (isActivePart())
 			JavaPlugin.getDefault().getASTProvider().aboutToBeReconciled(getInputJavaElement());
+		
+		// Notify listeners
+		synchronized (fReconcilingListeners) {
+			Object[] listeners = fReconcilingListeners.getListeners();
+			for (int i = 0, length= listeners.length; i < length; ++i)
+				((IJavaReconcilingListener)listeners[i]).aboutToBeReconciled();
+		}
 	}
 	
 	/*
@@ -1516,6 +1524,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// Notify AST provider
 		if (isActivePart())
 			JavaPlugin.getDefault().getASTProvider().reconciled(ast, getInputJavaElement());
+		
+		// Notify listeners
+		synchronized (fReconcilingListeners) {
+			Object[] listeners = fReconcilingListeners.getListeners();
+			for (int i = 0, length= listeners.length; i < length; ++i)
+				((IJavaReconcilingListener)listeners[i]).reconciled(ast);
+		}
+
 		
 		// Update Java Outline page selection
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE)) {
