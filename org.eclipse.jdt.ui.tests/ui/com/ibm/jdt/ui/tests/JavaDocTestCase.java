@@ -1,5 +1,5 @@
 package com.ibm.jdt.ui.tests;
-import java.io.File;import java.io.IOException;import java.io.Reader;import java.net.URL;import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import java.io.BufferedReader;import java.io.File;import java.io.IOException;import java.io.Reader;import java.net.URL;import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 
 public class JavaDocTestCase extends TestCase {
@@ -17,7 +17,7 @@ public class JavaDocTestCase extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		//suite.addTest(new JavaDocTestCase("doTest1"));
-		suite.addTest(new JavaDocTestCase("doTest2"));
+		suite.addTest(new JavaDocTestCase("doTest3"));
 		return new JavaTestSetup(suite);
 	}
 	
@@ -172,12 +172,22 @@ public class JavaDocTestCase extends TestCase {
 			Reader reader= JavaDocAccess.getJavaDoc(methods[i]);
 			if (reader != null) {
 				JavaDocTextReader txtreader= new JavaDocTextReader(reader);
-				System.out.println(txtreader.getString());
+				BufferedReader bufRd= new BufferedReader(txtreader);
+				String line;
+				do {
+					line= bufRd.readLine();
+					if (line != null) {
+						System.out.println(line);
+					}
+				} while (line != null);
+				
 			} else {
 				System.out.println("not found");
 			}
 		}
 	}
+	
+		
 	
 	/**
 	 * Gets the comment as a String
