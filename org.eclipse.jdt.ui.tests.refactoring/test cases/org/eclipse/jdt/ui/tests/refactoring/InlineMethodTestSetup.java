@@ -37,6 +37,7 @@ public class InlineMethodTestSetup extends TestSetup {
 	private IPackageFragment fNameConflict;
 	private IPackageFragment fCall;
 	private IPackageFragment fExpression;
+	private IPackageFragment fControlStatement;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -65,6 +66,7 @@ public class InlineMethodTestSetup extends TestSetup {
 		fNameConflict= fRoot.createPackageFragment("nameconflict_in", true, null);
 		fCall= fRoot.createPackageFragment("call_in", true, null);
 		fExpression= fRoot.createPackageFragment("expression_in", true, null);
+		fControlStatement= fRoot.createPackageFragment("controlStatement_in", true, null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -95,5 +97,9 @@ public class InlineMethodTestSetup extends TestSetup {
 
 	public IPackageFragment getExpressionPackage() {
 		return fExpression;
+	}
+	
+	public IPackageFragment getControlStatementPackage() {
+		return fControlStatement;
 	}
 }

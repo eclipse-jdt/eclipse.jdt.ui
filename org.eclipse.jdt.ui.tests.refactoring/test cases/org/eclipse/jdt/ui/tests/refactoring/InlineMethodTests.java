@@ -18,8 +18,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 
-import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class InlineMethodTests extends AbstractSelectionTestCase {
 
@@ -46,8 +46,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		ASTNode node= InlineMethodRefactoring.getSelectedNode(unit, Selection.createFromStartLength(selection[0], selection[1]));
-		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(unit, (MethodInvocation)node);
+		ASTNode node= InlineMethodRefactoring.getTargetNode(unit, selection[0], selection[1]);
+		InlineMethodRefactoring refactoring= new InlineMethodRefactoring(
+			unit, (MethodInvocation)node,
+			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setSaveChanges(true);
 		String out= null;
 		switch (mode) {
@@ -80,6 +82,18 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
+	public void testCompileError1() throws Exception {
+		performInvalidTest();
+	}
+	
+	public void testCompileError2() throws Exception {
+		performInvalidTest();
+	}
+	
+	public void testCompileError3() throws Exception {
+		performInvalidTest();
+	}
+	
 	/************************ Simple Tests ********************************/
 		
 	private void performSimpleTest() throws Exception {
@@ -94,6 +108,18 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTest();
 	}	
 	
+	public void testEmptyBody() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testPrimitiveArray() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testTypeArray() throws Exception {
+		performSimpleTest();
+	}	
+
 	/************************ Argument Tests ********************************/
 		
 	private void performArgumentTest() throws Exception {
@@ -182,6 +208,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performNameConflictTest();
 	}
 
+	public void testSwitchStatement() throws Exception {
+		performNameConflictTest();
+	}
+
 	/************************ Call Tests ********************************/
 		
 	private void performCallTest() throws Exception {
@@ -212,5 +242,39 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	
 	public void testSimpleBody() throws Exception {
 		performExpressionTest();
+	}
+	
+	public void testAssignment() throws Exception {
+		performExpressionTest();
+	}
+	
+	public void testReturnStatement() throws Exception {
+		performExpressionTest();
+	}
+	
+	/************************ Expression Tests ********************************/
+		
+	private void performControlStatementTest() throws Exception {
+		performTest(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
+	}
+	
+	public void testForEmpty() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testForOne() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testForTwo() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testForAssignmentOne() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testForAssignmentTwo() throws Exception {
+		performControlStatementTest();
 	}
 }
