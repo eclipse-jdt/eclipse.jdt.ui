@@ -59,16 +59,26 @@ public class DeleteFileChange extends JDTChange {
 	
 	private String getSource(IFile file) throws CoreException {
 		InputStream in= file.getContents();
-		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
+		
+		String encoding= null;
+		try {
+			encoding= file.getCharset();
+		} catch (CoreException ex) {
+			// fall through. Take default encoding.
+		}
+		
 		StringBuffer sb= new StringBuffer();
 		BufferedReader br= null;
 		try {
-			br= new BufferedReader(new InputStreamReader(in, ResourcesPlugin.getEncoding()));	
+		    if (encoding != null)
+		        br= new BufferedReader(new InputStreamReader(in, encoding));	
+		    else
+		        br= new BufferedReader(new InputStreamReader(in));	
 			int read= 0;
 			while ((read= br.read()) != -1)
 				sb.append((char) read);
 		} catch (IOException e){
-				throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
+			throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
 		} finally {
 			try{
 				IOCloser.rethrows(br, in);
