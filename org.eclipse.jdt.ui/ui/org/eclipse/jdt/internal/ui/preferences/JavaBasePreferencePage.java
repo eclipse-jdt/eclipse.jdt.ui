@@ -161,8 +161,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
-		store.setDefault(SHOW_CU_CHILDREN, true);		
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
+		store.setDefault(JavaBrowsingPreferencePage.LINK_VIEW_TO_EDITOR, true);
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 
@@ -244,8 +244,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
 
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.reconcileJavaViews"), RECONCILE_JAVA_VIEWS); //$NON-NLS-1$
 		
 		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ); //$NON-NLS-1$
@@ -267,8 +265,23 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fBinFolderNameText.addModifyListener(fModifyListener);
 		
 		new Label(composite, SWT.NONE); // spacer
-		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings"));  //$NON-NLS-1$
+		new Label(composite, SWT.NONE).setText("Java Browsing Settings");
+		addCheckBox(composite, "&Link Java Browsing views selection to active editor", JavaBrowsingPreferencePage.LINK_VIEW_TO_EDITOR);
 		
+		new Label(composite, SWT.NONE).setText("Package view settings");
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
+
+		Label doubleClickLabel= new Label(composite, SWT.NONE);
+		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
+
+		Composite doubleClickRadioGroup= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		doubleClickRadioGroup.setLayout(layout);		
+		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
+		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
+		
+		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings"));  //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 		
 		Label label= new Label(composite, SWT.NONE);
@@ -282,16 +295,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
 
-		Label doubleClickLabel= new Label(composite, SWT.NONE);
-		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
-
-		Composite doubleClickRadioGroup= new Composite(composite, SWT.NONE);
-		layout= new GridLayout();
-		layout.marginHeight= 0;
-		doubleClickRadioGroup.setLayout(layout);		
-		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
-		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
-	
 		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
 		final Button reuse= addCheckBox(composite, "&Reuse Type Hierarchy perspective in same window", OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
 		reuse.setEnabled(perspective.getSelection());

@@ -42,8 +42,6 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(LINK_VIEW_TO_EDITOR, true);
-		store.setDefault(STACK_VERTICALLY, false);
 	}
 
 	public static boolean linkViewSelectionToEditor() {
@@ -65,21 +63,6 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	}
 	
 	protected void createFieldEditors() {
-		Composite parent= getFieldEditorParent();
-
-		BooleanFieldEditor boolEditor= new BooleanFieldEditor(
-			LINK_VIEW_TO_EDITOR,
-			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.linkViewToEditor"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
-
-		boolEditor= new BooleanFieldEditor(
-			STACK_VERTICALLY,
-			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.stackVertically"), //$NON-NLS-1$
-			parent
-        );
-		addField(boolEditor);
 	}
 
 	/*
