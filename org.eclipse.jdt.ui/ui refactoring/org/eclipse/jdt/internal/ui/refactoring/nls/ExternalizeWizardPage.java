@@ -922,6 +922,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		try {
 			IStructuredSelection sel= (IStructuredSelection) fTableViewer.getSelection();
 			NLSSubstitution substitution= (NLSSubstitution) sel.getFirstElement();
+			if (substitution == null) {
+				return;
+			}
+			
 			NLSInputDialog dialog= new NLSInputDialog(getShell(), NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Title"), //$NON-NLS-1$
 					NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Label"), //$NON-NLS-1$
 					substitution);
@@ -971,9 +975,11 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private void updateSourceView(IStructuredSelection selection) {
 		NLSSubstitution first= (NLSSubstitution) selection.getFirstElement();
-		Region region= first.getNLSElement().getPosition();
-		fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
-		fSourceViewer.revealRange(region.getOffset(), region.getLength());
+		if (first != null) {
+			Region region= first.getNLSElement().getPosition();
+			fSourceViewer.setSelectedRange(region.getOffset(), region.getLength());
+			fSourceViewer.revealRange(region.getOffset(), region.getLength());
+		}
 	}
 
 	private void updateButtonStates(IStructuredSelection selection) {
