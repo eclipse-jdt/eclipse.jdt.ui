@@ -18,7 +18,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.IJobManager;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -30,6 +32,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IThreadListener;
+
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
@@ -95,11 +99,20 @@ public class RefactoringExecutionHelper {
 	public void perform() throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
+		final IWorkspaceRoot rule= ResourcesPlugin.getWorkspace().getRoot();
+		class OperationRunner extends WorkbenchRunnableAdapter implements IThreadListener {
+			public OperationRunner(IWorkspaceRunnable runnable, ISchedulingRule schedulingRule) {
+				super(runnable, schedulingRule);
+			}
+			public void threadChange(Thread thread) {
+				manager.transferRule(getSchedulingRule(), thread);
+			}
+		}
 		try {
 			try {
 				Runnable r= new Runnable() {
 					public void run() {
-						manager.suspend(ResourcesPlugin.getWorkspace().getRoot(), null);
+						manager.beginRule(rule, null);
 					}
 				};
 				BusyIndicator.showWhile(fParent.getDisplay(), r);
@@ -113,7 +126,7 @@ public class RefactoringExecutionHelper {
 			Operation op= new Operation();
 			fRefactoring.setValidationContext(fParent);
 			try{
-				fExecContext.run(false, false, new WorkbenchRunnableAdapter(op));
+				fExecContext.run(false, false, new OperationRunner(op, rule));
 				RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 
@@ -141,7 +154,7 @@ public class RefactoringExecutionHelper {
 				saveHelper.triggerBuild();
 			}
 		} finally {
-			manager.resume(ResourcesPlugin.getWorkspace().getRoot());
+			manager.endRule(rule);
 			fRefactoring.setValidationContext(null);
 		}
 	}	
