@@ -228,12 +228,29 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	public static void initDefaults(IPreferenceStore store) {
 		
-		Color color;
-		Display display= Display.getDefault();
+		/* 
+		 * Ensure that the display is accessed only in the UI thread.
+		 * Ensure that there are no side effects of switching the thread.
+		 */
+		final RGB[] rgbs= new RGB[3];
+		final Display display= Display.getDefault();
+		display.syncExec(new Runnable() {
+			public void run() {
+				Color c= display.getSystemColor(SWT.COLOR_GRAY);
+				rgbs[0]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
+				rgbs[1]= c.getRGB();
+				c= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
+				rgbs[2]= c.getRGB();
+			}
+		});
 		
+		
+		/* 
+		 * Go on in whatever thread this is. 
+		 */
 		store.setDefault(CompilationUnitEditor.MATCHING_BRACKETS, true);
-		color= display.getSystemColor(SWT.COLOR_GRAY);
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  color.getRGB());
+		PreferenceConverter.setDefault(store, CompilationUnitEditor.MATCHING_BRACKETS_COLOR,  rgbs[0]);
 		
 		store.setDefault(CompilationUnitEditor.CURRENT_LINE, true);
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.CURRENT_LINE_COLOR, new RGB(225, 235, 224));
@@ -248,19 +265,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, CompilationUnitEditor.PROBLEM_INDICATION_COLOR, new RGB(255, 0 , 128));
 		
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, true);
-
-		PreferenceConverter.setDefault(store, CompilationUnitEditor.LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 		
-		color= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, color.getRGB());
+		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, rgbs[1]);
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
 		
-		color= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, color.getRGB());		
+		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, rgbs[2]);		
 		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, true);
 		
 		store.setDefault(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 4);
@@ -268,31 +281,31 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.SPACES_FOR_TABS, false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_MULTI_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + "_bold", false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT, new RGB(63, 127, 95));
-		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + "_bold", false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_KEYWORD, new RGB(127, 0, 85));
-		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + BOLD, true);
+		store.setDefault(IJavaColorConstants.JAVA_KEYWORD + "_bold", true);
 				
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_STRING, new RGB(42, 0, 255));
-		store.setDefault(IJavaColorConstants.JAVA_STRING + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVA_STRING + "_bold", false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
-		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false);
 
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + BOLD, true);
+		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_TAG, new RGB(127, 127, 159));
-		store.setDefault(IJavaColorConstants.JAVADOC_TAG + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVADOC_TAG + "_bold", false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_LINK, new RGB(63, 63, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_LINK + BOLD, false);
+		store.setDefault(IJavaColorConstants.JAVADOC_LINK + "_bold", false);
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_DEFAULT, new RGB(63, 95, 191));
-		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + BOLD, false);		
+		store.setDefault(IJavaColorConstants.JAVADOC_DEFAULT + "_bold", false);		
 		
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION, true);
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_DELAY, 500);
@@ -302,13 +315,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PROPOSALS_FOREGROUND, new RGB(0, 0, 0));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_BACKGROUND, new RGB(254, 241, 233));
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, "."); //$NON-NLS-1$
-		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@"); //$NON-NLS-1$
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, ".");
+		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@");
 		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
 		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
 		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);				
-
 	}
 
 	/*
