@@ -99,6 +99,11 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
             if (element instanceof IJavaProject) {
                 if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) == null)
                     return false;
+            } else if (element instanceof IPackageFragmentRoot) {
+				IClasspathEntry entry= ((IPackageFragmentRoot) element).getRawClasspathEntry();
+				if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					return false;
+				}
             }
         }
         return true;
