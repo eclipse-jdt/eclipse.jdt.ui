@@ -42,9 +42,15 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		int placeHolderStart= dummy.indexOf(placeHolder);
 		int[] positions= new int[] {placeHolderStart, placeHolderStart + placeHolder.length() - 1};
 		String formattedCode= formatter.format(dummy, 0, positions, lineSeparator);
+		// begin workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=19335
+		if (!adjustPositions(formattedCode, placeHolder, positions)) {
+			// nothing we can do here.
+			Assert.isTrue(false, "This should never happend");	//$NON-NLS-1$
+		}
+		// end workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=19335
 		TextBuffer textBuffer= TextBuffer.create(formattedCode);
 		String placeHolderLine= textBuffer.getLineContentOfOffset(positions[0]);
-		String bodyIndent= indent + CodeFormatterUtil.createIndentString(placeHolderLine);
+		String bodyIndent= indent + (placeHolderLine != null ? CodeFormatterUtil.createIndentString(placeHolderLine) : ""); //$NON-NLS-1$
 		
 		fill(buffer, formattedCode.substring(0, positions[0]), firstLineIndent, indent, lineSeparator);
 		fTryBody.fill(buffer, "", bodyIndent, lineSeparator); //$NON-NLS-1$
@@ -62,4 +68,18 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		return buffer.toString();	
 	}
 
+	/*
+	 * Workaround for http://dev.eclipse.org/bugs/show_bug.cgi?id=19335
+	 */
+	private static boolean adjustPositions(String code, String placeHolder, int[] positions) {
+		int length= code.length();
+		if (positions[0] < 0 || positions[1] < 0 || positions[0] >= length || positions[1] >= length) {
+			int candidate= code.indexOf(placeHolder);
+			if (candidate == -1)
+				return false;
+			positions[0]= candidate;
+			positions[1]= candidate + placeHolder.length() - 1;
+		}
+		return true;
+	}
 }
