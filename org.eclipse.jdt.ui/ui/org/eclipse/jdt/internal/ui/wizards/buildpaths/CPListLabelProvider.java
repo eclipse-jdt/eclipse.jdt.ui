@@ -14,7 +14,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.ui.ISharedImages;
+import org.eclipse.core.runtime.IPath;import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -51,18 +51,21 @@ class CPListLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
 			CPListElement cpentry= (CPListElement)element;
-			String name= cpentry.getPath().toString();
 			if (cpentry.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
+				String name= cpentry.getPath().toString();
 				IResource resource= cpentry.getResource();
 				if (resource == null || !resource.exists()) {				
-					name = name + ' ' + fNewLabel;
+					return name + ' ' + fNewLabel;
 				}
+				return name;
 			} else { // CPE_LIBRARY
+				IPath path= cpentry.getPath();
 				if (cpentry.getResource() instanceof IFolder) {
-					name = name + ' ' + fClassLabel;
+					return path.toString() + ' ' + fClassLabel;
+				} else {
+					return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
 				}
 			}
-			return name;
 		}
 		return "";
 	}			

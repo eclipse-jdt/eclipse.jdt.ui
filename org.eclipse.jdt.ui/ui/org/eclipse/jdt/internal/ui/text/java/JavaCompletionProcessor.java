@@ -89,11 +89,11 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		
-		fCollector.reset(unit.getJavaProject());
 		try {
-			if (unit != null)
+			if (unit != null) {
+				fCollector.reset(unit.getJavaProject());
 				unit.codeComplete(offset, fCollector);
-		
+			}
 		} catch (JavaModelException x) {
 			ResourceBundle b= JavaPlugin.getDefault().getResourceBundle();
 			Shell shell= viewer.getTextWidget().getShell();

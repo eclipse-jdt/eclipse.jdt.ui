@@ -214,7 +214,7 @@ public class ListDialogField extends DialogField {
 	 * subclasses may override to specify a different style
 	 */
 	protected int getListStyle(){
-		return SWT.BORDER + SWT.MULTI + SWT.H_SCROLL;
+		return SWT.BORDER + SWT.MULTI + SWT.H_SCROLL + SWT.V_SCROLL;
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {

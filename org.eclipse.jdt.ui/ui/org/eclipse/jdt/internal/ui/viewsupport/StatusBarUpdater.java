@@ -37,7 +37,8 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 		int options= JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION
 		 +  JavaElementLabelProvider.SHOW_CONTAINER
 		 +  JavaElementLabelProvider.SHOW_ROOT
-		 +  JavaElementLabelProvider.SHOW_PARAMETERS;
+		 +  JavaElementLabelProvider.SHOW_PARAMETERS
+		 +  JavaElementLabelProvider.SHOW_RETURN_TYPE;
 		fJavaTextLabelProvider= new JavaTextLabelProvider(options);
 	}
 	
