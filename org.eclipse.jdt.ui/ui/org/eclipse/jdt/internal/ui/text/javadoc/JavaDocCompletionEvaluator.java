@@ -301,7 +301,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
 		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
-		if ("@see".equals(tag) || "@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
+		if ("@see".equals(tag) || "@link".equals(tag) || "@linkplain".equals(tag) || "@value".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-1$
 			if (elem instanceof IMember) {
 				evalSeeTag((IMember) elem, argument);
 				return true;
