@@ -570,6 +570,10 @@ public final class JavaModelUtil {
 	 * to be removed once the bug is fixed
 	 */
 	private static IMethod toOriginalMethod(IMethod method) {
+		ICompilationUnit cu= method.getCompilationUnit();
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS && (cu == null || isPrimary(cu))) {
+			return method;
+		}
 		try{
 			//use the workaround only if needed	
 			if (! method.getElementName().equals(method.getDeclaringType().getElementName()))
@@ -628,6 +632,9 @@ public final class JavaModelUtil {
 	 * working copy or the member does not exist in the working copy the input is returned.
 	 */
 	public static IMember toWorkingCopy(IMember member) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return member;
+		}
 		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && !cu.isWorkingCopy()) {
 			if (PRIMARY_ONLY) {
@@ -650,6 +657,9 @@ public final class JavaModelUtil {
 	 * working copy or the package declaration does not exist in the working copy the input is returned.
 	 */
 	public static IPackageDeclaration toWorkingCopy(IPackageDeclaration declaration) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return declaration;
+		}
 		ICompilationUnit cu= (ICompilationUnit)declaration.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
 			if (PRIMARY_ONLY) {
@@ -668,6 +678,10 @@ public final class JavaModelUtil {
 	}
 	
 	public static IJavaElement toWorkingCopy(IJavaElement elem) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return elem;
+		}
+		
 		switch (elem.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
 				return toWorkingCopy((ICompilationUnit) elem);
@@ -692,6 +706,9 @@ public final class JavaModelUtil {
 	 * working copy or the import container does not exist in the working copy the input is returned.
 	 */
 	public static IImportContainer toWorkingCopy(IImportContainer container) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return container;
+		}
 		ICompilationUnit cu= (ICompilationUnit)container.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
 			if (PRIMARY_ONLY) {
@@ -713,6 +730,9 @@ public final class JavaModelUtil {
 	 * working copy or the import declaration does not exist in the working copy the input is returned.
 	 */
 	public static IImportDeclaration toWorkingCopy(IImportDeclaration importDeclaration) {
+		if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+			return importDeclaration;
+		}
 		ICompilationUnit cu= (ICompilationUnit)importDeclaration.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && !cu.isWorkingCopy()) {
 			if (PRIMARY_ONLY) {
