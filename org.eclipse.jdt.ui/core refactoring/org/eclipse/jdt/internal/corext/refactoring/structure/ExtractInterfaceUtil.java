@@ -172,8 +172,12 @@ class ExtractInterfaceUtil {
 	private static boolean isBindingForType(ITypeBinding typeBinding, IType type) {
 		if (! typeBinding.getName().equals(type.getElementName()))
 			return false;
-		if (! typeBinding.getPackage().getName().equals(type.getPackageFragment().getElementName()))
+		if (typeBinding.getPackage().isUnnamed() != type.getPackageFragment().isDefaultPackage())
 			return false;
+		if (! typeBinding.getPackage().isUnnamed() && !type.getPackageFragment().isDefaultPackage()){
+			if (! typeBinding.getPackage().getName().equals(type.getPackageFragment().getElementName()))
+				return false;
+		}
 		return true;
 	}
 
