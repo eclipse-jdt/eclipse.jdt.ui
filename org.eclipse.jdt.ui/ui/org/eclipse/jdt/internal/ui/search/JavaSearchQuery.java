@@ -89,7 +89,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			for (int i= 0; i < fParticipants.length; i++) {
 				totalTicks+= fParticipants[i].estimateTicks(fPatternData);
 			}
-			monitor.beginTask("Searching", totalTicks);
+			monitor.beginTask(SearchMessages.getString("JavaSearchQuery.task.label"), totalTicks); //$NON-NLS-1$
 			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
 
 			boolean ignoreImports= (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES);
@@ -97,13 +97,20 @@ public class JavaSearchQuery implements ISearchQuery {
 			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, mainSearchPM, ignoreImports);
 			
 			ISearchPattern pattern;
-			if (fPatternData instanceof ElementQuerySpecification)
+			String stringPattern= null;
+			
+			if (fPatternData instanceof ElementQuerySpecification) {
 				pattern= SearchEngine.createSearchPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo());
-			else {
+				stringPattern= ((ElementQuerySpecification)fPatternData).getElement().getElementName();
+			} else {
 				PatternQuerySpecification patternSpec= (PatternQuerySpecification)fPatternData;
 				pattern= SearchEngine.createSearchPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), patternSpec.isCaseSensitive());
+				stringPattern= patternSpec.getPattern();
 			}
 			
+			if (pattern == null) {
+				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, SearchMessages.getFormattedString("JavaSearchQuery.error.unsupported_pattern", stringPattern), null);  //$NON-NLS-1$
+			}
 			engine.search(JavaPlugin.getWorkspace(), pattern, fPatternData.getScope(), collector);
 			for (int i= 0; i < fParticipants.length; i++) {
 				ISearchRequestor requestor= new SearchRequestor(fParticipants[i], textResult);
@@ -120,16 +127,16 @@ public class JavaSearchQuery implements ISearchQuery {
 
 	public String getLabel() {
 		if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES)
-			return "Search for References";
+			return SearchMessages.getString("JavaSearchQuery.searchfor_references"); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
-			return "Search for Declarations";
+			return SearchMessages.getString("JavaSearchQuery.searchfor_declarations"); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.READ_ACCESSES)
-			return "Search for Read Accesses";
+			return SearchMessages.getString("JavaSearchQuery.searchfor_read_access"); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.WRITE_ACCESSES)
-			return "Search for Write Accesses";
+			return SearchMessages.getString("JavaSearchQuery.searchfor_write_access"); //$NON-NLS-1$
 		else if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS)
-			return "Search for Implementors";
-		return "Search";
+			return SearchMessages.getString("JavaSearchQuery.searchfor_implementors"); //$NON-NLS-1$
+		return SearchMessages.getString("JavaSearchQuery.search_label"); //$NON-NLS-1$
 	}
 
 	String getSingularLabel() {

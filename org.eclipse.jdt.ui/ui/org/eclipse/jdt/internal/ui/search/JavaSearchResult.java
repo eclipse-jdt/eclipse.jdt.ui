@@ -166,7 +166,7 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 		Object element= match.getElement();
 		if (fElementsToParticipants.get(element) != null) {
 			// TODO must access the participant id / label to properly report the error.
-			JavaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "A second search participant was found for an element", null));
+			JavaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "A second search participant was found for an element", null)); //$NON-NLS-1$
 			return false;
 		}
 		fElementsToParticipants.put(element, participant);
