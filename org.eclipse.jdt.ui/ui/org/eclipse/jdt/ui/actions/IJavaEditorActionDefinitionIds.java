@@ -26,6 +26,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	// edit
 
 	/**
+	 * Action definition ID of the edit -> smart typing action
+	 * (value <code>"org.eclipse.jdt.smartTyping.toggle"</code>).
+	 *
+	 * @since 3.0
+	 */
+	public static final String TOGGLE_SMART_TYPING= "org.eclipse.jdt.smartTyping.toggle"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the edit -> go to matching bracket action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.goto.matching.bracket"</code>).
 	 *

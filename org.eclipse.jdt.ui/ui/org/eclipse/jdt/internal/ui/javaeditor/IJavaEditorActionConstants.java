@@ -16,10 +16,23 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 public interface IJavaEditorActionConstants {
 
 	/**
+	 * ID of the action to toggle smart typing.
+	 * Value: <code>"smartTyping"</code>
+	 * @since 3.0
+	 */
+	public static final String TOGGLE_SMART_TYPING= "smartTyping"; //$NON-NLS-1$
+
+	/**
+	 * ID of the smart typing status item
+	 * Value: <code>"SmartTyping"</code>
+	 * @since 3.0
+	 */
+	public static final String STATUS_CATEGORY_SMART_TYPING= "SmartTyping"; //$NON-NLS-1$
+
+	/**
 	 * ID of the action to toggle the style of the presentation.
 	 */
 	public static final String TOGGLE_PRESENTATION= "togglePresentation"; //$NON-NLS-1$
-
 	
 	/**
 	 * ID of the toolbar action to go to the previous error.

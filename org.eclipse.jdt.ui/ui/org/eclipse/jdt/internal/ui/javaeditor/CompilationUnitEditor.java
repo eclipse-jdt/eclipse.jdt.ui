@@ -36,6 +36,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentCommand;
+import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
@@ -75,6 +76,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.IStatusField;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
@@ -92,9 +94,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.compare.LocalHistoryActionGroup;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
 import org.eclipse.jdt.internal.ui.text.java.SmartBracesAutoEditStrategy;
+import org.eclipse.jdt.internal.ui.text.java.SmartSemicolonAutoEditStrategy;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitFlags;
@@ -111,8 +115,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
  * Java specific text editor.
  */
 public class CompilationUnitEditor extends JavaEditor implements IReconcilingParticipant {
-	
-	
+
 	/** 
 	 * Text operation code for requesting correction assist to show correction
 	 * proposals for the current position. 
@@ -244,6 +247,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			super.configure(configuration);
 			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
 			fCorrectionAssistant.install(this);
+			IAutoEditStrategy smartSemi= new SmartSemicolonAutoEditStrategy();
+			prependAutoEditStrategy(smartSemi, IDocument.DEFAULT_CONTENT_TYPE);
+			prependAutoEditStrategy(smartSemi, IJavaPartitions.JAVA_STRING);			
 			prependAutoEditStrategy(new SmartBracesAutoEditStrategy(this), IDocument.DEFAULT_CONTENT_TYPE);
 		}
 	};
@@ -364,6 +370,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			case '\n':
 			case '\r':
 				return new ExitFlags(LinkedPositionUI.COMMIT, true);
+			
+			case ';':
+				if (fSmartTyping)
+					return new ExitFlags(LinkedPositionUI.COMMIT, true);
+				// else fall through
 				
 			default:
 				return null;
@@ -587,7 +598,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private int fRememberedElementOffset;
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
-	
+	/** The editor's smart typing state. */
+	private boolean fSmartTyping;
+
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
 	private CompositeActionGroup fContextMenuGroup;
@@ -605,6 +618,9 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fSavePolicy= null;
 			
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
+
+		// smart typing
+		setSmartTyping(JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TYPING));
 	}
 	
 	/*
@@ -650,7 +666,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
 		markAsSelectionDependentAction("Format", true); //$NON-NLS-1$		
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.FORMAT_ACTION);
-		
+
 		fGenerateActionGroup= new GenerateActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		ActionGroup rg= new RefactorActionGroup(this, ITextEditorActionConstants.GROUP_EDIT);
 		
@@ -1317,4 +1333,46 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		return oldExtension.equals(newExtension);
 	}
+	
+	/**
+	 * Returns the editor's smart typing state.
+	 * @return <code>true</code> if the editor is in smart typing mode, <code>false</code>
+	 * otherwise.
+	 */
+	public boolean isSmartTyping() {
+		return fSmartTyping;
+	}
+
+	/**
+	 * Sets the editor's smart typing state.
+	 * @param smart the new smart typing state.
+	 */
+	public void setSmartTyping(boolean smart) {
+		if (smart != fSmartTyping) {
+			fSmartTyping= smart;
+			updateStatusField(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);
+		}
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updateStatusFields()
+	 */
+	protected void updateStatusFields() {
+		super.updateStatusFields();
+		updateStatusField(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updateStatusField(java.lang.String)
+	 */
+	protected void updateStatusField(String category) {
+		if (IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING.equals(category)) {
+			IStatusField field= getStatusField(category);
+			if (field != null)
+				field.setText(fSmartTyping ? JavaEditorMessages.getString("ToggleSmartTypingAction.Smart.label") : JavaEditorMessages.getString("ToggleSmartTypingAction.Raw.label"));  //$NON-NLS-1$//$NON-NLS-2$
+		} else {
+			super.updateStatusField(category);
+		}
+	}
+
 }

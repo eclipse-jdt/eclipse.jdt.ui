@@ -1383,6 +1383,26 @@ public class PreferenceConstants {
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER= "browserLikeLinksKeyModifier"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls the smart typing input mode.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 2.1
+	 */	
+	public static final String EDITOR_SMART_TYPING= "org.eclipse.jdt.ui.editor.smart_typing"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls the "smart semicolon" smart typing handler
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 2.1
+	 */	
+	public static final String EDITOR_SMART_SEMICOLON= "org.eclipse.jdt.ui.editor.smart_semicolon"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1855,7 +1875,11 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
 		
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
-		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);
+		
+		// work in progress
+		store.setDefault(PreferenceConstants.EDITOR_SMART_TYPING, false);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, true);
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	
