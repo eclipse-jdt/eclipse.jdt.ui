@@ -54,12 +54,14 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 
 import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -74,6 +76,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
@@ -89,7 +92,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		}
 		
 		/**
-		 * Annotation representating an <code>IProblem</code>.
+		 * Annotation representing an <code>IProblem</code>.
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
@@ -375,7 +378,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		
 		/**
 		 * Annotation model dealing with java marker annotations and temporary problems.
-		 * Also acts as problem requestor for its compilation unit. Initialiy inactive. Must explicitly be
+		 * Also acts as problem requester for its compilation unit. Initially inactive. Must explicitly be
 		 * activated.
 		 */
 		protected static class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor, IProblemRequestorExtension {
@@ -759,7 +762,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * Constructor
 	 */
 	public CompilationUnitDocumentProvider() {
-		setParentDocumentProvider(new TextFileDocumentProvider(new JavaStorageDocumentProvider()));		
+		
+		IDocumentProvider provider= new TextFileDocumentProvider(new JavaStorageDocumentProvider());
+		provider= new ForwardingDocumentProvider(IJavaPartitions.JAVA_PARTITIONING, new JavaDocumentSetupParticipant(), provider);
+		setParentDocumentProvider(provider);
+		
 		fGlobalAnnotationModelListener= new GlobalAnnotationModelListener();
 		fPropertyListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
