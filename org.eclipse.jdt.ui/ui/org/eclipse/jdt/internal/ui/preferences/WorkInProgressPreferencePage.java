@@ -260,7 +260,7 @@ WorkInProgressPreferencePage
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 	
-		l= new Label(result, SWT.LEFT);
+		l= new Label(group, SWT.LEFT);
 		l.setText(PreferencesMessages.getString(PREFIX + "quickdiff.referenceprovidertitle")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
