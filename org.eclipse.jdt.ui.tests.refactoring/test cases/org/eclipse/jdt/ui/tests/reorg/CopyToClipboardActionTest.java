@@ -239,7 +239,11 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		Object typeB= fCuB.getType("B");
 		Object[] elements= {typeA, typeB};
 		checkDisabled(elements);
-	}	
+	}
+	
+	public void testDisabled23() throws Exception{
+		checkDisabled(new Object[]{faTxt, fCuB});
+	}
 
 	public void testEnabled0() throws Exception {
 		Object[] elements= {MySetup.getProject()};
@@ -348,5 +352,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		Object packDecl= fCuA.getPackageDeclarations()[0];
 		Object[] elements= {classA, importContainer, packDecl};
 		checkEnabled(elements);
+	}
+
+	public void testEnabled20() throws Exception{
+		checkEnabled(new Object[]{faTxt, fCuA});
 	}
 }
