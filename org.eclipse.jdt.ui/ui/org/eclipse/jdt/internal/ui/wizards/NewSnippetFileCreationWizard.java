@@ -33,6 +33,7 @@ public class NewSnippetFileCreationWizard extends Wizard implements INewWizard {
 	
 	public NewSnippetFileCreationWizard() {
 		setNeedsProgressMonitor(true);
+		setWindowTitle(NewWizardMessages.getString("NewSnippetFileCreationWizard.title")); //$NON-NLS-1$
 	}
 
 	/*

@@ -155,7 +155,6 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 			
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
-			dialog.getShell().setText(NewWizardMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
 			dialog.open();
 		} catch (CoreException e) {
 			String title= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.title"); //$NON-NLS-1$
