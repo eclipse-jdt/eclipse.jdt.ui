@@ -246,7 +246,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 		final String innerSpace= (replace.getOffset() + replace.getLength() == statement.getOffset()) ? "" : " "; //$NON-NLS-1$ //$NON-NLS-2$
 
 		switch (statementLine - insertionLine) {
-			// same line
+			// statement on same line
 			case 0:
 				{
 					int replaceOffset= statement.getOffset() + statement.getLength();
@@ -255,12 +255,25 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 				}
 				break;
 
-			// more lines:
+			// more than one line distance between block begin and next statement:
 			default:
-				// statement is too far away
+				// statement is too far away, assume normal typing; add closing braces before statement
+				{
+					final String lineDelimiter= getLineDelimiter(document);
+					final String lineIndentation= getLineIndentation(document, insertionLine, replace.getOffset());
+
+					final StringBuffer buffer= new StringBuffer();
+					buffer.append(lineIndentation);
+					buffer.append("}"); //$NON-NLS-1$					
+					buffer.append(lineDelimiter);
+
+					// skip line delimiter, otherwise it may clash with the insertion of '{'
+					int replaceOffset= document.getLineOffset(insertionLine) + document.getLineLength(insertionLine);										
+					addReplace(document, command, replaceOffset, 0, buffer.toString());
+				}
 				break;
 
-			// next line
+			// statement on next line
 			case 1:
 				final String lineDelimiter= getLineDelimiter(document);
 				final String lineIndentation= getLineIndentation(document, insertionLine, replace.getOffset());
