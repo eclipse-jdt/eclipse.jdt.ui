@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
@@ -139,11 +140,19 @@ class MoveMembersInputPage extends UserInputWizardPage {
 	}
 	
 	private IJavaSearchScope createWorkspaceSourceScope(){
-		return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
+		try {
+			return RefactoringScopeFactory.create(getMoveRefactoring().getDeclaringType().getJavaProject());
+		} catch (JavaModelException e) {
+			//fallback is the whole workspace scope
+			String title= "Move Members";
+			String message= "Internal error occurred. See log for details.";
+			ExceptionHandler.handle(e, getShell(), title, message);
+			return SearchEngine.createJavaSearchScope(new IJavaElement[]{getMoveRefactoring().getDeclaringType().getJavaProject()}, true);
+		}
 	}
 	
 	private void openTypeSelectionDialog(){
-		int elementKinds= IJavaSearchConstants.CLASS | IJavaSearchConstants.INTERFACE;
+		int elementKinds= IJavaSearchConstants.TYPE;
 		final IJavaSearchScope scope= createWorkspaceSourceScope();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), elementKinds, scope);
 		dialog.setTitle(RefactoringMessages.getString("MoveMembersInputPage.choose_Type")); //$NON-NLS-1$
