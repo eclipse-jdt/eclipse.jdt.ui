@@ -125,9 +125,15 @@ public class RefactoringScanner {
 		if (! isQualifierSeparator(charBeforeName))
 			return false;
 		
+		if (qualifierEnd > 0) {
+			char charBeforeSeparator= value.charAt(qualifierEnd - 1);
+			if (! Character.isJavaIdentifierPart(charBeforeSeparator))
+				return false; // case: "look at #f" -> should be updated
+		}
+			
 		String srcQualifier= value.substring(qualifierStart, qualifierEnd);
 		if (! srcQualifier.equals(fQualifier))
-			return true;
+			return true; // fails to update if srcQualifier contains whitespace
 		
 		if (qualifierStart > 0) {
 			// check case "p.A" -> "p.B" with reference "another.p.A":
