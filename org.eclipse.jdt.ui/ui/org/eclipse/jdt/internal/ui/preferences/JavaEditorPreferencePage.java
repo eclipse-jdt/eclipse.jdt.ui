@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
@@ -134,7 +135,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.OVERVIEW_RULER),
-		
+//		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, JavaEditor.LINE_NUMBER_RULER),
+				
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SPACES_FOR_TABS),
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.AUTOACTIVATION),
@@ -150,7 +152,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT)
-		
 	};
 	
 	private final String[][] fListModel= new String[][] {
@@ -189,11 +190,17 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	};
 	
 	private Map fTextFields= new HashMap();
-	private ArrayList fNumberFields= new ArrayList();
 	private ModifyListener fTextFieldListener= new ModifyListener() {
 		public void modifyText(ModifyEvent e) {
-			if (!e.widget.isDisposed())
-				textChanged((Text) e.widget);
+			Text text= (Text) e.widget;
+			fOverlayStore.setValue((String) fTextFields.get(text), text.getText());
+		}
+	};
+
+	private ArrayList fNumberFields= new ArrayList();
+	private ModifyListener fNumberFieldListener= new ModifyListener() {
+		public void modifyText(ModifyEvent e) {
+			numberFieldChanged((Text) e.widget);
 		}
 	};
 	
@@ -267,6 +274,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitDocumentProvider.HANDLE_TEMPRARY_PROBELMS, true);
 		
 		store.setDefault(CompilationUnitEditor.OVERVIEW_RULER, true);
+//		store.setDefault(JavaEditor.LINE_NUMBER_RULER, false);
 		
 		WorkbenchChainedTextFontFieldEditor.startPropagate(store, JFaceResources.TEXT_FONT);
 
@@ -612,6 +620,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOverviewRuler"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.OVERVIEW_RULER, 0);
 		
+//		label= "Show line numbers";
+//		addCheckBox(behaviorComposite, label, JavaEditor.LINE_NUMBER_RULER, 0);
+		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightMatchingBrackets"); //$NON-NLS-1$
 		fBracketHighlightButton= addCheckBox(behaviorComposite, label, CompilationUnitEditor.MATCHING_BRACKETS, 0);
 
@@ -697,9 +708,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showOnlyProposalsVisibleInTheInvocationContext"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
-		
-//		label= "Show only proposals with &matching cases";
-//		addCheckBox(contentAssistComposite, label, ContentAssistPreference.CASE_SENSITIVITY, 0);
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.presentProposalsInAlphabeticalOrder"); //$NON-NLS-1$
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
@@ -940,10 +948,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd.horizontalAlignment= GridData.END;
 		textControl.setLayoutData(gd);
 		textControl.setTextLimit(textLimit);
-		textControl.addModifyListener(fTextFieldListener);
 		fTextFields.put(textControl, key);
-		if (isNumber)
+		if (isNumber) {
 			fNumberFields.add(textControl);
+			textControl.addModifyListener(fNumberFieldListener);
+		} else {
+			textControl.addModifyListener(fTextFieldListener);
+		}
 			
 		return composite;
 	}
@@ -983,7 +994,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return buffer.toString();
 	}
 	
-	private void textChanged(Text textControl) {
+	private void numberFieldChanged(Text textControl) {
 		String number= textControl.getText();
 		IStatus status= validatePositiveNumber(number);
 		if (!status.matches(IStatus.ERROR))
