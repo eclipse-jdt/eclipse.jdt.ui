@@ -58,12 +58,11 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
-
-import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 
 /**
  *	Page 1 of the JAR Package wizard
@@ -157,7 +156,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		update();
 		giveFocusToDestination();
 		
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE);								
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JARPACKAGER_WIZARD_PAGE);
 	}
 
 	/**
@@ -308,7 +307,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			String[] directoryNames= settings.getArray(STORE_DESTINATION_NAMES);
 			if (directoryNames == null)
 				return; // ie.- no settings stored
-			fJarPackage.setJarLocation(getPathFromString(directoryNames[0]));
+			fJarPackage.setJarLocation(new Path(directoryNames[0]));
 		}
 	}
 
@@ -325,18 +324,20 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fJarPackage.setExportJavaFiles(fExportJavaFilesCheckbox.getSelection());
 
 		// destination
-		IPath path= getPathFromString(fDestinationNamesCombo.getText());
+		String comboText= fDestinationNamesCombo.getText();
+		IPath path= new Path(comboText);
+		if (!new File(comboText).isAbsolute())
+			// prepend workspace path
+			path= getWorkspaceLocation().append(path);
 		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
+			// append .jar
 			path= path.addFileExtension(JarPackagerUtil.JAR_EXTENSION);
+
 		fJarPackage.setJarLocation(path);
 
 		// options
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
-	}
-
-	protected IPath getPathFromString(String text) {
-		return new Path(text).makeAbsolute();
 	}
 
 	/**
@@ -346,7 +347,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * @return boolean
 	 */
 	protected boolean ensureTargetFileIsValid(File targetFile) {
-		if (targetFile.exists() && targetFile.isDirectory()) {
+		if (targetFile.exists() && targetFile.isDirectory() && fDestinationNamesCombo.getText().length() > 0) {
 			setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.exportDestinationMustNotBeDirectory")); //$NON-NLS-1$
 			fDestinationNamesCombo.setFocus();
 			return false;
@@ -442,7 +443,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * @return the resource specified by the path or <code>null</code>
 	 */
 	protected IResource findResource(IPath path) {
-		IWorkspace workspace= JavaPlugin.getWorkspace();
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IStatus result= workspace.validatePath(
 							path.toString(),
 							IResource.ROOT | IResource.PROJECT | IResource.FOLDER | IResource.FILE);
@@ -469,7 +470,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			};
 		fInputGroup= new CheckboxTreeAndListGroup(
 					parent,
-					JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()),
+					JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()),
 					treeContentProvider,
 					new JavaElementLabelProvider(labelFlags),
 					new StandardJavaElementContentProvider(),
@@ -516,8 +517,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Overrides method from IJarPackageWizardPage
 	 */
 	public boolean isPageComplete() {
-		setErrorMessage(null);
-		return super.determinePageCompletion();
+		boolean complete= validateSourceGroup()
+			&& validateDestinationGroup()
+			&& validateOptionsGroup();
+		if (complete)
+			setErrorMessage(null);
+		return complete;
 	}
 
 	/*
@@ -535,11 +540,21 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		updatePageCompletion();
 	}
 	
+	protected void updatePageCompletion() {	
+		boolean pageComplete= isPageComplete();
+		setPageComplete(pageComplete);
+		if (pageComplete)
+			setErrorMessage(null);
+	}
+	
 	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected boolean validateDestinationGroup() {
 		if (fDestinationNamesCombo.getText().length() == 0) {
+			// Clear error 
+			if (getErrorMessage() != null)
+				setErrorMessage(null);
 			return false;
 		}
 		if (fJarPackage.getJarLocation().toString().endsWith("/")) { //$NON-NLS-1$
@@ -547,11 +562,10 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			fDestinationNamesCombo.setFocus();
 			return false;
 		}
-
-		if (JavaPlugin.getWorkspace().getRoot().getLocation().isPrefixOf(fJarPackage.getJarLocation())) {
-			int segments= JavaPlugin.getWorkspace().getRoot().getLocation().matchingFirstSegments(fJarPackage.getJarLocation());
+		if (getWorkspaceLocation() != null && getWorkspaceLocation().isPrefixOf(fJarPackage.getJarLocation())) {
+			int segments= getWorkspaceLocation().matchingFirstSegments(fJarPackage.getJarLocation());
 			IPath path= fJarPackage.getJarLocation().removeFirstSegments(segments);
-			IResource resource= JavaPlugin.getWorkspace().getRoot().findMember(path);
+			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
 			if (resource != null && resource.getType() == IResource.FILE) {
 				// test if included
 				if (JarPackagerUtil.contains(JarPackagerUtil.asResources(fJarPackage.getElements()), (IFile)resource)) {
@@ -560,7 +574,15 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				}
 			}
 		}
-		
+		// Inform user about relative directory
+		String currentMessage= getMessage();
+		if (!(new File(fDestinationNamesCombo.getText()).isAbsolute())) {
+			if (currentMessage == null)
+				setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.info.relativeExportDestination")); //$NON-NLS-1$
+		} else {
+			if (currentMessage != null)
+				setMessage(null);
+		}
 		return ensureTargetFileIsValid(fJarPackage.getJarLocation().toFile());
 	}
 
@@ -580,9 +602,11 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			setErrorMessage(JarPackagerMessages.getString("JarPackageWizardPage.error.noExportTypeChecked")); //$NON-NLS-1$
 			return false;
 		}
-		if (getSelectedResources().size() == 0) 
+		if (getSelectedResources().size() == 0) {
+			if (getErrorMessage() != null)
+				setErrorMessage(null);
 			return false;
-		
+		}
 		if (fExportClassFilesCheckbox.getSelection() || !fExportJavaFilesCheckbox.getSelection())
 			return true;
 			
@@ -592,6 +616,9 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			if (!(iter.next() instanceof IClassFile))
 				return true;
 		}
+
+		if (getErrorMessage() != null)
+			setErrorMessage(null);
 		return false;
 	}
 
@@ -759,5 +786,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 	private Object[] getSelectedElements() {
 		return getSelectedResources().toArray();
+	}
+
+	/**
+	 * @return the location if or <code>null</code>
+	 */
+	private IPath getWorkspaceLocation() {
+		return ResourcesPlugin.getWorkspace().getRoot().getLocation();
 	}
 }
