@@ -242,7 +242,7 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 	 */	
 	public Object getLaunchObject(String memento) {
 		IJavaElement e = JavaCore.create(memento);
-		if (e.exists()) {
+		if (e != null && e.exists()) {
 			return e;
 		} else {
 			return null;
