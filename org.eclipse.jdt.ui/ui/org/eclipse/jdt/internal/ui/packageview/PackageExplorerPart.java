@@ -708,7 +708,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
 			for (int i= 0; i < elementMem.length; i++) {
 				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				list.add(element);
+				if (element != null)
+					list.add(element);
 			}
 			fViewer.setSelection(new StructuredSelection(list));
 		}
@@ -721,7 +722,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			IMemento[] elementMem= childMem.getChildren(TAG_ELEMENT);
 			for (int i= 0; i < elementMem.length; i++) {
 				Object element= JavaCore.create(elementMem[i].getString(TAG_PATH));
-				elements.add(element);
+				if (element != null)
+					elements.add(element);
 			}
 			fViewer.setExpandedElements(elements.toArray());
 		}
