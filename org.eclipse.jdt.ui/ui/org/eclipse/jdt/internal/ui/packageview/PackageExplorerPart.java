@@ -65,6 +65,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -513,9 +514,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		ContextMenuGroup.add(menu, fStandardGroups, fViewer);
 		
-		if (fAddBookmarkAction.canOperateOnSelection())
+		if (onlyFilesSelected(selection)) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fAddBookmarkAction);
-					
+			fAddBookmarkAction.selectionChanged(selection);
+		}
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 		fRefreshAction.selectionChanged(selection);
 
@@ -534,13 +536,31 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		gotoMenu.add(fGotoPackageAction);
 	}
 
+	private boolean onlyFilesSelected(IStructuredSelection selection) {
+		if (selection.isEmpty())
+			return false;
+		for (Iterator enum= selection.iterator(); enum.hasNext();) {
+			Object o= enum.next();
+			if (o instanceof IFile)
+				continue;
+			if (o instanceof IAdaptable) {
+				Object resource= ((IAdaptable)o).getAdapter(IResource.class);
+				if (!(resource instanceof IFile))
+					return false;
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	private void makeActions() {
 		ISelectionProvider provider= getSelectionProvider();
 		fOpenCUAction= new OpenResourceAction(provider);
 		fPropertyDialogAction= new PropertyDialogAction(getShell(), provider);
 		// fShowTypeHierarchyAction= new ShowTypeHierarchyAction(provider);
 		fShowNavigatorAction= new ShowInNavigatorAction(provider);
-		fAddBookmarkAction= new AddBookmarkAction(provider);
+		fAddBookmarkAction= new AddBookmarkAction(getShell());
 		
 		fStandardGroups= new ContextMenuGroup[] {
 			new BuildGroup(),
