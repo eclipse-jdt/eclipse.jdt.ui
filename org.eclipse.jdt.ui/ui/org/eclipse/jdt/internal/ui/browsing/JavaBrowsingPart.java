@@ -597,7 +597,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * @param parent	the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
-		return new ProblemTableViewer(parent, SWT.SINGLE);
+		return new ProblemTableViewer(parent, SWT.MULTI);
 	}
 	
 	protected int getLabelProviderFlags() {
