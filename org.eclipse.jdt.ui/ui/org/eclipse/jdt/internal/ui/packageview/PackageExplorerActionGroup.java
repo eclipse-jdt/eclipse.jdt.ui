@@ -14,6 +14,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
@@ -239,8 +240,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 			if (action.isEnabled())
 				action.run();
 		} else if (event.character == SWT.DEL) {
-			IRefactoringAction delete= fCCPActionGroup.getDeleteAction();
-			delete.update();
+			IAction delete= fCCPActionGroup.getDeleteAction();
 			if (delete.isEnabled())
 				delete.run();
 		}

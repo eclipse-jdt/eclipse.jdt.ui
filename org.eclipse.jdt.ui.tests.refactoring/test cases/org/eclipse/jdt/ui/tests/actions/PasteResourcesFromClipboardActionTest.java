@@ -14,8 +14,6 @@ import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.viewers.StructuredSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -26,8 +24,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.*;
 
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
@@ -142,7 +143,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private void doCopy(Object[] copySelection) {
 		if (copySelection == null)
 			return; 
-		IRefactoringAction copyAction= ReorgGroup.createCopyAction(new FakeSelectionProvider(copySelection));
+		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(copySelection), new MockSelectionProvider(copySelection));
 		copyAction.update();
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
@@ -150,14 +151,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 
 	private void checkEnabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(new FakeSelectionProvider(pasteSelection));
+		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
 		doCopy(copySelection);		
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(new FakeSelectionProvider(pasteSelection));
+		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(pasteSelection), new MockSelectionProvider(pasteSelection));
 		pasteAction.update();
 		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
 	}

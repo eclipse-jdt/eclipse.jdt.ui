@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -128,6 +129,7 @@ import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
+import org.eclipse.jdt.ui.actions.UnifiedSite;
 
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
@@ -146,7 +148,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private Action fOpenToAction;
 	private Action fShowNavigatorAction;
 	protected PropertyDialogAction fPropertyDialogAction;
- 	private IRefactoringAction fDeleteAction;
+ 	private IAction fDeleteAction;
  	private RefreshAction fRefreshAction;
 
 	private Menu fContextMenu;		
@@ -312,7 +314,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		fBuildGroup.fillActionBars(actionBars);
 		
-		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
+		ReorgGroup.addGlobalReorgActions(UnifiedSite.create(getSite()), actionBars, getSelectionProvider());
 	}
 	
 	//---- IWorkbenchPart ------------------------------------------------------
@@ -354,7 +356,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			if (fRefreshAction.isEnabled())
 				fRefreshAction.run();
 		} if (event.character == SWT.DEL) {
-			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();
 		}
@@ -441,7 +442,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fBuildGroup= new BuildGroup(this, true);
 		fStandardGroups= new ContextMenuGroup[] {
 			fBuildGroup,
-			new ReorgGroup(),
+			new ReorgGroup(UnifiedSite.create(getSite())),
 			new GenerateGroup(),
 			new JavaSearchGroup()
 		};
@@ -451,12 +452,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				new RefactorActionGroup(this, getViewer()), new GenerateActionGroup(this)});
 
 		
-		fDeleteAction= ReorgGroup.createDeleteAction(provider);
+		fDeleteAction= ReorgGroup.createDeleteAction(UnifiedSite.create(getSite()), provider);
 		fRefreshAction= new RefreshAction(getShell());
 		
 		IActionBars actionService= getViewSite().getActionBars();
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
-		ReorgGroup.addGlobalReorgActions(actionService, provider);
+		ReorgGroup.addGlobalReorgActions(UnifiedSite.create(getSite()), actionService, provider);
 	}
 
 

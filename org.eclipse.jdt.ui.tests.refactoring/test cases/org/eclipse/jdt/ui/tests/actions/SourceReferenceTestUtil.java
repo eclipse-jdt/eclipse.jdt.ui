@@ -6,9 +6,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.ui.tests.refactoring.infra.*;
+
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class SourceReferenceTestUtil {
 	
@@ -16,9 +20,7 @@ class SourceReferenceTestUtil {
 	}
 	
 	static DeleteSourceReferencesAction createDeleteAction(Object[] elems){
-		ISelectionProvider provider= new FakeSelectionProvider(elems);
-
-		DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(provider){
+		DeleteSourceReferencesAction deleteAction= new DeleteSourceReferencesAction(new MockUnifiedSite(elems)){
 			protected boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 				return false;
 			}
@@ -46,16 +48,14 @@ class SourceReferenceTestUtil {
 //	}	
 
 	static void copy(Object[] elems) {
-		ISelectionProvider provider= new FakeSelectionProvider(elems);
-		IRefactoringAction copyAction= ReorgGroup.createCopyAction(provider);
+		SelectionDispatchAction copyAction= ReorgGroup.createCopyAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
 		copyAction.update();
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
 	static void paste(Object[] elems) {
-		ISelectionProvider provider1= new FakeSelectionProvider(elems);
-		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(provider1);
+		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(new MockUnifiedSite(elems), new MockSelectionProvider(elems));
 		pasteAction.update();
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();
