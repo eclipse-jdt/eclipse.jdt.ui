@@ -83,7 +83,7 @@ public class OpenAction extends SelectionDispatchAction {
 			return;
 		
 		IRegion region= new Region(selection.getOffset(), selection.getLength());
-		IHyperlink[]hyperlinks= new PropertiesKeyHyperlinkDetector(fEditor).detectHyperlinks(fEditor.internalGetSourceViewer(), region, false);
+		IHyperlink[]hyperlinks= new PropertyKeyHyperlinkDetector(fEditor).detectHyperlinks(fEditor.internalGetSourceViewer(), region, false);
 		
 		if (hyperlinks != null && hyperlinks.length == 1)
 			hyperlinks[0].open();

@@ -43,7 +43,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * 
  * @since 3.1
  */
-public class PropertiesKeyHyperlinkDetector implements IHyperlinkDetector {
+public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 
 	private ITextEditor fTextEditor;
 
@@ -53,7 +53,7 @@ public class PropertiesKeyHyperlinkDetector implements IHyperlinkDetector {
 	 *  
 	 * @param editor the editor in which to detect the hyperlink
 	 */
-	public PropertiesKeyHyperlinkDetector(ITextEditor editor) {
+	public PropertyKeyHyperlinkDetector(ITextEditor editor) {
 		Assert.isNotNull(editor);
 		fTextEditor= editor;
 	}
@@ -104,7 +104,7 @@ public class PropertiesKeyHyperlinkDetector implements IHyperlinkDetector {
 				return null;
 			}
 			
-			return new PropertiesKeyHyperlink[] {new PropertiesKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
+			return new PropertyKeyHyperlink[] {new PropertyKeyHyperlink(new Region(partition.getOffset() + delta, realKey.length()), realKey, fTextEditor)};
 			
 		} catch (BadLocationException ex) {
 			return null;

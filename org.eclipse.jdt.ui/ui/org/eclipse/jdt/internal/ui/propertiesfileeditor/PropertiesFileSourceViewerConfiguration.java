@@ -240,7 +240,7 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 		
 		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
 		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
-		detectors[0]= new PropertiesKeyHyperlinkDetector(fTextEditor);
+		detectors[0]= new PropertyKeyHyperlinkDetector(fTextEditor);
 		for (int i= 0; i < inheritedDetectorsLength; i++)
 			detectors[i+1]= inheritedDetectors[i];
 		

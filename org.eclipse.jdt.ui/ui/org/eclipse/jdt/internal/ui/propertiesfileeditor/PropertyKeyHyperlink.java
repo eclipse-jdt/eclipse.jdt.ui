@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * 
  * @since 3.1
  */
-public class PropertiesKeyHyperlink implements IHyperlink {
+public class PropertyKeyHyperlink implements IHyperlink {
 
 	
 	private static class KeyReference extends PlatformObject implements IWorkbenchAdapter {
@@ -171,7 +171,7 @@ public class PropertiesKeyHyperlink implements IHyperlink {
 	 * @param key the properties key
 	 * @param editor the text editor
 	 */
-	public PropertiesKeyHyperlink(IRegion region, String key, ITextEditor editor) {
+	public PropertyKeyHyperlink(IRegion region, String key, ITextEditor editor) {
 		Assert.isNotNull(region);
 		Assert.isNotNull(key);
 		Assert.isNotNull(editor);
