@@ -11,6 +11,9 @@ public abstract class NewElementWizardPage extends WizardPage {
 	private IStatus fCurrStatus;
 	private ResourceBundle fResourceBundle;
 	
+	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
+	private boolean fPageVisible;
+	
 	public NewElementWizardPage(String name, ResourceBundle bundle) {
 		super(name);
 		
@@ -18,7 +21,8 @@ public abstract class NewElementWizardPage extends WizardPage {
 		if (bundle != null) {
 			setTitle(bundle.getString(name + ".title"));
 			setDescription(bundle.getString(name + ".description"));
-		}		
+		}
+		fPageVisible= false;	
 	}
 	
 	public NewElementWizardPage(String name) {
@@ -71,10 +75,9 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 * @see WizardPage#becomesVisible
 	 */
 	public void setVisible(boolean visible) {
-		if (visible) {
-			updateStatus(fCurrStatus);
-		}
 		super.setVisible(visible);
+		fPageVisible= visible;
+		updateStatus(fCurrStatus);
 	}			
 	
 	/**
@@ -90,8 +93,8 @@ public abstract class NewElementWizardPage extends WizardPage {
 	 */
 	protected void updateStatus(IStatus status) {
 		fCurrStatus= status;
-		if (isCurrentPage() && isControlCreated() && getControl().isVisible()) {
-			setPageComplete(!status.matches(IStatus.ERROR));
+		setPageComplete(!status.matches(IStatus.ERROR));
+		if (fPageVisible) {
 			StatusTool.applyToStatusLine(this, status);
 		}
 	}

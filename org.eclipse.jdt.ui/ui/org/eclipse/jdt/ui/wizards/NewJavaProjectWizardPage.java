@@ -24,6 +24,9 @@ public class NewJavaProjectWizardPage extends WizardPage {
 
 	private IStatus fCurrStatus;
 	
+	// added for 1GEUK5C, 1GEUUN9, 1GEUNW2
+	private boolean fPageVisible;	
+	
 	/**
 	 * Creates a Java project wizard creation page.
 	 * <p>
@@ -46,9 +49,9 @@ public class NewJavaProjectWizardPage extends WizardPage {
 			}
 		};
 
-				
 		fBuildPathsBlock= new BuildPathsBlock(root, listener, true);
 		fCurrStatus= new StatusInfo();
+		fPageVisible= false;
 	}		
 	
 	/**
@@ -131,9 +134,10 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	public void setVisible(boolean visible) {
 		if (visible) {
 			fBuildPathsBlock.init(getProjectHandle(), false);		
-			updateStatus(fCurrStatus);
 		}
 		super.setVisible(visible);
+		fPageVisible= visible;
+		updateStatus(fCurrStatus);
 	}
 
 	/**
@@ -191,8 +195,8 @@ public class NewJavaProjectWizardPage extends WizardPage {
 	 */	
 	private void updateStatus(IStatus status) {
 		fCurrStatus= status;
-		if (isCurrentPage() && isControlCreated() && getControl().isVisible()) {
-			setPageComplete(!status.matches(IStatus.ERROR));
+		setPageComplete(!status.matches(IStatus.ERROR));
+		if (fPageVisible) {
 			StatusTool.applyToStatusLine(this, status);
 		}
 	}
