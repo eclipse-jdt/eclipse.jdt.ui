@@ -557,7 +557,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;	
 			}
 
-			if (event.keyCode != SWT.CTRL) {
+			if (event.keyCode != SWT.MOD1) {
 				deactivate();
 				return;
 			}
@@ -601,7 +601,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (!fActive)
 				return;
 				
-			if (event.stateMask != SWT.CTRL) {
+			if (event.stateMask != SWT.MOD1) {
 				deactivate();
 				return;	
 			}
@@ -645,9 +645,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			if (!fActive) {
-				if (event.stateMask != SWT.CTRL)
+				if (event.stateMask != SWT.MOD1)
 					return;
-				// Ctrl was already pressed
+				// MOD1 was already pressed
 				fActive= true;
 			}
 	

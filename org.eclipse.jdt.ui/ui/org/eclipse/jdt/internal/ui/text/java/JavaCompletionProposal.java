@@ -495,7 +495,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		IDocument document= viewer.getDocument();
 
-		fToggleEating= (stateMask & SWT.CTRL) != 0;
+		fToggleEating= (stateMask & SWT.MOD1) != 0;
 		if (insertCompletion() ^ fToggleEating)
 			fReplacementLength= offset - fReplacementOffset;
 		

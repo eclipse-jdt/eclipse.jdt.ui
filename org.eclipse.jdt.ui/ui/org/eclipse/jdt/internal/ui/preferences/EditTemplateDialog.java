@@ -409,7 +409,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private void handleKeyPressed(KeyEvent event) {
-		if (event.stateMask != SWT.CTRL)
+		if (event.stateMask != SWT.MOD1)
 			return;
 			
 		switch (event.character) {
@@ -428,7 +428,7 @@ public class EditTemplateDialog extends StatusDialog {
 		if (!event.doit)
 			return;
 
-		if (event.stateMask != SWT.CTRL)
+		if (event.stateMask != SWT.MOD1)
 			return;
 			
 		switch (event.character) {
