@@ -22,8 +22,9 @@ public class Rectangle {
 	}
 
 	/**
-	 * @param shape
-	 * @return
+	 * Is smaller
+	 * @param shape TODO
+	 * @return boolean
 	 */
 	public boolean isSmallerThan(Shape shape) {
 		return shape.area() < getWidth() * getHeight();

@@ -10,6 +10,10 @@ public class A {
 		a.print(s);
 	}
 
+	/**
+	 * Print
+	 * @param s
+	 */
 	public void print(Second s) {
 		System.out.println(s + ": " + fMagic);
 	}

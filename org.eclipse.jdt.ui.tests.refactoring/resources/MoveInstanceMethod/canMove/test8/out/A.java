@@ -5,8 +5,14 @@ import p2.B;
 public class A {
 	
 	public String foo= "foo";
-	
-	public Object m(B b) {
+
+	/**
+	 * m
+	 * @param b
+	 * @return Object
+	 * @throws Exception
+	 */
+	public Object m(B b) throws Exception {
 		return b.m(this);
 	}
 }

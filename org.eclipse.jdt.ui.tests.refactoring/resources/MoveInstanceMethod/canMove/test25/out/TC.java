@@ -3,9 +3,6 @@ public class TC {
 	public void runBare() {
 	}
 
-	/**
-	 * @param tr
-	 */
 	protected void run(final TR tr) {
 		tr.startTest(this);
 		P p= new P() {

@@ -1,5 +1,10 @@
 package p1;
 public class TR {
+
+	/**
+	 * Runs the test
+	 * @param test the test to run
+	 */
 	protected void run(final TC test) {
 		test.run(this);
 	}

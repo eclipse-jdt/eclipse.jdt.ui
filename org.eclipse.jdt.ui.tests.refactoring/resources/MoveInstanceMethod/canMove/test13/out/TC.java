@@ -4,7 +4,8 @@ public class TC {
 	}
 
 	/**
-	 * @param tr
+	 * Run the test case
+	 * @param tr TODO
 	 */
 	protected void run(TR tr) {
 		tr.startTest(this);
@@ -14,7 +15,7 @@ public class TC {
 			}
 		};
 		tr.runProtected(this, p);
-	
+			// Some comment
 		tr.endTest(this);
 	}
 }

@@ -9,7 +9,11 @@ public class Shape {
 		int height= fBounds.getHeight();
 		return width*height;
 	}
-	
+
+	/**
+	 * Returns the filled area
+	 * @return the filled area
+	 */
 	public int filledArea() {
 		return fInnerBounds.filledArea(this);
 	}

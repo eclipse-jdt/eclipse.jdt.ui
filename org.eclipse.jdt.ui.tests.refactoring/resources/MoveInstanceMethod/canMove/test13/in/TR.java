@@ -1,6 +1,11 @@
 package p1;
 
 public class TR {
+
+	/**
+	 * Run the test case
+	 * @param test
+	 */
 	protected void run(final TC test) {
 		startTest(test);
 		P p= new P() {
@@ -9,7 +14,7 @@ public class TR {
 			}
 		};
 		runProtected(test, p);
-
+			// Some comment
 		endTest(test);
 	}
 

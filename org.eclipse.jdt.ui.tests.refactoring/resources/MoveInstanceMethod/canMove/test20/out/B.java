@@ -12,7 +12,7 @@ public class B {
 	}
 
 	/**
-	 * 
+	 * Print
 	 */
 	public void print() {
 		System.out.println(

@@ -6,6 +6,7 @@ public class B {
 	public void mB2() {}
 
 	/**
+	 * This is a comment
 	 * @param j
 	 * @param foo
 	 * @param bar

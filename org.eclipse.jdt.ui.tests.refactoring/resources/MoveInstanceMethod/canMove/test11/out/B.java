@@ -8,7 +8,8 @@ public class B {
 	public void mB2() {}
 
 	/**
-	 * @param a
+	 * This is a comment
+	 * @param a TODO
 	 * @param j
 	 * @param foo
 	 * @param bar

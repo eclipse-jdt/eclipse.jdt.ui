@@ -6,10 +6,12 @@ public class B {
 	public String bar= "bar";
 
 	/**
-	 * @param a
-	 * @return
+	 * m
+	 * @param a TODO
+	 * @return Object
+	 * @throws Exception
 	 */
-	public Object m(A a) {
+	public Object m(A a) throws Exception {
 		System.out.println(a.foo);
 		System.out.println(a.foo);
 		System.out.println(bar);

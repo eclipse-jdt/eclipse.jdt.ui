@@ -10,9 +10,6 @@ public class B {
 		return fName;
 	}
 
-	/**
-	 * 
-	 */
 	public void print() {
 		class StarDecorator1 extends StarDecorator{
 			public String decorate(String in) {

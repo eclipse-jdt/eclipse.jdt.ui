@@ -10,6 +10,10 @@ public class A {
 		a.print(s);
 	}
 
+	/**
+	 * Print
+	 * @param s
+	 */
 	public void print(Second s) {
 		s.print(this);
 	}
@@ -24,7 +28,8 @@ class Second {
 		return fName;
 	}
 	/**
-	 * @param a
+	 * Print
+	 * @param a TODO
 	 */
 	public void print(A a) {
 		System.out.println(this + ": " + a.fMagic);

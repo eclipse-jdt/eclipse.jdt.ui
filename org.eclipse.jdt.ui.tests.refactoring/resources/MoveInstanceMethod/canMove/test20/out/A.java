@@ -7,6 +7,10 @@ public class A {
 		a.print(b);
 	}
 
+	/**
+	 * Print
+	 * @param b
+	 */
 	public void print(B b) {
 		b.print();
 	}

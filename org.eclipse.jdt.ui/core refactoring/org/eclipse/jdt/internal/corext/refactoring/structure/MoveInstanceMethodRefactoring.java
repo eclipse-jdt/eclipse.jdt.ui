@@ -53,7 +53,7 @@ public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
 	 */
 	public static boolean isAvailable(final IMethod method) throws JavaModelException {
 		Assert.isNotNull(method);
-		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isLocal() && !method.isReadOnly() && !JdtFlags.isStatic(method);
+		return method.exists() && !method.isConstructor() && !method.isBinary() && !method.getDeclaringType().isLocal() && !method.getDeclaringType().isAnnotation() && !method.isReadOnly() && !JdtFlags.isStatic(method);
 	}
 
 	/**

@@ -10,9 +10,6 @@ class Second {
 	public void go(int i, int j) {
 	}
 
-	/**
-	 * 
-	 */
 	public void print() {
 		foo(this);
 		bar();

@@ -13,7 +13,12 @@ public class Shape {
 	public int filledArea() {
 		return area() -	fInnerBounds.getWidth() * fInnerBounds.getHeight();
 	}
-	
+
+	/**
+	 * Is smaller
+	 * @param rect
+	 * @return boolean
+	 */
 	public boolean isSmallerThan(Rectangle rect) {
 		return area() < rect.getWidth() * rect.getHeight();
 	}

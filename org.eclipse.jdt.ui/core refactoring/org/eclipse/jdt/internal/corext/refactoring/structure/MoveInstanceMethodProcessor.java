@@ -100,8 +100,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
@@ -118,6 +116,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -752,7 +751,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	public final class SuperReferenceFinder extends AstNodeFinder {
 
+		public final boolean visit(final AnnotationTypeDeclaration node) {
+			return false;
+		}
+
 		public final boolean visit(final AnonymousClassDeclaration node) {
+			return false;
+		}
+
+		public final boolean visit(final EnumDeclaration node) {
 			return false;
 		}
 
@@ -771,14 +778,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		}
 
 		public final boolean visit(final TypeDeclaration node) {
-			return false;
-		}
-
-		public final boolean visit(final AnnotationTypeDeclaration node) {
-			return false;
-		}
-
-		public final boolean visit(final EnumDeclaration node) {
 			return false;
 		}
 	}
@@ -891,12 +890,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.moveInstanceMethodProcessor"; //$NON-NLS-1$
 
 	/**
-	 * Returns the bindings of the method parameters of the specified declaration.
+	 * Returns the bindings of the method arguments of the specified declaration.
 	 * 
 	 * @param declaration the method declaration
-	 * @return the array of method parameter variable bindings
+	 * @return the array of method argument variable bindings
 	 */
-	protected static IVariableBinding[] getParameterBindings(final MethodDeclaration declaration) {
+	protected static IVariableBinding[] getArgumentBindings(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
 		final List parameters= new ArrayList(declaration.parameters().size());
 		VariableDeclaration variable= null;
@@ -914,14 +913,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Returns the bindings of the method parameters types of the specified declaration.
+	 * Returns the bindings of the method argument types of the specified declaration.
 	 * 
 	 * @param declaration the method declaration
-	 * @return the array of method parameter variable bindings
+	 * @return the array of method argument variable bindings
 	 */
-	protected static ITypeBinding[] getParameterTypes(final MethodDeclaration declaration) {
+	protected static ITypeBinding[] getArgumentTypes(final MethodDeclaration declaration) {
 		Assert.isNotNull(declaration);
-		final IVariableBinding[] parameters= getParameterBindings(declaration);
+		final IVariableBinding[] parameters= getArgumentBindings(declaration);
 		final List types= new ArrayList(parameters.length);
 		IVariableBinding binding= null;
 		ITypeBinding type= null;
@@ -1252,7 +1251,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			if (fMethod.isConstructor())
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_constructors"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
 			monitor.worked(1);
-			if (fMethod.getDeclaringType().isInterface())
+			if (fMethod.getDeclaringType().isAnnotation())
+				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_annotation"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
+			else if (fMethod.getDeclaringType().isInterface())
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.no_interface"), JavaStatusContext.create(fMethod))); //$NON-NLS-1$
 			monitor.worked(1);
 		} finally {
@@ -1326,19 +1327,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @throws JavaModelException if the method declaration could not be found
 	 */
 	protected String[] computeReservedIdentifiers() throws JavaModelException {
-		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
 		final List names= new ArrayList();
-		final List parameters= declaration.parameters();
-		VariableDeclaration variable= null;
-		for (int index= 0; index < parameters.size(); index++) {
-			variable= (VariableDeclaration) parameters.get(index);
-			names.add(variable.getName().getIdentifier());
-		}
-		final Block body= declaration.getBody();
-		if (body != null) {
-			final IBinding[] bindings= new ScopeAnalyzer(fSourceRewrite.getRoot()).getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES);
-			for (int index= 0; index < bindings.length; index++)
-				names.add(bindings[index].getName());
+		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+		if (declaration != null) {
+			final List parameters= declaration.parameters();
+			VariableDeclaration variable= null;
+			for (int index= 0; index < parameters.size(); index++) {
+				variable= (VariableDeclaration) parameters.get(index);
+				names.add(variable.getName().getIdentifier());
+			}
+			final Block body= declaration.getBody();
+			if (body != null) {
+				final IBinding[] bindings= new ScopeAnalyzer(fSourceRewrite.getRoot()).getDeclarationsAfter(body.getStartPosition(), ScopeAnalyzer.VARIABLES);
+				for (int index= 0; index < bindings.length; index++)
+					names.add(bindings[index].getName());
+			}
 		}
 		final String[] result= new String[names.size()];
 		names.toArray(result);
@@ -1359,11 +1362,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final IMethodBinding method= declaration.resolveBinding();
 			if (method != null) {
 				final ITypeBinding declaring= method.getDeclaringClass();
-				IVariableBinding[] bindings= getParameterBindings(declaration);
+				IVariableBinding[] bindings= getArgumentBindings(declaration);
 				ITypeBinding binding= null;
 				for (int index= 0; index < bindings.length; index++) {
 					binding= bindings[index].getType();
-					if (binding.isClass() && binding.isFromSource() && !Bindings.equals(declaring, binding)) {
+					if ((binding.isClass() || binding.isEnum()) && binding.isFromSource() && !Bindings.equals(declaring, binding)) {
 						possibleTargets.add(bindings[index]);
 						candidateTargets.add(bindings[index]);
 					}
@@ -1392,17 +1395,17 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates a argument node list for the methods being refactored.
+	 * Creates a generic argument list of the refactored moved method
 	 * 
-	 * @param declaration the original method declaration of the method to move
-	 * @param nodes the argument node list to create
-	 * @param factory the method argument node factory to use
+	 * @param declaration the method declaration of the method to move
+	 * @param arguments the argument list to create
+	 * @param factory the argument factory to use
 	 * @return <code>true</code> if a target node had to be inserted as first argument, <code>false</code> otherwise
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected boolean createArgumentNodeList(final MethodDeclaration declaration, final List nodes, final IArgumentFactory factory) throws JavaModelException {
+	protected boolean createArgumentList(final MethodDeclaration declaration, final List arguments, final IArgumentFactory factory) throws JavaModelException {
 		Assert.isNotNull(declaration);
-		Assert.isNotNull(nodes);
+		Assert.isNotNull(arguments);
 		Assert.isNotNull(factory);
 		final AstNodeFinder finder= new ThisReferenceFinder();
 		declaration.accept(finder);
@@ -1414,16 +1417,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			binding= variable.resolveBinding();
 			if (binding != null) {
 				if (!Bindings.equals(binding, fTarget))
-					nodes.add(factory.getArgumentNode(binding));
+					arguments.add(factory.getArgumentNode(binding));
 				else if (!finder.getStatus().isOK()) {
-					nodes.add(factory.getTargetNode());
+					arguments.add(factory.getTargetNode());
 					added= true;
 				}
 			} else
-				nodes.add(factory.getArgumentNode(binding));
+				arguments.add(factory.getArgumentNode(binding));
 		}
 		if (!finder.getStatus().isOK() && !added) {
-			nodes.add(0, factory.getTargetNode());
+			arguments.add(0, factory.getTargetNode());
 			added= true;
 		}
 		return added;
@@ -1557,7 +1560,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 						list.insertLast(rewrite.createCopyTarget(invocation.getExpression()), null);
 				}
 			} else {
-				final IVariableBinding[] bindings= getParameterBindings(declaration);
+				final IVariableBinding[] bindings= getArgumentBindings(declaration);
 				if (bindings.length > 0) {
 					int index= 0;
 					for (; index < bindings.length; index++)
@@ -1669,6 +1672,71 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Creates the method arguments for the target method declaration.
+	 * 
+	 * @param rewrites the compilation unit rewrites
+	 * @param rewrite the source ast rewrite
+	 * @param declaration the source method declaration
+	 * @param adjusted the set of elements whose visibility has been adjusted
+	 * @param status the refactoring status
+	 * @return <code>true</code> if a target node had to be inserted as method argument, <code>false</code> otherwise
+	 * @throws JavaModelException if an error occurs while accessing the types of the arguments
+	 */
+	protected boolean createMethodArguments(final Map rewrites, final ASTRewrite rewrite, final MethodDeclaration declaration, final Set adjusted, final RefactoringStatus status) throws JavaModelException {
+		Assert.isNotNull(rewrites);
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(rewrite);
+		Assert.isNotNull(adjusted);
+		Assert.isNotNull(status);
+		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
+		final AST ast= rewriter.getRoot().getAST();
+		final AstNodeFinder finder= new AnonymousClassReferenceFinder(declaration);
+		declaration.accept(finder);
+		final List arguments= new ArrayList(declaration.parameters().size() + 1);
+		final boolean result= createArgumentList(declaration, arguments, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjusted, status) {
+
+			public final ASTNode getArgumentNode(final IVariableBinding binding) throws JavaModelException {
+				Assert.isNotNull(binding);
+				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
+				final ITypeBinding type= binding.getType();
+				adjustTypeVisibility(type);
+				variable.setType(ASTNodeFactory.newType(ast, type, false));
+				variable.setName(ast.newSimpleName(binding.getName()));
+				variable.modifiers().addAll(ast.newModifiers(binding.getModifiers()));
+				return variable;
+			}
+
+			public final ASTNode getTargetNode() throws JavaModelException {
+				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
+				final IMethodBinding method= declaration.resolveBinding();
+				if (method != null) {
+					final ITypeBinding declaring= method.getDeclaringClass();
+					if (declaring != null) {
+						adjustTypeVisibility(declaring);
+						final String type= rewriter.getImportRewrite().addImport(declaring);
+						variable.setType(ASTNodeFactory.newType(ast, type));
+						variable.setName(ast.newSimpleName(fTargetName));
+						if (finder.getResult().size() > 0)
+							variable.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
+					}
+				}
+				return variable;
+			}
+		});
+		final ListRewrite list= rewrite.getListRewrite(declaration, MethodDeclaration.PARAMETERS_PROPERTY);
+		ASTNode node= null;
+		for (final Iterator iterator= declaration.parameters().iterator(); iterator.hasNext();) {
+			node= (ASTNode) iterator.next();
+			list.remove(node, null);
+		}
+		for (final Iterator iterator= arguments.iterator(); iterator.hasNext();) {
+			node= (ASTNode) iterator.next();
+			list.insertLast(node, null);
+		}
+		return result;
+	}
+
+	/**
 	 * Creates the method body for the target method declaration.
 	 * 
 	 * @param rewriter the target compilation unit rewrite
@@ -1683,86 +1751,77 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	/**
 	 * Creates the method comment for the target method declaration.
 	 * 
-	 * @param rewriter the target compilation unit rewrite
 	 * @param rewrite the source ast rewrite
-	 * @param sourceDeclaration the source method declaration
-	 * @param parameters the parameter list of the target method
-	 * @throws CoreException if the comment template could not be retrieved
-	 * @throws JavaModelException if the method properties could not be retrieved
+	 * @param declaration the source method declaration
+	 * @throws JavaModelException if the argument references could not be generated
 	 */
-	protected void createMethodComment(final CompilationUnitRewrite rewriter, final ASTRewrite rewrite, final MethodDeclaration sourceDeclaration, final List parameters) throws CoreException, JavaModelException {
-		Assert.isNotNull(rewriter);
+	protected void createMethodComment(final ASTRewrite rewrite, final MethodDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(rewrite);
-		Assert.isNotNull(sourceDeclaration);
-		Assert.isNotNull(parameters);
-		final Javadoc comment= sourceDeclaration.getJavadoc();
+		Assert.isNotNull(declaration);
+		final Javadoc comment= declaration.getJavadoc();
 		if (comment != null) {
-			final AST ast= rewrite.getAST();
-			final Map existing= new HashMap(parameters.size());
-			final ListRewrite list= rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY);
-			boolean found= true;
+			final List tags= new LinkedList(comment.tags());
+			final IVariableBinding[] bindings= getArgumentBindings(declaration);
+			final Map elements= new HashMap(bindings.length);
 			String name= null;
-			TagElement tag= null;
-			TagElement first= null;
-			TextElement text= null;
-			for (final Iterator tags= comment.tags().iterator(); tags.hasNext();) {
-				found= false;
-				tag= (TagElement) tags.next();
-				name= tag.getTagName();
-				if (name != null && name.equals(TagElement.TAG_PARAM)) {
-					final List fragments= tag.fragments();
-					if (fragments.size() > 0) {
-						final ASTNode fragment= (ASTNode) fragments.get(0);
-						if (fragment instanceof TextElement) {
-							VariableDeclaration variable= null;
-							for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-								variable= (VariableDeclaration) iterator.next();
-								text= (TextElement) fragment;
-								if (variable.getName().getIdentifier().equals(text.getText()))
-									found= true;
-							}
-						}
-					}
-					if (!found)
-						list.remove(tag, null);
-					else
-						existing.put(text.getText(), tag);
-				} else
-					first= tag;
-			}
-			tag= first;
+			List fragments= null;
 			TagElement element= null;
-			VariableDeclaration variable= null;
-			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-				variable= (VariableDeclaration) iterator.next();
-				name= variable.getName().getIdentifier();
-				if (existing.containsKey(name))
-					tag= (TagElement) existing.get(name);
-				else {
-					element= ast.newTagElement();
-					element.setTagName(TagElement.TAG_PARAM);
-					text= ast.newTextElement();
-					text.setText(name);
-					element.fragments().add(text);
-					if (tag != null)
-						list.insertAfter(element, tag, null);
-					else
-						list.insertFirst(element, null);
+			TagElement reference= null;
+			IVariableBinding binding= null;
+			for (int index= 0; index < bindings.length; index++) {
+				binding= bindings[index];
+				for (final Iterator iterator= comment.tags().iterator(); iterator.hasNext();) {
+					element= (TagElement) iterator.next();
+					name= element.getTagName();
+					fragments= element.fragments();
+					if (name != null) {
+						if (name.equals(TagElement.TAG_PARAM) && !fragments.isEmpty() && fragments.get(0) instanceof SimpleName) {
+							final SimpleName simple= (SimpleName) fragments.get(0);
+							if (binding.getName().equals(simple.getIdentifier())) {
+								elements.put(binding.getKey(), element);
+								tags.remove(element);
+							}
+						} else if (reference == null)
+							reference= element;
+					}
 				}
 			}
-		} else if (fSettings.createComments) {
-			final List list= new ArrayList();
-			VariableDeclaration variable= null;
-			for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-				variable= (VariableDeclaration) iterator.next();
-				list.add(variable.getName().getIdentifier());
+			if (bindings.length == 0 && reference == null) {
+				for (final Iterator iterator= comment.tags().iterator(); iterator.hasNext();) {
+					element= (TagElement) iterator.next();
+					name= element.getTagName();
+					fragments= element.fragments();
+					if (name != null && !name.equals(TagElement.TAG_PARAM))
+						reference= element;
+				}
 			}
-			final String[] names= new String[list.size()];
-			list.toArray(names);
-			final String text= CodeGeneration.getMethodComment(rewriter.getCu(), getTargetType().getTypeQualifiedName('.'), fMethodName, names, fMethod.getExceptionTypes(), fMethod.getReturnType(), null, StubUtility.getLineDelimiterUsed(getTargetType()));
-			if (text != null && text.length() > 0) {
-				final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(text, ASTNode.JAVADOC);
-				rewrite.set(sourceDeclaration, MethodDeclaration.JAVADOC_PROPERTY, doc, null);
+			final List arguments= new ArrayList(bindings.length + 1);
+			createArgumentList(declaration, arguments, new IArgumentFactory() {
+
+				public final ASTNode getArgumentNode(final IVariableBinding argument) throws JavaModelException {
+					Assert.isNotNull(argument);
+					if (elements.containsKey(argument.getKey()))
+						return rewrite.createCopyTarget((ASTNode) elements.get(argument.getKey()));
+					return JavadocUtil.createParamTag(argument.getName(), declaration.getAST(), fMethod.getJavaProject());
+				}
+
+				public final ASTNode getTargetNode() throws JavaModelException {
+					return JavadocUtil.createParamTag(fTargetName, declaration.getAST(), fMethod.getJavaProject());
+				}
+			});
+			final ListRewrite rewriter= rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY);
+			ASTNode tag= null;
+			for (final Iterator iterator= comment.tags().iterator(); iterator.hasNext();) {
+				tag= (ASTNode) iterator.next();
+				if (!tags.contains(tag))
+					rewriter.remove(tag, null);
+			}
+			for (final Iterator iterator= arguments.iterator(); iterator.hasNext();) {
+				tag= (ASTNode) iterator.next();
+				if (reference != null)
+					rewriter.insertBefore(tag, reference, null);
+				else
+					rewriter.insertLast(tag, null);
 			}
 		}
 	}
@@ -1790,7 +1849,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final IDocument document= new Document(fMethod.getCompilationUnit().getBuffer().getContents());
 		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
 		try {
-			final List parameters= new ArrayList(declaration.parameters().size());
 			rewrite.set(declaration, MethodDeclaration.NAME_PROPERTY, rewrite.getAST().newSimpleName(fMethodName), null);
 			boolean same= false;
 			if (!adjusted.contains(fMethod)) {
@@ -1805,11 +1863,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 					adjusted.add(fMethod);
 				}
 			}
-			target= createMethodParameters(rewrites, rewrite, declaration, parameters, adjusted, status);
-			createMethodComment(rewriter, rewrite, declaration, parameters);
+			target= createMethodArguments(rewrites, rewrite, declaration, adjusted, status);
+			createMethodComment(rewrite, declaration);
 			createMethodBody(rewriter, rewrite, declaration);
-			final String content= createMethodDeclaration(document, declaration, rewrite);
-			final MethodDeclaration targetDeclaration= (MethodDeclaration) rewriter.getASTRewrite().createStringPlaceholder(content, ASTNode.METHOD_DECLARATION);
+			final String source= createMethodDeclaration(document, declaration, rewrite);
+			final MethodDeclaration targetDeclaration= (MethodDeclaration) rewriter.getASTRewrite().createStringPlaceholder(source, ASTNode.METHOD_DECLARATION);
 			final AbstractTypeDeclaration type= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetType(), rewriter.getRoot());
 			rewriter.getASTRewrite().getListRewrite(type, type.getBodyDeclarationsProperty()).insertAt(targetDeclaration, ASTNodes.getInsertionIndex(targetDeclaration, type.bodyDeclarations()), rewriter.createGroupDescription(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.add_moved_method"))); //$NON-NLS-1$
 		} catch (MalformedTreeException exception) {
@@ -1871,7 +1929,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final MethodInvocation invocation= ast.newMethodInvocation();
 		invocation.setName(ast.newSimpleName(fMethodName));
 		invocation.setExpression(createTargetAccessExpression(declaration));
-		final boolean target= createArgumentNodeList(declaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(ast, rewrites, adjusted, status));
+		final boolean target= createArgumentList(declaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(ast, rewrites, adjusted, status));
 		final Block block= ast.newBlock();
 		block.statements().add(createMethodInvocation(declaration, invocation));
 		remover.registerRemovedNode(declaration.getBody());
@@ -2159,72 +2217,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
-	 * Creates the method parameters for the target method declaration.
-	 * 
-	 * @param rewrites the compilation unit rewrites
-	 * @param rewrite the source ast rewrite
-	 * @param declaration the source method declaration
-	 * @param parameters the parameter list to create
-	 * @param adjusted the set of elements whose visibility has been adjusted
-	 * @param status the refactoring status
-	 * @return <code>true</code> if a target node had to be inserted as method argument, <code>false</code> otherwise
-	 * @throws JavaModelException if an error occurs while accessing the types of the parameters
-	 */
-	protected boolean createMethodParameters(final Map rewrites, final ASTRewrite rewrite, final MethodDeclaration declaration, final List parameters, final Set adjusted, final RefactoringStatus status) throws JavaModelException {
-		Assert.isNotNull(rewrites);
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(rewrite);
-		Assert.isNotNull(parameters);
-		Assert.isNotNull(adjusted);
-		Assert.isNotNull(status);
-		final CompilationUnitRewrite rewriter= getCompilationUnitRewrite(rewrites, getTargetType().getCompilationUnit());
-		final AST ast= rewriter.getRoot().getAST();
-		final AstNodeFinder finder= new AnonymousClassReferenceFinder(declaration);
-		declaration.accept(finder);
-		final boolean result= createArgumentNodeList(declaration, parameters, new VisibilityAdjustingArgumentFactory(ast, rewrites, adjusted, status) {
-
-			public final ASTNode getArgumentNode(final IVariableBinding binding) throws JavaModelException {
-				Assert.isNotNull(binding);
-				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
-				final ITypeBinding type= binding.getType();
-				adjustTypeVisibility(type);
-				variable.setType(ASTNodeFactory.newType(ast, type, false));
-				variable.setName(ast.newSimpleName(binding.getName()));
-				variable.modifiers().addAll(ast.newModifiers(binding.getModifiers()));
-				return variable;
-			}
-
-			public final ASTNode getTargetNode() throws JavaModelException {
-				final SingleVariableDeclaration variable= ast.newSingleVariableDeclaration();
-				final IMethodBinding method= declaration.resolveBinding();
-				if (method != null) {
-					final ITypeBinding declaring= method.getDeclaringClass();
-					if (declaring != null) {
-						adjustTypeVisibility(declaring);
-						final String type= rewriter.getImportRewrite().addImport(declaring);
-						variable.setType(ASTNodeFactory.newType(ast, type));
-						variable.setName(ast.newSimpleName(fTargetName));
-						if (finder.getResult().size() > 0)
-							variable.modifiers().add(ast.newModifier(Modifier.ModifierKeyword.FINAL_KEYWORD));
-					}
-				}
-				return variable;
-			}
-		});
-		final ListRewrite list= rewrite.getListRewrite(declaration, MethodDeclaration.PARAMETERS_PROPERTY);
-		ASTNode node= null;
-		for (final Iterator iterator= declaration.parameters().iterator(); iterator.hasNext();) {
-			node= (ASTNode) iterator.next();
-			list.remove(node, null);
-		}
-		for (final Iterator iterator= parameters.iterator(); iterator.hasNext();) {
-			node= (ASTNode) iterator.next();
-			list.insertLast(node, null);
-		}
-		return result;
-	}
-
-	/**
 	 * Creates a comment method reference to the moved method
 	 * 
 	 * @param declaration the method declaration of the original method
@@ -2238,7 +2230,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final MethodRef reference= ast.newMethodRef();
 		reference.setName(ast.newSimpleName(fMethodName));
 		reference.setQualifier(ASTNodeFactory.newName(ast, JavaModelUtil.getFullyQualifiedName(fTargetType)));
-		createArgumentNodeList(declaration, reference.parameters(), new IArgumentFactory() {
+		createArgumentList(declaration, reference.parameters(), new IArgumentFactory() {
 
 			public final ASTNode getArgumentNode(final IVariableBinding binding) {
 				Assert.isNotNull(binding);
@@ -2290,7 +2282,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final ITypeBinding type= fTarget.getDeclaringClass();
 		if (type != null) {
 			boolean shadows= false;
-			final IVariableBinding[] bindings= getParameterBindings(declaration);
+			final IVariableBinding[] bindings= getArgumentBindings(declaration);
 			IVariableBinding variable= null;
 			for (int index= 0; index < bindings.length; index++) {
 				variable= bindings[index];

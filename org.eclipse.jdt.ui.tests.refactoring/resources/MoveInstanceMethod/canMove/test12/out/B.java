@@ -6,9 +6,10 @@ public class B {
 	public void mB2() {}
 
 	/**
-	 * @param j
-	 * @param foo
-	 * @param bar
+	 * This is a comment
+	 * @param j a float
+	 * @param foo a foo
+	 * @param bar a bar
 	 */
 	public void mA1(float j, int foo, String bar) {
 		mB1();

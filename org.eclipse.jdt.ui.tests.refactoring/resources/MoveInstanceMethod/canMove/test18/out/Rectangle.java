@@ -22,8 +22,9 @@ public class Rectangle {
 	}
 
 	/**
-	 * @param shape
-	 * @return
+	 * Returns the filled area
+	 * @param shape TODO
+	 * @return the filled area
 	 */
 	public int filledArea(Shape shape) {
 		return shape.area() -	getWidth() * getHeight();

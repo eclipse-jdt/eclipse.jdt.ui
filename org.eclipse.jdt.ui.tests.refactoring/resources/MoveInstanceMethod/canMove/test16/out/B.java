@@ -7,7 +7,11 @@ public class B {
 		Inner s= new Inner();
 		print(s);
 	}
-	
+
+	/**
+	 * Bla bla
+	 * @param s
+	 */
 	public void print(Inner s) {
 		s.print(this);
 	}	
@@ -15,7 +19,8 @@ public class B {
 	public class Inner {
 
 		/**
-		 * @param b
+		 * Bla bla
+		 * @param b TODO
 		 */
 		public void print(B b) {
 			b.count++;

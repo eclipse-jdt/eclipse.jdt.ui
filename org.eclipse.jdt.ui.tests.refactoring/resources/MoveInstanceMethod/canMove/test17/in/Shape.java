@@ -3,7 +3,11 @@ package p;
 public class Shape {
 	Rectangle fBounds;
 	Rectangle fInnerBounds;
-	
+
+	/**
+	 * Returns the area
+	 * @return the area
+	 */
 	public int area() {
 		int width= fBounds.getWidth();
 		int height= fBounds.getHeight();

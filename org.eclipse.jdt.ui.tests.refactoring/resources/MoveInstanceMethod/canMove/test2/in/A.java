@@ -4,6 +4,11 @@ package p1;
 import p2.B;
 
 public class A {
+
+	/**
+	 * mA1
+	 * @param b
+	 */
 	public void mA1(B b) {
 		b.mB1();
 		mA2();
