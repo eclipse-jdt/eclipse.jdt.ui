@@ -222,7 +222,7 @@ public class ConstraintVariableFactory implements IConstraintVariableFactory {
 	public TypeVariable makeTypeVariable(Type type) {
 		ICompilationUnit cu= ASTCreator.getCu(type);
 		Assert.isNotNull(cu);
-		CompilationUnitRange range= new CompilationUnitRange(cu, ASTNodes.getElementType(type));
+		CompilationUnitRange range= new CompilationUnitRange(cu, type);
 		if (! fTypeVariableMap.containsKey(range)){
 			fTypeVariableMap.put(range, new TypeVariable(type));
 			if (REPORT) nrCreated++;

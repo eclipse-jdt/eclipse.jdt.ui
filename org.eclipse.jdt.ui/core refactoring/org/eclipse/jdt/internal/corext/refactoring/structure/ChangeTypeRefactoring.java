@@ -81,7 +81,9 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintOperator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariableFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExpressionVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
@@ -89,6 +91,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ParameterType
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -215,6 +218,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public static final short SUPERTYPES_AND_SUBTYPES= 2;
 	private ConstraintVariable fCv;
 	private IBinding fSelectionBinding;
+	private ITypeBinding fSelectionTypeBinding;
 	private ConstraintCollector fCollector;
 	
 	public static boolean isAvailable(IJavaElement element) throws JavaModelException {
@@ -289,6 +293,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		fEffectiveSelectionStart= name.getStartPosition();
 		fEffectiveSelectionLength= name.getLength();
 		fSelectionBinding= ExpressionVariable.resolveBinding(name);
+		fSelectionTypeBinding= name.resolveTypeBinding();
 	}
 	
 	/**
@@ -311,7 +316,20 @@ public class ChangeTypeRefactoring extends Refactoring {
 				System.out.println("node= " + node + ", type= " + node.getClass().getName()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 
-			fCollector = new ConstraintCollector(new FullConstraintCreator());
+			TypeConstraintFactory typeConstraintFactory = new TypeConstraintFactory(){
+				public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator o){
+					if (o.isStrictSubtypeOperator()) return true;
+					if (v1.getBinding() != null && 
+						v2.getBinding() != null &&
+						!TypeBindings.isEqualTo(v1.getBinding(), fSelectionTypeBinding) &&
+						!TypeBindings.isEqualTo(v2.getBinding(), fSelectionTypeBinding)){
+						if (PRINT_STATS) fNrFiltered++;
+						return true;
+					}		
+					return super.filter(v1, v2, o);
+				}
+			};
+			fCollector= new ConstraintCollector(new FullConstraintCreator(new ConstraintVariableFactory(), typeConstraintFactory));
 			
 			String selectionValid= determineSelection(node);
 			if (selectionValid != null){
@@ -324,27 +342,18 @@ public class ChangeTypeRefactoring extends Refactoring {
 			pm.worked(1);
 
 			RefactoringStatus result= new RefactoringStatus();
-
-			// need to construct the type hierarchy for the selection so the wizard can display it
-			
-			fCv= findConstraintVariableForSelectedNode(new SubProgressMonitor(pm, 3));
-			if (DEBUG) System.out.println("selected CV: " + fCv +  //$NON-NLS-1$
-										  " (" + fCv.getClass().getName() +  //$NON-NLS-1$
-										  ")");  //$NON-NLS-1$
-
-			ITypeBinding typeBinding= fCv.getBinding();
 			
 			// produce error message if array or primitive type is selected
-			if (typeBinding.isArray()){
+			if (fSelectionTypeBinding.isArray()){
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.arraysNotSupported")); //$NON-NLS-1$
 			}
-			if (typeBinding.isPrimitive()){
+			if (fSelectionTypeBinding.isPrimitive()){
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.primitivesNotSupported")); //$NON-NLS-1$
 			}
 			if (checkOverriddenBinaryMethods())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.notSupportedOnBinary")); //$NON-NLS-1$
 			
-			if (typeBinding.isLocal()){
+			if (fSelectionTypeBinding.isLocal()){
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
 			}
 			
@@ -352,8 +361,9 @@ public class ChangeTypeRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
 			}
 			
-			fOriginalTypeOfSelection= Bindings.findType(fCv.getBinding(), fCu.getJavaProject());
+			fOriginalTypeOfSelection= Bindings.findType(fSelectionTypeBinding, fCu.getJavaProject());
 			
+            // need to construct the type hierarchy for the selection so the wizard can display it			
 			fTypeHierarchy= getTypeHierarchy(fOriginalTypeOfSelection, pm, fCu.getJavaProject());
 
 			pm.worked(1);
@@ -412,6 +422,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 		pm.beginTask(RefactoringCoreMessages.getString("ChangeTypeRefactoring.checking_preconditions"), 100); //$NON-NLS-1$
 
 		try {
+			fCv= findConstraintVariableForSelectedNode(new SubProgressMonitor(pm, 3));
+			if (DEBUG) System.out.println("selected CV: " + fCv +  //$NON-NLS-1$
+										  " (" + fCv.getClass().getName() +  //$NON-NLS-1$
+										  ")");  //$NON-NLS-1$
 			
 			fRelevantVars= findRelevantConstraintVars(fCv, new SubProgressMonitor(pm, 50));
 			
@@ -704,6 +718,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (parent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION || parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			if ((grandParent.getNodeType() == ASTNode.METHOD_DECLARATION)) {
 				fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
+				fSelectionTypeBinding= simpleName.resolveTypeBinding();
 				fParamIndex= ((MethodDeclaration)grandParent).parameters().indexOf(parent);
 			}
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && (grandParent.getNodeType() == ASTNode.SINGLE_VARIABLE_DECLARATION)) {
@@ -715,6 +730,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			setSelectionRanges(simpleName);
 		} else if (parent.getNodeType() == ASTNode.SIMPLE_TYPE && grandParent.getNodeType() == ASTNode.METHOD_DECLARATION) {
 			fMethodBinding= ((MethodDeclaration)grandParent).resolveBinding();
+			fSelectionTypeBinding= fMethodBinding.getReturnType();
 			fParamIndex= -1;
 		} else if (parent.getNodeType() == ASTNode.METHOD_DECLARATION && 
 				grandParent.getNodeType() == ASTNode.TYPE_DECLARATION) {

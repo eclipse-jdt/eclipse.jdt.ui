@@ -72,9 +72,9 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -83,7 +83,9 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintOperator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariableFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.DeclaringTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExpressionVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
@@ -93,6 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.RawBindingVar
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -109,12 +112,14 @@ class ExtractInterfaceUtil {
 	private final ICompilationUnit fSupertypeWorkingCopy;//can be null
 	private final WorkingCopyOwner fWorkingCopyOwner;
 	private static ICompilationUnit fCu;
-	
-	private ExtractInterfaceUtil(ICompilationUnit inputTypeWorkingCopy, ICompilationUnit supertypeWorkingCopy, WorkingCopyOwner workingCopyOwner){
+	private final IType fInputType;
+
+	private ExtractInterfaceUtil(ICompilationUnit inputTypeWorkingCopy, ICompilationUnit supertypeWorkingCopy, WorkingCopyOwner workingCopyOwner, IType inputType){
 		Assert.isNotNull(inputTypeWorkingCopy);
 		fSupertypeWorkingCopy= supertypeWorkingCopy;
 		fInputTypeWorkingCopy= inputTypeWorkingCopy;
 		fWorkingCopyOwner= workingCopyOwner;
+		fInputType= inputType;
 	}
 	
 	private static ConstraintVariable[] getAllOfType(ITypeConstraint[] constraints, ITypeBinding binding){
@@ -200,7 +205,7 @@ class ExtractInterfaceUtil {
 	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status, CodeGenerationSettings settings) throws CoreException{
 		ICompilationUnit typeWorkingCopy= inputType.getCompilationUnit();
 		fCu= typeWorkingCopy;
-		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), workingCopyOwner);
+		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), workingCopyOwner, inputType);
 		ITypeBinding inputTypeBinding= getTypeBinding(inputType, workingCopyOwner);
 		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputTypeBinding, inputType, supertypeToUse, pm, status);
 		if (status.hasFatalError())
@@ -310,6 +315,8 @@ class ExtractInterfaceUtil {
 		//DeclaringTypeVariables are different - they can never be updated by this refactoring
 		else if (setOfAll.contains(right) && ! (right instanceof DeclaringTypeVariable))
 			return false;
+		else if (right instanceof DeclaringTypeVariable && right.getBinding() == null)
+			return false; // calls to [].length do not give rise to badness
 		else
 			return true;
 	}
@@ -368,7 +375,7 @@ class ExtractInterfaceUtil {
 
 	private ITypeConstraint[] getConstraints(ICompilationUnit[] referringCus) {
 		Set result= new HashSet();
-		ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator());
+		ConstraintCollector collector= new ConstraintCollector(new ExtractInterfaceConstraintCreator(fInputType));
 		
 		for (int i= 0; i < referringCus.length; i++) {
 			ICompilationUnit unit= referringCus[i];
@@ -689,15 +696,37 @@ class ExtractInterfaceUtil {
 	}
 	
 	private static class ExtractInterfaceConstraintCreator extends FullConstraintCreator{
+
+		public ExtractInterfaceConstraintCreator(final IType inputType){
+			super(new ConstraintVariableFactory(), new TypeConstraintFactory(){
+				public boolean filter(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator o){
+					ITypeBinding v1Binding= v1.getBinding();
+					ITypeBinding v2Binding= v2.getBinding();
+					if (v1Binding != null && v2Binding != null){
+						String inputTypeName= inputType.getFullyQualifiedName();
+						String v1Name= (!v1Binding.isArray()) ? v1Binding.getQualifiedName()
+															  : v1Binding.getElementType().getQualifiedName();
+						String v2Name= (!v2Binding.isArray()) ? v2Binding.getQualifiedName()
+															  : v2Binding.getElementType().getQualifiedName();
+						if (!v1Name.equals(inputTypeName) && !v2Name.equals(inputTypeName)){
+							if (PRINT_STATS) fNrFiltered++;
+							return true;
+						}
+					}
+					return super.filter(v1, v2, o);
+				}
+			});
+		}
+		
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCreator#create(org.eclipse.jdt.core.dom.ArrayCreation)
 		 */
 		// TODO check implementation
 		public ITypeConstraint[] create(ArrayCreation node) {
-			ConstraintVariable arrayCreationVar= getFactory().makeExpressionOrTypeVariable(node, getContext());
-			ConstraintVariable typeVar= getFactory().makeTypeVariable(node.getType());
-			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(arrayCreationVar, typeVar);
-			return new ITypeConstraint[]{equals};
+			ConstraintVariable arrayCreationVar= getConstraintVariableFactory().makeExpressionOrTypeVariable(node, getContext());
+			ConstraintVariable typeVar= getConstraintVariableFactory().makeTypeVariable(node.getType());
+			ITypeConstraint[] equals= getConstraintFactory().createEqualsConstraint(arrayCreationVar, typeVar);
+			return equals;
 		}
 
 		/* (non-Javadoc)
@@ -706,8 +735,8 @@ class ExtractInterfaceUtil {
 		 // TODO check implementation
 		public ITypeConstraint[] create(ArrayAccess node) {
 			Expression expression= node.getArray();
-			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(getFactory().makeExpressionOrTypeVariable(node, getContext()), getFactory().makeExpressionOrTypeVariable(expression, getContext()));
-			return new ITypeConstraint[]{equals};
+			ITypeConstraint[] equals= getConstraintFactory().createEqualsConstraint(getConstraintVariableFactory().makeExpressionOrTypeVariable(node, getContext()), getConstraintVariableFactory().makeExpressionOrTypeVariable(expression, getContext()));
+			return equals;
 		}
 	
 		/* (non-Javadoc)
@@ -715,9 +744,9 @@ class ExtractInterfaceUtil {
 		 */
 		// TODO check implementation
 		public ITypeConstraint[] create(ArrayType node) {
-			ConstraintVariable component= getFactory().makeTypeVariable(node.getComponentType());
-			ITypeConstraint equals= SimpleTypeConstraint.createEqualsConstraint(getFactory().makeTypeVariable(node), component);
-			return new ITypeConstraint[]{equals};
+			ConstraintVariable component= getConstraintVariableFactory().makeTypeVariable(node.getComponentType());
+			ITypeConstraint[] equals= getConstraintFactory().createEqualsConstraint(getConstraintVariableFactory().makeTypeVariable(node), component);
+			return equals;
 		}
 	}
 }

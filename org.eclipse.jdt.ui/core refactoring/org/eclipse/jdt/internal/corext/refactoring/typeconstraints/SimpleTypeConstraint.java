@@ -18,7 +18,7 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 	private final ConstraintVariable fRight;
 	private final ConstraintOperator fOperator;
 	
-	private SimpleTypeConstraint(ConstraintVariable left, ConstraintVariable right, ConstraintOperator operator) {
+	/* package */ SimpleTypeConstraint(ConstraintVariable left, ConstraintVariable right, ConstraintOperator operator) {
 		Assert.isNotNull(left);
 		Assert.isNotNull(right);
 		Assert.isNotNull(operator);
@@ -27,23 +27,6 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 		fOperator= operator;
 	}
 	
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public  boolean equals(Object obj) {
-		if (!(obj instanceof SimpleTypeConstraint))
-			return false;
-		SimpleTypeConstraint other= (SimpleTypeConstraint)obj;
-		return getLeft().equals(other.getLeft()) && fOperator.equals(other.fOperator) && getRight().equals(other.getRight());
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public  int hashCode() {
-		return getLeft().hashCode() ^ fOperator.hashCode() ^ getRight().hashCode();
-	}
-
 	public  ConstraintVariable getLeft() {
 		return fLeft;
 	}
@@ -91,25 +74,5 @@ public final class SimpleTypeConstraint implements ITypeConstraint {
 
 	public boolean isDefinesConstraint(){
 		return fOperator.isDefinesOperator();
-	}
-
-	public static SimpleTypeConstraint createConstraint(ConstraintVariable v1, ConstraintVariable v2, ConstraintOperator operator){
-		return new SimpleTypeConstraint(v1, v2, operator);
-	}
-	
-	public static SimpleTypeConstraint createStrictSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, ConstraintOperator.createStrictSubtypeOperator());
-	}
-	
-	public static SimpleTypeConstraint createSubtypeConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, ConstraintOperator.createSubTypeOperator());
-	}
-
-	public static SimpleTypeConstraint createEqualsConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, ConstraintOperator.createEqualsOperator());
-	}
-
-	public static SimpleTypeConstraint createDefinesConstraint(ConstraintVariable v1, ConstraintVariable v2){
-		return createConstraint(v1, v2, ConstraintOperator.createDefinesOperator());
-	}
+	}	
 }

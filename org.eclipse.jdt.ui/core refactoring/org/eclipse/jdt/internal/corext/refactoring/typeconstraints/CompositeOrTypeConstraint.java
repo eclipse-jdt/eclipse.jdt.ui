@@ -20,7 +20,7 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 	
 	private final ITypeConstraint[] fConstraints;
 	
-	public CompositeOrTypeConstraint(ITypeConstraint[] constraints){
+	/* package */ CompositeOrTypeConstraint(ITypeConstraint[] constraints){
 		Assert.isNotNull(constraints);
 		fConstraints= sort(getCopy(constraints));
 	}
@@ -73,35 +73,6 @@ public class CompositeOrTypeConstraint implements ITypeConstraint{
 			buff.append(constraint.toString());
 		}
 		return buff.toString();
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	public boolean equals(Object obj) {
-		if (! (obj instanceof CompositeOrTypeConstraint))
-			return false;
-			
-		//TODO this is too restrictive - the sequence should not matter	
-		CompositeOrTypeConstraint other= (CompositeOrTypeConstraint)obj;
-		if (fConstraints.length != other.fConstraints.length)
-			return false;
-		for (int i= 0; i < fConstraints.length; i++) {
-			if (! fConstraints[i].equals(other.fConstraints[i]))
-				return false;
-		}
-		return true;
-	}
-
-	/* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	public int hashCode() {
-		int hashCode= 0;
-		for (int i= 0; i < fConstraints.length; i++) {
-			hashCode^= fConstraints[i].hashCode();
-		}
-		return hashCode;
 	}
 
 	public ITypeConstraint[] getConstraints() {
