@@ -12,6 +12,14 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,18 +30,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -138,21 +138,6 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(canEnable(selection));
-	}
-	
-	private boolean canEnable(ITextSelection selection) {
-		final ICompilationUnit unit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-		if (unit != null && fEditor != null) {
-			try {
-				final IJavaElement element= SelectionConverter.getElementAtOffset(unit, selection);
-				if (element instanceof IField && !JdtFlags.isEnum((IMember) element))
-					return true;
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
-		}
-		return false;
 	}
 
 	/**
