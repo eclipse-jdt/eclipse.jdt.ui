@@ -263,12 +263,12 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (start >= 0 && offset <= document.getLength()) {
 				try {
 					String content= document.get(start, offset - start);
-					while (content.length() > 0) {
+//					while (content.length() > 0) {
 						if (insert.startsWith(content))
 							return true;
-						else
-							content= content.substring(1);
-					}
+//						else
+//							content= content.substring(1);
+//					}
 				} catch (BadLocationException e) {
 					JavaPlugin.log(e);
 					// and ignore and return false
