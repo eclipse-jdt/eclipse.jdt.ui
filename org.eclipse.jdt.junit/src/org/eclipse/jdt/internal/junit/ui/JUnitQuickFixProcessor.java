@@ -46,7 +46,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 				if (s.equals("TestCase") //$NON-NLS-1$
 						|| s.equals("junit") //$NON-NLS-1$
 						|| s.equals("TestSuite") //$NON-NLS-1$
-						|| s.equals("Test"))
+						|| s.equals("Test")) //$NON-NLS-1$
 					return true; //$NON-NLS-1$
 			} catch (JavaModelException e) {
 			    JUnitPlugin.log(e.getStatus());

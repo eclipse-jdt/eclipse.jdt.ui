@@ -25,13 +25,16 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
+import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.OpenStrategy;
@@ -40,17 +43,27 @@ import org.eclipse.jface.util.OpenStrategy;
  * A view that shows a stack trace of a failed test.
  */
 class FailureTraceView implements IMenuListener {
-	private static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
+    private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
+    private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
+    
+    private static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	private final Clipboard fClipboard;
-	
-	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
-	private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
+    private TestRunInfo fFailure;
+    private CompareResultsAction fCompareAction;
 
-	public FailureTraceView(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner) {
+	public FailureTraceView(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
+		
+		// fill the failure trace viewer toolbar
+		ToolBarManager failureToolBarmanager= new ToolBarManager(toolBar);
+		failureToolBarmanager.add(new EnableStackFilterAction(this));			
+		fCompareAction = new CompareResultsAction(this);
+        failureToolBarmanager.add(fCompareAction);			
+		failureToolBarmanager.update(true);
+		
 		fTable= new Table(parent, SWT.SINGLE | SWT.V_SCROLL | SWT.H_SCROLL);
 		fTestRunner= testRunner;
 		fClipboard= clipboard;
@@ -148,7 +161,12 @@ class FailureTraceView implements IMenuListener {
 	/**
 	 * Shows a TestFailure
 	 */
-	public void showFailure(String trace) {	
+	public void showFailure(TestRunInfo failure) {	
+	    fFailure= failure;
+	    String trace= ""; //$NON-NLS-1$
+	    fCompareAction.setEnabled(failure != null && failure.isComparisonFailure());
+	    if (failure != null) 
+	        trace= failure.getTrace();
 		if (fInputTrace == trace)
 			return;
 		fInputTrace= trace;
@@ -262,4 +280,12 @@ class FailureTraceView implements IMenuListener {
 		}		
 		return false;
 	}
+
+    public TestRunInfo getFailedTest() {
+        return fFailure;
+    }
+
+    public Shell getShell() {
+        return fTable.getShell();
+    }
 }

@@ -17,6 +17,9 @@ public class TestRunInfo extends Object {
 	private String fTestId;
 	private String fTestName;
 	private String fTrace;
+	private String fExpected;
+	private String fActual;
+	
 	private int fStatus;
 
 	public TestRunInfo(String testId, String testName){
@@ -85,8 +88,24 @@ public class TestRunInfo extends Object {
 	public int getStatus() {
 		return fStatus;
 	}
+	
+    public String getActual() {
+        return fActual;
+    }
+    
+    public void setActual(String actual) {
+        fActual = actual;
+    }
+    
+    public String getExpected() {
+        return fExpected;
+    }
+    
+    public void setExpected(String expected) {
+        fExpected = expected;
+    }
+    
+    public boolean isComparisonFailure() {
+        return fExpected != null && fActual != null;
+    }
 }
-
-
-
-

@@ -79,7 +79,7 @@ import org.eclipse.ui.part.ViewPart;
 /**
  * A ViewPart that shows the results of a test run.
  */
-public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, IPropertyChangeListener {
+public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
 
 	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
  	/**
@@ -462,23 +462,35 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 * @see ITestRunListener#testFailed
 	 */
 	public void testFailed(int status, String testId, String testName, String trace){
-		TestRunInfo testInfo= getTestInfo(testId);
-		if (testInfo == null) {
-			testInfo= new TestRunInfo(testId, testName);
-			fTestInfos.put(testName, testInfo);
-		}
-		testInfo.setTrace(trace);
-		testInfo.setStatus(status);
-		if (status == ITestRunListener.STATUS_ERROR)
-			fErrorCount++;
-		else
-			fFailureCount++;
-		fFailures.add(testInfo);
-		// show the view on the first error only
-		if (fShowOnErrorOnly && (fErrorCount + fFailureCount == 1)) 
-			postShowTestResultsView();
+		testFailed(status, testId, testName, trace, null, null);
 	}
 
+	/*
+	 * @see ITestRunListener#testFailed
+	 */
+	public void testFailed(int status, String testId, String testName, String trace, String expected, String actual){
+	    TestRunInfo testInfo= getTestInfo(testId);
+	    if (testInfo == null) {
+	        testInfo= new TestRunInfo(testId, testName);
+	        fTestInfos.put(testName, testInfo);
+	    }
+	    testInfo.setTrace(trace);
+	    testInfo.setStatus(status);
+	    if (expected != null)
+	        testInfo.setExpected(expected.substring(0, expected.length()-1));
+	    if (actual != null)
+	        testInfo.setActual(actual.substring(0, actual.length()-1));
+	    
+	    if (status == ITestRunListener.STATUS_ERROR)
+	        fErrorCount++;
+	    else
+	        fFailureCount++;
+	    fFailures.add(testInfo);
+	    // show the view on the first error only
+	    if (fShowOnErrorOnly && (fErrorCount + fFailureCount == 1)) 
+	        postShowTestResultsView();
+	}
+	
 	/*
 	 * @see ITestRunListener#testReran
 	 */
@@ -497,7 +509,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		updateTest(info, status);
 		if (info.getTrace() == null || !info.getTrace().equals(trace)) {
 			info.setTrace(trace);
-			showFailure(info.getTrace());
+			showFailure(info);
 		}
 	}
 
@@ -805,14 +817,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
-		
-		fFailureView= new FailureTraceView(bottom, fClipboard, this);
+		fFailureView= new FailureTraceView(bottom, fClipboard, this, failureToolBar);
 		bottom.setContent(fFailureView.getComposite()); 
-
-		// fill the failure trace viewer toolbar
-		ToolBarManager failureToolBarmanager= new ToolBarManager(failureToolBar);
-		failureToolBarmanager.add(new EnableStackFilterAction(fFailureView));			
-		failureToolBarmanager.update(true);
 		
 		fSashForm.setWeights(new int[]{50, 50});
 		return fSashForm;
@@ -962,13 +968,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		TestRunInfo testInfo= getTestInfo(testId);
 
 		if (testInfo == null) {
-			showFailure(""); //$NON-NLS-1$
+			showFailure(null); //$NON-NLS-1$
 		} else {
-			showFailure(testInfo.getTrace());
+			showFailure(testInfo);
 		}
 	}
 
-	private void showFailure(final String failure) {
+	private void showFailure(final TestRunInfo failure) {
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				if (!isDisposed())

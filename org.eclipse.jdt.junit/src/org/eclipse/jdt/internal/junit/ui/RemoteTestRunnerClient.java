@@ -35,6 +35,133 @@ public class RemoteTestRunnerClient {
 			JUnitPlugin.log(exception);
 		}
 	}
+	/**
+	 * A simple state machine to process requests from the RemoteTestRunner
+	 */
+	abstract class ProcessingState {
+	    abstract ProcessingState readMessage(String message);
+	}
+	
+	class DefaultProcessingState extends ProcessingState {
+	    ProcessingState readMessage(String message) {
+	        if (message.startsWith(MessageIds.TRACE_START)) {
+	            fFailedTrace= ""; //$NON-NLS-1$
+	            return fTraceState;
+	        }
+	        if (message.startsWith(MessageIds.EXPECTED_START)) {
+	            fExpectedResult= ""; //$NON-NLS-1$
+	            return fExpectedState;
+	        }
+	        if (message.startsWith(MessageIds.ACTUAL_START)) {
+	            fActualResult= ""; //$NON-NLS-1$
+	            return fActualState;
+	        }
+	        if (message.startsWith(MessageIds.RTRACE_START)) {
+	            fFailedRerunTrace= ""; //$NON-NLS-1$
+	            return fRerunState;
+	        }
+	        String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
+	        if (message.startsWith(MessageIds.TEST_RUN_START)) {
+	            // version < 2 format: count
+	            // version >= 2 format: count+" "+version
+	            int count= 0;
+	            int v= arg.indexOf(' ');
+	            if (v == -1) {
+	                fVersion= "v1"; //$NON-NLS-1$
+	                count= Integer.parseInt(arg);
+	            } else {
+	                fVersion= arg.substring(v+1);
+	                String sc= arg.substring(0, v);
+	                count= Integer.parseInt(sc);
+	            }
+	            notifyTestRunStarted(count);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_START)) {
+	            notifyTestStarted(arg);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_END)) {
+	            notifyTestEnded(arg);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_ERROR)) {
+	            extractFailure(arg, ITestRunListener.STATUS_ERROR);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_FAILED)) {
+	            extractFailure(arg, ITestRunListener.STATUS_FAILURE);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_RUN_END)) {
+	            long elapsedTime = Long.parseLong(arg);
+	            testRunEnded(elapsedTime);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_STOPPED)) {
+	            long elapsedTime = Long.parseLong(arg);
+	            notifyTestRunStopped(elapsedTime);
+	            shutDown();
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_TREE)) {
+	            notifyTestTreeEntry(arg);
+	            return this;
+	        }
+	        if (message.startsWith(MessageIds.TEST_RERAN)) {
+	            if (hasTestId())
+	                scanReranMessage(arg);
+	            else 
+	                scanOldReranMessage(arg);
+	            return this;
+	        }	
+	        return this;
+	    }
+	}
+	
+	class TraceProcessingState extends ProcessingState {
+	    ProcessingState readMessage(String message) {
+	        if (message.startsWith(MessageIds.TRACE_END)) {
+	            notifyTestFailed();
+	            fFailedTrace = ""; //$NON-NLS-1$
+	            fExpectedResult= ""; //$NON-NLS-1$
+	            fActualResult = ""; //$NON-NLS-1$
+	            return fDefaultState;
+	        }
+	        fFailedTrace+= message + '\n';
+	        return this;
+	    }
+	}
+	class ExpectedProcessingState extends ProcessingState {
+	    ProcessingState readMessage(String message) {
+	        if (message.startsWith(MessageIds.EXPECTED_END)) 
+	            return fDefaultState;
+	        fExpectedResult+= message + '\n';
+	        return this;
+	    }
+	}
+	class ActualProcessingState extends ProcessingState {
+	    ProcessingState readMessage(String message) {
+	        if (message.startsWith(MessageIds.ACTUAL_END)) 
+	            return fDefaultState;
+	        fActualResult+= message + '\n';
+	        return this;
+	    }
+	}
+	class RerunTraceProcessingState extends ProcessingState {
+	    ProcessingState readMessage(String message) {
+	        if (message.startsWith(MessageIds.RTRACE_END)) 
+	            return fDefaultState;
+	        fFailedRerunTrace+= message + '\n';
+	        return this;
+	    }
+	}
+	ProcessingState fDefaultState= new DefaultProcessingState();
+	ProcessingState fTraceState= new TraceProcessingState();
+	ProcessingState fExpectedState= new ExpectedProcessingState();
+	ProcessingState fActualState= new ActualProcessingState();
+	ProcessingState fRerunState= new RerunTraceProcessingState();
+	ProcessingState fCurrentState= fDefaultState;
 	
 	/**
 	 * An array of listeners that are informed about test events.
@@ -49,17 +176,10 @@ public class RemoteTestRunnerClient {
 	private int fPort= -1;
 	private PrintWriter fWriter;
 	private BufferedReader fBufferedReader;
-	// protocol version
+	/**
+	 * The protocol version
+	 */ 
 	private String fVersion;
-
-	/**
-	 * RemoteTestRunner is sending trace. 
-	 */
-	private boolean fInReadTrace= false;
-	/**
-	 * RemoteTestRunner is sending the rerun trace. 
-	 */
-	private boolean fInReadRerunTrace= false;
 	/**
 	 * The failed test that is currently reported from the RemoteTestRunner
 	 */
@@ -72,6 +192,14 @@ public class RemoteTestRunnerClient {
 	 * The failed trace that is currently reported from the RemoteTestRunner
 	 */
 	private String fFailedTrace;
+	/**
+	 * The expected test result
+	 */
+	private String fExpectedResult;
+	/**
+	 * The actual test result
+	 */
+	private String fActualResult;
 	/**
 	 * The failed trace of a reran test
 	 */
@@ -153,15 +281,15 @@ public class RemoteTestRunnerClient {
 			}
 		} catch(IOException e) {
 		}	
-		try{
-			if(fSocket != null) {
+		try {
+			if (fSocket != null) {
 				fSocket.close();
 				fSocket= null;
 			}
 		} catch(IOException e) {
 		}
 		try{
-			if(fServerSocket != null) {
+			if (fServerSocket != null) {
 				fServerSocket.close();
 				fServerSocket= null;
 			}
@@ -178,93 +306,7 @@ public class RemoteTestRunnerClient {
 	}
 		
 	private void receiveMessage(String message) {
-		if (message.startsWith(MessageIds.TRACE_START)) {
-			fInReadTrace= true;
-			fFailedTrace= ""; //$NON-NLS-1$
-			return;
-		}
-		if (message.startsWith(MessageIds.TRACE_END)) {
-			fInReadTrace = false;
-
-			notifyTestFailed();
-
-			fFailedTrace = ""; //$NON-NLS-1$
-			return;
-		}
-		if (fInReadTrace) {
-			fFailedTrace+= message + '\n';
-			return;
-		}
-		
-		if (message.startsWith(MessageIds.RTRACE_START)) {
-			fInReadRerunTrace= true;
-			fFailedRerunTrace= ""; //$NON-NLS-1$
-			return;
-		}
-		if (message.startsWith(MessageIds.RTRACE_END)) {
-			fInReadRerunTrace= false;
-			return;
-		}
-		if (fInReadRerunTrace) {
-			fFailedRerunTrace+= message + '\n';
-			return;
-		}
-
-		String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
-		if (message.startsWith(MessageIds.TEST_RUN_START)) {
-			// version < 2 format: count
-			// version >= 2 format: count+" "+version
-			int count= 0;
-			int v= arg.indexOf(' ');
-			if (v == -1) {
-				fVersion= "v1"; //$NON-NLS-1$
-				count= Integer.parseInt(arg);
-			} else {
-				fVersion= arg.substring(v+1);
-				String sc= arg.substring(0, v);
-				count= Integer.parseInt(sc);
-			}
-			notifyTestRunStarted(count);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_START)) {
-			notifyTestStarted(arg);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_END)) {
-			notifyTestEnded(arg);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_ERROR)) {
-			extractFailure(arg, ITestRunListener.STATUS_ERROR);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_FAILED)) {
-			extractFailure(arg, ITestRunListener.STATUS_FAILURE);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_RUN_END)) {
-			long elapsedTime = Long.parseLong(arg);
-			testRunEnded(elapsedTime);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_STOPPED)) {
-			long elapsedTime = Long.parseLong(arg);
-			notifyTestRunStopped(elapsedTime);
-
-			shutDown();
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_TREE)) {
-			notifyTestTreeEntry(arg);
-			return;
-		}
-		if (message.startsWith(MessageIds.TEST_RERAN)) {
-			if (hasTestId())
-				scanReranMessage(arg);
-			else 
-				scanOldReranMessage(arg);
-		}
+	    fCurrentState= fCurrentState.readMessage(message);
 	}
 
 	private void scanOldReranMessage(String arg) {
@@ -287,7 +329,6 @@ public class RemoteTestRunnerClient {
 			trace = fFailedRerunTrace;
 		// assumption a rerun trace was sent before
 		notifyTestReran(className+testName, className, testName, statusCode, trace);
-				
 	}
 
 	private void scanReranMessage(String arg) {
@@ -432,7 +473,11 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-					listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace);
+				    if (listener instanceof ITestRunListener3 )
+				        ((ITestRunListener3)listener).testFailed(fFailureKind, fFailedTestId, 
+				                fFailedTest, fFailedTrace, fExpectedResult, fActualResult);
+				    else
+				        listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace);
 				}
 			});
 		}
