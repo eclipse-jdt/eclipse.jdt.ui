@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -121,7 +122,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "a", "b", "c", "equals" }, methods);
+		checkMethods(new String[] { "a", "b", "c", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Vector" }, imports);	
@@ -138,7 +139,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "c", "d", "equals" }, methods);
+		checkMethods(new String[] { "c", "d", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Enumeration", "java.util.Hashtable" }, imports);
@@ -155,7 +156,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "c", "d", "equals" }, methods);
+		checkMethods(new String[] { "c", "d", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.Enumeration" }, imports);
@@ -172,7 +173,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		testHelper(testClass);
 		
 		IMethod[] methods= testClass.getMethods();
-		checkMethods(new String[] { "c", "e", "equals" }, methods);
+		checkMethods(new String[] { "c", "e", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
 		
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
@@ -191,9 +192,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			keys[index]= bindings[index].getKey();
 		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, null, keys, new CodeGenerationSettings(), false, true);
 		op.run(new NullProgressMonitor());
-		synchronized (testClass.getCompilationUnit()) {
-			testClass.getCompilationUnit().reconcile(ICompilationUnit.NO_AST, false, null, new NullProgressMonitor());
-		}
+		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}
 	
 	private void checkMethods(String[] expected, IMethod[] methods) {
