@@ -1,5 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -19,6 +21,20 @@ import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {	
+
+	private static Comparator fgTemplateVariableProposalComparator= new Comparator() {
+		public int compare(Object arg0, Object arg1) {
+			TemplateVariableProposal proposal0= (TemplateVariableProposal) arg0;
+			TemplateVariableProposal proposal1= (TemplateVariableProposal) arg1;
+			
+			return proposal0.getDisplayString().compareTo(proposal1.getDisplayString());
+		}
+
+		public boolean equals(Object arg0) {
+			return false;
+		}
+	};
+
 	
 	/** the context type */
 	private ContextType fContextType;
@@ -57,8 +73,11 @@ public class TemplateVariableProcessor implements IContentAssistProcessor {
 			Shell shell= viewer.getTextWidget().getShell();
 			MessageDialog.openError(shell, TemplateMessages.getString("TemplateVariableProcessor.error.title"), e.getMessage()); //$NON-NLS-1$
 		}
+
+		ICompletionProposal[] proposals= (ICompletionProposal[]) vector.toArray(new ICompletionProposal[vector.size()]);
+		Arrays.sort(proposals, fgTemplateVariableProposalComparator);
 		
-		return (ICompletionProposal[]) vector.toArray(new ICompletionProposal[vector.size()]);
+		return proposals;
 	}
 
 	/*
