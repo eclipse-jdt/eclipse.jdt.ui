@@ -11,7 +11,9 @@ import java.util.Stack;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.ast.AssertStatement;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
@@ -1148,4 +1150,19 @@ import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 		endVisitConditionBlock(whileStatement, RefactoringCoreMessages.getString("StatementAnalyzer.a_while")); //$NON-NLS-1$
 		fReturnAnalyzer.endVisit(whileStatement, scope, fMode);
 	}
+	
+    /**
+     * @see IAbstractSyntaxTreeVisitor#visit(AssertStatement, BlockScope)
+     */
+    public boolean visit(AssertStatement assertStatement, BlockScope scope) {
+        return visitNode(assertStatement, scope);
+    }
+    
+    /**
+     * @see IAbstractSyntaxTreeVisitor#endVisit(AssertStatement, BlockScope)
+     */
+    public void endVisit(AssertStatement assertStatement, BlockScope scope) {
+    	endVisitNode(assertStatement, scope);
+    }    
+
 }

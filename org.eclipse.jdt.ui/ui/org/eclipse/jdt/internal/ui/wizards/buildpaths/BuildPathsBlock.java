@@ -416,43 +416,22 @@ public class BuildPathsBlock {
 	// a class path entry should not be the prefix of another entry
 	private void updateClassPathStatus() {
 		fClassPathStatus.setOK();
-		List elements= fClassPathList.getElements();
-
-		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 		
+		List elements= fClassPathList.getElements();
+	
 		boolean entryMissing= false;
+		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
+
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
 			CPListElement currElement= (CPListElement)elements.get(i);
-			int currKind= currElement.getEntryKind();
-			if (currKind == IClasspathEntry.CPE_SOURCE || currKind == IClasspathEntry.CPE_LIBRARY) {
-				IPath currPath= currElement.getPath();
-				for (int j= 0; j < i; j++) {
-					CPListElement cpelement= (CPListElement)elements.get(j);
-					int cpelementKind= cpelement.getEntryKind();
-					if (cpelementKind == IClasspathEntry.CPE_SOURCE || cpelementKind == IClasspathEntry.CPE_LIBRARY) {
-						IPath cpelementPath= cpelement.getPath();
-						if (currPath.equals(cpelementPath)) {
-							// duplicate entry
-							fClassPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.DuplicateEntriesInClassPath", cpelementPath.toString())); //$NON-NLS-1$
-							return;
-						} else {
-							// overlapping entry
-							if (JavaConventions.isOverlappingRoots(currPath, cpelementPath)) {
-								fClassPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.RecursiveClassPath", new String[] { currPath.toString(), cpelementPath.toString()})); //$NON-NLS-1$
-								return;
-							}
-						}
-					}
-				}
-			}
 			entries[i]= currElement.getClasspathEntry();
-			entryMissing= entryMissing || currElement.isMissing();
+			entryMissing= entryMissing || currElement.isMissing();			
 		}
+				
 		if (entryMissing) {
 			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.EntryMissing")); //$NON-NLS-1$
 		}
-		
-		
+				
 		if (fCurrJProject.hasClasspathCycle(entries)) {
 			fClassPathStatus.setWarning(NewWizardMessages.getString("BuildPathsBlock.warning.CycleInClassPath")); //$NON-NLS-1$
 		}	
@@ -488,59 +467,18 @@ public class BuildPathsBlock {
 		}
 		fOutputLocationPath= path;
 		
-		// 1GET6BZ: ITPJUI:ALL - Error setting source folder
-		// test if the build path is overlapping with a class path entry
-		// (exception: a source contianer may be equal to the bin folder (but not nested))
 		List elements= fClassPathList.getElements();
+		IClasspathEntry[] entries= new IClasspathEntry[elements.size()];
 		
-		// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
-		// check if any source entries coincidates with binary output - in which case nesting inside output is legal
-		// Code adopted from JavaCore SetClasspathOperation.verfiy()
-		boolean allowNestingInOutput = false;
 		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement entry= (CPListElement)elements.get(i);
-			if (entry.getPath().equals(fOutputLocationPath)){
-				allowNestingInOutput= true;
-				break;
-			}
+			CPListElement currElement= (CPListElement)elements.get(i);
+			entries[i]= currElement.getClasspathEntry();
 		}
 		
-		// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
-		IPath projectPath= fCurrProject.getFullPath();
-		
-		for (int i= elements.size()-1 ; i >= 0 ; i--) {
-			CPListElement listElement= (CPListElement)elements.get(i);
-						
-			IPath cppath= listElement.getPath();
-			
-			// Addition to Java Core. Avoid setting class file folder to output location
-			if (listElement.getEntryKind() == IClasspathEntry.CPE_LIBRARY && cppath.equals(fOutputLocationPath)) {
-				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.OutputIsClassFileFolder", cppath.toString())); //$NON-NLS-1$
-				return;
-				
-			}
-						
-			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
-			// Code adopted from SetClasspathOperation.verify();
-			// no further check if entry coincidates with project or output location
-			if (cppath.equals(projectPath)) continue;
-			if (cppath.equals(fOutputLocationPath)) continue;
-			
-			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
-			// prevent nesting the output location inside entry.
-			if (cppath.isPrefixOf(fOutputLocationPath)) {
-				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.OutputInSourceFolder", cppath.toString())); //$NON-NLS-1$
-				return;
-			}
-			
-			// 1GET6BZ: ITPJUI:ALL - Error setting source folder
-			// 1GF5S2N: ITPJUI:ALL - Can't add an internal JAR to the buildpath in simple project layout
-			// Removed kind check to be consistent with check done in SetClasspathOperation
-			if (!allowNestingInOutput && fOutputLocationPath.isPrefixOf(cppath)) {
-				fBuildPathStatus.setError(NewWizardMessages.getFormattedString("BuildPathsBlock.error.BuildPathInClassPath", cppath.toString())); //$NON-NLS-1$
-				return;
-			}
-				
+		IStatus status= JavaConventions.validateClasspath(fCurrJProject, entries, path);
+		if (!status.isOK()) {
+			fBuildPathStatus.setError(status.getMessage());
+			return;
 		}
 				
 		fBuildPathStatus.setOK();
