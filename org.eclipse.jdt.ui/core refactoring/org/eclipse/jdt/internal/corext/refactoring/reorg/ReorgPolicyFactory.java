@@ -142,6 +142,7 @@ class ReorgPolicyFactory {
 		if (isNothingToReorg(resources, javaElements) || 
 			containsNull(resources) ||
 			containsNull(javaElements) ||
+			ReorgUtils.isArchiveMember(javaElements) ||
 			ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_PROJECT) ||
 			ReorgUtils.hasElementsOfType(javaElements, IJavaElement.JAVA_MODEL) ||
 			ReorgUtils.hasElementsOfType(resources, IResource.PROJECT | IResource.ROOT) ||

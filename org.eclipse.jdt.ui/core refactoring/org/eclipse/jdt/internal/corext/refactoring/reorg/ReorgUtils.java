@@ -60,6 +60,16 @@ public class ReorgUtils {
 	private ReorgUtils() {
 	}
 
+	public static boolean isArchiveMember(IJavaElement[] elements) {
+		for (int i= 0; i < elements.length; i++) {
+			IJavaElement element= elements[i];
+			IPackageFragmentRoot root= (IPackageFragmentRoot)element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+			if (root != null && root.isArchive())
+				return true;
+		}
+		return false;
+	}
+	
 	public static boolean containsOnlyProjects(List elements){
 		if (elements.isEmpty())
 			return false;
