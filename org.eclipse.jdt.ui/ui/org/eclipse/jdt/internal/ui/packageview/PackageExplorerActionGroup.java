@@ -85,6 +85,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private UpAction fUpAction;
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
+	private GotoResourceAction fGotoResourceAction;
 	private CollapseAllAction fCollapseAllAction;
 	private RenameResourceAction fRenameResourceAction;
 	private MoveResourceAction fMoveResourceAction;
@@ -133,6 +134,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		
 		fGotoTypeAction= new GotoTypeAction(fPart);
 		fGotoPackageAction= new GotoPackageAction(fPart);
+		fGotoResourceAction= new GotoResourceAction(fPart);
 		fCollapseAllAction= new CollapseAllAction(fPart);
 		
 		fMemberFilterActionGroup= new MemberFilterActionGroup(fPart.getViewer(), "PackageView");  //$NON-NLS-1$
@@ -214,6 +216,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BACK, fBackAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.FORWARD, fForwardAction);
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.UP, fUpAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.GO_TO_RESOURCE, fGotoResourceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_TYPE, fGotoTypeAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.GOTO_PACKAGE, fGotoPackageAction);
 	}

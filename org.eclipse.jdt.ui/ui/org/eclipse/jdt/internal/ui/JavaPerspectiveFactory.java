@@ -7,7 +7,9 @@ package org.eclipse.jdt.internal.ui;
 import org.eclipse.ui.IFolderLayout;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
+
 import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.debug.ui.IDebugUIConstants;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -40,6 +42,7 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ELEMENT_CREATION_ACTION_SET);
+		layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);
 		
 		// views - java
 		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
