@@ -43,11 +43,11 @@ public class ClassPathDetectorTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ClassPathDetectorTest("testClassFolder"));
+			suite.addTest(new ClassPathDetectorTest("testClassFolderConflictingWithOutput"));
 			return suite;
 		}
 	}
@@ -68,11 +68,13 @@ public class ClassPathDetectorTest extends TestCase {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		store.setValue(PreferenceConstants.SRCBIN_BINNAME, "bin");
 
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		fJProject1= null;
 	}
 
 	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fJProject1);
+		if (fJProject1 != null) {
+			JavaProjectHelper.delete(fJProject1);
+		}
 
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);		
@@ -130,6 +132,8 @@ public class ClassPathDetectorTest extends TestCase {
 	
 	
 	public void testSourceAndLibrary() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		
 		// source folder & internal JAR
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -149,7 +153,7 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
-		IPath projectOutput= fJProject1.getPath().append("bin");
+		IPath projectOutput= fJProject1.getOutputLocation();
 		
 		clearClasspath();
 		
@@ -165,6 +169,7 @@ public class ClassPathDetectorTest extends TestCase {
 	}
 
 	public void testTwoSourceFolders() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// 2 source folders
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -190,8 +195,8 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
-		
-		IPath projectOutput= fJProject1.getPath().append("bin");
+		IPath projectOutput= fJProject1.getOutputLocation();
+
 		clearClasspath();
 		
 		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
@@ -206,6 +211,7 @@ public class ClassPathDetectorTest extends TestCase {
 	}
 	
 	public void testNestedSources() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
 		// 2 nested source folders
 		
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -232,11 +238,10 @@ public class ClassPathDetectorTest extends TestCase {
 		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
 		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
-		
-		IPath projectOutput= fJProject1.getPath().append("bin");
+		IPath projectOutput= fJProject1.getOutputLocation();
+
 		clearClasspath();
 
-		
 		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
@@ -248,22 +253,70 @@ public class ClassPathDetectorTest extends TestCase {
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
 	}
 	
+	public void testSourceAndOutputOnProject() throws Exception {
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "");
+	
+		// source folder & internal JAR
+	
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "", zipfile);		
+	
+		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
+		for (int i= 0; i < jreEntries.length; i++) {
+			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
+		}
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
+	
+		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
+		IPath projectOutput= fJProject1.getOutputLocation();
+	
+		clearClasspath();
+	
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		IPath outputLocation= detector.getOutputLocation();
+		IClasspathEntry[] entries= detector.getClasspath();
+		assertNotNull("No classpath detected", entries);
+		assertNotNull("No outputLocation detected", outputLocation);
+	
+		assertSameClasspath(projectEntries, entries);
+
+		assertTrue("Output folder", outputLocation.equals(projectOutput));
+	}
+	
 	public void testClassFolder() throws Exception {
-		// 2 nested source folders
+		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
+		// class folder:
 		
-/**		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(fJProject1, "src1");
+		IPackageFragment pack1= root.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
+		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", lib != null && lib.exists());
 		ZipFile zipfile= new ZipFile(lib);
 		
-		JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, zipfile);
+		IPackageFragmentRoot cfroot= JavaProjectHelper.addClassFolderWithImport(fJProject1, "cf", null, null, zipfile);
 		
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		for (int i= 0; i < jreEntries.length; i++) {
 			JavaProjectHelper.addToClasspath(fJProject1, jreEntries[i]);
 		}
-		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, null);
 		
-		IPath projectOutput= fJProject1.getPath().append("bin");
+		JavaProjectHelper.removeFromClasspath(fJProject1, cfroot.getPath()); // classfolder should not be detected
+		
+		IClasspathEntry[] projectEntries= fJProject1.getRawClasspath();
+		IPath projectOutput= fJProject1.getOutputLocation();
+
 		clearClasspath();
 		
 		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
@@ -272,11 +325,8 @@ public class ClassPathDetectorTest extends TestCase {
 		assertNotNull("No classpath detected", entries);
 		assertNotNull("No outputLocation detected", outputLocation);
 		
-		assertSameClasspath(projectEntries, entries);
-		
+		assertSameClasspath(projectEntries, entries); 
 		assertTrue("Output folder", outputLocation.equals(projectOutput));
-		*/
-	}	
-	
+	}
 
 }

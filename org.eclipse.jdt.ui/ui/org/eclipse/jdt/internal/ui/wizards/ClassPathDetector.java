@@ -76,7 +76,7 @@ public class ClassPathDetector implements IResourceVisitor {
 		
 		detectLibraries(cpEntries, outputLocation);
 			
-		if (cpEntries.isEmpty()) {
+		if (cpEntries.isEmpty() && fClassFiles.isEmpty()) {
 			return;
 		}
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
