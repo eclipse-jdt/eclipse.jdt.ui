@@ -59,7 +59,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -111,7 +112,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		public AddUnimplementedConstructorsContentProvider(IType type) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null)
@@ -503,7 +504,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, dialog.getElementPosition(), selected, settings, false);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, dialog.getElementPosition(), selected, settings, true, true, false);
 				operation.setVisibility(dialog.getVisibilityModifier());
 				operation.setOmitSuper(dialog.isOmitSuper());
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();

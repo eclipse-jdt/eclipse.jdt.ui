@@ -65,7 +65,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddDelegateMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -155,7 +157,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		AddDelegateMethodsContentProvider(IType type, IField[] fields) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null) {
@@ -572,7 +574,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					String[] keys= new String[tuples.size()];
 					for (int index= 0; index < keys.length; index++)
 						keys[index]= ((IBinding[]) tuples.get(index))[1].getKey();
-					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), keys, settings, false);
+					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), keys, settings, true, false);
 					IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 					if (context == null)
 						context= new BusyIndicatorRunnableContext();

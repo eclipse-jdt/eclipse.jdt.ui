@@ -39,7 +39,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstruc
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -123,7 +124,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	private AddUnimplementedConstructorsOperation createOperation(IType type, CodeGenerationSettings settings) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
@@ -131,7 +132,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		String[] keys= new String[bindings.length];
 		for (int index= 0; index < bindings.length; index++)
 			keys[index]= bindings[index].getKey();
-		return new AddUnimplementedConstructorsOperation(type, null, keys, settings, true);
+		return new AddUnimplementedConstructorsOperation(type, null, keys, settings, true, true, true);
 	}
 
 	private void initCodeTemplates() {
