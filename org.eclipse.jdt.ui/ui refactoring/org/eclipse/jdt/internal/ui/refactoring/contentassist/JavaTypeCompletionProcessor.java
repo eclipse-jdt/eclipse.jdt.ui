@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.CompletionRequestorAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -28,7 +27,6 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
@@ -39,7 +37,6 @@ import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -61,6 +58,7 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	private static final String CU_NAME= CLASS_NAME + ".java"; //$NON-NLS-1$
 	private static final String CU_START= "public class " + CLASS_NAME + " { ";  //$NON-NLS-1$ //$NON-NLS-2$
 	private static final String CU_END= " }"; //$NON-NLS-1$
+
 	private static final String VOID= "void"; //$NON-NLS-1$
 	private static final List BASE_TYPES= Arrays.asList(
 		new String[] {"boolean", "byte", "char", "double", "float", "int", "long", "short"});  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
@@ -73,6 +71,14 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 	
+	/**
+	 * Creates a <code>JavaTypeCompletionProcessor</code> to complete existing types
+	 * in the context of <code>packageFragment</code>.
+	 * 
+	 * @param packageFragment the context for type completion
+	 * @param enableBaseTypes complete java base types iff <code>true</code>
+	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
+	 */
 	public JavaTypeCompletionProcessor(IPackageFragment packageFragment, boolean enableBaseTypes, boolean enableVoid) {
 		fPackageFragment= packageFragment;
 		fEnableBaseTypes= enableBaseTypes;
@@ -143,45 +149,17 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeCompletionProposals(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(IContentAssistSubject contentAssistSubject, int documentOffset) {
-		String input= ""; //$NON-NLS-1$
-		try {
-			input= contentAssistSubject.getDocument().get(0, documentOffset);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		}
-		if (input.length() == 0)
-			return createPackageTypesProposals();
-		else
-			return internalComputeCompletionProposals(documentOffset, input);
-	}
-
-	private ICompletionProposal[] createPackageTypesProposals() {
-		ArrayList proposals= new ArrayList();
-		IJavaProject javaProject= fPackageFragment.getJavaProject();
-		String packageName= fPackageFragment.getElementName();
-		char[] pack= packageName.toCharArray();
-		try {
-			ICompilationUnit[] cus= fPackageFragment.getCompilationUnits();
-			for (int i= 0; i < cus.length; i++) {
-				ICompilationUnit unit= cus[i];
-				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(unit);
-				IType[] types= wc.getTypes();
-				for (int t= 0; t < types.length; t++) {
-					IType type= types[t];
-					String typeName= type.getTypeQualifiedName('.');
-					ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(type.isInterface(), type.isMember(), type.getFlags());
-					ProposalInfo info= new ProposalInfo(javaProject, pack, typeName.toCharArray());
-					proposals.add(createTypeCompletion(0, 0, type.getFullyQualifiedName(), descriptor, typeName, packageName, info, 0));
-				}
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+		String input= contentAssistSubject.getDocument().get();
+		if (documentOffset == 0)
+			return null;
+		ICompletionProposal[] proposals= internalComputeCompletionProposals(documentOffset, input);
+		Arrays.sort(proposals, fComparator);
+		return proposals;
 	}
 
 	private ICompletionProposal[] internalComputeCompletionProposals(int documentOffset, String input) {
 		String cuString= CU_START + input + CU_END;
+		String prefix= input.substring(0, documentOffset);
 		ICompilationUnit cu= fPackageFragment.getCompilationUnit(CU_NAME);
 		try {
 			/*
@@ -189,9 +167,9 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			 */
 			cu= (ICompilationUnit) cu.getWorkingCopy();
 			cu.getBuffer().setContents(cuString);
-			int cuOffset= CU_START.length() + input.length();
-			TypeCompletionCollector collector= new TypeCompletionCollector(cuOffset - documentOffset, fPackageFragment.getJavaProject(), fEnableBaseTypes, fEnableVoid);
-			cu.codeComplete(cuOffset, collector);
+			int cuPrefixLength= CU_START.length();
+			TypeCompletionCollector collector= new TypeCompletionCollector(cuPrefixLength, fPackageFragment.getJavaProject(), fEnableBaseTypes, fEnableVoid);
+			cu.codeComplete(cuPrefixLength + documentOffset, collector);
 			
 			JavaCompletionProposal[] proposals= collector.getResults();
 			if (proposals.length == 0) {
@@ -202,7 +180,6 @@ public class JavaTypeCompletionProcessor implements IContentAssistProcessor, ICo
 			} else {
 				fErrorMessage= collector.getErrorMessage();
 			}
-			Arrays.sort(proposals, fComparator);
 			return proposals;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
