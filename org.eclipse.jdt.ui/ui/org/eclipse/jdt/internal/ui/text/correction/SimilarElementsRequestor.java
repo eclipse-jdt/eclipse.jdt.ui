@@ -76,9 +76,8 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 			requestor.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
 			requestor.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
-			// bug 80126 
-			//requestor.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
-			//requestor.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
+			requestor.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+			requestor.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 			return requestor.process(cu, pos);
 		} finally {
 			if (preparedCU != null) {
