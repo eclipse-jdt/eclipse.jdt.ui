@@ -94,16 +94,16 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * </p>
 	 */
 	public static void openInBrowser(final URL url, final Shell shell) {
-		IHelpResource helpResource= new IHelpResource() {
-			public String getHref() {
-				return url.toExternalForm();
-			}
-
-			public String getLabel() {
-				return url.toExternalForm();
-			}
-		};
-		WorkbenchHelp.getHelpSupport().displayHelpResource(helpResource);
+//		IHelpResource helpResource= new IHelpResource() {
+//			public String getHref() {
+//				return url.toExternalForm();
+//			}
+//
+//			public String getLabel() {
+//				return url.toExternalForm();
+//			}
+//		};
+		WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
 	}
 	
 	/* (non-Javadoc)

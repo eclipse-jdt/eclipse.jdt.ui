@@ -22,11 +22,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.help.IHelp;
-import org.eclipse.help.IHelpResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -151,21 +148,7 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	 * Copied from AboutPluginsDialog.openMoreInfo
 	 */
 	public static void openInBrowser(final URL url, final Shell shell) {
-		IHelpResource helpResource= new IHelpResource() {
-			public String getHref() {
-				return url.toExternalForm();
-			}
-
-			public String getLabel() {
-				return url.toExternalForm();
-			}
-		};
-		IHelp help= WorkbenchHelp.getHelpSupport();
-		if (help != null) {
-			help.displayHelpResource(helpResource);
-		} else {
-			showError(shell, "Help support not available");
-		}
+		OpenExternalJavadocAction.openInBrowser(url, shell);
 	}
 
 	
