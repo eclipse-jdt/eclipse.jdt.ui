@@ -129,15 +129,17 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	private Object[] getRequiredProjects() {
-		IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		List list= new ArrayList();
-		for (int i= 0; i < classpathEntries.length; i++) {
-			IClasspathEntry entry= classpathEntries[i];
-			if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
-				IResource resource= root.findMember(entry.getPath());
-				if (resource instanceof IProject)
-					list.add(new RequiredProjectWrapper(JavaCore.create(resource)));
+		if (fContainer != null) {
+			IClasspathEntry[] classpathEntries= fContainer.getClasspathEntries();
+			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+			for (int i= 0; i < classpathEntries.length; i++) {
+				IClasspathEntry entry= classpathEntries[i];
+				if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) {
+					IResource resource= root.findMember(entry.getPath());
+					if (resource instanceof IProject)
+						list.add(new RequiredProjectWrapper(JavaCore.create(resource)));
+				}
 			}
 		}
 		return list.toArray();
