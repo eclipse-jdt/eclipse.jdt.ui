@@ -272,7 +272,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			res= openVariableSelectionDialog(elem);
 			break;
 		}
-		if (res != null) {
+		if (res != null && res.length > 0) {
 			fLibrariesList.replaceElement(elem, res[0]);
 		}		
 			
