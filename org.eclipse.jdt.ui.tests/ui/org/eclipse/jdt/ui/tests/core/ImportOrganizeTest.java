@@ -1785,7 +1785,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");	
 		buf.append("public class C {\n");
 		buf.append("    public int foo() {\n");
-		buf.append("        out.print(Math.max(1, 2));\n");
+		buf.append("        out.print(File.separator);\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
@@ -1800,12 +1800,12 @@ public class ImportOrganizeTest extends CoreTests {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import java.lang.Math;\n");
+		buf.append("import java.io.File;\n");
 		buf.append("import static java.lang.System.out;\n");
 		buf.append("\n");	
 		buf.append("public class C {\n");
 		buf.append("    public int foo() {\n");
-		buf.append("        out.print(Math.max(1, 2));\n");
+		buf.append("        out.print(File.separator);\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
