@@ -217,8 +217,19 @@
             icon="icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
+            nameFilter="*.java"
+            filterClass="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
+        <contextLabel
+         	mode="run"
+         	label="%JUnitShortcutRun.label"/>
+  		 <contextLabel
+  		 	mode="debug"
+  		 	label="%JUnitShortcutDebug.label"/>
+         <filter
+         	name="ContextualLaunchActionFilter"
+         	value="supportsContextualLaunch"/>
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
          </perspective>

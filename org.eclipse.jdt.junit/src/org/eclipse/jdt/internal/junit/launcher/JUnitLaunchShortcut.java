@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -23,11 +24,16 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
+import org.eclipse.debug.ui.ILaunchFilter;
 import org.eclipse.debug.ui.ILaunchShortcut;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.debug.ui.JavaUISourceLocator;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -44,7 +50,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
-public class JUnitLaunchShortcut implements ILaunchShortcut {
+public class JUnitLaunchShortcut implements ILaunchShortcut, ILaunchFilter {
 	
 	/**
 	 * @see ILaunchShortcut#launch(IEditorPart, String)
@@ -316,5 +322,28 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 	 */
 	protected Shell getShell() {
 		return JUnitPlugin.getActiveWorkbenchShell();
+	}
+
+	public boolean testAttribute(IResource target, String name, String value) {
+		if ("ContextualLaunchActionFilter".equals(name)) { //$NON-NLS-1$
+			return isJUnitTest(target);
+		} 
+		return false;
+	}
+		
+	private boolean isJUnitTest(IResource target) {
+		if (target != null) {
+			IJavaElement element = JavaCore.create(target);
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit cu = (ICompilationUnit) element;
+				IType mainType= cu.getType(Signature.getQualifier(cu.getElementName()));
+				try {
+					return TestSearchEngine.isTestOrTestSuite(mainType);
+				} catch (JavaModelException e) {
+					return false;
+				}
+			} 
+		}
+		return false;
 	}
 }
