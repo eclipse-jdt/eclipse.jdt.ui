@@ -73,7 +73,7 @@ public class RenameResourceChange extends Change {
 	}
 	
 	public String getName(){
-		return "Rename \"" + fResourcePath.toString() + "\" to:\"" + fNewName + "\"";
+		return "Rename \"" + fResourcePath.toString() + "\" to: " + fNewName + "";
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){
