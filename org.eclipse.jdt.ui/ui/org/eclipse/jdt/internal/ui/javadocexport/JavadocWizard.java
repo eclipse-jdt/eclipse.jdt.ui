@@ -82,10 +82,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		fFromAnt= (xmlJavadocFile != null);
 	}
 
-	public IWorkspaceRoot getRoot() {
-		return fRoot;
-	}
-
 	/*
 	 * @see IWizard#performFinish()
 	 */
@@ -150,7 +146,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 
 				IProcess[] iProcesses= new IProcess[] { iprocess };
 
-				IDebugEventListener listener= new JavadocDebugEventListener(iprocess);
+				IDebugEventListener listener= new JavadocDebugEventListener();
 				DebugPlugin.getDefault().addDebugEventListener(listener);
 
 				ILaunch newLaunch= new Launch(null, ILaunchManager.RUN_MODE, null, iProcesses, null);
@@ -190,7 +186,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 	}
 	
-	public void refresh(IPath path) {
+	private void refresh(IPath path) {
 		if (fRoot.getContainerForLocation(path) != null) {
 			try {
 				fRoot.refreshLocal(fJTWPage.fRoot.DEPTH_INFINITE, null);
@@ -198,41 +194,34 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				JavaPlugin.log(e);
 			}
 		}
+	}
+	
+	private void spawnInBrowser() {
+		if (fOpenInBrowser) {
+			try {
+				IPath indexFile= fDestination.append("index.html");
+				URL url= indexFile.toFile().toURL();
+				OpenExternalJavadocAction.openInBrowser(url, getShell());
+			} catch (MalformedURLException e) {
+				JavaPlugin.logErrorMessage(e.getMessage());
+			}
+		}
 	}	
 
 	private class JavadocDebugEventListener implements IDebugEventListener {
 
-		private IProcess iprocess;
-		private boolean finished;
-
-		public JavadocDebugEventListener(IProcess process) {
-			this.iprocess= process;
-			finished= false;
+		public JavadocDebugEventListener() {
 		}
 
 		public void handleDebugEvent(DebugEvent event) {
 			if (event.getKind() == DebugEvent.TERMINATE) {
 				try {
-					//If destination of javadoc is in workspace then refresh workspace
 					if (!fWriteCustom) {
-						refresh(fDestination);
+						refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
 						spawnInBrowser();
 					}
 				} finally {
 					DebugPlugin.getDefault().removeDebugEventListener(this);
-				}
-			}
-		}
-
-		public void spawnInBrowser() {
-			if (fOpenInBrowser) {
-
-				try {
-					IPath indexFile= fDestination.append("index.html");
-					URL url= indexFile.toFile().toURL();
-					OpenExternalJavadocAction.openInBrowser(url, getShell());
-				} catch (MalformedURLException e) {
-					JavaPlugin.logErrorMessage(e.getMessage());
 				}
 			}
 		}
