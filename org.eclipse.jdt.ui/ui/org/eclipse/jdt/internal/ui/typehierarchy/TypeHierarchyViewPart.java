@@ -1211,7 +1211,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			String handleIndentifier=  fInputElement.getHandleIdentifier();
 			if (fInputElement instanceof IType) {
 				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
-				if (hierarchy != null && hierarchy.getSupertypes((IType) fInputElement).length > 1000) {
+				if (hierarchy != null && hierarchy.getSubtypes((IType) fInputElement).length > 1000) {
 					// for startup performance reasons do not try to recover huge hierarchies
 					handleIndentifier= null;
 				}
