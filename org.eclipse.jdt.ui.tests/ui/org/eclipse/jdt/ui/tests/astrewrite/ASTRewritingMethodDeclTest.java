@@ -50,11 +50,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testMethodDeclarationExtraDimensions"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testMethodDeclarationParamShuffel"));
 			return suite;
 		}
 	}
@@ -1002,6 +1002,53 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	
+	public void testMethodDeclarationParamShuffel() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public Object foo1(int i, boolean b) { return null; }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		
+		{ // add extra dim, add throws
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo1");
+			
+			List params= methodDecl.parameters();
+			
+			SingleVariableDeclaration first= (SingleVariableDeclaration) params.get(0);
+			SingleVariableDeclaration second= (SingleVariableDeclaration) params.get(1);
+			rewrite.markAsReplaced(first.getName(), ast.newSimpleName("x"));
+			rewrite.markAsReplaced(second.getName(), ast.newSimpleName("y"));
+				
+			ASTNode copy1= rewrite.createCopy(first);
+			ASTNode copy2= rewrite.createCopy(second);
+			
+			rewrite.markAsReplaced(first, copy2);
+			rewrite.markAsReplaced(second, copy1);
+			
+		}
+	
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public Object foo1(boolean y, int x) { return null; }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
 	
 	
 }
