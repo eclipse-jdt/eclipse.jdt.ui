@@ -161,7 +161,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator {
 	}
 
 	private int getErrorTicksFromMarkers(IResource res, int depth, ISourceReference sourceElement) throws CoreException {
-		if (res == null || !res.exists()) {
+		if (res == null || !res.isAccessible()) {
 			return 0;
 		}
 		int info= 0;
