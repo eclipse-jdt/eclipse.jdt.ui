@@ -208,7 +208,6 @@ public class CopyRefactoring extends ReorgRefactoring {
 				return simpleCopy;
 			
 			try {
-				String newTypeName= removeTrailingJava(newName);
 				IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
 				INewNameQuery nameQuery= fCopyQueries.createNewCompilationUnitNameQuery(cu);
 				return new CreateCopyOfCompilationUnitChange(newPath, cu.getSource(), cu, nameQuery); //XXX
@@ -226,10 +225,4 @@ public class CopyRefactoring extends ReorgRefactoring {
 			return new CopyResourceChange(res, (IContainer)dest, nameQuery);
 		}		
 	}
-	
-	private static String removeTrailingJava(String name) {
-		Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
-		return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
-	}
-	
 }
