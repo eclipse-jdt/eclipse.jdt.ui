@@ -68,8 +68,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
@@ -853,14 +853,12 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		IAction action= null;
 		if (event.character == SWT.DEL) {
 			action= getAction("DeleteElement"); //$NON-NLS-1$
-			if (action instanceof DeleteAction){
+			if (action instanceof IRefactoringAction){
 				//special case - DeleteAction is not a ISelectionChangedListener
-				DeleteAction deleteAction= (DeleteAction)action;
-				deleteAction.update();
-				if (deleteAction.isEnabled())
-					deleteAction.run();
-				return;
-			}
+				((IRefactoringAction)action).update();
+				if (! action.isEnabled())
+					return;
+			}	
 		} else if (event.keyCode == SWT.F4) {
 			// Special case since Open Type Hierarchy is no action.
 			OpenTypeHierarchyUtil.open(getSelection(), fEditor.getSite().getWorkbenchWindow());
