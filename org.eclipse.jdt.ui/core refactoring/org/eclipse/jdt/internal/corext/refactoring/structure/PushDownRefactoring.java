@@ -223,8 +223,8 @@ public class PushDownRefactoring extends Refactoring {
 	//caches
 	private IType fCachedDeclaringClass;
 	private ITypeHierarchy fCachedClassHierarchy;
-	
 	private IType[] fTypesReferencedInPushedDownMembers;
+	
 	private PushDownRefactoring(IMember[] members, CodeGenerationSettings preferenceSettings){
 		Assert.isTrue(members.length > 0);
 		Assert.isNotNull(preferenceSettings);
@@ -461,7 +461,7 @@ public class PushDownRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.creating_preview"), 5); //$NON-NLS-1$
-			clearManagers();
+			clearCaches();
 						
 			RefactoringStatus result= new RefactoringStatus();
 			
@@ -488,7 +488,8 @@ public class PushDownRefactoring extends Refactoring {
 		}	
 	}
 
-	private void clearManagers() {
+	private void clearCaches() {
+		fTypesReferencedInPushedDownMembers= null;
 		fImportEditManager.clear();
 	}
 
@@ -737,7 +738,7 @@ public class PushDownRefactoring extends Refactoring {
 			return new CompositeChange("Push down", fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
-			clearManagers();
+			clearCaches();
 		}
 	}
 

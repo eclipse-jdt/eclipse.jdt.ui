@@ -367,7 +367,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	public ITypeHierarchy getTypeHierarchyOfTargetClass(IProgressMonitor pm) throws JavaModelException {
 		try{
-			if (fCachedTargetClassHierarchy != null)
+			if (fCachedTargetClassHierarchy != null && fCachedTargetClassHierarchy.getType().equals(getTargetClass()))
 				return fCachedTargetClassHierarchy;
 			fCachedTargetClassHierarchy= getTargetClass().newTypeHierarchy(pm);
 			return fCachedTargetClassHierarchy;
@@ -668,7 +668,7 @@ public class PullUpRefactoring extends Refactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 7); //$NON-NLS-1$
-			clearManagers();
+			clearCaches();
 
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
@@ -704,7 +704,8 @@ public class PullUpRefactoring extends Refactoring {
 		return MemberCheckUtil.checkMembersInDestinationType(members, getTargetClass());
 	}
 	
-	private void clearManagers() {
+	private void clearCaches() {
+		fTypesReferencedInPulledUpMembers= null;
 		fImportEditManager.clear();
 	}
 	
@@ -964,7 +965,7 @@ public class PullUpRefactoring extends Refactoring {
 	private Set getSkippedSuperclasses(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			if (fCachedSkippedSuperclasses != null)
+			if (fCachedSkippedSuperclasses != null && getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1)).getType().equals(getTargetClass()))
 				return fCachedSkippedSuperclasses;
 			ITypeHierarchy hierarchy= getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
 			fCachedSkippedSuperclasses= new HashSet(2);
@@ -1152,7 +1153,7 @@ public class PullUpRefactoring extends Refactoring {
 			return new CompositeChange(RefactoringCoreMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
-			clearManagers();
+			clearCaches();
 		}
 	}
 
