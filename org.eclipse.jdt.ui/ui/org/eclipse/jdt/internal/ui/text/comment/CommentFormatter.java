@@ -12,7 +12,9 @@
 package org.eclipse.jdt.internal.ui.text.comment;
 
 import org.eclipse.jdt.core.ICodeFormatter;
+import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 /**
@@ -40,7 +42,7 @@ public class CommentFormatter implements ICodeFormatter {
 	public String format(String string, int indentationLevel, int[] positions, String lineSeparator) {
 
 		try {
-			final CommentRegion region= CommentObjectFactory.getRegion(fSourceViewer.getDocument(), fSourceViewer.getDocument().getPartition(0), lineSeparator);
+			final CommentRegion region= CommentObjectFactory.getRegion(fSourceViewer.getDocument(), TextUtilities.getPartition(fSourceViewer.getDocument(), IJavaPartitions.JAVA_PARTITIONING, 0), lineSeparator);
 			region.formatRegion();
 		} catch (BadLocationException e) {
 		}
