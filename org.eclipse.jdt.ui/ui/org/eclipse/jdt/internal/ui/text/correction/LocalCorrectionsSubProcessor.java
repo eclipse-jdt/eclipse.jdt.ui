@@ -74,7 +74,7 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 		
-		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
 		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
@@ -152,7 +152,7 @@ public class LocalCorrectionsSubProcessor {
 		
 		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
 		if (surroundingTry != null) {
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			ASTRewrite rewrite= new ASTRewrite(surroundingTry);
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addadditionalcatch.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);

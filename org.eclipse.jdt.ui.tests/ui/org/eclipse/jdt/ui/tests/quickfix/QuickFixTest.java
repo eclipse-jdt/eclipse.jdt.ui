@@ -33,6 +33,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(new TestSuite(LocalCorrectionsQuickFixTest.class));
 		suite.addTest(new TestSuite(ReorgQuickFixTest.class));
 		suite.addTest(new TestSuite(ModifierCorrectionsQuickFixTest.class));
+		suite.addTest(new TestSuite(AssistQuickFixTest.class));
 		suite.addTest(new TestSuite(MarkerResolutionTest.class));
 		return suite;
 	}
@@ -56,7 +57,9 @@ public class QuickFixTest extends TestCase {
 	}
 	
 	public static void assertCorrectContext(CorrectionContext context) {
-		assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		if (context.getProblemId() != 0) {
+			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getProblemId()));
+		}
 	}	
 	
 	
@@ -189,6 +192,12 @@ public class QuickFixTest extends TestCase {
 		context.initialize(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, problem.getID(), problem.getArguments());
 		return context;
 	}
+	
+	public static CorrectionContext getCorrectionContext(ICompilationUnit cu, int offset, int length) {
+		CorrectionContext context= new CorrectionContext(cu);
+		context.initialize(offset, length, 0, null);
+		return context;
+	}	
 	
 	
 }

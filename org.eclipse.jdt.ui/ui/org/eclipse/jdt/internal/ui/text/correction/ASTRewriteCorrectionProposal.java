@@ -41,10 +41,12 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 			buffer= TextBuffer.acquire(change.getFile());
 			ArrayList groupDescriptions= new ArrayList(5);
 			ASTRewrite rewrite= getRewrite();
-			rewrite.rewriteNode(buffer, rootEdit, groupDescriptions);
-			rewrite.removeModifications();
-			for (int i= 0; i < groupDescriptions.size(); i++) {
-				change.addGroupDescription((GroupDescription) groupDescriptions.get(i));
+			if (rewrite != null) {
+				rewrite.rewriteNode(buffer, rootEdit, groupDescriptions);
+				rewrite.removeModifications();
+				for (int i= 0; i < groupDescriptions.size(); i++) {
+					change.addGroupDescription((GroupDescription) groupDescriptions.get(i));
+				}
 			}
 		} finally {
 			if (buffer != null) {

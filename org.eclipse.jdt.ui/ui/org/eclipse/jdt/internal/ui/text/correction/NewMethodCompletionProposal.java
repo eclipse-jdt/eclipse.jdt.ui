@@ -54,22 +54,21 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 	}
 		
 	protected ASTRewrite getRewrite() throws CoreException {
-		ASTRewrite rewrite;
+		
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newTypeDecl= null;
 		if (typeDecl != null) {
 			fIsInDifferentCU= false;
-			rewrite= new ASTRewrite(astRoot);
 			newTypeDecl= typeDecl;
 		} else {
 			fIsInDifferentCU= true;
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
-			rewrite= new ASTRewrite(newRoot);
-			
 			newTypeDecl= newRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
+			ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
+			
 			List methods;
 			if (fSenderBinding.isAnonymous()) {
 				methods= ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations();
@@ -86,9 +85,9 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 				methods.add(newStub);
 			}
 			rewrite.markAsInserted(newStub);
+			return rewrite;
 		}
-		
-		return rewrite;
+		return null;
 	}
 	
 	private boolean isConstructor() {

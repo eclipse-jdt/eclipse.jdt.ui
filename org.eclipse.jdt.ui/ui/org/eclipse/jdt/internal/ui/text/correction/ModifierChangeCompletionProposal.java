@@ -56,22 +56,19 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 	}
 	
 	protected ASTRewrite getRewrite() throws CoreException {
-		ASTRewrite rewrite;
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
 		if (boundNode != null) {
 			fIsInDifferentCU= false;
-			rewrite= new ASTRewrite(astRoot);
 			declNode= boundNode;
 		} else {
 			fIsInDifferentCU= true;
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
-			rewrite= new ASTRewrite(newRoot);
-			
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {
+			ASTRewrite rewrite= new ASTRewrite(declNode.getParent());
 			AST ast= declNode.getAST();
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;
@@ -129,9 +126,9 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				
 				rewrite.markAsModified(typeDecl, modifiedNode);				
 			}
+			return rewrite;
 		}
-		
-		return rewrite;
+		return null;
 	}
 		
 	public void apply(IDocument document) {

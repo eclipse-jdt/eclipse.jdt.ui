@@ -164,6 +164,7 @@ public final class ASTRewrite {
 	 * @param node Description of the change.
 	 */
 	public final void markAsRemoved(ASTNode node, String description) {
+		assertIsInside(node);
 		ASTRemove remove= new ASTRemove();
 		remove.description= description;
 		setChangeProperty(node, remove);
@@ -188,6 +189,7 @@ public final class ASTRewrite {
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, String description) {
 		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)");
 		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node");
+		assertIsInside(node);
 		ASTReplace replace= new ASTReplace();
 		replace.replacingNode= replacingNode;
 		replace.description= description;
@@ -215,6 +217,7 @@ public final class ASTRewrite {
 	 */			
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
 		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type");
+		assertIsInside(node);
 		ASTModify modify= new ASTModify();
 		modify.modifiedNode= modifiedNode;
 		modify.description= description;
@@ -238,6 +241,7 @@ public final class ASTRewrite {
 	public final ASTNode createCopy(ASTNode node) {
 		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node");
 		Assert.isTrue(getCopySourceEdit(node) == null, "Node used as more than one copy source");
+		assertIsInside(node);
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
 		setCopySourceEdit(node, copySource);
 		
@@ -258,6 +262,8 @@ public final class ASTRewrite {
 		Assert.isTrue(getCopySourceEdit(startNode) == null, "Start node used as more than one copy source ");
 		Assert.isTrue(getCopySourceEdit(endNode) == null, "End node used as more than one copy source ");
 		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent");
+		assertIsInside(startNode);
+		assertIsInside(endNode);
 		int start= startNode.getStartPosition();
 		int end= endNode.getStartPosition() + endNode.getLength();
 		Assert.isTrue(start < end, "Start node must have smaller offset than end node");
@@ -375,7 +381,15 @@ public final class ASTRewrite {
 	
 	/* package */ final Object getCopySourceEdit(ASTNode node) {
 		return fCopiedProperties.get(node);
-	}	
+	}
+	
+	private void assertIsInside(ASTNode node) {
+		int endPos= node.getStartPosition() + node.getLength();
+		if (fRootNode.getStartPosition() > node.getStartPosition() || fRootNode.getStartPosition() + fRootNode.getLength() < endPos) {
+			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root");
+		}
+	}
+	
 
 	private static class ASTChange {
 		String description;

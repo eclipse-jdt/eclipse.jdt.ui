@@ -265,10 +265,7 @@ public class ASTResolving {
 	}
 	
 	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
-		while ((node != null) && (node.getNodeType() != ASTNode.COMPILATION_UNIT)) {
-			node= node.getParent();
-		}
-		return (CompilationUnit) node;
+		return (CompilationUnit) findAncestor(node, ASTNode.COMPILATION_UNIT);
 	}
 	
 	/**
@@ -279,6 +276,13 @@ public class ASTResolving {
 		}
 		return node;
 	}
+	
+	public static ASTNode findAncestor(ASTNode node, int nodeType) {
+		while ((node != null) && (node.getNodeType() != nodeType)) {
+			node= node.getParent();
+		}
+		return node;
+	}	
 	
 	/**
 	 * Returns the type binding of the node's parent type declararation

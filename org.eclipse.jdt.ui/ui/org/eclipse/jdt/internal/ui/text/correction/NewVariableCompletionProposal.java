@@ -64,28 +64,31 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 
 	private ASTRewrite doAddParam(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
-		ASTRewrite rewrite= new ASTRewrite(cu);
 		SimpleName node= fOriginalNode;
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration) {
+			ASTRewrite rewrite= new ASTRewrite(decl);
+			
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 			
 			rewrite.markAsInserted(newDecl);
 			((MethodDeclaration)decl).parameters().add(newDecl);
+			return rewrite;
 		}
-		return rewrite;
+		return null;
 	}
 
 	private ASTRewrite doAddLocal(CompilationUnit cu) throws CoreException {
 		AST ast= cu.getAST();
-		ASTRewrite rewrite= new ASTRewrite(cu);
+		
 		SimpleName node= fOriginalNode;
 
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(node);
 		if (decl instanceof MethodDeclaration || decl instanceof Initializer) {
+			ASTRewrite rewrite= new ASTRewrite(decl);
 			
 			VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 			VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
@@ -130,27 +133,27 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 				Block block= (Block) statement.getParent();
 				List statements= block.statements();
 				statements.add(0, newDecl);
-				
 				rewrite.markAsInserted(newDecl);
+				return rewrite;
 			}
 		}
-		return rewrite;
+		return null;
 	}
 
 	private ASTRewrite doAddField(CompilationUnit astRoot) throws CoreException {
 		SimpleName node= fOriginalNode;
-		ASTRewrite rewrite;
+		
 		ASTNode newTypeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		if (newTypeDecl != null) {
-			rewrite= new ASTRewrite(astRoot);
 		} else {
 			astRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
-			rewrite= new ASTRewrite(astRoot);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 			fIsInDifferentCU= true;
 		}
 		
 		if (newTypeDecl != null) {
+			ASTRewrite rewrite= new ASTRewrite(newTypeDecl);
+			
 			AST ast= newTypeDecl.getAST();
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(node.getIdentifier()));
@@ -171,8 +174,9 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			decls.add(findInsertIndex(decls, node.getStartPosition()), newDecl);
 			
 			rewrite.markAsInserted(newDecl);
+			return rewrite;
 		}
-		return rewrite;
+		return null;
 	}
 	
 	private int findInsertIndex(List decls, int currPos) {

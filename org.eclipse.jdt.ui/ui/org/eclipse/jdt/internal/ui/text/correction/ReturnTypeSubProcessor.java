@@ -79,12 +79,11 @@ public class ReturnTypeSubProcessor {
 	public static void addMethodWithConstrNameProposals(ICorrectionContext context, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 	
-		CompilationUnit astRoot= context.getASTRoot();
 		ASTNode selectedNode= context.getCoveringNode();
 		if (selectedNode instanceof MethodDeclaration) {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			ASTRewrite rewrite= new ASTRewrite(declaration);
 			rewrite.markAsRemoved(declaration.getReturnType());
 			
 			ReturnStatementCollector collector= new ReturnStatementCollector();
@@ -122,7 +121,7 @@ public class ReturnTypeSubProcessor {
 				}
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;   
 				
-				ASTRewrite rewrite= new ASTRewrite(astRoot);
+				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
 				
 				if (methodDeclaration.isConstructor()) {
@@ -144,7 +143,7 @@ public class ReturnTypeSubProcessor {
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
 			}
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			ASTRewrite rewrite= new ASTRewrite(decl);
 			rewrite.markAsRemoved(returnStatement);
 			
 			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.removereturn.description"); //$NON-NLS-1$	
@@ -174,7 +173,7 @@ public class ReturnTypeSubProcessor {
 
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
 
-			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
 			AST ast= astRoot.getAST();
 
 			Type type;
