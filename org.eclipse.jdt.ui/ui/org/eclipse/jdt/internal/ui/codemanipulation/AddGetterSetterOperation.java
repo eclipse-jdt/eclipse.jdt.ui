@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -38,6 +39,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	private boolean fSkipAllFinalSetters;
 	private boolean fSkipAllExisting;
 	
+	private String[] fNamePrefixes;
+	private String[] fNameSuffixes;
+	
 	
 	/**
 	 * Creates the operation.
@@ -47,11 +51,13 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * @param skipExistingQuery Callback to ask if setter / getters that already exist can be skipped.
 	 *        Argument of the query is the existing method. <code>null</code> is a valid input and stands for skip all.
 	 */
-	public AddGetterSetterOperation(IField[] fields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
+	public AddGetterSetterOperation(IField[] fields, String[] prefixes, String[] suffixes, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery) {
 		super();
 		fFields= fields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
+		fNamePrefixes= prefixes;
+		fNameSuffixes= suffixes;
 		
 		fCreatedAccessors= new ArrayList();
 	}
@@ -60,22 +66,39 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	 * The policy to evaluate the base name (no 'set'/'get' of the accessor.
 	 */
 	private String evalAccessorName(String fieldname) {
-		if (fieldname.length() > 0) {
-			char firstLetter= fieldname.charAt(0);			
-			if (!Character.isUpperCase(firstLetter)) {
-				if (fieldname.length() > 1) {
-					char secondLetter= fieldname.charAt(1);
-					if (Character.isUpperCase(secondLetter)) {
-						return fieldname.substring(1);
-					}
-					if (firstLetter == '_') {
-						return String.valueOf(Character.toUpperCase(secondLetter)) + fieldname.substring(2);
+		String name= fieldname;
+		int bestLength= 0;
+		if (fNamePrefixes != null) {
+			for (int i= 0; i < fNamePrefixes.length; i++) {
+				String curr= fNamePrefixes[i];
+				if (fieldname.startsWith(curr)) {
+					int currLen= curr.length();
+					if (bestLength < currLen && fieldname.length() != currLen) {
+						String cand= fieldname.substring(currLen);
+						if (JavaConventions.validateFieldName(cand).isOK()) {
+							bestLength= currLen;
+							name= cand;
+						}
 					}
 				}
-				return String.valueOf(Character.toUpperCase(firstLetter)) + fieldname.substring(1);
 			}
 		}
-		return fieldname;
+		if (fNameSuffixes != null) {
+			for (int i= 0; i < fNameSuffixes.length; i++) {
+				String curr= fNameSuffixes[i];
+				if (fieldname.endsWith(curr)) {
+					int currLen= curr.length();
+					if (bestLength < currLen && fieldname.length() != currLen) {
+						String cand= fieldname.substring(0, fieldname.length() - currLen);
+						if (JavaConventions.validateFieldName(cand).isOK()) {
+							bestLength= currLen;
+							name= cand;
+						}
+					}
+				}
+			}
+		}			
+		return name;
 	}
 	
 	/**
@@ -85,7 +108,10 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		if (accessorName.length() > 0) {
 			char firstLetter= accessorName.charAt(0);
 			if (Character.isUpperCase(firstLetter)) {
-				return String.valueOf(Character.toLowerCase(firstLetter)) + accessorName.substring(1);
+				accessorName= String.valueOf(Character.toLowerCase(firstLetter)) + accessorName.substring(1);
+				if (!JavaConventions.validateFieldName(accessorName).isOK()) {
+					accessorName= "arg";
+				}
 			}
 		}
 		return accessorName;

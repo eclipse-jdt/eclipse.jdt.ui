@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
@@ -121,7 +122,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 		}
 		ArrayList res= new ArrayList();
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
-		StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, res, imports);
+		StubUtility.evalUnimplementedMethods(fDeclaringType, hierarchy, true, CodeGenerationPreferencePage.getGenStubOptions(), res, imports);
 		
 		for (int i= 0; i < res.size(); i++) {
 			buf.append((String) res.get(i));

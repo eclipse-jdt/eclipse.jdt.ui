@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.ui.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
@@ -92,8 +93,10 @@ public class AddGetterSetterAction extends Action {
 			}
 			IRequestQuery skipSetterForFinalQuery= skipSetterForFinalQuery();
 			IRequestQuery skipReplaceQuery= skipReplaceQuery();
+			String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
+			String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
 		
-			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, skipSetterForFinalQuery, skipReplaceQuery);
+			AddGetterSetterOperation op= new AddGetterSetterOperation(workingCopyFields, prefixes, suffixes, skipSetterForFinalQuery, skipReplaceQuery);
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
 			dialog.run(false, true, new WorkbenchRunnableWrapper(op));
 		

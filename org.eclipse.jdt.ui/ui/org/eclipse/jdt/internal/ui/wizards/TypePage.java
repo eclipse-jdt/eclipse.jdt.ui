@@ -8,13 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -22,6 +15,11 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -55,6 +53,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -1282,14 +1281,15 @@ public abstract class TypePage extends ContainerPage {
 	protected String[] constructInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		List newMethods= new ArrayList();
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
+		int codeGenOptions= CodeGenerationPreferencePage.getGenStubOptions();
 		if (doConstructors) {
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
-				StubUtility.evalConstructors(type, superclass, newMethods, imports);
+				StubUtility.evalConstructors(type, superclass, codeGenOptions, newMethods, imports);
 			}
 		}
 		if (doUnimplementedMethods) {
-			StubUtility.evalUnimplementedMethods(type, hierarchy, false, newMethods, imports);
+			StubUtility.evalUnimplementedMethods(type, hierarchy, false, codeGenOptions, newMethods, imports);
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
 		

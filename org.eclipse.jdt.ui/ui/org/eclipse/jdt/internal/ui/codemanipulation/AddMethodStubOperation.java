@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
@@ -103,6 +104,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 			
 			String lineDelim= StubUtility.getLineDelimiterUsed(fType);
 			int indent= StubUtility.getIndentUsed(fType) + 1;
+			int options= CodeGenerationPreferencePage.getGenStubOptions();
+			if (fType.isClass() && !Flags.isAbstract(fType.getFlags())) {
+				options |= StubUtility.GENSTUB_CREATEBODY;
+			}
 			
 			ITypeHierarchy typeHierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			
@@ -121,7 +126,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 					IMethod overwrittenMethod= JavaModelUtil.findMethodImplementationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
 					if (overwrittenMethod == null) {
 						// create method without super call
-						content= StubUtility.genStub(fType, curr, false, false, imports);
+						content= StubUtility.genStub(fType.getElementName(), curr, options, imports);
 					} else {
 						int flags= overwrittenMethod.getFlags();
 						if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {
@@ -131,8 +136,10 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 							}
 						}
 						boolean callSuper= overwrittenMethod.getDeclaringType().isClass() && !Flags.isAbstract(overwrittenMethod.getFlags());	
+						int newOptions= options | StubUtility.GENSTUB_OVERWRITES | (callSuper ? StubUtility.GENSTUB_CALLSUPER : 0);
+						
 						IMethod declaration= JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
-						content= StubUtility.genStub(fType, declaration, true, callSuper, imports);	
+						content= StubUtility.genStub(fType.getElementName(), declaration, newOptions, imports);	
 					}
 					IJavaElement sibling= null;
 					IMethod existing= JavaModelUtil.findMethod(curr.getElementName(), curr.getParameterTypes(), curr.isConstructor(), existingMethods);

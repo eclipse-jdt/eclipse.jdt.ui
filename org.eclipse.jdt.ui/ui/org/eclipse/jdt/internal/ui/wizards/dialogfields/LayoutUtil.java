@@ -80,7 +80,7 @@ public class LayoutUtil {
 	}
 	
 	/**
-	 * Sets the span of a control. Assumes that MGriddata is used.
+	 * Sets the span of a control. Assumes that MGridData is used.
 	 */
 	public static void setHorizontalSpan(Control control, int span) {
 		Object ld= control.getLayoutData();
@@ -94,12 +94,22 @@ public class LayoutUtil {
 	}	
 
 	/**
-	 * Sets the span of a control. Assumes that MGriddata is used.
+	 * Sets the width hint of a control. Assumes that MGridData is used.
 	 */
 	public static void setWidthHint(Control control, int widthHint) {
 		Object ld= control.getLayoutData();
 		if (ld instanceof MGridData) {
 			((MGridData)ld).widthHint= widthHint;
+		}
+	}
+	
+	/**
+	 * Sets the horizontal indent of a control. Assumes that MGridData is used.
+	 */
+	public static void setHorizontalIndent(Control control, int horizontalIndent) {
+		Object ld= control.getLayoutData();
+		if (ld instanceof MGridData) {
+			((MGridData)ld).horizontalIndent= horizontalIndent;
 		}
 	}	
 

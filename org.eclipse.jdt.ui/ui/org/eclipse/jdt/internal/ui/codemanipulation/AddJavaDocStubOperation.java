@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.util.DocumentManager;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
@@ -57,7 +58,8 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		StringBuffer buf= new StringBuffer();
 		IMethod inheritedMethod= JavaModelUtil.findMethodDeclarationInHierarchy(fLastTypeHierarchy, meth.getElementName(), meth.getParameterTypes(), meth.isConstructor());
 		if (inheritedMethod != null) {
-			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), buf);
+			boolean nonJavaDocComments= CodeGenerationPreferencePage.doNonJavaDocSeeComments();
+			StubUtility.genJavaDocSeeTag(inheritedMethod.getDeclaringType().getElementName(), inheritedMethod.getElementName(), inheritedMethod.getParameterTypes(), nonJavaDocComments, buf);
 		} else {
 			String desc= "Method " + meth.getElementName();
 			StubUtility.genJavaDocStub(desc, meth.getParameterNames(), meth.getReturnType(), meth.getExceptionTypes(), buf);

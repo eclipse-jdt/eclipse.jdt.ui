@@ -316,6 +316,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page name="%codeGenerationPreferencePageName"
+		id = "org.eclipse.jdt.ui.preferences.CodeGenerationPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>	
 </extension>
 
 <extension
@@ -483,7 +488,7 @@
 	point="org.eclipse.ui.preferencePages">
 	<page name="%Refactoring.BasePreferencePage.name"
 		id="org.eclipse.jdt.ui.preferences.RefactoringPreferencePage"
-		class="org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage"
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
 </extension>

@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 
 /**
@@ -56,7 +58,7 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), prefOrder, threshold, true);
 			
-			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, toImplement, imports);
+			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, CodeGenerationPreferencePage.getGenStubOptions(), toImplement, imports);
 			
 			int nToImplement= toImplement.size();
 			ArrayList createdMethods= new ArrayList(nToImplement);

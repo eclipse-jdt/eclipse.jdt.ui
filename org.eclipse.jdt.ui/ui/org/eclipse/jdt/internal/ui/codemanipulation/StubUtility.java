@@ -44,34 +44,50 @@ import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class StubUtility {
-
+	
+	
+	/**
+	 * If set a method body will be created
+	 */	
+	public static final int GENSTUB_CREATEBODY= 1 << 0;
+	
+	/**
+	 * If set, a super call is added to the body
+	 */
+	public static final int GENSTUB_CALLSUPER= 1 << 1;
+	
+	/**
+	 * If set, the new method overwrites the given method (the comment contains this info)
+	 */	
+	public static final int GENSTUB_OVERWRITES= 1 << 2;
+	
+	/**
+	 * If set, JavaDoc comments are generated
+	 */		
+	public static final int GENSTUB_COMMENTS = 1 << 3;
+	
+	/**
+	 * If set, overwriten methods get a non-JavaDoc comment
+	 */			
+	public static final int GENSTUB_NONJAVADOC_COMMENTS = 1 << 4;
+	
 
 	/**
-	 * Generates a stub. Given a template method, a stub with the same signature
-	 * will be constructed so it can be added to a type.
-	 * @param parenttype The type to which the method will be added to
-	 * @param method A method template (method belongs to different type than the parent)
-	 * @param callSuper If set a super call will be added to the method body
-	 * @param addSeeTag A see tag to the given method is generated in the java doc comment.
-	 * @param imports Imports required by the sub are added to the imports structure
-	 * @throws JavaModelException
-	 */
-	public static String genStub(IType parenttype, IMethod method, boolean callSuper, boolean addSeeTag, IImportsStructure imports) throws JavaModelException {
-		return  genStub(parenttype.getElementName(), parenttype.isInterface(), method, callSuper, addSeeTag, imports);
-	}
+	 *  Options dealing with comments
+	 */	
+	public static final int COMMENTS_OPTIONS = GENSTUB_COMMENTS | GENSTUB_NONJAVADOC_COMMENTS;
+
 
 	/**
 	 * Generates a stub. Given a template method, a stub with the same signature
 	 * will be constructed so it can be added to a type.
 	 * @param destTypeName The name of the type to which the method will be added to (Used for the constructor)
-	 * @param createBody Specifies if a method body will be added. Else the method is left abstract.
 	 * @param method A method template (method belongs to different type than the parent)
-	 * @param callSuper If set a super call will be added to the method body
-	 * @param addSeeTag A see tag to the given method is generated in the java doc comment.
+	 * @param options Options as defined abouve (GENSTUB_*)
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */
-	public static String genStub(String destTypeName, boolean createBody, IMethod method, boolean callSuper, boolean addSeeTag, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(String destTypeName, IMethod method, int options, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -80,21 +96,24 @@ public class StubUtility {
 		String retTypeSig= method.getReturnType();
 		
 		int lastParam= paramTypes.length -1;		
-		if (method.isConstructor()) {
-			String desc= "Constructor for " + destTypeName; //$NON-NLS-1$
-			genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
-		} else {			
-			// java doc
-			if (addSeeTag) {
-				genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, buf);
-			} else {
-				// generate a default java doc comment
-				String desc= "Method " + method.getElementName(); //$NON-NLS-1$
-				genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
+		
+		if (isSet(options, GENSTUB_COMMENTS)) {
+			if (method.isConstructor()) {
+				String desc= "Constructor for " + destTypeName; //$NON-NLS-1$
+				genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
+			} else {			
+				// java doc
+				if (isSet(options, GENSTUB_OVERWRITES)) {
+					genJavaDocSeeTag(declaringtype.getElementName(), method.getElementName(), paramTypes, isSet(options, GENSTUB_NONJAVADOC_COMMENTS),  buf);
+				} else {
+					// generate a default java doc comment
+					String desc= "Method " + method.getElementName(); //$NON-NLS-1$
+					genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
+				}
 			}
-		}		
+		}
 		int flags= method.getFlags();
-		if (Flags.isPublic(flags) || (declaringtype.isInterface() && createBody)) {
+		if (Flags.isPublic(flags) || (declaringtype.isInterface() && isSet(options, GENSTUB_CREATEBODY))) {
 			buf.append("public "); //$NON-NLS-1$
 		} else if (Flags.isProtected(flags)) {
 			buf.append("protected "); //$NON-NLS-1$
@@ -154,11 +173,11 @@ public class StubUtility {
 				}
 			}
 		}
-		if (!createBody) {
+		if (!isSet(options, GENSTUB_CREATEBODY)) {
 			buf.append(";\n\n"); //$NON-NLS-1$
 		} else {
 			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (!callSuper) {
+			if (!isSet(options, GENSTUB_CALLSUPER)) {
 				if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 					buf.append('\t');
 					if (!isBuiltInType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
@@ -193,6 +212,10 @@ public class StubUtility {
 		}
 		return buf.toString();
 	}
+	
+	private static boolean isSet(int options, int flag) {
+		return (options & flag) != 0;
+	}	
 
 	private static boolean isBuiltInType(String typeName) {
 		char first= Signature.getElementType(typeName).charAt(0);
@@ -229,10 +252,13 @@ public class StubUtility {
 	/**
 	 * Generates a '@see' tag to the defined method.
 	 */
-	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, StringBuffer buf) {
-		// create a @see link 
-		buf.append("/*\n"); //$NON-NLS-1$
-		buf.append(" * @see "); //$NON-NLS-1$
+	public static void genJavaDocSeeTag(String declaringTypeName, String methodName, String[] paramTypes, boolean nonJavaDocComment, StringBuffer buf) {
+		// create a @see link
+		buf.append("/*");
+		if (!nonJavaDocComment) {
+			buf.append('*');
+		}
+		buf.append("\n * @see "); //$NON-NLS-1$
 		buf.append(declaringTypeName);
 		buf.append('#'); 
 		buf.append(methodName);
@@ -273,12 +299,13 @@ public class StubUtility {
 	 * @param newMethods The resulting source for the created constructors (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalConstructors(IType type, IType supertype, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static void evalConstructors(IType type, IType supertype, int commentOptions, List newMethods, IImportsStructure imports) throws JavaModelException {
 		IMethod[] methods= supertype.getMethods();
+		int options= commentOptions | GENSTUB_CALLSUPER | GENSTUB_CREATEBODY;
 		for (int i= 0; i < methods.length; i++) {
 			IMethod curr= methods[i];
 			if (curr.isConstructor() && JavaModelUtil.isVisible(curr, type.getPackageFragment())) {
-				String newStub= genStub(type, methods[i], true, false, imports);
+				String newStub= genStub(type.getElementName(), methods[i], options, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -289,10 +316,11 @@ public class StubUtility {
 	 * Searches for unimplemented methods of a type.
 	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
 	 * evaluation is for the type itself.
+	 * @param commentOptions Options for comment generation (see above)
 	 * @param newMethods The source for the created methods (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, int commentOptions, List newMethods, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();
@@ -324,7 +352,8 @@ public class StubUtility {
 				if (desc == null) {
 					desc= curr;
 				}
-				String newStub= genStub(type.getElementName(), true, desc, false, true, imports);
+				int options= (commentOptions & COMMENTS_OPTIONS) | GENSTUB_OVERWRITES | GENSTUB_CREATEBODY;
+				String newStub= genStub(type.getElementName(), desc, options, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -342,7 +371,8 @@ public class StubUtility {
 					if (impl == null || curr.getExceptionTypes().length < impl.getExceptionTypes().length) {
 						// implement an interface method when it does not exist in the hierarchy
 						// or when it throws less exceptions that the implemented
-						String newStub= genStub(type.getElementName(), true, curr, false, true, imports);
+						int options= (commentOptions & COMMENTS_OPTIONS) | GENSTUB_OVERWRITES | GENSTUB_CREATEBODY;
+						String newStub= genStub(type.getElementName(), curr, options, imports);
 						newMethods.add(newStub);
 						allMethods.add(curr);
 					}
