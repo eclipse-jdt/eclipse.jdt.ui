@@ -4,15 +4,16 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.core.dom.SimpleName;
+
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 final class EncapsulateReadAccess extends SimpleTextEdit {
 
-	public EncapsulateReadAccess(String getter, SingleNameReference node) {
-		this(getter, node.sourceStart, node.sourceEnd - node.sourceStart + 1);
+	public EncapsulateReadAccess(String getter, SimpleName node) {
+		this(getter, node.getStartPosition(), node.getLength());
 	}
 	
 	public EncapsulateReadAccess(String getter, int offset, int length) {

@@ -17,6 +17,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -49,20 +52,14 @@ public class SefTests extends AbstractSelectionTestCase {
 		return Character.toUpperCase(name.charAt(0)) + name.substring(1) + ".java";
 	}	
 	
-	private IPackageFragment getObjectPackage() throws JavaModelException {
-		return fgTestSetup.getObjectPackage();
- 	}
-	
-	private IPackageFragment getBasePackage() throws JavaModelException {
-		return fgTestSetup.getBasePackage();
- 	}
-	
 	protected void performTest(IPackageFragment packageFragment, String id, String outputFolder, String fieldName) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, 4);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		settings.fieldPrefixes= new String[0];
+		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		assertTrue(!status.hasFatalError());
 		IChange change= refactoring.createChange(pm);
@@ -75,6 +72,17 @@ public class SefTests extends AbstractSelectionTestCase {
 		String source= unit.getSource();
 		String out= getProofedContent(outputFolder, id);
 		assertTrue(compareSource(source, out));
+	}
+	
+	protected void performInvalidTest(IPackageFragment packageFragment, String id, String fieldName) throws Exception {
+		ICompilationUnit unit= createCU(packageFragment, id);
+		IField field= getField(unit, fieldName);
+		assertNotNull(field);
+		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		settings.fieldPrefixes= new String[0];
+		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
+		RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
+		assertTrue(status.hasError());
 	}	
 	
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
@@ -89,8 +97,52 @@ public class SefTests extends AbstractSelectionTestCase {
 		return result;
 	}
 
+	private IPackageFragment getObjectPackage() throws JavaModelException {
+		return fgTestSetup.getObjectPackage();
+ 	}
+	
+	private IPackageFragment getBasePackage() throws JavaModelException {
+		return fgTestSetup.getBasePackage();
+ 	}
+	
+	private IPackageFragment getInvalidPackage() throws JavaModelException {
+		return fgTestSetup.getInvalidPackage();
+	}
+	
 	private void objectTest(String fieldName) throws Exception {
 		performTest(getObjectPackage(), getName(), "object_out", fieldName);
+	}
+	
+	private void baseTest(String fieldName) throws Exception {
+		performTest(getBasePackage(), getName(), "base_out", fieldName);
+	}
+	
+	private void invalidTest(String fieldName) throws Exception {
+		performInvalidTest(getInvalidPackage(), getName(), fieldName);
+	}
+	
+	//=====================================================================================
+	// Invalid
+	//=====================================================================================
+	
+	public void testPostfixExpression() throws Exception {
+		invalidTest("field");
+	}
+	
+	//=====================================================================================
+	// Primitiv Data Test
+	//=====================================================================================
+	
+	public void testPrefixInt() throws Exception {
+		baseTest("field");
+	}
+	
+	public void testPrefixBoolean() throws Exception {
+		baseTest("field");
+	}
+	
+	public void testPostfixInt() throws Exception {
+		baseTest("field");
 	}
 	
 	//=====================================================================================
@@ -115,5 +167,33 @@ public class SefTests extends AbstractSelectionTestCase {
 	
 	public void testArrayRead() throws Exception {
 		objectTest("field");
-	}	
+	}
+	
+	public void testSetterInAssignment() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testSetterInExpression() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testSetterInInitialization() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testSetterAsReceiver() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testCompoundWrite() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testCompoundWrite2() throws Exception {
+		objectTest("field");
+	}
+	
+	public void testCompoundWrite3() throws Exception {
+		objectTest("field");
+	}
 }

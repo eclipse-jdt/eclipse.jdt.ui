@@ -37,9 +37,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 	
 	private boolean fSkipAllFinalSetters;
 	private boolean fSkipAllExisting;
-	
-	private String[] fNamePrefixes;
-	private String[] fNameSuffixes;
+
+	private NameProposer fNameProposer;	
 	private CodeGenerationSettings fSettings;
 	
 	
@@ -56,63 +55,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		fFields= fields;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
-		fNamePrefixes= prefixes;
-		fNameSuffixes= suffixes;
 		fSettings= settings;
-		
+		fNameProposer= new NameProposer(prefixes, suffixes);
 		fCreatedAccessors= new ArrayList();
-	}
-	
-	/**
-	 * The policy to evaluate the base name (setBasename / getBasename)
-	 */
-	private String evalAccessorName(String fieldname) {
-		String name= fieldname;
-		int bestLength= 0;
-		if (fNamePrefixes != null) {
-			for (int i= 0; i < fNamePrefixes.length; i++) {
-				String curr= fNamePrefixes[i];
-				if (fieldname.startsWith(curr)) {
-					int currLen= curr.length();
-					if (bestLength < currLen && fieldname.length() != currLen) {
-						name= fieldname.substring(currLen);
-						bestLength= currLen;
-					}
-				}
-			}
-		}
-		if (fNameSuffixes != null) {
-			for (int i= 0; i < fNameSuffixes.length; i++) {
-				String curr= fNameSuffixes[i];
-				if (fieldname.endsWith(curr)) {
-					int currLen= curr.length();
-					if (bestLength < currLen && fieldname.length() != currLen) {
-						name= fieldname.substring(0, fieldname.length() - currLen);
-						bestLength= currLen;
-					}
-				}
-			}
-		}
-		if (name.length() > 0 && Character.isLowerCase(name.charAt(0))) {
-			name= String.valueOf(Character.toUpperCase(name.charAt(0))) + name.substring(1);
-		}
-		return name;
-	}
-	
-	/**
-	 * Creates the name of the parameter from an accessor name.
-	 */	
-	private String getArgumentName(String accessorName) {
-		if (accessorName.length() > 0) {
-			char firstLetter= accessorName.charAt(0);
-			if (Character.isUpperCase(firstLetter)) {
-				accessorName= String.valueOf(Character.toLowerCase(firstLetter)) + accessorName.substring(1);
-				if (!JavaConventions.validateFieldName(accessorName).isOK()) {
-					accessorName= "arg";
-				}
-			}
-		}
-		return accessorName;
 	}
 	
 	/**
@@ -177,8 +122,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			fSkipAllExisting= (fSkipExistingQuery == null);
 	
 			String fieldName= field.getElementName();
-			String accessorName= evalAccessorName(fieldName);
-			String argname= getArgumentName(accessorName);
+			String accessorName= fNameProposer.proposeAccessorName(field);
+			String argname= fNameProposer.proposeArgName(field);
 			
 			boolean isStatic= Flags.isStatic(field.getFlags());
 			boolean isFinal= Flags.isFinal(field.getFlags());

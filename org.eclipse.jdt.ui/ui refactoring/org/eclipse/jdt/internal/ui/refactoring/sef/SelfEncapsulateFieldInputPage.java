@@ -6,6 +6,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.sef;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -20,6 +21,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
@@ -70,17 +72,19 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			}
 		});
 		
-		label= new Label(result, SWT.LEFT);
-		label.setText("&Setting method name");
-		text= new Text(result, SWT.BORDER);
-		text.setText(fRefactoring.getSetterName());
-		layouter.perform(label, text, 1);
-		text.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				fRefactoring.setSetterName(((Text)e.widget).getText());
-				processValidation();
-			}
-		});
+		if (needsModifiers()) {
+			label= new Label(result, SWT.LEFT);
+			label.setText("&Setting method name");
+			text= new Text(result, SWT.BORDER);
+			text.setText(fRefactoring.getSetterName());
+			layouter.perform(label, text, 1);
+			text.addModifyListener(new ModifyListener() {
+				public void modifyText(ModifyEvent e) {
+					fRefactoring.setSetterName(((StyledText)e.widget).getText());
+					processValidation();
+				}
+			});
+		}			
 		
 		// createSeparator(result, layouter);
 		
@@ -133,5 +137,13 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		}
 		setErrorMessage(message);
 		setPageComplete(valid);
+	}
+	
+	private boolean needsModifiers() {
+		try {
+			return !Flags.isFinal(fRefactoring.getField().getFlags());
+		} catch(JavaModelException e) {
+		}
+		return true;
 	}	
 }

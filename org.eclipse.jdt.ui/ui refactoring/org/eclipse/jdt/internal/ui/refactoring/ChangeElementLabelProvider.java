@@ -126,8 +126,13 @@ public class ChangeElementLabelProvider extends LabelProvider {
 	}
 	
 	private String getPath(IFile file) {
-		StringBuffer result= new StringBuffer();
-		return file.getProject().getName() + "/" + file.getParent().getProjectRelativePath().toString();
+		StringBuffer result= new StringBuffer(file.getProject().getName());
+		String projectRelativePath= file.getParent().getProjectRelativePath().toString();
+		if (projectRelativePath.length() > 0) {
+			result.append('/');
+			result.append(projectRelativePath);
+		}
+		return result.toString();
 	}
 	
 	private ChangeElement getParent(TextEditChangeElement element) {

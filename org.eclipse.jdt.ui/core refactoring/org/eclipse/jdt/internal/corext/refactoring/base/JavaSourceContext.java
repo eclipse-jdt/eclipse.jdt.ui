@@ -125,7 +125,8 @@ public abstract class JavaSourceContext extends Context {
 	 * Creates an status entry context for the given compilation unit
 	 * 
 	 * @param cunit the compilation unit for which the context is supposed to be created
-	 * @param range the source range that has caused the error
+	 * @param range the source range that has caused the error or <code>null</code>
+	 *  	if the source range is unknown.
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */

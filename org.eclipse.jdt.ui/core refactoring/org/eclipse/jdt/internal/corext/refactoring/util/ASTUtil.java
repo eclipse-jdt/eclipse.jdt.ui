@@ -4,6 +4,13 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
@@ -19,6 +26,13 @@ public class ASTUtil {
 	
 	//no instances
 	private ASTUtil(){
+	}
+	
+	public static boolean needsParenthesis(Expression expression) {
+		return expression instanceof InfixExpression ||
+			expression instanceof ConditionalExpression ||
+			expression instanceof PrefixExpression ||
+			expression instanceof PostfixExpression;
 	}
 	
 	public static int getStart(long position){

@@ -10,6 +10,9 @@ public class JavaPreferencesSettings  {
 		res.createNonJavadocComments= CodeGenerationPreferencePage.doNonJavaDocSeeComments();
 		res.importOrder= ImportOrganizePreferencePage.getImportOrderPreference();
 		res.importThreshold= ImportOrganizePreferencePage.getImportNumberThreshold();
+		res.fieldPrefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
+		res.fieldSuffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
+		res.tabWidth= CodeFormatterPreferencePage.getTabSize();
 		return res;
 	}
 	

@@ -28,6 +28,7 @@ public class SefTestSetup extends TestSetup {
 
 	private IPackageFragment fBaseTypes;
 	private IPackageFragment fObjectTypes;
+	private IPackageFragment fInvalid;
 	
 	public SefTestSetup(Test test) {
 		super(test);
@@ -51,6 +52,7 @@ public class SefTestSetup extends TestSetup {
 		
 		fBaseTypes= getRoot().createPackageFragment("base_in", true, null);
 		fObjectTypes= getRoot().createPackageFragment("object_in", true, null);
+		fInvalid= getRoot().createPackageFragment("invalid", true, null);
 	}
 
 	protected void tearDown() throws Exception {
@@ -64,6 +66,10 @@ public class SefTestSetup extends TestSetup {
 
 	public IPackageFragment getObjectPackage() {
 		return fObjectTypes;
+	}	
+
+	public IPackageFragment getInvalidPackage() {
+		return fInvalid;
 	}	
 }
 

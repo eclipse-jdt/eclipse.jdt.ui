@@ -11,7 +11,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -24,7 +24,7 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 	
 	public void run() {
 		IField field= (IField)SelectionUtil.getSingleElement(getStructuredSelection());
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, CodeFormatterPreferencePage.getTabSize());
+		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, JavaPreferencesSettings.getCodeGenerationSettings());
 		try  {	
 			new RefactoringStarter().activate(
 				refactoring, 

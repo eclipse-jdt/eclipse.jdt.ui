@@ -7,6 +7,11 @@ public class CodeGenerationSettings {
 	
 	public String[] importOrder= new String[0];
 	public int importThreshold= 99;
+	
+	public String[] fieldPrefixes;
+	public String[] fieldSuffixes;
+	
+	public int tabWidth;
 
 }
 

@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.ASTNode;
 
 public class SourceRange implements ISourceRange{
 	
@@ -19,6 +20,10 @@ public class SourceRange implements ISourceRange{
 		Assert.isTrue(length >= 0);
 		fLength= length;
 		fOffset= offset;
+	}
+	
+	public SourceRange(ASTNode node) {
+		this(node.getStartPosition(), node.getLength());
 	}
 	
 	/*

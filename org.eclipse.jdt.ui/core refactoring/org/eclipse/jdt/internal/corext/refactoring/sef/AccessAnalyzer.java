@@ -4,179 +4,117 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Assignment;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.BinaryExpression;
-import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.NameReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
-import org.eclipse.jdt.internal.compiler.ast.Reference;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
-import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
+import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.ParentProvider;
 
-public class AccessAnalyzer extends ParentProvider {
-	
-	private char[] fFieldIdentifier;
+class AccessAnalyzer extends ASTVisitor {
+
+	private ICompilationUnit fCUnit;
+	private BindingIdentifier fFieldIdentifier;	
 	private String fGetter;
 	private String fSetter;
 	private TextChange fChange;
 	private RefactoringStatus fStatus;
+	private boolean fSetterMustReturnValue;
 
 	private static final String READ_ACCESS= "Encapsulate read access";
 	private static final String WRITE_ACCESS= "Encapsulate write access";
+	private static final String PREFIX_ACCESS= "Encapsulate prefix access";
+	private static final String POSTFIX_ACCESS= "Encapsulate postfix access";
 		
-	public AccessAnalyzer( SelfEncapsulateFieldRefactoring refactoring, FieldDeclaration field, TextChange change) {
-		fFieldIdentifier= ASTUtil.getIdentifier(field.binding);
-		Assert.isNotNull(fFieldIdentifier);
+	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, BindingIdentifier identifier, TextChange change) {
+		Assert.isNotNull(refactoring);
+		Assert.isNotNull(unit);
+		Assert.isNotNull(identifier);
+		Assert.isNotNull(change);
+		fCUnit= unit;
+		fFieldIdentifier= identifier;
 		fChange= change;
-		Assert.isNotNull(fChange);
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
 		fStatus= new RefactoringStatus();
+	}
+
+	public boolean getSetterMustReturnValue() {
+		return fSetterMustReturnValue;
 	}
 
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
 	
-	public boolean visit(Assignment node, BlockScope scope) {
-		if (node.lhs instanceof SingleNameReference) {
-			if (getFieldBinding(node.lhs) != null) {	
-				handleSingleWriteAccess(node, scope);
-				return false;
-			}
-		} else if (node.lhs instanceof QualifiedNameReference) {
-			QualifiedNameReference qnr= (QualifiedNameReference)node.lhs;
-			return handleQualifiedWriteAccess(node, scope, qnr);
-		}
-		return true;
+	public boolean visit(Assignment node) {
+		if (!fFieldIdentifier.matches(resolveBinding(node.getLeftHandSide())))
+			return true;
+			
+		checkParent(node);
+		fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fGetter, fSetter, node));
+		node.getRightHandSide().accept(this);
+		return false;
 	}
 
-	/*
-	 * Handles write access of kind field= value;
-	 */
-	private void handleSingleWriteAccess(Assignment node, BlockScope scope) {
-		if (checkParent(node))
-			fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fSetter, node.lhs, node.expression));
-		node.expression.traverse(this, scope);
+	public boolean visit(SimpleName node) {
+		if (fFieldIdentifier.matches(node.resolveBinding()))
+			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
+		return true;
 	}
-	 
-	/*
-	 * Handles write access of kind a.field= value
-	 */
-	private boolean handleQualifiedWriteAccess(Assignment node, BlockScope scope, QualifiedNameReference qnr) {
-		FieldBinding binding;
-		int index= qnr.otherBindings.length - 1;
-		binding= qnr.otherBindings[index];
-		if (considerFieldBinding(binding)) {
-			if (checkParent(node)) {
-				int offset= getOffset(qnr, index);
-				fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(
-					fSetter, offset, node.expression.sourceStart - offset, node.expression));
-			}
-			node.expression.traverse(this, scope);
-			return false;
-		} else {
+	
+	public boolean visit(PrefixExpression node) {
+		if (!fFieldIdentifier.matches(resolveBinding(node.getOperand())))
 			return true;
-		}
+		
+		PrefixExpression.Operator operator= node.getOperator();	
+		if (operator != operator.INCREMENT && operator != operator.DECREMENT)
+			return true;
+			
+		checkParent(node);
+		fChange.addTextEdit(PREFIX_ACCESS, new EncapsulatePrefixAccess(fGetter, fSetter, node));
+		return false;
 	}
+	
+	public boolean visit(PostfixExpression node) {
+		if (!fFieldIdentifier.matches(resolveBinding(node.getOperand())))
+			return true;
 
-	private boolean checkParent(Assignment assignment) {
-		AstNode parent= getParent();
-		if (parent instanceof Assignment) {
-			// case t= a.text= "d";
-			fStatus.addError("Cannot encapsulate write access. It is part of an assignment statement.");
+		ASTNode parent= node.getParent();
+		if (!(parent instanceof ExpressionStatement)) {
+			fStatus.addError("Cannot convert postfix expression. It is used inside another expression.", 
+				JavaSourceContext.create(fCUnit, new SourceRange(node)));
 			return false;
-		} else if (parent instanceof AbstractVariableDeclaration) { 
-			AbstractVariableDeclaration declaration= (AbstractVariableDeclaration)parent;
-			if (declaration.initialization == assignment) {
-				// caseString  t= a.text= "d";
-				fStatus.addError("Cannot encapsulate write access. It is part of a variable declaration's initializer.");
-				return false;
-			}
-		} else if (parent instanceof BinaryExpression) {
-			// case if ((a.text= "d") == "d")
-			fStatus.addError("Cannot encapsulate write access. It is part of an expression.");
-			return false;
-		} else if (parent instanceof MessageSend) {
-			// case (a.text= "d").length();
-			MessageSend messageSend= (MessageSend)parent;
-			if (messageSend.receiver == assignment) {
-				fStatus.addError("Cannot encapsulate write access. Is is part of a message send's receiver.");
-				return false;
-			}
 		}
-		return true;
+		fChange.addTextEdit(POSTFIX_ACCESS, new EncapsulatePostfixAccess(fGetter, fSetter, node));
+		return false;
 	}
 	
-	public boolean visit(SingleNameReference node, BlockScope scope) {
-		FieldBinding binding= getFieldBinding(node);
-		if (binding == null)
-			return true;
-		
-		fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
-		return true;
+	private void checkParent(ASTNode node) {
+		ASTNode parent= node.getParent();
+		if (!(parent instanceof ExpressionStatement))
+			fSetterMustReturnValue= true;
 	}
-	
-	public boolean visit(QualifiedNameReference node, BlockScope scope) {
-		FieldBinding binding= getFieldBinding(node);
-		if (binding != null)
-			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node.sourceStart, node.tokens[0].length));
-	
-		FieldBinding[] others= node.otherBindings;
-		if (others == null)		// Access to static fields like System.err. In this case other binding is null.
-			return true;
-			
-		int start= node.sourceStart + node.tokens[0].length + 1;
-		for (int i= 0; i < others.length; i++) {
-			FieldBinding other= others[i];
-			int length= node.tokens[i + 1].length;
-			if (considerFieldBinding(other)) {
-				fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, start, length));
-			}
-			start+=  length + 1;
-		}
 		
-		return true;
-	}
-	
-	private FieldBinding getFieldBinding(Reference reference) {
-		if (! (reference instanceof NameReference))
-			return null;
-		Binding binding= ((NameReference)reference).binding;
-		if (!(binding instanceof FieldBinding))
-			return null;
-			
-		FieldBinding result= (FieldBinding)binding;
-		
-		if (considerFieldBinding(result))
-			return result;
-			
+	private IBinding resolveBinding(Expression expression) {
+		if (expression instanceof SimpleName)
+			return ((SimpleName)expression).resolveBinding();
+		else if (expression instanceof QualifiedName)
+			return ((QualifiedName)expression).resolveBinding();
 		return null;
-	}
-	
-	private boolean considerFieldBinding(FieldBinding binding) {
-		if (binding.declaringClass == null) // case array.length
-			return false;
-		return CharOperation.equals(fFieldIdentifier, ASTUtil.getIdentifier(binding));
-	}
-	
-	private int getOffset(QualifiedNameReference node, int index) {
-		int offset= node.sourceStart;
-		for (int i= 0; i <= index; i++) {		// first token belongs to node itself.
-			offset+= node.tokens[index].length + 1;
-		}
-		return offset;
-	}
+	}	
 }
 
