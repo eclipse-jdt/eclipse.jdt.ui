@@ -5,7 +5,7 @@
 	name="%pluginName"
 	version="2.0.0"
 	class="org.eclipse.jdt.internal.junit.ui.JUnitPlugin"
-	provider-name="Object Technology International, Inc.">
+	provider-name="%providerName">
 
 	<requires>
 		<import plugin="org.eclipse.ui"/>
