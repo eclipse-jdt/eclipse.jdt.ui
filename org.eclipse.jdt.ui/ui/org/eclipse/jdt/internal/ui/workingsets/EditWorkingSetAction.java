@@ -55,6 +55,10 @@ public class EditWorkingSetAction extends Action {
 			fShell= JavaPlugin.getActiveWorkbenchShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
+		if (workingSet == null) {
+			setEnabled(false);
+			return;
+		}
 		IWorkingSetEditWizard wizard= manager.createWorkingSetEditWizard(workingSet);
 		if (wizard == null) {
 			String title= WorkingSetMessages.getString("EditWorkingSetAction.error.nowizard.title"); //$NON-NLS-1$
