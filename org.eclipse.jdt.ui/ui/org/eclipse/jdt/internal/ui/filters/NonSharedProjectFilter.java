@@ -38,7 +38,7 @@ public class NonSharedProjectFilter extends ViewerFilter {
 		if (element instanceof IJavaProject)
 			return isSharedProject(((IJavaProject)element).getProject());
 
-		return false;
+		return true;
 	}
 	
 	private boolean isSharedProject(IProject project) {
