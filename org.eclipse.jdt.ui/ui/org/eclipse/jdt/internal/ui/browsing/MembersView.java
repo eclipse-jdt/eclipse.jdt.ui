@@ -27,6 +27,7 @@ import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.ui.viewsupport.OverrideAdornmentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
@@ -44,7 +45,7 @@ public class MembersView extends JavaBrowsingPart {
 		return new StandardJavaUILabelProvider(
 						StandardJavaUILabelProvider.DEFAULT_TEXTFLAGS,
 						StandardJavaUILabelProvider.DEFAULT_IMAGEFLAGS,
-						StandardJavaUILabelProvider.getAdornmentProviders(true, null)
+						StandardJavaUILabelProvider.getAdornmentProviders(true, new OverrideAdornmentProvider())
 						);
 	}
 
