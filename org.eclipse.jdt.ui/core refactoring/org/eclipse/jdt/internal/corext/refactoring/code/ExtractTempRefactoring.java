@@ -141,8 +141,10 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 			Expression selectedExpression= getSelectedExpression();
 			
-			if (selectedExpression == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression")); //$NON-NLS-1$
+			if (selectedExpression == null){
+				String message= RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression");//$NON-NLS-1$
+				return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, fCu, message);
+			}	
 			pm.worked(1);
 			
 			if (selectedExpression.getStartPosition() != fSelectionStart){ 

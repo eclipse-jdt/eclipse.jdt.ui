@@ -133,8 +133,10 @@ public class InlineTempRefactoring extends Refactoring {
 	private RefactoringStatus checkSelection() throws JavaModelException {
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 		
-		if (fTempDeclaration == null)
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp")); //$NON-NLS-1$
+		if (fTempDeclaration == null){
+			String message= RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp");//$NON-NLS-1$
+			return CodeRefactoringUtil.checkMethodSyntaxErrors(fSelectionStart, fSelectionLength, fCompilationUnitNode, fCu, message);
+		}	
 
 		if (fTempDeclaration.getParent() instanceof FieldDeclaration)
 			return RefactoringStatus.createFatalErrorStatus("Cannot inline fields");
