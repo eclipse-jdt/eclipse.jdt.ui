@@ -307,11 +307,15 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 3))));
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 				
-			if (getGetter() != null && fRenameGetter)
+			if (getGetter() != null && fRenameGetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));
+				result.merge(Checks.checkIfConstructorName(getGetter(), getNewGetterName(), fField.getDeclaringType().getElementName()));
+			}	
 				
-			if (getSetter() != null && fRenameSetter)
+			if (getSetter() != null && fRenameSetter){
 				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getSetter(), getNewSetterName()));
+				result.merge(Checks.checkIfConstructorName(getSetter(), getNewSetterName(), fField.getDeclaringType().getElementName()));
+			}	
 				
 			return result;
 		} finally{
