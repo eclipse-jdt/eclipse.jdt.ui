@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;
+import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.swt.widgets.Text;
 
 public class AddVMDialog extends StatusDialog {
 	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java";
@@ -360,7 +360,7 @@ public class AddVMDialog extends StatusDialog {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrary.getText());
 		dialog.setText("Select the library JAR file for the JRE Installation");
-		dialog.setFilterExtensions(new String[] { "*.zip", "*.jar"});
+		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"});
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fSystemLibrary.setText(newPath);
@@ -370,7 +370,7 @@ public class AddVMDialog extends StatusDialog {
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setFilterPath(fSystemLibrarySource.getText());
 		dialog.setText("Select the JRE library source file");
-		dialog.setFilterExtensions(new String[] { "*.zip", "*.jar"});
+		dialog.setFilterExtensions(new String[] { "*.jar", "*.zip"});
 		String newPath= dialog.open();
 		if  (newPath != null)
 			fSystemLibrarySource.setText(newPath);
@@ -400,6 +400,8 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected void doOkPressed() {
 		IVMInstall vm= getConcernedVM();
+		if (JavaRuntime.getDefaultVMInstall() == null)
+			JavaRuntime.setDefaultVMInstall(vm);
 		vm.setInstallLocation(new File(fJDKRoot.getText()));
 		vm.setName(fVMName.getText());
 		vm.setDebuggerTimeout(getTimeout());

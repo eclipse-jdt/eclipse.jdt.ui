@@ -129,7 +129,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		dialog.setTitle("Add JRE");
 		if (dialog.open() != dialog.OK)
 			return;
-		fVMList.refresh();
+		fVMList.refresh();		updateJREVariables(JavaRuntime.getDefaultVMInstall());
 	}
 	
 	
@@ -156,7 +156,7 @@ public class VMPreferencePage extends PreferencePage implements IWorkbenchPrefer
 		dialog.setTitle("Edit JRE");
 		if (dialog.open() != dialog.OK)
 			return;
-		fVMList.refresh(vm);
+		fVMList.refresh(vm);		if (JavaRuntime.getDefaultVMInstall() == vm)			updateJREVariables(vm);
 	}
 
 	public boolean performOk() {
