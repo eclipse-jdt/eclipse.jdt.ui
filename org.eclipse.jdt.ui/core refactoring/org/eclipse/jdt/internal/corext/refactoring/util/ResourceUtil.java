@@ -7,11 +7,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 public class ResourceUtil {
 	
@@ -60,6 +60,29 @@ public class ResourceUtil {
 	public static IResource getResource(IMember member) throws JavaModelException{
 		Assert.isTrue(!member.isBinary());
 		return getResource(member.getCompilationUnit());
+	}
+
+	public static IResource getResource(Object o){
+		if (o instanceof IResource)
+			return (IResource)o;
+		if (o instanceof IJavaElement)
+			return getResource((IJavaElement)o);
+		return null;	
+	}
+
+	public static IResource getResource(IJavaElement element){
+		if (! element.exists())
+			return null;
+		try {
+			if (element.getCorrespondingResource() != null)
+				return element.getCorrespondingResource();
+			if (element.getElementType() == IJavaElement.COMPILATION_UNIT)	
+				return ResourceUtil.getResource((ICompilationUnit)element);
+			return null;
+		} catch(JavaModelException e) {
+			//no action
+			return null;
+		}	
 	}
 
 }
