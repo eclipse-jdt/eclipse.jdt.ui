@@ -175,10 +175,10 @@ public final class CopyRefactoring2 extends Refactoring{
 			}
 			
 			if (hasElementsSmallerThanCu(javaElements)){
-				if (resources.length != 0 ||
-					ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT) || 
-					hasElementsLargerThanCu(javaElements))
-					return NO;
+				//assertions guaranteed by common parent
+				Assert.isTrue(resources.length == 0);
+				Assert.isTrue(! ReorgUtils2.hasElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT));
+				Assert.isTrue(! hasElementsLargerThanCu(javaElements));
 				return new CopySubCuElementsPolicy(javaElements);
 			}
 			return NO;
