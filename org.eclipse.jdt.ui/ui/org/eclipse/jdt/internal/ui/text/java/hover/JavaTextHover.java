@@ -197,7 +197,9 @@ public class JavaTextHover extends JavaElementHover {
 		if (extensionPoint != null) {
 			IConfigurationElement[] elements= extensionPoint.getConfigurationElements();			
 			for (int i= 0; i < elements.length; i++)
-				fTextHoverSpecifications.add(elements[i]);
+				// ensure that we don't add ourselves to the list
+				if (!"org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover".equals(elements[i].getAttribute("id"))) //$NON-NLS-1$ //$NON-NLS-2$
+					fTextHoverSpecifications.add(elements[i]);
 		}
 		
 		Collections.sort(fTextHoverSpecifications, new ConfigurationElementComparator());
