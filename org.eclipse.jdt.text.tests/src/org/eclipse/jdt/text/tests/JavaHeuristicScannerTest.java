@@ -86,7 +86,11 @@ public class JavaHeuristicScannerTest extends TestCase {
 		fPartitioner.disconnect();
 		fPartitioner= null;
 		fDocument= null;
-	}
+
+		if (JavaCore.getPlugin() != null) {
+			JavaCore.setOptions(JavaCore.getDefaultOptions());
+		}
+}
 
 	public void testPrevIndentationUnit1() {
 		fDocument.set("\tint a;\n" +
