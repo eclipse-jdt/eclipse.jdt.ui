@@ -53,7 +53,7 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private Object fInput;		
 	private boolean fIsEmpty;
 	
-	private int fWidth= 40;
+	private int fWidth= 60;
 	private int fHeight= 18;
 
 	/**
