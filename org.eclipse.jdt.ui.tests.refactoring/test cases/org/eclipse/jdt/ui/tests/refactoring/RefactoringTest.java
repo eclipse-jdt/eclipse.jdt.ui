@@ -156,6 +156,8 @@ public abstract class RefactoringTest extends TestCase {
 	 * @param contents
 	 */
 	protected ICompilationUnit createCU(IPackageFragment pack, String name, String contents) throws Exception {
+		if (pack.getCompilationUnit(name).exists())
+			return pack.getCompilationUnit(name);
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
 		forceIndexing();
