@@ -258,7 +258,6 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	private final static Category fMemberFunctionCategory= new Category(
 		FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.title"), //$NON-NLS-1$
 		new Option [] {
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_opening_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_FIRST_ARGUMENT, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.after_opening_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.before_closing_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.memberfunctions.between_empty_paren")), //$NON-NLS-1$
@@ -270,6 +269,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	private final static Category fMethodCategory= new Category(
 		FormatterMessages.getString("WhiteSpaceTabPage.methods.title"), //$NON-NLS-1$
 		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_METHOD_DECLARATION_OPEN_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_opening_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_comma_in_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.methods.after_comma_in_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.methods.before_comma_in_throws")), //$NON-NLS-1$
@@ -281,6 +281,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 	private final static Category fConstructorCategory= new Category(
 		FormatterMessages.getString("WhiteSpaceTabPage.constructors.title"), //$NON-NLS-1$
 		new Option [] {
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CONSTRUCTOR_DECLARATION_OPEN_PAREN, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_opening_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_comma_in_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_CONSTRUCTOR_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.after_comma_in_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_CONSTRUCTOR_THROWS, FormatterMessages.getString("WhiteSpaceTabPage.constructors.before_comma_in_throws")), //$NON-NLS-1$
@@ -352,7 +353,9 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		FormatterMessages.getString("WhiteSpaceTabPage.calls.title"), //$NON-NLS-1$
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_opening_paren")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_WITHIN_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_opening_before_closing")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_opening_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_MESSAGE_SEND, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_closing_paren")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_MESSAGESEND_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.between_empty_paren")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_MESSAGESEND_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_method_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_MESSAGESEND_ARGUMENTS, FormatterMessages.getString("WhiteSpaceTabPage.calls.after_comma_in_method_args")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_ALLOCATION_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.calls.before_comma_in_alloc")), //$NON-NLS-1$
@@ -576,7 +579,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 		FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.title"), //$NON-NLS-1$
 		new Option [] {
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.before_opening")), //$NON-NLS-1$
-			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPEN_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.after_opening")), //$NON-NLS-1$
+			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.after_opening")), //$NON-NLS-1$
 			new Option(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_PARENTHESIZED_EXPRESSION, FormatterMessages.getString("WhiteSpaceTabPage.parenexpr.before_closing")) //$NON-NLS-1$
 		},
 		"class Example {" + //$NON-NLS-1$

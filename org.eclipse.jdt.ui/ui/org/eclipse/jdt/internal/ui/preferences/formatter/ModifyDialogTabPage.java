@@ -406,6 +406,10 @@ public abstract class ModifyDialogTabPage {
 				// this is the first time
 			}
 		}
+		
+		public void resetFocus() {
+			fDialogSettings.put(PREF_LAST_FOCUS_INDEX, -1);
+		}
 	}
 
 	
@@ -521,6 +525,7 @@ public abstract class ModifyDialogTabPage {
 	 * </ul>
 	 */
 	final public void makeVisible() {
+		fDefaultFocusManager.resetFocus();
 		doUpdatePreview();
 	}
 	

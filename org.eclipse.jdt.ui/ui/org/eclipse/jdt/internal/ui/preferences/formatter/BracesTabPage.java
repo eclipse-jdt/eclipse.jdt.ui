@@ -51,11 +51,26 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
 	};
 	
+	private final static String [] fExtendedBracePositions= {
+		DefaultCodeFormatterConstants.END_OF_LINE,
+	    DefaultCodeFormatterConstants.NEXT_LINE,
+	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED, 
+		DefaultCodeFormatterConstants.NEXT_LINE_ON_WRAP
+	};
+	
 	private final static String [] fBracePositionNames= {
 	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line_indented") //$NON-NLS-1$
 	};
+	
+	private final static String [] fExtendedBracePositionNames= {
+	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
+	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
+	    FormatterMessages.getString("BracesTabPage.position.next_line_indented"), //$NON-NLS-1$
+		FormatterMessages.getString("BracesTabPage.position.next_line_on_wrap") //$NON-NLS-1$
+	};
+
 	
 	private final static int NUM_COLUMNS= 4;
 	
@@ -75,10 +90,10 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		composite.setLayout(createGridLayout(NUM_COLUMNS, false));
 		
 		final Group bracesGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("BracesTabPage.group.brace_positions.title")); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
-		createBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.class_declaration", DefaultCodeFormatterConstants.FORMATTER_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_ANONYMOUS_TYPE_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION); //$NON-NLS-1$
+		createExtendedBracesCombo(bracesGroup, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION); //$NON-NLS-1$
 		createBracesCombo(bracesGroup, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION); //$NON-NLS-1$
 		createBracesCombo(bracesGroup, "BracesTabPage.option.array_initializer", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION); //$NON-NLS-1$
 		
@@ -88,4 +103,9 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	private void createBracesCombo(Composite composite, String messagesKey, String key) {
 		createComboPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, fBracePositions, fBracePositionNames);
 	}
+
+	private void createExtendedBracesCombo(Composite composite, String messagesKey, String key) {
+		createComboPref(composite, NUM_COLUMNS, FormatterMessages.getString(messagesKey), key, fExtendedBracePositions, fExtendedBracePositionNames);
+	}
+
 }

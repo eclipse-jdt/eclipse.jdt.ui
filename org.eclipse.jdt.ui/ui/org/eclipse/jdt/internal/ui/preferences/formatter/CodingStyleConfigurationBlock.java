@@ -11,31 +11,12 @@
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -57,19 +38,10 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 
 
@@ -83,12 +55,9 @@ public class CodingStyleConfigurationBlock {
 	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".codeformatter.savepath"; //$NON-NLS-1$
 	
 	
-	private class XMLFileUpdater implements Observer {
+	private class StoreUpdater implements Observer {
 		
-		private final File fFile;
-		
-		public XMLFileUpdater() {
-			fFile= getStoreFile();
+		public StoreUpdater() {
 			fProfileManager.addObserver(this);
 		}
 
@@ -100,7 +69,7 @@ public class CodingStyleConfigurationBlock {
 			case ProfileManager.PROFILE_CREATED_EVENT:
 			case ProfileManager.SETTINGS_CHANGED_EVENT:
 				try {
-					writeProfilesToFile(fProfileManager.getSortedProfiles(), fFile);
+					fProfileStore.writeProfiles(fProfileManager.getSortedProfiles());
 				} catch (Exception x) {
 					JavaPlugin.log(x);
 				}
@@ -111,9 +80,11 @@ public class CodingStyleConfigurationBlock {
 	
 
 	private class ProfileComboController implements Observer, SelectionListener {
-		private List fSortedProfiles;
+		
+		private final List fSortedProfiles;
 		
 		public ProfileComboController() {
+			fSortedProfiles= fProfileManager.getSortedProfiles();
 			fProfileCombo.addSelectionListener(this);
 			fProfileManager.addObserver(this);
 			updateProfiles();
@@ -141,7 +112,6 @@ public class CodingStyleConfigurationBlock {
 		}
 		
 		private void updateProfiles() {
-			fSortedProfiles= fProfileManager.getSortedProfiles();
 			fProfileCombo.setItems(fProfileManager.getSortedNames());
 		}
 
@@ -240,7 +210,7 @@ public class CodingStyleConfigurationBlock {
 			final Collection profiles= new ArrayList();
 			profiles.add(fProfileManager.getSelected());
 			try {
-				writeProfilesToFile(profiles, file);
+				ProfileStore.writeProfilesToFile(profiles, file);
 			} catch (Exception x) {
 				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.title"); //$NON-NLS-1$
 				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.error.message"); //$NON-NLS-1$
@@ -264,7 +234,7 @@ public class CodingStyleConfigurationBlock {
 			final File file= new File(path);
 			Collection profiles= null;
 			try {
-				profiles= readProfilesFromFile(file);
+				profiles= ProfileStore.readProfilesFromFile(file);
 			} catch (Exception e) {
 				final String title= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.title"); //$NON-NLS-1$
 				final String message= FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.error.message"); //$NON-NLS-1$
@@ -279,6 +249,7 @@ public class CodingStyleConfigurationBlock {
 				if (aeDialog.open() != Window.OK) 
 					return;
 			}
+			ProfileVersioner.updateAndComplete(profile);
 			fProfileManager.addProfile(profile);
 		}
 	}
@@ -307,31 +278,6 @@ public class CodingStyleConfigurationBlock {
 
 	
 	/**
-	 * Identifiers for the XML file.
-	 */
-	private final static String XML_NODE_ROOT= "profiles"; //$NON-NLS-1$
-	private final static String XML_NODE_PROFILE= "profile"; //$NON-NLS-1$
-	private final static String XML_NODE_SETTING= "setting"; //$NON-NLS-1$
-	
-	private final static String XML_ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
-	private final static String XML_ATTRIBUTE_ID= "id"; //$NON-NLS-1$
-	private final static String XML_ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
-	private final static String XML_ATTRIBUTE_VALUE= "value"; //$NON-NLS-1$
-
-	
-	/**
-	 * The version of the XML file
-	 */
-	private final static int XML_VERSION= 1;
-	
-	
-	/**
-	 * The name of the store file.
-	 */
-	protected final static String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
-	
-	
-	/**
 	 * Some Java source code used for preview.
 	 */
 	private final static String fPreview=
@@ -345,6 +291,14 @@ public class CodingStyleConfigurationBlock {
 		"public void push(int elem){fStack.addFirst(new Integer(elem));}" + //$NON-NLS-1$
 		"public boolean isEmpty() {return fStack.isEmpty();}" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$
+	
+
+	/**
+	 * The name of the store file.
+	 */
+	protected final static String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
+	
+	
 
 	/**
 	 * The GUI controls
@@ -363,6 +317,12 @@ public class CodingStyleConfigurationBlock {
 	 */
 	protected final ProfileManager fProfileManager;
 	
+	
+	/**
+	 * Utility class to manage profile files. 
+	 */
+	protected final ProfileStore fProfileStore;
+	
 	/**
 	 * The JavaPreview.
 	 */
@@ -374,19 +334,29 @@ public class CodingStyleConfigurationBlock {
 	 * Create a new <code>CodeFormatterPreferencePage</code>.
 	 */
 	public CodingStyleConfigurationBlock() {
+
+		fProfileStore= new ProfileStore(getStoreFile());
+		
 		Collection profiles= null;
+
 		try {
-			profiles= readProfilesFromFile(getStoreFile());
+			profiles= fProfileStore.readProfiles();
 		} catch (Exception e) {
 			JavaPlugin.log(e);
 		}
-		if (profiles == null)
-			profiles= new ArrayList();
+		
+		if (profiles == null) 
+		    profiles= new ArrayList();
+
+		for (final Iterator iter= profiles.iterator(); iter.hasNext(); ) {
+			CustomProfile profile= (CustomProfile) iter.next();
+			ProfileVersioner.updateAndComplete(profile);
+		}
+		
 		fProfileManager= new ProfileManager(profiles);
-		Profile selected= fProfileManager.getSelected();
-		fJavaPreview= new JavaPreview(selected.getSettings());
+		fJavaPreview= new JavaPreview(fProfileManager.getSelected().getSettings());
 		fJavaPreview.setPreviewText(fPreview);
-		new XMLFileUpdater();
+		new StoreUpdater();
 	}
 
 	/**
@@ -495,189 +465,10 @@ public class CodingStyleConfigurationBlock {
 	
 	
 	/**
-	 * Read the available profiles from the internal XML file and return them
-	 * as collection.
-	 */
-	public Collection readProfilesFromFile(File file) throws CoreException, IOException {
-		
-		if (!file.exists())
-			return null;
-		
-		Reader reader= new FileReader(file);
-		if (reader == null) 
-			return null;
-		try {
-			return readProfilesFromStream(reader);
-		} finally {
-			if (reader != null)
-				try { reader.close(); } catch (IOException e) {}
-		}
-	}
-	
-	
-	/**
-	 * Load profiles from a XML stream and add them to a map.
-	 */
-	private Collection readProfilesFromStream(Reader reader) throws CoreException {
-		
-		Element cpElement;
-		try {
-		    final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			final DocumentBuilder parser = factory.newDocumentBuilder();
-			cpElement = parser.parse(new InputSource(reader)).getDocumentElement();
-			
-		} catch (SAXException e) {
-			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
-		} catch (ParserConfigurationException e) {
-			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
-		} catch (IOException e) {
-			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message"));  //$NON-NLS-1$
-		}
-
-		if (cpElement == null || !cpElement.getNodeName().equalsIgnoreCase(XML_NODE_ROOT)) {
-		    throw createException(new Exception(), FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-		}
-		
-		final NodeList list= cpElement.getChildNodes();
-		
-		final int length= list.getLength();
-		
-		final Collection profiles= new ArrayList();
-
-		for (int i= 0; i < length; i++) {
-			final Node node= list.item(i);
-			final short type= node.getNodeType();
-			if (type != Node.ELEMENT_NODE)
-			    continue; // white space 
-			final Element element= (Element) node;
-			if (!element.getNodeName().equalsIgnoreCase(XML_NODE_PROFILE)) {
-			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-			}	
-			profiles.add(createProfileFromElement(element));
-		}
-		return profiles;
-	}
-	
-
-	/**
-	 * Create a new custom profile from its XML description.
-	 */
-	private CustomProfile createProfileFromElement(final Element element) throws CoreException {
-
-	    final Map settings= ProfileManager.getDefaultSettings();
-		final String name= element.getAttribute(XML_ATTRIBUTE_NAME);
-		final NodeList list= element.getChildNodes();
-		
-		for (int i= 0; i < list.getLength(); i++) {
-		    
-			final Node node= list.item(i);
-			
-			if (node.getNodeType() != Node.ELEMENT_NODE)
-			    continue; // white space
-			
-			final Element setting= (Element) node;
-			
-			if (!setting.getNodeName().equalsIgnoreCase(XML_NODE_SETTING)) {
-			    throw createException(null, FormatterMessages.getString("CodingStyleConfigurationBlock.error.reading_xml.message")); //$NON-NLS-1$
-			}	
-			
-			final String id= setting.getAttribute(XML_ATTRIBUTE_ID);
-			final String value= setting.getAttribute(XML_ATTRIBUTE_VALUE);
-			
-			if (settings.containsKey(id)) {
-			    settings.put(id, value);
-			}
-		}
-		return new CustomProfile(name, settings);
-	}
-	
-	
-	/**
-	 * Write the available profiles to the internal XML file.
-	 */
-	public static void writeProfilesToFile(Collection profiles, File file) throws IOException, CoreException {
-		Writer writer= new FileWriter(file);
-		try {
-			writeProfilesToStream(profiles, writer);
-		} finally {
-			if (writer != null)
-				writer.close();
-		}
-	}
-
-	
-	/**
-	 * Save profiles to an XML stream
-	 */
-	private static void writeProfilesToStream(Collection profiles, Writer writer) throws CoreException {
-		try {
-			final DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			final DocumentBuilder builder= factory.newDocumentBuilder();		
-			final Document document= builder.newDocument();
-			
-			final Element rootElement = document.createElement(XML_NODE_ROOT);
-			rootElement.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(XML_VERSION));
-			document.appendChild(rootElement);
-			
-			final Iterator iter= profiles.iterator();
-			
-			while (iter.hasNext()) {
-				final Profile p= (Profile)iter.next();
-				if (p instanceof CustomProfile) {
-					final Element profile= createProfileElement((CustomProfile)p, document);
-					rootElement.appendChild(profile);
-				}
-			}
-
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(writer);
-
-			transformer.transform(source, result);
-		} catch (TransformerException e) {
-			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.serializing_xml.message"));  //$NON-NLS-1$
-		} catch (ParserConfigurationException e) {
-			throw createException(e, FormatterMessages.getString("CodingStyleConfigurationBlock.error.serializing_xml.message")); //$NON-NLS-1$
-		}
-	}
-
-	
-	/**
-	 * Create a new profile element in the specified document. The profile is not added
-	 * to the document by this method. 
-	 */
-	private static Element createProfileElement(CustomProfile profile, Document document) {
-		final Element element= document.createElement(XML_NODE_PROFILE);
-		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
-		
-		final Iterator keyIter= profile.getSettings().keySet().iterator();
-		
-		while (keyIter.hasNext()) {
-			final String key= (String)keyIter.next();
-			final String value= (String)profile.getSettings().get(key);
-			final Element setting= document.createElement(XML_NODE_SETTING);
-			setting.setAttribute(XML_ATTRIBUTE_ID, key);
-			setting.setAttribute(XML_ATTRIBUTE_VALUE, value);
-			element.appendChild(setting);
-		}
-		return element;
-	}
-	
-	/**
 	 * Get a <code>File</code> object representing the internal store file.
 	 */
 	protected static File getStoreFile() {
 		return JavaPlugin.getDefault().getStateLocation().append(STORE_FILE).toFile();
 	}
 
-	
-	/**
-	 * Creates a UI exception for logging purposes
-	 */
-	private static JavaUIException createException(Throwable t, String message) {
-		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
-	}
 }

@@ -187,7 +187,7 @@ public class CreateProfileDialog extends StatusDialog {
 		final Map baseSettings= new HashMap(((Profile)fSortedProfiles.get(fProfileCombo.getSelectionIndex())).getSettings());
 		final String profileName= fNameText.getText();
 		
-		fCreatedProfile= new CustomProfile(profileName, baseSettings);
+		fCreatedProfile= new CustomProfile(profileName, baseSettings, ProfileVersioner.CURRENT_VERSION);
 		fProfileManager.addProfile(fCreatedProfile);
 		super.okPressed();
 	}

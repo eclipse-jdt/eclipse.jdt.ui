@@ -68,6 +68,7 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		
 		final Group emptyStatementsGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("NewLinesTabPage.empty_statement_group.title")); //$NON-NLS-1$
 		createPref(emptyStatementsGroup, "NewLinesTabPage.emtpy_statement_group.option.empty_statement_on_new_line", DefaultCodeFormatterConstants.FORMATTER_PUT_EMPTY_STATEMENT_ON_NEW_LINE, FALSE_TRUE); //$NON-NLS-1$
+		createPref(emptyStatementsGroup, "NewLinesTabPage.empty_statement_group.option.remove_unnecessary_semicolon", DefaultCodeFormatterConstants.FORMATTER_REMOVE_UNNECESSARY_SEMICOLON, FALSE_TRUE); //$NON-NLS-1$
 		
 		final Group userGroup= createGroup(NUM_COLUMNS, composite, FormatterMessages.getString("NewLinesTabPage.existing_breaks_group.title")); //$NON-NLS-1$
 		createPref(userGroup, "NewLinesTabPage.existing_breaks_group.preserve_existing_line_breaks", DefaultCodeFormatterConstants.FORMATTER_PRESERVE_USER_LINEBREAKS, FALSE_TRUE); //$NON-NLS-1$

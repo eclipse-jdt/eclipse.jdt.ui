@@ -26,6 +26,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	"package foo.bar.baz;" + //$NON-NLS-1$
 	"import java.util.List;" + //$NON-NLS-1$
 	"import java.util.Vector;" + //$NON-NLS-1$
+	"public class Another {}" + //$NON-NLS-1$
 	"public class Example {" + //$NON-NLS-1$
 	"public static class Pair {" + //$NON-NLS-1$
 	"public String first;" + //$NON-NLS-1$
@@ -85,6 +86,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_first_decl", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_decls_of_same_kind", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_member_class_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE); //$NON-NLS-1$
+		createBlankLineTextField(group, "BlankLinesTabPage.class.option.between_type_declarations", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_TYPE_DECLARATIONS); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_field_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD); //$NON-NLS-1$
 		createBlankLineTextField(group, "BlankLinesTabPage.class.option.before_method_decls", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD); //$NON-NLS-1$
 

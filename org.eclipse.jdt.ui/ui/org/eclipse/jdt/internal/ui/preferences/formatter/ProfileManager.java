@@ -56,10 +56,6 @@ public class ProfileManager extends Observable {
 		public abstract void setSettings(Map settings);
 		
 		public abstract String getID();
-		
-		public final int compareTo(Object o) {
-			return getName().compareToIgnoreCase(((Profile)o).getName());
-		}
 	}
 	
 	/**
@@ -94,6 +90,14 @@ public class ProfileManager extends Observable {
 		public String getID() { 
 			return fID; 
 		}
+		
+		public final int compareTo(Object o) {
+			if (o instanceof BuiltInProfile) {
+				return getName().compareToIgnoreCase(((Profile)o).getName());
+			}
+			return -1;
+		}
+
 	}
 
 	/**
@@ -103,12 +107,14 @@ public class ProfileManager extends Observable {
 		private String fName;
 		private Map fSettings;
 		private ProfileManager fManager;
+		private int fVersion;
 
-		public CustomProfile(String name, Map settings) {
+		public CustomProfile(String name, Map settings, int version) {
 			fName= name;
 			fSettings= settings;
+			fVersion= version;
 		}
-
+		
 		public String getName() {
 			return fName;
 		}
@@ -164,6 +170,22 @@ public class ProfileManager extends Observable {
 				fManager= null;
 			}
 		}
+
+		public int getVersion() {
+			return fVersion;
+		}
+		
+		public void setVersion(int version)	{
+			fVersion= version;
+		}
+		
+		public final int compareTo(Object o) {
+			if (o instanceof CustomProfile) {
+				return getName().compareToIgnoreCase(((Profile)o).getName());
+			}
+			return 1;
+		}
+
 	}
 	
 
@@ -197,6 +219,8 @@ public class ProfileManager extends Observable {
 	protected final Map fProfiles;
 	
 	
+	
+	
 	/**
 	 * The available profiles, sorted by name.
 	 */
@@ -206,32 +230,43 @@ public class ProfileManager extends Observable {
 	/**
 	 * The currently selected profile. 
 	 */
-	protected Profile fSelected;
+	private Profile fSelected;
 	
 
 	/**
 	 * The keys of the options to be saved with each profile
 	 */
-	protected final List fUIKeys, fCoreKeys;
+	private final static List fUIKeys= Arrays.asList(new CommentFormattingContext().getPreferenceKeys()); 
+	private final static List fCoreKeys= new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet()); 
+
+	/**
+	 * All keys appearing in a profile, sorted alphabetically
+	 */
+	private final static List fKeys;
+	
+	static {
+	    fKeys= new ArrayList();
+	    fKeys.addAll(fUIKeys);
+	    fKeys.addAll(fCoreKeys);
+	    Collections.sort(fKeys);
+	}
 	
 
 	/**
 	 * Create and initialize a new profile manager.
 	 */
 	public ProfileManager(Collection profiles) {
-		fUIKeys= getUIKeys();
-		fCoreKeys= getCoreKeys();
 		fProfiles= new HashMap();
 		fProfilesByName= new ArrayList();
 	
-		addBuiltinProfiles(fProfiles, fProfilesByName);
-		
-		for (Iterator iter = profiles.iterator(); iter.hasNext();) {
+		for (final Iterator iter = profiles.iterator(); iter.hasNext();) {
 			final CustomProfile profile= (CustomProfile) iter.next();
 			profile.setManager(this);
 			fProfiles.put(profile.getID(), profile);
 			fProfilesByName.add(profile);
 		}
+
+		addBuiltinProfiles(fProfiles, fProfilesByName);
 		
 		Collections.sort(fProfilesByName);
 		
@@ -271,7 +306,7 @@ public class ProfileManager extends Observable {
 		for (final Iterator keyIter = fCoreKeys.iterator(); keyIter.hasNext(); ) {
 			final String key= (String) keyIter.next();
 			final String oldVal= (String) actualOptions.get(key);
-			String val= (String) profileOptions.get(key);
+			final String val= (String) profileOptions.get(key);
 			if (!val.equals(oldVal)) {
 				hasChanges= true;
 				actualOptions.put(key, val);
@@ -323,27 +358,24 @@ public class ProfileManager extends Observable {
 		return options;
 	}
 	
-	/**
-	 * Get a list of all keys specific to the core preference store.
-	 */
-	private List getCoreKeys() {
-		return new ArrayList(DefaultCodeFormatterConstants.getDefaultSettings().keySet());
-	}
 	
 	/**
-	 * Get a list of all keys which are specific to the UI preference store.
+	 * All keys appearing in a profile, sorted alphabetically.
 	 */
-	private List getUIKeys() {
-		return Arrays.asList( new CommentFormattingContext().getPreferenceKeys());
+	public static List getKeys() {
+	    return fKeys;
 	}
+	
 	
 	/** 
-	 * Get a list of all profiles, sorted alphabetically. Unless the set of profiles has been modified between
-	 * the two calls, the sequence is guaranteed to correspond to the one returned by <code>getSortedNames</code>. 
+	 * Get an immutable list as view on all profiles, sorted alphabetically. Unless the set 
+	 * of profiles has been modified between the two calls, the sequence is guaranteed to 
+	 * correspond to the one returned by <code>getSortedNames</code>.
+	 * 
 	 * @see #getSortedNames()
 	 */
 	public List getSortedProfiles() {
-		return new ArrayList(fProfilesByName);
+		return Collections.unmodifiableList(fProfilesByName);
 	}
 
 	/**
@@ -355,7 +387,7 @@ public class ProfileManager extends Observable {
 	public String [] getSortedNames() {
 		final String [] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
-		for (Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
+		for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
 			sortedNames[i++]= ((Profile) iter.next()).getName();
 		}
 		return sortedNames;
@@ -444,7 +476,7 @@ public class ProfileManager extends Observable {
 	/**
 	 * Get the UI preference store.
 	 */
-	public static IPreferenceStore getUIPreferenceStore() {
+	private static IPreferenceStore getUIPreferenceStore() {
 		return PreferenceConstants.getPreferenceStore();
 	}
 }
