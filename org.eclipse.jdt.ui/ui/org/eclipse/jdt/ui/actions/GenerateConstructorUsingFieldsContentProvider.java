@@ -44,17 +44,19 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 
 	private ITypeBinding fType= null;
 
+	private final CompilationUnit fUnit;
+
 	public GenerateConstructorUsingFieldsContentProvider(IType type, List fields, List selected) throws JavaModelException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+		fUnit= parser.parse(type.getCompilationUnit(), true);
+		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 		if (declaration != null) {
 			fType= declaration.resolveBinding();
 			if (fType != null) {
 				IField field= null;
 				for (Iterator iterator= fields.iterator(); iterator.hasNext();) {
 					field= (IField) iterator.next();
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, unit);
+					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
 					if (fragment != null) {
 						IVariableBinding binding= fragment.resolveBinding();
 						if (binding != null)
@@ -63,7 +65,7 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 				}
 				for (Iterator iterator= selected.iterator(); iterator.hasNext();) {
 					field= (IField) iterator.next();
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, unit);
+					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
 					if (fragment != null) {
 						IVariableBinding binding= fragment.resolveBinding();
 						if (binding != null)
@@ -72,6 +74,10 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 				}
 			}
 		}
+	}
+
+	public CompilationUnit getCompilationUnit() {
+		return fUnit;
 	}
 
 	public boolean canMoveDown(List selectedElements) {

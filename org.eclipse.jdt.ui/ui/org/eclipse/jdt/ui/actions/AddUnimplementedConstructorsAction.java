@@ -109,15 +109,21 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 		private IMethodBinding[] fMethodsList= new IMethodBinding[0];
 
+		private final CompilationUnit fUnit;
+	
 		public AddUnimplementedConstructorsContentProvider(IType type) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-			CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+			fUnit= parser.parse(type.getCompilationUnit(), true);
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null)
 					fMethodsList= StubUtility2.getVisibleConstructors(binding);
 			}
+		}
+
+		public CompilationUnit getCompilationUnit() {
+			return fUnit;
 		}
 
 		/*
@@ -504,7 +510,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, dialog.getElementPosition(), selected, settings, true, true, false);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), selected, settings, true, true, false);
 				operation.setVisibility(dialog.getVisibilityModifier());
 				operation.setOmitSuper(dialog.isOmitSuper());
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();

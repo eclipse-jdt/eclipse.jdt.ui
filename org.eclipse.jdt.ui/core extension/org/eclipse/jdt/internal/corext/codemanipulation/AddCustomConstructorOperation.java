@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -95,6 +96,9 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	/** The type declaration to add the constructors to */
 	private final IType fType;
 
+	/** The compilation unit ast node */
+	private final CompilationUnit fUnit;
+
 	/** The visibility flags of the new constructor */
 	private int fVisibility= 0;
 
@@ -103,20 +107,21 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 	 * 
 	 * @param type the type to add the methods to
 	 * @param insert the insertion point, or <code>null</code>
+	 * @param unit the compilation unit ast node
 	 * @param bindings the variable bindings to use in the constructor
 	 * @param binding the method binding of the super constructor
 	 * @param settings the code generation settings to use
-	 * @param apply <code>true</code> if the resulting edit should be applied,
-	 *               <code>false</code> otherwise
-	 * @param save <code>true</code> if the changed compilation unit should be saved,
-	 *               <code>false</code> otherwise
+	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddCustomConstructorOperation(final IType type, final IJavaElement insert, final IVariableBinding[] bindings, final IMethodBinding binding, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
+	public AddCustomConstructorOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final IVariableBinding[] bindings, final IMethodBinding binding, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
+		Assert.isNotNull(unit);
 		Assert.isNotNull(bindings);
 		Assert.isNotNull(settings);
 		fType= type;
 		fInsert= insert;
+		fUnit= unit;
 		fBindings= bindings;
 		fBinding= binding;
 		fSettings= settings;
@@ -124,6 +129,11 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		fApply= apply;
 	}
 
+	/**
+	 * Returns the resulting text edit.
+	 * 
+	 * @return the resulting text edit
+	 */
 	public final TextEdit getResultingEdit() {
 		return fEdit;
 	}
@@ -137,10 +147,20 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
+	/**
+	 * Returns the visibility modifier of the generated constructors.
+	 * 
+	 * @return the visibility modifier
+	 */
 	public final int getVisibility() {
 		return fVisibility;
 	}
 
+	/**
+	 * Should the call to the super constructor be omitted?
+	 * 
+	 * @return <code>true</code> to omit the call, <code>false</code> otherwise
+	 */
 	public final boolean isOmitSuper() {
 		return fOmitSuper;
 	}
@@ -156,7 +176,7 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			monitor.setTaskName(CodeGenerationMessages.getString("AddCustomConstructorOperation.description")); //$NON-NLS-1$
 			fCreated.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
@@ -225,10 +245,20 @@ public final class AddCustomConstructorOperation implements IWorkspaceRunnable {
 		}
 	}
 
+	/**
+	 * Determines whether the call to the super constructor should be omitted.
+	 * 
+	 * @param omit <code>true</code> to omit the call, <code>false</code> otherwise
+	 */
 	public final void setOmitSuper(final boolean omit) {
 		fOmitSuper= omit;
 	}
 
+	/**
+	 * Sets the visibility modifier of the generated constructors.
+	 * 
+	 * @param visibility the visibility modifier
+	 */
 	public final void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}

@@ -62,10 +62,14 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -85,6 +89,7 @@ import org.eclipse.jdt.internal.ui.dialogs.SourceActionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -293,9 +298,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				setterFields= getSetterOnlyFields(result);
 				getterSetterFields= getGetterSetterFields(result);
 			}
-			IJavaElement elementPosition= dialog.getElementPosition();
-
-			generate(type, getterFields, setterFields, getterSetterFields, elementPosition);
+			generate(type, getterFields, setterFields, getterSetterFields, new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), true), dialog.getElementPosition());
 		}
 	}
 
@@ -466,7 +469,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
-	private void generate(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IJavaElement elementPosition) throws CoreException {
+	private void generate(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, CompilationUnit unit, IJavaElement elementPosition) throws CoreException {
 		if (getterFields.length == 0 && setterFields.length == 0 && getterSetterFields.length == 0)
 			return;
 
@@ -478,8 +481,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		else
 			cu= getterSetterFields[0].getCompilationUnit();
 		// open the editor, forces the creation of a working copy
-		IEditorPart editor= EditorUtility.openInEditor(cu);
-		run(cu, type, getterFields, setterFields, getterSetterFields, editor, elementPosition);
+		run(cu, type, getterFields, setterFields, getterSetterFields, EditorUtility.openInEditor(cu), unit, elementPosition);
 	}
 
 	// ---- Java Editior --------------------------------------------------------------
@@ -523,13 +525,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	// ---- Helpers -------------------------------------------------------------------
 
-	private void run(ICompilationUnit cu, IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, IJavaElement elementPosition) {
+	private void run(ICompilationUnit cu, IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IEditorPart editor, CompilationUnit unit, IJavaElement elementPosition) {
 		IRewriteTarget target= (IRewriteTarget) editor.getAdapter(IRewriteTarget.class);
 		if (target != null) {
 			target.beginCompoundChange();
 		}
 		try {
-			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, true, false);
+			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+			settings.createComments= fGenerateComment;
+
+			AddGetterSetterOperation op= new AddGetterSetterOperation(type, getterFields, setterFields, getterSetterFields, unit, skipSetterForFinalQuery(), skipReplaceQuery(), elementPosition, settings, true, false);
 			setOperationStatusFields(op);
 
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
@@ -561,8 +566,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			flags|= Flags.AccFinal;
 		}
 		op.setSort(fSort);
-		op.setFlags(flags);
-		op.setCreateComments(fGenerateComment);
+		op.setVisibility(flags);
 	}
 
 	private IRequestQuery skipSetterForFinalQuery() {
@@ -736,10 +740,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		private Viewer fViewer;
 
-		private Map fGetterSetterEntries; // IField -> Object[]
-																// (with 0 to 2 elements
-																// of type
-																// GetterSetterEntry)
+		private Map fGetterSetterEntries;
 
 		public AddGetterSetterContentProvider(Map entries) {
 			fGetterSetterEntries= entries;

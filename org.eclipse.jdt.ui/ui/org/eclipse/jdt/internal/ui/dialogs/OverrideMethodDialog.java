@@ -250,17 +250,19 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 	}
 
+	private CompilationUnit fUnit= null;
+
 	public OverrideMethodDialog(Shell parent, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
 		super(parent, new SourceActionLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
+		fUnit= parser.parse(type.getCompilationUnit(), true);
 		ITypeBinding binding= null;
 		if (type.isAnonymous()) {
-			final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), ClassInstanceCreation.class);
+			final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), ClassInstanceCreation.class);
 			if (creation != null)
 				binding= creation.resolveTypeBinding();
 		} else {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null)
 				binding= declaration.resolveBinding();
 		}
@@ -302,6 +304,10 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		setContainerMode(true);
 		setSize(60, 18);
 		setInput(new Object());
+	}
+
+	public CompilationUnit getCompilationUnit() {
+		return fUnit;
 	}
 
 	/*

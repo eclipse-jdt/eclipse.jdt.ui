@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -87,6 +88,9 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	/** The type declaration to add the methods to */
 	private final IType fType;
 
+	/** The compilation unit ast node */
+	private final CompilationUnit fUnit;
+
 	/**
 	 * Creates a new add delegate methods operation.
 	 * 
@@ -94,17 +98,17 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param keys the method binding keys to implement
 	 * @param settings the code generation settings to use
-	 * @param apply <code>true</code> if the resulting edit should be applied,
-	 *               <code>false</code> otherwise
-	 * @param save <code>true</code> if the changed compilation unit should be saved,
-	 *               <code>false</code> otherwise
+	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
+	public AddDelegateMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
+		Assert.isNotNull(unit);
 		Assert.isNotNull(keys);
 		Assert.isNotNull(settings);
 		fType= type;
 		fInsert= insert;
+		fUnit= unit;
 		fKeys= keys;
 		fSettings= settings;
 		fSave= save;
@@ -122,6 +126,11 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 		return keys;
 	}
 
+	/**
+	 * Returns the resulting text edit.
+	 * 
+	 * @return the resulting text edit
+	 */
 	public final TextEdit getResultingEdit() {
 		return fEdit;
 	}
@@ -146,7 +155,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor.setTaskName(CodeGenerationMessages.getString("AddDelegateMethodsOperation.monitor.message")); //$NON-NLS-1$
 			fCreated.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
@@ -229,5 +238,4 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			monitor.done();
 		}
 	}
-
 }

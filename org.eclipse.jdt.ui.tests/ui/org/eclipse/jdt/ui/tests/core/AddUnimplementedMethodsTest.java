@@ -191,7 +191,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		String[] keys= new String[bindings.length];
 		for (int index= 0; index < bindings.length; index++)
 			keys[index]= bindings[index].getKey();
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, null, keys, new CodeGenerationSettings(), false, true, true, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, null, unit, keys, new CodeGenerationSettings(), false, true, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}

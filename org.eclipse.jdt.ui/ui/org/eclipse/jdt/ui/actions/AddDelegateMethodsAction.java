@@ -154,10 +154,12 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 		private IVariableBinding[] fExpanded= new IVariableBinding[0];
 
+		private final CompilationUnit fUnit;
+
 		AddDelegateMethodsContentProvider(IType type, IField[] fields) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
-			CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
+			fUnit= parser.parse(type.getCompilationUnit(), true);
+			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
 			if (declaration != null) {
 				ITypeBinding binding= declaration.resolveBinding();
 				if (binding != null) {
@@ -169,7 +171,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 				List expanded= new ArrayList();
 				for (int index= 0; index < fields.length; index++) {
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], unit);
+					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fields[index], fUnit);
 					if (fragment != null) {
 						IVariableBinding variableBinding= fragment.resolveBinding();
 						if (variableBinding != null)
@@ -180,6 +182,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				expanded.toArray(result);
 				fExpanded= result;
 			}
+		}
+
+		public CompilationUnit getCompilationUnit() {
+			return fUnit;
 		}
 
 		public void dispose() {
@@ -574,7 +580,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					String[] keys= new String[tuples.size()];
 					for (int index= 0; index < keys.length; index++)
 						keys[index]= ((IBinding[]) tuples.get(index))[1].getKey();
-					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), keys, settings, true, false);
+					AddDelegateMethodsOperation operation= new AddDelegateMethodsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), keys, settings, true, false);
 					IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 					if (context == null)
 						context= new BusyIndicatorRunnableContext();

@@ -42,10 +42,13 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -63,108 +66,213 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 
-	private final String[] EMPTY= new String[0];
+	/** The empty strings constant */
+	private static final String[] EMPTY_STRINGS= new String[0];
 
+	/** The accessor fields */
+	private final IField[] fAccessorFields;
+
+	/** Should the resulting edit be applied? */
 	private boolean fApply= true;
 
-	private boolean fCreateComments;
-
+	/** The resulting text edit */
 	private TextEdit fEdit= null;
 
-	private int fFlags;
+	/** The getter fields */
+	private final IField[] fGetterFields;
 
-	private IField[] fGetterFields;
+	/** The insertion point, or <code>null</code> */
+	private final IJavaElement fInsert;
 
-	private IField[] fGetterSetterFields;
+	/** Should the compilation unit content be saved? */
+	private final boolean fSave;
 
-	private IJavaElement fInsertPosition;
+	/** The setter fields */
+	private final IField[] fSetterFields;
 
-	private boolean fSave;
+	/** The code generation settings to use */
+	private final CodeGenerationSettings fSettings;
 
-	private IField[] fSetterFields;
+	/** Should all existing members be skipped? */
+	private boolean fSkipAllExisting= false;
 
-	private boolean fSkipAllExisting;
+	/** Should all final setters be skipped? */
+	private boolean fSkipAllFinalSetters= false;
 
-	private boolean fSkipAllFinalSetters;
+	/** The skip existing request query */
+	private final IRequestQuery fSkipExistingQuery;
 
-	private IRequestQuery fSkipExistingQuery;
+	/** The skip final setters query */
+	private final IRequestQuery fSkipFinalSettersQuery;
 
-	private IRequestQuery fSkipFinalSettersQuery;
+	/** Should the accessors be sorted? */
+	private boolean fSort= false;
 
-	private boolean fSort;
+	/** The type declaration to add the constructors to */
+	private final IType fType;
 
-	private IType fType;
+	/** The compilation unit ast node */
+	private final CompilationUnit fUnit;
 
-	public AddGetterSetterOperation(IType type, IField[] getterFields, IField[] setterFields, IField[] getterSetterFields, IRequestQuery skipFinalSettersQuery, IRequestQuery skipExistingQuery, IJavaElement elementPosition, boolean apply, boolean save) {
+	/** The visibility flags of the new accessors */
+	private int fVisibility= Modifier.PUBLIC;
+
+	/**
+	 * Creates a new add getter setter operation.
+	 * 
+	 * @param type the type to add the accessors to
+	 * @param getters the fields to create getters for
+	 * @param setters the fields to create setters for
+	 * @param accessors the fields to create both
+	 * @param unit the compilation unit ast node
+	 * @param skipFinalSettersQuery the request query
+	 * @param skipExistingQuery the request query
+	 * @param insert the insertion point, or <code>null</code>
+	 * @param settings the code generation settings to use
+	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
+	 */
+	public AddGetterSetterOperation(final IType type, final IField[] getters, final IField[] setters, final IField[] accessors, final CompilationUnit unit, final IRequestQuery skipFinalSettersQuery, final IRequestQuery skipExistingQuery, final IJavaElement insert, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
+		Assert.isNotNull(type);
+		Assert.isNotNull(unit);
+		Assert.isNotNull(settings);
 		fType= type;
-		fGetterFields= getterFields;
-		fSetterFields= setterFields;
-		fGetterSetterFields= getterSetterFields;
+		fGetterFields= getters;
+		fSetterFields= setters;
+		fAccessorFields= accessors;
+		fUnit= unit;
 		fSkipExistingQuery= skipExistingQuery;
 		fSkipFinalSettersQuery= skipFinalSettersQuery;
-		fInsertPosition= elementPosition;
-		fCreateComments= true;
-		fFlags= Flags.AccPublic;
-		fSort= false;
+		fInsert= insert;
+		fSettings= settings;
+		fSave= save;
 		fApply= apply;
 	}
 
-	private void addNewAccessor(IField field, ListRewrite rewrite, IType type, String contents, ASTNode insertion) throws JavaModelException {
-		String delimiter= StubUtility.getLineDelimiterUsed(type);
-		MethodDeclaration declaration= (MethodDeclaration) rewrite.getASTRewrite().createStringPlaceholder(CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, contents, 0, null, delimiter, field.getJavaProject()) + delimiter, ASTNode.METHOD_DECLARATION);
+	/**
+	 * Adds a new accessor for the specified field.
+	 * 
+	 * @param type the type
+	 * @param field the field
+	 * @param contents the contents of the accessor method
+	 * @param rewrite the list rewrite to use
+	 * @param insertion the insertion point
+	 * @throws JavaModelException if an error occurs
+	 */
+	private void addNewAccessor(final IType type, final IField field, final String contents, final ListRewrite rewrite, final ASTNode insertion) throws JavaModelException {
+		final String delimiter= StubUtility.getLineDelimiterUsed(type);
+		final MethodDeclaration declaration= (MethodDeclaration) rewrite.getASTRewrite().createStringPlaceholder(CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, contents, 0, null, delimiter, field.getJavaProject()) + delimiter, ASTNode.METHOD_DECLARATION);
 		if (insertion != null)
 			rewrite.insertBefore(declaration, insertion, null);
 		else
 			rewrite.insertLast(declaration, null);
 	}
 
-	private void generateGetter(IField field, ListRewrite rewrite) throws CoreException, OperationCanceledException {
-		IType type= field.getDeclaringType();
-		String name= GetterSetterUtil.getGetterName(field, null);
-		IMethod existing= JavaModelUtil.findMethod(name, EMPTY, false, type);
+	/**
+	 * Generates a new getter method for the specified field
+	 * 
+	 * @param field the field
+	 * @param rewrite the list rewrite to use
+	 * @throws CoreException if an error occurs
+	 * @throws OperationCanceledException if the operation has been cancelled
+	 */
+	private void generateGetterMethod(final IField field, final ListRewrite rewrite) throws CoreException, OperationCanceledException {
+		final IType type= field.getDeclaringType();
+		final String name= GetterSetterUtil.getGetterName(field, null);
+		final IMethod existing= JavaModelUtil.findMethod(name, EMPTY_STRINGS, false, type);
 		if (existing == null || !querySkipExistingMethods(existing)) {
-			String stub= GetterSetterUtil.getGetterStub(field, name, fCreateComments, fFlags | (field.getFlags() & Flags.AccStatic));
 			IJavaElement sibling= null;
 			if (existing != null) {
 				sibling= StubUtility.findNextSibling(existing);
-				removeExistingAccessor(rewrite, existing);
+				removeExistingAccessor(existing, rewrite);
 			} else
-				sibling= fInsertPosition;
+				sibling= fInsert;
 			ASTNode insertion= null;
 			if (sibling instanceof IMethod)
-				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsertPosition).getNameRange()), MethodDeclaration.class);
-			addNewAccessor(field, rewrite, type, stub, insertion);
+				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+			addNewAccessor(type, field, GetterSetterUtil.getGetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
 
-	private void generateSetter(IField field, ListRewrite rewrite) throws CoreException, OperationCanceledException {
-		IType type= field.getDeclaringType();
-		String name= GetterSetterUtil.getSetterName(field, null);
-		IMethod existing= JavaModelUtil.findMethod(name, new String[] { field.getTypeSignature()}, false, type);
+	/**
+	 * Generates a new setter method for the specified field
+	 * 
+	 * @param field the field
+	 * @param rewrite the list rewrite to use
+	 * @throws CoreException if an error occurs
+	 * @throws OperationCanceledException if the operation has been cancelled
+	 */
+	private void generateSetterMethod(final IField field, final ListRewrite rewrite) throws CoreException, OperationCanceledException {
+		final IType type= field.getDeclaringType();
+		final String name= GetterSetterUtil.getSetterName(field, null);
+		final IMethod existing= JavaModelUtil.findMethod(name, new String[] { field.getTypeSignature()}, false, type);
 		if ((!Flags.isFinal(field.getFlags()) || !querySkipFinalSetters(field)) && (existing == null || querySkipExistingMethods(existing))) {
-			String stub= GetterSetterUtil.getSetterStub(field, name, fCreateComments, fFlags | (field.getFlags() & Flags.AccStatic));
 			IJavaElement sibling= null;
 			if (existing != null) {
 				sibling= StubUtility.findNextSibling(existing);
-				removeExistingAccessor(rewrite, existing);
+				removeExistingAccessor(existing, rewrite);
 			} else
-				sibling= fInsertPosition;
+				sibling= fInsert;
 			ASTNode insertion= null;
 			if (sibling instanceof IMethod)
-				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsertPosition).getNameRange()), MethodDeclaration.class);
-			addNewAccessor(field, rewrite, type, stub, insertion);
+				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
 
+	/**
+	 * Returns the resulting text edit.
+	 * 
+	 * @return the resulting text edit
+	 */
 	public final TextEdit getResultingEdit() {
 		return fEdit;
 	}
 
-	public ISchedulingRule getSchedulingRule() {
+	/**
+	 * Returns the scheduling rule for this operation.
+	 * 
+	 * @return the scheduling rule
+	 */
+	public final ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
-	private boolean querySkipExistingMethods(IMethod method) throws OperationCanceledException {
+	/**
+	 * Returns the visibility modifier of the generated constructors.
+	 * 
+	 * @return the visibility modifier
+	 */
+	public final int getVisibility() {
+		return fVisibility;
+	}
+
+	/**
+	 * Should all existing members be skipped?
+	 * 
+	 * @return <code>true</code> if they should be skipped, <code>false</code> otherwise
+	 */
+	public final boolean isSkipAllExisting() {
+		return fSkipAllExisting;
+	}
+
+	/**
+	 * Should all final setters be skipped?
+	 * 
+	 * @return <code>true</code> if final setters should be skipped, <code>false</code> otherwise
+	 */
+	public final boolean isSkipAllFinalSetters() {
+		return fSkipAllFinalSetters;
+	}
+
+	/**
+	 * Queries the user whether to skip existing methods.
+	 * 
+	 * @param method the method in question
+	 * @return <code>true</code> to skip existing methods, <code>false</code> otherwise
+	 * @throws OperationCanceledException if the operation has been cancelled
+	 */
+	private boolean querySkipExistingMethods(final IMethod method) throws OperationCanceledException {
 		if (!fSkipAllExisting) {
 			switch (fSkipExistingQuery.doQuery(method)) {
 				case IRequestQuery.CANCEL:
@@ -178,7 +286,14 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}
 
-	private boolean querySkipFinalSetters(IField field) throws OperationCanceledException {
+	/**
+	 * Queries the user whether to skip final setters of existing fields.
+	 * 
+	 * @param field the field in question
+	 * @return <code>true</code> to skip final setters, <code>false</code> otherwise
+	 * @throws OperationCanceledException if the operation has been cancelled
+	 */
+	private boolean querySkipFinalSetters(final IField field) throws OperationCanceledException {
 		if (!fSkipAllFinalSetters) {
 			switch (fSkipFinalSettersQuery.doQuery(field)) {
 				case IRequestQuery.CANCEL:
@@ -192,21 +307,30 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 		return true;
 	}
 
-	private void removeExistingAccessor(ListRewrite rewrite, IMethod accessor) throws JavaModelException {
-		MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), accessor.getNameRange()), MethodDeclaration.class);
+	/**
+	 * Removes an existing accessor method.
+	 * 
+	 * @param accessor the accessor method to remove
+	 * @param rewrite the list rewrite to use
+	 * @throws JavaModelException if an error occurs
+	 */
+	private void removeExistingAccessor(final IMethod accessor, final ListRewrite rewrite) throws JavaModelException {
+		final MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), accessor.getNameRange()), MethodDeclaration.class);
 		if (declaration != null)
 			rewrite.remove(declaration, null);
 	}
 
-	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
+	/*
+	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public final void run(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		}
 		try {
 			monitor.setTaskName(CodeGenerationMessages.getString("AddGetterSetterOperation.description")); //$NON-NLS-1$
 			monitor.beginTask("", fGetterFields.length + fSetterFields.length); //$NON-NLS-1$
 			final ICompilationUnit unit= fType.getCompilationUnit();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
 				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
@@ -233,9 +357,9 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 					fSkipAllFinalSetters= (fSkipFinalSettersQuery == null);
 					fSkipAllExisting= (fSkipExistingQuery == null);
 					if (!fSort) {
-						for (int index= 0; index < fGetterSetterFields.length; index++) {
-							generateGetter(fGetterSetterFields[index], rewriter);
-							generateSetter(fGetterSetterFields[index], rewriter);
+						for (int index= 0; index < fAccessorFields.length; index++) {
+							generateGetterMethod(fAccessorFields[index], rewriter);
+							generateSetterMethod(fAccessorFields[index], rewriter);
 							monitor.worked(1);
 							if (monitor.isCanceled()) {
 								throw new OperationCanceledException();
@@ -243,14 +367,14 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 						}
 					}
 					for (int index= 0; index < fGetterFields.length; index++) {
-						generateGetter(fGetterFields[index], rewriter);
+						generateGetterMethod(fGetterFields[index], rewriter);
 						monitor.worked(1);
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
 						}
 					}
 					for (int index= 0; index < fSetterFields.length; index++) {
-						generateSetter(fSetterFields[index], rewriter);
+						generateSetterMethod(fSetterFields[index], rewriter);
 						monitor.worked(1);
 						if (monitor.isCanceled()) {
 							throw new OperationCanceledException();
@@ -286,15 +410,34 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 		}
 	}
 
-	public void setCreateComments(boolean createComments) {
-		fCreateComments= createComments;
+	/**
+	 * Determines whether existing members should be skipped.
+	 * 
+	 * @param skip <code>true</code> to skip existing members, <code>false</code> otherwise
+	 */
+	public final void setSkipAllExisting(final boolean skip) {
+		fSkipAllExisting= skip;
 	}
 
-	public void setFlags(int flags) {
-		fFlags= flags;
+	/**
+	 * Determines whether final setters should be skipped.
+	 * 
+	 * @param skip <code>true</code> to skip final setters, <code>false</code> otherwise
+	 */
+	public final void setSkipAllFinalSetters(final boolean skip) {
+		fSkipAllFinalSetters= skip;
 	}
 
 	public void setSort(boolean sort) {
 		fSort= sort;
+	}
+
+	/**
+	 * Sets the visibility modifier of the generated constructors.
+	 * 
+	 * @param visibility the visibility modifier
+	 */
+	public final void setVisibility(final int visibility) {
+		fVisibility= visibility;
 	}
 }

@@ -132,7 +132,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		String[] keys= new String[bindings.length];
 		for (int index= 0; index < bindings.length; index++)
 			keys[index]= bindings[index].getKey();
-		return new AddUnimplementedConstructorsOperation(type, null, keys, settings, true, true, true);
+		return new AddUnimplementedConstructorsOperation(type, null, unit, keys, settings, true, true, true);
 	}
 
 	private void initCodeTemplates() {

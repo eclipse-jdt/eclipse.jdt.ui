@@ -2125,13 +2125,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				binding= declaration.resolveBinding();
 		}
 		if (binding != null) {
-			if (doConstructors) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, createBindingKeys(StubUtility2.getVisibleConstructors(binding)), settings, false, true, true);
+			if (doUnimplementedMethods) {
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, JavaModelUtil.is50OrHigher(type.getJavaProject()), false, true, true);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
-			if (doUnimplementedMethods) {
-				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, JavaModelUtil.is50OrHigher(type.getJavaProject()), false, true, true);
+			if (doConstructors) {
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding)), settings, false, true, true);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}

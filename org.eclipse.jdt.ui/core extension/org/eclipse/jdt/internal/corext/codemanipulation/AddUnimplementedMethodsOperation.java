@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -96,28 +97,30 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	/** The type declaration to add the methods to */
 	private final IType fType;
 
+	/** The compilation unit ast node */
+	private final CompilationUnit fUnit;
+
 	/**
 	 * Creates a new add unimplemented methods operation.
 	 * 
 	 * @param type the type to add the methods to
 	 * @param insert the insertion point, or <code>null</code>
+	 * @param unit the compilation unit ast node
 	 * @param keys the method binding keys to implement
 	 * @param settings the code generation settings to use
-	 * @param annotations <code>true</code> if annotations should be generated,
-	 *        <code>false</code> otherwise
-	 * @param imports <code>true</code> if the import edits should be applied,
-	 *        <code>false</code> otherwise
-	 * @param apply <code>true</code> if the resulting edit should be applied,
-	 *        <code>false</code> otherwise
-	 * @param save <code>true</code> if the changed compilation unit should be saved,
-	 *        <code>false</code> otherwise
+	 * @param annotations <code>true</code> if annotations should be generated, <code>false</code> otherwise
+	 * @param imports <code>true</code> if the import edits should be applied, <code>false</code> otherwise
+	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean imports, final boolean apply, final boolean save) {
+	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean imports, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
+		Assert.isNotNull(unit);
 		Assert.isNotNull(keys);
 		Assert.isNotNull(settings);
 		fType= type;
 		fInsert= insert;
+		fUnit= unit;
 		fKeys= keys;
 		fSettings= settings;
 		fAnnotations= annotations;
@@ -177,7 +180,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
 			fCreatedMethods.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
