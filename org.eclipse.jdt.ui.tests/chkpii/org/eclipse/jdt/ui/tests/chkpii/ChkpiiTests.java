@@ -229,9 +229,9 @@ public class ChkpiiTests extends TestCase {
 	private int parseLine(String aLine) {
 		int index= aLine.indexOf("Files Contain Error"); //$NON-NLS-1$
 		
-		if (index == -1) {
-			index= aLine.indexOf("Files Contain Warning"); //$NON-NLS-1$
-		}
+//		if (index == -1) {
+//			index= aLine.indexOf("Files Contain Warning"); //$NON-NLS-1$
+//		}
 		
 		if (index == -1) {
 			index= aLine.indexOf("Files Could Not Be Processed"); //$NON-NLS-1$
