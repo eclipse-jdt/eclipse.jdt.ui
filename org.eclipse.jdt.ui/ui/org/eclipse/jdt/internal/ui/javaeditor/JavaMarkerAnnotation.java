@@ -94,7 +94,6 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				fPresentation= DebugUITools.newDebugModelPresentation();
 				
 			setLayer(4);
-			setImage(fPresentation.getImage(marker));
 			fImageType= BREAKPOINT_IMAGE;					
 			
 			fType= AnnotationType.UNKNOWN;
@@ -221,8 +220,14 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see MarkerAnnotation#getImage(Display)
 	 */
 	public Image getImage(Display display) {
-		if (fImageType == BREAKPOINT_IMAGE)
-			return super.getImage(display);
+		if (fImageType == BREAKPOINT_IMAGE) {
+			Image result= super.getImage(display);
+			if (result == null) {
+				result= fPresentation.getImage(getMarker());
+				setImage(result);
+			}					
+			return result;
+		}
 
 		int newImageType= NO_IMAGE;
 
