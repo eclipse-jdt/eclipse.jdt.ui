@@ -21,6 +21,8 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jface.text.Region;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,7 +36,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
-import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 public class ImportOrganizeTest extends CoreTests {
@@ -1601,7 +1602,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 		int start= content.indexOf("/*b*/");
 		int end= content.indexOf("/*e*/");
-		Selection sel= Selection.createFromStartEnd(start, end);
+		Region sel= new Region(start, end);
 
 		String[] order= new String[] { };
 		int threshold= 99;
@@ -1645,7 +1646,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("A.java", content, false, null);
 
 		int start= content.indexOf("/*b*/");
-		Selection sel= Selection.createFromStartLength(start, 5);
+		Region sel= new Region(start, 5);
 
 		String[] order= new String[] { };
 		int threshold= 99;
@@ -1665,7 +1666,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");	
 		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());
 		
-		sel= Selection.createFromStartLength(start, 9);
+		sel= new Region(start, 9);
 		
 		structure= new ImportsStructure(cu, order, threshold, true);
 		op= new OrganizeImportsOperation(structure, sel, true, true, null);
