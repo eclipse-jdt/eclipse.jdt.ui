@@ -95,7 +95,6 @@ import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -762,7 +761,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			if (!(input instanceof IJavaElement) && input instanceof IAdaptable)
 				input= ((IAdaptable)input).getAdapter(IJavaElement.class);
 		}
-		setInput(findInputForJavaElement((JavaElement)input));		
+		setInput(findInputForJavaElement((IJavaElement)input));		
 	}
 
 	protected void setInitialSelection() {
