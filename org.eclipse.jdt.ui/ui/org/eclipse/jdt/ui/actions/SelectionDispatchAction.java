@@ -23,10 +23,9 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ui.IPartService;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -136,7 +135,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 				run(selection);
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), ActionUtil.getText(this), "Unexpected exception during action execution. See log for more details.");
+			ExceptionHandler.handle(e, getShell(), ActionUtil.getText(this), ActionMessages.getString("SelectionDispatchAction.unexpected_exception")); //$NON-NLS-1$
 		}
 	}
 }

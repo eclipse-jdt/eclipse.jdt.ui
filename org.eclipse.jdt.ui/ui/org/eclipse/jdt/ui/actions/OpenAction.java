@@ -135,7 +135,7 @@ public class OpenAction extends SelectionDispatchAction {
 				OpenActionUtil.open(element);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					JavaStatusConstants.INTERNAL_ERROR, PackagesMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
+					JavaStatusConstants.INTERNAL_ERROR, ActionMessages.getString("OpenAction.error.message"), e)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(getShell(), 
 					ActionMessages.getString("OpenAction.error.title"), //$NON-NLS-1$

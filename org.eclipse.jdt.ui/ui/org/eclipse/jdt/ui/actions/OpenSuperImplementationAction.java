@@ -151,8 +151,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			String title= ActionMessages.getString("OpenSuperImplementationAction.error.title");
-			String message= ActionMessages.getString("OpenSuperImplementationAction.error.message");
+			String title= ActionMessages.getString("OpenSuperImplementationAction.error.title"); //$NON-NLS-1$
+			String message= ActionMessages.getString("OpenSuperImplementationAction.error.message"); //$NON-NLS-1$
 			ErrorDialog.openError(getShell(), title, message, e.getStatus());
 		}
 	}

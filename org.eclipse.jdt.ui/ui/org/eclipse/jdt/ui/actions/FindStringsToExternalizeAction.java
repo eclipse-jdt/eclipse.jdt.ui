@@ -144,7 +144,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		if (elements == null || elements.isEmpty())
 			return new NonNLSElement[0];
 
-		pm.beginTask("Finding not externalized strings...", elements.size());
+		pm.beginTask(ActionMessages.getString("FindStringsToExternalizeAction.find_strings"), elements.size()); //$NON-NLS-1$
 					
 		try{
 			List l= new ArrayList();	
@@ -194,7 +194,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			
 		ICompilationUnit[] cus= pack.getCompilationUnits();
 
-		pm.beginTask("", cus.length);
+		pm.beginTask("", cus.length); //$NON-NLS-1$
 		
 		List l= new ArrayList(cus.length);
 		for (int i= 0; i < cus.length; i++){
@@ -211,7 +211,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 */	
 	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws JavaModelException{
 		IJavaElement[] children= sourceFolder.getChildren();
-		pm.beginTask("", children.length);
+		pm.beginTask("", children.length); //$NON-NLS-1$
 		List result= new ArrayList();
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement iJavaElement= children[i];
@@ -232,7 +232,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 */
 	private List analyze(IJavaProject project, IProgressMonitor pm) throws JavaModelException{
 		IPackageFragment[] packs= project.getPackageFragments();
-		pm.beginTask("", packs.length);
+		pm.beginTask("", packs.length); //$NON-NLS-1$
 		List result= new ArrayList();
 		for (int i= 0; i < packs.length; i++) {
 			if (! packs[i].isReadOnly())

@@ -94,7 +94,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), "&Select or enter the element to reveal:"));
+		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), ActionMessages.getString("ShowInPackageViewAction.select_name"))); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -120,8 +120,8 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
-			String title= ActionMessages.getString("ShowInPackageViewAction.error.title");
-			String message= ActionMessages.getString("ShowInPackageViewAction.error.message");
+			String title= ActionMessages.getString("ShowInPackageViewAction.error.title"); //$NON-NLS-1$
+			String message= ActionMessages.getString("ShowInPackageViewAction.error.message"); //$NON-NLS-1$
 			ErrorDialog.openError(getShell(), title, message, e.getStatus());
 		}
 	}	

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -66,9 +67,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 */ 
 	public OpenExternalJavadocAction(UnifiedSite site) {
 		super(site);
-		setText("Open E&xternal Javadoc@Shift+F2");
-		setDescription("Opens the Javadoc of the selected element in an external browser");
-		setToolTipText("Opens the Javadoc of the selected element in an external browser");
+		setText(ActionMessages.getString("OpenExternalJavadocAction.label")); //$NON-NLS-1$
+		setDescription(ActionMessages.getString("OpenExternalJavadocAction.description")); //$NON-NLS-1$
+		setToolTipText(ActionMessages.getString("OpenExternalJavadocAction.tooltip")); //$NON-NLS-1$
 	}
 	
 	/**
@@ -103,7 +104,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		if (help != null) {
 			WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
 		} else {
-			showMessage(shell, "Help support not available", false);
+			showMessage(shell, ActionMessages.getString("OpenExternalJavadocAction.help_not_available"), false); //$NON-NLS-1$
 		}
 	}
 	
@@ -131,7 +132,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(ITextSelection selection) throws JavaModelException {
-		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), "&Select or enter the element to open:"));
+		run(SelectionConverter.codeResolveOrInput(fEditor, getShell(), ActionUtil.getText(this), ActionMessages.getString("OpenExternalJavadocAction.select_element"))); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -154,19 +155,19 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			if (baseURL == null) {
 				IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(element);
 				if (root != null && root.getKind() == IPackageFragmentRoot.K_BINARY) {
-					String message= "The documentation location for ''{0}'' has not been configured. For elements from libraries specify the Javadoc location URL on the property page of the parent JAR (''{1}'').";	
+					String message= ActionMessages.getString("OpenExternalJavadocAction.libraries.no_location");	 //$NON-NLS-1$
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, root.getElementName() }), false);
 				} else {
 					IJavaElement annotatedElement= element.getJavaProject();
-					String message= "The documentation location for ''{0}'' has not been configured. For elements from source specify the Javadoc location URL on the property page of the parent project (''{1}'').";	
+					String message= ActionMessages.getString("OpenExternalJavadocAction.source.no_location");	 //$NON-NLS-1$
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, annotatedElement.getElementName() }), false);
 				}
 				return;
 			}
-			if ("file".equals(baseURL.getProtocol())) {
+			if ("file".equals(baseURL.getProtocol())) { //$NON-NLS-1$
 				URL noRefURL= JavaDocLocations.getJavaDocLocation(element, false);
 				if (!(new File(noRefURL.getFile())).isFile()) {
-					String message= "The documentation does not contain an entry for ''{0}''.\n(File ''{1}'' does not exist.)";
+					String message= ActionMessages.getString("OpenExternalJavadocAction.no_entry"); //$NON-NLS-1$
 					showMessage(shell, MessageFormat.format(message, new String[] { labelName, noRefURL.toExternalForm() }), false);
 					return;
 				}
@@ -178,7 +179,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 			} 		
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			showMessage(shell, "Opening Javadoc failed. See log for details.", true);
+			showMessage(shell, ActionMessages.getString("OpenExternalJavadocAction.opening_failed"), true); //$NON-NLS-1$
 		}
 	}
 	
@@ -186,9 +187,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				if (isError) {
-					MessageDialog.openError(shell, "Open External Javadoc", message);
+					MessageDialog.openError(shell, ActionMessages.getString("OpenExternalJavadocAction.dialog.title"), message); //$NON-NLS-1$
 				} else {
-					MessageDialog.openInformation(shell, "Open External Javadoc", message);
+					MessageDialog.openInformation(shell, ActionMessages.getString("OpenExternalJavadocAction.dialog.title"), message); //$NON-NLS-1$
 				}
 			}
 		});

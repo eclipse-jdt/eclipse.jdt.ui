@@ -114,6 +114,6 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		
 		Refactoring refactoring= createNewRefactoringInstance(unit);
 		ExternalizeWizard wizard= new ExternalizeWizard(refactoring);
-		new RefactoringStarter().activate(refactoring, wizard, ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true);
+		new RefactoringStarter().activate(refactoring, wizard, ActionMessages.getString("ExternalizeStringsAction.dialog.title"), true); //$NON-NLS-1$
 	}		
 }

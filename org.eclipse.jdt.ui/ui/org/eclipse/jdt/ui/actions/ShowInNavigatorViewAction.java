@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -55,7 +56,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 */
 	public ShowInNavigatorViewAction(UnifiedSite site) {
 		super(site);
-		setText("Show in &Navigator View");
+		setText(ActionMessages.getString("ShowInNavigatorView.label")); //$NON-NLS-1$
 	}
 
 	/**
@@ -109,7 +110,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) throws CoreException {
 		run(getResource(SelectionConverter.codeResolveOrInput(fEditor, 
-			getShell(), ActionUtil.getText(this), "Select the element to be opened in the navigator view:")));
+			getShell(), ActionUtil.getText(this), ActionMessages.getString("ShowInNavigatorView.dialog.message")))); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
