@@ -10,7 +10,8 @@ import java.util.Set;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.IResourceProxy;
+import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -21,6 +22,7 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.util.IClassFileReader;
@@ -29,7 +31,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
   */
-public class ClassPathDetector implements IResourceVisitor {
+public class ClassPathDetector implements IResourceProxyVisitor {
 		
 	private HashMap fSourceFolders;
 	private List fClassFiles;
@@ -46,7 +48,7 @@ public class ClassPathDetector implements IResourceVisitor {
 		fClassFiles= new ArrayList(100);
 		fProject= project;
 			
-		project.accept(this);
+		project.accept(this, 0);
 			
 		fResultClasspath= null;
 		fResultOutputFolder= null;
@@ -234,17 +236,20 @@ public class ClassPathDetector implements IResourceVisitor {
 		}
 		return null;
 	}
-		
-	public boolean visit(IResource resource) throws CoreException {
-		if (resource.getType() == IResource.FILE) {
-			IFile file= (IFile) resource;
-			String extension= resource.getFileExtension();
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
+	 */
+	public boolean visit(IResourceProxy proxy) throws CoreException {
+		if (proxy.getType() == IResource.FILE) {
+			String name= proxy.getName();
+			String extension= Signature.getSimpleName(name);
 			if ("java".equalsIgnoreCase(extension)) { //$NON-NLS-1$
-				visitCompilationUnit(file);
+				visitCompilationUnit((IFile) proxy.requestResource());
 			} else if ("class".equalsIgnoreCase(extension)) { //$NON-NLS-1$
-				fClassFiles.add(file);
+				fClassFiles.add((IFile) proxy.requestResource());
 			} else if ("jar".equalsIgnoreCase(extension)) { //$NON-NLS-1$
-				fJARFiles.add(file.getFullPath());
+				fJARFiles.add(proxy.requestFullPath());
 			}
 			return false;
 		}
@@ -258,6 +263,9 @@ public class ClassPathDetector implements IResourceVisitor {
 	public IClasspathEntry[] getClasspath() {
 		return fResultClasspath;
 	}
+
+
+
 }
 	
 
