@@ -1650,6 +1650,54 @@ public class PreferenceConstants {
 	public static final String EDITOR_STICKY_OCCURRENCES= "stickyOccurrences"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether type occurrences are marked. This
+	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * <p>
+	 * 		1 << 0 : types
+	 * 		1 << 1 : methods
+	 * 		1 << 2 : fields
+	 * 		1 << 3 : local variables
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_TYPE_OCCURRENCES= "markTypeOccurrences"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether method occurrences are marked. This
+	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_METHOD_OCCURRENCES= "markMethodOccurrences"; //$NON-NLS-1$
+	/**
+	 * A named preference that controls whether field occurrences are marked. This
+	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_FIELD_OCCURRENCES= "markFieldOccurrences"; //$NON-NLS-1$
+	/**
+	 * A named preference that controls whether local variable occurrences are marked. This
+	 * is only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES= "markLocalVariableOccurrences"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls disabling of the overwrite mode.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1668,6 +1716,15 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */	
 	public static final String EDITOR_SMART_SEMICOLON= "smart_semicolon"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls the smart backspace behavior.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SMART_BACKSPACE= "smart_backspace"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference that controls the "smart opening brace" smart typing handler
@@ -1687,15 +1744,6 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
-
-	/**
-	 * A named preference that controls the smart backspace behavior.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * 
-	 * @since 3.0
-	 */
-	public static final String EDITOR_SMART_BACKSPACE= "smart_backspace"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether Java comments should be
@@ -2449,6 +2497,10 @@ public class PreferenceConstants {
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);
 		store.setDefault(PreferenceConstants.EDITOR_STICKY_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_TYPE_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_METHOD_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, true);
 		
 		// spell checking
 		store.setDefault(PreferenceConstants.SPELLING_CHECK_SPELLING, false);
