@@ -500,7 +500,7 @@ public class PartialASTTest extends CoreTests {
 	}		
 	
 	private CompilationUnit getPartialCompilationUnit(ICompilationUnit cu, int offset) {
-		return AST.parsePartialCompilationUnit(cu, offset, true);
+		return AST.parsePartialCompilationUnit(cu, offset, true, null, null);
 	}
 	
 	/*

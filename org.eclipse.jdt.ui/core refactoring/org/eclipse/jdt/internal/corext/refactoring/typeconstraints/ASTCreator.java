@@ -36,7 +36,7 @@ public class ASTCreator {
 	private static CompilationUnit getCuNode(WorkingCopyOwner workingCopyOwner, ICompilationUnit wc) {
 		if (workingCopyOwner == null)
 			return AST.parseCompilationUnit(wc, true);
-		return AST.parseCompilationUnit(wc, true, workingCopyOwner);
+		return AST.parseCompilationUnit(wc, true, workingCopyOwner, null);
 	}
 
 	public static ICompilationUnit getCu(ASTNode node) {

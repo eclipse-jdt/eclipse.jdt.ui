@@ -63,7 +63,7 @@ public class AssistContext implements IInvocationContext {
 	
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
-			fASTRoot= AST.parsePartialCompilationUnit(fCompilationUnit, fOffset, true);
+			fASTRoot= AST.parsePartialCompilationUnit(fCompilationUnit, fOffset, true, null, null);
 		}
 		return fASTRoot;
 	}

@@ -285,7 +285,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			TextChangeManager manager= new TextChangeManager(true);
 			
 			typeCu= WorkingCopyUtil.getNewWorkingCopy(getInputTypeCU(), fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
-			CompilationUnit typeCuNode= AST.parseCompilationUnit(typeCu, true, fWorkingCopyOwner);
+			CompilationUnit typeCuNode= AST.parseCompilationUnit(typeCu, true, fWorkingCopyOwner, null);
 			ASTRewrite typeCuRewrite= new ASTRewrite(typeCuNode);
 			IType theType= (IType)JavaModelUtil.findInCompilationUnit(typeCu, fInputType);
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(theType, typeCuNode);

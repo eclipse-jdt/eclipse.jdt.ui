@@ -143,7 +143,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (parent instanceof IMember)
 				cu2= ((IMember)parent).getCompilationUnit();
 			
-			CompilationUnit root= AST.parsePartialCompilationUnit(cu2, 0, false);
+			CompilationUnit root= AST.parsePartialCompilationUnit(cu2, 0, false, null, null);
 			
 			ASTRewrite rewriter= new ASTRewrite(root);
 			

@@ -91,7 +91,7 @@ public class JavaTextSelection extends TextSelection {
 		if (! (fElement instanceof ICompilationUnit))
 			return null;
 		// long start= System.currentTimeMillis();
-		fPartialAST= AST.parsePartialCompilationUnit((ICompilationUnit)fElement, getOffset(), true);
+		fPartialAST= AST.parsePartialCompilationUnit((ICompilationUnit)fElement, getOffset(), true, null, null);
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
 		return fPartialAST;
 	}
