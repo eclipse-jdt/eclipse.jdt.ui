@@ -247,6 +247,14 @@ public class ChangeParametersControl extends Composite {
 				}
 			}
 		});
+		table.addKeyListener(new KeyAdapter() {
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.F2 && e.stateMask == SWT.NONE) {
+					editColumnOrNextPossible(0);
+					e.doit= false;
+				}
+			}
+		});
 
 		if (canEditTableCells()){
 			addCellEditors();
