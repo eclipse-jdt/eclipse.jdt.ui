@@ -57,7 +57,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 					
 					ITypeBinding definingType= definingMethod.getDeclaringClass();
 					
-					if (Bindings.isSuperType(fSelectedType, definingType))
+					if (Bindings.isSuperType(definingType, fSelectedType))
 						fResult.add(node.getName());
 				}
 			}
