@@ -35,7 +35,7 @@ import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
-	private static final boolean BUG_79760= true;
+	private static final boolean BUG_80839= true;
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -889,7 +889,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test366() throws Exception {
-		if (BUG_79760) {
+		if (BUG_80839) {
 			System.out.println("test 366 disabled due to bug 79760");
 			return;
 		}
@@ -897,7 +897,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test367() throws Exception {
-		if (BUG_79760) {
+		if (BUG_80839) {
 			System.out.println("test 367 disabled due to bug 79760");
 			return;
 		}
@@ -1031,10 +1031,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test508() throws Exception {
-		if (BUG_79760) {
-			System.out.println("test 508 disabled due to bug 79760");
-			return;
-		}
 		localsTest();
 	}
 	
@@ -1051,10 +1047,6 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 		
 	public void test512() throws Exception {
-		if (BUG_79760) {
-			System.out.println("test 512 disabled due to bug 79760");
-			return;
-		}
 		localsTest();
 	}
 	
@@ -1255,6 +1247,18 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void test569() throws Exception {
+		localsTest();
+	}
+	
+	public void test570() throws Exception {
+		localsTest();
+	}
+	
+	public void test571() throws Exception {
+		localsTest();
+	}
+	
+	public void test572() throws Exception {
 		localsTest();
 	}
 	
@@ -1710,6 +1714,20 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test1152() throws Exception {
 		enumTest();
+	}
+	
+	//---- Test varargs ---------------------------------
+	
+	protected void varargsTest() throws Exception {
+		performTest(fgTestSetup.getVarargsPackage(), "A", COMPARE_WITH_OUTPUT, "varargs_out");
+	}
+	
+	public void test1200() throws Exception {
+		varargsTest();
+	}
+	
+	public void test1201() throws Exception {
+		varargsTest();
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

@@ -96,10 +96,13 @@ public class ChangeParametersControl extends Composite {
 		}
 		public String getColumnText(Object element, int columnIndex) {
 			ParameterInfo info= (ParameterInfo) element;
-			if (columnIndex == TYPE_PROP)
-				return info.getNewTypeName();
-			if (columnIndex == NEWNAME_PROP)
+			if (columnIndex == TYPE_PROP) {
+				String result= info.getNewTypeName();
+				return info.isVarargs() ? (result + "...") : result; //$NON-NLS-1$
+			}
+			if (columnIndex == NEWNAME_PROP) {
 				return info.getNewName();
+			}
 			if (columnIndex == DEFAULT_PROP) {
 			    if (info.isAdded())
 			        return info.getDefaultValue();

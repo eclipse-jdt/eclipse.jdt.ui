@@ -19,6 +19,7 @@ public class ParameterInfo {
 	
 	public static final int INDEX_FOR_ADDED= -1;
 	private final IVariableBinding fOldBinding;
+	private final boolean fIsVarargs;
 	private final String fOldName;
 	private final String fOldTypeName;
 	private final int fOldIndex;
@@ -34,6 +35,10 @@ public class ParameterInfo {
 	}
 
 	public ParameterInfo(IVariableBinding binding, String type, String name, int index) {
+		this(binding, false, type, name, index);
+	}
+
+	public ParameterInfo(IVariableBinding binding, boolean isVarargs, String type, String name, int index) {
 		fOldBinding= binding;
 		fOldTypeName= type;
 		fNewTypeName= type;
@@ -42,12 +47,17 @@ public class ParameterInfo {
 		fOldIndex= index;
 		fDefaultValue= ""; //$NON-NLS-1$
 		fIsDeleted= false;
+		fIsVarargs= isVarargs;
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
 		ParameterInfo info= new ParameterInfo("Object", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
 		info.setDefaultValue("null"); //$NON-NLS-1$
 		return info;
+	}
+	
+	public boolean isVarargs() {
+		return fIsVarargs;
 	}
 	
 	public boolean isDeleted(){

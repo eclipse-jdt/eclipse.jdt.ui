@@ -16,6 +16,7 @@ import java.util.List;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -60,6 +61,11 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	public void endVisit(CatchClause node) {
 		super.endVisit(node);
 		clearAccessMode(accessFlowInfo(node), node.getException());
+	}
+	
+	public void endVisit(EnhancedForStatement node) {
+		super.endVisit(node);
+		clearAccessMode(accessFlowInfo(node), node.getParameter());
 	}
 	
 	public void endVisit(ForStatement node) {

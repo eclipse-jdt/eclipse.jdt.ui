@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -65,6 +66,27 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			// No need to merge the condition. It was already considered by the InputFlowAnalyzer.
 			info.removeLabel(null);	
 		}
+		public void endVisit(EnhancedForStatement node) {
+			if (skipNode(node))
+				return;
+			FlowInfo paramInfo= getFlowInfo(node.getParameter());
+			FlowInfo expressionInfo= getFlowInfo(node.getExpression());
+			FlowInfo actionInfo= getFlowInfo(node.getBody());
+			EnhancedForFlowInfo forInfo= createEnhancedFor();
+			setFlowInfo(node, forInfo);
+			// If the for statement is the outermost loop then we only have to consider
+			// the action. The parameter and expression are only evaluated once.
+			if (node == fLoopNode) {
+				forInfo.mergeAction(actionInfo, fFlowContext);
+			} else {
+				// Inner for loops are evaluated in the sequence expression, parameter,
+				// action.
+				forInfo.mergeExpression(expressionInfo, fFlowContext);
+				forInfo.mergeParameter(paramInfo, fFlowContext);
+				forInfo.mergeAction(actionInfo, fFlowContext);
+			}
+			forInfo.removeLabel(null);
+		}
 		public void endVisit(ForStatement node) {
 			if (skipNode(node))
 				return;
@@ -80,11 +102,10 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 				forInfo.mergeIncrement(incrementInfo, fFlowContext);
 				forInfo.mergeCondition(conditionInfo, fFlowContext);
 				forInfo.mergeAction(actionInfo, fFlowContext);
-				forInfo.removeLabel(null);
 			} else {
 				// we have to merge two different cases. One if we reenter the for statement
-				// immediatelly (that means we have to consider increments, condition and action
-				// ) and the other case if we reenter the for in the next loop of
+				// immediatelly (that means we have to consider increments, condition and action)
+				// and the other case if we reenter the for in the next loop of
 				// the outer loop. Then we have to consider initializations, condtion and action.
 				// For a conditional flow info that means:
 				// (initializations | increments) & condition & action.
@@ -125,6 +146,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 	
 	public boolean visit(DoStatement node) {
+		createLoopReentranceVisitor(node);
+		return super.visit(node);			
+	}
+	
+	public boolean visit(EnhancedForStatement node) {
 		createLoopReentranceVisitor(node);
 		return super.visit(node);			
 	}
@@ -177,6 +203,11 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		} else {
 			super.endVisit(node);
 		}
+	}
+	
+	public void endVisit(EnhancedForStatement node) {
+		super.endVisit(node);
+		handleLoopReentrance(node);
 	}
 	
 	public void endVisit(ForStatement node) {

@@ -540,7 +540,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (argument == null)
 				continue;
 			VariableDeclaration declaration= ASTNodes.findVariableDeclaration(argument, root);
-			ParameterInfo info= new ParameterInfo(argument, getType(declaration), argument.getName(), i);
+			boolean isVarargs= declaration instanceof SingleVariableDeclaration 
+				? ((SingleVariableDeclaration)declaration).isVarargs()
+				: false;
+			ParameterInfo info= new ParameterInfo(argument, isVarargs, getType(declaration), argument.getName(), i);
 			fParameterInfos.add(info);
 		}
 	}
@@ -684,7 +687,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			SnippetFinder.Match duplicate= fDuplicates[d];
 			if (!duplicate.isMethodBody()) {
 				ASTNode[] callNodes= createCallNodes(duplicate);
-				StatementRewrite.create(fRewriter, duplicate.getNodes()).replace(callNodes, description);
+				new StatementRewrite(fRewriter, duplicate.getNodes()).replace(callNodes, description);
 			}
 		}		
 	}
@@ -719,6 +722,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			parameter.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, ASTNodes.getModifiers(infoDecl)));
 			parameter.setType(ASTNodeFactory.newType(fAST, infoDecl));
 			parameter.setName(fAST.newSimpleName(info.getNewName()));
+			parameter.setVarargs(info.isVarargs());
 			parameters.add(parameter);
 		}
 		

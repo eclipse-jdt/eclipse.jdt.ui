@@ -39,6 +39,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fDestinationPackage;
 	private IPackageFragment fGenericsPackage;
 	private IPackageFragment fEnumsPackage;
+	private IPackageFragment fVarargsPackage;
 	
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
@@ -69,6 +70,7 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 		fDestinationPackage= root.createPackageFragment("destination_in", true, null);
 		fGenericsPackage= root.createPackageFragment("generics_in", true, null);
 		fEnumsPackage= root.createPackageFragment("enums_in", true, null);
+		fVarargsPackage= root.createPackageFragment("varargs_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
 			"A.java", 
@@ -156,6 +158,10 @@ public class ExtractMethodTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getEnumsPackage() {
 		return fEnumsPackage;
+	}	
+	
+	public IPackageFragment getVarargsPackage() {
+		return fVarargsPackage;
 	}	
 }
 
