@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.IOpenable;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -70,6 +71,7 @@ import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
+
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
@@ -115,7 +117,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			fBuildActionGroup= new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart),
 			new ProjectActionGroup(fPart), 
-			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater())});
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(part.getViewer(), JavaUI.ID_PACKAGES, shell, createTitleUpdater()),
+			new LayoutActionGroup(part)});
 		
 		PackagesFrameSource frameSource= new PackagesFrameSource(fPart);
 		FrameList frameList= new FrameList(frameSource);
@@ -277,7 +280,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	private void addOpenNewWindowAction(IMenuManager menu, Object element) {
 		if (element instanceof IJavaElement) {
 			element= ((IJavaElement)element).getResource();
-		}
+			}
 		if (!(element instanceof IContainer))
 			return;
 		menu.appendToGroup(

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -39,10 +40,12 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelDecorator;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -51,12 +54,14 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -81,7 +86,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -92,12 +99,14 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -121,6 +130,11 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart,  IPropertyChangeListener, IViewPartInputProvider {
 	
+	private boolean fIsCurrentLayoutFlat; // true means flat, false means hierachical
+
+	private static final int HIERARCHICAL_LAYOUT= 0x1;
+	private static final int FLAT_LAYOUT= 0x2;
+	
 	public final static String VIEW_ID= JavaUI.ID_PACKAGES;
 				
 	// Persistance tags.
@@ -134,7 +148,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
+	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
+	
 
+	private PackageExplorerContentProvider fContentProvider;
+	
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
 	private Menu fContextMenu;		
@@ -143,7 +161,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private ISelectionChangedListener fSelectionListener;
 	
 	private String fWorkingSetName;
-	
 	
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
@@ -172,16 +189,35 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	};
 
-	
-	public PackageExplorerPart() { 
-	}
 
+	private PackageExplorerLabelProvider fLabelProvider;	
+	
 	/* (non-Javadoc)
 	 * Method declared on IViewPart.
 	 */
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
+		restoreLayoutState(memento);
+	}
+
+	private void restoreLayoutState(IMemento memento) {
+		Integer state= null;
+		if (memento != null)
+			state= memento.getInteger(TAG_LAYOUT);
+
+		// If no memento try an restore from preference store
+		if(state == null) {
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			state= new Integer(store.getInt(TAG_LAYOUT));
+		}
+
+		if (state.intValue() == FLAT_LAYOUT)
+			fIsCurrentLayoutFlat= true;
+		else if (state.intValue() == HIERARCHICAL_LAYOUT)
+			fIsCurrentLayoutFlat= false;
+		else
+			fIsCurrentLayoutFlat= true;
 	}
 	
 	/** 
@@ -228,31 +264,22 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fActionSet.dispose();
 		super.dispose();	
 	}
+
 	/**
 	 * Implementation of IWorkbenchPart.createPartControl(Composite)
 	 */
 	public void createPartControl(Composite parent) {
-		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
-		boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
-		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
-		fViewer.setContentProvider(new PackageExplorerContentProvider(showCUChildren, reconcile));
+		fViewer= createViewer(parent);
+		
+		setProviders();
 		
 		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(this);
-		
-		ILabelProvider labelProvider= 
-			new AppearanceAwareLabelProvider(
-				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
-				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
-				AppearanceAwareLabelProvider.getDecorators(true, null)
-			);
-		
-		fViewer.setLabelProvider(new DecoratingLabelProvider(
-			labelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator())
-		);
+	
 		fViewer.setSorter(new JavaElementSorter());
+		
 		fViewer.setUseHashlookup(true);
-
+		
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
@@ -299,7 +326,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (fMemento != null)
 			restoreState(fMemento);
 		fMemento= null;
-
+	
 		// Set help for the view 
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.PACKAGES_VIEW);
 		
@@ -308,6 +335,102 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		updateTitle();
 	}
 
+	/**
+	 * This viewer ensures that non-leaves in the hierarchical
+	 * layout are not removed by any filters.
+	 * 
+	 * @since 2.1
+	 */
+	private ProblemTreeViewer createViewer(Composite parent) {
+		return  new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
+			/*
+			 * @see org.eclipse.jface.viewers.StructuredViewer#filter(java.lang.Object)
+			 */
+			protected Object[] getFilteredChildren(Object parent) {
+				List list = new ArrayList();
+				ViewerFilter[] filters = fViewer.getFilters();
+				Object[] children = ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
+				for (int i = 0; i < children.length; i++) {
+					Object object = children[i];
+					if (!isEssential(object)) {
+						object = filter(object, parent, filters);
+						if (object != null) {
+							list.add(object);
+						}
+					} else
+						list.add(object);
+				}
+				return list.toArray();
+			}
+			
+			// Sends the object through the given filters
+			private Object filter(Object object, Object parent, ViewerFilter[] filters) {
+				for (int i = 0; i < filters.length; i++) {
+					ViewerFilter filter = filters[i];
+					if (!filter.select(fViewer, parent, object))
+						return null;
+				}
+				return object;
+			}
+		
+			/* Checks if a filtered object in essential (ie. is a parent that
+			 * should not be removed).
+			 */ 
+			private boolean isEssential(Object object) {
+				if (!isFlatLayout() && object instanceof IPackageFragment)
+					return fContentProvider.hasChildren(object);
+				else
+					return false;
+			}
+		};
+	}
+
+	/**
+	 * Answers whether this part shows the packages flat or hierarchical.
+	 * 
+	 * @since 2.1
+	 */
+	boolean isFlatLayout() {
+		return fIsCurrentLayoutFlat;
+	}
+	
+	private void setProviders() {
+		//content provider must be set before the label provider
+		fContentProvider= createContentProvider();
+		fContentProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
+		fViewer.setContentProvider(fContentProvider);
+	
+		fLabelProvider= createLabelProvider();
+		fLabelProvider.setIsFlatLayout(fIsCurrentLayoutFlat);
+		fViewer.setLabelProvider(new DecoratingLabelProvider(fLabelProvider, PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
+	}
+	
+	void toggleLayout() {
+
+		// Update current state and inform content and label providers
+		fIsCurrentLayoutFlat= !fIsCurrentLayoutFlat;
+		saveLayoutState(null);
+		
+		fContentProvider.setIsFlatLayout(isFlatLayout());
+		fLabelProvider.setIsFlatLayout(isFlatLayout());
+		
+		fViewer.getControl().setRedraw(false);
+		fViewer.refresh();
+		fViewer.getControl().setRedraw(true);
+	}
+	
+	private PackageExplorerContentProvider createContentProvider() {
+		boolean showCUChildren= AppearancePreferencePage.showCompilationUnitChildren();
+		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
+		return new PackageExplorerContentProvider(showCUChildren, reconcile);
+	}
+	
+	private PackageExplorerLabelProvider createLabelProvider() {
+		return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
+				AppearanceAwareLabelProvider.getDecorators(true, null), fContentProvider);			
+	}
+	
 	private void fillActionBars() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		fActionSet.fillActionBars(actionBars);
@@ -557,6 +680,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		return this == getSite().getPage().getActivePart();
 	}
 
+
 	
 	public void saveState(IMemento memento) {
 		if (fViewer == null) {
@@ -567,9 +691,35 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		saveExpansionState(memento);
 		saveSelectionState(memento);
+		saveLayoutState(memento);
+		
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//saveScrollState(memento, fViewer.getTree());
 		fActionSet.saveState(memento);
+	}
+	
+	/**
+	 * Saves the current layout state.
+	 * 
+	 * @param memento	the memento to save the state into or
+	 * 					<code>null</code> to store the state in the preferences
+	 * @since 2.1
+	 */
+	private void saveLayoutState(IMemento memento) {
+		if (memento != null) {	
+			memento.putInteger(TAG_LAYOUT, getLayoutAsInt());
+		} else {
+		//if memento is null save in preference store
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			store.setValue(TAG_LAYOUT, getLayoutAsInt());
+		}
+	}
+
+	private int getLayoutAsInt() {
+		if (fIsCurrentLayoutFlat)
+			return FLAT_LAYOUT;
+		else
+			return HIERARCHICAL_LAYOUT;
 	}
 
 	protected void saveScrollState(IMemento memento, Tree tree) {
@@ -896,5 +1046,5 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	public void collapseAll() {
 		fViewer.collapseToLevel(getViewPartInput(), TreeViewer.ALL_LEVELS);
 	}
-
-}
+	public PackageExplorerPart() { 
+	}}

@@ -1,8 +1,12 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001.
+ * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.packageview;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
@@ -33,36 +37,25 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
  
 /**
- * A ContentProvider for the PackageExplorer
+ * Content provider for the PackageExplorer.
  * 
- * @see StandardJavaElementContentProvider
+ * <p>
+ * Since 2.1 this content provider can provide the children for flat or hierarchical
+ * layout. The hierarchical layout is done by delegating to the <code>PackageFragmentProvider</code>.
+ * </p>
+ * 
+ * @see org.eclipse.jdt.ui.StandardJavaElementContentProvider
+ * @see org.eclipse.jdt.internal.ui.packageview.PackageFragmentProvider
  */
-public class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
+class PackageExplorerContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
 	protected TreeViewer fViewer;
 	protected Object fInput;
-	
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
-	public void dispose() {
-		super.dispose();
-		JavaCore.removeElementChangedListener(this);
-	}
 
-	/* (non-Javadoc)
-	 * Method declared on IContentProvider.
-	 */
-	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		super.inputChanged(viewer, oldInput, newInput);
-		fViewer= (TreeViewer)viewer;
-		if (oldInput == null && newInput != null) {
-			JavaCore.addElementChangedListener(this); 
-		} else if (oldInput != null && newInput == null) {
-			JavaCore.removeElementChangedListener(this); 
-		}
-		fInput= newInput;
-	}
+	private boolean fIsFlatLayout;
+	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
+	
+
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
@@ -73,7 +66,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	 * Creates a new content provider for Java elements.
 	 */
 	public PackageExplorerContentProvider(boolean provideMembers, boolean provideWorkingCopy) {
-		super(provideMembers, provideWorkingCopy);
+		super(provideMembers, provideWorkingCopy);	
 	}
 	
 	/* (non-Javadoc)
@@ -86,16 +79,93 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 			JavaPlugin.log(e);
 		}
 	}
-	
+
+	/* (non-Javadoc)
+	 * Method declared on IContentProvider.
+	 */
+	public void dispose() {
+		super.dispose();
+		JavaCore.removeElementChangedListener(this);
+		fPackageFragmentProvider.dispose();
+	}
+
+	// ------ Code which delegates to PackageFragmentProvider ------
+
+	private boolean needsToDelegate(Object element) {
+		int type= -1;
+		if (element instanceof IJavaElement)
+			type= ((IJavaElement)element).getElementType();
+		return (!fIsFlatLayout && (type == IJavaElement.PACKAGE_FRAGMENT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.JAVA_PROJECT));
+	}		
+
+	public Object[] getChildren(Object parentElement) {
+		if (needsToDelegate(parentElement)) {
+			Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
+			return getWithParentsResources(packageFragments, parentElement);
+		} else
+			return super.getChildren(parentElement);
+	}
+
+	public Object getParent(Object child) {
+		if (needsToDelegate(child)) {
+			return fPackageFragmentProvider.getParent(child);
+		} else
+			return super.getParent(child);
+	}
+
+	/**
+	 * Returns the given objects with the resources of the parent.
+	 */
+	private Object[] getWithParentsResources(Object[] existingObject, Object parent) {
+		Object[] objects= super.getChildren(parent);
+		List list= new ArrayList();
+		// Add everything that is not a PackageFragment
+		for (int i= 0; i < objects.length; i++) {
+			Object object= objects[i];
+			if (!(object instanceof IPackageFragment)) {
+				list.add(object);
+			}
+		}
+		if (existingObject != null)
+			list.addAll(Arrays.asList(existingObject));
+		return list.toArray();
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on IContentProvider.
+	 */
+	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+		super.inputChanged(viewer, oldInput, newInput);
+		fPackageFragmentProvider.inputChanged(viewer, oldInput, newInput);
+		fViewer= (TreeViewer)viewer;
+		if (oldInput == null && newInput != null) {
+			JavaCore.addElementChangedListener(this); 
+		} else if (oldInput != null && newInput == null) {
+			JavaCore.removeElementChangedListener(this); 
+		}
+		fInput= newInput;
+	}
+
+	// ------ delta processing ------
+
 	/**
 	 * Processes a delta recursively. When more than two children are affected the
 	 * tree is fully refreshed starting at this node. The delta is processed in the
 	 * current thread but the viewer updates are posted to the UI thread.
 	 */
-	protected void processDelta(IJavaElementDelta delta) throws JavaModelException {
+	public void processDelta(IJavaElementDelta delta) throws JavaModelException {
+
 		int kind= delta.getKind();
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
+		
+		if (!fIsFlatLayout && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+			fPackageFragmentProvider.processDelta(delta);
+			IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();			
+			processAffectedChildren(affectedChildren);
+			return;
+		}
+			
 
 		if (!getProvideWorkingCopy() && isWorkingCopy(element))
 			return; 
@@ -193,6 +263,11 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				processResourceDelta(rd[i], element);
 			}
 		}
+
+		handleAffectedChildren(delta, element);
+	}
+		
+	private void handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
 		
 		IJavaElementDelta[] affectedChildren= delta.getAffectedChildren();
 		if (affectedChildren.length > 1) {
@@ -215,6 +290,10 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				postRefresh(element);
 			return;
 		}
+		processAffectedChildren(affectedChildren);
+	}
+	
+	protected void processAffectedChildren(IJavaElementDelta[] affectedChildren) throws JavaModelException {
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i]);
 		}
@@ -363,5 +442,9 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		if (ctrl != null && !ctrl.isDisposed()) {
 			ctrl.getDisplay().asyncExec(r); 
 		}
+	}
+
+	void setIsFlatLayout(boolean state) {
+		fIsFlatLayout= state;
 	}
 }
