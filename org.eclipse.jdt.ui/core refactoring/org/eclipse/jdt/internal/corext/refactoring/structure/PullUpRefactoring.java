@@ -336,7 +336,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		if (!Checks.isAvailable(member))
 			return false;
 		if (member instanceof IType) {
-			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member))
+			if (!JdtFlags.isStatic(member) && !JdtFlags.isEnum(member) && !JdtFlags.isAnnotation(member))
 				return false;
 		}
 		if (member instanceof IMethod) {
