@@ -78,7 +78,6 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		};
 		
 		fResourceFilterField= new StringDialogField();
-		fResourceFilterField.setDialogFieldListener(listener);
 		fResourceFilterField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.filter.label")); //$NON-NLS-1$
 		
 		fAbortInvalidClasspathField= new SelectionButtonDialogField(SWT.CHECK);
@@ -86,6 +85,10 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		fAbortInvalidClasspathField.setLabelText(JavaUIMessages.getString("JavaBuilderPreferencePage.abortinvalidprojects.label")); //$NON-NLS-1$
 		
 		updateControls();				
+	
+		fResourceFilterField.setDialogFieldListener(listener);
+		fAbortInvalidClasspathField.setDialogFieldListener(listener);
+	
 	}
 	
 
@@ -170,7 +173,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 
 	private void updateValues() {
 		IStatus status= validateResourceFilters();
-		fWorkingValues.put(PREF_RESOURCE_FILTER, fAbortInvalidClasspathField.isSelected() ? ABORT : IGNORE);
+		fWorkingValues.put(PREF_BUILD_INVALID_CLASSPATH, fAbortInvalidClasspathField.isSelected() ? ABORT : IGNORE);
 		
 		updateStatus(status);
 	}
@@ -259,7 +262,9 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		}
 		fResourceFilterField.setText(buf.toString());
 		
-		fAbortInvalidClasspathField.setSelection(ABORT.equals(fWorkingValues.get(PREF_BUILD_INVALID_CLASSPATH)));
+		String build= (String) fWorkingValues.get(PREF_BUILD_INVALID_CLASSPATH);
+		
+		fAbortInvalidClasspathField.setSelection(ABORT.equals(build));
 	}
 
 }
