@@ -305,9 +305,6 @@ public final class JavaUI {
 	 * <p>
 	 * [Issue: IJavaSearchScope is not currently part of the Java core API.]
 	 * </p>
-	 * <p>
-	 * [Issue: SelectionDialogs must be parented. shell must not be null.]
-	 * </p>
 	 * 
 	 * @param parent the parent shell of the dialog to be created
 	 * @param context the runnable context used to show progress when the dialog
