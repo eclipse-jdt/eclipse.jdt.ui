@@ -20,7 +20,7 @@ class ReorgExceptionHandler implements IChangeExceptionHandler{
 
 	ReorgExceptionHandler() {
 		String id = JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();
-		fStatus = new MultiStatus(id, IStatus.OK, "Status", null);
+		fStatus = new MultiStatus(id, IStatus.OK, "See details", null);
 	}
 
 	public void handle(ChangeContext context, IChange change, Exception e) {

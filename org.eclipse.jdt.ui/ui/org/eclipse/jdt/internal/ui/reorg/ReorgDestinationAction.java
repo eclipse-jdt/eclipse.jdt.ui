@@ -148,8 +148,8 @@ abstract class ReorgDestinationAction extends ReorgAction {
 		if (status.isOK()) 
 			return;
 		ExceptionHandler.handle(new JavaUIException(status), 
-													ReorgMessages.getString("copyAction.exception.title"), //$NON-NLS-1$
-													ReorgMessages.getString("copyAction.exception.label")); //$NON-NLS-1$ 
+													getActionName(), 
+													"An error occurred while reorganizing resources");
 	}	
 		
 	private static boolean ensureSaved(List elements, String actionName) {
