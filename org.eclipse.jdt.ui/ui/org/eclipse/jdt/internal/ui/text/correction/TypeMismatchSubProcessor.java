@@ -280,7 +280,7 @@ public class TypeMismatchSubProcessor {
 			return;
 		}
 		
-		IMethodBinding overridden= Bindings.findMethodDefininition(binding);
+		IMethodBinding overridden= Bindings.findMethodDefininition(binding, false);
 		if (overridden == null || overridden.getReturnType() == binding.getReturnType()) {
 			return;
 		}
@@ -310,7 +310,7 @@ public class TypeMismatchSubProcessor {
 			return;
 		}
 		
-		IMethodBinding overridden= Bindings.findMethodDefininition(binding);
+		IMethodBinding overridden= Bindings.findMethodDefininition(binding, false);
 		if (overridden == null) {
 			return;
 		}

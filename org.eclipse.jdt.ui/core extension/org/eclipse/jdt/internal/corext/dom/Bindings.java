@@ -31,20 +31,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperFieldAccess;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -328,10 +315,11 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the method that is defines the given method.
+	 * Finds the method that is defines the given method. The returned method might not be visible.
 	 * @param method The method to find
+	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 */
-	public static IMethodBinding findMethodDefininition(IMethodBinding method) {
+	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding type= method.getDeclaringClass();
 		String methodName= method.getName();
 		ITypeBinding[] parameters= method.getParameterTypes();
@@ -340,7 +328,9 @@ public class Bindings {
 		for (int i= 0; i < interfaces.length; i++) {
 			IMethodBinding res= findMethodInHierarchy(interfaces[i], methodName, parameters);
 			if (res != null) {
-				return res;
+				if (isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
+					return res;
+				}
 			}
 		}
 		if (type.getSuperclass() != null) {
@@ -352,8 +342,9 @@ public class Bindings {
 	/**
 	 * Finds the method that is implemented by the given method.
 	 * @param method The method to find
+ 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 */
-	public static IMethodBinding findMethodImplementation(IMethodBinding method) {
+	public static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
 		
 		String methodName= method.getName();
@@ -361,11 +352,25 @@ public class Bindings {
 		while (superClass != null) {
 			IMethodBinding res= findMethodInType(superClass, methodName, parameters);
 			if (res != null) {
-				return res;
+				if (isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
+					return res;
+				}
+				return null;
 			}
 			superClass= superClass.getSuperclass();
 		}
 		return null;
+	}
+	
+	private static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
+		int otherflags= member.getModifiers();
+		ITypeBinding declaringType= member.getDeclaringClass();
+		if (Modifier.isPublic(otherflags) || Modifier.isProtected(otherflags) || (declaringType != null && declaringType.isInterface())) {
+			return true;
+		} else if (Modifier.isPrivate(otherflags)) {
+			return false;
+		}		
+		return pack == declaringType.getPackage();
 	}
 	
 	/**

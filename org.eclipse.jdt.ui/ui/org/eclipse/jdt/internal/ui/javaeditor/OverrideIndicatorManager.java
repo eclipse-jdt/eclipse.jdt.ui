@@ -106,7 +106,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			if (node instanceof MethodDeclaration) {
 				try {
 					IMethodBinding methodBinding= ((MethodDeclaration)node).resolveBinding();
-					IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding);
+					IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding, true);
 					if (definingMethodBinding != null) {
 						String definingTypeQualifiedName= definingMethodBinding.getDeclaringClass().getQualifiedName();
 						IType definingType= null;
@@ -159,7 +159,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			return findType(types, methodBinding.getDeclaringClass().getQualifiedName());
 		}
 		
-		private IType findType(IType[] types, String fullyQualifiedName) throws JavaModelException {
+		private IType findType(IType[] types, String fullyQualifiedName) {
 			if (types == null)
 				return null;
 			
@@ -227,7 +227,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			public boolean visit(MethodDeclaration node) {
 				IMethodBinding binding= node.resolveBinding();
 				if (binding != null) {
-					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding);
+					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding, true);
 					if (definingMethod != null) {
 						
 						ITypeBinding definingType= definingMethod.getDeclaringClass();

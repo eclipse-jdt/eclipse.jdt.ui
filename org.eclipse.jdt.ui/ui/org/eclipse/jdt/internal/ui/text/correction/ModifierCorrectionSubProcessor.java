@@ -190,7 +190,7 @@ public class ModifierCorrectionSubProcessor {
 			}
 		}
 		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
-			IMethodBinding defining= Bindings.findMethodDefininition(method);
+			IMethodBinding defining= Bindings.findMethodDefininition(method, false);
 			if (defining != null) {
 				int excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
 				int includedModifiers= defining.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC);
