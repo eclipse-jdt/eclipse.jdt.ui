@@ -51,6 +51,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -355,5 +359,27 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 	
 	final public void run(IAction action) {
 		run(fSelection);
+	}
+	
+	static CompilationUnit parsePartialCompilationUnit(
+		ICompilationUnit unit,
+		int position,
+		boolean resolveBindings) {
+				
+		if (unit == null) {
+			throw new IllegalArgumentException();
+		}
+		try {
+			ASTParser c= ASTParser.newParser(AST.LEVEL_2_0);
+			c.setSource(unit);
+			c.setFocalPosition(position);
+			c.setResolveBindings(resolveBindings);
+			c.setWorkingCopyOwner(null);
+			ASTNode result= c.createAST(null);
+			return (CompilationUnit) result;
+		} catch (IllegalStateException e) {
+			// convert ASTParser's complaints into old form
+			throw new IllegalArgumentException();
+		}
 	}
 }

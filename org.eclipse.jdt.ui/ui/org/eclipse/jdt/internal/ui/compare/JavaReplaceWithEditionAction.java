@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -114,7 +113,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					return;
 				}
 				
-				CompilationUnit root= AST.parsePartialCompilationUnit(input.getCompilationUnit(), 0, false, null, null);
+				CompilationUnit root= parsePartialCompilationUnit(input.getCompilationUnit(), 0, false);
 				BodyDeclaration node= (BodyDeclaration)ASTNodes.getParent(NodeFinder.perform(root, input.getNameRange()), BodyDeclaration.class);
 				if (node == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);

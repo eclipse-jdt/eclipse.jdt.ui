@@ -414,7 +414,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			if (name == null)
 				return null;
 			args.add(name);
-			if (je instanceof IWorkingCopy || je instanceof ICompilationUnit)
+			if (je instanceof ICompilationUnit)
 				break;
 			je= je.getParent();
 		}

@@ -24,7 +24,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -143,7 +142,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (parent instanceof IMember)
 				cu2= ((IMember)parent).getCompilationUnit();
 			
-			CompilationUnit root= AST.parsePartialCompilationUnit(cu2, 0, false, null, null);
+			CompilationUnit root= parsePartialCompilationUnit(cu2, 0, false);
 			
 			OldASTRewrite rewriter= new OldASTRewrite(root);
 			
