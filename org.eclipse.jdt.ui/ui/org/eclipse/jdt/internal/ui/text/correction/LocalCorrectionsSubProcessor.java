@@ -612,6 +612,22 @@ public class LocalCorrectionsSubProcessor {
 		String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removesemicolon.description"); //$NON-NLS-1$
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), "", 6); //$NON-NLS-1$
 		proposals.add(proposal);
-	}		
+	}
+	
+	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof CastExpression) {
+			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+			
+			CastExpression cast= (CastExpression) selectedNode;
+			ASTNode placeholder= rewrite.createCopy(cast.getExpression());
+			rewrite.markAsReplaced(selectedNode, placeholder);
+			
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessarycast.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposals.add(proposal);
+		}
+	}	
 	
 }

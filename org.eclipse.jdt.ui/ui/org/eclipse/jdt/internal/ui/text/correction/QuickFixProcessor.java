@@ -103,6 +103,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:			
 			case IProblem.SuperfluousSemicolon:
+			case IProblem.UnnecessaryCast:
+			case IProblem.UnnecessaryArgumentCast:			
 				return true;
 			default:
 				return false;
@@ -287,6 +289,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.SuperfluousSemicolon:
 				LocalCorrectionsSubProcessor.addSuperfluousSemicolonProposal(context, problem, proposals);
+				break;
+			case IProblem.UnnecessaryCast:
+			case IProblem.UnnecessaryArgumentCast:
+				LocalCorrectionsSubProcessor.addUnnecessaryCastProposal(context, problem, proposals);
 				break;
 			default:
 		}
