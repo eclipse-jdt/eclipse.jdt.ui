@@ -21,8 +21,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -172,16 +176,18 @@ public class InlineMethodRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+		pm.beginTask("", 3); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
 		InvocationAnalyzer invocationAnalyzer= new InvocationAnalyzer(fSourceProvider);
+		pm.setTaskName(RefactoringCoreMessages.getString("InlineMethodRefactoring.searching")); //$NON-NLS-1$
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
 		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units)));
 		if (result.hasFatalError())
 			return result;
+		checkOverridden(result, new SubProgressMonitor(pm, 1));
 		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (int c= 0; c < units.length; c++) {
@@ -331,5 +337,55 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (resource != null && resource.getType() == IResource.FILE)
 			return (IFile)resource;
 		return null;
-	}	
+	}
+	
+	private void checkOverridden(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 9); //$NON-NLS-1$
+		pm.setTaskName(RefactoringCoreMessages.getString("InlineMethodRefactoring.checking.overridden")); //$NON-NLS-1$
+		MethodDeclaration decl= fSourceProvider.getDeclaration();
+		IMethod method= Binding2JavaModel.find(decl.resolveBinding(), fSourceProvider.getCompilationUnit().getJavaProject());
+		if (method == null || Flags.isPrivate(method.getFlags())) {
+			pm.worked(8);
+			return;
+		}
+		IType type= method.getDeclaringType();
+		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 6));
+		checkSubTypes(status, method, hierarchy.getAllSubtypes(type), new SubProgressMonitor(pm, 1));
+		checkSuperClasses(status, method, hierarchy.getAllSuperclasses(type), new SubProgressMonitor(pm, 1));
+		checkSuperInterfaces(status, method, hierarchy.getAllSuperInterfaces(type), new SubProgressMonitor(pm, 1));
+		pm.setTaskName(""); //$NON-NLS-1$
+	}
+
+	private void checkSubTypes(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
+		checkTypes(
+			result, method, types, 
+			"InlineMethodRefactoring.checking.overridden.error", //$NON-NLS-1$
+			pm);
+	}
+	
+	private void checkSuperClasses(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
+		checkTypes(
+			result, method, types, 
+			"InlineMethodRefactoring.checking.overrides.error", //$NON-NLS-1$
+			pm);
+	}
+
+	private void checkSuperInterfaces(RefactoringStatus result, IMethod method, IType[] types, IProgressMonitor pm) {
+		checkTypes(
+			result, method, types, 
+			"InlineMethodRefactoring.checking.implements.error", //$NON-NLS-1$
+			pm);
+	}
+	private void checkTypes(RefactoringStatus result, IMethod method, IType[] types, String key, IProgressMonitor pm) {
+		pm.beginTask("", types.length); //$NON-NLS-1$
+		for (int i= 0; i < types.length; i++) {
+			pm.worked(1);
+			IMethod[] overridden= types[i].findMethods(method);
+			if (overridden != null && overridden.length > 0) {
+				result.addError(
+					RefactoringCoreMessages.getFormattedString(key, types[i].getElementName()), 
+					JavaSourceContext.create(overridden[0]));
+			}
+		}
+	}
 }
