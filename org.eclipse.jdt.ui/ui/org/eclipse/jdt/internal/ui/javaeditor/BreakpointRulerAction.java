@@ -132,7 +132,7 @@ public class BreakpointRulerAction extends MarkerRulerAction {
 					}
 				}
 				if (type != null) {
-					if (!JDIDebugModel.lineBreakpointExists(type, lineNumber)) {
+					if (!JDIDebugModel.lineBreakpointExists(type.getFullyQualifiedName(), lineNumber)) {
 						Map attributes = new HashMap(10);
 						JavaCore.addJavaElementMarkerAttributes(attributes, type);
 						attributes.put("org.eclipse.jdt.debug.ui.JAVA_ELEMENT_HANDLE_ID", type.getHandleIdentifier());
