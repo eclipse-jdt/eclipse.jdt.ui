@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,7 +58,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		super.setUp();
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(
 			"${package_declaration}" + 
-			System.getProperty("line.separator", "\n") +			"${type_declaration}");
+			System.getProperty("line.separator", "\n") +
+			"${type_declaration}");
 
 		Hashtable options= JavaCore.getOptions();
 		

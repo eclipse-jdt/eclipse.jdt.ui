@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -86,12 +86,24 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", 
-			"package p;" +			"import java.util.List;" +			"class A{" +			"int f;" +			"{}" +			"void foo(){}" +			"class Inner{}" +			"}");
+			"package p;" +
+			"import java.util.List;" +
+			"class A{" +
+			"int f;" +
+			"{}" +
+			"void foo(){}" +
+			"class Inner{}" +
+			"}");
 		
 		fPackageQ= MySetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackageQ, CU_B_NAME + ".java", 
-				"package q;" +				"import java.util.Set;" +
-				"class B{" +				"int x;" +				"void bar(){}" +				"class InnerB{}" +				"}");
+				"package q;" +
+				"import java.util.Set;" +
+				"class B{" +
+				"int x;" +
+				"void bar(){}" +
+				"class InnerB{}" +
+				"}");
 		
 		fPackageQ_R= MySetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 		
