@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,10 +31,15 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -277,10 +283,45 @@ public class PullUpRefactoring extends Refactoring {
 					result.addFatalError(message);
 				}	
 			}
+			result.merge(checkMultiDeclarationOfFields());
+			if (result.hasFatalError())
+				return result;			
 			return new RefactoringStatus();
 		} finally {
 			pm.done();
 		}
+	}
+
+	private RefactoringStatus checkMultiDeclarationOfFields() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		ASTNodeMappingManager astManager= new ASTNodeMappingManager();
+		for (int i= 0; i < fElementsToPullUp.length; i++) {
+			IMember member= fElementsToPullUp[i];
+			if (member.getElementType() != IJavaElement.FIELD)
+				continue;
+			if (isPartOfMultiDeclaration((IField)member, astManager)){
+				Context context= JavaSourceContext.create(member);
+				String pattern= "Field ''{0}'' is declared in a multi declaration. Pulling up is currently not supported.";
+				String msg= MessageFormat.format(pattern, new String[]{member.getElementName()});
+				result.addFatalError(msg, context);
+			}
+		}
+		return result;
+	}
+
+	private boolean isPartOfMultiDeclaration(IField iField, ASTNodeMappingManager manager) throws JavaModelException {
+		Selection selection= Selection.createFromStartLength(iField.getNameRange().getOffset(), iField.getNameRange().getLength());
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, true);
+		manager.getAST(iField.getCompilationUnit()).accept(analyzer);
+		ASTNode selected= analyzer.getFirstSelectedNode();
+		if (selected == null)
+			selected= analyzer.getLastCoveringNode();
+		if (selected == null)
+			return false;
+		FieldDeclaration fieldDeclaration= (FieldDeclaration)ASTNodes.getParent(selected, FieldDeclaration.class);	
+		if (fieldDeclaration == null)
+			return false;
+		return fieldDeclaration.fragments().size() != 1;	
 	}
 	
 	private static IMethod[] getOriginals(IMethod[] methods){
