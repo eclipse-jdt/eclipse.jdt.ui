@@ -67,9 +67,9 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	
 	/** Key used to look up display tab width */
 	public final static String PREFERENCE_TAB_WIDTH= "org.eclipse.jdt.ui.editor.tab.width"; //$NON-NLS-1$
-	/* Key used to look up code formatter tab size */
+	/** Key used to look up code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
-	/* Key used to look up code formatter tab character */
+	/** Key used to look up code formatter tab character */
 	private final static String CODE_FORMATTER_TAB_CHAR= "org.eclipse.jdt.core.formatter.tabulation.char"; //$NON-NLS-1$
 	
 	private JavaTextTools fJavaTextTools;
