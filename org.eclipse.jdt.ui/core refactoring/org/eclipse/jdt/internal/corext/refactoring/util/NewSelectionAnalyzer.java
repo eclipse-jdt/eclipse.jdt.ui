@@ -500,7 +500,7 @@ public class NewSelectionAnalyzer extends GenericVisitor {
 	public boolean visit(QualifiedAllocationExpression node, BlockScope scope) {
 		boolean result= super.visit(node, scope);
 		trackExpressionTypeBinding(node, node.type.binding, scope);
-		return true;
+		return result;
 	}
 
 	public boolean visit(TrueLiteral node, BlockScope scope) {
