@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -49,6 +50,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class DeleteSourceReferencesAction extends SourceReferenceAction {
 
@@ -233,7 +235,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 
 
 	private static boolean isOkToDeleteReadOnly(ICompilationUnit cu){
-		String message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_read_only", cu.getElementName());//$NON-NLS-1$
+		String message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_read_only", getName(cu));//$NON-NLS-1$
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("DeleteSourceReferencesAction.delete1"), message); //$NON-NLS-1$
 	}
 	
@@ -326,7 +328,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
 		String label;
 		if (selection.size() == 1){
-			String[] keys= {ReorgUtils.getName(selection.getFirstElement())};
+			String[] keys= {getName(selection.getFirstElement())};
 			label= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.sure", keys); //$NON-NLS-1$
 		} else {
 			String[] keys= {String.valueOf(selection.size())};
@@ -335,11 +337,21 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		return MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), title, label);
 	}
 
+	private static String getName(Object element) {
+		if (element instanceof IJavaElement){
+			ILabelProvider lp= new JavaElementLabelProvider();
+			String text= lp.getText(element);
+			lp.dispose();
+			return text;
+		} else
+			return ReorgUtils.getName(element);
+	}
+
 	//made protected for ui-less testing
 	protected  boolean confirmCusDelete(ICompilationUnit[] cusToDelete) {
 		String message;
 		if (cusToDelete.length == 1){
-			message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_empty", cusToDelete[0].getElementName());//$NON-NLS-1$
+			message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cu_empty", getName(cusToDelete[0]));//$NON-NLS-1$
 		} else {
 			message= ReorgMessages.getFormattedString("DeleteSourceReferencesAction.cus_empty", String.valueOf(cusToDelete.length));//$NON-NLS-1$
 		}	
