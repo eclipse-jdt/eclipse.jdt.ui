@@ -63,7 +63,8 @@ public abstract class StatusDialog extends Dialog {
 		}
 	}
 	
-	protected IStatus getStatus() {
+	// 1GFCRWW: ITPJUI:ALL - Compile errors in VA/Java	
+	public IStatus getStatus() {
 		return fLastStatus;
 	}
 
