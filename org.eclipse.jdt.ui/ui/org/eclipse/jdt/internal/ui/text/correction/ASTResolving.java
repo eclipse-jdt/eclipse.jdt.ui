@@ -205,7 +205,7 @@ public class ASTResolving {
 			}
 			break;
 		case ASTNode.RETURN_STATEMENT:
-			MethodDeclaration decl= findParentMethodDeclaration(parent);
+			MethodDeclaration decl= ASTResolving.findParentMethodDeclaration(parent);
 			if (decl != null && !decl.isConstructor()) {
 				if (decl.getAST().apiLevel() == AST.JLS2) {
 					return decl.getReturnType().resolveBinding();
@@ -427,13 +427,6 @@ public class ASTResolving {
 	}
 
 	 
-	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
-		while ((node != null) && (node.getNodeType() != ASTNode.METHOD_DECLARATION)) {
-			node= node.getParent();
-		}
-		return (MethodDeclaration) node;
-	}
-	
 	public static BodyDeclaration findParentBodyDeclaration(ASTNode node) {
 		while ((node != null) && (!(node instanceof BodyDeclaration))) {
 			node= node.getParent();
@@ -455,6 +448,25 @@ public class ASTResolving {
 			node= node.getParent();
 		}
 		return node;
+	}
+	
+	/**
+	 * Returns the method binding of the node's parent method declaration or <code>null</code> if the node
+	 * is not inside a metho
+	 * @param node
+	 * @return CompilationUnit
+	 */
+	public static MethodDeclaration findParentMethodDeclaration(ASTNode node) {
+		while (node != null) {
+			if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				return (MethodDeclaration) node;
+			}
+			if (node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration) {
+				return null;
+			}
+			node= node.getParent();
+		}
+		return null;
 	}
 	
 	public static ASTNode findAncestor(ASTNode node, int nodeType) {
@@ -566,7 +578,7 @@ public class ASTResolving {
 		if (binding == null || !binding.isFromSource() || binding.isTypeVariable() || binding.isWildcardType()) {
 			return null;
 		}
-		ASTNode node= astRoot.findDeclaringNode(binding.getGenericType());
+		ASTNode node= astRoot.findDeclaringNode(binding.getTypeDeclaration());
 		if (node == null) {
 			ICompilationUnit targetCU= Bindings.findCompilationUnit(binding, cu.getJavaProject());
 			if (targetCU != null) {
@@ -680,6 +692,9 @@ public class ASTResolving {
 			for (int i= 0; i < typeParameters.length; i++) {
 				result.add(typeParameters[i]);
 			}
+			if (Modifier.isStatic(type.getModifiers())) {
+				break;
+			}
 			binding= type.getDeclaringClass();
 		}
 		
@@ -748,10 +763,14 @@ public class ASTResolving {
 			if (noWildcards) {
 				return false;
 			}
-			return isUseableTypeInContext(type.getBound(), availableVariables, noWildcards);
+			if (type.getBound() != null) { 
+				return isUseableTypeInContext(type.getBound(), availableVariables, noWildcards);
+			}
 		}
 		return true;
 	}
+
+
 	
 	
 }
