@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -111,10 +110,14 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
     private RefactoringStatus checkInitializer() {
-    	Expression initializer= fTempDeclaration.getInitializer();
-    	if (initializer instanceof NullLiteral)
-    		return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.nulLiteralsCannotBeInlined")); //$NON-NLS-1$
-        return null;
+    	switch(fTempDeclaration.getInitializer().getNodeType()){
+    		case ASTNode.NULL_LITERAL:
+    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTemRefactoring.error.message.nulLiteralsCannotBeInlined")); //$NON-NLS-1$
+    		case ASTNode.ARRAY_INITIALIZER:
+    			return RefactoringStatus.createFatalErrorStatus("Array variables initialized with constants cannot be inlined."); 	
+    		default:	
+		        return null;
+    	}
     }
 
 	/*
