@@ -313,8 +313,6 @@ public class JavaIndenter {
 		boolean found= false; // whether we have found anything at all. If we have, we'll trace back to it once we have a hoist point
 		boolean hasBrace= false;
 		
-		int commaPosition= JavaHeuristicScanner.NOT_FOUND;
-		
 		if (matchBrace) {
 			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
 				fPosition= position;
@@ -490,7 +488,7 @@ public class JavaIndenter {
 				
 				case Symbols.TokenCOMMA:
 					if (found)
-						commaPosition= fScanner.findNonWhitespaceForward(fPreviousPos, position);
+						fScanner.findNonWhitespaceForward(fPreviousPos, position);
 					nextToken();
 					break;
 
