@@ -201,7 +201,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(javaResources))));
 		for (int i= 0; i < fJavaElements.length; i++) {
 			IJavaElement element= fJavaElements[i];
-			if (element.getElementType() == IJavaElement.TYPE && ((IType)element).isAnonymous()) {
+			if (element instanceof IType && ((IType)element).isAnonymous()) {
 				// work around for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=44450
 				result.addFatalError("Currently, there isn't any support to delete an anonymous type.");
 			}
