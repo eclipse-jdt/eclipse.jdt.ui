@@ -23,6 +23,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.preference.PreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.MarginPainter;
@@ -31,7 +32,9 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
+import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -97,15 +100,23 @@ public abstract class JavaPreview {
 	
 	/**
 	 * Create a new Java preview
+	 * @param workingValues
+	 * @param parent
 	 */
-	
 	public JavaPreview(Map workingValues, Composite parent) {
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		fPreviewDocument= new Document();
 		fWorkingValues= workingValues;
 		tools.setupJavaDocumentPartitioner( fPreviewDocument, IJavaPartitions.JAVA_PARTITIONING);	
 		
-		fPreferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		PreferenceStore prioritizedSettings= new PreferenceStore();
+		prioritizedSettings.setValue(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		prioritizedSettings.setValue(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		prioritizedSettings.setValue(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		prioritizedSettings.setValue(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		
+		IPreferenceStore[] chain= { prioritizedSettings, JavaPlugin.getDefault().getCombinedPreferenceStore() };
+		fPreferenceStore= new ChainedPreferenceStore(chain);
 		fSourceViewer= new JavaSourceViewer(parent, null, null, false, SWT.READ_ONLY | SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, fPreferenceStore);
 		fViewerConfiguration= new JavaSourceViewerConfiguration(tools.getColorManager(), fPreferenceStore, null, IJavaPartitions.JAVA_PARTITIONING);
 		fSourceViewer.configure(fViewerConfiguration);

@@ -21,9 +21,9 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class NewLinesTabPage extends ModifyDialogTabPage {
 	
-	private final static String PREVIEW= 
+	private final String PREVIEW= 
 	createPreviewHeader(FormatterMessages.getString("NewLinesTabPage.preview.header")) + //$NON-NLS-1$
-	"private class Empty {}\n" + //$NON-NLS-1$
+	"public class Empty {}\n" + //$NON-NLS-1$
 	"class Example {" + //$NON-NLS-1$
 	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
@@ -35,10 +35,14 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 	"    do {} while (false);" + //$NON-NLS-1$
 	"    for (;;) {}" + //$NON-NLS-1$
 	"  }" + //$NON-NLS-1$
-	"}"; //$NON-NLS-1$
-
+	"}"+ //$NON-NLS-1$
+	"\n" + //$NON-NLS-1$
+	"enum MyEnum {" + //$NON-NLS-1$
+	"    UNDEFINED(0) { }" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
+	"enum EmptyEnum { }";//$NON-NLS-1$
 	
-	private final static String [] NOTINSERT_INSERT= {
+	private final String [] NOTINSERT_INSERT= {
 	    JavaCore.DO_NOT_INSERT,
 	    JavaCore.INSERT
 	};
@@ -59,7 +63,10 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_anonymous_class_body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_method_body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_block", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, NOTINSERT_INSERT); //$NON-NLS-1$
+		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_enum_declaration", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION, NOTINSERT_INSERT); //$NON-NLS-1$
+		createPref(newlinesGroup, numColumns, "NewLinesTabPage.newlines_group.option.empty_enum_constant", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, NOTINSERT_INSERT); //$NON-NLS-1$
 
+		
 		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.getString("NewLinesTabPage.arrayInitializer_group.title")); //$NON-NLS-1$
 		createPref(arrayInitializerGroup, numColumns, "NewLinesTabPage.array_group.option.after_opening_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$
 		createPref(arrayInitializerGroup, numColumns, "NewLinesTabPage.array_group.option.before_closing_brace_of_array_initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT); //$NON-NLS-1$

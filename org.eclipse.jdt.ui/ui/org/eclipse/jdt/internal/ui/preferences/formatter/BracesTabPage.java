@@ -21,10 +21,15 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 public class BracesTabPage extends ModifyDialogTabPage {
 	
-	private final static String PREVIEW=
+	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.getString("BracesTabPage.preview.header")) + //$NON-NLS-1$
 	"class Empty {}\n" + //$NON-NLS-1$
 	"\n" + //$NON-NLS-1$
+	"enum MyEnum {" + //$NON-NLS-1$
+	"    UNDEFINED(0) {" + //$NON-NLS-1$
+	"        void foo() {}" + //$NON-NLS-1$
+	"    }" + //$NON-NLS-1$
+	"}" + //$NON-NLS-1$
 	"class Example {" + //$NON-NLS-1$
 	"  SomeClass fField= new SomeClass() {" + //$NON-NLS-1$
 	"  };" + //$NON-NLS-1$
@@ -46,33 +51,32 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	"        fField.reset();" + //$NON-NLS-1$
 	"    }" + //$NON-NLS-1$
 	"  }" + //$NON-NLS-1$
-	"  void foo() {}" + //$NON-NLS-1$
 	"}"; //$NON-NLS-1$
 	
 	
 	private CompilationUnitPreview fPreview;
 	
 	
-	private final static String [] fBracePositions= {
+	private final String [] fBracePositions= {
 	    DefaultCodeFormatterConstants.END_OF_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED
 	};
 	
-	private final static String [] fExtendedBracePositions= {
+	private final String [] fExtendedBracePositions= {
 		DefaultCodeFormatterConstants.END_OF_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE,
 	    DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED, 
 		DefaultCodeFormatterConstants.NEXT_LINE_ON_WRAP
 	};
 	
-	private final static String [] fBracePositionNames= {
+	private final String [] fBracePositionNames= {
 	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line_indented") //$NON-NLS-1$
 	};
 	
-	private final static String [] fExtendedBracePositionNames= {
+	private final String [] fExtendedBracePositionNames= {
 	    FormatterMessages.getString("BracesTabPage.position.same_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line"), //$NON-NLS-1$
 	    FormatterMessages.getString("BracesTabPage.position.next_line_indented"), //$NON-NLS-1$
@@ -82,6 +86,8 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	
 	/**
 	 * Create a new BracesTabPage.
+	 * @param modifyDialog
+	 * @param workingValues
 	 */
 	public BracesTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
@@ -95,6 +101,9 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.anonymous_class_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANONYMOUS_TYPE_DECLARATION); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.constructor_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_CONSTRUCTOR_DECLARATION); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.method_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.enum_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_DECLARATION); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.enumconst_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ENUM_CONSTANT); //$NON-NLS-1$
+		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.annotation_type_declaration", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ANNOTATION_TYPE_DECLARATION); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK); //$NON-NLS-1$
 		createExtendedBracesCombo(group, numColumns, "BracesTabPage.option.blocks_in_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK_IN_CASE); //$NON-NLS-1$
 		createBracesCombo(group, numColumns, "BracesTabPage.option.switch_case", DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_SWITCH); //$NON-NLS-1$

@@ -68,15 +68,18 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		
 		public int index;
 
-		public Category(String key, String previewText, String name) {
-			this.key= key;
-			this.name= name;
-			this.previewText= previewText != null ? createPreviewHeader(name) + previewText : null; //$NON-NLS-1$
+		public Category(String _key, String _previewText, String _name) {
+			this.key= _key;
+			this.name= _name;
+			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null; //$NON-NLS-1$
 			children= new ArrayList();
 		}
 		
-		public Category(String name) {
-		    this(null, null, name);
+		/**
+		 * @param _name Category name
+		 */
+		public Category(String _name) {
+		    this(null, null, _name);
 		}
 		
 		public String toString() {
@@ -177,14 +180,14 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
         }
 	}
 	
-	protected final static String[] INDENT_NAMES = {
+	protected final String[] INDENT_NAMES = {
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.default"), //$NON-NLS-1$ 
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.on_column"), //$NON-NLS-1$ 
 	    FormatterMessages.getString("LineWrappingTabPage.indentation.by_one") //$NON-NLS-1$
 	};
 	
 	
-	protected final static String[] WRAPPING_NAMES = { 
+	protected final String[] WRAPPING_NAMES = { 
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.do_not_split"), //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.wrap_when_necessary"), // COMPACT_SPLIT //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.splitting.always_wrap_first_others_when_necessary"), // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
@@ -194,7 +197,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	};
 	
 
-	private final static Category fCompactIfCategory= new Category(
+	private final Category fCompactIfCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_COMPACT_IF,
 	    "class Example {" + //$NON-NLS-1$
 	    "int foo(int argument) {" + //$NON-NLS-1$
@@ -205,46 +208,46 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	);
 	
 
-	private final static Category fTypeDeclarationSuperclassCategory= new Category(
+	private final Category fTypeDeclarationSuperclassCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERCLASS_IN_TYPE_DECLARATION,
 	    "class Example extends OtherClass {}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.extends_clause") //$NON-NLS-1$
 	);
 	
 
-	private final static Category fTypeDeclarationSuperinterfacesCategory= new Category(
+	private final Category fTypeDeclarationSuperinterfacesCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_TYPE_DECLARATION,
 	    "class Example implements I1, I2, I3 {}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.implements_clause") //$NON-NLS-1$
 	);
 	
 	
-	private final static Category fConstructorDeclarationsParametersCategory= new Category(
+	private final Category fConstructorDeclarationsParametersCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_CONSTRUCTOR_DECLARATION,
 	    "class Example {Example(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) { this();}" + //$NON-NLS-1$
 	    "Example() {}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.parameters") //$NON-NLS-1$
 	); 
 
-	private final static Category fMethodDeclarationsParametersCategory= new Category(
+	private final Category fMethodDeclarationsParametersCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION,
 	    "class Example {void foo(int arg1, int arg2, int arg3, int arg4, int arg5, int arg6) {}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.parameters") //$NON-NLS-1$
 	); 
 	
-	private final static Category fMessageSendArgumentsCategory= new Category(
+	private final Category fMessageSendArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION,
 	    "class Example {void foo() {Other.bar( 100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.arguments") //$NON-NLS-1$
 	); 
 
-	private final static Category fMessageSendSelectorCategory= new Category(
+	private final Category fMessageSendSelectorCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SELECTOR_IN_METHOD_INVOCATION,
 	    "class Example {int foo(Some a) {return a.getFirst();}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.qualified_invocations") //$NON-NLS-1$
 	);
 	
-	private final static Category fMethodThrowsClauseCategory= new Category(
+	private final Category fMethodThrowsClauseCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_THROWS_CLAUSE_IN_METHOD_DECLARATION, 
 	    "class Example {" + //$NON-NLS-1$
 	    "int foo() throws FirstException, SecondException, ThirdException {" + //$NON-NLS-1$
@@ -252,7 +255,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    FormatterMessages.getString("LineWrappingTabPage.throws_clause") //$NON-NLS-1$
 	);
 
-	private final static Category fConstructorThrowsClauseCategory= new Category(
+	private final Category fConstructorThrowsClauseCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_THROWS_CLAUSE_IN_CONSTRUCTOR_DECLARATION, 
 	    "class Example {" + //$NON-NLS-1$
 	    "Example() throws FirstException, SecondException, ThirdException {" + //$NON-NLS-1$
@@ -261,37 +264,37 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	);
 
 	
-	private final static Category fAllocationExpressionArgumentsCategory= new Category(
+	private final Category fAllocationExpressionArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ALLOCATION_EXPRESSION,
 	    "class Example {SomeClass foo() {return new SomeClass(100, 200, 300, 400, 500, 600, 700, 800, 900 );}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.object_allocation") //$NON-NLS-1$
 	);
 	
-	private final static Category fQualifiedAllocationExpressionCategory= new Category (
+	private final Category fQualifiedAllocationExpressionCategory= new Category (
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_QUALIFIED_ALLOCATION_EXPRESSION,
 	    "class Example {SomeClass foo() {return SomeOtherClass.new SomeClass(100, 200, 300, 400, 500 );}}", //$NON-NLS-1$
 		FormatterMessages.getString("LineWrappingTabPage.qualified_object_allocation") //$NON-NLS-1$
 	);
 	
-	private final static Category fArrayInitializerExpressionsCategory= new Category(
+	private final Category fArrayInitializerExpressionsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER,
 	    "class Example {int [] fArray= {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.array_init") //$NON-NLS-1$
 	);
 	
-	private final static Category fExplicitConstructorArgumentsCategory= new Category(
+	private final Category fExplicitConstructorArgumentsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_EXPLICIT_CONSTRUCTOR_CALL,
 	    "class Example extends AnotherClass {Example() {super(100, 200, 300, 400, 500, 600, 700);}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.explicit_constructor_invocations") //$NON-NLS-1$
 	);
 
-	private final static Category fConditionalExpressionCategory= new Category(
+	private final Category fConditionalExpressionCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION,
 	    "class Example extends AnotherClass {int Example(boolean Argument) {return argument ? 100000 : 200000;}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.conditionals") //$NON-NLS-1$
 	);
 
-	private final static Category fBinaryExpressionCategory= new Category(
+	private final Category fBinaryExpressionCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_BINARY_EXPRESSION,
 	    "class Example extends AnotherClass {" + //$NON-NLS-1$
 	    "int foo() {" + //$NON-NLS-1$
@@ -301,6 +304,21 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "  return product / sum;}}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.binary_exprs") //$NON-NLS-1$
 	);
+	
+	private final Category fEnumConstArgumentsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ENUM_CONSTANT,
+	    "enum Example {" + //$NON-NLS-1$
+	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.enum_arguments") //$NON-NLS-1$
+	);
+	
+	private final Category fEnumDeclInterfacesCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_ENUM_DECLARATION,
+	    "enum Example implements A, B {" + //$NON-NLS-1$
+	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.enum_superinterfaces") //$NON-NLS-1$
+	);
+	
 	
 	/**
 	 * The default preview line width.
@@ -355,6 +373,8 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	
 	/**
 	 * Create a new line wrapping tab page.
+	 * @param modifyDialog
+	 * @param workingValues
 	 */
 	public LineWrappingTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);
@@ -373,7 +393,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	}
 	
 	/**
-	 * Create the categories tree.
+	 * @return Create the categories tree.
 	 */
 	protected List createCategories() {
 
@@ -388,6 +408,10 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		final Category methodDeclarations= new Category(null, null, FormatterMessages.getString("LineWrappingTabPage.method_decls")); //$NON-NLS-1$
 		methodDeclarations.children.add(fMethodDeclarationsParametersCategory);
 		methodDeclarations.children.add(fMethodThrowsClauseCategory);
+
+		final Category enumDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.enum_decls")); //$NON-NLS-1$
+		enumDeclarations.children.add(fEnumConstArgumentsCategory);
+		enumDeclarations.children.add(fEnumDeclInterfacesCategory);
 		
 		final Category functionCalls= new Category(FormatterMessages.getString("LineWrappingTabPage.function_calls")); //$NON-NLS-1$
 		functionCalls.children.add(fMessageSendArgumentsCategory);
@@ -408,6 +432,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		root.add(classDeclarations);
 		root.add(constructorDeclarations);
 		root.add(methodDeclarations);
+		root.add(enumDeclarations);
 		root.add(functionCalls);
 		root.add(expressions);
 		root.add(statements);

@@ -26,21 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.ArrayContentProvider;
-import org.eclipse.jface.viewers.CheckStateChangedEvent;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.ICheckStateListener;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.part.PageBook;
@@ -65,8 +51,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 
 	    private final String PREF_NODE_KEY= JavaUI.ID_PLUGIN + "formatter_page.white_space_tab_page.node"; //$NON-NLS-1$
 	    
-	    private final ArrayList fIndexedNodeList;
-		private final ArrayList fTree;
+	    private final List fIndexedNodeList;
+		private final List fTree;
 		
 		private ContainerCheckedTreeViewer fTreeViewer;
 		private Composite fComposite;
@@ -446,6 +432,8 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 
 	/**
 	 * Create a new white space dialog page.
+	 * @param modifyDialog
+	 * @param workingValues
 	 */
 	public WhiteSpaceTabPage(ModifyDialog modifyDialog, Map workingValues) {
 		super(modifyDialog, workingValues);

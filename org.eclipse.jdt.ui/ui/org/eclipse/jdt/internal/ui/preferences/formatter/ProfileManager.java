@@ -253,6 +253,7 @@ public class ProfileManager extends Observable {
 
 	/**
 	 * Create and initialize a new profile manager.
+	 * @param profiles Initial custom profiles (List of type <code>CustomProfile</code>)
 	 */
 	public ProfileManager(List profiles) {
 		fProfiles= new HashMap();
@@ -279,6 +280,7 @@ public class ProfileManager extends Observable {
 
 	/**
 	 * Notify observers with a message. The message must be one of the following:
+	 * @param message Message to send out
 	 * 
 	 * @see #SELECTION_CHANGED_EVENT
 	 * @see #PROFILE_DELETED_EVENT
@@ -294,6 +296,7 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Update all formatter settings with the settings of the specified profile. 
+	 * @param profile The profilde to write to the preference store
 	 */
 	private void writeToPreferenceStore(Profile profile) {
 	
@@ -327,6 +330,8 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Add all the built-in profiles to the map and to the list.
+	 * @param profiles The map to add the profiles to
+	 * @param profilesByName List of profiles by
 	 */
 	private void addBuiltinProfiles(Map profiles, List profilesByName) {
 		final Profile javaProfile= new BuiltInProfile(JAVA_PROFILE, FormatterMessages.getString("ProfileManager.java_conventions_profile.name"), getJavaSettings()); //$NON-NLS-1$
@@ -340,36 +345,30 @@ public class ProfileManager extends Observable {
 	
 	
 	/**
-	 * Get the settings for the default profile.
+	 * @return Returns the settings for the default profile.
 	 */	
 	public static Map getEclipse21Settings() {
 		final Map options= DefaultCodeFormatterConstants.getEclipse21Settings();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		ProfileVersioner.setLatestCompliance(options);
 		return options;
 	}
 
 	/** 
-	 * Get the settings for the Java Conventions profile.
+	 * @return Returns the settings for the Java Conventions profile.
 	 */
 	public static Map getJavaSettings() {
 		final Map options= DefaultCodeFormatterOptions.getJavaConventionsSettings().getMap();
 		new CommentFormattingContext().storeToMap(getUIPreferenceStore(), options, true);
 
-		options.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
-		options.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+		ProfileVersioner.setLatestCompliance(options);
 		return options;
 	}
 	
 	
 	/**
-	 * All keys appearing in a profile, sorted alphabetically.
+	 * @return All keys appearing in a profile, sorted alphabetically.
 	 */
 	public static List getKeys() {
 	    return fKeys;
@@ -380,6 +379,7 @@ public class ProfileManager extends Observable {
 	 * Get an immutable list as view on all profiles, sorted alphabetically. Unless the set 
 	 * of profiles has been modified between the two calls, the sequence is guaranteed to 
 	 * correspond to the one returned by <code>getSortedNames</code>.
+	 * @return Al list of elements of type <code>Profile</code>
 	 * 
 	 * @see #getSortedNames()
 	 */
@@ -391,6 +391,7 @@ public class ProfileManager extends Observable {
 	 * Get the names of all profiles stored in this profile manager, sorted alphabetically. Unless the set of 
 	 * profiles has been modified between the two calls, the sequence is guaranteed to correspond to the one 
 	 * returned by <code>getSortedProfiles</code>.
+	 * @return All names, sorted alphabetically
 	 * @see #getSortedProfiles()  
 	 */	
 	public String [] getSortedNames() {
@@ -404,6 +405,8 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Get the profile for this profile id.
+	 * @param ID The profile ID
+	 * @return The profile with the given ID or <code>null</code> 
 	 */
 	public Profile getProfile(String ID) {
 		return (Profile)fProfiles.get(ID);
@@ -429,6 +432,7 @@ public class ProfileManager extends Observable {
 
 	/**
 	 * Set the selected profile. The profile must already be contained in this profile manager.
+	 * @param profile The profile to select
 	 */
 	public void setSelected(Profile profile) {
 		final Profile newSelected= (Profile)fProfiles.get(profile.getID());
@@ -441,6 +445,8 @@ public class ProfileManager extends Observable {
 	/**
 	 * Check whether a user-defined profile in this profile manager
 	 * already has this name.
+	 * @param name The name to test for
+	 * @return Returns <code>true</code> if a profile with the given name exists
 	 */
 	public boolean containsName(String name) {
 		return fProfiles.containsKey(ID_PREFIX + name);
@@ -448,6 +454,7 @@ public class ProfileManager extends Observable {
 	
 	/**
 	 * Add a new custom profile to this profile manager.
+	 * @param profile The profile to add
 	 */	
 	public void addProfile(CustomProfile profile) {
 		profile.setManager(this);
@@ -484,6 +491,7 @@ public class ProfileManager extends Observable {
 
 	/**
 	 * Get the UI preference store.
+	 * @return Returns the preference store
 	 */
 	private static IPreferenceStore getUIPreferenceStore() {
 		return PreferenceConstants.getPreferenceStore();
