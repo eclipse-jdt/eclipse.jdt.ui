@@ -372,7 +372,7 @@ public class JavaElementImageProvider {
 	}
 		
 	public static ImageDescriptor getFieldImageDescriptor(boolean isInInterfaceOrAnnotation, int flags) {
-		if (Flags.isPublic(flags) || isInInterfaceOrAnnotation)
+		if (Flags.isPublic(flags) || isInInterfaceOrAnnotation || Flags.isEnum(flags))
 			return JavaPluginImages.DESC_FIELD_PUBLIC;
 		if (Flags.isProtected(flags))
 			return JavaPluginImages.DESC_FIELD_PROTECTED;
