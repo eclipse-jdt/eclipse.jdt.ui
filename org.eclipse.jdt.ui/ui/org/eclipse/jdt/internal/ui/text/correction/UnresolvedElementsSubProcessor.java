@@ -128,11 +128,11 @@ public class UnresolvedElementsSubProcessor {
 		ITypeBinding senderBinding= binding != null ? binding : ASTResolving.getBindingOfParentType(node);
 		String label;
 		Image image;
-		if (cu.equals(targetCU)) {
+		if (binding == null) {
 			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", simpleName.getIdentifier()); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
 		} else {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), targetCU.getElementName() } ); //$NON-NLS-1$
+			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), binding.getName() } ); //$NON-NLS-1$
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 		}
 		proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 2, image));

@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
@@ -240,11 +241,40 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
+		StringBuffer buf= new StringBuffer();
 		if (fIsClass) {
-			return CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createclass.info"); //$NON-NLS-1$
+			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createclass.info")); //$NON-NLS-1$
 		} else {
-			return CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info"); //$NON-NLS-1$
+			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info")); //$NON-NLS-1$
 		}
+		buf.append("<br>");
+		buf.append("<br>");
+		if (fTypeContainer instanceof IType) {
+			buf.append("Enclosing type: <b>");
+		} else {
+			buf.append("Package: <b>");
+		}
+		buf.append(JavaElementLabels.getElementLabel(fTypeContainer, JavaElementLabels.T_FULLY_QUALIFIED));
+		buf.append("</b><br>");
+		buf.append("public ");
+		if (fIsClass) {
+			buf.append("class <b>");
+		} else {
+			buf.append("interface <b>");
+		}
+		buf.append(ASTResolving.getSimpleName(fNode));
+		
+		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
+		if (superclass != null) {
+			if (superclass.isClass() || !fIsClass) {
+				buf.append("</b> extends <b>");
+			} else {
+				buf.append("</b> implements <b>");
+			}
+			buf.append(superclass.getName());
+		}
+		buf.append("</b> {<br>}<br>");
+		return buf.toString();
 	}
 
 	/**
