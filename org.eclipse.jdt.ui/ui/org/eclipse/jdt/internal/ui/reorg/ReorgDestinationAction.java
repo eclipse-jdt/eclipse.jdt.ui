@@ -34,6 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -202,7 +203,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
  	void reorg(ReorgRefactoring refactoring) throws JavaModelException{
 		CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
 		try {
-			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, runnable);
+			new ProgressMonitorDialog(getShell()).run(false, false, runnable);
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getActionName(), ReorgMessages.getString("ReorgDestinationAction.error_occurred"));  //$NON-NLS-1$
 			return;
