@@ -135,7 +135,11 @@ public class JavaMergeViewer extends TextMergeViewer {
 	}
 	
 	protected int findInsertionPosition(char type, ICompareInput input) {
-		/*
+		
+		int pos= super.findInsertionPosition(type, input);
+		if (pos != 0)
+			return pos;
+		
 		if (input instanceof IDiffElement) {
 			
 			// find the other (not deleted) element
@@ -215,7 +219,6 @@ public class JavaMergeViewer extends TextMergeViewer {
 					// append after last class
 					children= javaContainer.getChildren();
 					if (children.length > 0) {
-						JavaNode packageDecl= null;
 						for (int i= children.length-1; i >= 0; i--) {
 							JavaNode child= (JavaNode) children[i];
 							switch (child.getTypeCode()) {
@@ -231,6 +234,14 @@ public class JavaMergeViewer extends TextMergeViewer {
 					return javaContainer.getAppendPosition().getOffset();
 					
 				case JavaNode.METHOD:
+					// append in next line after last child
+					children= javaContainer.getChildren();
+					if (children.length > 0) {
+						JavaNode child= (JavaNode) children[children.length-1];
+						p= child.getRange();
+						return findEndOfLine(javaContainer, p.getOffset() + p.getLength());
+					}
+					// otherwise use position from parser
 					return javaContainer.getAppendPosition().getOffset();
 					
 				case JavaNode.FIELD:
@@ -255,10 +266,36 @@ public class JavaMergeViewer extends TextMergeViewer {
 					return javaContainer.getAppendPosition().getOffset();
 				}
 			}
+			
+			if (javaContainer != null) {
+				// return end of container
+				Position p= javaContainer.getRange();
+				return p.getOffset() + p.getLength();
+			}
 		}
-		*/
+
+		// we give up
+		return 0;
+	}
+	
+	private int findEndOfLine(JavaNode container, int pos) {
+		int line;
+		IDocument doc= container.getDocument();
+		try {
+			line= doc.getLineOfOffset(pos);
+			pos= doc.getLineOffset(line+1);
+		} catch (BadLocationException ex) {
+		}
 		
-		// fall back
-		return super.findInsertionPosition(type, input);
+		// ensure that pos is within container range
+		Position containerRange= container.getRange();
+		int start= containerRange.getOffset();
+		int end= containerRange.getOffset() + containerRange.getLength();
+		if (pos < start)
+			return start;
+		if (pos >= end)
+			return end-1;
+		
+		return pos;
 	}
 }
