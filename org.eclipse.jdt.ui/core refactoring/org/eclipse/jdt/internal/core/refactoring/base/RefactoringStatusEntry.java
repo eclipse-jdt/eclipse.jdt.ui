@@ -19,17 +19,29 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
  */
 public class RefactoringStatusEntry{
 	
+	/**
+	 * A <code>Context<code> can be used to annotate a <code>RefactoringStatusEntry</code>with 
+	 * additional information presentable in the UI.
+	 */
+	public static class Context {
+	
+		/** A singleton for the null context */
+		public static final Context NULL_CONTEXT= new Context();
+		
+	}
+
 	private String fMessage;
 	private int fSeverity;
-	private Object fResource;
-	private ISourceRange fSourceRange;
+	private Context fContext;
 	
 	/**
 	 * Creates an entry with the given severity.
 	 * @param msg message
 	 * @param severity severity
+	 * @param context a context which can be used to show more detailed information
+	 * 	about this error in the UI
 	 */
-	public RefactoringStatusEntry(String msg, int severity, Object resource, ISourceRange sourceRange){
+	public RefactoringStatusEntry(String msg, int severity, Context context){
 		Assert.isTrue(severity == RefactoringStatus.INFO 
 				   || severity == RefactoringStatus.WARNING
 				   || severity == RefactoringStatus.ERROR
@@ -37,8 +49,7 @@ public class RefactoringStatusEntry{
 		fMessage= msg;
 		Assert.isNotNull(fMessage);
 		fSeverity= severity;
-		fResource= resource;
-		fSourceRange= sourceRange;
+		fContext= context;
 	}
 	
 	/**
@@ -46,15 +57,15 @@ public class RefactoringStatusEntry{
 	 * @param severity severity
 	 * @param msg message
 	 */
-	public RefactoringStatusEntry(String msg, int severity){
-		this(msg, severity, null, null);
+	public RefactoringStatusEntry(String msg, int severity) {
+		this(msg, severity, null);
 	}
 	
 	/**
 	 * Creates an entry with <code>RefactoringStatus.INFO</code> status.
 	 * @param msg message
 	 */
-	public static RefactoringStatusEntry createInfo(String msg){
+	public static RefactoringStatusEntry createInfo(String msg) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO);
 	}
 	
@@ -62,14 +73,14 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.INFO</code> status.
 	 * @param msg message
 	 */
-	public static RefactoringStatusEntry createInfo(String msg, Object resource, ISourceRange range){
-		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO, resource, range);
+	public static RefactoringStatusEntry createInfo(String msg, Context context) {
+		return new RefactoringStatusEntry(msg, RefactoringStatus.INFO, context);
 	}
 	/**
 	 * Creates an entry with <code>RefactoringStatus.WARNING</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createWarning(String msg){
+	public static RefactoringStatusEntry createWarning(String msg) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING);
 	}
 
@@ -77,15 +88,15 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.WARNING</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createWarning(String msg, Object resource, ISourceRange range){
-		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING, resource, range);
+	public static RefactoringStatusEntry createWarning(String msg, Context context) {
+		return new RefactoringStatusEntry(msg, RefactoringStatus.WARNING, context);
 	}
 	
 	/**
 	 * Creates an entry with <code>RefactoringStatus.ERROR</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createError(String msg){
+	public static RefactoringStatusEntry createError(String msg) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR);
 	}
 
@@ -93,15 +104,15 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.ERROR</code> status.
 	 * @param msg message
 	 */		
-	public static RefactoringStatusEntry createError(String msg, Object resource, ISourceRange range){
-		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, resource, range);
+	public static RefactoringStatusEntry createError(String msg, Context context) {
+		return new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, context);
 	}
 	
 	/**
 	 * Creates an entry with <code>RefactoringStatus.FATAL</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createFatal(String msg){
+	public static RefactoringStatusEntry createFatal(String msg) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL);
 	}
 
@@ -109,42 +120,42 @@ public class RefactoringStatusEntry{
 	 * Creates an entry with <code>RefactoringStatus.FATAL</code> status.
 	 * @param msg message
 	 */	
-	public static RefactoringStatusEntry createFatal(String msg, Object resource, ISourceRange range){
-		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, resource, range);
+	public static RefactoringStatusEntry createFatal(String msg, Context context) {
+		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, context);
 	}
 	
 	/**
 	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.FATAL</code>).
 	 */
-	public boolean isFatalError(){
+	public boolean isFatalError() {
 		return fSeverity == RefactoringStatus.FATAL;
 	}
 	
 	/**
 	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.ERROR</code>).
 	 */
-	public boolean isError(){
+	public boolean isError() {
 		return fSeverity == RefactoringStatus.ERROR;
 	}
 	
 	/**
 	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.WARNING</code>).
 	 */
-	public boolean isWarning(){
+	public boolean isWarning() {
 		return fSeverity == RefactoringStatus.WARNING;
 	}
 	
 	/**
 	 * @return <code>true</code> iff (severity == <code>RefactoringStatus.INFO</code>).
 	 */
-	public boolean isInfo(){
+	public boolean isInfo() {
 		return fSeverity == RefactoringStatus.INFO;
 	}
 
 	/**
 	 * @return message.
 	 */
-	public String getMessage(){
+	public String getMessage() {
 		return fMessage;
 	}
 	/**
@@ -157,19 +168,22 @@ public class RefactoringStatusEntry{
 		return fSeverity;
 	}
 
-	public Object getResource(){
-		return fResource;
+	/**
+	 * Returns the context which can be used to show more detailed information
+	 * regarding this status entry in the UI. The method may return <code>null
+	 * </code> indicating that no context is available.
+	 * 
+	 * @return the status entry's context
+	 */
+	public Context getContext() {
+		return fContext;
 	}
 	
-	public ISourceRange getSourceRange(){
-		return fSourceRange;
-	} 
 	/* non java-doc
 	 * for debugging only
 	 */
-	public String toString(){
-		String pathString= fResource == null ? "<Unspecified resource>": fResource.toString();
-		String rangeString= fSourceRange == null ? "<Unspecified range>": fSourceRange.toString();	
-		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage + " in " + pathString + " " + rangeString;
+	public String toString() {
+		String contextString= fContext == null ? "<Unspecified context>": fContext.toString();
+		return RefactoringStatus.getSeverityString(fSeverity) + ": " + fMessage + " Context: " + contextString;
 	}
 }

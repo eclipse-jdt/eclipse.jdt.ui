@@ -8,9 +8,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry.Context;
 
 /**
  * A <code>RefactoringStatus</code> object represents the outcome of a precondition checking
@@ -51,8 +50,8 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one INFO entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createInfoStatus(String msg, Object resource, ISourceRange range){
-		return createStatus(INFO, msg, resource, range); 
+	public static RefactoringStatus createInfoStatus(String msg, Context context){
+		return createStatus(INFO, msg, context); 
 	}
 	
 	/**
@@ -67,8 +66,8 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one WARNING entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createWarningStatus(String msg, Object resource, ISourceRange range){
-		return createStatus(WARNING, msg, resource, range);  
+	public static RefactoringStatus createWarningStatus(String msg, Context context){
+		return createStatus(WARNING, msg, context);  
 	}
 	
 	/**
@@ -83,8 +82,8 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one ERROR entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createErrorStatus(String msg, Object resource, ISourceRange range){
-		return createStatus(ERROR, msg, resource, range);  
+	public static RefactoringStatus createErrorStatus(String msg, Context context){
+		return createStatus(ERROR, msg, context);  
 	}
 		
 	/**
@@ -99,19 +98,19 @@ public class RefactoringStatus {
 	 * Creates a <code>RefactorngStatus</code> with one FATAL entry.
 	 * This is a convenience method.
 	 */
-	public static RefactoringStatus createFatalErrorStatus(String msg, Object resource, ISourceRange range){
-		return createStatus(FATAL, msg, resource, range); 
+	public static RefactoringStatus createFatalErrorStatus(String msg, Context context){
+		return createStatus(FATAL, msg, context); 
 	}
 	
-	private static RefactoringStatus createStatus(int severity, String msg, Object resource, ISourceRange range){
+	private static RefactoringStatus createStatus(int severity, String msg, Context context) {
 		RefactoringStatus result= new RefactoringStatus(); 
-		result.fEntries.add(new RefactoringStatusEntry(msg, severity, resource, range));
+		result.fEntries.add(new RefactoringStatusEntry(msg, severity, context));
 		result.fSeverity= severity;
 		return result;
 	}
 	
 	private static RefactoringStatus createStatus(int severity, String msg){
-		return createStatus(severity, msg, null, null);
+		return createStatus(severity, msg, null);
 	}
 	
 	/**
@@ -122,7 +121,7 @@ public class RefactoringStatus {
 	 * @see #INFO	 
 	 */ 
 	public void addInfo(String msg){
-		addInfo(msg, null, null);
+		addInfo(msg, null);
 	}
 	
 	/**
@@ -132,8 +131,8 @@ public class RefactoringStatus {
 	 * @see #OK
 	 * @see #INFO	 
 	 */ 
-	public void addInfo(String msg, Object resource, ISourceRange range){
-		fEntries.add(RefactoringStatusEntry.createInfo(msg, resource, range));
+	public void addInfo(String msg, Context context){
+		fEntries.add(RefactoringStatusEntry.createInfo(msg, context));
 		fSeverity= Math.max(fSeverity, INFO);
 	}
 	
@@ -146,7 +145,7 @@ public class RefactoringStatus {
 	 * @see #WARNING
 	 */
 	public void addWarning(String msg){
-		addWarning(msg, null, null);
+		addWarning(msg, null);
 	}
 	
 	/**
@@ -157,8 +156,8 @@ public class RefactoringStatus {
 	 * @see #INFO	 
 	 * @see #WARNING
 	 */
-	public void addWarning(String msg, Object resource, ISourceRange range){
-		fEntries.add(RefactoringStatusEntry.createWarning(msg, resource, range));
+	public void addWarning(String msg, Context context){
+		fEntries.add(RefactoringStatusEntry.createWarning(msg, context));
 		fSeverity= Math.max(fSeverity, WARNING);
 	}
 	
@@ -174,7 +173,7 @@ public class RefactoringStatus {
 	 * @see #ERROR
 	 */	
 	public void addError(String msg){
-		addError(msg, null, null);
+		addError(msg, null);
 	}
 
 	/**
@@ -187,8 +186,8 @@ public class RefactoringStatus {
 	 * @see #WARNING
 	 * @see #ERROR
 	 */	
-	public void addError(String msg, Object resource, ISourceRange range){
-		fEntries.add(RefactoringStatusEntry.createError(msg, resource, range));
+	public void addError(String msg, Context context){
+		fEntries.add(RefactoringStatusEntry.createError(msg, context));
 		fSeverity= Math.max(fSeverity, ERROR);
 	}
 
@@ -204,7 +203,7 @@ public class RefactoringStatus {
 	 * @see #FATAL
 	 */	
 	public void addFatalError(String msg){
-		addFatalError(msg, null, null);
+		addFatalError(msg, null);
 	}
 	
 	/**
@@ -218,8 +217,8 @@ public class RefactoringStatus {
 	 * @see #ERROR
 	 * @see #FATAL
 	 */	
-	public void addFatalError(String msg, Object resource, ISourceRange range){
-		fEntries.add(RefactoringStatusEntry.createFatal(msg, resource, range));
+	public void addFatalError(String msg, Context context){
+		fEntries.add(RefactoringStatusEntry.createFatal(msg, context));
 		fSeverity= Math.max(fSeverity, FATAL);
 	}
 	

@@ -2,7 +2,7 @@
  * (c) Copyright 2001 MyCorporation.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.core.refactoring.util;
+package org.eclipse.jdt.internal.corext.util;
 
 /**
  * Helper class to provide String manipulation functions not available in standard JDK.

@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.core.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.code.flow.InputFlowAnalyzer;
-import org.eclipse.jdt.internal.core.refactoring.util.Binding2JavaModel;
 
 /* package */ class ExtractMethodAnalyzer extends StatementAnalyzer {
 

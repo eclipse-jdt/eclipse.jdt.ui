@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IReferenceUpdatingRefactoring;
@@ -259,7 +260,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
 																			new String[]{fField.getElementName(), getNewName(), nestedTypes[i].getFullyQualifiedName()});
-				result.addWarning(msg, Refactoring.getResource(otherField), otherField.getNameRange());
+				result.addWarning(msg, JavaSourceContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
 		}	
@@ -276,7 +277,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
 				 															new String[]{getNewName(), current.getFullyQualifiedName(), fField.getElementName()});
-				result.addWarning(msg, Refactoring.getResource(otherField), otherField.getNameRange());
+				result.addWarning(msg, JavaSourceContext.create(otherField));
 			}									
 			current= current.getDeclaringType();
 		}

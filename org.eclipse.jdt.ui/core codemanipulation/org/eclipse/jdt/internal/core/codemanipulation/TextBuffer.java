@@ -362,7 +362,7 @@ public class TextBuffer {
 				indent++;
 				blanks= 0;
 				continue;
-			case	' ':
+			case ' ':
 				blanks++;
 				if (blanks == tabWidth) {
 					indent++;

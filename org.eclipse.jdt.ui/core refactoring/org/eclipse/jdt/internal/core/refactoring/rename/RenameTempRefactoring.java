@@ -27,9 +27,9 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
-import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.SourceRange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.CompilationUnitChange;
@@ -119,7 +119,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		if (! Checks.startsWithLowerCase(fNewName))
 			result.addWarning("By convention, all names of  local variables start with lowercase letters.");
 		if (fAlreadyUsedNames.containsKey(fNewName))
-			result.addError("Name '" + fNewName + "' is already used.", Refactoring.getResource(fCu), (ISourceRange)fAlreadyUsedNames.get(fNewName));
+			result.addError("Name '" + fNewName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNames.get(fNewName)));
 		return result;		
 	}
 

@@ -17,8 +17,6 @@ import org.eclipse.swt.widgets.TableColumn;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -29,7 +27,6 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorInput;
@@ -42,9 +39,13 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.internal.core.refactoring.base.FileContext;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.refactoring.SourceContextViewer.SourceContextInput;
@@ -137,23 +138,35 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 	 * @return a input element for a <code>SourceContextViewer</code>
 	 */
 	protected SourceContextInput getSourceContextInput(RefactoringStatusEntry entry) {
-		Object resource= entry.getResource();
+		Context context= entry.getContext();
+		if (context == Context.NULL_CONTEXT)
+			return null;
 		IEditorInput editorInput= null;
 		SourceViewerConfiguration configuration= null;
 		IDocumentProvider provider= null;
+		ISourceRange range= null;
 		try {
-			if (resource instanceof IFile) {
-				editorInput= new FileEditorInput((IFile)resource);
+			if (context instanceof FileContext) {
+				FileContext fc= (FileContext)context;
+				editorInput= new FileEditorInput(fc.getFile());
 				configuration= new SourceViewerConfiguration();
 				provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-			} else if (resource instanceof IClassFile) {
-				editorInput= new InternalClassFileEditorInput((IClassFile)resource);
-				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-				provider= JavaPlugin.getDefault().getClassFileDocumentProvider();
-			} else if (resource instanceof ICompilationUnit) {
-				editorInput= new FileEditorInput((IFile)((ICompilationUnit)resource).getUnderlyingResource());
-				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-				provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+				range= fc.getSourceRange();
+			} else if (context instanceof JavaSourceContext) {
+				JavaSourceContext jsc= (JavaSourceContext)context;
+				range= jsc.getSourceRange();
+				if (jsc.isBinary()) {
+					editorInput= new InternalClassFileEditorInput(jsc.getClassFile());
+					configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
+					provider= JavaPlugin.getDefault().getClassFileDocumentProvider();
+				} else {
+					ICompilationUnit cunit= jsc.getCompilationUnit();
+					if (cunit.isWorkingCopy())
+						cunit= (ICompilationUnit)cunit.getOriginalElement();
+					editorInput= new FileEditorInput((IFile)cunit.getUnderlyingResource());
+					configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
+					provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -170,7 +183,7 @@ public class ErrorWizardPage extends RefactoringWizardPage {
 		}
 		if (document == null || configuration == null)
 			return null;
-		return new SourceContextInput(document, configuration, entry.getSourceRange());
+		return new SourceContextInput(document, configuration, range);
 	}
 		 
 	//---- UI creation ----------------------------------------------------------------------

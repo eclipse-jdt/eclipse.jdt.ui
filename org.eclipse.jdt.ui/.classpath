@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
     <classpathentry kind="src" path="ui"/>
-    <classpathentry kind="src" path="ui debug"/>
     <classpathentry kind="src" path="ui refactoring"/>
     <classpathentry kind="src" path="core refactoring"/>
     <classpathentry kind="src" path="core codemanipulation"/>
+    <classpathentry kind="src" path="core extension"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.debug"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>

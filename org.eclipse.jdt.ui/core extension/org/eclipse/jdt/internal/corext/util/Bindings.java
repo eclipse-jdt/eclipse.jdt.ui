@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.core.refactoring.util;
+package org.eclipse.jdt.internal.corext.util;
 
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;

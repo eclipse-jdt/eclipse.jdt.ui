@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.SourceRange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
@@ -309,7 +310,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 											new Object[]{fNewName, getResource(fType).getFullPath()});
 		IJavaElement grandParent= imp.getParent().getParent();
 		if (grandParent instanceof ICompilationUnit)
-			return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource((ICompilationUnit)grandParent), imp.getSourceRange());
+			return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(imp));
 
 		return null;	
 	}
@@ -320,7 +321,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
 																	new String[]{fNewName, fType.getPackageFragment().getElementName()});
-		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(type), type.getNameRange());
+		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(type));
 	}
 	
 	private RefactoringStatus checkEnclosedTypes() throws JavaModelException{
@@ -329,7 +330,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
 																		new String[]{fType.getFullyQualifiedName(), fNewName});
-		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(enclosedType), enclosedType.getNameRange());
+		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(enclosedType));
 	}
 	
 	private RefactoringStatus checkEnclosingTypes() throws JavaModelException{
@@ -339,7 +340,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",//$NON-NLS-1$
 								new String[]{fType.getFullyQualifiedName(), fNewName});
-		return RefactoringStatus.createErrorStatus(msg, Refactoring.getResource(enclosingType)	,enclosingType.getNameRange());
+		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(enclosingType));
 	}
 	
 	private static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
@@ -431,7 +432,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			if (siblingType.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
 																		new String[]{fNewName, fType.getDeclaringType().getFullyQualifiedName()});
-				result.addError(msg, Refactoring.getResource(siblingType), siblingType.getNameRange());
+				result.addError(msg, JavaSourceContext.create(siblingType));
 			}
 		}
 		return result;
@@ -442,22 +443,22 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 * and if it declares a native method
 	 */ 	
 	private static RefactoringStatus analyseEnclosedLocalTypes(final IType type, final String newName) throws JavaModelException{
-		final IResource resource= Refactoring.getResource(type);
-		CompilationUnit cu= (CompilationUnit) (JavaCore.create(resource));
+		final ICompilationUnit cunit= type.getCompilationUnit();
+		final CompilationUnit cu= (CompilationUnit)cunit;
 		final RefactoringStatus result= new RefactoringStatus();
 		cu.accept(new AbstractSyntaxTreeVisitorAdapter(){
 			public boolean visit(TypeDeclaration typeDeclaration, ClassScope scope) {
 				if ( new String(typeDeclaration.name).equals(newName) 	&& isInType(type.getElementName(), scope)){
 						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
 																				new String[]{type.getElementName(), newName});
-						result.addError(msg, resource, createSourceRange(typeDeclaration));
+						result.addError(msg, JavaSourceContext.create(cunit, createSourceRange(typeDeclaration)));
 					}															
 				if (typeDeclaration.methods != null){
 					for (int i=0; i < typeDeclaration.methods.length; i++){
 						AbstractMethodDeclaration method= typeDeclaration.methods[i];
 						if (method.isNative()){
 							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native", type.getElementName());//$NON-NLS-1$
-							result.addWarning(msg, resource, createSourceRange(method));  
+							result.addWarning(msg, JavaSourceContext.create(cunit, createSourceRange(method)));  
 						}	
 					}	
 				}	
@@ -468,7 +469,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				if (new String(typeDeclaration.name).equals(newName)   && isInType(type.getElementName(), scope)){
 					String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
 																					new String[]{type.getElementName(), newName});
-					result.addError(msg, resource, createSourceRange(typeDeclaration));
+					result.addError(msg, JavaSourceContext.create(cunit, createSourceRange(typeDeclaration)));
 				}																
 						
 				if (typeDeclaration.methods != null){
@@ -476,7 +477,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 						AbstractMethodDeclaration method= typeDeclaration.methods[i];
 						if (method.isNative()){
 							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", type.getElementName());//$NON-NLS-1$
-							result.addWarning(msg, resource, createSourceRange(method)); 
+							result.addWarning(msg, JavaSourceContext.create(cunit, createSourceRange(method))); 
 						}	
 					}	
 				}	
@@ -524,8 +525,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			if (Flags.isPublic(types[i].getFlags()) && types[i].getElementName().equals(fNewName)){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
 																			new Object[]{types[i].getFullyQualifiedName(), getFullPath(getCompilationUnit(imp))});
-				IResource res= imp.exists() ? imp.getUnderlyingResource() : null ;
-				result.addError(msg, res, imp.getSourceRange());
+				result.addError(msg, JavaSourceContext.create(imp));
 			}
 		}
 	}

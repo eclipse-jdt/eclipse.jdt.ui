@@ -35,10 +35,12 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.core.refactoring.base.FileContext;
+import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.core.refactoring.util.Bindings;
+import org.eclipse.jdt.internal.corext.util.Bindings;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -188,7 +190,7 @@ public class Checks {
 			if (!resource.isAccessible())
 				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_not_accessible", resource.getFullPath())); //$NON-NLS-1$
 			if (resource.isReadOnly())
-				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath()), resource, null); //$NON-NLS-1$
+				result.addFatalError(RefactoringCoreMessages.getFormattedString("Checks.resource_read_only", resource.getFullPath()), FileContext.create(resource, null)); //$NON-NLS-1$
 		}
 		return result;
 	}	
@@ -230,7 +232,7 @@ public class Checks {
 				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
 								new String[]{methods[i].getDeclaringType().getFullyQualifiedName(), methods[i].getElementName()})
 								+ " UnsatisfiedLinkError."; //$NON-NLS-1$
-				result.addError(msg, Refactoring.getResource(methods[i]), methods[i].getNameRange()); 
+				result.addError(msg, JavaSourceContext.create(methods[i])); 
 			}				
 		}
 		return result;
@@ -247,8 +249,9 @@ public class Checks {
 			result.addWarning("New method name has constructor name");
 		MethodBinding method= Bindings.findMethodInType(type, methodName.toCharArray(), parameters);
 		if (method != null) 
-			result.addEntry(JavaStatusEntry.createError(
-				"Method " + methodName + " already exists in " + new String(type.sourceName), method, scope));	
+			result.addError(
+				"Method " + methodName + " already exists in " + new String(type.sourceName), 
+				JavaSourceContext.create(method, scope));
 		return result;
 	}
 	
@@ -265,9 +268,9 @@ public class Checks {
 		MethodBinding method= Bindings.findMethodInHierarchy(type, methodName.toCharArray(), parameters);
 		if (method != null) {
 			ReferenceBinding dc= method.declaringClass;
-			result.addEntry(JavaStatusEntry.createError(
+			result.addError(
 				"New method " + methodName + " overrides existing method in " + new String(dc.sourceName),
-				method, scope));
+				JavaSourceContext.create(method, scope));
 		}
 		return result;
 	}

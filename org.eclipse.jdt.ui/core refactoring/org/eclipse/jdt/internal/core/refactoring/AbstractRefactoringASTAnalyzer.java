@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.core.refactoring;import org.eclipse.core.resources.IResource;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;import org.eclipse.jdt.internal.compiler.ast.AstNode;import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;import org.eclipse.jdt.internal.core.CompilationUnit;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;public abstract class AbstractRefactoringASTAnalyzer  extends AbstractSyntaxTreeVisitorAdapter{
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.core.refactoring;import org.eclipse.core.resources.IResource;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.ISourceRange;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;import org.eclipse.jdt.internal.compiler.ast.AstNode;import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;import org.eclipse.jdt.internal.core.CompilationUnit;import org.eclipse.jdt.internal.core.refactoring.base.FileContext;import org.eclipse.jdt.internal.core.refactoring.base.JavaSourceContext;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;public abstract class AbstractRefactoringASTAnalyzer  extends AbstractSyntaxTreeVisitorAdapter{
 
 	private RefactoringStatus fResult;
 	private CompilationUnit fCu;
@@ -27,13 +27,13 @@
 		Assert.isNotNull(fLineSeparatorPositions);
 		return ProblemHandler.searchLineNumber(fLineSeparatorPositions, node.sourceStart);
 	}
-		protected void addFatalError(String msg){		fResult.addFatalError(msg);	}		protected void addFatalError(String msg, int start, int end){		fResult.addFatalError(msg, getResource(fCu), createSourceRange(start, end));	}	
+		protected void addFatalError(String msg){		fResult.addFatalError(msg);	}		protected void addFatalError(String msg, int start, int end){		fResult.addFatalError(msg, JavaSourceContext.create(fCu, createSourceRange(start, end)));	}	
 	protected void addError(String msg){
 		fResult.addError(msg);
-	}		protected void addError(String msg, int start, int end){		fResult.addError(msg, getResource(fCu), createSourceRange(start, end));	}	
+	}		protected void addError(String msg, int start, int end){		fResult.addError(msg, JavaSourceContext.create(fCu, createSourceRange(start, end)));	}	
 	protected void addWarning(String msg){
 		fResult.addWarning(msg);
-	}		protected void addWarning(String msg, int start, int end){		fResult.addWarning(msg, getResource(fCu), createSourceRange(start, end));	}		protected void addInfo(String msg){		fResult.addInfo(msg);	}	protected void addInfo(String msg, int start, int end){		fResult.addInfo(msg, getResource(fCu), createSourceRange(start, end));	}	
+	}		protected void addWarning(String msg, int start, int end){		fResult.addWarning(msg, JavaSourceContext.create(fCu, createSourceRange(start, end)));	}		protected void addInfo(String msg){		fResult.addInfo(msg);	}	protected void addInfo(String msg, int start, int end){		fResult.addInfo(msg, JavaSourceContext.create(fCu, createSourceRange(start, end)));	}	
 	protected static String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
 		try {
