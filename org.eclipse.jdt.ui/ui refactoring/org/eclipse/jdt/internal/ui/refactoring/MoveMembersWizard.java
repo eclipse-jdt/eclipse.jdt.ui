@@ -95,8 +95,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 	private static class MoveMembersInputPage extends UserInputWizardPage {
 
 		public static final String PAGE_NAME= "MoveMembersInputPage"; //$NON-NLS-1$
-		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
-				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
+		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT;
 
 		private Combo fDestinationField;
 		private static final int MRU_COUNT= 10;
