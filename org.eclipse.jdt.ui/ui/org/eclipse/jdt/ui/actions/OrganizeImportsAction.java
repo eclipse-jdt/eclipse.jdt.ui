@@ -159,6 +159,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				if (selected[i] instanceof IJavaElement) {
 					IJavaElement elem= (IJavaElement) selected[i];
 					switch (elem.getElementType()) {
+						case IJavaElement.TYPE:
+							if (elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT) {
+								result.add(elem.getParent());
+							}
+							break;						
 						case IJavaElement.COMPILATION_UNIT:
 							result.add(elem);
 							break;
@@ -211,6 +216,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				if (selected[i] instanceof IJavaElement) {
 					IJavaElement elem= (IJavaElement) selected[i];
 					switch (elem.getElementType()) {
+						case IJavaElement.TYPE:
+							return elem.getParent().getElementType() == IJavaElement.COMPILATION_UNIT; // for browsing perspective
 						case IJavaElement.COMPILATION_UNIT:
 							return true;
 						case IJavaElement.IMPORT_CONTAINER:
@@ -266,8 +273,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 	}
 
-
-	private void runOnMultiple(final ICompilationUnit[] cus) {
+	/**
+	 * Peform organize import on multiple compilation units. No editors are opened.
+	 */
+	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {
 			String message= ActionMessages.getString("OrganizeImportsAction.multi.status.description"); //$NON-NLS-1$
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, Status.OK, message, null);
