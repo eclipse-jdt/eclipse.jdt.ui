@@ -126,19 +126,7 @@ public class MoveCuUpdateCreator {
 	 * returns <code>true</code> if the import declaration has been added and <code>false</code> otherwise.
 	 */
 	private static boolean addImport(TextBufferChangeManager changeManager, final IPackageFragment pack, ICompilationUnit cu) throws JavaModelException {
-		if (cu.getImport(pack.getElementName() + ".*").exists()) //$NON-NLS-1$
-			return false;
-					
-		int start = computeStart(cu);
-		
-		changeManager.addSimpleTextChange(cu, new SimpleReplaceTextChange("add import", start + 1){
-			public SimpleTextChange[] adjust(ITextBuffer buffer) {
-				String lineDelimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(getOffset()));
-				setText(lineDelimiter + "import " + pack.getElementName() + ".*;");//$NON-NLS-2$ //$NON-NLS-1$
-				return null;
-			}
-		});
-		return true;
+		return AddImportUtil.addImport(changeManager, pack, cu);
 	}
 
 	private static boolean isQualifiedReference(SearchResult searchResult){
@@ -168,20 +156,6 @@ public class MoveCuUpdateCreator {
 				return null;
 			}
 		};
-	}
-	
-	private static int computeStart(ICompilationUnit cu) throws JavaModelException {
-		IImportContainer importContainer= cu.getImportContainer();
-		if (importContainer.exists()){
-			ISourceRange sr= importContainer.getSourceRange();
-			return sr.getOffset() + sr.getLength() - 1;
-		}
-		
-		IPackageDeclaration declars[]= cu.getPackageDeclarations();
-		if (declars.length == 0)
-			return 0;
-		ISourceRange sr= declars[declars.length - 1].getSourceRange();
-		return sr.getOffset() + sr.getLength() - 1;
 	}
 	
 	private static IPackageFragment getPackage(ICompilationUnit cu){
