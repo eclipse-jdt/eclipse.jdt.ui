@@ -76,7 +76,7 @@ public class MethodsViewerFilter extends ViewerFilter {
 		} catch (JavaModelException e) {
 			// ignore
 		}
-		return false;
+		return true;
 	}		
 
 }

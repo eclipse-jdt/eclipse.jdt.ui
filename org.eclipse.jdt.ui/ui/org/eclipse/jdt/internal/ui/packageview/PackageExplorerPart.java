@@ -15,54 +15,23 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
- 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
-import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.IPreferencesConstants;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
-import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
-import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-import org.eclipse.jdt.internal.ui.wizards.NewGroup;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSource;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.ScrollBar;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -86,24 +55,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
-
-import org.eclipse.search.ui.IWorkingSet;
-import org.eclipse.search.ui.SearchUI;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.dnd.DND;
-import org.eclipse.swt.dnd.DragSource;
-import org.eclipse.swt.dnd.DropTargetEvent;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.ScrollBar;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
@@ -133,6 +84,56 @@ import org.eclipse.ui.views.internal.framelist.FrameList;
 import org.eclipse.ui.views.internal.framelist.GoIntoAction;
 import org.eclipse.ui.views.internal.framelist.UpAction;
 
+import org.eclipse.search.ui.IWorkingSet;
+import org.eclipse.search.ui.SearchUI;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
+import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
+import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
+import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
+import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
+import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
 
 /**
  * The ViewPart for the ProjectExplorer. It listens to part activation events.
@@ -157,11 +158,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
 	static final String TAG_WORKINGSET = "workingset"; //$NON-NLS-1$
+	static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
+	static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
+	static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
 	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
+	private MethodsViewerFilter fMemberFilter;
 
 	private ProblemTreeViewer fViewer; 
 	private PackagesFrameSource fFrameSource;
@@ -172,7 +177,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private Action fOpenToAction;
 	private Action fShowTypeHierarchyAction;
 	private Action fShowNavigatorAction;
-	private Action fPropertyDialogAction;
+	private PropertyDialogAction fPropertyDialogAction;
  	private RefactoringAction fDeleteAction;
  	private RefreshAction fRefreshAction;
  	private BackAction fBackAction;
@@ -182,6 +187,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private GotoTypeAction fGotoTypeAction;
 	private GotoPackageAction fGotoPackageAction;
 	private AddBookmarkAction fAddBookmarkAction;
+	
+	private ActionContributionItem[] fFilterActions;
+	private Separator fFilterSeparator;
 
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
@@ -294,7 +302,42 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.setUseHashlookup(true);
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
-		//fViewer.addFilter(fBinaryFilter);
+		
+		// fields
+		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
+		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
+		MembersFilterAction hideFields= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_FIELDS, helpContext, false);
+		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
+		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
+		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
+		
+		// static
+		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
+		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
+		MembersFilterAction hideStatic= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_STATIC, helpContext, false);
+		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
+		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
+		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
+		
+		// non-public
+		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
+		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
+		MembersFilterAction hideNonPublic= new MembersFilterAction(this, title, MethodsViewerFilter.FILTER_NONPUBLIC, helpContext, false);
+		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
+		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
+		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
+
+		fFilterActions= new ActionContributionItem[] { 
+			new ActionContributionItem(hideFields), 
+			new ActionContributionItem(hideStatic), 
+			new ActionContributionItem(hideNonPublic) 
+		};
+		fMemberFilter= new MethodsViewerFilter();
+		fViewer.addFilter(fMemberFilter);
+	
 		fViewer.addFilter(fWorkingSetFilter);
 		if(fMemento != null) 
 			restoreFilters();
@@ -360,6 +403,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		toolBar.add(fBackAction);
 		toolBar.add(fForwardAction);
 		toolBar.add(fUpAction);
+		
+		fFilterSeparator= new Separator();
+		if (JavaBasePreferencePage.showCompilationUnitChildren()) 
+			addFilterActions(toolBar);
 		actionBars.updateActionBars();
 	
 		IMenuManager menu= actionBars.getMenuManager();
@@ -444,6 +491,30 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 	
 	/**
+	 * Filters the members list
+	 */	
+	public void setMemberFilter(int filterProperty, boolean set) {
+		if (set) {
+			fMemberFilter.addFilter(filterProperty);
+		} else {
+			fMemberFilter.removeFilter(filterProperty);
+		}
+		for (int i= 0; i < fFilterActions.length; i++) {
+			if (((MembersFilterAction)fFilterActions[i].getAction()).getFilterProperty() == filterProperty) {
+				fFilterActions[i].getAction().setChecked(set);
+			}
+		}
+		getViewer().refresh();
+	}
+
+	/**
+	 * Returns <code>true</code> if the given filter is set.
+	 */	
+	public boolean hasMemberFilter(int filterProperty) {
+		return fMemberFilter.hasFilter(filterProperty);
+	}
+
+	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
 	 */
@@ -477,6 +548,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		boolean selectionHasElements= !selection.isEmpty();
 		Object element= selection.getFirstElement();
 		
+		fPropertyDialogAction.selectionChanged(selection);
+
 		MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
 		menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
 		new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
@@ -503,11 +576,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fRefreshAction);
 		fRefreshAction.selectionChanged(selection);
 
-		if (selectionHasElements) {
-			// update the action to use the right selection since the refresh
-			// action doesn't listen to selection changes.
-			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);
-		}	
+		menu.add(new Separator());
+		if (fPropertyDialogAction.isApplicableForSelection())
+			menu.appendToGroup(IContextMenuConstants.GROUP_PROPERTIES, fPropertyDialogAction);	
 	}
 
 	 void addGotoMenu(IMenuManager menu) {
@@ -529,9 +600,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fAddBookmarkAction= new AddBookmarkAction(provider);
 		
 		fStandardGroups= new ContextMenuGroup[] {
-			//new NewGroup(),
 			new BuildGroup(),
 			new ReorgGroup(),
+			new GenerateGroup(),
 			new JavaSearchGroup()
 		};
 		
@@ -807,6 +878,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		savePatternFilterState(memento);
 		saveFilterState(memento);
 		saveWorkingSetState(memento);
+		saveMemberFilterState(memento);
 	}
 
 	protected void saveFilterState(IMemento memento) {
@@ -878,6 +950,26 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (ws != null) {
 			memento.putString(TAG_WORKINGSET, ws.getName());
 		}
+	}
+	/**
+	 * Saves the state of the filter actions
+	 */
+	public void saveMemberFilterState(IMemento memento) {
+		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_FIELDS)));
+		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_STATIC)));
+		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC)));
+	}
+
+	/**
+	 * Restores the state of the member filter actions
+	 */	
+	public void restoreMemberFilterState(IMemento memento) {
+		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
+		setMemberFilter(MethodsViewerFilter.FILTER_FIELDS, set);
+		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
+		setMemberFilter(MethodsViewerFilter.FILTER_STATIC, set);
+		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
+		setMemberFilter(MethodsViewerFilter.FILTER_NONPUBLIC, set);		
 	}
 
 	void restoreState(IMemento memento) {
@@ -968,14 +1060,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 	}
 
-
-	
 	void initFrameList() {
 		fFrameSource= new PackagesFrameSource(this);
 		fFrameList= new FrameList(fFrameSource);
 		fFrameSource.connectTo(fFrameList);
 	}
-
 
 	/**
 	 * An editor has been activated.  Set the selection in this Packages Viewer
@@ -1140,6 +1229,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				getWorkingSetFilter().setWorkingSet(ws);
 			}
 		}
+		restoreMemberFilterState(fMemento);
 	}
 	
 	void initFilterFromPreferences() {
@@ -1199,7 +1289,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private int getLabelProviderFlags() {
 		return JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
 					JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_VARIABLE | JavaElementLabelProvider.SHOW_PARAMETERS;
-	}		
+	}
+		
 	/*
 	 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
 	 */
@@ -1209,10 +1300,26 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 					
 		if (fViewer != null) {
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			IActionBars actionBars= getViewSite().getActionBars();
+			IToolBarManager toolBar= actionBars.getToolBarManager();
 			boolean b= store.getBoolean(IPreferencesConstants.SHOW_CU_CHILDREN);
 			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(b);
+			if (b) {
+				addFilterActions(toolBar);
+			} else {
+				toolBar.remove(fFilterSeparator);
+				for (int i= 0; i < fFilterActions.length; i++)	
+					toolBar.remove(fFilterActions[i]);
+			}
+			actionBars.updateActionBars();
 			fViewer.refresh();
 		}
+	}
+
+	protected void addFilterActions(IToolBarManager toolBar) {
+		toolBar.add(fFilterSeparator);
+		for (int i= 0; i < fFilterActions.length; i++)	
+			toolBar.add(fFilterActions[i]);  
 	}
 
 }
