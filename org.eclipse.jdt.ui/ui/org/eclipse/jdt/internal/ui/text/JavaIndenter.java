@@ -141,7 +141,7 @@ public class JavaIndenter {
 				// a special case has been detected.
 				IRegion line= fDocument.getLineInformationOfOffset(fAlign);
 				int lineOffset= line.getOffset();
-				return createIndent(lineOffset, fAlign);
+				return createIndent(lineOffset, fAlign, false);
 			} catch (BadLocationException e) {
 				return null;
 			}
@@ -194,24 +194,28 @@ public class JavaIndenter {
 	}
 
 	/**
-	 * Creates an indentation string of the length indent - start + 1,
-	 * consisting of the content in <code>fDocument</code> in the range
-	 * [start, indent), with every character replaced by a space except for
-	 * tabs, which are kept as such.
+	 * Creates an indentation string of the length indent - start, consisting of
+	 * the content in <code>fDocument</code> in the range [start, indent),
+	 * with every character replaced by a space except for tabs, which are kept
+	 * as such.
 	 * <p>
-	 * Every run of the number of spaces that make up a tab are replaced by a
-	 * tab character.
+	 * If <code>convertSpaceRunsToTabs</code> is <code>true</code>, every
+	 * run of the number of spaces that make up a tab are replaced by a tab
+	 * character. If it is not set, no conversion takes place, but tabs in the
+	 * original range are still copied verbatim.
 	 * </p>
 	 * 
 	 * @param start the start of the document region to copy the indent from
 	 * @param indent the exclusive end of the document region to copy the indent
 	 *        from
+	 * @param convertSpaceRunsToTabs whether to convert consecutive runs of
+	 *        spaces to tabs
 	 * @return the indentation corresponding to the document content specified
 	 *         by <code>start</code> and <code>indent</code>
 	 */
-	private StringBuffer createIndent(int start, int indent) {
+	private StringBuffer createIndent(int start, final int indent, final boolean convertSpaceRunsToTabs) {
 		final int tabLen= prefTabLength();		
-		StringBuffer ret= new StringBuffer();
+		final StringBuffer ret= new StringBuffer();
 		try {
 			int spaces= 0;
 			while (start < indent) {
@@ -220,7 +224,7 @@ public class JavaIndenter {
 				if (ch == '\t') {
 					ret.append('\t');
 					spaces= 0;
-				} else if (tabLen == -1){
+				} else if (!convertSpaceRunsToTabs || tabLen == -1) {
 					ret.append(' ');
 				} else {
 					spaces++;
