@@ -1831,7 +1831,7 @@ class ReorgPolicyFactory {
 			if (getCus().length == 0)
 				return false;
 			IPackageFragment pack= getDestinationAsPackageFragment();
-			if (pack == null || pack.isDefaultPackage())
+			if (pack != null && pack.isDefaultPackage())
 				return false;
 			Object commonParent= getCommonParent();
 			if (JavaElementUtil.isDefaultPackage(commonParent))

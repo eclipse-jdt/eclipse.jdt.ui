@@ -38,10 +38,18 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | computeHasPreviewPage(ref)); 
-		setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE | computeHasPreviewPage(ref));
+		if (canUpdateReferences(ref))
+			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
+		else
+			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.textual_move")); //$NON-NLS-1$
 	}
 	
+	private static boolean canUpdateReferences(MoveRefactoring ref) {
+		JavaMoveProcessor moveProcessor= (JavaMoveProcessor) ref.getAdapter(JavaMoveProcessor.class);
+		return moveProcessor.canUpdateReferences();
+	}
+
 	private static int computeHasPreviewPage(MoveRefactoring refactoring) {
 		JavaMoveProcessor processor= (JavaMoveProcessor)refactoring.getAdapter(JavaMoveProcessor.class);
 		if (processor.canUpdateReferences() || processor.canEnableQualifiedNameUpdating())
