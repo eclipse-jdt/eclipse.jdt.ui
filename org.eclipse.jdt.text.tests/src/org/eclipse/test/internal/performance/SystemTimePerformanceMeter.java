@@ -26,10 +26,9 @@ import org.eclipse.test.internal.performance.data.Assert;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.test.performance.PerformanceMeter;
 
 
-public class SystemTimePerformanceMeter extends PerformanceMeter {
+public class SystemTimePerformanceMeter extends InternalPerformanceMeter {
 
 	private static final String VERSION_SUFFIX= "-runtime";
 	
@@ -51,24 +50,40 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 
 	private static final String SDK_BUNDLE_GROUP_IDENTIFIER= "org.eclipse.sdk";
 	
+	/**
+	 * @param scenarioId the scenario id
+	 */
 	public SystemTimePerformanceMeter(String scenario) {
 		this(scenario, DEFAULT_INITIAL_CAPACITY);
 	}
 	
-	public SystemTimePerformanceMeter(String scenario, int initalCapacity) {
-		fScenario= scenario;
+	/**
+	 * @param scenarioId the scenario id
+	 * @param initalCapacity the initial capacity in the number of measurments
+	 */
+	public SystemTimePerformanceMeter(String scenarioId, int initalCapacity) {
+		fScenario= scenarioId;
 		fStartTime= new ArrayList(initalCapacity);
 		fStopTime= new ArrayList(initalCapacity);
 	}
 	
+	/*
+	 * @see org.eclipse.test.performance.PerformanceMeter#start()
+	 */
 	public void start() {
 		fStartTime.add(new Long(System.currentTimeMillis()));
 	}
 	
+	/*
+	 * @see org.eclipse.test.performance.PerformanceMeter#stop()
+	 */
 	public void stop() {
 		fStopTime.add(new Long(System.currentTimeMillis()));
 	}
 	
+	/*
+	 * @see org.eclipse.test.performance.PerformanceMeter#commit()
+	 */
 	public void commit() {
 		Assert.isTrue(fStartTime.size() == fStopTime.size());
 		System.out.println("Scenario: " + fScenario);
@@ -84,6 +99,15 @@ public class SystemTimePerformanceMeter extends PerformanceMeter {
 		for (int i= 0; i < n; i++)
 			buf.append(s);
 		return buf.toString();
+	}
+
+	/*
+	 * @see org.eclipse.test.performance.PerformanceMeter#dispose()
+	 */
+	public void dispose() {
+		fScenario= null;
+		fStartTime= null;
+		fStopTime= null;
 	}
 
 	public Sample getSample() {
