@@ -878,7 +878,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IType getSelectableType(IJavaElement elem) {
 		ISelection sel= null;
 		if (elem.getElementType() != IJavaElement.TYPE) {
-			return (IType) getCurrentViewer().getTreeRootType();
+			return null; //(IType) getCurrentViewer().getTreeRootType();
 		} else {
 			return (IType) elem;
 		}
