@@ -123,8 +123,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		if (containerHandle.length() == 0) {
 			return findSingleTest(javaProject, testTypeName);
 		}
-		else 
-			return findTestsInContainer(containerHandle, pm);
+		return findTestsInContainer(containerHandle, pm);
 	}
 	
 	/**
