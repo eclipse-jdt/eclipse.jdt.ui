@@ -69,7 +69,7 @@ public class ModifierCorrectionSubProcessor {
 		} else {
 			return;
 		}
-		if (typeBinding.isFromSource()) {
+		if (typeBinding != null && typeBinding.isFromSource()) {
 			int includedModifiers= 0;
 			int excludedModifiers= 0;
 			String label;
@@ -86,6 +86,22 @@ public class ModifierCorrectionSubProcessor {
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
 			}
+		}
+	}
+	
+	public static void addNonFinalLocalProposal(ICorrectionContext context, List proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+
+		ASTNode selectedNode= context.getCoveringNode();
+		if (!(selectedNode instanceof SimpleName)) {
+			return;
+		}
+		
+		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
+		if (binding instanceof IVariableBinding) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemodifiertofinal.description", binding.getName());
+			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 0, image));
 		}
 	}
 		

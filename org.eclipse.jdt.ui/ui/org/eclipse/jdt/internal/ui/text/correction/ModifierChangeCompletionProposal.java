@@ -27,8 +27,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -81,15 +83,33 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 				
 				rewrite.markAsModified(methodDecl, modifiedNode);
 			} else if (declNode instanceof VariableDeclarationFragment) {
-				if (declNode.getParent() instanceof FieldDeclaration) {
-					FieldDeclaration fieldDecl= (FieldDeclaration) declNode.getParent();
+				ASTNode parent= declNode.getParent();
+				if (parent instanceof FieldDeclaration) {
+					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
 					int newModifiers= (fieldDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
 					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
 					rewrite.markAsModified(fieldDecl, modifiedNode);					
+				} else if (parent instanceof VariableDeclarationStatement) {
+					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
+					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
+					
+					VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+					modifiedNode.setModifiers(newModifiers);
+					
+					rewrite.markAsModified(varDecl, modifiedNode);					
 				}
+			} else if (declNode instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration variableDeclaration= (SingleVariableDeclaration) declNode;
+				int newModifiers= (variableDeclaration.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
+				
+				SingleVariableDeclaration modifiedNode= ast.newSingleVariableDeclaration();
+				modifiedNode.setExtraDimensions(variableDeclaration.getExtraDimensions()); // no change
+				modifiedNode.setModifiers(newModifiers);
+				
+				rewrite.markAsModified(variableDeclaration, modifiedNode);				
 			} else if (declNode instanceof TypeDeclaration) {
 				TypeDeclaration typeDecl= (TypeDeclaration) declNode;
 				int newModifiers= (typeDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
