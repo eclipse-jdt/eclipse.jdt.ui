@@ -133,7 +133,6 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 
 			final String value= (String)fWorkingValues.get(category.key);
 			final boolean enabled= value != null;
-			fOptionsGroup.setVisible(enabled);
 			
 			if (enabled) {
 				
@@ -155,6 +154,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 				fWrappingStyleCombo.setText(WRAPPING_NAMES[wrappingStyle]);
 				updateControls(wrappingStyle);
 			}
+			fForceSplit.setEnabled(enabled);
+			fIndentStyleCombo.setEnabled(enabled);
+			fWrappingStyleCombo.setEnabled(enabled);
 		}
 		
 		public void restoreSelection() {
