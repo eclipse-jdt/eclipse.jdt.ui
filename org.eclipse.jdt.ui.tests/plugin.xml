@@ -96,7 +96,7 @@
                   type="org.eclipse.core.resources.IResource">
                <test
                      value="A.java"
-                     property="org.eclipse.jdt.ui.matchesPattern">
+                     property="org.eclipse.jdt.internal.ui.matchesPattern">
                </test>
             </adapt>
          </enablement>

@@ -3996,62 +3996,11 @@
    
    <extension point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="matchesPattern, projectNature, canDelete"
+      		namespace="org.eclipse.jdt.internal.ui"
+            properties="matchesPattern"
             type="org.eclipse.core.resources.IResource"
             class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourceExtender"
             id="org.eclipse.jdt.IResourceExtender">
-      </propertyTester>
-   </extension>
-   <extension point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="isCompilationUnit"
-            type="org.eclipse.core.resources.IFile"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.FileExtender"
-            id="org.eclipse.jdt.IFileExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="isSourceFolder"
-            type="org.eclipse.core.resources.IFolder"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.FolderExtender"
-            id="org.eclipse.jdt.IFolderExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="isAvailable, canDelete"
-            type="org.eclipse.jdt.core.IJavaElement"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaElementExtender"
-            id="org.eclipse.jdt.IJavaElementExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            id="org.eclipse.jdt.IPackageFragmentExtender"
-            properties="isDefaultPackage"
-            type="org.eclipse.jdt.core.IPackageFragment"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.PackageFragmentExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="isStatic, isPrivate"
-            type="org.eclipse.jdt.core.IMember"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaMemberExtender"
-            id="org.eclipse.jdt.IMemberExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="hasMainType, isAnonymous, isLocal"
-            type="org.eclipse.jdt.core.IType"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaTypeExtender"
-            id="org.eclipse.jdt.ITypeExtender">
-      </propertyTester>
-      <propertyTester
-      		namespace="org.eclipse.jdt.ui"
-            properties="isVirtual, isConstructor, isMainMethod"
-            type="org.eclipse.jdt.core.IMethod"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaMethodExtender"
-            id="org.eclipse.jdt.IMethodExtender">
       </propertyTester>
    </extension>
    
