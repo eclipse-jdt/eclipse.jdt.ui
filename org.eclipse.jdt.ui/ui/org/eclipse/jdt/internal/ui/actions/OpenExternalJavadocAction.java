@@ -25,6 +25,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.help.IHelp;
 import org.eclipse.help.IHelpResource;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -159,7 +160,12 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 				return url.toExternalForm();
 			}
 		};
-		WorkbenchHelp.getHelpSupport().displayHelpResource(helpResource);
+		IHelp help= WorkbenchHelp.getHelpSupport();
+		if (help != null) {
+			help.displayHelpResource(helpResource);
+		} else {
+			showError(shell, "Help support not available");
+		}
 	}
 
 	
