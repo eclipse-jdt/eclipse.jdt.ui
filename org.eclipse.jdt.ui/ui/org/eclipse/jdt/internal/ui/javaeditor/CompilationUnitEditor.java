@@ -879,19 +879,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
 		
 		Shell shell= getSite().getShell();
+		IEditorInput input = getEditorInput();
 		
 		SaveAsDialog dialog= new SaveAsDialog(shell);
-		dialog.create();
-		
-		IEditorInput input = getEditorInput();
 		
 		IFile original= (input instanceof IFileEditorInput) ? ((IFileEditorInput) input).getFile() : null;
 		if (original != null)
 			dialog.setOriginalFile(original);
 			
+		dialog.create();
+		
+			
 		IDocumentProvider provider= getDocumentProvider();
 		if (provider.isDeleted(input) && original != null) {
 			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() }); //$NON-NLS-1$
+			dialog.setErrorMessage(null);
 			dialog.setMessage(message, IMessageProvider.WARNING);
 		}
 			
