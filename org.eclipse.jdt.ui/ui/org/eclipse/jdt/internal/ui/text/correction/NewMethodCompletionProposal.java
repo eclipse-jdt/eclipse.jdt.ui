@@ -75,7 +75,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else {
 				methods= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 			}
-			MethodDeclaration newStub= getStub(newTypeDecl);
+			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
 			if (!fIsInDifferentCU) {
 				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
@@ -94,7 +94,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
 	}
 	
-	private MethodDeclaration getStub(ASTNode targetTypeDecl) throws CoreException {
+	private MethodDeclaration getStub(ASTRewrite rewrite, ASTNode targetTypeDecl) throws CoreException {
 		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
@@ -118,22 +118,26 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 		
 		Block body= null;
+		if (!fSenderBinding.isInterface()) {
+			body= ast.newBlock();
+			String todoTask= StubUtility.getTodoTaskTag(getCompilationUnit().getJavaProject());
+			if (todoTask != null) {
+				ASTNode todoNode= rewrite.createPlaceholder("// " + todoTask, ASTRewrite.STATEMENT);
+				body.statements().add(todoNode);
+			}			
+		}
 		if (!isConstructor()) {
 			Type returnType= evaluateMethodType(ast);
 			if (returnType == null) {
 				decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-				body= ast.newBlock();
 			} else {
 				decl.setReturnType(returnType);
-				if (!fSenderBinding.isInterface()) {
-					body= ast.newBlock();
-					ReturnStatement returnStatement= ast.newReturnStatement();
-					returnStatement.setExpression(ASTResolving.getInitExpression(returnType, 0));
-					body.statements().add(returnStatement);
-				}
 			}
-		} else {
-			body= ast.newBlock();
+			if (body != null && returnType != null) {
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(ASTResolving.getInitExpression(returnType, 0));
+				body.statements().add(returnStatement);
+			}
 		}
 		decl.setBody(body);
 

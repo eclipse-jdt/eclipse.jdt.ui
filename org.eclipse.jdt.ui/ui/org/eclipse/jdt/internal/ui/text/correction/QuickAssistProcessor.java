@@ -13,9 +13,11 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -42,6 +44,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		}
 		getAssignToVariableProposals(context, resultingCollections);
 		getCatchClauseToThrowsProposals(context, resultingCollections);
+		getRenameLocalProposals(context, resultingCollections);
 	}
 	
 	private void getAssignToVariableProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
@@ -117,6 +120,19 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 
 	}
 	
+	private void getRenameLocalProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
+		ASTNode node= context.getCoveringNode();
+		if (!(node instanceof SimpleName)) {
+			return;
+		}
+		SimpleName name= (SimpleName) node;
+		IBinding binding= name.resolveBinding();
+		if (binding == null || binding.getKind() == IBinding.PACKAGE) {
+			return;
+		}
+		LinkedNamesAssistProposal proposal= new LinkedNamesAssistProposal(name);
+		resultingCollections.add(proposal);
+	}
 	
 	
 

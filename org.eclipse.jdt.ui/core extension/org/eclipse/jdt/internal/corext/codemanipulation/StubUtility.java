@@ -18,11 +18,13 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -526,6 +528,25 @@ public class StubUtility {
 				if (member.equals(elements[i])) {
 					return elements[i+1];
 				}
+			}
+		}
+		return null;
+	}
+	
+	public static String getTodoTaskTag(IJavaProject project) {
+		String markers= null;
+		if (project == null) {
+			markers= JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS);
+		} else {
+			markers= project.getOption(JavaCore.COMPILER_TASK_TAGS, true);
+		}
+		
+		if (markers != null && markers.length() > 0) {
+			int idx= markers.indexOf(',');
+			if (idx == -1) {
+				return markers;
+			} else {
+				return markers.substring(0, idx);
 			}
 		}
 		return null;
