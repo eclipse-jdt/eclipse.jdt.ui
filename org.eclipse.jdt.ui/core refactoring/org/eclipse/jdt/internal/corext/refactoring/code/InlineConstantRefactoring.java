@@ -523,7 +523,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		fSelectionCu= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fSelectionCuRewrite= new CompilationUnitRewrite(fSelectionCu);
+		fSelectionCuRewrite= createCuRewrite(fSelectionCu);
 		fSelectedConstantName= findConstantNameNode();
 	}
 
@@ -638,7 +638,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		if (fField.getCompilationUnit() == null)
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InlineConstantRefactoring.binary_file"), null, Corext.getPluginId(), RefactoringStatusCodes.DECLARED_IN_CLASSFILE, null); //$NON-NLS-1$
 		
-		fDeclarationCuRewrite= new CompilationUnitRewrite(fField.getCompilationUnit());
+		fDeclarationCuRewrite= createCuRewrite(fField.getCompilationUnit());
 		fDeclaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(fField, fDeclarationCuRewrite.getRoot());
 		return null;
 	}
@@ -748,12 +748,24 @@ public class InlineConstantRefactoring extends Refactoring {
 
 	private CompilationUnitRewrite getCuRewrite(ICompilationUnit cu) {
 		CompilationUnitRewrite cuRewrite;
-		if (cu.equals(fSelectionCu))
+		if (cu.equals(fSelectionCu)) {
 			cuRewrite= fSelectionCuRewrite;
-		else if (cu.equals(fField.getCompilationUnit()))
+		} else if (cu.equals(fField.getCompilationUnit())) {
 			cuRewrite= fDeclarationCuRewrite;
-		else
-			cuRewrite= new CompilationUnitRewrite(cu);
+		} else {
+			cuRewrite= createCuRewrite(cu);
+		}
+		return cuRewrite;
+	}
+
+	private CompilationUnitRewrite createCuRewrite(ICompilationUnit cu) {
+		CompilationUnitRewrite cuRewrite;
+		cuRewrite= new CompilationUnitRewrite(cu);
+		cuRewrite.getASTRewrite().setTargetSourceRangeComputer(new TargetSourceRangeComputer() {
+			public SourceRange computeSourceRange(ASTNode node) {
+				return new SourceRange(node.getStartPosition(), node.getLength());
+			}
+		});
 		return cuRewrite;
 	}
 
