@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -384,6 +385,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fCurrJProject.getProject());
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
 			dialog.setInitialSelection(fCurrJProject.getProject());
 		} else {

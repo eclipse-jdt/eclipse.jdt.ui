@@ -37,6 +37,7 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModel;
@@ -362,6 +363,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
 			dialog.setInitialSelection(fCurrJProject.getProject());
 		} else {
@@ -397,6 +399,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		if (existing == null) {
 			dialog.setInitialSelection(fCurrJProject.getProject());		
 		} else {
