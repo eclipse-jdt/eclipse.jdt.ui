@@ -26,8 +26,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.core.JavaModelManager;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
@@ -161,13 +159,7 @@ public abstract class RefactoringTest extends TestCase {
 			return pack.getCompilationUnit(name);
 		ICompilationUnit cu= pack.createCompilationUnit(name, contents, true, null);
 		cu.save(null, true);
-		forceIndexing();
 		return cu;
-	}
-
-	//BOGUS??
-	protected void forceIndexing() {
-		JavaModelManager.getJavaModelManager().getIndexManager().checkIndexConsistency();
 	}
 
 	/**
