@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
@@ -187,7 +188,9 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			
 			String typeName= Signature.toString(field.getTypeSignature());
 			
-			IType parentType= field.getDeclaringType();	
+			IType parentType= field.getDeclaringType();
+			
+			boolean addComments= CodeGenerationPreferencePage.doCreateComments();
 			
 			// test if the getter already exists
 			String getterName= "get" + accessorName; //$NON-NLS-1$
@@ -206,10 +209,12 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			if (doCreateGetter) {			
 				// create the getter stub
 				StringBuffer buf= new StringBuffer();
-				buf.append("/**\n"); //$NON-NLS-1$
-				buf.append(" * Gets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				buf.append(" * @return Returns a "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
-				buf.append(" */\n"); //$NON-NLS-1$
+				if (addComments) {
+					buf.append("/**\n"); //$NON-NLS-1$
+					buf.append(" * Gets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					buf.append(" * @return Returns a "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
+					buf.append(" */\n"); //$NON-NLS-1$
+				}
 				buf.append("public "); //$NON-NLS-1$
 				if (isStatic) {
 					buf.append("static "); //$NON-NLS-1$
@@ -234,10 +239,12 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			if (doCreateSetter) {
 				// create the setter stub
 				StringBuffer buf= new StringBuffer();
-				buf.append("/**\n"); //$NON-NLS-1$
-				buf.append(" * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				buf.append(" * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
-				buf.append(" */\n"); //$NON-NLS-1$
+				if (addComments) {
+					buf.append("/**\n"); //$NON-NLS-1$
+					buf.append(" * Sets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					buf.append(" * @param "); buf.append(argname); buf.append(" The "); buf.append(argname); buf.append(" to set\n"); //$NON-NLS-3$ //$NON-NLS-1$ //$NON-NLS-2$
+					buf.append(" */\n"); //$NON-NLS-1$
+				}
 				buf.append("public "); //$NON-NLS-1$
 				if (isStatic) {
 					buf.append("static "); //$NON-NLS-1$
