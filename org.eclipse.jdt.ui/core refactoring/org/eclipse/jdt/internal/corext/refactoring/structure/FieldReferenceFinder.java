@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import org.eclipse.jdt.internal.corext.dom.ASTUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -54,14 +55,10 @@ class FieldReferenceFinder {
 			return (ISourceRange[]) fFoundRanges.toArray(new ISourceRange[fFoundRanges.size()]);
 		}
 		
-		private static int getNodeEnd(ASTNode node){
-			return node.getStartPosition() + node.getLength();
-		}
-		
 		private static boolean areReportedForSameNode(SimpleName node, SearchResult searchResult){
 			if (node.getStartPosition() != searchResult.getStart())
 				return false;
-			if (getNodeEnd(node) < searchResult.getEnd())	
+			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 				
 			return true;	
@@ -70,7 +67,7 @@ class FieldReferenceFinder {
 		private static boolean areReportedForSameNode(FieldAccess node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (getNodeEnd(node) < searchResult.getEnd())	
+			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 			if (node.getName().getStartPosition() != searchResult.getStart())
 				return false;
@@ -81,7 +78,7 @@ class FieldReferenceFinder {
 		private static boolean areReportedForSameNode(QualifiedName node, SearchResult searchResult){
 			if (node.getStartPosition() > searchResult.getStart())
 				return false;
-			if (getNodeEnd(node) < searchResult.getEnd())	
+			if (ASTUtil.getEndPosition(node) < searchResult.getEnd())	
 				return false;
 				
 			return true;	
