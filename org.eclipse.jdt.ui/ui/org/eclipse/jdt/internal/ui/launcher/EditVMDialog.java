@@ -5,8 +5,8 @@ public class EditVMDialog extends AddVMDialog {
 	/**
 	 * Constructor for EditVMDialog
 	 */
-	public EditVMDialog(Shell shell, IVMInstallType[] vmTypes, IVMInstall vm) {
-		super(shell, vmTypes, vm.getVMInstallType());
+	public EditVMDialog(VMPreferencePage page, IVMInstallType[] vmTypes, IVMInstall vm) {
+		super(page, vmTypes, vm.getVMInstallType());
 		fVM= vm;
 	}
 
@@ -15,5 +15,4 @@ public class EditVMDialog extends AddVMDialog {
 			return null;
 		return super.validateVMName();
 	}		protected void initializeFields() {		fVMTypeCombo.setEnabled(false);		fVMName.setText(fVM.getName());		fJDKRoot.setText(fVM.getInstallLocation().getAbsolutePath());		fDebuggerTimeout.setText(String.valueOf(fVM.getDebuggerTimeout()));		LibraryLocation desc= fVM.getLibraryLocation();		fUseDefaultLibrary.setSelection(desc == null);		if (desc == null) {			desc= getVMType().getDefaultLibraryLocation(fVM.getInstallLocation());			useDefaultSystemLibrary();		} else {			useCustomSystemLibrary();		}			setSystemLibraryFields(desc);		}	
-	protected IVMInstall getConcernedVM() {		return fVM;	}
-}
+	protected void doOkPressed() {		setFieldValuesToVM(fVM);	}}

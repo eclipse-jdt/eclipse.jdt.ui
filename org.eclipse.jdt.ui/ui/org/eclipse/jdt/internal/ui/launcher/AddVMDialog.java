@@ -4,10 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.LibraryLocation;
+import java.io.File;import java.io.IOException;import java.util.Enumeration;import java.util.zip.ZipEntry;import java.util.zip.ZipFile;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.IVMInstallType;import org.eclipse.jdt.launching.LibraryLocation;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Combo;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.DirectoryDialog;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.FileDialog;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.help.WorkbenchHelp;
 
 public class AddVMDialog extends StatusDialog {
 	private static final String JAVA_LANG_OBJECT= "java/lang/Object.java";
+
+	private VMPreferencePage fPreferencePage;
 
 	protected IVMInstallType[] fVMTypes;
 	protected IVMInstallType fSelectedVMType;
@@ -24,8 +26,9 @@ public class AddVMDialog extends StatusDialog {
 	
 	protected IStatus[] fStati;
 		
-	public AddVMDialog(Shell shell, IVMInstallType[] vmInstallTypes, IVMInstallType initialVMType) {
-		super(shell);
+	public AddVMDialog(VMPreferencePage page, IVMInstallType[] vmInstallTypes, IVMInstallType initialVMType) {
+		super(page.getShell());
+		fPreferencePage= page;
 		fStati= new IStatus[5];
 		
 		fVMTypes= vmInstallTypes;
@@ -231,11 +234,9 @@ public class AddVMDialog extends StatusDialog {
 		if (name == null || "".equals(name.trim())) {
 			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "", null);
 		}
-		IVMInstall[] vms= getVMType().getVMInstalls();
-		for (int i= 0; i < vms.length; i++) {
-			if (vms[i].getName().equals(name)) {
-				return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null);
-			}
+		IVMInstallType type= getVMType();
+		if (fPreferencePage.isDuplicateName(type, name)) {
+			return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, "The name is already ussed", null);
 		}
 		return null;
 	}
@@ -408,9 +409,24 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected void doOkPressed() {
-		IVMInstall vm= getConcernedVM();
-		if (JavaRuntime.getDefaultVMInstall() == null)
-			JavaRuntime.setDefaultVMInstall(vm);
+		IVMInstall vm= new VMStandin(fSelectedVMType, createUniqueId(fSelectedVMType));
+		setFieldValuesToVM(vm);
+		fPreferencePage.vmAdded(vm);
+	}
+	
+	private String createUniqueId(IVMInstallType vmType) {
+		String id= null;
+		do {
+			id= String.valueOf(System.currentTimeMillis());
+		} while (vmType.findVMInstall(id) != null);
+		return id;
+	}
+	
+	private void vmTypeChanged() {
+		useDefaultSystemLibrary();
+	}
+
+	protected void setFieldValuesToVM(IVMInstall vm) {
 		vm.setInstallLocation(new File(fJDKRoot.getText()));
 		vm.setName(fVMName.getText());
 		vm.setDebuggerTimeout(getTimeout());
@@ -426,21 +442,4 @@ public class AddVMDialog extends StatusDialog {
 			vm.setLibraryLocation(null);
 		}
 	}
-	
-	protected IVMInstall getConcernedVM() {
-		return fSelectedVMType.createVMInstall(createUniqueId(fSelectedVMType));
-	}
-	
-	private String createUniqueId(IVMInstallType vmType) {
-		String id= null;
-		do {
-			id= String.valueOf(System.currentTimeMillis());
-		} while (vmType.findVMInstall(id) != null);
-		return id;
-	}
-	
-	private void vmTypeChanged() {
-		useDefaultSystemLibrary();
-	}
-
 }
