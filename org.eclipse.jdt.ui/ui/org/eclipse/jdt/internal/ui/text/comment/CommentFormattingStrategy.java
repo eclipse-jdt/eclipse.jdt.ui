@@ -74,11 +74,16 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		if (document != null && position != null) {
 			TextEdit edit= null;
 			try {
+				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
+				int partitionOffset= position.getOffset() - sourceOffset;
+				int sourceLength= partitionOffset + position.getLength();
+				String source= document.get(sourceOffset, sourceLength);
+				
 				Map preferences= CommentFormattingContext.mapOptions(getPreferences());
 				CodeFormatter commentFormatter= new CommentFormatter(fTextMeasurement, preferences);
-				int sourceOffset= document.getLineOffset(document.getLineOfOffset(position.getOffset()));
-				int indentationLevel= inferIndentationLevel(document.get(sourceOffset, position.getOffset() - sourceOffset), getTabSize(preferences));
-				edit= commentFormatter.format(getPartitionKind(position.getType()), document.get(), position.getOffset(), position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
+				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
+				edit= commentFormatter.format(getPartitionKind(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
+				edit.moveTree(sourceOffset);
 			} catch (BadLocationException exception) {
 				JavaPlugin.log(exception);
 			}
