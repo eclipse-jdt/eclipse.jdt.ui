@@ -556,11 +556,11 @@ public class JavaModelUtil {
 	 * Returns the original if the given member. If the member is already
 	 * an original the input is returned. The returned member must not exist
 	 */
-	public static IMember toOriginal(IMember type) {
-		ICompilationUnit cu= type.getCompilationUnit();
+	public static IMember toOriginal(IMember member) {
+		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null && cu.isWorkingCopy())
-			return (IMember)cu.getOriginal(type);
-		return type;
+			return (IMember)cu.getOriginal(member);
+		return member;
 	}
 	
 	/**
@@ -582,9 +582,9 @@ public class JavaModelUtil {
 		if (cu != null && !cu.isWorkingCopy()) {
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
-				IJavaElement[] types= workingCopy.findElements(member);
-				if (types != null && types.length > 0) {
-					return (IMember) types[0];
+				IJavaElement[] members= workingCopy.findElements(member);
+				if (members != null && members.length > 0) {
+					return (IMember) members[0];
 				}
 			}
 		}
