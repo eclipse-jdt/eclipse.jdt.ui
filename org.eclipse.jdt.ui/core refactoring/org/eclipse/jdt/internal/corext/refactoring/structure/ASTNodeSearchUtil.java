@@ -12,6 +12,7 @@ import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -19,6 +20,7 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -90,6 +92,9 @@ public class ASTNodeSearchUtil {
 		cuNode.accept(analyzer);
 		//XXX workaround for bug 23527
 		ASTNode node= analyzer.getFirstSelectedNode();
+		if (node == null && analyzer.getLastCoveringNode() instanceof SuperConstructorInvocation)
+			node= analyzer.getLastCoveringNode().getParent();
+			
 		if (node != null && node.getParent() instanceof MethodDeclaration){
 			MethodDeclaration md= (MethodDeclaration)node.getParent();
 			if (md.isConstructor() && 
@@ -126,6 +131,10 @@ public class ASTNodeSearchUtil {
 	
 	public static FieldDeclaration getFieldDeclarationNode(IField iField, ASTNodeMappingManager astManager) throws JavaModelException {
 		return (FieldDeclaration)ASTNodes.getParent(getDeclarationNode(iField, astManager), FieldDeclaration.class);
+	}
+
+	public static TypeDeclaration getTypeDeclarationNode(IType iType, ASTNodeMappingManager astManager) throws JavaModelException {
+		return (TypeDeclaration)ASTNodes.getParent(getDeclarationNode(iType, astManager), TypeDeclaration.class);
 	}
 	
 	private static ASTNode getDeclarationNode(IMember iMember, ASTNodeMappingManager astManager) throws JavaModelException {
