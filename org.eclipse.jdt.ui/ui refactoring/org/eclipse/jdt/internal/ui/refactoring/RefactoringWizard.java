@@ -102,6 +102,17 @@ public class RefactoringWizard extends Wizard {
 		addPage(new PreviewWizardPage());
 	}
 	
+	/**
+	 * Hook to determine if the wizard has more than one user input page without
+	 * actually creating the pages.
+	 * 
+	 * @return boolean <code>true<code> if multi page user input exists.
+	 * Otherwise <code>false</code> is returned
+	 */
+	public boolean hasMultiPageUserInput() {
+		return false;
+	}
+	
 	//---- Setter and Getters ------------------------------------------------------------
 	
 	/**

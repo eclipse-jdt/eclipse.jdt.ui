@@ -73,7 +73,7 @@ public class RefactoringStarter {
 		if (! activationStatus.hasFatalError()){
 			wizard.setActivationStatus(activationStatus);
 			Dialog dialog;
-			if (RefactoringPreferences.useWizardUI())
+			if (RefactoringPreferences.useWizardUI() || mustUseWizardUI(wizard))
 				dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
 			else 
 				dialog= new RefactoringWizardDialog2(JavaPlugin.getActiveWorkbenchShell(), wizard);
@@ -224,5 +224,9 @@ public class RefactoringStarter {
 		if (fSavedFiles && ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding()) {
 			new GlobalBuildAction(JavaPlugin.getActiveWorkbenchWindow(), IncrementalProjectBuilder.INCREMENTAL_BUILD).run();
 		}
+	}
+	
+	private boolean mustUseWizardUI(RefactoringWizard wizard) {
+		return wizard.hasMultiPageUserInput();
 	}
 }

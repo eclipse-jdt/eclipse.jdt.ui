@@ -22,6 +22,13 @@ public class ExternalizeWizard extends RefactoringWizard {
 	}
 	
 	/* non java-doc
+	 * @see RefactoringWizard#hasMultiPageUserInput
+	 */ 
+	public boolean hasMultiPageUserInput() {
+		return true;
+	}
+	
+	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
 	protected void addUserInputPages(){
