@@ -47,7 +47,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		public Page(Object[] elements) {
 			this.elements= elements;
 		}
-	};
+	}
 	
 	private Page[] fPages;		
 	private int fCurrentPage;

@@ -280,7 +280,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				IWorkbenchPart part= ref.getPart(false);
 				if (part instanceof IEditorPart)
 					editorActivated((IEditorPart) part);
-		 	};
+		 	}
 
 			public void partBroughtToTop(IWorkbenchPartReference ref) {}
 			public void partClosed(IWorkbenchPartReference ref) {}

@@ -456,7 +456,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	private TypeInfo[] doChooseImports(TypeInfo[][] openChoices, final ISourceRange[] ranges) {
 		// remember selection
 		ISelection sel= fEditor != null ? fEditor.getSelectionProvider().getSelection() : null;
-		TypeInfo[] result= null;;
+		TypeInfo[] result= null;
 		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 		
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider) {

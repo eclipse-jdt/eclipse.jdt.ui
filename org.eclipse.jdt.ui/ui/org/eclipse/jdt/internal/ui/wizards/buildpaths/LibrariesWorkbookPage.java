@@ -581,7 +581,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement newCPLibraryElement(IResource res) {
 		return new CPListElement(fCurrJProject, IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
-	};
+	}
 
 	
 	private CPListElement[] openExtJarFileDialog(CPListElement existing) {
