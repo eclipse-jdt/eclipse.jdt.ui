@@ -1078,6 +1078,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				IInformationProvider informationProvider= new InformationProvider(hoverRegion, hoverInfo, controlCreator);
 
 				fInformationPresenter.setOffset(offset);	
+				fInformationPresenter.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
 				fInformationPresenter.setInformationProvider(informationProvider, contentType);
 				fInformationPresenter.showInformation();
 
