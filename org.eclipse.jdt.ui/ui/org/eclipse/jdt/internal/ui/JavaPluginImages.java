@@ -276,6 +276,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_WORKINGSET= create(T_WIZBAN, "java_workingset_wiz.gif");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_EXPORT_JAVADOC= create(T_WIZBAN, "export_javadoc_wiz.gif");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_EXTERNALIZE_STRINGS= create(T_WIZBAN, "extstr_wiz.gif");//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_ADD_LIBRARY= create(T_WIZBAN, "addlibrary_wiz.gif");//$NON-NLS-1$
+
 		
 	public static final ImageDescriptor DESC_TOOL_DISPLAYSNIPPET= create(T_CTOOL, "disp_sbook.gif"); 			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_TOOL_RUNSNIPPET= create(T_CTOOL, "run_sbook.gif"); 				//$NON-NLS-1$

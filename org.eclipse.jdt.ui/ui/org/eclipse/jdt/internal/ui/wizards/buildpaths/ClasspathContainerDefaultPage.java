@@ -4,27 +4,23 @@ import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
-import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
-import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPage;
+import org.eclipse.jdt.ui.wizards.IClasspathContainerPageExtension;
+import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
   */
@@ -40,6 +36,7 @@ public class ClasspathContainerDefaultPage extends NewElementWizardPage implemen
 		super("ClasspathContainerDefaultPage"); //$NON-NLS-1$
 		setTitle(NewWizardMessages.getString("ClasspathContainerDefaultPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("ClasspathContainerDefaultPage.description")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 		
 		fUsedPaths= new ArrayList();
 		

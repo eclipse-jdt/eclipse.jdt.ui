@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -50,6 +51,7 @@ public class ClasspathContainerSelectionPage extends WizardPage {
 		super("ClasspathContainerWizardPage"); //$NON-NLS-1$
 		setTitle(NewWizardMessages.getString("ClasspathContainerSelectionPage.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("ClasspathContainerSelectionPage.description")); //$NON-NLS-1$
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_ADD_LIBRARY);
 
 		fContainers= containerPages;
 
