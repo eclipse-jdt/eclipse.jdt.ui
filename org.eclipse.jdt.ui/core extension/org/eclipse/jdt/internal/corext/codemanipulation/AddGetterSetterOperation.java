@@ -172,8 +172,8 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 				StringBuffer buf= new StringBuffer();
 				if (addComments) {
 					buf.append("/**\n"); //$NON-NLS-1$
-					buf.append(" * Gets the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
-					buf.append(" * @return Returns a "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
+					buf.append(" * Returns the "); buf.append(argname); buf.append(".\n"); //$NON-NLS-1$ //$NON-NLS-2$
+					buf.append(" * @return "); buf.append(typeName); buf.append('\n'); //$NON-NLS-1$
 					buf.append(" */\n"); //$NON-NLS-1$
 				}
 				buf.append("public "); //$NON-NLS-1$
