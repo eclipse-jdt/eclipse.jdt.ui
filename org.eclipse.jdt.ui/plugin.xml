@@ -2908,23 +2908,6 @@
     </page>
 </extension>
 
-<!-- Smart Typing Toggle -->
-<extension
-	point="org.eclipse.ui.commands">
-	<command
-		name="%ActionDefinition.smartTypingToggle.name"
-		description="%ActionDefinition.smartTypingToggle.description"
-		category="org.eclipse.ui.category.edit"
-		id="org.eclipse.jdt.smartTyping.toggle">
-	</command>
-	<keyBinding
-		string="Ctrl+M"
-		scope="org.eclipse.jdt.ui.javaEditorScope"
-		command="org.eclipse.jdt.smartTyping.toggle"
-		configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
-	</keyBinding>
-</extension>
-
 <!---
 <extension
 	point="org.eclipse.ui.decorators">
