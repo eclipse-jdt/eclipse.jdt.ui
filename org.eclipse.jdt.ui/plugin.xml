@@ -2241,6 +2241,17 @@
 <!-- =========================================================================== -->
 <!-- JDT/UI command definitions                                                   -->
 <!-- =========================================================================== -->
+
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            name="%context.editingJavaSource.name"
+            description="%context.editingJavaSource.description"
+            parentId="org.eclipse.ui.textEditorScope"
+            id="org.eclipse.jdt.ui.javaEditorScope">
+      </context>
+   </extension>
+
    <extension
          point="org.eclipse.ui.commands">
       <category
@@ -2655,6 +2666,7 @@
             category="org.eclipse.jdt.ui.category.source"
             id="org.eclipse.jdt.ui.edit.text.java.add.block.comment">
       </command>
+      
       <keyBinding
             string="Ctrl+Shift+/"
             scope="org.eclipse.jdt.ui.javaEditorScope"
