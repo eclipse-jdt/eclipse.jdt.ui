@@ -35,6 +35,14 @@ public class WorkingCopyUtil {
 	public static ICompilationUnit getOriginal(ICompilationUnit cu){
 		return JavaModelUtil.toOriginal(cu);
 	}
+	
+	public static IMember[] getOriginals(IMember[] members){
+		IMember[] result= new IMember[members.length];
+		for (int i= 0; i < members.length; i++) {
+			result[i]= (IMember)WorkingCopyUtil.getOriginal(members[i]);
+		}
+		return result;
+	}
 
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
