@@ -566,7 +566,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private ASTNode[] getFieldReferenceNodes(VariableDeclaration varDeclaration, IProgressMonitor pm) throws JavaModelException{
 		Assert.isTrue(varDeclaration.resolveBinding().isField());
-		IField field= Binding2JavaModel.lookupIField(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
+		IField field= Binding2JavaModel.find(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
 		if (field == null)
 			return new ASTNode[0];
 		return getReferenceNodes(field, pm);	
