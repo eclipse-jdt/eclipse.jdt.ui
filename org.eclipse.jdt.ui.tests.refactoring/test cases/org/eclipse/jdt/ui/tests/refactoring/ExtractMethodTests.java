@@ -584,6 +584,12 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
+	//---- Assignment
+	
+	public void test192() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
