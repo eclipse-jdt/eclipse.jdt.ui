@@ -21,13 +21,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
-import org.eclipse.jdt.text.tests.performance.data.PerfMsrDimensions;
-import org.eclipse.jdt.text.tests.performance.eval.AbsoluteBandChecker;
 import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
 import org.eclipse.jdt.text.tests.performance.eval.IEvaluator;
-import org.eclipse.jdt.text.tests.performance.eval.AssertChecker;
-import org.eclipse.jdt.text.tests.performance.eval.RelativeBandChecker;
 
 public abstract class RevertEditorTest extends TestCase {
 	private static final int RUNS= 20;
@@ -40,11 +35,7 @@ public abstract class RevertEditorTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 		fPerformanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
-		fEvaluator= new Evaluator();
-		AssertChecker cpuLessThan110Percent= new RelativeBandChecker(PerfMsrDimensions.CPU_TIME, 0.0F, 1.1F);
-		AssertChecker workingSetWithin1MB= new AbsoluteBandChecker(PerfMsrDimensions.WORKING_SET, 1024*1024, 1024*1024);
-		fEvaluator.setAssertCheckers(new AssertChecker[] {cpuLessThan110Percent, workingSetWithin1MB});
-		fEvaluator.setReferenceFilterProperties("3.0-runtime2", fPerformanceMeter.getScenarioName(), null, "1092146708700");
+		fEvaluator= Evaluator.getDefaultEvaluator();
 	}
 	
 	protected void measureRevert(IFile file) throws PartInitException, BadLocationException {
@@ -59,8 +50,7 @@ public abstract class RevertEditorTest extends TestCase {
 		}
 		
 		fPerformanceMeter.commit();
-		MeteringSession session= fPerformanceMeter.getSessionData();
-		fEvaluator.evaluate(session);
+		fEvaluator.evaluate(fPerformanceMeter.getSessionData());
 	}
 	
 	protected void tearDown() throws Exception {

@@ -18,7 +18,7 @@ public final class PerfMsrConstants {
 	public static final String BEFORE= "1"; //$NON-NLS-1$
 	public static final String AFTER= "2"; //$NON-NLS-1$
 	public static final String DRIVER_PROPERTY= "driver"; //$NON-NLS-1$
-	public static final String HOSTNAME_PROPERTY= "hostname"; //$NON-NLS-1$
+	public static final String HOSTNAME_PROPERTY= "host"; //$NON-NLS-1$
 	public static final String RUN_TS_PROPERTY= "runTS"; //$NON-NLS-1$
 	public static final String TESTNAME_PROPERTY= "testname"; //$NON-NLS-1$
 }

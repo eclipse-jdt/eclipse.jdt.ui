@@ -37,12 +37,8 @@ public interface IEvaluator {
 	/**
 	 * Selects the reference build against which the current session will
 	 * be compared in <code>evaluate</code>.
-	 * 
 	 * @param driver 
-	 * @param testname
-	 * @param host the hostname for the tests may be null to use any
 	 * @param timestamp the timestamp of the reference, may be null to use any
 	 */
-	void setReferenceFilterProperties(String driver, String testname, String host, String timestamp);
-
+	void setReferenceFilterProperties(String driver, String timestamp);
 }
