@@ -192,7 +192,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
-	}	public static String getPluginId() {
+	}
+	
+	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}
 
@@ -252,7 +254,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
 					PreferenceConverter.putValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
-	}
+			}
 		};
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 	}
@@ -406,7 +408,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		manager.registerAdapters(fEditorInputAdapterFactory, IEditorInput.class);
 		manager.registerAdapters(fResourceAdapterFactory, IResource.class);
 		manager.registerAdapters(fLogicalPackageAdapterFactory, LogicalPackage.class);
-}
+	}
+	
 	private void unregisterAdapters() {
 		IAdapterManager manager= Platform.getAdapterManager();
 		manager.unregisterAdapters(fJavaElementAdapterFactory);
