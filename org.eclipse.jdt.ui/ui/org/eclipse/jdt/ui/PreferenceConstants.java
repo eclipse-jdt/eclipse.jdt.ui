@@ -28,7 +28,6 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 /**
@@ -96,7 +95,8 @@ public class PreferenceConstants {
 	 * Java views using the <code>JavaElementSorter</code>.
 	 * <p>
 	 * Value is of type <code>String</code>: A comma separated list of the
-	 * following entries. Each entry must be in the list, no duplication.
+	 * following entries. Each entry must be in the list, no duplication. List
+	 * order defines the sort order.
 	 * <ul>
 	 * <li><b>T</b>: Types</li>
 	 * <li><b>C</b>: Constructors</li>
@@ -1689,9 +1689,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_CTRL_ALT_SHIFT_HOVER, PreferenceConstants.EDITOR_DEFAULT_HOVER_CONFIGURED_ID);
 		
 		JavadocPreferencePage.initDefaults(store);
-		NewJavaProjectPreferencePage.initDefaults(store);
-
-		
+		NewJavaProjectPreferencePage.initDefaults(store);	
 	}
 	
 	/**
