@@ -31,6 +31,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
+import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 
@@ -54,6 +55,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 public class GenerateActionGroup extends ActionGroup {
 	
 	private boolean fEditorIsOwner;
+	private CompilationUnitEditor fEditor;
 	private IWorkbenchSite fSite;
 	private String fGroupName= IContextMenuConstants.GROUP_SOURCE;
 	private List fRegisteredSelectionListeners;
@@ -81,10 +83,11 @@ public class GenerateActionGroup extends ActionGroup {
 	public GenerateActionGroup(CompilationUnitEditor editor, String groupName) {
 		fSite= editor.getSite();
 		fEditorIsOwner= true;
+		fEditor= editor;
 		fGroupName= groupName;
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
-
+	
 		fAddImport= new AddImportOnSelectionAction(editor);
 		fAddImport.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_IMPORT);
 		fAddImport.update();
@@ -94,7 +97,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
 		fOrganizeImports.editorStateChanged();
 		editor.setAction("OrganizeImports", fOrganizeImports); //$NON-NLS-1$
-
+	
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
 		fOverrideMethods.editorStateChanged();
@@ -131,7 +134,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
 		fConvertToUNIX.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
 		editor.setAction("ConvertLineDelimitersToUNIX", fConvertToUNIX); //$NON-NLS-1$		
-
+	
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
 		fConvertToMac.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$		
@@ -262,6 +265,9 @@ public class GenerateActionGroup extends ActionGroup {
 	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
 		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 		int added= 0;
+		added+= addEditorAction(result, "Comment"); //$NON-NLS-1$
+		added+= addEditorAction(result, "Uncomment"); //$NON-NLS-1$
+		result.add(new Separator());
 		added+= addAction(result, fOrganizeImports);
 		added+= addAction(result, fAddImport);
 		result.add(new Separator());
@@ -289,6 +295,7 @@ public class GenerateActionGroup extends ActionGroup {
 				provider.removeSelectionChangedListener(listener);
 			}
 		}
+		fEditor= null;
 		super.dispose();
 	}
 	
@@ -322,6 +329,21 @@ public class GenerateActionGroup extends ActionGroup {
 
 	private int addAction(IMenuManager menu, IAction action) {
 		if (action != null && action.isEnabled()) {
+			menu.add(action);
+			return 1;
+		}
+		return 0;
+	}	
+	
+	private int addEditorAction(IMenuManager menu, String actionID) {
+		if (fEditor == null)
+			return 0;
+		IAction action= fEditor.getAction(actionID);
+		if (action == null)
+			return 0;
+		if (action instanceof IUpdate)
+			((IUpdate)action).update();
+		if (action.isEnabled()) {
 			menu.add(action);
 			return 1;
 		}
