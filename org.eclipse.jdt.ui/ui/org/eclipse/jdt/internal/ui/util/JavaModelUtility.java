@@ -397,7 +397,8 @@ public class JavaModelUtility {
 	
 	private static boolean isStaticPublicVoidMethod(IMethod m) {
 		try {
-			return "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags()); //$NON-NLS-1$
+			// 1GI1H80: ITPJUI:WINNT - Log filled with 'main does not exist' messages
+			return m.exists() && "V".equals(m.getReturnType()) && Flags.isStatic(m.getFlags()) && Flags.isPublic(m.getFlags()); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 			return false;
