@@ -48,6 +48,8 @@ public class RemoteTestRunnerClient {
 	private int fPort= -1;
 	private PrintWriter fWriter;
 	private BufferedReader fBufferedReader;
+	// protocol version
+	private String fVersion;
 
 	/**
 	 * RemoteTestRunner is sending trace. 
@@ -209,7 +211,16 @@ public class RemoteTestRunnerClient {
 
 		String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
 		if (message.startsWith(MessageIds.TEST_RUN_START)) {
-			int count = Integer.parseInt(arg);
+			int count= 0;
+			int v= arg.indexOf(' ');
+			if (v == -1) {
+				fVersion= "v1"; //$NON-NLS-1$
+				count= Integer.parseInt(arg);
+			} else {
+				fVersion= arg.substring(v+1);
+				String sc= arg.substring(0, v);
+				count= Integer.parseInt(sc);
+			}
 			notifyTestRunStarted(count);
 			return;
 		}
@@ -246,27 +257,57 @@ public class RemoteTestRunnerClient {
 			return;
 		}
 		if (message.startsWith(MessageIds.TEST_RERAN)) {
-			// format: testId" "className" "testName" "status
-			// status: FAILURE, ERROR, OK
-			int i= arg.indexOf(' ');
-			int c= arg.indexOf(' ', i+1); //$NON-NLS-1$
-			int t= arg.indexOf(' ', c+1); //$NON-NLS-1$
-			String testId= arg.substring(0, i);
-			String className= arg.substring(i+1, c);
-			String testName= arg.substring(c+1, t);
-			String status= arg.substring(t+1);
-			int statusCode= ITestRunListener.STATUS_OK;
-			if (status.equals("FAILURE")) //$NON-NLS-1$
-				statusCode= ITestRunListener.STATUS_FAILURE;
-			else if (status.equals("ERROR")) //$NON-NLS-1$
-				statusCode= ITestRunListener.STATUS_ERROR;
-				
-			String trace= ""; //$NON-NLS-1$
-			if (statusCode != ITestRunListener.STATUS_OK)
-				trace = fFailedRerunTrace;
-			// assumption a rerun trace was sent before
-			notifyTestReran(testId, className, testName, statusCode, trace);
+			if (hasTestId())
+				scanReranMessage(arg);
+			else 
+				scanOldReranMessage(arg);
 		}
+	}
+
+	private void scanOldReranMessage(String arg) {
+		// OLD V1 format
+		// format: className" "testName" "status
+		// status: FAILURE, ERROR, OK
+		int c= arg.indexOf(" "); //$NON-NLS-1$
+		int t= arg.indexOf(" ", c+1); //$NON-NLS-1$
+		String className= arg.substring(0, c);
+		String testName= arg.substring(c+1, t);
+		String status= arg.substring(t+1);
+		int statusCode= ITestRunListener.STATUS_OK;
+		if (status.equals("FAILURE")) //$NON-NLS-1$
+			statusCode= ITestRunListener.STATUS_FAILURE;
+		else if (status.equals("ERROR")) //$NON-NLS-1$
+			statusCode= ITestRunListener.STATUS_ERROR;
+				
+		String trace= ""; //$NON-NLS-1$
+		if (statusCode != ITestRunListener.STATUS_OK)
+			trace = fFailedRerunTrace;
+		// assumption a rerun trace was sent before
+		notifyTestReran(className+testName, className, testName, statusCode, trace);
+				
+	}
+
+	private void scanReranMessage(String arg) {
+		// format: testId" "className" "testName" "status
+		// status: FAILURE, ERROR, OK
+		int i= arg.indexOf(' ');
+		int c= arg.indexOf(' ', i+1); //$NON-NLS-1$
+		int t= arg.indexOf(' ', c+1); //$NON-NLS-1$
+		String testId= arg.substring(0, i);
+		String className= arg.substring(i+1, c);
+		String testName= arg.substring(c+1, t);
+		String status= arg.substring(t+1);
+		int statusCode= ITestRunListener.STATUS_OK;
+		if (status.equals("FAILURE")) //$NON-NLS-1$
+			statusCode= ITestRunListener.STATUS_FAILURE;
+		else if (status.equals("ERROR")) //$NON-NLS-1$
+			statusCode= ITestRunListener.STATUS_ERROR;
+			
+		String trace= ""; //$NON-NLS-1$
+		if (statusCode != ITestRunListener.STATUS_OK)
+			trace = fFailedRerunTrace;
+		// assumption a rerun trace was sent before
+		notifyTestReran(testId, className, testName, statusCode, trace);
 	}
 
 	private void extractFailure(String arg, int status) {
@@ -280,13 +321,22 @@ public class RemoteTestRunnerClient {
 	 * Returns an array with two elements. The first one is the testId, the second one the testName.
 	 */
 	String[] extractTestId(String arg) {
-		int i= arg.indexOf(',');
 		String[] result= new String[2];
+		if (!hasTestId()) {
+			result[0]= arg; // use the test name as the test Id
+			result[1]= arg;
+			return result;
+		}
+		int i= arg.indexOf(',');
 		result[0]= arg.substring(0, i);
 		result[1]= arg.substring(i+1, arg.length());
 		return result;
 	}
 	
+	private boolean hasTestId() {
+		return fVersion.equals("v2"); //$NON-NLS-1$
+	}
+
 	private void notifyTestReran(final String testId, final String className, final String testName, final int statusCode, final String trace) {
 		for (int i= 0; i < fListeners.length; i++) {
 			final ITestRunListener listener= fListeners[i];
@@ -302,9 +352,21 @@ public class RemoteTestRunnerClient {
 		for (int i= 0; i < fListeners.length; i++) {
 			if (fListeners[i] instanceof ITestRunListener2) {
 				ITestRunListener2 listener= (ITestRunListener2)fListeners[i];
-				listener.testTreeEntry(treeEntry);
+				if (!hasTestId()) 
+					listener.testTreeEntry(fakeTestId(treeEntry));
+				else
+					listener.testTreeEntry(treeEntry);
 			}
 		}
+	}
+
+	private String fakeTestId(String treeEntry) {
+		// extract the test name and add it as the testId
+		int index0= treeEntry.indexOf(',');
+		String testName= treeEntry.substring(0, index0).trim();
+		System.out.println("original:"+fVersion+"+"+treeEntry);
+		System.out.println(testName+","+treeEntry);
+		return testName+","+treeEntry; //$NON-NLS-1$
 	}
 
 	private void notifyTestRunStopped(final long elapsedTime) {

@@ -595,7 +595,7 @@ public class RemoteTestRunner implements TestListener {
 
 
 	private void notifyTestRunStarted(int testCount) {
-		sendMessage(MessageIds.TEST_RUN_START + testCount);
+		sendMessage(MessageIds.TEST_RUN_START + testCount + " " + "v2"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 

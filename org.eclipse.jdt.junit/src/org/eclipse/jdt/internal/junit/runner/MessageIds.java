@@ -40,7 +40,7 @@ public class MessageIds {
 	public static final String RTRACE_END=  "%RTRACEE"; //$NON-NLS-1$
 	/**
 	 * Notification that a test run has started. 
-	 * MessageIds.TEST_RUN_START+testCount.toString
+	 * MessageIds.TEST_RUN_START+testCount.toString+" "+version
 	 */
 	public static final String TEST_RUN_START=  "%TESTC  "; //$NON-NLS-1$
 	/**
