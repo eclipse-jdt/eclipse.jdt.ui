@@ -58,13 +58,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		fIntitialized= true;
 	}
 	
-	private static ITextBufferChangeCreator createChangeCreator(){
+	/* package */ static ITextBufferChangeCreator createChangeCreator(){
 		return new DocumentTextBufferChangeCreator(JavaPlugin.getDefault().getCompilationUnitDocumentProvider());
 	}
 	
 	// -------------------- method refactorings ----------------------
 	
-	private OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
+	/* package */ static OpenRefactoringWizardAction createRenameParametersAction(StructuredSelectionProvider selectionProvider, final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringMessages.getString("RefactoringGroup.rename_parameters"); //$NON-NLS-1$
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){

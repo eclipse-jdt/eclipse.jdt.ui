@@ -529,23 +529,27 @@
          	<separator name="reorgGroup"/>
          	<separator name="codingGroup"/>
       	</menu>
-		<action id="org.eclipse.jdt.ui.refactoring.RedoAction"
+		<action id="RedoAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.redoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RedoRefactoringAction"/>
-		<action id="org.eclipse.jdt.ui.refactoring.UndoAction"
+		<action id="UndoAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
 			label="%Refactoring.undoAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
-		<action id="org.eclipse.jdt.ui.refactoring.MoveAction"
+		<action id="MoveAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.moveAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate"/>
-		<action id="org.eclipse.jdt.ui.refactoring.RenameAction"
+		<action id="RenameParametersAction"
+			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
+			label="%Refactoring.renameParametersAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameParametersActionDelegate"/>
+		<action id="RenameAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
 			label="%Refactoring.renameAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
-		<action id="org.eclipse.jdt.ui.refactoring.ExtractMethodAction"
+		<action id="ExtractMethodAction"
 			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
 			label="%Refactoring.extractMethodAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction"/>
@@ -553,7 +557,6 @@
 </extension>
 
 <!-- End Refactoring -->
-
 
 <!-- =========================================================================== -->
 <!-- Java Launching and debugging                                                -->

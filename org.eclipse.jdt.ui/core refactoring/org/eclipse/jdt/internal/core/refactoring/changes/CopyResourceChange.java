@@ -56,7 +56,7 @@ public class CopyResourceChange extends ResourceReorgChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Copy resource:" + getResource().getFullPath() + " to: " + getDestination().getName();;
+		return "Copy resource:" + getResource().getFullPath() + " to: " + getDestination().getName();
 	}
 }
 

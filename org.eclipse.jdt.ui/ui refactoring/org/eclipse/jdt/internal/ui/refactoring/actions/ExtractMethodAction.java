@@ -123,7 +123,7 @@ public class ExtractMethodAction extends Action implements IUpdate, IWorkbenchWi
 			public void partBroughtToTop(IWorkbenchPart part) {
 			}
 			public void partClosed(IWorkbenchPart part) {
-				if (part == fEditor)
+				if (part == fEditor && fAction != null)
 					fAction.setEnabled(false);
 			}
 			public void partDeactivated(IWorkbenchPart part) {

@@ -129,7 +129,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		if (fWillRenameType)
 			return fRenameTypeRefactoring.checkPreactivation();
 		else	
-			return new RefactoringStatus();;
+			return new RefactoringStatus();
 	}
 	
 	/* non java-doc

@@ -6,11 +6,9 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.ui.reorg.MoveAction;
+public class RenameParametersActionDelegate extends RefactoringActionDelegate {
 
-public class MoveActionDelegate extends RefactoringActionDelegate {
-
-	public MoveActionDelegate() {
+	public RenameParametersActionDelegate() {
 	}
 	
 	/* (non-Javadoc)
@@ -20,7 +18,8 @@ public class MoveActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			new MoveAction(provider)
+			RefactoringGroup.createRenameParametersAction(provider, getChangeCreator())		
 		});
-	}	
+	}
 }
+
