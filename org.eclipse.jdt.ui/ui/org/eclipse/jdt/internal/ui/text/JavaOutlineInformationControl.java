@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -33,6 +35,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
@@ -45,6 +49,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -186,7 +192,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					ITypeHierarchy th= getSuperTypeHierarchy(type);
 					if (th != null) {
 						List children= new ArrayList();
-						IType[] superClasses= th.getAllSuperclasses(type);
+						IType[] superClasses= th.getAllSupertypes(type);
 						children.addAll(Arrays.asList(super.getChildren(type)));
 						for (int i= 0, scLength= superClasses.length; i < scLength; i++)
 							children.addAll(Arrays.asList(super.getChildren(superClasses[i])));
@@ -201,13 +207,25 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
 			if (th == null) {
 				try {
-					th= type.newSupertypeHierarchy(JavaPlugin.getActiveWorkbenchWindow().getActivePage().getActiveEditor().getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor());
+					th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());
 				} catch (JavaModelException e) {
 					return null;
 				}
 				fTypeHierarchies.put(type, th);
 			}
 			return th;
+		}
+		
+		private IProgressMonitor getProgressMonitor() {
+			IWorkbenchPage wbPage= JavaPlugin.getActivePage();
+			if (wbPage == null)
+				return null;
+			
+			IEditorPart editor= wbPage.getActiveEditor();
+			if (editor == null)
+				return null;
+			
+			return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();			
 		}
 		
 		/**
