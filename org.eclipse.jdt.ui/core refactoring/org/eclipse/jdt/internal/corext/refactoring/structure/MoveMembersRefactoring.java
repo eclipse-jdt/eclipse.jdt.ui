@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
@@ -48,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRa
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -61,6 +64,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	private IMember[] fMembers;
 	private IType fDestinationType;
 	private String fDestinationTypeName;
+	private TextChangeManager fChangeManager;
 	
 	private Map fImportEdits;
 
@@ -132,7 +136,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Checking preconditions", 4);
+			pm.beginTask("Checking preconditions", 5);
 			
 			RefactoringStatus result= new RefactoringStatus();	
 			
@@ -153,7 +157,12 @@ public class MoveMembersRefactoring extends Refactoring {
 				return result;
 			
 			result.merge(checkNativeMovedMethods(new SubProgressMonitor(pm, 1)));
+			
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			result.merge(validateModifiesFiles());
 			return result;
+		} catch (CoreException e){
+			throw new JavaModelException(e);	
 		} finally{
 			pm.done();
 		}	
@@ -310,6 +319,14 @@ public class MoveMembersRefactoring extends Refactoring {
 		return result;
 	}
 	
+	private IFile[] getAllFilesToModify() throws CoreException{
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	private RefactoringStatus validateModifiesFiles() throws CoreException{
+		return Checks.validateModifiesFiles(getAllFilesToModify());
+	}
+	
 	private static boolean isVisibleFrom(IMember member, IType accessingType, IType newMemberDeclaringType) throws JavaModelException{
 		if (JdtFlags.isPrivate(member))
 			return newMemberDeclaringType.equals(accessingType); //roughly
@@ -418,6 +435,14 @@ public class MoveMembersRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
+			return new CompositeChange("Move members", fChangeManager.getAllChanges());
+		} finally{
+			pm.done();
+		}	
+	}
+	
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+		try{
 			pm.beginTask("Analyzing", 6);
 			TextChangeManager manager= new TextChangeManager();
 			addCopyMembersChange(new SubProgressMonitor(pm, 1), manager);
@@ -434,10 +459,8 @@ public class MoveMembersRefactoring extends Refactoring {
 			addModifyReferencesToMovedMembers(new SubProgressMonitor(pm, 1), manager);
 
 			addImports(manager);
-
-			return new CompositeChange("Move members", manager.getAllChanges());
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
+			
+			return manager;
 		} finally{
 			pm.done();
 		}	
