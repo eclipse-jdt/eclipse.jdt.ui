@@ -270,8 +270,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_21() throws Exception{
-		printTestDisabledMessage("must fix - consequence of fix for 23464");
-//		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+//		printTestDisabledMessage("must fix - consequence of fix for 23464");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
 	}
 	public void test_nonstatic_22() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
