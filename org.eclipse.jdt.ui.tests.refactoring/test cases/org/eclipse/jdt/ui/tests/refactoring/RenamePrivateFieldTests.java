@@ -200,7 +200,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	
 	public void test8() throws Exception{
 		//regression test for 26769
-		helper2("f", "g", true, false, false, false, true, true, true, true);
+		helper2("f", "g", true, false, false, false, true, false, true, false);
 	}
 	
 }
