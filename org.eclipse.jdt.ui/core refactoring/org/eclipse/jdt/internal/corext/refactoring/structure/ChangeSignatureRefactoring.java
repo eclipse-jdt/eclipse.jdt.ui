@@ -1060,15 +1060,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private int getNewModifiers(MethodDeclaration md) {
-		return clearAccessModifiers(md.getModifiers()) | fVisibility;
-	}
-	
-	private static int clearAccessModifiers(int flags) {
-		return clearFlag(clearFlag(clearFlag(flags, Modifier.PRIVATE), Modifier.PUBLIC), Modifier.PROTECTED);
-	}
-	
-	private static int clearFlag(int flags, int flag){
-		return flags & ~ flag;
+		return ASTNodes.clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
 	private MethodDeclaration getDeclarationNode(IMethod method) throws JavaModelException {
