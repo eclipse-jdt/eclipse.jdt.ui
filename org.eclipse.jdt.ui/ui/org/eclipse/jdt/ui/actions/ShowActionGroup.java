@@ -104,6 +104,7 @@ public class ShowActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
+		super.fillContextMenu(menu);
 		if (!fIsPackageExplorer)
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackagesViewAction);
 	}

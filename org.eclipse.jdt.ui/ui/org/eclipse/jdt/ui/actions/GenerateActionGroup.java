@@ -117,6 +117,6 @@ public class GenerateActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void fillContextMenu(IMenuManager menu) {
-		Assert.isTrue(false, "Not yet implemented");
+		super.fillContextMenu(menu);
 	}
 }
