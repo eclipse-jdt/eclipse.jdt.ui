@@ -28,7 +28,9 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,6 +43,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.reorg.TypedSource;
 import org.eclipse.jdt.internal.ui.reorg.TypedSourceTransfer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -56,9 +60,22 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
+		setText("&Copy");
+		setDescription("Copy the selected elements to the clipboard");
 		Assert.isNotNull(clipboard);
 		fClipboard= clipboard;
 		fPasteAction= pasteAction;
+		ISharedImages workbenchImages= getWorkbenchSharedImages();
+		setDisabledImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_DISABLED));
+		setImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY));
+		setHoverImageDescriptor(workbenchImages.getImageDescriptor(ISharedImages.IMG_TOOL_COPY_HOVER));
+		update(getSelection());
+
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);
+	}
+
+	private static ISharedImages getWorkbenchSharedImages() {
+		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
 	}
 
 	/* (non-Javadoc)
