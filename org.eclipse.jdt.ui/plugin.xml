@@ -627,14 +627,6 @@ JavaStructureDiffViewerCreator
 	</filter>
 </extension>
 
-<extension
-	point= "org.eclipse.jdt.ui.javaElementFilters">
-	<filter pattern = ".*" selected = "true">
-	</filter>
-	<filter pattern = "*$*.class" selected = "false">
-	</filter>
-</extension>
-
 <!-- =========================================================================== -->
 <!-- JAR Packager                                                                -->
 <!-- =========================================================================== -->
@@ -1180,6 +1172,17 @@ JavaStructureDiffViewerCreator
 		<!-- Search Menu                                                         -->
 		<!-- =================================================================== -->
 		
+		<!-- Note: The menu (re-) definition has to be here due to bug: -->
+		<!-- see http://bugs.eclipse.org/bugs/show_bug.cgi?id=155684    -->
+      	<menu
+            id="org.eclipse.search.menu"
+            label="%searchMenu.label"
+            path="navigate">
+			<groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
+			<groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
+         	<separator name="contextMenuActionsGroup"/>
+      	</menu>
+		
       	<!-- dialog group  -->
 		<action id="org.eclipse.jdt.ui.actions.OpenJavaSearchPage"
 			menubarPath="org.eclipse.search.menu/dialogGroup"
@@ -1359,13 +1362,12 @@ JavaStructureDiffViewerCreator
 </extension>
 
 <!-- =========================================================================== -->
-<!-- Java Working Set Page 														 -->
+<!-- Java Working Set Page                                                       -->
 <!-- =========================================================================== -->
-<!-- no icon yet 		icon="icons/full/ctool16/java_workingset_wiz.gif" -->
-<!-- see http://bugs.eclipse.org/bugs/show_bug.cgi?id=16234 -->
 <extension point="org.eclipse.ui.workingSets">
 	<workingSet
 		id="org.eclipse.jdt.ui.JavaWorkingSetPage"
+		icon="icons/full/obj16/jworkingSet_obj.gif"
 		name="%JavaWorkingSetPage.name"
 		pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage">
 	</workingSet>
@@ -1581,5 +1583,86 @@ JavaStructureDiffViewerCreator
       markerType="org.eclipse.jdt.core.problem"> 
    </markerResolutionGenerator> 
 </extension> 
+
+<!-- =========================================================================== -->
+<!-- Filter Support                                                              -->
+<!-- =========================================================================== -->
+<extension point= "org.eclipse.jdt.ui.javaElementFilters">
+
+	<!-- Package Explorer -->
+	<filter
+		name= "%HideSystemFiles.label"
+		pattern= ".*"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		selected = "true">
+	</filter>
+	<filter
+		name= "%HideAnonymousInnerClasses.label"
+		pattern= "*$*.class"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		enabled = "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.internal.ui.PackageExplorer.EmptyPackageFilter"
+		name= "%HideEmptyPackages.label"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.internal.ui.PackageExplorer.EmptyInnerPackageFilter"
+		name= "%HideEmptyInnerPackages.label"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
+		enabled= "true">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaElementFilter"
+		name= "%HideNonJavaElements.label"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.NonJavaElementFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.LibraryFilter"
+		name= "%HideReferencedLibraries.label"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
+		enabled= "false">
+	</filter>
+
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.CuAndClassFileFilter"
+		name= "%HideJavaFiles.label"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.CuAndClassFileFilter"
+		enabled= "false">
+	</filter>
+
+	<!-- Packages view -->
+	<filter
+		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyPackageFilter"
+		name= "%HideEmptyPackages.label"
+		viewId= "org.eclipse.jdt.ui.PackagesView"
+		class= "org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter"
+		enabled= "true">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.internal.ui.PackagesView.EmptyInnerPackageFilter"
+		name= "%HideEmptyInnerPackages.label"
+		viewId= "org.eclipse.jdt.ui.PackagesView"
+		class= "org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
+		enabled= "true">
+	</filter>
+	
+	<!-- Projects view -->
+	<filter
+		id= "org.eclipse.jdt.ui.PackagesView.LibraryFilter"
+		name= "%HideReferencedLibraries.label"
+		viewId= "org.eclipse.jdt.ui.ProjectsView"
+		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
+		enabled= "false">
+	</filter>
+</extension>
 
 </plugin>
