@@ -173,6 +173,9 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		if (Checks.isInsideJavadoc(expression))
 			return;
 		//TODO: exclude invalid selections
+		if (Checks.isEnumCase(expression.getParent()))
+			return;
+		
 		fSelectedExpression= expression;
 	}
 	

@@ -176,6 +176,8 @@ public class ExtractTempRefactoring extends Refactoring {
 			return false;
 		if (isUsedInForInitializerOrUpdater((Expression) node))
 			return false;
+		if (parent instanceof SwitchCase)
+			return false;
 		return true;
 	}
 
@@ -799,6 +801,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
 		}
 
+		if (fSelectedExpression != null && Checks.isEnumCase(fSelectedExpression.getAssociatedExpression().getParent())) {
+			fSelectedExpression= null;
+		}
+		
 		return fSelectedExpression;
 	}
 

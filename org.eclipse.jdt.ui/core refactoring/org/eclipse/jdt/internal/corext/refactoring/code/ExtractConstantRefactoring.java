@@ -61,6 +61,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -749,12 +750,15 @@ public class ExtractConstantRefactoring extends Refactoring {
 	// !! - like one in ExtractTempRefactoring
 	private static boolean canReplace(IASTFragment fragment) {
 		ASTNode node= fragment.getAssociatedNode();
-		if (node.getParent() instanceof VariableDeclarationFragment) {
-			VariableDeclarationFragment vdf= (VariableDeclarationFragment) node.getParent();
+		ASTNode parent= node.getParent();
+		if (parent instanceof VariableDeclarationFragment) {
+			VariableDeclarationFragment vdf= (VariableDeclarationFragment) parent;
 			if (node.equals(vdf.getName()))
 				return false;
 		}
-		if (node.getParent() instanceof ExpressionStatement)
+		if (parent instanceof ExpressionStatement)
+			return false;
+		if (parent instanceof SwitchCase)
 			return false;
 		return true;
 	}
@@ -768,6 +772,10 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if (selectedFragment instanceof IExpressionFragment
 				&& ! Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
 			fSelectedExpression= (IExpressionFragment) selectedFragment;
+		}
+		
+		if (fSelectedExpression != null && Checks.isEnumCase(fSelectedExpression.getAssociatedExpression().getParent())) {
+			fSelectedExpression= null;
 		}
 		
 		return fSelectedExpression;
