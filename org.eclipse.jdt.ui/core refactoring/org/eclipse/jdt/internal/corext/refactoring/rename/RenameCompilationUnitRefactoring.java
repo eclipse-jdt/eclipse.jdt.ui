@@ -280,10 +280,11 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed", fCu.getElementName())); //$NON-NLS-1$
 		}
 		
-		if (fRenameTypeRefactoring != null){
-			IType type= fRenameTypeRefactoring.getType();
-			if (! type.exists())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.type_does_not_exist", type.getElementName())); //$NON-NLS-1$
+		//for a test case what it's needed, see bug 24248 
+		//(the type might be gone from the editor by now)
+		if (fWillRenameType && fRenameTypeRefactoring != null && ! fRenameTypeRefactoring.getType().exists()){
+			fWillRenameType= false;
+			return new RefactoringStatus();
 		}
 		 
 		// we purposely do not check activation of the renameTypeRefactoring here. 
