@@ -159,7 +159,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 		}
 	};
-	
+
 	
 	class AdaptedSourceViewer extends JavaCorrectionSourceViewer  {
 		
@@ -209,23 +209,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 			
 			super.doOperation(operation);
-		}
-		
-		/*
-		 * @see ITextOperationTarget#canDoOperation(int)
-		 */
-		public boolean canDoOperation(int operation) {
-			
-			if (getTextWidget() == null)
-				return false;
-		
-			switch (operation) {
-				case SHIFT_RIGHT:
-				case SHIFT_LEFT:
-					return isEditable() && fIndentChars != null && isBlockSelected();
-			}
-			
-			return super.canDoOperation(operation);
 		}
 		
 		public void insertTextConverter(ITextConverter textConverter, int index) {

@@ -27,6 +27,7 @@ import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.util.Assert;
@@ -135,9 +136,11 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		fViewer.addTextInputListener(this);
 				
+		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+		extension.prependVerifyKeyListener(this);
+
 		StyledText text= fViewer.getTextWidget();			
 		text.addVerifyListener(this);
-		text.addVerifyKeyListener(this);
 		text.addModifyListener(this);
 		text.addPaintListener(this);
 		text.showSelection();
@@ -173,8 +176,10 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		StyledText text= fViewer.getTextWidget();	
 		text.removePaintListener(this);
 		text.removeModifyListener(this);
-		text.removeVerifyKeyListener(this);
 		text.removeVerifyListener(this);
+
+		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+		extension.removeVerifyKeyListener(this);
 
 		fViewer.removeTextInputListener(this);
 		
