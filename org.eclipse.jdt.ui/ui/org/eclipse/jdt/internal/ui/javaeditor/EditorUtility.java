@@ -12,9 +12,15 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.swt.SWT;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
@@ -22,20 +28,19 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorRegistry;
-import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.ide.IDE;
+import org.eclipse.ui.ide.IGotoMarker;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.part.MultiPageEditorSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -44,6 +49,8 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -73,7 +80,7 @@ public class EditorUtility {
 	}
 	
 	/** 
-	 * Tests if a cu is currently shown in an editor
+	 * Tests if a CU is currently shown in an editor
 	 * @return the IEditorPart if shown, null if element is not open in an editor
 	 */	
 	public static IEditorPart isOpenInEditor(Object inputElement) {
@@ -129,16 +136,22 @@ public class EditorUtility {
 	 * Selects a Java Element in an editor
 	 */	
 	public static void revealInEditor(IEditorPart part, IJavaElement element) {
-		if (part == null)
+		if (element == null)
 			return;
 		
-		// Support for nested Java editor
-		IEditorSite site= part.getEditorSite();
-		if (site instanceof MultiPageEditorSite)
-			part= ((MultiPageEditorSite)site).getEditor();
-		
-		if (element != null && part instanceof JavaEditor)
+		if (part instanceof JavaEditor)
 			((JavaEditor) part).setSelection(element);
+		else if (element instanceof ISourceReference) {
+			
+			// Support for non-Java editor
+			try {
+				ISourceRange range= ((ISourceReference)element).getSourceRange();
+				if (range != null)
+					revealInEditor(part, range.getOffset(), range.getLength());
+			} catch (JavaModelException e) {
+				// don't reveal
+			}
+		}
 	}
 	
 	/** 
@@ -152,17 +165,43 @@ public class EditorUtility {
 	/** 
 	 * Selects and reveals the given offset and length in the given editor part.
 	 */	
-	public static void revealInEditor(IEditorPart part, int offset, int length) {
-		if (part == null)
-			return;
-		
-		// Support for nested text editor
-		IEditorSite site= part.getEditorSite();
-		if (site instanceof MultiPageEditorSite)
-			part= ((MultiPageEditorSite)site).getEditor();
-		
-		if (part instanceof ITextEditor)
+	public static void revealInEditor(IEditorPart part, final int offset, final int length) {
+		if (part instanceof ITextEditor) {
 			((ITextEditor)part).selectAndReveal(offset, length);
+			return;
+		}
+		
+		// Support for non-text editor
+		 if (part instanceof IGotoMarker) {
+			final IEditorInput input= part.getEditorInput();
+			if (input instanceof IFileEditorInput) {
+				final IGotoMarker gotoMarkerTarget= (IGotoMarker)part;
+				WorkspaceModifyOperation op = new WorkspaceModifyOperation() {
+					protected void execute(IProgressMonitor monitor) throws CoreException {
+						IMarker marker= null;
+						try {
+							marker= ((IFileEditorInput)input).getFile().createMarker(IMarker.TEXT);
+							marker.setAttribute(IMarker.CHAR_START, offset); 
+							marker.setAttribute(IMarker.CHAR_END, offset + length);
+
+							gotoMarkerTarget.gotoMarker(marker);
+							
+						} finally {
+							if (marker != null)
+								marker.delete();
+						}
+					}
+				};
+
+				try {
+					op.run(null);
+				} catch (InvocationTargetException ex) {
+					// reveal failed
+				} catch (InterruptedException e) {
+					Assert.isTrue(false, "this operation can not be canceled"); //$NON-NLS-1$
+				}
+			}
+		}
 	}
 	
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
@@ -199,7 +238,7 @@ public class EditorUtility {
 					// Restore the action 
 					((TextEditorAction)toggleAction).setEditor((ITextEditor)editorPart);
 				} else {
-					// Uncheck 
+					// Un-check 
 					toggleAction.run();
 					// Check
 					toggleAction.run();
@@ -212,34 +251,17 @@ public class EditorUtility {
 	 *@deprecated	Made it public again for java debugger UI.
 	 */
 	public static String getEditorID(IEditorInput input, Object inputObject) {
-		IEditorRegistry registry= PlatformUI.getWorkbench().getEditorRegistry();
-		String inputName= input.getName();
-
-		/*
-		 * XXX: This is code copied from IDE.openEditor
-		 *      Filed bug 50285 requesting API for getting the descriptor 
-		 */ 
-		
-		// check for a default editor
-		IEditorDescriptor editorDescriptor= registry.getDefaultEditor(inputName);
-		
-		// next check the OS for in-place editor (OLE on Win32)
-		if (editorDescriptor == null && registry.isSystemInPlaceEditorAvailable(inputName))
-			editorDescriptor= registry.findEditor(IEditorRegistry.SYSTEM_INPLACE_EDITOR_ID);
-		
-		// next check with the OS for an external editor
-		if (editorDescriptor == null && registry.isSystemExternalEditorAvailable(inputName))
-			editorDescriptor= registry.findEditor(IEditorRegistry.SYSTEM_EXTERNAL_EDITOR_ID);
-		
-		// next lookup the default text editor
-		if (editorDescriptor == null)
-			editorDescriptor= registry.findEditor("org.eclipse.ui.DefaultTextEditor"); //$NON-NLS-1$
-		
-		// if no valid editor found, bail out
-		if (editorDescriptor == null)
+		IEditorDescriptor editorDescriptor;
+		try {
+			editorDescriptor= IDE.getEditorDescriptor(input.getName());
+		} catch (PartInitException e) {
 			return null;
+		}
 		
-		return editorDescriptor.getId();
+		if (editorDescriptor != null)
+			return editorDescriptor.getId();
+		
+		return null;
 	}
 	
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
