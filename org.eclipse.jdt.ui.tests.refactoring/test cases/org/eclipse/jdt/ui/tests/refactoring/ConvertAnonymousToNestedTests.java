@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     N.Metchev@teamphone.com - contributed fixes for
+ *     - convert anonymous to nested should sometimes declare class as static [refactoring] 
+ *       (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=43360)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -235,4 +238,31 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);
 	}
 
+    public void test21() throws Exception{
+        helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);   
+    }
+
+    public void test22() throws Exception{
+    	helper1(9, 34, 9, 34, true, "Inner", Modifier.PRIVATE);   
+    }
+    
+    public void test23() throws Exception{
+    	helper1(6, 33, 6, 33, true, "Inner", Modifier.PRIVATE);   
+    }
+    
+    public void test24() throws Exception{
+    	helper1(3, 26, 3, 26, true, "Inner", Modifier.PRIVATE);   
+    }
+
+    public void test25() throws Exception{
+    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);   
+    }
+
+    public void test26() throws Exception{
+    	helper1(8, 28, 8, 28, true, "Inner", Modifier.PRIVATE);   
+    }
+
+    public void test27() throws Exception{
+    	helper1(11, 39, 11, 39, true, "Inner", Modifier.PRIVATE);   
+    }
 }
