@@ -196,7 +196,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			statementRewrite.replace((ASTNode[])replacements.toArray(new ASTNode[replacements.size()]), null);
 			
 			if (!fImportRewrite.isEmpty()) {
-				TextEdit edit= fImportRewrite.createEdit(document);
+				TextEdit edit= fImportRewrite.createEdit(document, null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}
