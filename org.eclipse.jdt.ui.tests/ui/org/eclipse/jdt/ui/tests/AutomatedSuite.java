@@ -69,8 +69,9 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JavaHeuristicScannerTest.suite());
 		addTest(SmartSemicolonAutoEditStrategyTest.suite());
 		
+		
 		System.out.println("! Java Search Tests disabled !");
-//TODO: fix		addTest(SearchTest.suite());
+		if (false) addTest(SearchTest.suite()); //TODO: fix
 	}
 	
 }
