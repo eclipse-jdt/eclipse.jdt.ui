@@ -308,12 +308,10 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 				
 			if (getGetter() != null && fRenameGetter)
-				result.merge(checkAccessor(getGetter(), getNewGetterName()));
-			pm.worked(1);
+				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getGetter(), getNewGetterName()));
 				
 			if (getSetter() != null && fRenameSetter)
-				result.merge(checkAccessor(getSetter(), getNewSetterName()));
-			pm.worked(1);
+				result.merge(checkAccessor(new SubProgressMonitor(pm, 1), getSetter(), getNewSetterName()));
 				
 			return result;
 		} finally{
@@ -321,14 +319,40 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	}
 	
-	private RefactoringStatus checkAccessor(IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+	private RefactoringStatus checkAccessor(IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		result.merge(checkAccessorDeclarations(pm, existingAccessor));
+		result.merge(checkNewAccessor(existingAccessor, newAccessorName));
+		return result;
+	}
+	
+	private RefactoringStatus checkNewAccessor(IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
 		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, existingAccessor.getParameterTypes(), false, fField.getDeclaringType());
 		if (accessor == null || !accessor.exists())
 			return null;
 			
 		String msg= "Method \'" + JavaElementUtil.createMethodSignature(accessor) + "\' already exists in \'" 
 					+ fField.getDeclaringType().getFullyQualifiedName() + "\'";
-		return RefactoringStatus.createErrorStatus(msg, JavaSourceContext.create(accessor));
+		result.addError(msg, JavaSourceContext.create(accessor));
+		return result;
+	}
+	
+	private RefactoringStatus checkAccessorDeclarations(IProgressMonitor pm, IMethod existingAccessor) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		ISearchPattern pattern= SearchEngine.createSearchPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS);
+		IJavaSearchScope scope= SearchEngine.createHierarchyScope(fField.getDeclaringType());
+		SearchResultGroup[] groupDeclarations= RefactoringSearchEngine.search(pm, scope, pattern);
+		Assert.isTrue(groupDeclarations.length > 0);
+		if (groupDeclarations.length != 1){
+			result.addError("Method \'" + JavaElementUtil.createMethodSignature(existingAccessor) + "\' is overridden or overrides another method.");
+		} else {
+			SearchResultGroup group= groupDeclarations[0];
+			Assert.isTrue(group.getSearchResults().length > 0);
+			if (group.getSearchResults().length != 1)
+				result.addError("Method \'" + JavaElementUtil.createMethodSignature(existingAccessor) + "\' is overridden or overrides another method.");
+		}	
+		return result;
 	}
 	
 	private static boolean isInstaceField(IField field) throws JavaModelException{
