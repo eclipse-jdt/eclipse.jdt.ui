@@ -149,7 +149,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 				maxNumberOfLines--;
 			}
 			
-			if (line != null) {
+			if (line != null && buffer.length() > 0) {
 				append(buffer, LINE_DELIM, lineFormatted ? presentation : null);
 				append(buffer, JavaUIMessages.getString("HTMLTextPresenter.ellipsis"), presentation); //$NON-NLS-1$
 			}
