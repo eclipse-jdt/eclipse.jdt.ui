@@ -57,8 +57,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 
-import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -72,6 +70,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
@@ -103,8 +102,8 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 				 * @see org.eclipse.jface.util.IPropertyChangeListener#propertyChange(org.eclipse.jface.util.PropertyChangeEvent)
 				 */
 				public void propertyChange(PropertyChangeEvent event) {
-					if (event.getProperty().equals(PreferenceConstants.EDITOR_TEXT_FONT)) {
-						Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+					if (event.getProperty().equals(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT)) {
+						Font font= JFaceResources.getFont(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT);
 						viewer.getTextWidget().setFont(font);
 					}
 				}
@@ -477,13 +476,12 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	
 	private Control createPreviewer(Composite parent) {
 		
-		IPreferenceStore generalTextStore= EditorsUI.getPreferenceStore();
-		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, generalTextStore });
-		fPreviewViewer= new SourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER);
+		IPreferenceStore store= new ChainedPreferenceStore(new IPreferenceStore[] { fOverlayStore, JavaPlugin.getDefault().getCombinedPreferenceStore()});
+		fPreviewViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER, store);
 		fColorManager= new JavaColorManager(false);
 		PropertiesFileSourceViewerConfiguration configuration= new PropertiesFileSourceViewerConfiguration(fColorManager, store, null, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING);
 		fPreviewViewer.configure(configuration);
-		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
+		Font font= JFaceResources.getFont(PreferenceConstants.PROPERTIES_FILE_EDITOR_TEXT_FONT);
 		fPreviewViewer.getTextWidget().setFont(font);
 		new SourcePreviewerUpdater(fPreviewViewer, configuration, store);
 		fPreviewViewer.setEditable(false);

@@ -2606,6 +2606,14 @@ public class PreferenceConstants {
 
 
 	//---------- Properties File Editor ----------
+	
+	/**
+	 * The symbolic font name for the Java properties file editor text font 
+	 * (value <code>"org.eclipse.jdt.ui.PropertiesFileEditor.textfont"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	public static final String PROPERTIES_FILE_EDITOR_TEXT_FONT= "org.eclipse.jdt.ui.PropertiesFileEditor.textfont"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that holds the color used to render keys in a properties file.

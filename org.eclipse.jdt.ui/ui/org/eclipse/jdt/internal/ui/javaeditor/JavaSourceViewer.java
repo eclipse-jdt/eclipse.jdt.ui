@@ -172,22 +172,23 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	public void configure(SourceViewerConfiguration configuration) {
 		super.configure(configuration);
 		if (configuration instanceof JavaSourceViewerConfiguration) {
-			fOutlinePresenter= ((JavaSourceViewerConfiguration)configuration).getOutlinePresenter(this, false);
+			JavaSourceViewerConfiguration javaSVCconfiguration= (JavaSourceViewerConfiguration)configuration;
+			fOutlinePresenter= javaSVCconfiguration.getOutlinePresenter(this, false);
 			fOutlinePresenter.install(this);
-		}
-		if (configuration instanceof JavaSourceViewerConfiguration) {
-			fStructurePresenter= ((JavaSourceViewerConfiguration)configuration).getOutlinePresenter(this, true);
+
+			fStructurePresenter= javaSVCconfiguration.getOutlinePresenter(this, true);
 			fStructurePresenter.install(this);
-		}
-		if (configuration instanceof JavaSourceViewerConfiguration) {
-			fHierarchyPresenter= ((JavaSourceViewerConfiguration)configuration).getHierarchyPresenter(this, true);
+			
+			fHierarchyPresenter= javaSVCconfiguration.getHierarchyPresenter(this, true);
 			fHierarchyPresenter.install(this);
             
-			if (fPreferenceStore != null) {
-				fPreferenceStore.addPropertyChangeListener(this);
-				initializeViewerColors();
-			}
 		}
+		
+		if (fPreferenceStore != null) {
+			fPreferenceStore.addPropertyChangeListener(this);
+			initializeViewerColors();
+		}
+		
 		fIsConfigured= true;
 	}
 	
