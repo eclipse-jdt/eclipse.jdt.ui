@@ -16,6 +16,9 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModel;
 import org.eclipse.jface.text.Document;
+
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -39,7 +42,7 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		InsertEdit insertEdit= modell.insert("key", "value");
 		insertEdit.apply(props);
 
-		assertEquals("key=value\n", props.get());
+		RefactoringTest.assertEqualLines("key=value\n", props.get());
 	}
 
 	public void testInsertIntoDoc() throws Exception {
@@ -158,24 +161,24 @@ public class PropertyFileDocumentModellTest extends TestCase {
 	public void testEscapingOfComments() {
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(new Document());
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "value!please escape"));
-		assertEquals("key=value\\!please escape\n", insertEdit.getText());
+		RefactoringTest.assertEqualLines("key=value\\!please escape\n", insertEdit.getText());
 	}
 
 	public void testEscapingOfLineBreaks() {
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(new Document());
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "value1\nvalue2\r"));
-		assertEquals("key=value1\\nvalue2\\r\n", insertEdit.getText());
+		RefactoringTest.assertEqualLines("key=value1\\nvalue2\\r\n", insertEdit.getText());
 	}
 
 	public void testEscapingOfUniCode() {
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(new Document());
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "\u00ea"));
-		assertEquals("key=\\u00EA\n", insertEdit.getText());
+		RefactoringTest.assertEqualLines("key=\\u00EA\n", insertEdit.getText());
 	}
 	
 	public void testEscapingOfLeadingWhiteSpaces() {
 		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(new Document());
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "  test"));
-		assertEquals("key=\\ \\ test\n", insertEdit.getText());
+		RefactoringTest.assertEqualLines("key=\\ \\ test\n", insertEdit.getText());
 	}
 }
