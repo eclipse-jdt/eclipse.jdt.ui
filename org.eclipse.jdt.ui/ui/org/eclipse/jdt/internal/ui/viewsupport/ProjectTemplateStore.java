@@ -12,8 +12,8 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -70,19 +70,10 @@ public final class ProjectTemplateStore {
 	}
 	
 	public TemplatePersistenceData[] getTemplateData() {
-		Map datas= new HashMap();
 		if (fProjectStore != null) {
-			TemplatePersistenceData[] data= fInstanceStore.getTemplateData(false);
-			for (int i= 0; i < data.length; i++) {
-				datas.put(data[i].getId(), data[i]);
-			}
-			data= fProjectStore.getTemplateData(false);
-			for (int i= 0; i < data.length; i++) {
-				datas.put(data[i].getId(), data[i]);
-			}
-			return (TemplatePersistenceData[]) datas.values().toArray(new TemplatePersistenceData[datas.values().size()]);
+			return fProjectStore.getTemplateData(true);
 		} else {
-			return fInstanceStore.getTemplateData(false);
+			return fInstanceStore.getTemplateData(true);
 		}
 	}
 	
@@ -99,10 +90,30 @@ public final class ProjectTemplateStore {
 	public void load() throws IOException {
 		if (fProjectStore != null) {
 			fProjectStore.load();
+			
+			Set datas= new HashSet();
+			TemplatePersistenceData[] data= fProjectStore.getTemplateData(false);
+			for (int i= 0; i < data.length; i++) {
+				datas.add(data[i].getId());
+			}
+			
+			data= fInstanceStore.getTemplateData(false);
+			for (int i= 0; i < data.length; i++) {
+				TemplatePersistenceData orig= data[i];
+				if (!datas.contains(orig.getId())) {
+					TemplatePersistenceData copy= new TemplatePersistenceData(new Template(orig.getTemplate()), orig.isEnabled(), orig.getId());
+					fProjectStore.add(copy);
+					copy.setDeleted(true);
+				}
+			}
 		}
 	}
 	
 	public boolean isProjectSpecific(String id) {
+		if (id == null) {
+			return false;
+		}
+		
 		if (fProjectStore == null)
 			return false;
 		
@@ -114,20 +125,10 @@ public final class ProjectTemplateStore {
 		Assert.isNotNull(fProjectStore);
 		
 		TemplatePersistenceData data= fProjectStore.getTemplateData(id);
-		if (projectSpecific) {
-			if (data == null) {
-				TemplatePersistenceData orig= fInstanceStore.getTemplateData(id);
-				if (orig == null)
-					return; // does not exist
-				TemplatePersistenceData copy= new TemplatePersistenceData(new Template(orig.getTemplate()), orig.isEnabled(), orig.getId());
-				fProjectStore.add(copy);
-			} else {
-				data.setDeleted(false);
-			}
+		if (data == null) {
+			return; // does not exist
 		} else {
-			if (data != null)
-				data.setDeleted(true);
-			// else: nothing to do
+			data.setDeleted(!projectSpecific);
 		}
 	}
 
