@@ -543,7 +543,7 @@ public class CodeTemplateBlock {
 	
 	public void performCancel() {
 		try {
-			fTemplateStore.load();
+			fTemplateStore.revertChanges();
 		} catch (IOException e) {
 			openReadErrorDialog(e);
 		}
