@@ -571,6 +571,7 @@
 		</menu>
 		<action
 			id="javaReplaceFromHistory"
+			overrideActionId="replaceFromHistory"
 			label="%JavaReplaceFromHistoryAction.label"
 			tooltip="%JavaReplaceFromHistoryAction.tooltip"
 			menubarPath="replaceWithMenu/replaceWithGroup"
@@ -579,6 +580,7 @@
 		</action>
 		<action
 			id="javaReplacePreviousFromHistory"
+			overrideActionId="replaceWithPreviousFromHistory"
 			label="%JavaReplaceWithPreviousFromHistoryAction.label"
 			tooltip="%JavaReplaceWithPreviousFromHistoryAction.tooltip"
 			menubarPath="replaceWithMenu/replaceWithGroup"
@@ -587,6 +589,7 @@
 		</action>
 		<action
 			id="javaAddElementFromHistoryAction"
+			overrideActionId="addFromHistoryAction"
 			label="%JavaAddElementFromHistoryAction.label"
 			tooltip="%JavaAddElementFromHistoryAction.tooltip"
 			menubarPath="replaceWithMenu"
@@ -606,6 +609,7 @@
 		</menu>
 		<action
 			id="javaCompareFromHistory"
+			overrideActionId="compareWithHistory"
 			label="%JavaCompareFromHistoryAction.label"
 			tooltip="%JavaCompareFromHistoryAction.tooltip"
 			menubarPath="compareWithMenu/compareWithGroup"
@@ -628,6 +632,7 @@
 		objectClass="org.eclipse.jdt.core.ICompilationUnit">
 		<action
 			id="javaAddElementFromHistoryAction"
+			overrideActionId="addFromHistoryAction"
 			label="%JavaAddElementFromHistoryAction.label"
 			tooltip="%JavaAddElementFromHistoryAction.tooltip"
 			menubarPath="replaceWithMenu"
