@@ -158,7 +158,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		// XXX workaround:
 		// turn off template editing if visible region
 		// is smaller than the whole document
-		if (true) {
+		if (false) {
 			IRegion region= fViewer.getVisibleRegion();
 			if ((region.getOffset() != 0) || (region.getLength() != document.getLength()))
 				leave(true);

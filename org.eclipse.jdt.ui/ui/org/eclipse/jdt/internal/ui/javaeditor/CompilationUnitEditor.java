@@ -150,6 +150,10 @@ public class CompilationUnitEditor extends JavaEditor {
 			}
 			
 			public void paintControl(PaintEvent event) {
+				handleDrawRequest(event.gc);
+			}
+			
+			private void handleDrawRequest(GC gc) {
 				IRegion region= fSourceViewer.getVisibleRegion();
 				int offset= fBracketPosition.getOffset();
 				int length= fBracketPosition.getLength();
@@ -157,31 +161,29 @@ public class CompilationUnitEditor extends JavaEditor {
 				if (region.getOffset() <= offset && region.getOffset() + region.getLength() >= offset + length) {
 					offset -= region.getOffset();						
 					if (length == 2) {
-						draw(event.gc, offset, length);
+						draw(gc, offset, length);
 					} else {
-						draw(event.gc, offset, 1);
-						draw(event.gc, offset + length -1, 1);
+						draw(gc, offset, 1);
+						draw(gc, offset + length -1, 1);
 					}
 				}
 			}
 			
 			private void draw(GC gc, int offset, int length) {
-				Point left= fTextWidget.getLocationAtOffset(offset);
-				Point right= fTextWidget.getLocationAtOffset(offset + length);
-				gc.setForeground(fColor);
-				gc.drawRectangle(left.x, left.y, right.x - left.x - 1, gc.getFontMetrics().getHeight() - 1);
+				if (gc != null) {
+					Point left= fTextWidget.getLocationAtOffset(offset);
+					Point right= fTextWidget.getLocationAtOffset(offset + length);
+					gc.setForeground(fColor);
+					gc.drawRectangle(left.x, left.y, right.x - left.x - 1, gc.getFontMetrics().getHeight() - 1);
+				} else {
+					fTextWidget.redrawRange(offset, length, true);
+				}
 			}
-			
-			private void redraw() {
-				IRegion region= fSourceViewer.getVisibleRegion();
-				int offset= fBracketPosition.getOffset() - region.getOffset();
-				fSourceViewer.getTextWidget().redrawRange(offset, fBracketPosition.getLength(), true);
-			}
-			
+						
 			private void removeStyles() {
 				fHooked= false;
 				fTextWidget.removePaintListener(this);
-				redraw();
+				handleDrawRequest(null);
 			}
 			
 			private void applyStyles() {
@@ -189,7 +191,7 @@ public class CompilationUnitEditor extends JavaEditor {
 					fHooked= true;
 					fTextWidget.addPaintListener(this);
 				}
-				redraw();
+				handleDrawRequest(null);
 			}
 		};
 		

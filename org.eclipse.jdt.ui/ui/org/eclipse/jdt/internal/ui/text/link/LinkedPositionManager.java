@@ -60,62 +60,31 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		}
 	}
 	
-	private class Replace implements IDocumentExtension.IReplace, Runnable {
+	private class Replace implements IDocumentExtension.IReplace {
 		
-		private Position[] fReplacePositions;
+		private Position fReplacePosition;
 		private int fReplaceDeltaOffset;
 		private int fReplaceLength;
 		private String fReplaceText;
-		
-		// XXX StyledText workaround
-		private IDocument fDocument;
 		private IDocumentListener fOwner;
 		
-		public Replace(Position[] positions, int deltaOffset, int length, String text, IDocument document, IDocumentListener owner) {
-//		public Replace(Position[] positions, int deltaOffset, int length, String text) {
-			fDocument= document;
-			fOwner= owner;
-			
-			fReplacePositions= positions;
+		public Replace(Position position, int deltaOffset, int length, String text, IDocumentListener owner) {
+			fReplacePosition= position;
 			fReplaceDeltaOffset= deltaOffset;
 			fReplaceLength= length;
 			fReplaceText= text;
+			fOwner= owner;
 		}
-		
-		// XXX workaround
-		public void run() {
-			try {
-				perform(fDocument, fOwner);	
-			} catch (BadLocationException e) {
-				JavaPlugin.log(e);
-				Assert.isTrue(false);
-			}
-		}
-		
-		public void perform(IDocument document, IDocumentListener owner) throws BadLocationException {
+				
+		public void perform(IDocument document, IDocumentListener owner) {
 			document.removeDocumentListener(owner);
-			
-			for (int i= 0; i != fReplacePositions.length; i++) {
-/*
-				Position position= fReplacePositions[i];
-				int offset= position.getOffset() + fReplaceDeltaOffset;
-				int length= fReplaceLength;
-
-				// robustness
-				Position[] positions= getPositions(fDocument);
-				Position foundPosition= findCurrentPosition(positions, offset);				
-				if (!position.equals(foundPosition))	{
-					document.addDocumentListener(owner);
-					leave(true);
-					return;
-				}
-*/				
-				document.replace(fReplacePositions[i].getOffset() + fReplaceDeltaOffset,
-					fReplaceLength, fReplaceText);
+			try {
+				document.replace(fReplacePosition.getOffset() + fReplaceDeltaOffset, fReplaceLength, fReplaceText);
+			} catch (BadLocationException x) {
+				// TBD
 			}
-
 			document.addDocumentListener(owner);
-		}		
+		}
 	}
 
 	private static final String LINKED_POSITION= "LinkedPositionManager.linked.position";	
@@ -354,35 +323,24 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see IDocumentListener#documentChanged(DocumentEvent)
 	 */
 	public void documentChanged(DocumentEvent event) {
+		
+		if (fListener == null)
+			return;
+			
 		IDocument document= event.getDocument();
 
 		Position[] positions= getPositions(document);
 		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
+		int deltaOffset= event.getOffset() - currentPosition.getOffset();		
+		fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());
 		
-		int deltaOffset= event.getOffset() - currentPosition.getOffset();
-
-		Vector vector= new Vector();
 		for (int i= 0; i != positions.length; i++) {
-			TypedPosition position= (TypedPosition) positions[i];
+			TypedPosition p= (TypedPosition) positions[i];			
 			
-			if (position.getType().equals(currentPosition.getType()) &&
-				!position.equals(currentPosition))
-			{
-				vector.add(position);
+			if (p.getType().equals(currentPosition.getType()) && !p.equals(currentPosition)) {
+				Replace replace= new Replace(p, deltaOffset, event.getLength(), event.getText(), this);
+				((IDocumentExtension) document).registerPostNotificationReplace(this, replace);
 			}
-		}
-
-		if (fListener != null) {
-			Position[] replacePositions= (Position[]) vector.toArray(new Position[vector.size()]);		
-
-			Replace replace= new Replace(replacePositions, deltaOffset, event.getLength(), event.getText(), document, this);
-//			Replace replace= new Replace(replacePositions, deltaOffset, event.getLength(), event.getText());
-
-			IDocumentExtension extension= (IDocumentExtension) fDocument;
-			extension.registerPostNotificationReplace(this, replace);
-//			fListener.setReplace(replace);
-
-			fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());
 		}
 	}
 	
