@@ -44,7 +44,9 @@ public class ParameterInfo {
 	}
 
 	public static ParameterInfo createInfoForAddedParameter(){
-		return new ParameterInfo("", "", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		ParameterInfo info= new ParameterInfo("int", "newParam", INDEX_FOR_ADDED); //$NON-NLS-1$ //$NON-NLS-2$
+		info.setDefaultValue("0"); //$NON-NLS-1$
+		return info;
 	}
 	
 	public boolean isDeleted(){
