@@ -25,7 +25,7 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 	
 	private IJavaModel fJavaModel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 
-	public boolean contains(Object workingSetElement, Object element, boolean checkIfDescendent, boolean checkIfAncestor) {
+	public boolean contains(Object workingSetElement, Object element, int flags) {
 		if (!(workingSetElement instanceof IJavaElement) || element == null)
 			return false;
 						
@@ -48,27 +48,31 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 		}
 		
 		if (jElement != null) {
-			if (contains(workingSetJavaElement, jElement, checkIfDescendent, checkIfAncestor))
+			if (contains(workingSetJavaElement, jElement, flags))
 				return true;
 			if (workingSetJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT && 
-				resource.getType() == IResource.FOLDER && checkIfDescendent)
+				resource.getType() == IResource.FOLDER && checkIfDescendant(flags))
 				return isChild(workingSetJavaElement, resource);
 		} else if (resource != null) {
-			return contains(workingSetJavaElement, resource, checkIfDescendent, checkIfAncestor);
+			return contains(workingSetJavaElement, resource, flags);
 		}
 		return false;
 	}
 	
-	private boolean contains(IJavaElement workingSetElement, IJavaElement element, boolean checkIfDescendent, boolean checkIfAncestor) {
-		if (workingSetElement.equals(element))
-			return true;
-		if (checkIfDescendent && check(workingSetElement, element)) {
+	private boolean contains(IJavaElement workingSetElement, IJavaElement element, int flags) {
+		if (checkContext(flags) && workingSetElement.equals(element)) {
 			return true;
 		}
-		if (checkIfAncestor && check(element, workingSetElement)) {
+		if (checkIfChild(flags) && workingSetElement.equals(element.getParent())) {
 			return true;
 		}
-		return workingSetElement.equals(element.getParent());
+		if (checkIfDescendant(flags) && check(workingSetElement, element)) {
+			return true;
+		}
+		if (checkIfAncestor(flags) && check(element, workingSetElement)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean check(IJavaElement ancestor, IJavaElement descendent) {
@@ -88,19 +92,23 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 		return check(element, resource);
 	}
 	
-	private boolean contains(IJavaElement workingSetElement, IResource element, boolean checkIfDescendent, boolean checkIfAncestor) {
+	private boolean contains(IJavaElement workingSetElement, IResource element, int flags) {
 		IResource workingSetResource= workingSetElement.getResource();
 		if (workingSetResource == null)
 			return false;
-		if (workingSetResource.equals(element))
-			return true;
-		if (checkIfDescendent && check(workingSetResource, element)) {
+		if (checkContext(flags) && workingSetResource.equals(element)) {
 			return true;
 		}
-		if (checkIfAncestor && check(element, workingSetResource)) {
+		if (checkIfChild(flags) && workingSetResource.equals(element.getParent())) {
 			return true;
 		}
-		return workingSetResource.equals(element.getParent());
+		if (checkIfDescendant(flags) && check(workingSetResource, element)) {
+			return true;
+		}
+		if (checkIfAncestor(flags) && check(element, workingSetResource)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean check(IResource ancestor, IResource descendent) {
@@ -111,5 +119,21 @@ public class JavaElementContainmentAdapter implements IContainmentAdapter {
 			descendent= descendent.getParent();
 		}
 		return false;
+	}
+	
+	private boolean checkIfDescendant(int flags) {
+		return (flags & CHECK_IF_DESCENDANT) != 0;
+	}
+	
+	private boolean checkIfAncestor(int flags) {
+		return (flags & CHECK_IF_ANCESTOR) != 0;
+	}
+	
+	private boolean checkIfChild(int flags) {
+		return (flags & CHECK_IF_CHILD) != 0;
+	}
+	
+	private boolean checkContext(int flags) {
+		return (flags & CHECK_CONTEXT) != 0;
 	}
 }
