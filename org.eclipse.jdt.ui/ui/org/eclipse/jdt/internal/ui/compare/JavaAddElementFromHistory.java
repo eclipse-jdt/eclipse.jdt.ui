@@ -10,26 +10,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -135,74 +140,52 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			ITypedElement selected= d.selectEdition(target, editions, parent);
 			if (selected == null)
 				return;	// user cancel
+								
+			ICompilationUnit cu2= cu;
+			if (parent instanceof IMember)
+				cu2= ((IMember)parent).getCompilationUnit();
 			
+			CompilationUnit root= AST.parsePartialCompilationUnit(cu2, 0, false);
+			
+			ASTRewrite rewriter= new ASTRewrite(root);
+			
+			List list= getContainerList(parent, root);
+			if (list == null) {
+				MessageDialog.openError(shell, errorTitle, errorMessage);
+				return;					
+			}
+			
+			int pos= getIndex(input);
+							
 			ITypedElement[] results= d.getSelection();
-			//ITypedElement[] results= new ITypedElement[] { selected };
-			ArrayList edits= new ArrayList();
 			for (int i= 0; i < results.length; i++) {
 				ITypedElement ti= results[i];
 				if (!(ti instanceof IStreamContentAccessor))
 					continue;
-				IStreamContentAccessor sca= (IStreamContentAccessor)ti;
-				// from the edition get the lines (text) to insert
-				String[] lines= null;
-				try {
-					lines= JavaCompareUtilities.readLines(sca.getContents());								
-				} catch (CoreException ex) {
-					JavaPlugin.log(ex);
-				}
-				if (lines == null) {
+								
+				InputStream is= ((IStreamContentAccessor)ti).getContents();
+				String content= trimTextBlock(is, buffer.getLineDelimiter());
+				if (content == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
 				
-				// build the TextEdit that inserts the text into the buffer
-				MemberEdit edit= null;
-				if (input != null)
-					edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
+				ASTNode n= rewriter.createPlaceholder(content, getPlaceHolderType(parent, content));
+				if (pos < 0 && pos <= list.size())
+					list.add(n);
 				else
-					edit= createEdit(lines, parent);
-				if (edit == null) {
-					MessageDialog.openError(shell, errorTitle, errorMessage);
-					return;
-				}
-				edit.setAddLineSeparators(false);
-				edits.add(edit);
+					list.add(pos, n);
+				rewriter.markAsInserted(n);
 			}
 			
-			IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
-
-			TextBufferEditor editor= new TextBufferEditor(buffer);
-			Iterator iter= edits.iterator();
-			while (iter.hasNext())
-				editor.add((TextEdit)iter.next());
-			editor.performEdits(nullProgressMonitor);
-			
-			final TextBuffer bb= buffer;
-			IRunnableWithProgress r= new IRunnableWithProgress() {
-				public void run(IProgressMonitor pm) throws InvocationTargetException {
-					try {
-						TextBuffer.commitChanges(bb, false, pm);
-					} catch (CoreException ex) {
-						throw new InvocationTargetException(ex);
-					}
-				}
-			};
-			
-			if (inEditor) {
-				// we don't show progress
-				r.run(nullProgressMonitor);
-			} else {
-				ProgressMonitorDialog pd= new ProgressMonitorDialog(shell);
-				pd.run(true, false, r);
-			}
+			applyChanges(rewriter, buffer, shell, inEditor);
 
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancable
-			// NeedWork: use assert
+			Assert.isTrue(false);
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
@@ -213,44 +196,57 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	}
 	
 	/**
-	 * Creates a TextEdit for inserting the given lines into the container. 
+	 * Finds the corresponding ASTNode for the given container and returns 
+	 * its list of children. This list can be used to add a new child nodes to the container.
+	 * @param container the container for which to return the children list
+	 * @param root the AST
+	 * @return list of children or null
+	 * @throws JavaModelException
 	 */
-	private MemberEdit createEdit(String[] lines, IParent container) {
+	private List getContainerList(IParent container, CompilationUnit root) throws JavaModelException {
 		
-		// find a child where to insert before
-		IJavaElement[] children= null;
-		try {
-			children= container.getChildren();
-		} catch(JavaModelException ex) {
-			// NeedWork
+		if (container instanceof ICompilationUnit)
+			return root.types();
+			
+		if (container instanceof IType) {
+			ISourceRange sourceRange= ((IType)container).getNameRange();
+			ASTNode n= NodeFinder.perform(root, sourceRange);
+			BodyDeclaration parentNode= (BodyDeclaration)ASTNodes.getParent(n, BodyDeclaration.class);
+			if (parentNode != null)
+				return ((TypeDeclaration)parentNode).bodyDeclarations();
+			return null;
 		}
-		
-		if (children != null) {
-			IJavaElement candidate= null;
-			for (int i= 0; i < children.length; i++) {
-				IJavaElement chld= children[i];
-				
-				switch (chld.getElementType()) {
-				case IJavaElement.PACKAGE_DECLARATION:
-				case IJavaElement.IMPORT_CONTAINER:
-					// skip these but remember the last of them
-					candidate= chld;
-					continue;
-				default:
-					return new MemberEdit(chld, MemberEdit.INSERT_BEFORE, lines, JavaCompareUtilities.getTabSize());
-				}
-			}
-			if (candidate != null)
-				return new MemberEdit(candidate, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
-		}
-		
-		// no children: insert at end (but before closing bracket)
-		if (container instanceof IJavaElement)
-			return new MemberEdit((IJavaElement)container, MemberEdit.ADD_AT_END, lines, JavaCompareUtilities.getTabSize());
-											
+			
 		return null;
 	}
 	
+	/**
+	 * Returns the corresponding place holder type for the given container.
+	 * If the container can accept more than one type the type is determined 
+	 * by analyzing the content.
+	 * @param container
+	 * @param container
+	 * @return a place holder type (see ASTRewrite)
+	 */
+	private int getPlaceHolderType(IParent container, String content) {
+		
+		if (container instanceof ICompilationUnit)
+			// since we cannot deal with import statements, the only place holder type is a TYPE_DECLARATION
+			return ASTRewrite.TYPE_DECLARATION;
+			
+		if (container instanceof IType)
+			return ASTRewrite.METHOD_DECLARATION;
+			
+		// cannot happen
+		Assert.isTrue(false);
+		return ASTRewrite.UNKNOWN;
+	}
+
+	private int getIndex(IMember node) {
+		// NeedWork: not yet implemented
+		return -1;
+	}
+		
 	protected boolean isEnabled(ISelection selection) {
 		
 		if (selection.isEmpty()) {

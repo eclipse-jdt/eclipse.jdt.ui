@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ResourceBundle;
 
@@ -20,8 +21,6 @@ import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
@@ -35,8 +34,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IEditorPart;
@@ -47,11 +45,7 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
-import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -138,15 +132,13 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
-																		
-				String newContent= JavaCompareUtilities.readString(((IStreamContentAccessor)ti).getContents());
+				
+				InputStream is= ((IStreamContentAccessor)ti).getContents();
+				String newContent= trimTextBlock(is, buffer.getLineDelimiter());
 				if (newContent == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
-				String[] lines= Strings.convertIntoLines(newContent);
-				Strings.trimIndentation(lines, JavaCompareUtilities.getTabSize());
-				newContent= Strings.concatenate(lines, buffer.getLineDelimiter());
 				
 				CompilationUnit root= AST.parsePartialCompilationUnit(input.getCompilationUnit(), 0, false);
 				BodyDeclaration node= (BodyDeclaration)ASTNodes.getParent(NodeFinder.perform(root, input.getNameRange()), BodyDeclaration.class);
@@ -156,45 +148,23 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 				}
 				
 				ASTRewrite rewriter= new ASTRewrite(root);
-				rewriter.markAsReplaced(node,
-					rewriter.createPlaceholder(newContent, ASTNodes.getRewriteNodeType(node)));
-				MultiTextEdit edit= new MultiTextEdit();
-				rewriter.rewriteNode(buffer, edit);
-										
-				IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
-				
-				TextBufferEditor editor= new TextBufferEditor(buffer);
-				editor.add(edit);
-				editor.performEdits(nullProgressMonitor);
-				
-				final TextBuffer bb= buffer;
-				IRunnableWithProgress r= new IRunnableWithProgress() {
-					public void run(IProgressMonitor pm) throws InvocationTargetException {
-						try {
-							TextBuffer.commitChanges(bb, false, pm);
-						} catch (CoreException ex) {
-							throw new InvocationTargetException(ex);
-						}
-					}
-				};
+				rewriter.markAsReplaced(node, rewriter.createPlaceholder(newContent, ASTNodes.getRewriteNodeType(node)));
 				
 				if (inEditor) {
 					JavaEditor je= getEditor(file);
 					if (je != null)
 						je.setFocus();
-					// we don't show progress
-					r.run(nullProgressMonitor);
-				} else {
-					ProgressMonitorDialog pd= new ProgressMonitorDialog(shell);
-					pd.run(true, false, r);
 				}
+				
+				applyChanges(rewriter, buffer, shell, inEditor);
 				
 			}
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
+			
 		} catch(InterruptedException ex) {
 			// shouldn't be called because is not cancable
-			// NeedWork: use assert
+			Assert.isTrue(false);
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);

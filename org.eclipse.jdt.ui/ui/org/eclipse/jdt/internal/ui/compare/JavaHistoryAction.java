@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.ui.compare;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.*;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.*;
 
 import org.eclipse.ui.IActionDelegate;
@@ -22,10 +26,16 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.core.resources.*;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
@@ -197,5 +207,47 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 	public void selectionChanged(IAction action, ISelection selection) {
 		fSelection= selection;
 		action.setEnabled(isEnabled(selection));
+	}
+	
+	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor) throws CoreException, InvocationTargetException, InterruptedException {
+		MultiTextEdit edit= new MultiTextEdit();
+		rewriter.rewriteNode(buffer, edit);
+										
+		IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
+				
+		TextBufferEditor editor= new TextBufferEditor(buffer);
+		editor.add(edit);
+		editor.performEdits(nullProgressMonitor);
+				
+		IRunnableWithProgress r= new IRunnableWithProgress() {
+			public void run(IProgressMonitor pm) throws InvocationTargetException {
+				try {
+					TextBuffer.commitChanges(buffer, false, pm);
+				} catch (CoreException ex) {
+					throw new InvocationTargetException(ex);
+				}
+			}
+		};
+
+
+		if (inEditor) {
+			// we don't show progress
+			r.run(nullProgressMonitor);
+		} else {
+			ProgressMonitorDialog pd= new ProgressMonitorDialog(shell);
+			pd.run(true, false, r);
+		}
+	}
+
+	static String trimTextBlock(InputStream is, String delimiter) {
+		String content= JavaCompareUtilities.readString(is);
+		if (content != null) {
+			String[] lines= Strings.convertIntoLines(content);
+			if (lines != null) {
+				Strings.trimIndentation(lines, JavaCompareUtilities.getTabSize());
+				return Strings.concatenate(lines, delimiter);
+			}
+		}
+		return null;
 	}
 }
