@@ -326,9 +326,11 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	private void performNewSearch(IJavaElement element) throws JavaModelException {
-		JavaSearchQuery job= createJob(element);
-		NewSearchUI.activateSearchResultView();
-		NewSearchUI.runQuery(job);
+		JavaSearchQuery query= createJob(element);
+		if (query != null) {
+			NewSearchUI.activateSearchResultView();
+			NewSearchUI.runQuery(query);
+		}
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
