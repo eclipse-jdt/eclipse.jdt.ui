@@ -246,16 +246,14 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			updateUpperListWidget(fElementMap, 0);
 		} else {
 			int k= 0;
-			String text= fText.getText();
-			StringMatcher matcher= new StringMatcher(text+"*", fIgnoreCase, false); //$NON-NLS-1$
+			StringMatcher matcher= new StringMatcher(matchString + "*", fIgnoreCase, false); //$NON-NLS-1$
 			String lastString= null;
 			int length= fElements.length;
 			for (int i= 0; i < length; i++) {
-				while (i < length && fRenderedStrings[i].equals(lastString))
-					i++;
-				if (i < length) {
-					lastString= fRenderedStrings[i];
-					if (matcher.match(fRenderedStrings[i])) {
+				String curr= fRenderedStrings[i];
+				if (!curr.equals(lastString)) {
+					lastString= curr;
+					if (matcher.match(curr)) {
 						fElementMap[k]= i;
 						k++;
 					}
@@ -297,7 +295,6 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	public void create() {
 		super.create();
 		fText.setFocus();
-		rematch(""); //$NON-NLS-1$
 		setResult(null);
 		updateOkState();
 	}	

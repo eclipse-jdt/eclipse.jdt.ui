@@ -88,6 +88,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 	 */
 	public void setInitialSelection(Object element) {
 		// Allow clients to use set their own initial selection(s)
+		// XXX : MA: Looks buggy...
 		if (fInitialSelectionSet && element != null && element.equals("A")) //$NON-NLS-1$
 			return;
 

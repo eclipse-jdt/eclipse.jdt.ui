@@ -1000,7 +1000,7 @@ public abstract class TypePage extends ContainerPage {
 		scope.setIncludesBinaries(false);
 		scope.setIncludesClasspaths(false);	
 			
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES, false, false);
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES, true, true);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {	

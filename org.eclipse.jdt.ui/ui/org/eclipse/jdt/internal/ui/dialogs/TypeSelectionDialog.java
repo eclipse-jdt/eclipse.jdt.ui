@@ -36,8 +36,12 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		
 		List typeList= TypeCache.findTypes(engine, fStyle, fRunnableContext, fScope);
 		
-		if (typeList.isEmpty())
+		if (typeList.isEmpty()) {
+			String title= JavaUIMessages.getString("TypeSelectionDialog.notypes.title"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("TypeSelectionDialog.notypes.message"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), title, message);
 			return CANCEL;
+		}
 			
 		TypeRef[] typeRefs= (TypeRef[])typeList.toArray(new TypeRef[typeList.size()]);
 		setElements(typeRefs);
