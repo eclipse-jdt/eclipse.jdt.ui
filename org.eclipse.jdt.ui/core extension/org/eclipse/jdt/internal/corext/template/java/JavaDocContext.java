@@ -17,15 +17,12 @@ import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 /**
  * A context for javadoc.
  */
-public class JavaDocContext extends DocumentTemplateContext {
+public class JavaDocContext extends CompilationUnitContext {
 
 	// tags
 	private static final char HTML_TAG_BEGIN= '<';
 	private static final char HTML_TAG_END= '>';
 	private static final char JAVADOC_TAG_BEGIN= '@';	
-	
-	/** The compilation unit of the javadoc, may be <code>null</code>. */
-	private final ICompilationUnit fUnit;
 
 	/**
 	 * Creates a javadoc template context.
@@ -35,16 +32,10 @@ public class JavaDocContext extends DocumentTemplateContext {
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(ContextType type, String string, int completionPosition, ICompilationUnit unit) {
-		super(type, string, completionPosition);
-		fUnit= unit;
-	}
-	
-	/**
-	 * Returns the compilation unit if applicable, <code>null</code> otherwise.
-	 */
-	public ICompilationUnit getUnit() {
-		return fUnit;
+	public JavaDocContext(ContextType type, String string, int completionPosition,
+		ICompilationUnit compilationUnit)
+	{
+		super(type, string, completionPosition, compilationUnit);
 	}
 
 	/*

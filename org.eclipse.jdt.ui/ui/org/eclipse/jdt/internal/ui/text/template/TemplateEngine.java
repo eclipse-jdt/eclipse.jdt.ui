@@ -22,8 +22,9 @@ import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.Templates;
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
@@ -64,11 +65,11 @@ public class TemplateEngine {
 	/**
 	 * Inspects the context of the compilation unit around <code>completionPosition</code>
 	 * and feeds the collector with proposals.
-	 * @param viewer             the text viewer
+	 * @param viewer the text viewer
 	 * @param completionPosition the context position in the document of the text viewer
-	 * @param unit               the compilation unit (may be <code>null</code>)
+	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit)
+	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit compilationUnit)
 		throws JavaModelException
 	{
 	    IDocument document= viewer.getDocument();
@@ -77,16 +78,20 @@ public class TemplateEngine {
 		if (LinkedPositionManager.hasActiveManager(document))
 			return;
 
-		JavaContext context= new JavaContext(fContextType, document.get(), completionPosition, sourceUnit);
-		Template[] templates= Templates.getInstance().getTemplates();
-
+		if (!(fContextType instanceof CompilationUnitContextType))
+			return;
+		
+		((CompilationUnitContextType) fContextType).setContextParameters(document.get(), completionPosition, compilationUnit);		
+		CompilationUnitContext context= (CompilationUnitContext) fContextType.createContext();
 		int start= context.getStart();
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
+		Template[] templates= Templates.getInstance().getTemplates();
 		for (int i= 0; i != templates.length; i++)
 			if (context.canEvaluate(templates[i]))
 				fProposals.add(new TemplateProposal(templates[i], context, region, viewer, fLabelProvider.getColumnImage(templates[i], 0)));
 	}
+
 }
 

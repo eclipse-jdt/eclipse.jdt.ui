@@ -35,10 +35,8 @@ import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 /**
  * A context for java source.
  */
-public class JavaContext extends DocumentTemplateContext {
-	
-	/** The associated compilation unit. */
-	private final ICompilationUnit fCompilationUnit;
+public class JavaContext extends CompilationUnitContext {
+
 	/** A flag to force evaluation in head-less mode. */
 	private boolean fForceEvaluation;
 	/** A code completion requestor for guessing local variable names. */
@@ -52,17 +50,10 @@ public class JavaContext extends DocumentTemplateContext {
 	 * @param completionPosition the completion position within the document.
 	 * @param unit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaContext(ContextType type, String string, int completionPosition, ICompilationUnit unit) {			
-		super(type, string, completionPosition);
-		fCompilationUnit= unit;
-	}
-	
-	/**
-	 * Returns the compilation unit associated with this Java context, or <code>null</code> if
-	 * no compilation unit is associated with the context.
-	 */
-	public ICompilationUnit getUnit() {
-		return fCompilationUnit;
+	public JavaContext(ContextType type, String string, int completionPosition,
+		ICompilationUnit compilationUnit)
+	{
+		super(type, string, completionPosition, compilationUnit);
 	}
 	
 	/*
@@ -135,7 +126,7 @@ public class JavaContext extends DocumentTemplateContext {
 	}
 
 	private CompilationUnitCompletion guessVariableNames() {
-		ICompilationUnit unit= fCompilationUnit;
+		ICompilationUnit unit= getCompilationUnit();
 		int start= getStart();
 		
 		if (unit == null)
@@ -159,12 +150,13 @@ public class JavaContext extends DocumentTemplateContext {
 	}	
 
 	private CompilationUnitCompletion getCompletion() {
+		ICompilationUnit compilationUnit= getCompilationUnit();
 		if (fCompletion == null) {
-			fCompletion= new CompilationUnitCompletion(fCompilationUnit);
+			fCompletion= new CompilationUnitCompletion(compilationUnit);
 			
-			if (fCompilationUnit != null) {
+			if (compilationUnit != null) {
 				try {
-					fCompilationUnit.codeComplete(getStart(), fCompletion);
+					compilationUnit.codeComplete(getStart(), fCompletion);
 				} catch (JavaModelException e) {
 					// ignore
 				}
@@ -277,26 +269,6 @@ public class JavaContext extends DocumentTemplateContext {
 		}
 
 		return null;
-	}
-
-	/**
-	 * Returns the enclosing element of a particular element type, <code>null</code>
-	 * if no enclosing element of that type exists.
-	 */
-	public IJavaElement findEnclosingElement(int elementType) {
-		if (fCompilationUnit == null)
-			return null;
-
-		try {
-			IJavaElement element= fCompilationUnit.getElementAt(getStart());
-			while (element != null && element.getElementType() != elementType)
-				element= element.getParent();
-			
-			return element;
-
-		} catch (JavaModelException e) {
-			return null;
-		}	
 	}
 	
 	/**

@@ -58,7 +58,14 @@ public abstract class ContextType implements ITemplateEditor {
 	public void removeVariable(TemplateVariable variable) {
 		fVariables.remove(variable.getName());
 	}
-	
+
+	/**
+	 * Removes all template variables from the context type.
+	 */
+	public void removeAllVariables() {
+		fVariables.clear();
+	}
+
 	/**
 	 * Returns an iterator for the variables known to the context type.
 	 */
