@@ -14,7 +14,7 @@ public class RenameSupport implements IRenameSupport {
 		if (element instanceof ISourceManipulation) {
 			ISourceManipulation m= (ISourceManipulation)element;
 			m.rename(newName, true, pm);
-			JdtHackFinder.fixme("rename doesn't return renamed element");
+			// FIXME rename doesn't return renamed element
 			return null;
 		} 
 		if (element instanceof IPackageFragmentRoot) {

@@ -101,7 +101,7 @@ public class DeleteAction extends ReorgAction {
 	}
 
 	protected boolean canExecute(IStructuredSelection selection) {
-		JdtHackFinder.fixme("Could be done nicer<g>. DB & MA");
+		// XXX Could be done nicer<g>. DB & MA
 		if (selection.isEmpty())
 			return false;
 		Iterator elements= selection.iterator();

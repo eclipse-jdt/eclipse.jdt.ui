@@ -27,7 +27,7 @@ public class CopyElementsValidator implements ISelectionValidator {
 			info.setOK();
 		} else {
 			info.setError("");
-			JdtHackFinder.fixme("Could give more detailed error message");
+			// XXX Could give more detailed error message
 		}
 	}
 	

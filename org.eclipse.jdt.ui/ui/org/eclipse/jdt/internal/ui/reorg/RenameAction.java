@@ -195,7 +195,7 @@ public class RenameAction extends ReorgAction {
 	}
 	
 	protected String getConfirmDiscardChangesMessage() {
-		JdtHackFinder.fixme("NLS");
+		// FIXME NLS");
 		return "The selected element has unsaved changes that will be discarded if you proceed";
 	}
 	
