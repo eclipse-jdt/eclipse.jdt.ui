@@ -258,7 +258,6 @@ public interface IJavaHelpContextIds {
 	public static final String TODOTASK_PREFERENCE_PAGE= PREFIX + "tasktags_preference_page_context"; //$NON-NLS-1$
 	
 	public static final String TEMPLATE_PREFERENCE_PAGE= PREFIX + "template_preference_page_context"; //$NON-NLS-1$
-	public static final String JAVADOC_PREFERENCE_PAGE= PREFIX + "javadoc_preference_page_context"; //$NON-NLS-1$
 	public static final String NEW_JAVA_PROJECT_PREFERENCE_PAGE= PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$
 	public static final String JAVADOC_CONFIGURATION_PROPERTY_PAGE= PREFIX + "new_java_project_preference_page_context"; //$NON-NLS-1$
 	public static final String JAVA_ELEMENT_INFO_PAGE= PREFIX + "java_element_info_page_context"; //$NON-NLS-1$
