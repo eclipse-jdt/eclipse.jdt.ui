@@ -76,7 +76,8 @@ public class NLSHolder {
 				NLSElement element= elements[j];
 				if (element.hasTag()) //don't show nls'ed stuff
 					continue;
-				element.setValue(createModifiedValue(element.getValue()));
+				String val= element.getValue().substring(1, element.getValue().length() - 1);	// strip the ""
+				element.setValue(createModifiedValue(val));
 				result.add(new NLSSubstitution(createKey(keyCounter++), element, NLSSubstitution.DEFAULT));
 			}
 		}
@@ -84,7 +85,7 @@ public class NLSHolder {
 	}
 	
 	private static String createModifiedValue(String rawValue){
-		return "\"" + unwindEscapeChars(NLSRefactoring.removeQuotes(rawValue)) + "\""; //$NON-NLS-1$ //$NON-NLS-2$
+		return unwindEscapeChars(rawValue);
 	}
 	
 	private static String unwindEscapeChars(String s){

@@ -344,7 +344,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	private boolean hasSameValue(String val, NLSSubstitution sub){
-		return (val.equals(removeQuotes(sub.value.getValue())));
+		return (val.equals(sub.value.getValue()));
 	}
 	
 	/**
@@ -421,7 +421,7 @@ public class NLSRefactoring extends Refactoring {
 			toTranslate[i].putToPropertyFile= (i == 0);
 		}
 
-		String value= removeQuotes(toTranslate[0].value.getValue());
+		String value= toTranslate[0].value.getValue();
 		for (int i= 0; i < toTranslate.length; i++) {
 			NLSSubstitution each= toTranslate[i];
 			if (! hasSameValue(value, each)){
@@ -715,7 +715,7 @@ public class NLSRefactoring extends Refactoring {
 		StringBuffer sb= new StringBuffer();
 		sb.append(key)
 		  .append("=") //$NON-NLS-1$
-		  .append(convertToPropertyValue(removeQuotes(element.getValue())))
+		  .append(convertToPropertyValue(element.getValue()))
 		  .append(fgLineDelimiter);
 		return sb;
 	}
@@ -750,11 +750,6 @@ public class NLSRefactoring extends Refactoring {
 		}		
 		return s.length();
 	}
-	
-	public static String removeQuotes(String s){
-			Assert.isTrue(s.startsWith("\"") && s.endsWith("\"")); //$NON-NLS-2$ //$NON-NLS-1$
-			return s.substring(1, s.length() - 1);
-	} 
 
 	// ------------ accessor class creation
 

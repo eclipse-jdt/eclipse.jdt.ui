@@ -14,6 +14,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -31,14 +34,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IInputValidator;
-import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -71,20 +73,23 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 class ExternalizeWizardPage extends UserInputWizardPage {
 
@@ -118,8 +123,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		public boolean canModify(Object element, String property) {
 			if (property == null)
 				return false;
-			if (PROPERTIES[VAL_PROP].equals(property))
-				return false;
+
 			if (! (element instanceof NLSSubstitution))	
 				return false;
 				
@@ -138,7 +142,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				if (PROPERTIES[KEY_PROP].equals(property))
 					return s.key;
 				if (PROPERTIES[VAL_PROP].equals(property))
-					return s.value.toString();
+					return s.value.getValue().toString();
 				if (PROPERTIES[TASK_PROP].equals(property)){
 					return new Integer(s.task);
 				}	
@@ -158,6 +162,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						s.key= (String) value;
 						fViewer.update(s, new String[] { property });
 					}
+					if (PROPERTIES[VAL_PROP].equals(property)) {
+						s.value.setValue((String) value);
+						fViewer.update(s, new String[] { property });
+					}
 					if (PROPERTIES[TASK_PROP].equals(property)) {
 						s.task= ((Integer)value).intValue();
 						updateLabels();
@@ -168,7 +176,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		}
 	}
 	
-	private class NlsSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private class NLSSubstitutionLabelProvider extends LabelProvider implements ITableLabelProvider {
 		
 		public String getColumnText(Object element, int columnIndex) {
 			if (element instanceof NLSSubstitution) {
@@ -193,7 +201,134 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			return null;	
 		}
 	}
+
+	private class KeyValuePair {
+		private String fKey;
+		private String fValue;
+		
+		public KeyValuePair(String key, String value) {
+			this.setKey(key);
+			this.setValue(value);
+		}
+
+		private void setKey(String key) {
+			fKey= key;
+		}
+
+		private String getKey() {
+			return fKey;
+		}
+
+		private void setValue(String value) {
+			fValue= value;
+		}
+
+		private String getValue() {
+			return fValue;
+		}
+	}
+		
+	private class NLSInputDialog extends StatusDialog implements IDialogFieldListener {
+		private StringDialogField fKeyField;
+		private StringDialogField fValueField;
+		private DialogField fMessageField;
+		
+		public NLSInputDialog(Shell parent, String title, String message, NLSSubstitution entry) {
+			super(parent);				
+			setTitle(title);
 	
+			fMessageField= new DialogField();
+			fMessageField.setLabelText(message);
+		
+			fKeyField= new StringDialogField();
+			fKeyField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_key")); //$NON-NLS-1$
+			fKeyField.setDialogFieldListener(this);
+				
+			fValueField= new StringDialogField();
+			fValueField.setLabelText(NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Enter_value")); //$NON-NLS-1$
+			fValueField.setDialogFieldListener(this);			
+	
+			fKeyField.setText(entry.key);
+			fValueField.setText(entry.value.getValue());
+		}
+			
+		public KeyValuePair getResult() {
+			KeyValuePair res= new KeyValuePair(fKeyField.getText(), fValueField.getText());
+			return res;
+		}
+					
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite) super.createDialogArea(parent);
+				
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			layout.numColumns= 2;
+			inner.setLayout(layout);
+				
+			fMessageField.doFillIntoGrid(inner, 2);
+			fKeyField.doFillIntoGrid(inner, 2);
+			fValueField.doFillIntoGrid(inner, 2);
+				
+			LayoutUtil.setHorizontalGrabbing(fKeyField.getTextControl(null));
+			LayoutUtil.setWidthHint(fKeyField.getTextControl(null), convertWidthInCharsToPixels(45));
+			LayoutUtil.setWidthHint(fValueField.getTextControl(null), convertWidthInCharsToPixels(45));
+				
+			fKeyField.postSetFocusOnDialogField(parent.getDisplay());
+				
+			applyDialogFont(composite);		
+			return composite;
+		}
+			
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
+		public void dialogFieldChanged(DialogField field) {
+			// validate
+			IStatus keyStatus= validateIdentifiers(getTokens(fKeyField.getText(), ","), true); //$NON-NLS-1$
+			IStatus valueStatus= validateIdentifiers(getTokens(fValueField.getText(), ","), false); //$NON-NLS-1$
+				
+			updateStatus(StatusUtil.getMoreSevere(valueStatus, keyStatus));
+		}		
+		
+		protected String[] getTokens(String text, String separator) {
+			StringTokenizer tok= new StringTokenizer(text, separator); //$NON-NLS-1$
+			int nTokens= tok.countTokens();
+			String[] res= new String[nTokens];
+			for (int i= 0; i < res.length; i++) {
+				res[i]= tok.nextToken().trim();
+			}
+			return res;
+		}	
+			
+		private IStatus validateIdentifiers(String[] values, boolean isKey) {
+			for (int i= 0; i < values.length; i++) {
+				String val= values[i];
+				if (val.length() == 0) {
+					if (isKey) {
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_key")); //$NON-NLS-1$
+					} else {
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Error_empty_value")); //$NON-NLS-1$
+					}							
+				}
+				// validation so keys don't contain spaces
+				if (isKey) {
+					if (! validateKey(val))
+						return new StatusInfo(IStatus.ERROR, NLSUIMessages.getFormattedString("ExternalizeWizard.NLSInputDialog.Error_invalid_key", val)); //$NON-NLS-1$
+				}
+			}
+			return new StatusInfo();
+		}		
+		
+		private boolean validateKey(String s) {
+			for (int i= 0; i < s.length(); i++){
+				if (Character.isWhitespace(s.charAt(i)))
+					return false;
+			}				
+			return true;
+		}
+	}
 	private static Image getNLSImage(NLSSubstitution sub){
 		return getNLSImage(sub.task);
 	}
@@ -285,32 +420,14 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		};
 		fViewer.setUseHashlookup(true);
 		
-		final CellEditor editors[]= new CellEditor[SIZE];
-		editors[TASK_PROP]= new MultiStateCellEditor(fTable, NLSSubstitution.STATE_COUNT, NLSSubstitution.DEFAULT);
-		editors[VAL_PROP]= new TextCellEditor(fTable);
-		
-		class AutoApplyTextCellEditor extends TextCellEditor {
-			public AutoApplyTextCellEditor(Composite parent) {
-				super(parent);
-			}
-			public void fireApplyEditorValue() {
-				super.fireApplyEditorValue();
-			}
-		}
-		editors[KEY_PROP]= new AutoApplyTextCellEditor(fTable);
-		editors[KEY_PROP].getControl().addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-				((AutoApplyTextCellEditor)editors[KEY_PROP]).fireApplyEditorValue();
-			}
-		});
-
+		final CellEditor[] editors= createCellEditors();
 		fViewer.setCellEditors(editors);
 		
 		fViewer.setColumnProperties(PROPERTIES);
 		fViewer.setCellModifier(new CellModifier());
 
 		fViewer.setContentProvider(new NLSSubstitutionContentProvider());
-		fViewer.setLabelProvider(new NlsSubstitutionLabelProvider());
+		fViewer.setLabelProvider(new NLSSubstitutionLabelProvider());
 		
 		fViewer.setInput(getCu());
 		
@@ -336,6 +453,35 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 	}
 	
+	private CellEditor[] createCellEditors() {
+		final CellEditor editors[]= new CellEditor[SIZE];
+		editors[TASK_PROP]= new MultiStateCellEditor(fTable, NLSSubstitution.STATE_COUNT, NLSSubstitution.DEFAULT);
+		
+		class AutoApplyTextCellEditor extends TextCellEditor {
+			public AutoApplyTextCellEditor(Composite parent) {
+				super(parent);
+			}
+			public void fireApplyEditorValue() {
+				super.fireApplyEditorValue();
+			}
+		}
+		
+		editors[KEY_PROP]= new AutoApplyTextCellEditor(fTable);
+		editors[KEY_PROP].getControl().addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				((AutoApplyTextCellEditor)editors[KEY_PROP]).fireApplyEditorValue();
+			}
+		});
+		
+		editors[VAL_PROP]= new AutoApplyTextCellEditor(fTable);
+		editors[VAL_PROP].getControl().addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				((AutoApplyTextCellEditor)editors[VAL_PROP]).fireApplyEditorValue();
+			}
+		});
+		return editors;
+	}
+
 	private void createSourceViewer(Composite parent){
 		Composite c= new Composite(parent, SWT.NONE);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -356,7 +502,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
 
 		try {
-			
 			String contents= getCu().getBuffer().getContents();
 			IDocument document= new Document(contents);
 			tools.setupDocument(document);
@@ -537,7 +682,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 		
 		fEditButton= new Button(buttonComp, SWT.PUSH);
-        fEditButton.setText(RefactoringMessages.getString("ExternalizeWizardPage.Edit_Key")); //$NON-NLS-1$
+        fEditButton.setText(NLSUIMessages.getString("ExternalizeWizardPage.Edit_key_and_value")); //$NON-NLS-1$
         fEditButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
         SWTUtil.setButtonDimensionHint(fEditButton);
         fEditButton.setEnabled(false);
@@ -548,38 +693,28 @@ class ExternalizeWizardPage extends UserInputWizardPage {
         });
 	}
 	
-	
 	private void openEditButton(ISelection selection){
 		try{
 			Set selected= getSelectedTableEntries();
 			Assert.isTrue(selected.size() == 1);
 			NLSSubstitution nls= (NLSSubstitution)selected.iterator().next();
-			InputDialog dialog= new InputDialog(getShell(), RefactoringMessages.getString("ExternalizeWizardPage.Externalize_Strings"), RefactoringMessages.getString("ExternalizeWizardPage.Enter_New_Key"), nls.key, createKeyValidator());  //$NON-NLS-1$ //$NON-NLS-2$
+			NLSInputDialog dialog= new NLSInputDialog(getShell(), 
+													  NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Title"),  //$NON-NLS-1$
+													  NLSUIMessages.getString("ExternalizeWizard.NLSInputDialog.Label"),  //$NON-NLS-1$
+													  nls);
 			if (dialog.open() == Window.CANCEL)
 				return;
-			nls.key= dialog.getValue();
-			fViewer.update(nls, new String[] { PROPERTIES[KEY_PROP] });
+			KeyValuePair kvPair= dialog.getResult();
+			nls.key= kvPair.getKey();
+			nls.value.setValue(kvPair.getValue());
+			fViewer.update(nls, new String[] { PROPERTIES[KEY_PROP], PROPERTIES[VAL_PROP] });
 		} finally{
 			fViewer.refresh();
 			fViewer.getControl().setFocus();
 			fViewer.setSelection(selection);
 		}
 	}
-	
-	private IInputValidator createKeyValidator(){
-		return new IInputValidator(){
-			public String isValid(String newText) {
-				RefactoringStatus result= NLSRefactoring.checkKey(newText);
-				if (result == null)
-					return null;				
-				RefactoringStatusEntry firstFatal= result.getFirstEntry(RefactoringStatus.FATAL);
-				if (firstFatal == null)
-					return null;				
-				return firstFatal.getMessage();
-			}
-		};
-	}
-	
+
 	private Set getSelectedTableEntries() {
 		ISelection sel= fViewer.getSelection();
 		if (sel instanceof IStructuredSelection)
