@@ -5,8 +5,8 @@
 	<classpathentry kind="src" path="ui"/>
 	<classpathentry kind="src" path="chkpii"/>
 	<classpathentry kind="src" path="leaks"/>
+	<classpathentry kind="src" path="performance"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="performance"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
