@@ -225,7 +225,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	} 
 		
 	 public void dispose() {
-		JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fViewer);
+	 	if (fViewer != null)
+			JavaPlugin.getDefault().getProblemMarkerManager().removeListener(fViewer);
 		if (fContextMenu != null && !fContextMenu.isDisposed())
 			fContextMenu.dispose();
 		getSite().getPage().removePartListener(fPartListener);
