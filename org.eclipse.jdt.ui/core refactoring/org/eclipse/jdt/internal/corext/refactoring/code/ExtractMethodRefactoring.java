@@ -819,4 +819,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		result.setType(ASTNodeFactory.newType(fAST, original));
 		return result;
 	}	
+
+	public ICompilationUnit getCompilationUnit() {
+		return fCUnit;
+	}
 }
