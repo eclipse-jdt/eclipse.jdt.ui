@@ -224,7 +224,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			while (reference != null) {
 				ISourceRange range= reference.getSourceRange();
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
-					setHighlightRange(range.getOffset(), range.getLength(), true);
+					setHighlightRange(range.getOffset(), range.getLength(), false);
 					if (fOutlinePage != null) {
 						fOutlinePage.removeSelectionChangedListener(this);
 						fOutlinePage.select(reference);

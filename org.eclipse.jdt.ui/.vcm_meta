@@ -11,6 +11,7 @@
 	<reference project-name="org.eclipse.jdt.launching"/>
 	<reference project-name="org.eclipse.search"/>
 	<reference project-name="org.eclipse.ui"/>
+	<reference project-name="org.eclipse.swt"/>
 	<builder name="org.eclipse.jdt.core.javabuilder">
 	</builder>
 </project-description>

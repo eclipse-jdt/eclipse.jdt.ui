@@ -31,8 +31,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						d.asyncExec(new Runnable() {
 							public void run() {
 								IJavaElementDelta delta= findElement( (ICompilationUnit) fInput, e.getDelta());
-								if (delta != null && fOutlineViewer != null)
+								if (delta != null && fOutlineViewer != null) {
 									fOutlineViewer.reconcile(delta);
+								}
 							}
 						});
 					}

@@ -12,6 +12,7 @@
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.compare"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>
+    <classpathentry kind="src" path="/org.eclipse.swt"/>
     <classpathentry kind="lib" path="/org.eclipse.ui/workbench.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.jdt.debug/jdi.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.help/help.jar"/>
