@@ -349,13 +349,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		public void partOpened(IWorkbenchPartReference ref) {
 		}
 		public void partVisible(IWorkbenchPartReference ref) {
-			if (ref != null && ref.getId() == getSite().getId()) {
+			if (getSite().getId().equals(ref.getId())) {
 				fPartIsVisible= true;
 			}
-			
 		}
 		public void partHidden(IWorkbenchPartReference ref) {
-			if (ref != null && ref.getId() == getSite().getId()) {
+			if (getSite().getId().equals(ref.getId())) {
 				fPartIsVisible= false;
 			}
 		}
@@ -497,7 +496,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 	protected void selectFirstFailure() {
 		TestRunInfo firstFailure= (TestRunInfo)fFailures.get(0);
-		if (firstFailure != null && fAutoScroll) {
+		if (firstFailure != null && isAutoScroll()) {
 			fActiveRunTab.setSelectedTest(firstFailure.getTestId());
 			handleTestSelected(firstFailure.getTestId());
 		}
