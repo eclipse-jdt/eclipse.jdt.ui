@@ -28,6 +28,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -41,7 +43,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -88,14 +92,36 @@ public class QuickAssistLightBulbUpdater {
 		fViewer= viewer;
 		fAnnotation= new AssistAnnotation();
 		fIsAnnotationShown= false;
+		
+		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				doPropertyChanged(event.getProperty());
+			}
+		});
 	}
 	
+	protected void doPropertyChanged(String property) {
+		if (property.equals(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
+			if (isSetInPreferences()) {
+				install();
+				doSelectionChanged();
+			} else {
+				uninstall();
+			}			
+		}
+	}
+	
+	public boolean isSetInPreferences() {
+		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
+	}
+	
+
 	public void install() {
 		ISelectionProvider provider= fViewer.getSelectionProvider();
 		if (provider instanceof IPostSelectionProvider) {
 			fListener= new ISelectionChangedListener() {
 				public void selectionChanged(SelectionChangedEvent event) {
-					doSelectionChanged(event);
+					doSelectionChanged();
 				}
 			};
 			((IPostSelectionProvider) provider).addPostSelectionChangedListener(fListener);
@@ -117,7 +143,10 @@ public class QuickAssistLightBulbUpdater {
 	private ICompilationUnit getCompilationUnit(IEditorInput input) {
 		if (input instanceof FileEditorInput) {
 			IFile file= ((FileEditorInput) input).getFile();
-			return JavaCore.createCompilationUnitFrom(file);
+			ICompilationUnit cu= JavaCore.createCompilationUnitFrom(file);
+			if (cu != null) {
+				return JavaModelUtil.toWorkingCopy(cu);
+			}
 		}
 		return null;
 	}
@@ -134,36 +163,43 @@ public class QuickAssistLightBulbUpdater {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
 	 */
-	private void doSelectionChanged(SelectionChangedEvent event) {
+	private void doSelectionChanged() {
 		Point point= fViewer.getSelectedRange();
 		int offset= point.x;
 		int length= point.y;
 		
-		IAnnotationModel model= getAnnotationModel();
+		final IAnnotationModel model= getAnnotationModel();
+		boolean hasQuickFix= hasQuickFixLightBulb(model, offset);
+		ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
+
+		if (hasQuickFix || cu == null) {
+			if (fIsAnnotationShown) {
+				model.removeAnnotation(fAnnotation);
+			}
+			return;			
+		}
+		final IAssistContext context= new AssistContext(cu, offset, length);
+		calculateLightBulb(model, context);
+		//Runnable runnable= new Runnable() {
+		//	public void run() {
+		//		calculateLightBulb(model, context);
+		//	}
+		//};
+		//runnable.run();
+	}
 		
-		boolean needsAnnotation= needsQuickAssistLightBulb(model, offset, length);
+	
+	private void calculateLightBulb(IAnnotationModel model, IAssistContext context) {
+		boolean needsAnnotation= JavaCorrectionProcessor.hasAssists(context);
 		if (fIsAnnotationShown) {
 			model.removeAnnotation(fAnnotation);
 		}
 		if (needsAnnotation) {
-			model.addAnnotation(fAnnotation, new Position(offset, length));
+			model.addAnnotation(fAnnotation, new Position(context.getSelectionOffset(), context.getSelectionLength()));
 		}
 		fIsAnnotationShown= needsAnnotation;
 	}
 	
-	private boolean needsQuickAssistLightBulb(IAnnotationModel model, int offset, int length) {
-		if (hasQuickFixLightBulb(model, offset)) {
-			return false;
-		}
-				
-		ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
-		if (cu != null) {
-			IAssistContext context= new AssistContext(cu, offset, length);
-			return JavaCorrectionProcessor.hasAssists(context);
-		}
-		return false;
-	}
-
 	/*
 	 * Tests if there is already a quick fix light bulb on the current line
 	 */	

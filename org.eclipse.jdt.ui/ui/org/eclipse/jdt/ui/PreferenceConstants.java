@@ -26,6 +26,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -56,6 +57,15 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String APPEARANCE_OVERRIDE_INDICATOR= "org.eclipse.jdt.ui.overrideindicator";//$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if quick assist light bulbs are shown.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> light bulbs are shown
+	 * for quick assists.
+	 * </p>
+	 */
+	public static final String APPEARANCE_QUICKASSIST_LIGHTBULB="org.eclipse.jdt.quickassist.lightbulb"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that defines the pattern used for package name compression.
@@ -1933,9 +1943,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.CTRL);
 		
 		// work in progress
-		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
-		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
-		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
+		WorkInProgressPreferencePage.initDefaults(store);	
+
+		
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	

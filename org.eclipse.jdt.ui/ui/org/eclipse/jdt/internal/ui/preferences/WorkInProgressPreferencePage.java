@@ -40,7 +40,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Preference page for work in progress.
  */
-public class WorkInProgressPreferencePage
+public class 
+WorkInProgressPreferencePage
 	extends PreferencePage
 	implements IWorkbenchPreferencePage {
 
@@ -53,9 +54,6 @@ public class WorkInProgressPreferencePage
 	 */
 	private Set fSmartTypingItems= new HashSet();
 	
-	/** The field controlling the overwrite mode*/
-	private Button fDisableOverwriteMode;
-
 	private List fCheckBoxes;
 	private List fRadioButtons;
 	private List fTextControls;
@@ -108,7 +106,7 @@ public class WorkInProgressPreferencePage
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
 		
-		fDisableOverwriteMode= addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
+		addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
 		createSpacer(group, 1);
 
 		Label label= new Label(group, SWT.NONE);
@@ -126,6 +124,15 @@ public class WorkInProgressPreferencePage
 		group.setText(PreferencesMessages.getString(PREFIX + "refactoring")); //$NON-NLS-1$
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "refactoring.participants"), "org.eclipse.jdt.refactoring.participants"); //$NON-NLS-1$ //$NON-NLS-2$
+
+		group= new Group(result, SWT.NONE);
+		group.setLayout(new GridLayout());
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setText(PreferencesMessages.getString(PREFIX + "quickassist.group")); //$NON-NLS-1$
+		
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
+
+
 		return result;
 	}
 
@@ -197,5 +204,16 @@ public class WorkInProgressPreferencePage
 		
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
+	}
+
+	/**
+	 * @param store
+	 */
+	public static void initDefaults(IPreferenceStore store) {
+		store.setDefault(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE, false);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
+		
+		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, true); //$NON-NLS-1$
 	}
 }
