@@ -109,7 +109,8 @@ public class JavaSnippetViewerConfiguration extends SourceViewerConfiguration {
 		assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 		assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
 		assistant.setContextInformationPopupBackground(getColorManager().getColor(new RGB(150, 150, 0)));
-
+		assistant.setHoverControlCreator(getHoverControlCreator(sourceViewer));
+		
 		return assistant;
 	}
 	
