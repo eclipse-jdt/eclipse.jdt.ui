@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
  * Evaluates all fields, methods and types available (declared) at a given offset
- * in a compilation unit.
+ * in a compilation unit (Code assist that returns IBindings)
  */
 public class ScopeAnalyzer {
 	
@@ -51,6 +51,13 @@ public class ScopeAnalyzer {
 		fTypesVisited= new HashSet();
 	}
 	
+	protected void addResult(IBinding binding) {
+		String signature= getSignature(binding);
+		if (signature != null && fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
+			fRequestor.add(binding);
+		}			
+	}
+	
 	private void clearLists() {
 		fRequestor.clear();
 		fNamesAdded.clear();
@@ -59,28 +66,29 @@ public class ScopeAnalyzer {
 		fRoot= null;
 	}
 	
-	private static String getVariableSignature(IVariableBinding binding) {
-		return 'V' + binding.getName();
-	}
-
-	private static String getTypeSignature(ITypeBinding binding) {
-		return 'T' + binding.getName();
-	}
-	
-	
-	private static String getMethodSignature(IMethodBinding binding) {
-		StringBuffer buf= new StringBuffer();
-		buf.append('M');
-		buf.append(binding.getName()).append('(');
-		ITypeBinding[] parameters= binding.getParameterTypes();
-		for (int i= 0; i < parameters.length; i++) {
-			if (i > 0) {
-				buf.append(',');
+	private static String getSignature(IBinding binding) {
+		if (binding != null) {
+			switch (binding.getKind()) {
+				case IBinding.METHOD:
+					StringBuffer buf= new StringBuffer();
+					buf.append('M');
+					buf.append(binding.getName()).append('(');
+					ITypeBinding[] parameters= ((IMethodBinding) binding).getParameterTypes();
+					for (int i= 0; i < parameters.length; i++) {
+						if (i > 0) {
+							buf.append(',');
+						}
+						buf.append(parameters[i].getQualifiedName());
+					}
+					buf.append(')');
+					return buf.toString();
+				case IBinding.VARIABLE:
+					return 'V' + binding.getName();
+				case IBinding.TYPE:
+					return 'T' + binding.getName();			
 			}
-			buf.append(parameters[i].getQualifiedName());
 		}
-		buf.append(')');
-		return buf.toString();
+		return null;
 	}
 	
 	private boolean hasFlag(int property, int flags) {
@@ -95,10 +103,7 @@ public class ScopeAnalyzer {
 		if (hasFlag(VARIABLES, flags)) {
 			IVariableBinding[] variableBindings= binding.getDeclaredFields();
 			for (int i= 0; i < variableBindings.length; i++) {
-				IVariableBinding curr= variableBindings[i];
-				if (fNamesAdded.add(getVariableSignature(curr))) { // avoid duplicated results from inheritance
-					fRequestor.add(curr);
-				}
+				addResult(variableBindings[i]);
 			}
 		}
 		
@@ -107,10 +112,7 @@ public class ScopeAnalyzer {
 			for (int i= 0; i < methodBindings.length; i++) {
 				IMethodBinding curr= methodBindings[i];
 				if (!curr.isSynthetic() && !curr.isConstructor()) {
-					String signature= getMethodSignature(curr);
-					if (fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
-						fRequestor.add(curr);
-					}			
+					addResult(curr);		
 				}
 			}
 		}
@@ -119,9 +121,7 @@ public class ScopeAnalyzer {
 			ITypeBinding[] typeBindings= binding.getDeclaredTypes();
 			for (int i= 0; i < typeBindings.length; i++) {
 				ITypeBinding curr= typeBindings[i];
-				if (fNamesAdded.add(getTypeSignature(curr))) { // avoid duplicated results from inheritance
-					fRequestor.add(curr);
-				}				
+				addResult(curr);			
 			}
 		}		
 		
@@ -140,12 +140,9 @@ public class ScopeAnalyzer {
 	}
 		
 	
-	
 	private void addTypeDeclarations(ITypeBinding binding, int flags) {
-		if (hasFlag(TYPES, flags)) {
-			if (!binding.isAnonymous() && fNamesAdded.add(getTypeSignature(binding))) {
-				fRequestor.add(binding);
-			}
+		if (hasFlag(TYPES, flags) && !binding.isAnonymous()) {
+			addResult(binding);
 		}
 		
 		addInherited(binding, flags); // add inherited 
@@ -161,10 +158,7 @@ public class ScopeAnalyzer {
 					List types= fRoot.types();
 					for (int i= 0; i < types.size(); i++) {
 						TypeDeclaration decl= (TypeDeclaration) types.get(i);
-						ITypeBinding curr= decl.resolveBinding();
-						if (curr != null && fNamesAdded.add(getTypeSignature(curr))) { // avoid duplicated results from inheritance
-							fRequestor.add(curr);
-						}	
+						addResult(decl.resolveBinding());
 					}
 				}
 			}
@@ -321,10 +315,7 @@ public class ScopeAnalyzer {
 		
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && node.getStartPosition() < fPosition) {
-				IVariableBinding binding= node.resolveBinding();
-				if (binding != null && fNamesAdded.add(getVariableSignature(binding))) { // only if not already defined
-					fRequestor.add(binding);
-				}							
+				addResult(node.resolveBinding());					
 			}
 			return false;
 		}
@@ -348,18 +339,17 @@ public class ScopeAnalyzer {
 		}
 		
 		public boolean visit(ForStatement node) {
-			node.getBody().accept(this);
-			visitBackwards(node.initializers());
-			return false;			
+			if (isInside(node)) {
+				node.getBody().accept(this);
+				visitBackwards(node.initializers());
+			}
+			return false;
 		}
 	
 	
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
-				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
-				if (binding != null && fNamesAdded.add(getTypeSignature(binding))) {
-					fRequestor.add(binding);
-				}
+				addResult(node.getTypeDeclaration().resolveBinding());		
 				return false;
 			}
 			return isInside(node);
@@ -390,10 +380,7 @@ public class ScopeAnalyzer {
 		
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && fPosition < node.getStartPosition()) {
-				IVariableBinding binding= node.resolveBinding();
-				if (binding != null && fNamesAdded.add(getVariableSignature(binding))) {
-					fRequestor.add(binding);
-				}				
+				addResult(node.resolveBinding());		
 			}
 			return false;
 		}
@@ -404,10 +391,7 @@ public class ScopeAnalyzer {
 
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
-				ITypeBinding binding= node.getTypeDeclaration().resolveBinding();
-				if (binding != null && fNamesAdded.add(getTypeSignature(binding))) {
-					fRequestor.add(binding);
-				}
+				addResult(node.getTypeDeclaration().resolveBinding());
 			}
 			return false;
 		}
