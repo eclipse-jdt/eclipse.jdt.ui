@@ -126,6 +126,7 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 			redraw();
 			
 			fCurrentIndex++;
+			
 			int start= fModel.getOffset(fIndices[fCurrentIndex]) + fContext.getStart();
 			int end= fModel.getSize(fIndices[fCurrentIndex]) + start;
 			
@@ -143,7 +144,17 @@ public class TemplateEditor implements IDocumentListener, ModifyListener, Verify
 			fText.getDisplay().beep();
 		} else {
 			redraw();
+
 			fCurrentIndex--;
+			
+			int start= fModel.getOffset(fIndices[fCurrentIndex]) + fContext.getStart();
+			int end= fModel.getSize(fIndices[fCurrentIndex]) + start;
+			
+			IRegion region= fContext.getViewer().getVisibleRegion();
+			start -= region.getOffset();
+			end -= region.getOffset();
+
+			fText.setSelection(start, end);
 			redraw();
 		}					
 	}
