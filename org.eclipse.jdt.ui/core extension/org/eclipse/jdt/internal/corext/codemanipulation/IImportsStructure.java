@@ -13,8 +13,10 @@ public interface IImportsStructure {
 	 * same package as the compilation unit.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 *        (dot separated)
+	 * @return Retuns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
 	 */		
-	void addImport(String qualifiedTypeName);
+	String addImport(String qualifiedTypeName);
 	
 
 	/**
@@ -24,7 +26,9 @@ public interface IImportsStructure {
 	 * same package as the compilation unit.
 	 * @param typeContainerName The name of the type container (package name or outer type name) to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
-	 */			
-	void addImport(String typeContainerName, String typeName);
+	 * @return Retuns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 */
+	String addImport(String typeContainerName, String typeName);
 	
 }

@@ -43,28 +43,6 @@ public class ImportsStructure implements IImportsStructure {
 	private int fNumberOfImportsCreated;
 	
 	/**
-	 * Creates an ImportsStructure for a compilation unit with existing
-	 * imports. New imports are added next to the existing import that
-	 * is matching best.
-	 * @deprecated Use ImportsStructure(cu, new String[0], Integer.MAX_VALUE, true) instead
-	 */
-	public ImportsStructure(ICompilationUnit cu) throws CoreException {
-		this(cu, new String[0], Integer.MAX_VALUE, true);
-	}
-
-	/**
-	 * Creates an ImportsStructure for a compilation unit where existing imports should be
-	 * completly ignored. Create will replace all existing imports 
-	 * @param preferenceOrder Defines the preferred order of imports.
-	 * @param importThreshold Defines the number of imports in a package needed to introduce a
-	 * import on demand instead (e.g. java.util.*)
-	 * @deprecated Use ImportsStructure(cu, preferenceOrder, importThreshold, false) instead
-	 */
-	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
-		this(cu, preferenceOrder, importThreshold, false);
-	}
-
-	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
 	 * are added next to the existing import that is matching best. 
 	 * @param preferenceOrder Defines the preferred order of imports.
@@ -304,10 +282,10 @@ public class ImportsStructure implements IImportsStructure {
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 */			
-	public void addImport(String qualifiedTypeName) {
+	public String addImport(String qualifiedTypeName) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
 		String typeName= Signature.getSimpleName(qualifiedTypeName);
-		addImport(typeContainerName, typeName);
+		return addImport(typeContainerName, typeName);
 	}
 	
 	/**
@@ -317,8 +295,12 @@ public class ImportsStructure implements IImportsStructure {
 	 * @param typeContainerName The type container name (package name / outer type name) of the type to import
 	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
 	 */			
-	public void addImport(String typeContainerName, String typeName) {
+	public String addImport(String typeContainerName, String typeName) {
 		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
+		if (hasImport(typeName)) {
+			return fullTypeName;
+		}
+		
 		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
 			
 		PackageEntry bestMatch= findBestMatch(typeContainerName);
@@ -342,18 +324,7 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-	}
-	
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param packageName The package name of the type to import
-	 * @param enclosingTypeName Name of the enclosing type (dor-separated)
-	 * @param typeName The type name of the type to import (can be '*' for imports-on-demand)
-	 */			
-	public void addImport(String packageName, String enclosingTypeName, String typeName) {
-		addImport(JavaModelUtil.concatenateName(packageName, enclosingTypeName), typeName);
+		return typeName;
 	}
 	
 	/**
@@ -369,7 +340,21 @@ public class ImportsStructure implements IImportsStructure {
 				return;
 			}
 		}
-	}		
+	}
+
+	/**
+	 * Looks if there already is single import for the given type name.
+	 */	
+	public boolean hasImport(String simpleName) {
+		int nPackages= fPackageEntries.size();
+		for (int i= 0; i < nPackages; i++) {
+			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
+			if (entry.find(simpleName) != null) {
+				return true;
+			}
+		}
+		return false;		
+	}
 	
 	/**
 	 * Creates all new elements in the import structure.
@@ -595,11 +580,9 @@ public class ImportsStructure implements IImportsStructure {
 	 * of all types from the same package
 	 */
 	private static class PackageEntry {
-		
 		private String fName;
 		private ArrayList fImportEntries;
 		private int fGroup;
-	
 	
 		/**
 		 * Comment package entry
@@ -614,7 +597,6 @@ public class ImportsStructure implements IImportsStructure {
 		 * org.eclipse.jdt.ui.JavaUI.
 		 * @param group The index of the preference order entry assigned
 		 *    different group ids will result in spacers between the entries
-		 * @param existing Set if the group is existing in the imports to be restored.
 		 */
 		public PackageEntry(String name, int group) {
 			fName= name;
@@ -664,6 +646,23 @@ public class ImportsStructure implements IImportsStructure {
 		public void add(ImportDeclEntry imp) {
 			fImportEntries.add(imp);
 		}
+		
+		public ImportDeclEntry find(String simpleName) {
+			int nInports= fImportEntries.size();
+			for (int i= 0; i < nInports; i++) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (!curr.isComment()) {
+					String name= curr.getElementName();
+					if (name.endsWith(simpleName)) {
+						int dotPos= name.length() - simpleName.length() - 1;
+						if ((dotPos == -1) || (name.charAt(dotPos) == '.')) {
+							return curr;
+						}
+					}						
+				}
+			}
+			return null;
+		}		
 		
 		public void remove(String fullName) {
 			int nInports= fImportEntries.size();

@@ -484,7 +484,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeInfo typeInfo= chosen[i];
-					impStructure.addImport(typeInfo.getPackageName(), typeInfo.getEnclosingName(), typeInfo.getTypeName());
+					impStructure.addImport(typeInfo.getTypeContainerName(), typeInfo.getTypeName());
 				}				
 			}
 			impStructure.create(fDoSave, new SubProgressMonitor(monitor, 1));
