@@ -66,7 +66,7 @@ public class JavaCapabilityWizard extends Wizard implements ICapabilityInstallWi
 	public boolean performFinish() {
 		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(fJavaPage.getRunnable());
 		try {
-			getContainer().run(false, true, op);
+			getContainer().run(true, true, op);
 		} catch (InvocationTargetException e) {
 			String title= NewWizardMessages.getString("JavaCapabilityWizard.op_error.title"); //$NON-NLS-1$
 			String message= NewWizardMessages.getString("JavaCapabilityWizard.op_error.message");			 //$NON-NLS-1$
