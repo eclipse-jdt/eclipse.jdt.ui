@@ -485,12 +485,20 @@ public class TestRunnerViewPart
 		IWorkbenchPage page= window.getActivePage();
 		TestRunnerViewPart testRunner= null;
 		
-		try {
-			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-		} catch (PartInitException e) {
-			ErrorDialog.openError(getSite().getShell(), 
-				JUnitMessages.getString("TestRunnerViewPart.message.cannotshow"), e.getMessage(), e.getStatus() //$NON-NLS-1$
-			);
+		if (page != null) {
+			try { // show the result view
+				testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
+				if(testRunner == null) {
+					IWorkbenchPart activePart= page.getActivePart();
+					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+					//restore focus stolen by the creation of the console
+					page.activate(activePart);
+				} else {
+					page.bringToTop(testRunner);
+				}
+			} catch (PartInitException pie) {
+				JUnitPlugin.log(pie);
+			}
 		}
 	}
 

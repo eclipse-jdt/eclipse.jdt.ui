@@ -26,8 +26,10 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -142,14 +144,18 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			
 		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
-		TestRunnerViewPart testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
-		if (testRunner == null) {
-			try {
-				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-			} catch (PartInitException e) {
-				ErrorDialog.openError(getActiveWorkbenchShell(), 
-					JUnitMessages.getString("JUnitPlugin.error.cannotshow"), e.getMessage(), e.getStatus() //$NON-NLS-1$
-				);
+		TestRunnerViewPart testRunner= null;
+		if (page != null) {
+			try { // show the result view if it isn't shown yet
+				testRunner= (TestRunnerViewPart)page.findView(TestRunnerViewPart.NAME);
+				if(testRunner == null) {
+					IWorkbenchPart activePart= page.getActivePart();
+					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+					//restore focus stolen by the creation of the result view
+					page.activate(activePart);
+				} 
+			} catch (PartInitException pie) {
+				log(pie);
 			}
 		}
 		if (testRunner != null)
