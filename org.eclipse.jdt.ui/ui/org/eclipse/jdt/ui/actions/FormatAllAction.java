@@ -301,7 +301,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 	
 	private static Map getFomatterSettings(IJavaProject project) {
 		final Map options= project.getOptions(true);
-		new CommentFormattingContext().storeToMap(PreferenceConstants.getPreferenceStore(), options, true);
+		new CommentFormattingContext().storeToMap(PreferenceConstants.getPreferenceStore(), options, false);
 		return options;
 	}
 	
