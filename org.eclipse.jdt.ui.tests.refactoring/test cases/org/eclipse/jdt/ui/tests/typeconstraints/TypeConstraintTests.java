@@ -62,19 +62,12 @@ public class TypeConstraintTests extends RefactoringTest {
 		return ASTCreator.createAST(cu, null);
 	}
 
-	private static void assertAllSatisfied(ITypeConstraint[] constraints){
-		for (int i= 0; i < constraints.length; i++) {
-			assertTrue(constraints[i].toString(), constraints[i].isSatisfied());
-		}
-	}
-	
 	private void numberHelper(int number) throws Exception {
 		CompilationUnit cuNode= getCuNode();
 		ConstraintCollector collector= new ConstraintCollector();
 		cuNode.accept(collector);
 		ITypeConstraint[] constraints= collector.getConstraints();
 		assertEquals(Arrays.asList(constraints).toString(), number, constraints.length);
-		assertAllSatisfied(constraints);
 	}
 
 	public void testNumber0() throws Exception{
@@ -108,7 +101,6 @@ public class TypeConstraintTests extends RefactoringTest {
 		for (int i= 0; i < constraintStrings.length; i++) {
 			assertTrue("missing constraint:" + constraintStrings[i], externals.remove(constraintStrings[i]));
 		}
-		assertAllSatisfied(constraints);
 	}
 	
 	public void testConstraints0() throws Exception{
@@ -234,4 +226,10 @@ public class TypeConstraintTests extends RefactoringTest {
 		String[] strings= {"[null] <= [A:f(A, Object)]_returnType", "[Parameter(0,A:f(A, Object))] =^= [a0]", "[Parameter(1,A:f(A, Object))] =^= [a1]", "[A:f(A, Object)]_returnType =^= A", "Decl(A:f(A, Object)) =^= p.A", "[a1] =^= Object", "[a0] =^= A"};
 		testConstraints(strings);
 	}	
+	
+	public void testConstraints23() throws Exception{
+		//test for bug 41271 NullPointerException dumping set of ITypeConstraints to System.out 
+		String[] strings= {"[args.length] =^= int", "[0] <= [i]", "[i] =^= int", "[args] <= Decl((array type):length)", "[args] =^= String[]", "[Parameter(0,Test1:main(String[]))] =^= [args]", "Decl(Test1:main(String[])) =^= p.Test1"};
+		testConstraints(strings);
+	}
 }
