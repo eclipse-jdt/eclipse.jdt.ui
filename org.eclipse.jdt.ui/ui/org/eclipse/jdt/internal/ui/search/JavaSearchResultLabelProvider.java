@@ -61,7 +61,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
 		IMarker marker= ((ISearchResultViewEntry)o).getSelectedMarker();
-		if (marker == null)
+		if (marker == null || !marker.exists())
 			return null;
 		return getJavaElement(marker);
 	}
