@@ -58,13 +58,13 @@ public class KeyboardProbe {
 			} finally {
 				if (fDisposeDisplay && fDisplay != null) {
 					fDisplay.dispose();
-					fDisplay= null;
 				}
+				fDisplay= null;
 				
 				if (fShell != null && !fShell.isDisposed()) {
 					fShell.dispose();
-					fShell= null;
 				}
+				fShell= null;
 			}
 		}
 		return fCodes;
@@ -120,29 +120,49 @@ public class KeyboardProbe {
 	 *         the current keyboard layout.
 	 */
 	public boolean pressChar(char expected, Display display) {
-		int[] combo= getKeybindingForChar(expected);
+		return pressChar(expected, new int[0], display);
+	}
+	
+	/**
+	 * Presses a key combination such that the expected character is input by
+	 * simulating key events on the given display. Returns <code>true</code>
+	 * if a key combo could be found, <code>false</code> if not.
+	 * 
+	 * @param expected the expected character
+	 * @param modifiers additional modifiers to press
+	 * @param display the display to simulate the events on
+	 * @return <code>true</code> if there was a key combo to press,
+	 *         <code>false</code> if <code>expected</code> has no combo on
+	 *         the current keyboard layout.
+	 */
+	public boolean pressChar(char expected, int[] modifiers, Display display) {
+		int[] charkeys= getKeybindingForChar(expected);
+		int[] combo= new int[charkeys.length + modifiers.length];
+		System.arraycopy(modifiers, 0, combo, 0, modifiers.length);
+		System.arraycopy(charkeys, 0, combo, modifiers.length, charkeys.length);
+		
 		for (int i= 0; i <= combo.length - 2; i++) {
 			Event event= new Event();
 			event.type= SWT.KeyDown;
 			event.keyCode= combo[i];
-			fDisplay.post(event);
+			display.post(event);
 		}
 		
 		if (combo.length > 0) {
 			Event event= new Event();
 			event.type= SWT.KeyDown;
 			event.character= (char) combo[combo.length - 1];
-			fDisplay.post(event);
+			display.post(event);
 			
 			event.type= SWT.KeyUp;
-			fDisplay.post(event);
+			display.post(event);
 		}
 		
 		for (int i= combo.length - 2; i >= 0; i--) {
 			Event event= new Event();
 			event.type= SWT.KeyUp;
 			event.keyCode= combo[i];
-			fDisplay.post(event);
+			display.post(event);
 		}
 		
 		return combo.length > 0;
