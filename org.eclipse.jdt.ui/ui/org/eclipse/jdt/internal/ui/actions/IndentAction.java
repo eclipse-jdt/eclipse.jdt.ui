@@ -58,6 +58,9 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
  */
 public class IndentAction extends TextEditorAction {
 	
+	/** The caret offset after an indent operation. */
+	private int fCaretOffset;
+	
 	/**
 	 * Creates a new instance.
 	 * 
@@ -110,13 +113,14 @@ public class IndentAction extends TextEditorAction {
 					try {
 						JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 						JavaIndenter indenter= new JavaIndenter(document, scanner);
-						int newOffset= offset;
+						boolean hasChanged= false;
 						for (int i= 0; i < nLines; i++) {
-							newOffset= indentLine(document, firstLine + i, indenter, scanner);
+							hasChanged |= indentLine(document, firstLine + i, indenter, scanner);
 						}
 						
 						// update caret position: move to new position when indenting just one line
 						// keep selection when indenting multiple
+						int newOffset= fCaretOffset;
 						int newLength= 0;
 						if (nLines > 1) {
 							newOffset= offset;
@@ -126,8 +130,8 @@ public class IndentAction extends TextEditorAction {
 						Assert.isTrue(newLength >= 0);
 						Assert.isTrue(newOffset >= 0);
 						
-						// only change the selection if it really changes
-						if (offset != newOffset || length != newLength)
+						// always reset the selection if anything was replaced
+						if (hasChanged || newOffset != offset || newLength != length)
 							// TODO: be less intrusive than selectAndReveal
 							getTextEditor().selectAndReveal(newOffset, newLength);
 						
@@ -163,10 +167,10 @@ public class IndentAction extends TextEditorAction {
 	 * @param line the line to be indented
 	 * @param indenter the java indenter
 	 * @param scanner the heuristic scanner
-	 * @return the position in document after the indentation
+	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently 
 	 */
-	private int indentLine(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
+	private boolean indentLine(IDocument document, int line, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		
@@ -216,11 +220,14 @@ public class IndentAction extends TextEditorAction {
 		else
 			length= end - offset;
 		
-		// only change the document if it is a real change
-		if (!indent.equals(document.get(offset, length)))
-			document.replace(offset, length, indent);
+		fCaretOffset= offset + indent.length();
 		
-		return offset + indent.length();
+		// only change the document if it is a real change
+		if (!indent.equals(document.get(offset, length))) {
+			document.replace(offset, length, indent);
+			return true;
+		} else
+			return false;
 	}
 	
 	/**
