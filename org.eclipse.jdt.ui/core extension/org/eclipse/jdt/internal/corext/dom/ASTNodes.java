@@ -21,10 +21,12 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -208,11 +210,30 @@ public class ASTNodes {
 		return buffer.toString();
 	}
 	
-	public static boolean needsParenthesis(Expression expression) {
+	public static boolean needsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
 			type == ASTNode.PREFIX_EXPRESSION || type == ASTNode.POSTFIX_EXPRESSION ||
 			type == ASTNode.CAST_EXPRESSION;
+	}
+	
+	public static boolean substituteMustBeParenthesized(Expression substitute, Expression location) {
+    	if (!needsParentheses(substitute))
+    		return false;
+    		
+    	ASTNode parent= location.getParent();
+    	if (parent instanceof VariableDeclarationFragment){
+    		VariableDeclarationFragment vdf= (VariableDeclarationFragment)parent;
+    		if (vdf.getInitializer().equals(location))
+    			return false;
+    	} else if (parent instanceof MethodInvocation){
+    		MethodInvocation mi= (MethodInvocation)parent;
+    		if (mi.arguments().contains(location))
+    			return false;
+    	} else if (parent instanceof ReturnStatement)
+    		return false;
+    		
+        return true;		
 	}
 	
 	public static ASTNode getParent(ASTNode node, Class parentClass) {
