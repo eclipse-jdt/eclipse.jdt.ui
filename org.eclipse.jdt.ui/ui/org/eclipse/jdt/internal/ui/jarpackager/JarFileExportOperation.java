@@ -25,8 +25,6 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -820,21 +818,9 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		final boolean[] retVal= new boolean[1];
 		Runnable runnable= new Runnable() {
 			public void run() {
-				IWorkspace workspace= ResourcesPlugin.getWorkspace();
-				IWorkspaceDescription description= workspace.getDescription();
-				boolean autoBuild= description.isAutoBuilding();
-				description.setAutoBuilding(false);
 				try {
-					workspace.setDescription(description);
-					// This save operation can not be canceled.
-					try {
-						new ProgressMonitorDialog(fParentShell).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
-						retVal[0]= true;
-					} finally {
-						description.setAutoBuilding(autoBuild);
-						workspace.setDescription(description);
-					}
-					
+					new ProgressMonitorDialog(fParentShell).run(false, false, createSaveModifiedResourcesRunnable(dirtyFiles));
+					retVal[0]= true;
 				} catch (InvocationTargetException ex) {
 					addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingModifiedResources"), ex); //$NON-NLS-1$
 					JavaPlugin.log(ex);
@@ -842,12 +828,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 				} catch (InterruptedException ex) {
 						Assert.isTrue(false); // Can't happen. Operation isn't cancelable.
 						retVal[0]= false;
-				} catch (CoreException ex) {
-					addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingModifiedResources"), ex); //$NON-NLS-1$
-					JavaPlugin.log(ex);
-					retVal[0]= false;
 				}
-
 	 		}
 		};
 		display.syncExec(runnable);
