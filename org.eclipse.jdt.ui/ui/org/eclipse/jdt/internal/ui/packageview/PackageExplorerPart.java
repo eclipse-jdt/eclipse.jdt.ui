@@ -51,6 +51,7 @@ import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
@@ -606,8 +607,8 @@ public class PackageExplorerPart extends ViewPart
 	private void initDrag() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
-			LocalSelectionTransfer.getInstance(),
-			ResourceTransfer.getInstance(), 
+			LocalSelectionTransfer.getInstance(), 
+			ResourceTransfer.getInstance(),
 			FileTransfer.getInstance()};
 		TransferDragSourceListener[] dragListeners= new TransferDragSourceListener[] {
 			new SelectionTransferDragAdapter(fViewer),
@@ -615,7 +616,7 @@ public class PackageExplorerPart extends ViewPart
 			new FileTransferDragAdapter(fViewer)
 		};
 		fViewer.addDragSupport(ops, transfers, new JdtViewerDragAdapter(fViewer, dragListeners));
-	}
+				}
 
 	private void initDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK | DND.DROP_DEFAULT;
@@ -627,7 +628,7 @@ public class PackageExplorerPart extends ViewPart
 			new FileTransferDropAdapter(fViewer)
 		};
 		fViewer.addDropSupport(ops, transfers, new DelegatingDropAdapter(dropListeners));
-	}
+					}
 
 	/**
 	 * Handles selection changed in viewer.
@@ -676,10 +677,22 @@ public class PackageExplorerPart extends ViewPart
 				
 		for (int i= 0; i < elements.length; i++) {
 			Object o= elements[i];
-			if (o instanceof IResource) {
-				IJavaElement jElement= JavaCore.create((IResource)o);
-				if (jElement != null && jElement.exists()) 
-					elements[i]= jElement;
+			if (!(o instanceof IJavaElement)) {
+				if (o instanceof IResource) {
+					IJavaElement jElement= JavaCore.create((IResource)o);
+					if (jElement != null && jElement.exists()) 
+						elements[i]= jElement;
+				}
+				else if (o instanceof IAdaptable) {
+					IResource r= (IResource)((IAdaptable)o).getAdapter(IResource.class);
+					if (r != null) {
+						IJavaElement jElement= JavaCore.create(r);
+						if (jElement != null && jElement.exists()) 
+							elements[i]= jElement;
+						else
+							elements[i]= r;
+					}
+				}
 			}
 		}
 		
@@ -688,8 +701,13 @@ public class PackageExplorerPart extends ViewPart
 	
 	private boolean containsResources(Object[] elements) {
 		for (int i = 0; i < elements.length; i++) {
-			if (elements[i] instanceof IResource)
-				return true;
+			Object o= elements[i];
+			if (!(o instanceof IJavaElement)) {
+				if (o instanceof IResource)
+					return true;
+				if ((o instanceof IAdaptable) && ((IAdaptable)o).getAdapter(IResource.class) != null)
+					return true;
+				}
 		}
 		return false;
 	}
