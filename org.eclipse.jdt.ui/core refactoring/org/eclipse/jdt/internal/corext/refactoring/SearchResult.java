@@ -84,15 +84,17 @@ public final class SearchResult {
 	}
 	
 	public ICompilationUnit getCompilationUnit(){
+		if (fEnclosingElement != null){
+			if (fEnclosingElement instanceof ICompilationUnit)
+				return (ICompilationUnit)fEnclosingElement;
+			ICompilationUnit cu= (ICompilationUnit) fEnclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu != null)
+				return cu;
+		}
+		
 		IJavaElement jElement= JavaCore.create(getResource());
 		if (jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT)
 			return (ICompilationUnit)jElement;
-		if (fEnclosingElement == null)
-			return null;
-		if (fEnclosingElement instanceof ICompilationUnit)
-			return (ICompilationUnit)fEnclosingElement;
-		return (ICompilationUnit)fEnclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
+		return null;
 	}
-	
-	
 }
