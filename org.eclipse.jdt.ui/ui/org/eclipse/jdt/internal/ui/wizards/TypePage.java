@@ -342,15 +342,21 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	protected void createModifierControls(Composite composite, int nColumns) {
 		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getLabelControl(composite), 1);
-		LayoutUtil.setHorizontalSpan(fAccMdfButtons.getSelectionButtonsGroup(composite), nColumns - 2);
-		int minWidthHint= convertWidthInCharsToPixels(15);
 		
-		fAccMdfButtons.setButtonsMinWidth(minWidthHint);
+		Control control= fAccMdfButtons.getSelectionButtonsGroup(composite);
+		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= nColumns - 2;
+		control.setLayoutData(gd);
+		
 		DialogField.createEmptySpace(composite);
 		
 		DialogField.createEmptySpace(composite);
-		LayoutUtil.setHorizontalSpan(fOtherMdfButtons.getSelectionButtonsGroup(composite), nColumns - 2);
-		fOtherMdfButtons.setButtonsMinWidth(minWidthHint);
+		
+		control= fOtherMdfButtons.getSelectionButtonsGroup(composite);
+		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= nColumns - 2;
+		control.setLayoutData(gd);		
+
 		DialogField.createEmptySpace(composite);
 	}
 

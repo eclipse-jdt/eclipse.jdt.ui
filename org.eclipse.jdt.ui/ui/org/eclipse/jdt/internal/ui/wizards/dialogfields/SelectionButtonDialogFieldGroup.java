@@ -107,18 +107,6 @@ public class SelectionButtonDialogFieldGroup extends DialogField {
 	public int getNumberOfControls() {
 		return (fGroupBorderStyle == SWT.NONE) ? 2 : 1;
 	}
-
-	/**
-	 * Sets the minimal size of the buttons. Must be called after the creation of the buttons.
-	 */	
-	public void setButtonsMinWidth(int minWidth) {
-		if (fButtonComposite != null) {
-			Control[] control= fButtonComposite.getChildren();
-			if (control != null && control.length > 0) {
-				((MGridData)control[0].getLayoutData()).widthHint= minWidth;
-			}
-		}
-	}	
 	
 	// ------- ui creation
 	

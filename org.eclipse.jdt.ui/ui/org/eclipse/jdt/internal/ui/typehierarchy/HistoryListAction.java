@@ -76,7 +76,8 @@ public class HistoryListAction extends Action {
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
 			int minimalWidth= convertWidthInCharsToPixels(80);
-			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, minimalWidth, 0, SWT.DEFAULT, SWT.DEFAULT);	
+			int minimalHeight= convertHeightInCharsToPixels(20);
+			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, minimalWidth, minimalHeight, SWT.DEFAULT, SWT.DEFAULT);	
 			fHistoryList.getTableViewer().addDoubleClickListener(new IDoubleClickListener() {
 				public void doubleClick(DoubleClickEvent event) {
 					if (fHistoryStatus.isOK()) {

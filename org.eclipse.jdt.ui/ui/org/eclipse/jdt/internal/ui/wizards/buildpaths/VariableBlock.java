@@ -59,8 +59,8 @@ public class VariableBlock {
 	}
 	
 	public Control createContents(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);		int minimalWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, minimalWidth, 0, 0, 0);	
+		Composite composite= new Composite(parent, SWT.NONE);		int minimalWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);		int minimalHeight= SWTUtil.convertHeightInCharsToPixels(20, composite);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, minimalWidth, minimalHeight, 0, 0);	
 		fVariablesList.getTableViewer().setSorter(new ViewerSorter() {			public int compare(Viewer viewer, Object e1, Object e2) {				if (e1 instanceof CPVariableElement && e2 instanceof CPVariableElement) {					return ((CPVariableElement)e1).getName().compareTo(((CPVariableElement)e2).getName());				}				return super.compare(viewer, e1, e2);			}		});				fControl= composite;		return composite;
 	}
 	

@@ -156,8 +156,6 @@ public class ListDialogField extends DialogField {
 		gd.grabExcessVerticalSpace= true;
 		gd.grabColumn= 0;
 		gd.horizontalSpan= nColumns - 2;
-		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(40, list);
-		gd.heightHint= SWTUtil.convertHeightInCharsToPixels(15, list);
 		list.setLayoutData(gd);
 		
 		Composite buttons= getButtonBox(parent);

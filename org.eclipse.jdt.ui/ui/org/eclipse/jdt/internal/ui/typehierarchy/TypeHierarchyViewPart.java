@@ -197,6 +197,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		fHistoryDropDownAction= new HistoryDropDownAction(this);
+		fHistoryDropDownAction.setEnabled(false);
 		
 		fToggleOrientationActions= new ToggleOrientationAction[] {
 			new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
@@ -241,6 +242,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			fInputHistory.remove(entry);
 		}
 		fInputHistory.add(0, entry);
+		fHistoryDropDownAction.setEnabled(true);
 	}
 	
 	private void updateHistoryEntries() {
@@ -249,7 +251,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (!type.exists()) {
 				fInputHistory.remove(i);
 			}
-		}		
+		}
+		fHistoryDropDownAction.setEnabled(!fInputHistory.isEmpty());
 	}
 	
 	/**
@@ -265,7 +268,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Gets all history entries.
 	 */
 	public IJavaElement[] getHistoryEntries() {
-		updateHistoryEntries();
+		if (fInputHistory.size() > 0) {
+			updateHistoryEntries();
+		}
 		return (IJavaElement[]) fInputHistory.toArray(new IJavaElement[fInputHistory.size()]);
 	}
 	
