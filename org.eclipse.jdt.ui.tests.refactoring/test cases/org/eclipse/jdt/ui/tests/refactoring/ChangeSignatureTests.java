@@ -168,11 +168,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int[] permutation= createPermutation(infos, newOrder);
 		List swapped= new ArrayList(infos.size());
 		if (oldNames == null || newNames == null){
+			ParameterInfo[] newInfos= new  ParameterInfo[infos.size()];
 			for (int i= 0; i < permutation.length; i++) {
-				if (! swapped.contains(new Integer(i))){
-					swapped.add(new Integer(permutation[i]));
-					swap(infos, i, permutation[i]);
-				}	
+				newInfos[i]= (ParameterInfo)infos.get(permutation[i]);
+			}
+			infos.clear();
+			for (int i= 0; i < newInfos.length; i++) {
+				infos.add(newInfos[i]);
 			}
 			return;
 		} else {
@@ -604,6 +606,21 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String[] signature= {"I", "Z"};
 		String[] newNames= {"x"};
 		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= {"i", "jj"};
+		int[] permutation= {2, -1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll40()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int[]"};
 		String[] newDefaultValues= {"null"};
 		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
 		int[] newIndices= {1};
