@@ -8,17 +8,18 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
-import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
 
 class ReorderParameterMoveFinder {
 	
@@ -31,16 +32,15 @@ class ReorderParameterMoveFinder {
 	 */
 	static List findParameterSourceRanges(SearchResultGroup searchResultGroup) throws JavaModelException{
 		IJavaElement element= JavaCore.create(searchResultGroup.getResource());
-		if (!(element instanceof CompilationUnit))
+		if (!(element instanceof ICompilationUnit))
 			return new ArrayList(0);
 			
 		ReorderParameterMoveFinderVisitor visitor= new ReorderParameterMoveFinderVisitor(searchResultGroup.getSearchResults());
-		AST ast= new AST((ICompilationUnit)element);
-		ast.accept(visitor);
+		AST.parseCompilationUnit((ICompilationUnit)element, false).accept(visitor);
 		return visitor.getRegions();
 	}
 		
-	private static class ReorderParameterMoveFinderVisitor extends AbstractSyntaxTreeVisitorAdapter {
+	private static class ReorderParameterMoveFinderVisitor extends ASTVisitor {
 		private List fRegionsFound;
 		private SearchResult[] fSearchResults;
 
@@ -61,46 +61,50 @@ class ReorderParameterMoveFinder {
 			return false;
 		}
 
-		private boolean isOurMethod(MessageSend messageSend){
-			return isStartPositionOnList((int) (messageSend.nameSourcePosition >> 32));
-		}
-	
-		private boolean isOurMethod(MethodDeclaration methodDeclaration){
-			return isStartPositionOnList(methodDeclaration.sourceStart);
-		}	
-		
-		private static ISourceRange[] createRegionsArray(MessageSend messageSend){
-			ISourceRange[] result= new ISourceRange[messageSend.arguments.length];
-			for (int i= 0; i < result.length; i++){
-				int length= messageSend.arguments[i].sourceEnd - messageSend.arguments[i].sourceStart + 1;
-				result[i]= new SourceRange(messageSend.arguments[i].sourceStart, length);
-			}
-			return result;
+		private static ISourceRange[] createRegionsArray(MethodInvocation methodInvocation){
+			List args= methodInvocation.arguments();
+			return createRegionsArray((Expression[]) args.toArray(new Expression[args.size()]));
 		}
 		
 		private static ISourceRange[] createRegionsArray(MethodDeclaration methodDeclaration){
-			ISourceRange[] result= new ISourceRange[methodDeclaration.arguments.length];
+			List params= methodDeclaration.parameters();
+			return createRegionsArray((SingleVariableDeclaration[]) params.toArray(new SingleVariableDeclaration[params.size()]));
+		}
+		
+		private static ISourceRange[] createRegionsArray(SuperMethodInvocation superMethodInvocation){
+			List args= superMethodInvocation.arguments();
+			return createRegionsArray((Expression[]) args.toArray(new Expression[args.size()]));
+		}
+		
+		private static ISourceRange[] createRegionsArray(ASTNode[] nodes){
+			ISourceRange[] result= new ISourceRange[nodes.length];
 			for (int i= 0; i < result.length; i++){
-				int start= methodDeclaration.arguments[i].declarationSourceStart;
-				int length= methodDeclaration.arguments[i].sourceEnd - start + 1;
-				result[i]= new SourceRange(start, length);
-			}
+				result[i]= new SourceRange(nodes[i]);
+			}	
 			return result;
 		}
 		
 		//------visit methods
 	
-		public boolean visit(MessageSend messageSend, BlockScope scope) {
-			if (isOurMethod(messageSend))
-				fRegionsFound.add(createRegionsArray(messageSend));
+		public boolean visit(MethodInvocation methodInvocation) {
+			if (isStartPositionOnList(methodInvocation.getName().getStartPosition()))
+				fRegionsFound.add(createRegionsArray(methodInvocation));
 			return true;
 		}
 		
-		public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
-			if (isOurMethod(methodDeclaration))
+		public boolean visit(MethodDeclaration methodDeclaration) {
+			if (isStartPositionOnList(methodDeclaration.getName().getStartPosition()))
 				fRegionsFound.add(createRegionsArray(methodDeclaration));
 			return true;
-		}		
+		}
+		
+		public boolean visit(SuperMethodInvocation superMethodInvocation) {
+			if (isStartPositionOnList(superMethodInvocation.getName().getStartPosition()))
+				fRegionsFound.add(createRegionsArray(superMethodInvocation));
+			return true;
+		}
+		
 	}
 }
+
 
