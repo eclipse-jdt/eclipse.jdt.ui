@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
@@ -202,7 +203,12 @@ public class InlineConstantTests extends RefactoringTest {
 	}
 		
 	// -- testing failing preconditions
+	
 	public void testFail0() throws Exception {
-		failHelper1("foo.NeueZuercherZeitung", 5, 27, 5, 28, true, false, 128);
+		failHelper1("foo.NeueZuercherZeitung", 5, 27, 5, 28, true, false, RefactoringStatusCodes.NOT_STATIC_FINAL_SELECTED);
+	}
+	
+	public void testFail1() throws Exception {
+		failHelper1("fun.Fun", 8, 35, 8, 35, false, false, RefactoringStatusCodes.DECLARED_IN_CLASSFILE);	
 	}
 }
