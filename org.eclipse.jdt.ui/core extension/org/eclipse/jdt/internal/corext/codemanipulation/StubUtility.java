@@ -86,7 +86,7 @@ public class StubUtility {
 	 * added to
 	 * @param method A method template (method belongs to different type than the parent)
 	 * @param definingType The type that defines the method.
-	 * @param options Options as defined above (<code>GenStubSettings</code>)
+	 * @param settings Options as defined above (<code>GenStubSettings</code>)
 	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
 	 * all type names are qualified.
 	 * @throws JavaModelException
@@ -434,8 +434,9 @@ public class StubUtility {
 		buf.append(')');
 		return buf.toString();
 	}
+	
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(IMethod,IMethod,String)
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
@@ -446,7 +447,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, IMethod, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.METHODCOMMENT;
@@ -585,7 +586,7 @@ public class StubUtility {
 	 * @param decl The AST MethodDeclaration node that will be added as new
 	 * method.
 	 * @param isOverridden <code>true</code> iff decl overrides another method
-	 * @param isOverridingDeprecated <code>true</code> iff the method that decl overrides is deprecated.
+	 * @param isDeprecated <code>true</code> iff the method that decl overrides is deprecated.
 	 * Note: it must not be <code>true</code> if isOverridden is <code>false</code>.
 	 * @param declaringClassQualifiedName Fully qualified name of the type in which the overriddden 
 	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
@@ -774,7 +775,6 @@ public class StubUtility {
 	 * Returns all unimplemented constructors of a type including root type default 
 	 * constructors if there are no other superclass constructors unimplemented. 
 	 * @param type The type to create constructors for
-	 * @param supertype The type's super type
 	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
 	 */
 	public static IMethod[] getOverridableConstructors(IType type) throws CoreException {
@@ -1086,22 +1086,37 @@ public class StubUtility {
 		String[] newNames= new String[paramNames.length];
 		// Ensure that the codegeneration preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
-			newNames[i]= suggestArgumentName(project, paramNames[i], null);			
+			String curr= paramNames[i];
+			if (!hasPrefixOrSuffix(prefixes, suffixes, curr)) {
+				newNames[i]= suggestArgumentName(project, paramNames[i], null);
+			} else {
+				newNames[i]= curr;
+			}
 		}
 		return newNames;
 	}
 	
 	public static boolean hasFieldName(IJavaProject project, String name) {
-		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_FIELD_PREFIXES, JavaCore.CODEASSIST_FIELD_SUFFIXES, name) 
-			|| hasPrefixOrSuffix(project, JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, name);
+		String prefixes= project.getOption(JavaCore.CODEASSIST_FIELD_PREFIXES, true);
+		String suffixes= project.getOption(JavaCore.CODEASSIST_FIELD_SUFFIXES, true);
+		String staticPrefixes= project.getOption(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, true);
+		String staticSuffixes= project.getOption(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, true);
+		
+		
+		return hasPrefixOrSuffix(prefixes, suffixes, name) 
+			|| hasPrefixOrSuffix(staticPrefixes, staticSuffixes, name);
 	}
 	
 	public static boolean hasParameterName(IJavaProject project, String name) {
-		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_ARGUMENT_PREFIXES, JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, name);
+		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
+		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
+		return hasPrefixOrSuffix(prefixes, suffixes, name);
 	}
 	
 	public static boolean hasLocalVariableName(IJavaProject project, String name) {
-		return hasPrefixOrSuffix(project, JavaCore.CODEASSIST_LOCAL_PREFIXES, JavaCore.CODEASSIST_LOCAL_SUFFIXES, name);
+		String prefixes= project.getOption(JavaCore.CODEASSIST_LOCAL_PREFIXES, true);
+		String suffixes= project.getOption(JavaCore.CODEASSIST_LOCAL_SUFFIXES, true);
+		return hasPrefixOrSuffix(prefixes, suffixes, name);
 	}
 	
 	public static boolean hasConstantName(String name) {
@@ -1109,9 +1124,9 @@ public class StubUtility {
 	}
 	
 	
-	private static boolean hasPrefixOrSuffix(IJavaProject project, String prefixKey, String suffixKey, String name) {
+	private static boolean hasPrefixOrSuffix(String prefixes, String suffixes, String name) {
 		final String listSeparartor= ","; //$NON-NLS-1$
-		String prefixes= project.getOption(prefixKey, true);
+
 		StringTokenizer tok= new StringTokenizer(prefixes, listSeparartor);
 		while (tok.hasMoreTokens()) {
 			String curr= tok.nextToken();
@@ -1119,8 +1134,7 @@ public class StubUtility {
 				return true;
 			}
 		}
-		
-		String suffixes= project.getOption(suffixKey, true);
+
 		tok= new StringTokenizer(suffixes, listSeparartor);
 		while (tok.hasMoreTokens()) {
 			String curr= tok.nextToken();
