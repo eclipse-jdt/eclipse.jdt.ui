@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -21,14 +22,15 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 public class ASTNodeFactory {
 
 	private static final String STATEMENT_HEADER= "class __X__ { void __x__() { "; //$NON-NLS-1$
 	private static final String STATEMENT_FOOTER= "}}"; //$NON-NLS-1$
 	
-	private static final String TYPE_HEADER= "class __X__ { void __x__() { private "; //$NON-NLS-1$
-	private static final String TYPE_FOOTER= " __f__; }}"; //$NON-NLS-1$
+	private static final String TYPE_HEADER= "class __X__ { abstract "; //$NON-NLS-1$
+	private static final String TYPE_FOOTER= " __f__(); }}"; //$NON-NLS-1$
 	
 	private static class PositionClearer extends GenericVisitor {
 		protected boolean visitNode(ASTNode node) {
@@ -70,7 +72,10 @@ public class ASTNodeFactory {
 		buffer.append(content);
 		buffer.append(TYPE_FOOTER);
 		CompilationUnit root= AST.parseCompilationUnit(buffer.toString().toCharArray());
-		ASTNode result= ASTNode.copySubtree(ast, NodeFinder.perform(root, TYPE_HEADER.length(), content.length()));
+		List list= root.types();
+		TypeDeclaration typeDecl= (TypeDeclaration) list.get(0);
+		ASTNode type= typeDecl.getMethods()[0].getReturnType();
+		ASTNode result= ASTNode.copySubtree(ast, type);
 		result.accept(new PositionClearer());
 		return (Type)result;
 	}
