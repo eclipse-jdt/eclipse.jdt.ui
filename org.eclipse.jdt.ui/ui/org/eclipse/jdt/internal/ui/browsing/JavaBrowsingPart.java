@@ -593,9 +593,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		Object currentInput= (IJavaElement)getViewer().getInput();
 		if (selectedElement != null && selectedElement.equals(currentInput)) {
-			IJavaElement elementToSelect= findElementToSelect(getSingleElementFromSelection(selection));
+			IJavaElement elementToSelect= findElementToSelect(selectedElement);
 			if (elementToSelect != null && getTypeComparator().compare(selectedElement, elementToSelect) < 0)
 				setSelection(new StructuredSelection(elementToSelect), true);
+			else if (elementToSelect == null && (this instanceof MembersView)) {
+				setSelection(StructuredSelection.EMPTY, true);
+				fPreviousSelectedElement= StructuredSelection.EMPTY;
+			}
 			fPreviousSelectionProvider= part;
 			return;
 		}
@@ -801,6 +805,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			public void selectionChanged(SelectionChangedEvent event) {
 				if (!fProcessSelectionEvents)
 					return;
+
+				fPreviousSelectedElement= getSingleElementFromSelection(event.getSelection());
 
 				IWorkbenchPage page= getSite().getPage();
 				if (page == null)
