@@ -12,12 +12,12 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import org.eclipse.swt.SWT;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-
-import org.eclipse.swt.SWT;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -26,12 +26,14 @@ import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorRegistry;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.part.MultiPageEditorSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
@@ -125,9 +127,16 @@ public class EditorUtility {
 	 * Selects a Java Element in an editor
 	 */	
 	public static void revealInEditor(IEditorPart part, IJavaElement element) {
-		if (element != null && part instanceof JavaEditor) {
+		if (part == null)
+			return;
+		
+		// Support for nested Java editor
+		IEditorSite site= part.getEditorSite();
+		if (site instanceof MultiPageEditorSite)
+			part= ((MultiPageEditorSite)site).getEditor();
+		
+		if (element != null && part instanceof JavaEditor)
 			((JavaEditor) part).setSelection(element);
-		}
 	}
 	
 	private static IEditorPart openInEditor(IFile file, boolean activate) throws PartInitException {
