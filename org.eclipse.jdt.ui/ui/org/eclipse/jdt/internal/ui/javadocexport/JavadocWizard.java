@@ -247,7 +247,6 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
 					String name= JavadocExportMessages.getString("JavadocWizard.launchconfig.name"); //$NON-NLS-1$
 					wc= lcType.newInstance(null, name);
-					wc.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String) null);
 					wc.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
 
 					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
