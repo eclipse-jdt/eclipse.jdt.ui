@@ -249,7 +249,33 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		public IContextInformation getContextInformation() { return null; }
 		public void selected(ITextViewer viewer, boolean smartToggle) {}
 		public void unselected(ITextViewer viewer) {}
-		public boolean validate(IDocument document, int offset, DocumentEvent event) { return false;}
+		
+		/*
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+		 */
+		public boolean validate(IDocument document, int offset, DocumentEvent event) {
+			// ignore event
+			String insert= getDisplayString();
+			if (insert == null)
+				return false;
+			
+			int start= offset - insert.length();
+			if (start >= 0 && offset <= document.getLength()) {
+				try {
+					String content= document.get(start, offset - start);
+					while (content.length() > 0) {
+						if (insert.startsWith(content))
+							return true;
+						else
+							content= content.substring(1);
+					}
+				} catch (BadLocationException e) {
+					JavaPlugin.log(e);
+					// and ignore and return false
+				}
+			}
+			return false;
+		}
 	}
 	
 }
