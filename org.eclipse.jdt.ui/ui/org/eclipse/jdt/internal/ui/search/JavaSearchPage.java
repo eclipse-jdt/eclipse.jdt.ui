@@ -375,6 +375,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		Dialog.applyDialogFont(result);
 		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.JAVA_SEARCH_PAGE);	
+		initSelections();
 	}
 
 	private Control createExpression(Composite parent) {
@@ -408,6 +409,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			}
 		});
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		// limit preferred size 
+		gd.widthHint= convertWidthInCharsToPixels(50);
 		gd.horizontalIndent= -gd.horizontalIndent;
 		fPattern.setLayoutData(gd);
 
