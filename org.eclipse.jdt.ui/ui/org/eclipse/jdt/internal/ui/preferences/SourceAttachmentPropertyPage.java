@@ -141,6 +141,10 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		return null;		
 	}
 	
+	protected SourceAttachmentBlock getSourceAttachmentBlock(){
+		return fSourceAttachmentBlock;
+	}
+	
 	// ------- IStatusChangeListener --------
 	
 	public void statusChanged(IStatus status) {

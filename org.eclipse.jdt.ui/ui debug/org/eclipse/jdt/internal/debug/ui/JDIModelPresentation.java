@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.debug.ui;
  * (c) Copyright IBM Corp 2001
  */
 
-import java.text.MessageFormat;import java.util.*;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.debug.core.*;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.ITerminate;import org.eclipse.debug.ui.*;import org.eclipse.jdt.core.*;import org.eclipse.jdt.debug.core.*;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.graphics.Point;import org.eclipse.ui.IEditorInput;
+import java.text.MessageFormat;import java.util.HashMap;import java.util.Iterator;import java.util.List;import org.eclipse.core.resources.IMarker;import org.eclipse.core.runtime.IAdaptable;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.debug.core.model.IStackFrame;import org.eclipse.debug.core.model.ITerminate;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.debug.ui.IDebugModelPresentation;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.core.IMember;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.IJavaDebugTarget;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.debug.core.IJavaVariable;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;import org.eclipse.jdt.internal.ui.launcher.DebugOverlayDescriptorFactory;import org.eclipse.jdt.internal.ui.viewsupport.OverlayIconManager;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.WizardDialog;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.graphics.Point;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorInput;
 
 /**
  * @see IDebugModelPresentation
@@ -305,6 +305,9 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			IMarker m= (IMarker) item;
 			item= JDIDebugModel.getType(m);
 		}
+		if (item instanceof IType) {
+			promptForSource((IType)item);
+		}
 		try {
 			return EditorUtility.getEditorInput(item);
 		} catch (JavaModelException e) {
@@ -416,28 +419,30 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			return null;
 		}
 
-		StringBuffer buff= new StringBuffer(" (");
+		StringBuffer buff= new StringBuffer();
 		switch (sig.charAt(0)) {
 			case 'B' :
 			case 'I' :
 			case 'S' :
-				buff.append("0x");
+				buff.append(" (0x");
 				buff.append(Integer.toHexString(Integer.parseInt(value.getValueString())));
 				buff.append(')');
 				break;
 			case 'J' :
-				buff.append("0x");
+				buff.append(" (0x");
 				buff.append(Long.toHexString(Long.parseLong(value.getValueString())));
 				buff.append(')');
 				break;
 			case 'C' :
-				buff.append("\\u");
-				String hexString= Integer.toHexString(Integer.parseInt(value.getValueString()));
+				buff.append(" (\\u");
+				String hexString= Integer.toHexString(value.getValueString().charAt(0));
 				int length= hexString.length();
 				while (length < 4) {
 					buff.append('0');
 					length++;
 				}
+				buff.append(hexString);
+				buff.append(')');
 				break;
 		}
 		return buff.toString();
@@ -613,4 +618,23 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 		return DebugUIUtils.getResourceString(key);
 	}
 
+	/**
+	 * Prompts for source if required
+	 */
+	protected void promptForSource(IType type) {
+		if (type.isBinary()) {
+			IPackageFragmentRoot root = (IPackageFragmentRoot)type.getClassFile().getParent().getParent();
+			if (root.isArchive()) {
+				try {
+					if (root.getSourceAttachmentPath() == null && SourceAttachmentWizard.isOkToPrompt(root)) {
+						Shell shell = JavaPlugin.getActiveWorkbenchShell();
+						SourceAttachmentWizard wizard= new SourceAttachmentWizard(root);
+						WizardDialog wd = new WizardDialog(shell, wizard);
+						wd.open();
+					}
+				} catch (JavaModelException e) {
+				}
+			}
+		}
+	}
 }
