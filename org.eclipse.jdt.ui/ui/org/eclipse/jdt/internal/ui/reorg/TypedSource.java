@@ -24,7 +24,8 @@ class TypedSource {
 						  || type == IJavaElement.IMPORT_CONTAINER
 						  || type == IJavaElement.IMPORT_DECLARATION
 						  || type == IJavaElement.INITIALIZER
-						  || type == IJavaElement.METHOD);
+						  || type == IJavaElement.METHOD
+						  || type == IJavaElement.PACKAGE_DECLARATION);
 		fSource= source;
 		fType= type;				  
 	}
