@@ -26,21 +26,20 @@ import org.eclipse.jdt.internal.ui.refactoring.changes.TextBuffer;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
-public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.CancelListener {
-	
+public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.ExitListener {
+
+	private static final String TEMPLATE_POSITION= "TemplateEvaluator.template.position";	
 	private static final String VARIABLE_POSITION= "TemplateEvaluator.variable.position";
 	private static final String MARKER= "/*${cursor}*/";
-	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(VARIABLE_POSITION);
+	private static final IPositionUpdater fgVariableUpdater= new DefaultPositionUpdater(VARIABLE_POSITION);
+	private static final IPositionUpdater fgTemplateUpdater= new DefaultPositionUpdater(TEMPLATE_POSITION);
 
 	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
 
 	private Template fTemplate;
 	private TemplateContext fContext;
 
-	private IDocument fDocument;
-	
-	private int fOldOffset;
-	private int fOldLength;
+	private IDocument fDocument;	
 	private String fOldText;
 	
 	public TemplateEvaluator(Template template, TemplateContext context) {
@@ -101,7 +100,7 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ca
 		String pattern= fTemplate.getPattern();
 		fInterpolator.interpolate(pattern, this);
 
-		fDocument.addPositionUpdater(fgUpdater);
+		fDocument.addPositionUpdater(fgVariableUpdater);
 		
 		format(indentationLevel);
 
@@ -162,9 +161,9 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ca
 	}
 	
 	private void update(String string, int[] offsets) throws BadLocationException {
-		fDocument.removePositionUpdater(fgUpdater);
+		fDocument.removePositionUpdater(fgVariableUpdater);
 		fDocument.replace(0, fDocument.getLength(), string);
-		fDocument.addPositionUpdater(fgUpdater);
+		fDocument.addPositionUpdater(fgVariableUpdater);
 
 		try {		
 			// update positions ourselves
@@ -234,16 +233,22 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ca
 		int indentationLevel= guessIndentationLevel(document, start);
 		IDocument template= getDocument(indentationLevel);
 
-		// insert template in document
 		try {
-			// backup
-			fOldText= document.get(start, end - start);
-			fOldOffset= start;
-			fOldLength= template.get().length();
-			
+			// backup and replace with template
+			fOldText= document.get(start, end - start);			
 			document.replace(start, end - start, template.get());	
-			Position[] positions= getPositions();
 
+			// register template position
+			document.addPositionCategory(TEMPLATE_POSITION);
+			document.addPositionUpdater(fgTemplateUpdater);
+			try {
+				document.addPosition(TEMPLATE_POSITION, new Position(start, template.get().length()));
+			} catch (BadPositionCategoryException e) {
+				JavaPlugin.log(e);
+				Assert.isTrue(false);	
+			}
+
+			Position[] positions= getPositions();
 			LinkedPositionManager manager= new LinkedPositionManager(document);
 			for (int i= 0; i != positions.length; i++) {
 				TypedPosition position= (TypedPosition) positions[i];
@@ -253,7 +258,6 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ca
 				
 				int offset= position.getOffset() + start;
 				int length= position.getLength();
-//				String type= position.getType();
 				
 				manager.addPosition(offset, length);
 			}
@@ -272,10 +276,27 @@ public class TemplateEvaluator implements VariableEvaluator, LinkedPositionUI.Ca
 		return null;
 	}
 	
-	public void performCancel() {
-		IDocument document= fContext.getViewer().getDocument();
-		try {
-			document.replace(fOldOffset, fOldLength, fOldText);	
+	public void exit(boolean accept) {
+		IDocument document= fContext.getViewer().getDocument();		
+
+		try {		
+			
+			if (!accept) {
+				Position[] positions= document.getPositions(TEMPLATE_POSITION);
+				Assert.isTrue((positions != null) && (positions.length == 1));
+				
+				int offset= positions[0].getOffset();
+				int length= positions[0].getLength();
+						
+				document.replace(offset, length, fOldText);	
+			}
+
+			document.removePositionUpdater(fgTemplateUpdater);
+			document.removePositionCategory(TEMPLATE_POSITION);		
+
+		} catch (BadPositionCategoryException e) {
+			JavaPlugin.log(e);
+			Assert.isTrue(false);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 			// XXX dialog	

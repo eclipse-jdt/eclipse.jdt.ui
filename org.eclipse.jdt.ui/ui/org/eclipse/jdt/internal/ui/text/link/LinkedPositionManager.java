@@ -66,14 +66,12 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		private int fReplaceDeltaOffset;
 		private int fReplaceLength;
 		private String fReplaceText;
-		private IDocumentListener fOwner;
 		
-		public Replace(Position position, int deltaOffset, int length, String text, IDocumentListener owner) {
+		public Replace(Position position, int deltaOffset, int length, String text) {
 			fReplacePosition= position;
 			fReplaceDeltaOffset= deltaOffset;
 			fReplaceLength= length;
 			fReplaceText= text;
-			fOwner= owner;
 		}
 				
 		public void perform(IDocument document, IDocumentListener owner) {
@@ -277,6 +275,12 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			(offset + length <= position.getOffset() + position.getLength());
 	}
 
+	public static boolean excludes(Position position, int offset, int length) {
+		return
+			(offset + length <= position.getOffset()) ||
+			(position.getOffset() + position.getLength() <= offset);
+	}
+
 	/*
 	 * Collides if spacing if positions intersect each other or are adjacent.
 	 */
@@ -298,12 +302,6 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 */
 	public void documentAboutToBeChanged(DocumentEvent event) {
 		IDocument document= event.getDocument();
-
-		// check if document change includes line delimiters
-		if (containsLineDelimiters(event.getText())) {
-			leave(true);
-			return;
-		}
 			
 		Position[] positions= getPositions(document);
 		if (positions == null) {
@@ -312,33 +310,56 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		}
 				
 		// find a valid position
-		for (int i= 0; i != positions.length; i++)
-			if (includes(positions[i], event.getOffset(), event.getLength()))
+		for (int i= 0; i != positions.length; i++) {
+			if (includes(positions[i], event.getOffset(), event.getLength())) {
+				if (containsLineDelimiters(event.getText()))
+					leave(true);
+
+				return;				
+			}
+		}
+
+		// check for intersection
+		for (int i= 0; i != positions.length; i++) {
+			if (!excludes(positions[i], event.getOffset(), event.getLength())) {
+				leave(true);
 				return;
+			}
+		}
 		
-		leave(true);
+		// check for destruction of constraints (spacing of at least 1)
+		if ((event.getText().length() == 0) &&
+			(findCurrentPosition(positions, event.getOffset()) != null) &&
+			(findCurrentPosition(positions, event.getOffset() + event.getLength()) != null))
+		{
+			leave(true);
+			return;
+		}
 	}
 
 	/*
 	 * @see IDocumentListener#documentChanged(DocumentEvent)
 	 */
-	public void documentChanged(DocumentEvent event) {
-		
-		if (fListener == null)
-			return;
-			
+	public void documentChanged(DocumentEvent event) {		
 		IDocument document= event.getDocument();
 
 		Position[] positions= getPositions(document);
 		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
+
+		// ignore document changes (assume it won't invalidate constraints)
+		if (currentPosition == null)
+			return;
+		
 		int deltaOffset= event.getOffset() - currentPosition.getOffset();		
-		fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());
+
+		if (fListener != null)
+			fListener.setCurrentPosition(currentPosition, deltaOffset + event.getText().length());
 		
 		for (int i= 0; i != positions.length; i++) {
 			TypedPosition p= (TypedPosition) positions[i];			
 			
 			if (p.getType().equals(currentPosition.getType()) && !p.equals(currentPosition)) {
-				Replace replace= new Replace(p, deltaOffset, event.getLength(), event.getText(), this);
+				Replace replace= new Replace(p, deltaOffset, event.getLength(), event.getText());
 				((IDocumentExtension) document).registerPostNotificationReplace(this, replace);
 			}
 		}
@@ -348,28 +369,37 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see IPositionUpdater#update(DocumentEvent)
 	 */
 	public void update(DocumentEvent event) {
+		int deltaLength= event.getText().length() - event.getLength();
+
 		Position[] positions= getPositions(event.getDocument());
 		TypedPosition currentPosition= (TypedPosition) findCurrentPosition(positions, event.getOffset());
 
-		// XXX occurs when using async exec
+		// document change outside positions
 		if (currentPosition == null) {
-			leave(true);
-			return;
-		}
-		
-		int deltaLength= event.getText().length() - event.getLength();
-		int length= currentPosition.getLength();
-
-		for (int i= 0; i != positions.length; i++) {
-			TypedPosition position= (TypedPosition) positions[i];
-			int offset= position.getOffset();
 			
-			if (position.equals(currentPosition)) {
-				position.setLength(length + deltaLength);					
-			} else if (offset > currentPosition.getOffset()) {
-				position.setOffset(offset + deltaLength);
+			for (int i= 0; i != positions.length; i++) {
+				TypedPosition position= (TypedPosition) positions[i];
+				int offset= position.getOffset();
+				
+				if (offset >= event.getOffset())
+					position.setOffset(offset + deltaLength);
 			}
-		}		
+			
+		// document change within a position
+		} else {
+			int length= currentPosition.getLength();
+	
+			for (int i= 0; i != positions.length; i++) {
+				TypedPosition position= (TypedPosition) positions[i];
+				int offset= position.getOffset();
+				
+				if (position.equals(currentPosition)) {
+					position.setLength(length + deltaLength);					
+				} else if (offset > currentPosition.getOffset()) {
+					position.setOffset(offset + deltaLength);
+				}
+			}		
+		}
 	}
 
 	private static Position findCurrentPosition(Position[] positions, int offset) {
@@ -389,4 +419,17 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 
 		return false;
 	}
+	
+	/**
+	 * Test if ok to modify through UI.
+	 */
+	public boolean anyPositionIncludes(int offset, int length) {
+		Position[] positions= getPositions(fDocument);
+		Position position= findCurrentPosition(positions, offset);
+		if (position == null)
+			return false;
+		
+		return includes(position, offset, length);
+	}
+	
 }

@@ -7,13 +7,12 @@ package org.eclipse.jdt.internal.ui.text.link;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
@@ -38,17 +37,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
 public class LinkedPositionUI implements LinkedPositionListener,
-	ITextInputListener, ModifyListener, VerifyKeyListener, PaintListener {
+	ITextInputListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener {
 
 	/**
 	 * A listener for notification when the user cancelled the edit operation.
 	 */
-	public interface CancelListener {
-		void performCancel();
+	public interface ExitListener {
+		void exit(boolean accept);
 	}
 
 	private static final String CARET_POSITION= "LinkedPositionUI.caret.position";
-
 	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(CARET_POSITION);
 	
 	private final ITextViewer fViewer;
@@ -58,9 +56,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private int fFinalCaretOffset= -1; // no final caret offset
 
 	private Position fFramePosition;
-	private int fCaretOffset;;
+	private int fCaretOffset;
 	
-	private CancelListener fCancelListener;
+	private ExitListener fExitListener;
 	
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
@@ -91,8 +89,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	 * Sets a <code>CancelListener</code> which is notified if the linked mode
 	 * is exited unsuccessfully by hitting ESC.
 	 */
-	public void setCancelListener(CancelListener listener) {
-		fCancelListener= listener;
+	public void setCancelListener(ExitListener listener) {
+		fExitListener= listener;
 	}
 
 	/*
@@ -130,30 +128,33 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		fViewer.addTextInputListener(this);
 				
 		StyledText text= fViewer.getTextWidget();			
-		text.addModifyListener(this);
+		text.addVerifyListener(this);
 		text.addVerifyKeyListener(this);
+		text.addModifyListener(this);
 		text.addPaintListener(this);
 		text.showSelection();
 
 		fFramePosition= fManager.getFirstPosition();
 		if (fFramePosition == null)
 			leave(true);
-
-		// XXX workaround:
-		// turn off template editing if visible region
-		// is smaller than the whole document
-		if (false) {
-			IRegion region= fViewer.getVisibleRegion();
-			if ((region.getOffset() != 0) || (region.getLength() != document.getLength()))
-				leave(true);
-		}
 	}
 
-	/*
+	/**
 	 * @see LinkedPositionManager.LinkedPositionListener#exit(boolean)
 	 */
 	public void exit(boolean success) {
 		leave2(success, false);	
+	}
+
+	/**
+	 * Returns the cursor selection, after having entered the linked mode.
+	 * <code>enter()</code> must be called prior to a call to this method.
+	 */
+	public IRegion getSelectedRegion() {
+		if (fFramePosition == null)
+			return new Region(fFinalCaretOffset, 0);
+		else
+			return new Region(fFramePosition.getOffset(), fFramePosition.getLength());
 	}
 
 	private void leave(boolean accept) {
@@ -169,8 +170,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private void leave2(boolean accept, boolean documentChanged) {
 		StyledText text= fViewer.getTextWidget();	
 		text.removePaintListener(this);
-		text.removeVerifyKeyListener(this);
 		text.removeModifyListener(this);
+		text.removeVerifyKeyListener(this);
+		text.removeVerifyListener(this);
 
 		fViewer.removeTextInputListener(this);
 		
@@ -191,8 +193,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			document.removePositionUpdater(fgUpdater);
 			document.removePositionCategory(CARET_POSITION);
 			
-			if (!accept && (fCancelListener != null))
-				fCancelListener.performCancel();
+			if (fExitListener != null)
+				fExitListener.exit(accept || documentChanged);
 
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
@@ -259,6 +261,23 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			leave(false);
 			event.doit= false;
 			break;
+		}
+	}
+
+	/*
+	 * @see VerifyListener#verifyText(VerifyEvent)
+	 */
+	public void verifyText(VerifyEvent event) {
+		if (!event.doit)
+			return;
+
+		int offset= event.start;
+		int length= event.end - event.start;
+
+		// allow changes only within linked positions
+		if (!fManager.anyPositionIncludes(offset, length)) {
+			leave(true);
+			event.doit= false;
 		}
 	}
 
@@ -349,17 +368,6 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		// XXX workaround
 		redrawRegion();
 		updateCaret();
-	}
-	
-	/**
-	 * Returns the cursor selection, after having entered the linked mode.
-	 * <code>enter()</code> must be called prior to a call to this method.
-	 */
-	public IRegion getSelectedRegion() {
-		if (fFramePosition == null)
-			return new Region(fFinalCaretOffset, 0);
-		else
-			return new Region(fFramePosition.getOffset(), fFramePosition.getLength());
 	}
 
 	private static void openErrorDialog(Shell shell, Exception e) {
