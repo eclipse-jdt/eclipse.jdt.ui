@@ -29,6 +29,9 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
+	
+	private static final boolean BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT= true;
+	private static final boolean BUG_83332_SPLIT_SINGLE_IMPORT= true;
 
 	public RenameStaticMethodTests(String name) {
 		super(name);
@@ -36,6 +39,10 @@ public class RenameStaticMethodTests extends RefactoringTest {
 
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
 	}
 
 	protected String getRefactoringPath() {
@@ -213,4 +220,45 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			packageB.delete(true, new NullProgressMonitor());
 		}
 	}
+	
+	public void testStaticImportFail0() throws Exception {
+		helper1();
+	}
+	
+	public void testStaticImport1() throws Exception {
+		if (BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT) {
+			printTestDisabledMessage("BUG_83319_CORE_SEARCH_METHOD_STATIC_IMPORT");
+			return;
+		}
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "C");
+		helper2();
+		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), cuA.getSource());
+	}
+
+	public void testStaticImport2() throws Exception {
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "C");
+		helper2();
+		assertEqualLines("invalid renaming in C", getFileContents(getOutputTestFileName("C")), cuA.getSource());
+	}
+
+	public void testStaticImport3() throws Exception {
+		if (BUG_83332_SPLIT_SINGLE_IMPORT) {
+			printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");
+			return;
+		}
+		helper2();
+	}
+
+	public void testStaticImport4() throws Exception {
+		helper2();
+	}
+
+	public void testStaticImport5() throws Exception {
+		if (BUG_83332_SPLIT_SINGLE_IMPORT) {
+			printTestDisabledMessage("BUG_83332_SPLIT_SINGLE_IMPORT");
+			return;
+		}
+		helper2();
+	}
+
 }
