@@ -171,12 +171,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 		List result= new ArrayList(0);
 		IWorkbench workbench= getDefault().getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int x= 0; x < pages.length; x++) {
-				IEditorReference[] references= pages[i].getEditorReferences();
-				for (int j= 0; j < references.length; j++) {
-					IEditorPart editor= references[j].getEditor(false);
+		for (int windowIndex= 0; windowIndex < windows.length; windowIndex++) {
+			IWorkbenchPage[] pages= windows[windowIndex].getPages();
+			for (int pageIndex= 0; pageIndex < pages.length; pageIndex++) {
+				IEditorReference[] references= pages[pageIndex].getEditorReferences();
+				for (int refIndex= 0; refIndex < references.length; refIndex++) {
+					IEditorPart editor= references[refIndex].getEditor(false);
 					if (editor != null)
 						result.add(editor);
 				}
