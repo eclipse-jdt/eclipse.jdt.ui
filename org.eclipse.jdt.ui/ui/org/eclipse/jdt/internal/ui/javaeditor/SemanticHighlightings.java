@@ -742,7 +742,7 @@ public class SemanticHighlightings {
 	 * @param store The preference store
 	 */
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, true);
+		store.setDefault(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED, false);
 		
 		SemanticHighlighting[] semanticHighlightings= getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++) {
