@@ -14,12 +14,19 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
 import org.eclipse.jdt.core.dom.BreakStatement;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -376,6 +383,203 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
-	}	
+	}
+	
+	public void testConstructorInvocation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E(String e, String f) {\n");
+		buf.append("        this();\n");
+		buf.append("    }\n");
+		buf.append("    public E() {\n");
+		buf.append("        this(\"Hello\", true);\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration[] declarations= type.getMethods();
+		assertTrue("Number of statements not 2", declarations.length == 2);			
+
+		{ // add parameters
+			Block block= declarations[0].getBody();
+			List statements= block.statements();
+			assertTrue("Number of statements not 1", statements.size() == 1);
+			
+			ConstructorInvocation invocation= (ConstructorInvocation) statements.get(0);
+	
+			List arguments= invocation.arguments();
+			
+			StringLiteral stringLiteral1= ast.newStringLiteral();
+			stringLiteral1.setLiteralValue("Hello");
+			arguments.add(stringLiteral1);
+			ASTRewriteAnalyzer.markAsInserted(stringLiteral1);
+			
+			StringLiteral stringLiteral2= ast.newStringLiteral();
+			stringLiteral2.setLiteralValue("World");
+			arguments.add(stringLiteral2);
+			ASTRewriteAnalyzer.markAsInserted(stringLiteral2);
+		}
+		{ //remove parameters
+			Block block= declarations[1].getBody();
+			List statements= block.statements();
+			assertTrue("Number of statements not 1", statements.size() == 1);			
+			ConstructorInvocation invocation= (ConstructorInvocation) statements.get(0);
+	
+			List arguments= invocation.arguments();
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) arguments.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) arguments.get(1));
+		}		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public E(String e, String f) {\n");
+		buf.append("        this(\"Hello\", \"World\");\n");
+		buf.append("    }\n");
+		buf.append("    public E() {\n");
+		buf.append("        this();\n");
+		buf.append("    }\n");		
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testContinueStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        continue;\n");
+		buf.append("        continue label;\n");
+		buf.append("        continue label;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{ // insert label
+			ContinueStatement statement= (ContinueStatement) statements.get(0);
+			assertTrue("Has label", statement.getLabel() == null);
+			
+			SimpleName newLabel= ast.newSimpleName("label2");	
+			statement.setLabel(newLabel);
+			
+			ASTRewriteAnalyzer.markAsInserted(newLabel);
+		}
+		{ // replace label
+			ContinueStatement statement= (ContinueStatement) statements.get(1);
+			
+			SimpleName label= statement.getLabel();
+			assertTrue("Has no label", label != null);
+			
+			SimpleName newLabel= ast.newSimpleName("label2");	
+
+			ASTRewriteAnalyzer.markAsReplaced(label, newLabel);
+		}
+		{ // remove label
+			ContinueStatement statement= (ContinueStatement) statements.get(2);
+			
+			SimpleName label= statement.getLabel();
+			assertTrue("Has no label", label != null);
+			
+			ASTRewriteAnalyzer.markAsRemoved(label);
+		}	
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        continue label2;\n");
+		buf.append("        continue label2;\n");
+		buf.append("        continue;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testDoStatement() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        } while (i == j);\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+
+		{ // replace body
+			DoStatement doStatement= (DoStatement) statements.get(0);
+			
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(doStatement.getExpression(), literal);
+			
+			Block newBody= ast.newBlock();
+			
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName("hoo"));
+			invocation.arguments().add(ast.newNumberLiteral("11"));
+			
+			newBody.statements().add(ast.newExpressionStatement(invocation));
+			
+			ASTRewriteAnalyzer.markAsReplaced(doStatement.getBody(), newBody);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do {\n");
+		buf.append("            hoo(11);\n");
+		buf.append("        } while (true);\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}		
 	
 }

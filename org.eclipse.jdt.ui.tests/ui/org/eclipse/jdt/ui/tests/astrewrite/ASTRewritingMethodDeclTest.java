@@ -95,7 +95,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		AST ast= astRoot.getAST();
 		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
 		
-		{ // insert type
+		{ // convert constructor to method: insert return type
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "E");
 			
 			Type newReturnType= astRoot.getAST().newPrimitiveType(PrimitiveType.FLOAT);

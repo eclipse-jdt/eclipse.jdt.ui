@@ -104,9 +104,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		AST ast= astRoot.getAST();
 		
-		{ 
+		{  // rename type, rename supertype, rename first interface, replace inner class with field
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-			// rename type, rename supertype, rename first interface, replace inner class with field
 			SimpleName name= type.getName();
 			SimpleName newName= ast.newSimpleName("X");
 			

@@ -623,6 +623,63 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testConditionalExpression() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= (k == 0) ? 1 : 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 1", statements.size() == 1);
+		{ // change compare expression, then expression & else expression
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			Assignment assignment= (Assignment) stmt.getExpression();
+			ConditionalExpression condExpression= (ConditionalExpression) assignment.getRightHandSide();
+			
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(condExpression.getExpression(), literal);
+			
+			SimpleName newThenExpre= ast.newSimpleName("x");
+			ASTRewriteAnalyzer.markAsReplaced(condExpression.getThenExpression(), newThenExpre);
+			
+			InfixExpression infixExpression= ast.newInfixExpression();
+			infixExpression.setLeftOperand(ast.newNumberLiteral("1"));
+			infixExpression.setRightOperand(ast.newNumberLiteral("2"));
+			infixExpression.setOperator(InfixExpression.Operator.PLUS);
+			
+			ASTRewriteAnalyzer.markAsReplaced(condExpression.getElseExpression(), infixExpression);
+		}
+		
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= true ? x : 1 + 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	
 
 	
 }

@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -21,37 +20,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayAccess;
-import org.eclipse.jdt.core.dom.ArrayCreation;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SwitchStatement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
@@ -334,23 +303,7 @@ public class ASTResolving {
 			return ast.newArrayType(getTypeFromTypeBinding(ast, binding.getElementType()), dim);
 		} else if (binding.isPrimitive()) {
 			String name= binding.getName();
-			if ("int".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.INT);
-			} else if ("boolean".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.BOOLEAN);
-			} else if ("float".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.FLOAT);
-			} else if ("double".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.DOUBLE);
-			} else if ("char".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.CHAR);
-			} else if ("byte".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.BYTE);
-			} else if ("short".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.SHORT);
-			} else if ("long".equals(name)) {
-				return ast.newPrimitiveType(PrimitiveType.LONG);
-			}
+			return ast.newPrimitiveType(PrimitiveType.toCode(name));
 		} else if (!binding.isNullType() && !binding.isAnonymous()) {
 			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
 		}

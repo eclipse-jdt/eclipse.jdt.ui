@@ -969,9 +969,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		checkNoModification(node); // no modification possible
 		return false;
 	}
-	
-		
-	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ClassInstanceCreation)
@@ -1010,28 +1007,68 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ConditionalExpression)
 	 */
 	public boolean visit(ConditionalExpression node) {
-		return super.visit(node);
+		Expression expression= node.getExpression();
+		if (isReplaced(expression)) {
+			replaceNode(expression, getReplacingNode(expression));
+		} else {
+			expression.accept(this);
+		}
+		
+		Expression thenExpression= node.getThenExpression();
+		if (isReplaced(thenExpression)) {
+			replaceNode(thenExpression, getReplacingNode(thenExpression));
+		} else {
+			thenExpression.accept(this);
+		}
+		
+		Expression elseExpression= node.getElseExpression();
+		if (isReplaced(elseExpression)) {
+			replaceNode(elseExpression, getReplacingNode(elseExpression));
+		} else {
+			elseExpression.accept(this);
+		}		
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ConstructorInvocation)
 	 */
 	public boolean visit(ConstructorInvocation node) {
-		return super.visit(node);
+		List arguments= node.arguments();
+		if (hasChanges(arguments)) {
+			try {
+				int startpos= ASTResolving.getPositionAfter(getScanner(node.getStartPosition()), ITerminalSymbols.TokenNameLPAREN);
+				rewriteList(startpos, "", arguments, false);
+			} catch (InvalidInputException e) {
+				JavaPlugin.log(e);
+			}
+		} else {
+			visitList(arguments);
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ContinueStatement)
 	 */
 	public boolean visit(ContinueStatement node) {
-		return super.visit(node);
+		rewriteNode(node.getLabel(), node.getStartPosition() + node.getLength());
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(DoStatement)
 	 */
 	public boolean visit(DoStatement node) {
-		return super.visit(node);
+		Statement body= node.getBody();
+		if (isReplaced(body)) {
+			replaceParagraph(body, getReplacingNode(body));
+		}
+		ASTNode expression= node.getExpression();
+		if (isReplaced(expression)) {
+			replaceNode(expression, getReplacingNode(expression));
+		}		
+		return false;
 	}
 
 	/* (non-Javadoc)
