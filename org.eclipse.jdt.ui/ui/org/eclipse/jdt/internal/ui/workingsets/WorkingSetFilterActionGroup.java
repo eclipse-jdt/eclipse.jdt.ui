@@ -187,8 +187,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		add(mm, fEditWorkingSetAction);
 		add(mm, new Separator());
 		add(mm, new Separator(LRU_GROUP));
-		addLRUWorkingSetActions(mm);
-		
+
 		fMenuManager= mm;
 		fMenuListener= new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
