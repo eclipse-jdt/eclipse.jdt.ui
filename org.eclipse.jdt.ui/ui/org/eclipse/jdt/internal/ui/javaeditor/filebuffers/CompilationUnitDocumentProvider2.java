@@ -50,6 +50,7 @@ import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
+import org.eclipse.ui.texteditor.DefaultAnnotation;
 import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -108,16 +109,20 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				
 				fProblem= problem;
 				fCompilationUnit= cu;
-				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 				
-				if (IProblem.Task == fProblem.getID())
+				if (IProblem.Task == fProblem.getID()) {
 					fType= TASK_ANNOTATION_TYPE;
-				else if (fProblem.isWarning())
+					setLayer(DefaultAnnotation.TASK_LAYER + 1);
+				} else if (fProblem.isWarning()) {
 					fType= WARNING_ANNOTATION_TYPE;
-				else if (fProblem.isError())
+					setLayer(DefaultAnnotation.WARNING_LAYER + 1);
+				} else if (fProblem.isError()) {
 					fType= ERROR_ANNOTATION_TYPE;
-				else
+					setLayer(DefaultAnnotation.ERROR_LAYER + 1);
+				} else {
 					fType= INFO_ANNOTATION_TYPE;
+					setLayer(DefaultAnnotation.INFO_LAYER + 1);
+				}
 			}
 			
 			private void initializeImages() {
