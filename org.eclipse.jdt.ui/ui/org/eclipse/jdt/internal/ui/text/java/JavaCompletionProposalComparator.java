@@ -53,6 +53,7 @@ public class JavaCompletionProposalComparator implements Comparator {
 				return relevanceDif;
 			}
 		}
+		// fix for bug 67468 
 		return p1.getDisplayString().compareToIgnoreCase(p2.getDisplayString());
 	}
 
