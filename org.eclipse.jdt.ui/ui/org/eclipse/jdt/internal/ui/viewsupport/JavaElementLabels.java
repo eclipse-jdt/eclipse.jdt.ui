@@ -258,6 +258,7 @@ public class JavaElementLabels {
 	public final static String CONCAT_STRING= JavaUIMessages.getString("JavaElementLabels.concat_string"); // " - "; //$NON-NLS-1$
 	public final static String COMMA_STRING= JavaUIMessages.getString("JavaElementLabels.comma_string"); // ", "; //$NON-NLS-1$
 	public final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); // "  "; // use for return type //$NON-NLS-1$
+	public final static String DEFAULT_PACKAGE= JavaUIMessages.getString("JavaElementLabels.default_package"); // "(default package)" //$NON-NLS-1$
 
 	/*
 	 * Package name compression
@@ -580,7 +581,7 @@ public class JavaElementLabels {
 		}
 		refreshPackageNamePattern();
 		if (pack.isDefaultPackage()) {
-			buf.append(JavaUIMessages.getString("JavaElementLabels.default_package")); //$NON-NLS-1$
+			buf.append(DEFAULT_PACKAGE);
 		} else if (getFlag(flags, P_COMPRESSED) && fgPkgNameLength >= 0) {
 				String name= pack.getElementName();
 				int start= 0;

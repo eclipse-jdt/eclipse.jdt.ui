@@ -405,7 +405,7 @@ public class ASTResolving {
 		}
 		return (ITypeBinding[]) res.toArray(new ITypeBinding[res.size()]);
 	}
-	
+		
 	private static void collectRelaxingTypes(Set res, ITypeBinding type) {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {

@@ -20,6 +20,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -149,7 +150,9 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 			List arguments= invocation.arguments();
 			for (int i= 0; i < paramNames.length; i++) {
-				arguments.add(ast.newSimpleName(paramNames[i]));
+				Name argument= ast.newSimpleName(paramNames[i]);
+				arguments.add(argument);
+				markAsLinked(rewrite, argument, false, "arg_name_" + i); //$NON-NLS-1$
 			}
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, String.valueOf('\n'));
 		}

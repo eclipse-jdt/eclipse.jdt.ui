@@ -16,19 +16,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  *
@@ -93,7 +110,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 	
 	public void addLinkedModeProposal(String name, ITypeBinding proposal) {
-		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
+		addLinkedModeProposal(name, new LinkedModeProposal(getCompilationUnit(), proposal));
 	}	
 	
 	public void addLinkedModeProposal(String name, IJavaCompletionProposal proposal) {
@@ -124,5 +141,113 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	
 	public void setSelectionDescription(GroupDescription desc) {
 		fSelectionDescription= desc;
-	}	
+	}
+	
+	public static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
+
+		private String fProposal;
+		private ITypeBinding fTypeProposal;
+		private ICompilationUnit fCompilationUnit;
+
+		public LinkedModeProposal(String proposal) {
+			fProposal= proposal;
+		}
+	
+		public LinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal) {
+			this(typeProposal.getName());
+			fTypeProposal= typeProposal;
+			fCompilationUnit= unit;
+		}
+	
+		private ImportsStructure getImportStructure() throws CoreException {
+			IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(store);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(store);					
+			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+			return impStructure;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+		 */
+		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+			IDocument document= viewer.getDocument();
+			Point point= viewer.getSelectedRange();
+			try {
+				String replaceString= fProposal;
+				ImportsStructure impStructure= null;
+				if (fTypeProposal != null) {
+					impStructure= getImportStructure();
+					replaceString= impStructure.addImport(fTypeProposal);
+				}
+				document.replace(point.x, point.y, replaceString);
+			
+				if (impStructure != null) {
+					impStructure.create(false, null);
+				}
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}	
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getDisplayString()
+		 */
+		public String getDisplayString() {
+			if (fTypeProposal == null || fTypeProposal.isPrimitive()) {
+				return fProposal;
+			}
+			StringBuffer buf= new StringBuffer();
+			buf.append(fProposal);
+			buf.append(JavaElementLabels.CONCAT_STRING);
+			if (fTypeProposal.getPackage().isUnnamed()) {
+				buf.append(JavaElementLabels.DEFAULT_PACKAGE);
+			} else {
+				buf.append(fTypeProposal.getPackage().getName());
+			}
+			return buf.toString();
+		}
+	
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
+		 */
+		public Image getImage() {
+			if (fTypeProposal != null) {
+				ITypeBinding binding= fTypeProposal;
+				if (binding.isArray()) {
+					binding= fTypeProposal.getElementType();
+				}
+				if (binding.isPrimitive()) {
+					return null;
+				}
+				ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(binding.isInterface(), binding.isMember(), binding.getModifiers());
+				return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+			}
+			return null;
+		}
+	
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposal#getRelevance()
+		 */
+		public int getRelevance() {
+			return 0;
+		}		
+	
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)
+		 */
+		public void apply(IDocument document) {
+			// not called
+		}
+
+		public Point getSelection(IDocument document) { return null; }
+		public String getAdditionalProposalInfo() { return null; }
+		public IContextInformation getContextInformation() { return null; }
+		public void selected(ITextViewer viewer, boolean smartToggle) {}
+		public void unselected(ITextViewer viewer) {}
+		public boolean validate(IDocument document, int offset, DocumentEvent event) { return false;}
+	}
+	
 }

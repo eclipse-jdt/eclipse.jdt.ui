@@ -36,6 +36,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 
+	private static final String KEY_NAME= "name"; //$NON-NLS-1$
+	private static final String KEY_TYPE= "type"; //$NON-NLS-1$
+
 	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	private List fArguments;
 	private ITypeBinding fSenderBinding;
@@ -82,34 +85,22 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			}
 			rewrite.markAsInserted(newStub);
 
-			addLinkedRanges(rewrite, newStub);
-
+			if (!fIsInDifferentCU) {
+				markAsSelection(rewrite, fNode);
+				Name invocationName= getInvocationName();
+				if (invocationName != null) {
+					markAsLinked(rewrite, invocationName, true, KEY_NAME);
+				}
+			}
+			markAsLinked(rewrite, newStub.getName(), false, KEY_NAME);  //$NON-NLS-1$
+			if (!newStub.isConstructor()) {
+				markAsLinked(rewrite, newStub.getReturnType(), false, KEY_TYPE);  //$NON-NLS-1$
+			}			
+			
 			return rewrite;
 		}
 		return null;
 	}
-		
-	
-	private void addLinkedRanges(ASTRewrite rewrite, MethodDeclaration newStub) {
-		if (!fIsInDifferentCU) {
-			markAsSelection(rewrite, fNode);
-			Name invocationName= getInvocationName();
-			if (invocationName != null) {
-				markAsLinked(rewrite, invocationName, true, "name"); //$NON-NLS-1$
-			}
-		}
-		markAsLinked(rewrite, newStub.getName(), false, "name");  //$NON-NLS-1$
-		if (!newStub.isConstructor()) {
-			markAsLinked(rewrite, newStub.getReturnType(), false, "type");  //$NON-NLS-1$
-		}
-		List parameters= newStub.parameters();
-		for (int i= 0; i < parameters.size(); i++) {
-			SingleVariableDeclaration curr= (SingleVariableDeclaration) parameters.get(i);
-			markAsLinked(rewrite, curr.getType(), false, "arg_type_" + i); //$NON-NLS-1$
-			markAsLinked(rewrite, curr.getName(), false, "arg_name_" + i); //$NON-NLS-1$
-		}
-	}
-	
 	
 	private boolean isConstructor() {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
@@ -136,10 +127,21 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression elem= (Expression) arguments.get(i);
 			SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
-			Type type= getParameterType(ast, elem);
+
+			// argument type
+			String argTypeKey= "arg_type_" + i; //$NON-NLS-1$
+			Type type= evaluateParameterTypes(ast, elem, argTypeKey);
 			param.setType(type);
-			param.setName(ast.newSimpleName(getParameterName(takenNames, elem, type)));
+
+			// argument name
+			String argNameKey= "arg_name_" + i; //$NON-NLS-1$
+			String name= evaluateParameterNames(takenNames, elem, type, argNameKey);
+			param.setName(ast.newSimpleName(name));
+
 			params.add(param);
+			
+			markAsLinked(rewrite, param.getType(), false, argTypeKey);
+			markAsLinked(rewrite, param.getName(), false, argNameKey);
 		}
 		
 		Block body= null;
@@ -177,30 +179,6 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			}
 		}
 		return decl;
-	}
-			
-	private String getParameterName(ArrayList takenNames, Expression argNode, Type type) {
-		IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
-		if (argNode instanceof SimpleName) {
-			SimpleName name= (SimpleName) argNode;
-			String suggestion= StubUtility.guessArgumentName(project, name.getIdentifier(), excludedNames);
-			takenNames.add(suggestion);
-			return suggestion;
-		}
-		
-		int dim= 0;
-		if (type.isArrayType()) {
-			ArrayType arrayType= (ArrayType) type;
-			dim= arrayType.getDimensions();
-			type= arrayType.getElementType();
-		}
-		String typeName= ASTNodes.asString(type);
-		String packName= Signature.getQualifier(typeName);
-		
-		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
-		takenNames.add(names[0]);
-		return names[0];
 	}
 			
 	private int findMethodInsertIndex(List decls, int currPos) {
@@ -298,13 +276,47 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		return null;
 	}
 	
-	private Type getParameterType(AST ast, Expression elem) throws CoreException {
+	private Type evaluateParameterTypes(AST ast, Expression elem, String key) throws CoreException {
 		ITypeBinding binding= Bindings.normalizeTypeBinding(elem.resolveTypeBinding());
 		if (binding != null) {
+			ITypeBinding[] typeProposals= ASTResolving.getRelaxingTypes(ast, binding);
+			for (int i= 0; i < typeProposals.length; i++) {
+				addLinkedModeProposal(key, typeProposals[i]);
+			}		
 			String typeName= addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
+	
+	private String evaluateParameterNames(ArrayList takenNames, Expression argNode, Type type, String key) {
+		IJavaProject project= getCompilationUnit().getJavaProject();
+		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
+		String favourite= null;
+		if (argNode instanceof SimpleName) {
+			SimpleName name= (SimpleName) argNode;
+			favourite= StubUtility.guessArgumentName(project, name.getIdentifier(), excludedNames);
+		}
+		
+		int dim= 0;
+		if (type.isArrayType()) {
+			ArrayType arrayType= (ArrayType) type;
+			dim= arrayType.getDimensions();
+			type= arrayType.getElementType();
+		}
+		String typeName= ASTNodes.asString(type);
+		String packName= Signature.getQualifier(typeName);
+		
+		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
+		if (favourite == null) {
+			favourite= names[0];
+		}
+		for (int i= 0; i < names.length; i++) {
+			addLinkedModeProposal(key, names[i]);
+		}
+		
+		takenNames.add(favourite);
+		return favourite;
+	}	
 
 }
