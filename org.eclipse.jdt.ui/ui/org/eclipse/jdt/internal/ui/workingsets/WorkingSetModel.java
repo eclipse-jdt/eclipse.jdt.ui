@@ -31,17 +31,20 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.ui.workingsets.dyn.IDynamicWorkingSet;
+import org.eclipse.jdt.internal.ui.workingsets.dyn.LocalWorkingSetManager;
+import org.eclipse.jdt.internal.ui.workingsets.dyn.WorkingSetManagerExt;
+
 
 public class WorkingSetModel {
 	
 	public static final IElementComparer COMPARER= new WorkingSetComparar();
 	
-	public static final String WORKING_SET_MODEL_CHANGED= WorkingSetModel.class.getName() + ".model_changed"; //$NON-NLS-1$
+	private static final String TAG_ACTIVE_WORKING_SETS= WorkingSetModel.class.getName() + ".workingSets.active"; //$NON-NLS-1$
+	private static final String TAG_INACTIVE_WORKING_SETS= WorkingSetModel.class.getName() + ".workingSets.inactive"; //$NON-NLS-1$
 	
-	private static final String TAG_WORKING_SET= WorkingSetModel.class.getName() + ".workingSet"; //$NON-NLS-1$
-	private static final String TAG_WORKING_SET_NAME= WorkingSetModel.class.getName() + ".workingSet_name"; //$NON-NLS-1$
-	
-	private List fWorkingSets; 
+	private LocalWorkingSetManager fInactiveWorkingSets;
+	private LocalWorkingSetManager fActiveWorkingSets;
 	private ListenerList fListeners;
 	private IPropertyChangeListener fWorkingSetManagerListener;
 
@@ -71,21 +74,29 @@ public class WorkingSetModel {
 		public void clear() {
 			fElementToWorkingSet.clear();
 			fWorkingSetToElement.clear();
+			fResourceToWorkingSet.clear();
 		}
-		public IAdaptable[] put(IWorkingSet ws) {
+		public void put(IWorkingSet ws) {
+			Integer workingSetKey= new Integer(System.identityHashCode(ws));
+			if (fWorkingSetToElement.containsKey(workingSetKey))
+				return;
 			IAdaptable[] elements= ws.getElements();
-			fWorkingSetToElement.put(new Integer(System.identityHashCode(ws)), elements);
+			fWorkingSetToElement.put(workingSetKey, elements);
 			for (int i= 0; i < elements.length; i++) {
 				IAdaptable element= elements[i];
-				if (!fElementToWorkingSet.containsKey(element)) {
-					fElementToWorkingSet.put(element, ws);
-				}
+				addToMap(fElementToWorkingSet, element, ws);
 				IResource resource= (IResource)element.getAdapter(IResource.class);
-				if (resource != null && !fResourceToWorkingSet.containsKey(resource)) {
-					fResourceToWorkingSet.put(resource, ws);
+				if (resource != null) {
+					addToMap(fResourceToWorkingSet, resource, ws);
 				}
 			}
-			return elements;
+		}
+		public void putAll(IWorkingSet[] workingSets) {
+			if (fWorkingSetToElement.size() == workingSets.length)
+				return;
+			for (int i= 0; i < workingSets.length; i++) {
+				put(workingSets[i]);
+			}
 		}
 		public IAdaptable[] remove(IWorkingSet ws) {
 			IAdaptable[] elements= (IAdaptable[])fWorkingSetToElement.remove(new Integer(System.identityHashCode(ws)));
@@ -101,15 +112,81 @@ public class WorkingSetModel {
 			}
 			return elements;
 		}
-		public IWorkingSet getWorkingSet(Object element) {
-			return (IWorkingSet)fElementToWorkingSet.get(element);
+		public IWorkingSet getFirstWorkingSet(Object element) {
+			return (IWorkingSet)getFirstElement(fElementToWorkingSet, element);
 		}
-		public IWorkingSet getWorkingSetForResource(IResource resource) {
-			return (IWorkingSet)fResourceToWorkingSet.get(resource);
+		public List getAllWorkingSets(Object element) {
+			return getAllElements(fElementToWorkingSet, element);
+		}
+		public IWorkingSet getFirstWorkingSetForResource(IResource resource) {
+			return (IWorkingSet)getFirstElement(fResourceToWorkingSet, resource);
+		}
+		public List getAllWorkingSetsForResource(IResource resource) {
+			return getAllElements(fResourceToWorkingSet, resource);
+		}
+		private void addToMap(Map map, IAdaptable key, IWorkingSet value) {
+			Object obj= map.get(key);
+			if (obj == null) {
+				map.put(key, value);
+			} else if (obj instanceof IWorkingSet) {
+				List l= new ArrayList(2);
+				l.add(obj);
+				l.add(value);
+				map.put(key, l);
+				
+			} else if (obj instanceof List) {
+				((List)obj).add(value);
+			}
+		}
+		private Object getFirstElement(Map map, Object key) {
+			Object obj= map.get(key);
+			if (obj instanceof List) 
+				return ((List)obj).get(0);
+			return obj;
+		}
+		private List getAllElements(Map map, Object key) {
+			Object obj= map.get(key);
+			if (obj instanceof List)
+				return (List)obj;
+			if (obj == null)
+				return new ArrayList(0);
+			List result= new ArrayList(1);
+			result.add(obj);
+			return result;
 		}
 	}
 	
 	public WorkingSetModel() {
+		fActiveWorkingSets= new LocalWorkingSetManager();
+    	IDynamicWorkingSet history= WorkingSetManagerExt.
+			createDynamicWorkingSet("History", new HistoryWorkingSet());
+    	history.setId("org.eclipse.jdt.internal.ui.HistoryWorkingSet"); //$NON-NLS-1$
+    	fActiveWorkingSets.addWorkingSet(history);
+		IDynamicWorkingSet others= WorkingSetManagerExt.
+			createDynamicWorkingSet("Others", new OthersWorkingSet(this));
+    	fActiveWorkingSets.addWorkingSet(others);
+    	fInactiveWorkingSets= new LocalWorkingSetManager();
+		initialize();
+	}
+	
+	public WorkingSetModel(IMemento memento) {
+		restoreState(memento);
+		IWorkingSet ws= fActiveWorkingSets.getWorkingSetById(OthersWorkingSet.ID);
+		if (ws == null)
+			ws= fInactiveWorkingSets.getWorkingSetById(OthersWorkingSet.ID);
+		if (ws != null) {
+			((IDynamicWorkingSet)ws).addPropertyChangeListener(new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if (IDynamicWorkingSet.PROPERTY_IMPLEMENTATION_CREATED.equals(event.getProperty())) {
+						((OthersWorkingSet)event.getNewValue()).init(WorkingSetModel.this);
+					}
+				}
+			});
+		}
+		initialize();
+	}
+	
+	private void initialize() {
 		fListeners= new ListenerList();
 		fWorkingSetManagerListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -117,15 +194,63 @@ public class WorkingSetModel {
 			}
 		};
 		PlatformUI.getWorkbench().getWorkingSetManager().addPropertyChangeListener(fWorkingSetManagerListener);
+		fActiveWorkingSets.addPropertyChangeListener(fWorkingSetManagerListener);
 	}
 	
 	public void dispose() {
 		if (fWorkingSetManagerListener != null) {
 			PlatformUI.getWorkbench().getWorkingSetManager().removePropertyChangeListener(fWorkingSetManagerListener);
+			fActiveWorkingSets.removePropertyChangeListener(fWorkingSetManagerListener);
+			fActiveWorkingSets.dispose();
+			fInactiveWorkingSets.dispose();
 			fWorkingSetManagerListener= null;
 		}
+		
 	}
 	
+	//---- model relationships ---------------------------------------
+	
+    public Object[] getChildren(IWorkingSet workingSet) {
+    	fElementMapper.put(workingSet);
+    	return workingSet.getElements();
+    }
+    
+    public Object getParent(Object element) {
+    	if (element instanceof IWorkingSet && fActiveWorkingSets.contains((IWorkingSet)element))
+    		return this;
+    	return fElementMapper.getFirstWorkingSet(element);
+    }
+    
+    public Object[] getAllParents(Object element) {
+    	if (element instanceof IWorkingSet && fActiveWorkingSets.contains((IWorkingSet)element))
+    		return new Object[] {this};
+    	return fElementMapper.getAllWorkingSets(element).toArray();
+    }
+    
+    public Object[] addWorkingSets(Object[] elements) {
+    	fElementMapper.putAll(fActiveWorkingSets.getWorkingSets());
+    	List result= null;
+    	for (int i= 0; i < elements.length; i++) {
+    		Object element= elements[i];
+    		List sets= null;
+			if (element instanceof IResource) {
+    			sets= fElementMapper.getAllWorkingSetsForResource((IResource)element);
+    		} else {
+    			sets= fElementMapper.getAllWorkingSets(element);
+    		}
+			if (sets != null && sets.size() > 0) {
+				if (result == null)
+					result= new ArrayList(Arrays.asList(elements));
+				result.addAll(sets);
+			}
+		}
+    	if (result == null)
+    		return elements;
+    	return result.toArray();
+    }
+    
+    //---- working set management -----------------------------------
+    
 	/**
      * Adds a property change listener.
      * 
@@ -144,68 +269,43 @@ public class WorkingSetModel {
     	fListeners.remove(listener);
     }
     
-    public IWorkingSet[] getWorkingSets() {
-    	return (IWorkingSet[])fWorkingSets.toArray(new IWorkingSet[fWorkingSets.size()]);
+    public IWorkingSet[] getActiveWorkingSets() {
+    	return fActiveWorkingSets.getWorkingSets();
     }
     
-    public Object[] getChildren(IWorkingSet workingSet) {
-    	return fElementMapper.put(workingSet);
-    }
-    
-    public Object getParent(Object element) {
-    	if (fWorkingSets.contains(element))
-    		return this;
-    	return fElementMapper.getWorkingSet(element);
-    }
-    
-    public Object[] addWorkingSets(Object[] elements) {
-    	List result= null;
-    	for (int i= 0; i < elements.length; i++) {
-    		Object element= elements[i];
-    		IWorkingSet set= null;
-			if (element instanceof IResource) {
-    			set= fElementMapper.getWorkingSetForResource((IResource)element);
-    		} else {
-    			set= fElementMapper.getWorkingSet(element);
-    		}
-			if (set != null) {
-				if (result == null)
-					result= new ArrayList(Arrays.asList(elements));
-				result.add(set);
-			}
+    public IWorkingSet[] getAllWorkingSets() {
+    	List result= new ArrayList();
+    	result.addAll(Arrays.asList(fActiveWorkingSets.getWorkingSets()));
+    	result.addAll(Arrays.asList(fInactiveWorkingSets.getWorkingSets()));
+    	IWorkingSet[] globals= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSets();
+    	for (int i= 0; i < globals.length; i++) {
+			if ("org.eclipse.jdt.ui.JavaWorkingSetPage".equals(globals[i].getId()) && !result.contains(globals[i])) //$NON-NLS-1$
+				result.add(globals[i]);
 		}
-    	if (result == null)
-    		return elements;
-    	return result.toArray();
+    	return (IWorkingSet[])result.toArray(new IWorkingSet[result.size()]);
     }
     
-    /* package */ void setWorkingSets(IWorkingSet[] workingSets) {
-    	fWorkingSets= new ArrayList(Arrays.asList(workingSets));
-    	fElementMapper.clear();
-    	PropertyChangeEvent event= new PropertyChangeEvent(this, WORKING_SET_MODEL_CHANGED, null, this);
-    	fireEvent(event);
+    
+    /* package */ void setActiveWorkingSets(IWorkingSet[] workingSets) {
+    	List newInactive= new ArrayList(Arrays.asList(fActiveWorkingSets.getWorkingSets()));
+    	for (int i= 0; i < workingSets.length; i++) {
+			newInactive.remove(workingSets[i]);
+			fInactiveWorkingSets.removeWorkingSet(workingSets[i]);
+		}
+    	fActiveWorkingSets.setWorkingSets(workingSets);
+    	for (Iterator iter= newInactive.iterator(); iter.hasNext();) {
+			fInactiveWorkingSets.addWorkingSet((IWorkingSet)iter.next());
+		}
     }
-	
-	public void restoreState(IMemento memento) {
-		fWorkingSets= new ArrayList();
-		IWorkingSetManager workingSetManager= PlatformUI.getWorkbench().getWorkingSetManager();
-		IMemento[] workingSets= memento == null ? null : memento.getChildren(TAG_WORKING_SET);
-		if (workingSets == null || workingSets.length == 0) {
-			fWorkingSets.addAll(Arrays.asList(workingSetManager.getWorkingSets()));
-			return;
-		}
-		for (int i= 0; i < workingSets.length; i++) {
-			IMemento workingSet= workingSets[i];
-			fWorkingSets.add(workingSetManager.getWorkingSet(workingSet.getString(TAG_WORKING_SET_NAME)));
-		}
-	}
 	
 	public void saveState(IMemento memento) {
-		for (Iterator iter= fWorkingSets.iterator(); iter.hasNext();) {
-			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			IMemento wsm= memento.createChild(TAG_WORKING_SET);
-			wsm.putString(TAG_WORKING_SET_NAME, workingSet.getName());
-		}
+		fActiveWorkingSets.saveState(memento.createChild(TAG_ACTIVE_WORKING_SETS));
+		fInactiveWorkingSets.saveState(memento.createChild(TAG_INACTIVE_WORKING_SETS));
+	}
+	
+	private void restoreState(IMemento memento) {
+		fActiveWorkingSets= new LocalWorkingSetManager(memento.getChild(TAG_ACTIVE_WORKING_SETS));
+		fInactiveWorkingSets= new LocalWorkingSetManager(memento.getChild(TAG_INACTIVE_WORKING_SETS));
 	}
 	
     private void workingSetManagerChanged(PropertyChangeEvent event) {
@@ -217,10 +317,12 @@ public class WorkingSetModel {
 			}
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(event.getProperty())) {
 			// don't know what to do yet.
+		} else if (LocalWorkingSetManager.CHANGE_WORKING_SET_MANAGER_CONTENT_CHANGED.equals(event.getProperty())) {
+			fireEvent(event);
 		}
 	}
     
-    private void fireEvent(PropertyChangeEvent event) {
+    void fireEvent(PropertyChangeEvent event) {
     	Object[] listeners= fListeners.getListeners();
     	for (int i= 0; i < listeners.length; i++) {
 			((IPropertyChangeListener)listeners[i]).propertyChange(event);

@@ -12,11 +12,15 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.ISafeRunnable;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -43,9 +47,11 @@ import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -224,7 +230,19 @@ public class PackageExplorerPart extends ViewPart
 		public void add(Object parentElement, Object[] childElements) {
 			if (fPendingGetChildren.contains(parentElement)) 
 				return;
-			super.add(parentElement, childElements);
+			// we have to remember the list before we actually do something since
+			// the super.add call already modifies the mapping.
+			List l= (List)fAdditionalMappings.get(parentElement);
+			if (l == null) {
+				super.add(parentElement, childElements);
+			} else {
+				List stable= new ArrayList(l);
+				super.add(parentElement, childElements);
+				for (Iterator iter= stable.iterator(); iter.hasNext();) {
+					Widget item= (Widget)iter.next();
+					super.internalAdd(item, parentElement, childElements);				
+				}
+			}
 		}
 				
 		protected Object[] getRawChildren(Object parent) {
@@ -375,6 +393,115 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return elements;
 		}
+		
+		//---- sorter per parent support ------
+		
+		protected Object[] getSortedChildren(Object parent) {
+			IParentAwareSorter sorter= getSorter() instanceof IParentAwareSorter 
+				? (IParentAwareSorter)getSorter()
+				: null;
+			if (sorter != null)
+				sorter.setParent(parent);
+			try {
+				return super.getSortedChildren(parent);
+			} finally {
+				if (sorter != null)
+					sorter.setParent(null);
+			}
+		}
+		
+		//---- support for multiple elements in tree
+		
+		Map fAdditionalMappings= new HashMap();
+		protected void mapElement(Object element, Widget item) {
+			Widget existingItem= findItem(element);
+			if (existingItem == null || existingItem == item) {
+				super.mapElement(element, item);
+			} else {
+				List l= (List)fAdditionalMappings.get(element);
+				if (l == null) {
+					l= new ArrayList();
+					fAdditionalMappings.put(element, l);
+				}
+				if (!l.contains(item)) {
+					l.add(item);
+					fResourceToItemsMapper.addToMap(element, (Item)item);
+				}
+			}
+		}
+		protected void unmapElement(Object element, Widget item) {
+			List l= (List)fAdditionalMappings.get(element);
+			if (l == null) {
+				super.unmapElement(element, item);
+				return;
+			}
+			if (findItem(element) == item) {
+				super.unmapElement(element, item);
+				if (l != null && l.size() >= 1) {
+					Widget widget= (Widget)l.remove(0);
+					fResourceToItemsMapper.removeFromMap(element, (Item)widget);
+					super.mapElement(element, widget);
+				}
+			} else {
+				l.remove(item);
+				fResourceToItemsMapper.removeFromMap(element, (Item) item);
+			}
+			if (l.size() == 0)
+				fAdditionalMappings.remove(element);
+		}
+		protected void unmapAllElements() {
+			fAdditionalMappings.clear();
+			super.unmapAllElements();
+		}
+		public void remove(Object[] elements) {
+			super.remove(elements);
+			List stillExisting= new ArrayList();
+			do {
+				stillExisting.clear();
+				for (int i= 0; i < elements.length; i++) {
+					if (findItem(elements[i]) != null)
+						stillExisting.add(elements[i]);
+				}
+				if (stillExisting.size() > 0)
+					super.remove(stillExisting.toArray());
+			} while (stillExisting.size() > 0);
+		}
+		protected void internalRefresh(Object element, boolean updateLabels) {
+			List l= (List)fAdditionalMappings.get(element);
+			if (l == null) {
+				super.internalRefresh(element, updateLabels);
+			} else {
+				List stable= new ArrayList(l);
+				super.internalRefresh(element, updateLabels);
+				for (Iterator iter= stable.iterator(); iter.hasNext();) {
+					Widget item= (Widget)iter.next();
+					super.internalRefresh(item, element, true, updateLabels);				
+				}
+			}
+		}
+		protected void internalUpdate(Widget item, Object element, String[] properties) {
+			List l= (List)fAdditionalMappings.get(element);
+			if (l == null) {
+				super.internalUpdate(item, element, properties);
+			} else {
+				List stable= new ArrayList(l);
+				super.internalUpdate(item, element, properties);
+				for (Iterator iter= stable.iterator(); iter.hasNext();) {
+					Widget additionalItem= (Widget)iter.next();
+					super.internalUpdate(additionalItem, element, properties);
+				}
+			}
+		}
+		protected List getSelectionFromWidget() {
+			List all= super.getSelectionFromWidget();
+			List result= new ArrayList(all.size());
+			for (Iterator iter= all.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (!result.contains(element))
+					result.add(element);
+			}
+			return result;
+		}
 	}
  
 	/* (non-Javadoc)
@@ -386,8 +513,17 @@ public class PackageExplorerPart extends ViewPart
 		super.init(site, memento);
 		fMemento= memento;
 		restoreRootMode(fMemento);
-		fWorkingSetModel= new WorkingSetModel();
-		fWorkingSetModel.restoreState(fMemento);
+		Platform.run(new ISafeRunnable() {
+			public void handleException(Throwable exception) {
+				JavaPlugin.log(exception);
+				fWorkingSetModel= new WorkingSetModel();
+			}
+			public void run() throws Exception {
+				fWorkingSetModel= fMemento != null 
+				? new WorkingSetModel(fMemento) 
+				: new WorkingSetModel();
+			}
+		});
 		restoreLayoutState(memento);
 	}
 

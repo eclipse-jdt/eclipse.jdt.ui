@@ -2417,7 +2417,42 @@
       </workingSet>
    </extension>
 <!-- =========================================================================== -->
-<!-- JDT/UI command definitions                                                   -->
+<!-- History Working Set Page                                                    -->
+<!-- =========================================================================== -->
+   <extension point="org.eclipse.ui.workingSets">
+      <workingSet
+            name="%HistoryWorkingSetWizardPage.name"
+            pageClass="org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetWizardPage"
+            icon="icons/full/obj16/history_working_set_obj.gif"
+            id="org.eclipse.jdt.internal.ui.HistoryWorkingSet">
+      </workingSet>
+      <workingSet
+            name="%OthersWorkingSetWizardPage"
+            pageClass="org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetWizardPage"
+            icon="icons/full/obj16/jworkingSet_obj.gif"
+            id="org.eclipse.jdt.internal.ui.othersWorkingSet">
+      </workingSet>
+   </extension>
+   <extension point="org.eclipse.ui.elementFactories">
+      <factory
+            class="org.eclipse.jdt.internal.ui.workingsets.dyn.DynamicWorkingSetFactory"
+            id="org.eclipse.ui.internal.DynamicWorkingSet">
+      </factory>
+      <factory
+            class="org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetFactory"
+            id="org.eclipse.jdt.internal.ui.historyWorkingSet">
+      </factory>
+      <factory
+            class="org.eclipse.jdt.internal.ui.workingsets.HistoryElementFactory"
+            id="org.eclipse.jdt.internal.ui.historyElement">
+      </factory>
+      <factory
+            class="org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetFactory"
+            id="org.eclipse.jdt.internal.ui.othersWorkingSet">
+      </factory>
+   </extension>
+<!-- =========================================================================== -->
+<!-- JDT/UI command definitions                                                  -->
 <!-- =========================================================================== -->
 
    <extension

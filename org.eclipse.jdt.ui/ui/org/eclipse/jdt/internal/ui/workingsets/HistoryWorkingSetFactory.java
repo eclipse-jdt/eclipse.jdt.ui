@@ -10,26 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.IAdaptable;
 
-public class ViewAction extends Action {
+import org.eclipse.ui.IElementFactory;
+import org.eclipse.ui.IMemento;
 
-	private final ViewActionGroup fActionGroup;
-	private final int fMode;
+public class HistoryWorkingSetFactory implements IElementFactory {
 
-	public ViewAction(ViewActionGroup group, int mode) {
-		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-		Assert.isNotNull(group);
-		fActionGroup= group;
-		fMode= mode;
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 */
-	public void run() {
-		if (isChecked())
-			fActionGroup.setMode(fMode);
+	public IAdaptable createElement(IMemento memento) {
+		HistoryWorkingSet result= new HistoryWorkingSet(memento);
+		return result;
 	}
+
 }

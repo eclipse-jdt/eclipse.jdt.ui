@@ -10,20 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.swt.widgets.TreeItem;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
+import org.eclipse.jdt.internal.ui.workingsets.dyn.LocalWorkingSetManager;
 
 public class WorkingSetAwareContentProvider extends PackageExplorerContentProvider {
 
@@ -52,26 +53,26 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	/**
 	 * {@inheritDoc}
 	 */
+	public boolean hasChildren(Object element) {
+		if (element instanceof IWorkingSet)
+			return true;
+		return super.hasChildren(element);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public Object[] getChildren(Object element) {
 		Object[] children;
 		if (element instanceof WorkingSetModel) {
 			Assert.isTrue(fWorkingSetModel == element);
-			return fWorkingSetModel.getWorkingSets();
+			return fWorkingSetModel.getActiveWorkingSets();
 		} else if (element instanceof IWorkingSet) {
 			children= fWorkingSetModel.getChildren((IWorkingSet)element);
 		} else {
 			children= super.getChildren(element);
 		}
-		TreeViewer viewer= fPart.getViewer();
-		List result= new ArrayList();
-		for (int i= 0; i < children.length; i++) {
-			Object child= children[i];
-			TreeItem item;
-			if ((item= (TreeItem)viewer.testFindItem(child)) == null || item.getParentItem().getData() == element) {
-				result.add(child);
-			}
-		}
-		return result.toArray();
+		return children;
 	}
 	
 	/**
@@ -83,12 +84,38 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 			return result;
 		return super.getParent(child);
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	/* package */ int handleAffectedChildren(IJavaElementDelta delta, IJavaElement element) throws JavaModelException {
+		int result= super.handleAffectedChildren(delta, element);
+		/*
+		if ((result & PARENT_REFRESH) != 0 || (result & GRANT_PARENT_REFRESH) != 0) {
+			postRefresh(fWorkingSetModel.getAllParents(element), true);
+		}
+		*/
+		return result;
+	}
 	
 	private void workingSetModelChanged(PropertyChangeEvent event) {
-		if (WorkingSetModel.WORKING_SET_MODEL_CHANGED.equals(event.getProperty())) {
+		if (LocalWorkingSetManager.CHANGE_WORKING_SET_MANAGER_CONTENT_CHANGED.equals(event.getProperty())) {
 			postRefresh(fWorkingSetModel);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(event.getProperty())) {
 			postRefresh(event.getNewValue());
 		}
+	}
+	
+	private void postRefresh(final Object[] elements, final boolean updateLabels) {
+		postRunnable(new Runnable() {
+			public void run() {
+				Control ctrl= fViewer.getControl();
+				if (ctrl != null && !ctrl.isDisposed()){
+					for (int i= 0; i < elements.length; i++) {
+						fViewer.refresh(elements[i], updateLabels);
+					}
+				}
+			}
+		});
 	}
 }

@@ -10,26 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.ui.IWorkingSet;
 
-public class ViewAction extends Action {
+import org.eclipse.jdt.internal.ui.workingsets.dyn.WorkingSetManagerExt;
 
-	private final ViewActionGroup fActionGroup;
-	private final int fMode;
 
-	public ViewAction(ViewActionGroup group, int mode) {
-		super("", AS_RADIO_BUTTON); //$NON-NLS-1$
-		Assert.isNotNull(group);
-		fActionGroup= group;
-		fMode= mode;
+public class HistoryWorkingSetWizardPage extends AbstractWorkingSetWizardPage {
+
+	private static final String PAGE_ID= "historyWorkingSetWizardPage"; //$NON-NLS-1$
+	
+	public HistoryWorkingSetWizardPage() {
+		super(PAGE_ID, "History", null);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void run() {
-		if (isChecked())
-			fActionGroup.setMode(fMode);
+	protected IWorkingSet createWorkingSet(String workingSetName) {
+		return WorkingSetManagerExt.createDynamicWorkingSet(workingSetName, new HistoryWorkingSet());
 	}
 }
