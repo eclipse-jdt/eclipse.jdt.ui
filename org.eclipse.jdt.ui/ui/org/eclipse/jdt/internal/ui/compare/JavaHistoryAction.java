@@ -66,8 +66,12 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		}
 	}
 
+	private boolean fModifiesFile;
 	private ISelection fSelection;
 
+	JavaHistoryAction(boolean modifiesFile) {
+		fModifiesFile= modifiesFile;
+	}
 	
 	ISelection getSelection() {
 		return fSelection;
@@ -168,6 +172,8 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		if (m == null)
 			return false;
 		IFile file= getFile(m);
+		if (fModifiesFile && file != null && file.isReadOnly())
+			return false;
 		if (file != null && beingEdited(file))
 			return getWorkingCopy(m) != null;
 		return true;

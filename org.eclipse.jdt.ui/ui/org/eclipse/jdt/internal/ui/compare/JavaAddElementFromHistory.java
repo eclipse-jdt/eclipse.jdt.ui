@@ -39,6 +39,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 	private JavaEditor fEditor;
 
 	public JavaAddElementFromHistory() {
+		super(true);
 	}
 	
 	public void run(IAction action) {

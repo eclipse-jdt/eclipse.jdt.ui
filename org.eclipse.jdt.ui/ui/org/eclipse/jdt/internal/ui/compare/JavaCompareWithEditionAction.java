@@ -32,6 +32,7 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 	
 	
 	public JavaCompareWithEditionAction() {
+		super(false);
 	}	
 	
 	public void run(IAction action) {
