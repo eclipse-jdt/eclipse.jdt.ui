@@ -40,7 +40,8 @@ import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
  * A Java code scanner.
  */
 public final class JavaCodeScanner extends AbstractJavaScanner {
-	
+
+	private static final boolean COLOR_RETURN_AS_METHOD_NAME= Boolean.getBoolean("org.eclipse.jdt.internal.ui.text.java.colorReturnAsMethodName");  //$NON-NLS-1$
 	
 	/**
 	 * Rule to detect java operators.
@@ -103,7 +104,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 	 * @since 3.0
 	 */
 	protected class MethodNameRule implements IRule {
-
+		
 		/** Token to return for this rule */
 		private final IToken fToken;
 		/** Detector to determine the method names */
@@ -142,6 +143,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 				boolean isKeyword= false;
 				final String word= buffer.toString();
 
+				// Treat "return" as method name
+				if (COLOR_RETURN_AS_METHOD_NAME && "return".equals(word)) //$NON-NLS-1$
+					return fToken;
+				
 				// Check for keywords
 				for (int index= 0; index < JavaCodeScanner.fgKeywords.length; index++) {
 					if (JavaCodeScanner.fgKeywords[index].equals(word)) {
