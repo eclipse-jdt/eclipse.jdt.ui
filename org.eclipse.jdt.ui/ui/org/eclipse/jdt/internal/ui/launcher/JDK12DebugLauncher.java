@@ -89,47 +89,54 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 		String[] cmdLine= new String[arguments.size()];
 		arguments.copyInto(cmdLine);
 
-		Process p= null;
-		try {
-			p= Runtime.getRuntime().exec(cmdLine);
-
-		} catch (IOException e) {
-			if (p != null)
-				p.destroy();
-			showErrorDialog(ERROR_CREATE_PROCESS, new LauncherException(e));
-			return null;
-		}
-
-		IProcess[] processes= new IProcess[] {DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine))};
-
 		ListeningConnector connector= getConnector();
 		if (connector == null) {
-			p.destroy();
 			String msg= JavaLaunchUtils.getResourceString(ERROR_NO_CONNECTOR+"message");
 			showErrorDialog(ERROR_LAUNCHING, new LauncherException(msg));
 			return null;
 		}
 		Map map= connector.defaultArguments();
 		specifyArguments(map, port);
+			Process p= null;
 		try {
-			connector.startListening(map);
-			boolean retry= false;
-			do  {
+			try {
+				connector.startListening(map);
+
 				try {
-					VirtualMachine vm= connector.accept(map);
-					connector.stopListening(map);
-					IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), processes[0], true);
-					return new VMRunnerResult(debugTarget, processes);
-				} catch (InterruptedIOException e) {
-					retry= askRetry(CONNECT_TIMEOUT);
+					p= Runtime.getRuntime().exec(cmdLine);
+		
+				} catch (IOException e) {
+					if (p != null)
+						p.destroy();
+					showErrorDialog(ERROR_CREATE_PROCESS, new LauncherException(e));
+					return null;
 				}
-			} while (retry);
+		
+				IProcess[] processes= new IProcess[] {DebugPlugin.getDefault().newProcess(p, renderCommandLine(cmdLine))};
+				try {
+					Thread.currentThread().sleep(5000);
+				} catch (InterruptedException e) {
+				}
+				boolean retry= false;
+				do  {
+					try {
+						VirtualMachine vm= connector.accept(map);
+						IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), processes[0], true);
+						return new VMRunnerResult(debugTarget, processes);
+					} catch (InterruptedIOException e) {
+						retry= askRetry(CONNECT_TIMEOUT);
+					}
+				} while (retry);
+			} finally {
+				connector.stopListening(map);
+			}
 		} catch (IOException e) {
 			showErrorDialog(ERROR_CONNECT, new LauncherException(e));
 		} catch (IllegalConnectorArgumentsException e) {
 			showErrorDialog(ERROR_CONNECT, new LauncherException(e));
 		}
-		p.destroy();
+		if (p != null)
+			p.destroy();
 		return null;
 	}
 	
