@@ -63,8 +63,10 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -170,7 +172,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_QUOTES),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.SKIP_CLOSING_BRACKETS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.WRAP_STRINGS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, CompilationUnitEditor.ADD_JAVADOC_TAGS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -373,6 +376,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		store.setDefault(CompilationUnitEditor.SKIP_CLOSING_BRACKETS, true);
 		store.setDefault(CompilationUnitEditor.WRAP_STRINGS, true);
 		store.setDefault(CompilationUnitEditor.ADD_JAVADOC_TAGS, true);
+		
+		store.setDefault(AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, true);
 	}
 
 	/*
@@ -641,9 +646,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.printMarginColumn"); //$NON-NLS-1$
 		addTextField(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN_COLUMN, 3, 0, true);
 				
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
-				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
 
@@ -661,6 +663,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
+
 
 		Label l= new Label(behaviorComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -767,12 +770,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.wrapStrings"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.WRAP_STRINGS, 1);
+		
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.smartHomeEnd"); //$NON-NLS-1$
+		addCheckBox(composite, label, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeBrackets"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.CLOSE_BRACKETS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.skipClosingBrackets"); //$NON-NLS-1$
 		addCheckBox(composite, label, CompilationUnitEditor.SKIP_CLOSING_BRACKETS, 1);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.SPACES_FOR_TABS, 1);
 
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.closeJavaDocs"); //$NON-NLS-1$
 		Button button= addCheckBox(composite, label, CompilationUnitEditor.CLOSE_JAVADOCS, 1);
