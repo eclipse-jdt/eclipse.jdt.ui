@@ -87,10 +87,26 @@ public class LocalSelectionTransfer extends ByteArrayTransfer {
 		return new String[] {TYPE_NAME};
 	}	
 	
+	/**
+	 * Returns the time when the selection operation
+	 * this transfer is associated with has started.
+	 * 
+	 * @return the time when the selection operation has started
+	 * 
+	 * @see org.eclipse.swt.events.TypedEvent#time
+	 */
 	public int getSelectionSetTime() {
 		return fSelectionSetTime;
 	}
 
+	/**
+	 * Sets the time when the selection operation this
+	 * transfer is associated with has started.
+	 * 
+	 * @param time the time when the selection operation has started
+	 * 
+	 * @see org.eclipse.swt.events.TypeddEvent#time
+	 */
 	public void setSelectionSetTime(int time) {
 		fSelectionSetTime= time;
 	}
