@@ -134,6 +134,9 @@ public class AccessAnalyzer extends ParentProvider {
 			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node.sourceStart, node.tokens[0].length));
 	
 		FieldBinding[] others= node.otherBindings;
+		if (others == null)		// Access to static fields like System.err. In this case other binding is null.
+			return true;
+			
 		int start= node.sourceStart + node.tokens[0].length + 1;
 		for (int i= 0; i < others.length; i++) {
 			FieldBinding other= others[i];
