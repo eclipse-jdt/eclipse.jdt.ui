@@ -90,6 +90,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			return;
 		}
 		
+		
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(catchClause);
 		if (!(bodyDeclaration instanceof MethodDeclaration)) {
 			return;
@@ -112,10 +113,13 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 				rewrite.markAsRemoved(tryStatement);
 			}
 		}
-		Name name= ((SimpleType) type).getName();
-		Name newName= (Name) ASTNode.copySubtree(ast, name);
-		rewrite.markAsInserted(newName);
-		methodDeclaration.thrownExceptions().add(newName);
+		ITypeBinding binding= type.resolveBinding();
+		if (binding == null || isNotYetThrown(binding, methodDeclaration.thrownExceptions())) {
+			Name name= ((SimpleType) type).getName();
+			Name newName= (Name) ASTNode.copySubtree(ast, name);
+			rewrite.markAsInserted(newName);
+			methodDeclaration.thrownExceptions().add(newName);
+		}			
 	
 		String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description");
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
@@ -124,6 +128,25 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 		resultingCollections.add(proposal);
 
 	}
+	
+	private boolean isNotYetThrown(ITypeBinding binding, List thrownExcpetions) {
+		for (int i= 0; i < thrownExcpetions.size(); i++) {
+			Name name= (Name) thrownExcpetions.get(i);
+			ITypeBinding elem= (ITypeBinding) name.resolveBinding();
+			if (elem != null) {
+				ITypeBinding curr= binding;
+				if (curr != null && curr != elem) {
+					curr= curr.getSuperclass();
+				}
+				if (curr != null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	
+	}
+	
 	
 	private void getRenameLocalProposals(ICorrectionContext context, List resultingCollections) throws CoreException {
 		ASTNode node= context.getCoveringNode();
