@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -78,7 +79,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 			modifyClassPaths(new SubProgressMonitor(pm, 1));
 			IProjectDescription description = getProject().getDescription();
 			description.setName(createNewPath().segment(0));
-			getProject().move(description, true, new SubProgressMonitor(pm, 1));
+			getProject().move(description, IResource.FORCE | IResource.SHALLOW, new SubProgressMonitor(pm, 1));
 		} finally{
 			pm.done();
 		}	
