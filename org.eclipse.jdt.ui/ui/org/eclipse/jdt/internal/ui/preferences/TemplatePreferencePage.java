@@ -285,7 +285,7 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 	
 	private SourceViewer createViewer(Composite parent) {
-		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER /*| SWT.V_SCROLL | SWT.H_SCROLL*/);
+		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
 		viewer.configure(new JavaSourceViewerConfiguration(tools, null));
 		viewer.setEditable(false);
