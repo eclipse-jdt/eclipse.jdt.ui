@@ -145,28 +145,45 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 		}	
 	}
 	
+
 	private static File findJavaDocCommand() {
+		IVMInstall install= JavaRuntime.getDefaultVMInstall();
+		if (install != null) {
+			File res= getCommand(install);
+			if (res != null) {
+				return res;
+			}
+		}
+		
 		IVMInstallType[] jreTypes= JavaRuntime.getVMInstallTypes();
 		for (int i= 0; i < jreTypes.length; i++) {
 			IVMInstallType jreType= jreTypes[i];
 			IVMInstall[] installs= jreType.getVMInstalls();
 			for (int k= 0; k < installs.length; k++) {
-				File installLocation= installs[k].getInstallLocation();
-				if (installLocation != null) {
-					File javaDocCommand= new File(installLocation, "bin/javadoc"); //$NON-NLS-1$
-					if (javaDocCommand.isFile()) {
-						return javaDocCommand;
-					}
-					javaDocCommand= new File(installLocation, "bin/javadoc.exe"); //$NON-NLS-1$
-					if (javaDocCommand.isFile()) {
-						return javaDocCommand;
-					}
+				File res= getCommand(installs[i]);
+				if (res != null) {
+					return res;
 				}
 			}
 		}
 		return null;
 	}
 
+	private static File getCommand(IVMInstall install) {
+		File installLocation= install.getInstallLocation();
+		if (installLocation != null) {
+			File javaDocCommand= new File(installLocation, "bin/javadoc"); //$NON-NLS-1$
+			if (javaDocCommand.isFile()) {
+				return javaDocCommand;
+			}
+			javaDocCommand= new File(installLocation, "bin/javadoc.exe"); //$NON-NLS-1$
+			if (javaDocCommand.isFile()) {
+				return javaDocCommand;
+			}
+		}
+		return null;
+	}
+	
 	private void initFields() {
 		fJavadocSelection.setTextWithoutUpdate(getJavaDocCommand());
 	}
