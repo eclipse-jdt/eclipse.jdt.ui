@@ -70,6 +70,8 @@ import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -1600,7 +1602,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IBuffer buf= cu.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter, pack.getJavaProject()); 
+			String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter, pack.getJavaProject());
+			formattedContent= Strings.trimLeadingTabsAndSpaces(formattedContent);
 			buf.replace(range.getOffset(), range.getLength(), formattedContent);
 			if (!isInnerClass) {
 				String fileComment= getFileComment(cu);

@@ -551,8 +551,9 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
+		buf.append("\n");		
 		buf.append("    public class Inner {\n");
-		buf.append("\n");				
+		buf.append("\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
@@ -566,6 +567,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class F {\n");
+		buf.append("\n");
 		buf.append("    public interface Inner {\n");
 		buf.append("\n");				
 		buf.append("    }\n");		
