@@ -28,8 +28,8 @@ public class DefaultAnnotationAccess extends DefaultMarkerAnnotationAccess {
 	 * Creates a default annotation access for
 	 * annotations that implement <code>IAnnotationExtension</code>.
 	 */
-	public DefaultAnnotationAccess(MarkerAnnotationPreferences markerAnnotationPreferences) {
-		super(markerAnnotationPreferences);
+	public DefaultAnnotationAccess() {
+		super(new MarkerAnnotationPreferences());
 	}
 
 	/*

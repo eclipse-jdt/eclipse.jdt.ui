@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
-import org.eclipse.jface.text.source.*;
+import org.eclipse.jface.text.source.DefaultAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 
 import org.eclipse.ui.editors.text.FileDocumentProvider;
@@ -38,6 +38,6 @@ public class JspEditor extends TextEditor {
 	 * @see TextEditor#createAnnotationAccess()
 	 */
 	protected IAnnotationAccess createAnnotationAccess() {
-		return new DefaultAnnotationAccess(fAnnotationPreferences);
+		return new DefaultAnnotationAccess();
 	}
 }
