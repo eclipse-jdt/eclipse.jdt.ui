@@ -87,8 +87,8 @@ public class PackageExplorerActionGroup extends CompositeActionGroup {
 		setGroups(new ActionGroup[] {
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new ShowActionGroup(fPart), 
-			fCCPActionGroup= new CCPActionGroup(fPart, fPart.getViewer()),
-			new RefactorActionGroup(fPart, fPart.getViewer()),
+			fCCPActionGroup= new CCPActionGroup(fPart),
+			new RefactorActionGroup(fPart),
 			new GenerateActionGroup(fPart), 
 			fBuildActionGroup= new BuildActionGroup(fPart),
 			new JavaSearchActionGroup(fPart, fPart.getViewer())});
