@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 
@@ -162,6 +163,8 @@ public class JavaElementSorter extends ViewerSorter {
 			return RESOURCEFOLDERS;
 		} else if (element instanceof IStorage) {
 			return STORAGE;
+		} else if (element instanceof ClassPathContainer) {
+			return PACKAGEFRAGMENTROOTS;
 		}
 		return OTHERS;
 	}
@@ -188,8 +191,8 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 			
 		if (cat1 == PACKAGEFRAGMENTROOTS) {
-			IPackageFragmentRoot root1= JavaModelUtil.getPackageFragmentRoot((IJavaElement)e1);
-			IPackageFragmentRoot root2= JavaModelUtil.getPackageFragmentRoot((IJavaElement)e2);
+			IPackageFragmentRoot root1= getPackageFragmentRoot(e1);
+			IPackageFragmentRoot root2= getPackageFragmentRoot(e2);
 			if (!root1.getPath().equals(root2.getPath())) {
 				int p1= getClassPathIndex(root1);
 				int p2= getClassPathIndex(root2);
@@ -225,6 +228,19 @@ public class JavaElementSorter extends ViewerSorter {
 			return params1.length - params2.length;
 		}
 		return 0;
+	}
+
+	public IPackageFragmentRoot getPackageFragmentRoot(Object element) {
+		if (element instanceof ClassPathContainer) {
+			// return first package fragment root from the container
+			ClassPathContainer cp= (ClassPathContainer)element;
+			Object[] roots= cp.getPackageFragmentRoots();
+			if (roots.length > 0)
+				return (IPackageFragmentRoot)roots[0];
+			// non resolvable - return a dummy package fragment root
+			return cp.getJavaProject().getPackageFragmentRoot("Non-Resolvable");  //$NON-NLS-1$
+		}
+		return JavaModelUtil.getPackageFragmentRoot((IJavaElement)element);
 	}
 	
 	private int compareWithLabelProvider(Viewer viewer, Object e1, Object e2) {

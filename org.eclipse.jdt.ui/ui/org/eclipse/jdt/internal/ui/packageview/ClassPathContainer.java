@@ -22,13 +22,13 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 		fProject= parent;
 		fClassPathEntry= entry;
 		try {
-			fContainer = JavaCore.getClasspathContainer(entry.getPath(), parent);
+			fContainer= JavaCore.getClasspathContainer(entry.getPath(), parent);
 		} catch (JavaModelException e) {
 			fContainer= null;
 		}
 	}
 
-	public Object[] getPackageFragmentRoots() throws JavaModelException {
+	public Object[] getPackageFragmentRoots() {
 		return fProject.findPackageFragmentRoots(fClassPathEntry);
 	}
 
@@ -39,11 +39,7 @@ public class ClassPathContainer implements IAdaptable, IWorkbenchAdapter {
 	}
 
 	public Object[] getChildren(Object o) {
-		try {
-			return getPackageFragmentRoots();
-		} catch (JavaModelException e) {
-			return null;
-		}
+		return getPackageFragmentRoots();
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
