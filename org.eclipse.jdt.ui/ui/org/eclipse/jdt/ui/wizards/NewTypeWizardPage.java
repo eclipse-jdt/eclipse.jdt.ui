@@ -1412,6 +1412,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 
+	/**
+	 * @deprecated Use getTemplate(String,ICompilationUnit,int)
+	 */
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		return getTemplate(name, parentCU, 0);
 	
