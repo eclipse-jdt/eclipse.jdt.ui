@@ -340,7 +340,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public ICompilationUnit getCompilationUnit() {
 		IJavaElement element= JavaCore.create(getMarker().getResource());
 		if (element instanceof ICompilationUnit) {
-			ICompilationUnit cu= getCompilationUnit();
+			ICompilationUnit cu= (ICompilationUnit)element;
 			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
 			if (workingCopy != null) {
 				return workingCopy;
