@@ -447,9 +447,16 @@ public class LinkedUIControl {
 				ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 				IRewriteTarget target= extension.getRewriteTarget();
 
-				if (fPreviousPosition != null && !fPreviousPosition.equals(position))
+				// if the last position is not the same and there is an open change: close it.
+				if (!position.equals(fPreviousPosition) && fHasOpenCompoundChange) {
 					target.endCompoundChange();
-				target.beginCompoundChange();
+					fHasOpenCompoundChange= false;
+				}
+				// we are editing - if there is no open change: open one
+				if (!fHasOpenCompoundChange) {
+					target.beginCompoundChange();
+					fHasOpenCompoundChange= true;
+				}
 			}
 
 			fPreviousPosition= position;
@@ -540,6 +547,7 @@ public class LinkedUIControl {
 	private boolean fIsActive= false;
 	private IPositionUpdater fPositionUpdater= new DefaultPositionUpdater(getCategory());
 	private boolean fDoContextInfo= false;
+	private boolean fHasOpenCompoundChange= false;
 
 	/**
 	 * Creates a new UI on the given model (environment) and the set of
@@ -742,10 +750,12 @@ public class LinkedUIControl {
 		JavaPlugin.getActivePage().getNavigationHistory().markLocation(JavaPlugin.getActivePage().getActiveEditor());
 	
 		// undo
-		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
-		IRewriteTarget target= extension.getRewriteTarget();
-		if (fFramePosition != null && fFramePosition != fExitPosition)
+		if (fHasOpenCompoundChange) {
+			ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
+			IRewriteTarget target= extension.getRewriteTarget();
 			target.endCompoundChange();
+			fHasOpenCompoundChange= false;
+		}
 	
 		redraw();
 		IDocument oldDoc= fFramePosition == null ? null : fFramePosition.getDocument();
@@ -755,9 +765,6 @@ public class LinkedUIControl {
 		switchViewer(oldDoc, newDoc);
 		fFramePosition= pos;
 
-		if (fFramePosition != null && fFramePosition != fExitPosition)
-			target.beginCompoundChange();
-	
 		if (select)
 			select();
 		if (fFramePosition == fExitPosition && !fIterator.isCycling())
@@ -896,7 +903,10 @@ public class LinkedUIControl {
 
 		ITextViewerExtension extension= (ITextViewerExtension) fCurrentTarget.getViewer();
 		IRewriteTarget target= extension.getRewriteTarget();
-		target.endCompoundChange();
+		if (fHasOpenCompoundChange) {
+			target.endCompoundChange();
+			fHasOpenCompoundChange= false;
+		}
 		
 //		// debug trace
 //		JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "leaving linked mode", null));
