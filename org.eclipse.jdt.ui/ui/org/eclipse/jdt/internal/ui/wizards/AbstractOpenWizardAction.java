@@ -23,10 +23,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.actions.NewProjectAction;
+import org.eclipse.ui.actions.CreateProjectAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public abstract class AbstractOpenWizardAction extends Action implements IWorkbenchWindowActionDelegate {
@@ -144,7 +143,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		
 		dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 		dialog.create();
-		dialog.getShell().setText(JavaUIMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
+		dialog.getShell().setText(NewWizardMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
 		dialog.open();
 	}
 	
@@ -189,11 +188,11 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		if (workspace.getRoot().getProjects().length == 0) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
-			String title= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.title");
-			String message= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.message");
+			String title= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.title");
+			String message= NewWizardMessages.getString("AbstractOpenWizardAction.noproject.message");
 			if (MessageDialog.openQuestion(shell, title, message)) {
 				IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
-				(new NewProjectAction(window)).run();	// using internal class (PR: 6095)
+				(new CreateProjectAction(window)).run();
 				return workspace.getRoot().getProjects().length != 0;
 			}
 			return false;
