@@ -30,8 +30,8 @@ public class ExceptionHandler {
 	private static ExceptionHandler fgInstance= new ExceptionHandler();
 	
 	/**
-	 * Logs the given exception using the platforms logging mechanism. The exception is
-	 * looged as an error with the error code <code>JavaStatusConstants.INTERNAL_ERROR</code>.
+	 * Logs the given exception using the platform's logging mechanism. The exception is
+	 * logged as an error with the error code <code>JavaStatusConstants.INTERNAL_ERROR</code>.
 	 */
 	public static void log(Throwable t, String message) {
 		JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 
