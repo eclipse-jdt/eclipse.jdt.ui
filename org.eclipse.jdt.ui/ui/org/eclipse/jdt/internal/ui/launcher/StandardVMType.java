@@ -34,7 +34,7 @@ public class StandardVMType extends AbstractVMInstallType {
 		File java= new File(javaHome, File.separator+"bin"+File.separator+"java");
 		File javaExe= new File(javaHome, File.separator+"bin"+File.separator+"java.exe");
 		if (!(java.isFile() || javaExe.isFile()))
-			return null;
+			return null; 
 
 		String vendor= System.getProperty("java.vendor");
 		if (!(vendor.startsWith("Sun") || vendor.startsWith("IBM")))
@@ -44,7 +44,7 @@ public class StandardVMType extends AbstractVMInstallType {
 		String version= System.getProperty("java.version");
 		if (version == null)
 			return null;
-		if (!version.startsWith("1.2") || version.startsWith("1.3"))
+		if (version.startsWith("1.2") || version.startsWith("1.3"))
 			return null;
 		return javaHome;
 	}
