@@ -5,8 +5,11 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
+
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -18,7 +21,7 @@ import org.eclipse.jdt.core.IJavaElement;
  * The <code>JavaOutlineErrorTickUpdater</code> will register as a AnnotationModelListener on the annotation model
  * and update all images in the outliner tree when the annotation model changed.
  */
-public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
+public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener, IAnnotationModelListenerExtension {
 
 	private TreeViewer fViewer;
 	private ILabelProvider fLabelProvider;
@@ -62,7 +65,7 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	}	
 	
 		
-	/**
+	/*
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(IAnnotationModel model) {
@@ -75,6 +78,17 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 				}
 			});
 		}		
+	}
+	
+	/*
+	 * @see IAnnotationModelListenerExtension#modelChanged(AnnotationModelEvent)
+	 */
+	public void modelChanged(AnnotationModelEvent event) {
+		if (event instanceof CompilationUnitAnnotationModelEvent) {
+			CompilationUnitAnnotationModelEvent e= (CompilationUnitAnnotationModelEvent) event;
+			if (e.includesMarkerAnnotationChanges())
+				modelChanged(event.getAnnotationModel());
+		}
 	}
 	
 	private void doUpdateErrorTicks() {
@@ -110,8 +124,6 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 				updateItem(children[i]);
 			}
 		}
-	}	
-	
-
+	}
 }
 

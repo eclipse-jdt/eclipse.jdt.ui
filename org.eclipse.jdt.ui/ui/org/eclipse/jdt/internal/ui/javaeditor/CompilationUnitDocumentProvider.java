@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
@@ -33,9 +34,12 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.editors.text.FileDocumentProvider;
@@ -173,16 +177,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		};
 		
 		/**
-		 * Annotation model dealing with java marker annotations.
+		 * Annotation model dealing with java marker annotations and temporary problems.
 		 */
-		protected class CompilationUnitMarkerAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
+		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
 			
 			private List fCollectedProblems= new ArrayList();
 			private List fGeneratedAnnotations= new ArrayList();
+			private boolean fTemporaryProblemsChanged= false;
 			
 			
-			public CompilationUnitMarkerAnnotationModel(IResource resource) {
+			public CompilationUnitAnnotationModel(IResource resource, boolean collectProblems) {
 				super(resource);
+				if (collectProblems)
+					startCollectingProblems();
 			}
 			
 			protected MarkerAnnotation createMarkerAnnotation(IMarker marker) {
@@ -205,32 +212,78 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
-				removeAnnotations(fGeneratedAnnotations, false, true);
-				fGeneratedAnnotations.clear();
+				if (fCollectedProblems == null)
+					return;
+					
+				fTemporaryProblemsChanged= false;
+				
+				if (fGeneratedAnnotations.size() > 0) {
+					fTemporaryProblemsChanged= true;
+					removeAnnotations(fGeneratedAnnotations, false, true);
+					fGeneratedAnnotations.clear();
+				}
 			}
 			
 			/*
 			 * @see IProblemRequestor#acceptProblem(IProblem)
 			 */
 			public void acceptProblem(IProblem problem) {
-				fCollectedProblems.add(problem);
+				if (fCollectedProblems != null)
+					fCollectedProblems.add(problem);
 			}
 
 			/*
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
-				Iterator e= fCollectedProblems.iterator();
-				while (e.hasNext()) {
-					IProblem problem= (IProblem) e.next();
-					ProblemAnnotation annotation= new ProblemAnnotation(problem);
-					fGeneratedAnnotations.add(annotation);
-					Position p= createPositionFromProblem(problem);
-					if (p != null)
-						addAnnotation(annotation, p, false);
+				if (fCollectedProblems == null)
+					return;
+					
+				if (fCollectedProblems.size() > 0) {
+					fTemporaryProblemsChanged= true;
+					Iterator e= fCollectedProblems.iterator();
+					while (e.hasNext()) {
+						IProblem problem= (IProblem) e.next();
+						ProblemAnnotation annotation= new ProblemAnnotation(problem);
+						fGeneratedAnnotations.add(annotation);
+						Position p= createPositionFromProblem(problem);
+						if (p != null)
+							addAnnotation(annotation, p, false);
+					}
+					fCollectedProblems.clear();
 				}
-				fCollectedProblems.clear();
-				fireModelChanged();
+					
+				if (fTemporaryProblemsChanged) {
+					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, false));
+					fTemporaryProblemsChanged= false;
+				}
+			}
+			
+			/**
+			 * Tells this annotation model to collect temporary problems from now on.
+			 */
+			public void startCollectingProblems() {
+				fCollectedProblems= new ArrayList();
+				fGeneratedAnnotations= new ArrayList();  
+			}
+			
+			/**
+			 * Tells this annotation model to no longer collect temporary problems.
+			 */
+			public void stopCollectingProblems() {
+				if (fGeneratedAnnotations != null) {
+					removeAnnotations(fGeneratedAnnotations, true, true);
+					fGeneratedAnnotations.clear();
+				}
+				fCollectedProblems= null;
+				fGeneratedAnnotations= null;
+			}
+			
+			/*
+			 * @see AnnotationModel#fireModelChanged()
+			 */
+			protected void fireModelChanged() {
+				fireModelChanged(new CompilationUnitAnnotationModelEvent(this, true));
 			}
 		};
 		
@@ -282,6 +335,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		};
 		
+	/* Preference key for temporary problems */
+	public final static String HANDLE_TEMPRARY_PROBELMS= "handleTemporaryProblems";
+	
 	
 	/** The buffer factory */
 	private IBufferFactory fBufferFactory= new BufferFactory();
@@ -289,6 +345,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	private boolean fIsAboutToSave= false;
 	/** The save policy used by this provider */
 	private ISavePolicy fSavePolicy;
+	/** Internal property changed listener */
+	private IPropertyChangeListener fPropertyListener;
 	
 		
 	
@@ -296,6 +354,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * Constructor
 	 */
 	public CompilationUnitDocumentProvider() {
+		fPropertyListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (HANDLE_TEMPRARY_PROBELMS.equals(event.getProperty()))
+					enableHandlingTemporaryProblems();
+			}
+		};
+		
+		JavaPlugin.getDefault().getPreferenceStore().addPropertyChangeListener(fPropertyListener);
 	}
 	
 	/**
@@ -448,7 +514,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
 		
 		IFileEditorInput input= (IFileEditorInput) element;
-		return new CompilationUnitMarkerAnnotationModel(input.getFile());
+		return new CompilationUnitAnnotationModel(input.getFile(), isHandlingTemporaryProblems());
 	}
 	
 	/*
@@ -554,6 +620,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * @see IWorkingCopyManager#shutdown
 	 */
 	public void shutdown() {
+		
+		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyListener);
+		
 		Iterator e= getConnectedElements();
 		while (e.hasNext())
 			disconnect(e.next());
@@ -574,5 +643,33 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			}
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
-	}	
+	}
+	
+	/**
+	 * Returns the preference whether handling temporary problems is enabled.
+	 */
+	protected boolean isHandlingTemporaryProblems() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(HANDLE_TEMPRARY_PROBELMS);
+	} 
+	
+	/**
+	 * Switches the state of problem acceptance according to the value in the preference store.
+	 */
+	protected void enableHandlingTemporaryProblems() {
+		boolean enable= isHandlingTemporaryProblems();
+		for (Iterator iter= getConnectedElements(); iter.hasNext();) {
+			ElementInfo element= getElementInfo(iter.next());
+			if (element instanceof CompilationUnitInfo) {
+				CompilationUnitInfo info= (CompilationUnitInfo)element;
+				if (info.fModel instanceof CompilationUnitAnnotationModel) {
+					CompilationUnitAnnotationModel m= (CompilationUnitAnnotationModel) info.fModel;
+					if (enable)
+						m.startCollectingProblems();
+					else
+						m.stopCollectingProblems();
+				}
+			}
+		}
+	}
 }
