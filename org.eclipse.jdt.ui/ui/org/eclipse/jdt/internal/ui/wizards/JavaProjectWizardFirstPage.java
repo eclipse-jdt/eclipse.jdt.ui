@@ -40,6 +40,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -473,6 +474,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		fLocationGroup.addObserver(fValidator);
 
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 	}
 
 	/**

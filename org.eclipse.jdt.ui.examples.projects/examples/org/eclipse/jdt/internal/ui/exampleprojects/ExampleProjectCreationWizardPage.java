@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.wizard.WizardPage;
 
@@ -89,6 +90,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		fTextControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		setControl(composite);
+		Dialog.applyDialogFont(composite);
 	}
 
 	private void validateText(String text) {
