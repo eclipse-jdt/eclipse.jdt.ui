@@ -18,13 +18,13 @@ import java.util.Map;
 /**
  * <code>SubstitutionTextReader</code> that will substitute plain text values
  * for html entities encountered in the original text. Line breaks and
- * whitespaces are preserved.
+ * whitespace are preserved.
  * 
  * @since 3.0
  */
 public class HTMLEntity2JavaReader extends SubstitutionTextReader {
 
-	/** The hardcoded entity map. */
+	/** The hard-coded entity map. */
 	private static final Map fgEntityLookup;
 	
 	static {
