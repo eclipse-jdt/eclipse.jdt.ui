@@ -218,16 +218,20 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
 					return;
 				}
+				
 				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
 					containerPath= entry.getPath();
-					entry= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
-					if (entry == null) {
+					IClasspathEntry entry2= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
+					if (entry2 == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
 						String containerName= container == null ? entry.getPath().toString() : container.getDescription();
 						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.containerEntry", containerName));  //$NON-NLS-1$
 						return;
 					}
+					entry= entry2;
 				}
+				
+				
 				Button button;
 
 				IPath path= entry.getSourceAttachmentPath();			
