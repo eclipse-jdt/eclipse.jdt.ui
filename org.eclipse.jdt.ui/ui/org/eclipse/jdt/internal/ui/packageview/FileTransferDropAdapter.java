@@ -51,18 +51,25 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 		boolean isPackageFragment= target instanceof IPackageFragment;
 		boolean isJavaProject= target instanceof IJavaProject;
 		boolean isPackageFragmentRoot= target instanceof IPackageFragmentRoot;
+		boolean isContainer= target instanceof IContainer;
 		
-		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot)) 
+		if (!(isPackageFragment || isJavaProject || isPackageFragmentRoot || isContainer)) 
 			return;
 			
-		IJavaElement element= (IJavaElement)target;
-		if (!element.isReadOnly()) 
-			event.detail= DND.DROP_COPY;
+		if (isContainer) {
+			IContainer container= (IContainer)target;
+			if (!container.isReadOnly())
+				event.detail= DND.DROP_COPY;
+		} else {
+			IJavaElement element= (IJavaElement)target;
+			if (!element.isReadOnly()) 
+				event.detail= DND.DROP_COPY;
+		}
 			
 		return;	
 	}
 
-	public void drop(Object javaTarget, DropTargetEvent event) {
+	public void drop(Object dropTarget, DropTargetEvent event) {
 		int operation= event.detail;
 		
 		event.detail= DND.DROP_NONE;
@@ -71,11 +78,16 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements IOverwrite
 			return;
 			
 		IContainer target= null;
-		try {
-			target= (IContainer)((IJavaElement)javaTarget).getCorrespondingResource();	
-		} catch (JavaModelException e) {
-			return;
+		if (dropTarget instanceof IContainer) {
+			target= (IContainer)dropTarget;
+		} else {
+			try {
+				target= (IContainer)((IJavaElement)dropTarget).getCorrespondingResource();	
+			} catch (JavaModelException e) {
+			}
 		}
+		if (target == null)
+			return;
 		
 		List files= checkFiles(SWTUtil.getShell(event.widget),(String[])data, target.getLocation());
 		if (files.size() > 0) {
