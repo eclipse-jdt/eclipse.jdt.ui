@@ -57,6 +57,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
@@ -104,10 +105,29 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				setLayer(1);
 				
 				if (fgImage == null)
-					fgImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
+					fgImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 				
-				if (WorkInProgressPreferencePage.showTempProblems())
+				if (WorkInProgressPreferencePage.showTempProblems() && quickFixAvailable(fProblem))
 					fImage= fgImage;
+			}
+			
+			private boolean quickFixAvailable(IProblem problem) {
+				switch (problem.getID()) {
+					case IProblem.UnterminatedString: 
+					case IProblem.UnterminatedComment:
+					case IProblem.UndefinedMethod:
+					case IProblem.PublicClassMustMatchFileName:
+					case IProblem.PackageIsNotExpectedPackage:
+					case IProblem.UndefinedType:
+					case IProblem.FieldTypeNotFound:
+					case IProblem.ArgumentTypeNotFound:
+					case IProblem.ReturnTypeNotFound:
+					case IProblem.SuperclassNotFound:
+					case IProblem.ExceptionTypeNotFound:
+					case IProblem.InterfaceNotFound: 
+						return true;
+				}	
+				return false;
 			}
 			
 			/*
