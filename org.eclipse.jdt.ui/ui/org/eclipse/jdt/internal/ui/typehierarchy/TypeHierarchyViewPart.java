@@ -1047,7 +1047,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private void doTypeHierarchyChangedOnViewers(IType[] changedTypes) {
 		if (changedTypes == null) {
 			// hierarchy change
-			if (!fHierarchyLifeCycle.getHierarchy().exists()) {
+			if (fHierarchyLifeCycle.getHierarchy() == null || !fHierarchyLifeCycle.getHierarchy().exists()) {
 				clearInput();
 			} else {
 				try {
