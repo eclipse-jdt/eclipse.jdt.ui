@@ -120,7 +120,7 @@ public class SelectionListenerWithASTManager {
 				return Status.CANCEL_STATUS;
 			}
 			// create AST		
-			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, true, monitor);
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(input, true, monitor);
 		
 			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();

@@ -88,7 +88,7 @@ public final class ASTProvider {
 	/**
 	 * Returns a string for the given Java element used for debugging.
 	 * 
-	 * @param ast the compilation unit AST
+	 * @param javaElement the compilation unit AST
 	 * @return a string used for debugging
 	 */
 	private String toString(IJavaElement javaElement) {
@@ -136,7 +136,7 @@ public final class ASTProvider {
 		}
 	}
 	
-	public CompilationUnit getAST(IJavaElement je, boolean wait, boolean cacheAST, IProgressMonitor progressMonitor) {
+	public CompilationUnit getAST(IJavaElement je, boolean wait, IProgressMonitor progressMonitor) {
 		Assert.isTrue(je != null && (je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT));
 		
 		if (progressMonitor != null && progressMonitor.isCanceled())
@@ -169,7 +169,7 @@ public final class ASTProvider {
 						return fAST;
 					}
 				}
-				return getAST(je, wait, cacheAST, progressMonitor);
+				return getAST(je, wait, progressMonitor);
 			} catch (InterruptedException e) {
 			}
 		} else if (!wait)
@@ -181,9 +181,6 @@ public final class ASTProvider {
 		
 		if (DEBUG)
 			System.out.println(DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$
-		
-		if (cacheAST && ast != null)
-			cache(ast, je);
 		
 		return ast;
 	}
@@ -213,7 +210,11 @@ public final class ASTProvider {
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
 
-		return (CompilationUnit)parser.createAST(progressMonitor);
+		try {
+			return (CompilationUnit)parser.createAST(progressMonitor);
+		} catch (IllegalStateException ex) {
+			return null;
+		}
 	}
 	
 	/**

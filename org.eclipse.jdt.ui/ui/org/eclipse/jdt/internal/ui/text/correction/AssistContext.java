@@ -64,7 +64,7 @@ public class AssistContext implements IInvocationContext {
 	
 	public CompilationUnit getASTRoot() {
 		if (fASTRoot == null) {
-			fASTRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, true, false, null);
+			fASTRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, true, null);
 		}
 		return fASTRoot; 
 	}
