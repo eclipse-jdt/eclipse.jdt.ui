@@ -67,7 +67,10 @@ public class ErrorTickAdornmentProvider implements IAdornmentProvider {
 					default:
 				}
 			} else if (obj instanceof IResource) {
-				return getErrorTicksFromMarkers((IResource) obj, IResource.DEPTH_INFINITE, null);
+				IResource resource= (IResource) obj;
+				if (resource.exists()) {
+					return getErrorTicksFromMarkers(resource, IResource.DEPTH_INFINITE, null);
+				}
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
