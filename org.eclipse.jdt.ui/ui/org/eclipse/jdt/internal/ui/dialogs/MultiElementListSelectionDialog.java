@@ -208,7 +208,11 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	
 	private void turnPage(boolean toNextPage) {
 		setResult(fCurrentPage, Arrays.asList(getSelectedElements()));
-		setInitialSelection(fCurrentPage, getFilter());
+		String filter= getFilter();
+		if (filter == null)
+			filter= ""; //$NON-NLS-1$
+		setInitialSelection(fCurrentPage, filter);
+			
 		fSelectedIndices[fCurrentPage]= getSelectionIndices();
 		
 		if (toNextPage) {
