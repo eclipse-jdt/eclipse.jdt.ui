@@ -16,6 +16,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
 public abstract class OpenEditorTest extends TextPerformanceTestCase {
@@ -31,9 +32,9 @@ public abstract class OpenEditorTest extends TextPerformanceTestCase {
 	protected void measureOpenInEditor(IFile[] files, PerformanceMeter performanceMeter) throws PartInitException {
 		for (int i= 0, n= files.length; i < n; i++) {
 			performanceMeter.start();
-			EditorTestHelper.openInEditor(files[i], true);
+			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(files[i], true);
 			performanceMeter.stop();
-			EditorTestHelper.runEventQueue(2000);
+			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editor), 100, 10000, 100);
 		}
 		performanceMeter.commit();
 		assertPerformance(performanceMeter);
