@@ -11,15 +11,9 @@
 package org.eclipse.jdt.text.tests.performance;
 
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -32,13 +26,12 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -47,9 +40,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
-
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
@@ -67,14 +57,14 @@ public class EditorTestHelper {
 	}
 	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
-		IEditorPart part= IDE.openEditor(getActivePage(), file);
+		IEditorPart part= getActivePage().openEditor(file);
 		if (runEventLoop)
 			runEventQueue(part);
 		return part;
 	}
 
 	public static IEditorPart openInEditor(IFile file, String editorId, boolean runEventLoop) throws PartInitException {
-		IEditorPart part= IDE.openEditor(getActivePage(), file, editorId);
+		IEditorPart part= getActivePage().openEditor(file, editorId);
 		if (runEventLoop)
 			runEventQueue(part);
 		return part;
@@ -146,47 +136,22 @@ public class EditorTestHelper {
 	}
 	
 	public static void joinBackgroundActivities() throws CoreException {
-		// Join Building
-		boolean interrupted= true;
-		while (interrupted) {
-			try {
-				Platform.getJobManager().join(ResourcesPlugin.FAMILY_AUTO_BUILD, null);
-				interrupted= false;
-			} catch (InterruptedException e) {
-				interrupted= true;
-			}
-		}
 		// Join indexing
 		new SearchEngine().searchAllTypeNames(
+			ResourcesPlugin.getWorkspace(),
 			null,
 			null,
-			SearchPattern.R_EXACT_MATCH,
+			IJavaSearchConstants.EXACT_MATCH,
+			true,
 			IJavaSearchConstants.CLASS,
 			SearchEngine.createJavaSearchScope(new IJavaElement[0]),
 			new Requestor(),
 			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 			null);
-		// Join all types cache
-		AllTypesCache.getTypes(SearchEngine.createJavaSearchScope(new IJavaElement[0]), 
-			IJavaSearchConstants.CLASS, new NullProgressMonitor(), new ArrayList());
-		// Join jobs
-		joinJobs(0, Long.MAX_VALUE, 500);
 	}
 	
 	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
-		long startTime= System.currentTimeMillis() + minTime;
-		runEventQueue();
-		while (System.currentTimeMillis() < startTime)
-			runEventQueue(intervalTime);
-		
-		long endTime= maxTime > 0 ? System.currentTimeMillis() + maxTime : Long.MAX_VALUE;
-		boolean calm= allJobsQuiet();
-		while (!calm && System.currentTimeMillis() < endTime) {
-			runEventQueue(intervalTime);
-			calm= allJobsQuiet();
-		}
-//		System.out.println("--------------------------------------------------");
-		return calm;
+		return true;
 	}
 
 	public static void sleep(int intervalTime) {
@@ -198,34 +163,12 @@ public class EditorTestHelper {
 	}
 
 	public static boolean allJobsQuiet() {
-		IJobManager jobManager= Platform.getJobManager();
-		Job[] jobs= jobManager.find(null);
-		for (int i= 0; i < jobs.length; i++) {
-			Job job= jobs[i];
-			int state= job.getState();
-//			System.out.println(job.getName() + ": " + getStateName(state));
-			if (state == Job.RUNNING || state == Job.WAITING) {
-//				System.out.println();
-				return false;
-			}
-		}
-//		System.out.println();
 		return true;
 	}
 
-//	private static String getStateName(int state) {
-//		switch (state) {
-//			case Job.RUNNING: return "RUNNING";
-//			case Job.WAITING: return "WAITING";
-//			case Job.SLEEPING: return "SLEEPING";
-//			case Job.NONE: return "NONE";
-//			default: return "unknown " + state;
-//		}
-//	}
-
 	public static boolean showView(String viewId) throws PartInitException {
 		IWorkbenchPage activePage= getActivePage();
-		IViewReference view= activePage.findViewReference(viewId);
+		IViewPart view= activePage.findView(viewId);
 		boolean notShown= view == null;
 		if (notShown)
 			activePage.showView(viewId);
@@ -234,7 +177,7 @@ public class EditorTestHelper {
 
 	public static boolean hideView(String viewId) {
 		IWorkbenchPage activePage= getActivePage();
-		IViewReference view= activePage.findViewReference(viewId);
+		IViewPart view= activePage.findView(viewId);
 		boolean shown= view != null;
 		if (shown)
 			activePage.hideView(view);

@@ -26,7 +26,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -42,10 +41,8 @@ public class PerformanceTestSetup extends TestSetup {
 
 	public static final String PROJECT= "org.eclipse.swt";
 	
-	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
+	private static final String PROJECT_ZIP= "testResources/org.eclipse.swt-R3_0.zip";
 
-	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
-	
 	public PerformanceTestSetup(Test test) {
 		super(test);
 	}
@@ -57,10 +54,6 @@ public class PerformanceTestSetup extends TestSetup {
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
 		IWorkbenchPage activePage= activeWindow.getActivePage();
-		
-		IViewReference viewReference= activePage.findViewReference(INTRO_VIEW);
-		if (viewReference != null)
-			activePage.hideView(viewReference);
 		
 		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		

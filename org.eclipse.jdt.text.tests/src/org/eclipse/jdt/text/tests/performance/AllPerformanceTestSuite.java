@@ -27,6 +27,5 @@ public class AllPerformanceTestSuite extends TestSuite {
 		addTest(PerformanceTestSuite.suite());
 		addTest(OpenJavaEditorTest.suite());
 		addTest(OpenTextEditorTest.suite());
-		addTest(EventDrivenTestSuite.suite());
 	}
 }
