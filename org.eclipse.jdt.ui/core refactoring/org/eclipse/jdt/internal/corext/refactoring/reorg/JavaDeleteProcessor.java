@@ -74,7 +74,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 
 	private Change fDeleteChange;
 	
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
 	
 	public JavaDeleteProcessor(Object[] elements) {
 		fElements= elements;

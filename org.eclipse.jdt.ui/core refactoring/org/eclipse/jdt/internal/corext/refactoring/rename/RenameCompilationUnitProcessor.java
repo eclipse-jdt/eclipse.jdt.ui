@@ -50,7 +50,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
 	
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor --------------------------------
 	

@@ -42,7 +42,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 
 	private IPackageFragmentRoot fSourceFolder;
 	
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 	

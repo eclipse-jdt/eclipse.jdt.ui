@@ -50,7 +50,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 	private IMovePolicy fMovePolicy;
 	private boolean fWasCanceled;
 
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
 	public static boolean isAvailable(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		if (javaElements != null) {

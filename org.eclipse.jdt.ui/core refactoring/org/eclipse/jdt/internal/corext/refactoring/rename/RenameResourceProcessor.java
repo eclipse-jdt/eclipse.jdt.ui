@@ -43,7 +43,7 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 	private IResource fResource;
 	private String fNewElementName;
 		
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 	
 	public RenameResourceProcessor(IResource resource) {
 		fResource= resource;

@@ -65,7 +65,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private ICompilationUnit[] fNewWorkingCopies;
 	private WorkingCopyOwner fWorkingCopyOwner;
 	
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
 	public RenameMethodProcessor(IMethod method) {
 		initialize(method);

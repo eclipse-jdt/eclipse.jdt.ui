@@ -105,7 +105,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 	
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
 	

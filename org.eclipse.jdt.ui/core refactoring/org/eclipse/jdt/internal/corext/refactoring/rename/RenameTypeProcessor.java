@@ -94,7 +94,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
 	
 	public RenameTypeProcessor(IType type) {
 		fType= type;

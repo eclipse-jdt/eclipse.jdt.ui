@@ -72,7 +72,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 
-	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 	
 	public RenameFieldProcessor(IField field) {
 		fField= field;
