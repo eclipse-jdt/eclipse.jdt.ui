@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.Manifest;
+import java.util.zip.ZipException;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -57,15 +58,16 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.ui.jarpackager.JarWriter;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
@@ -93,6 +95,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	private IContainer fClassFilesMapContainer;
 	private Set fExportedClassContainers;
 	private MessageMultiStatus fStatus;
+	private StandardJavaElementContentProvider fJavaElementContentProvider;
 	
 	/**
 	 * Creates an instance of this class.
@@ -120,6 +123,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	private JarFileExportOperation(Shell parent) {
 		fParentShell= parent;
 		fStatus= new MessageMultiStatus(JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+		fJavaElementContentProvider= new StandardJavaElementContentProvider();
 	}
 
 	protected void addToStatus(CoreException ex) {
@@ -223,6 +227,11 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		if (element instanceof IJavaElement) {
 			isInJavaProject= true;
 			IJavaElement je= (IJavaElement)element;
+			int type= je.getElementType();
+			if (type != IJavaElement.CLASS_FILE && type != IJavaElement.COMPILATION_UNIT) {
+				exportJavaElement(progressMonitor, je);
+				return;
+			}
 			try {
 				resource= je.getUnderlyingResource();
 			} catch (JavaModelException ex) {
@@ -273,7 +282,13 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			
 			if (pkgRoot != null) {
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
-				if (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH))
+				boolean isOnBuildPath;
+				try {
+					isOnBuildPath= jProject.isOnClasspath(resource);
+				} catch (JavaModelException ex) {
+					isOnBuildPath= false;
+				}
+				if (!isOnBuildPath || (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH)))
 					leadSegmentsToRemove--;
 			}
 			
@@ -294,25 +309,17 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
 
-		} else if (element instanceof IPackageFragment)
-			exportPackageFragment(progressMonitor, (IPackageFragment)element);
-		else
+		} else
 			exportContainer(progressMonitor, (IContainer)resource);
 	}
 
-	private void exportPackageFragment(IProgressMonitor progressMonitor, IPackageFragment pkgFragment) throws java.lang.InterruptedException {
-		Object[] children;
-		try {
-			children= pkgFragment.getChildren();
-			for (int i= 0; i < children.length; i++)
-				exportElement(children[i], progressMonitor);
-			children= pkgFragment.getNonJavaResources();
-			for (int i= 0; i < children.length; i++)
-				exportElement(children[i], progressMonitor);
-		} catch (CoreException e) {
-			// this should never happen because an #isAccessible check is done before #members is invoked
-			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", pkgFragment.toString()), e); //$NON-NLS-1$
-		}
+	private void exportJavaElement(IProgressMonitor progressMonitor, IJavaElement je) throws java.lang.InterruptedException {
+		if (je.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT && ((IPackageFragmentRoot)je).isArchive())
+			return;
+
+		Object[] children= fJavaElementContentProvider.getChildren(je);
+		for (int i= 0; i < children.length; i++)
+			exportElement(children[i], progressMonitor);
 	}
 
 	private void exportContainer(IProgressMonitor progressMonitor, IContainer container) throws java.lang.InterruptedException {
@@ -364,7 +371,11 @@ public class JarFileExportOperation implements IJarExportRunnable {
 				progressMonitor.subTask(JarPackagerMessages.getFormattedString("JarFileExportOperation.exporting", destinationPath.toString())); //$NON-NLS-1$
 				fJarWriter.write((IFile) resource, destinationPath);
 			} catch (CoreException ex) {
-				addToStatus(ex);
+				Throwable realEx= ex.getStatus().getException();
+				if (realEx instanceof ZipException && realEx.getMessage() != null && realEx.getMessage().startsWith("duplicate entry:")) //$NON-NLS-1$
+					addWarning(ex.getMessage(), realEx);
+				else
+					addToStatus(ex);
 			}
 		}					
 	}
@@ -382,6 +393,9 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	private void exportClassFiles(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, IResource resource, IJavaProject jProject, IPath destinationPath) {
 		if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {
 			try {
+				if (!jProject.isOnClasspath(resource))
+					return;
+
 				// find corresponding file(s) on classpath and export
 				Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, pkgRoot, progressMonitor);
 				IPath baseDestinationPath= destinationPath.removeLastSegments(1);
