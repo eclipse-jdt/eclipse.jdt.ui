@@ -1,4 +1,4 @@
-package p;
+package p; 
 class A{
 
 	int[] m() throws java.lang.Exception, Throwable {
