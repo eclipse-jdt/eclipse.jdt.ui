@@ -7,7 +7,7 @@ import junit.textui.TestRunner;
 import org.eclipse.jdt.internal.ui.refactoring.nls.MultiStateCellEditor;
 
 public class CellEditorTester extends TestCase {
-
+
 	/**
 	 * Constructor for CellEditorTester
 	 */
