@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -35,12 +36,12 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	 * @see org.eclipse.jface.viewers.StructuredViewer#mapElement(java.lang.Object, org.eclipse.swt.widgets.Widget)
 	 */
 	public void mapElement(Object element, Widget item) {
-		if (element instanceof LogicalPackage) {
+		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
 			IPackageFragment[] fragments= cp.getFragments();
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
-				super.mapElement(fragment, item);
+				fResourceToItemsMapper.addToMap(fragment, (Item) item);
 			}
 		}
 		super.mapElement(element, item);		
@@ -50,12 +51,13 @@ public class PackagesViewTreeViewer extends ProblemTreeViewer implements IPackag
 	 * @see org.eclipse.jface.viewers.StructuredViewer#unmapElement(java.lang.Object, org.eclipse.swt.widgets.Widget)
 	 */
 	public void unmapElement(Object element, Widget item) {
-		if (element instanceof LogicalPackage) {
+
+		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
 			IPackageFragment[] fragments= cp.getFragments();
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
-				super.unmapElement(fragment, item);
+				fResourceToItemsMapper.removeFromMap((Object)fragment, (Item)item);
 			}	
 		}
 		super.unmapElement(element, item);

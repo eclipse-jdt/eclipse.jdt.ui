@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.ui.browsing;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.List;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
+import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jdt.core.IPackageFragment;
+
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Widget;
 	
 /**
  * Special problem table viewer to handle logical packages.
@@ -30,24 +31,24 @@ class PackagesViewTableViewer extends ProblemTableViewer implements IPackagesVie
 	}
 
 	public void mapElement(Object element, Widget item) {
-		if (element instanceof LogicalPackage) {
+		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
 			IPackageFragment[] fragments= cp.getFragments();
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
-				super.mapElement(fragment, item);
+				fResourceToItemsMapper.addToMap(fragment, (Item)item);
 			}
 		}
 		super.mapElement(element, item);		
 	}
 
 	public void unmapElement(Object element, Widget item) {
-		if (element instanceof LogicalPackage) {
+		if (element instanceof LogicalPackage && item instanceof Item) {
 			LogicalPackage cp= (LogicalPackage) element;
 			IPackageFragment[] fragments= cp.getFragments();
 			for (int i= 0; i < fragments.length; i++) {
 				IPackageFragment fragment= fragments[i];
-				super.unmapElement(fragment, item);
+				fResourceToItemsMapper.removeFromMap(fragment, (Item)item);
 			}	
 		}
 		super.unmapElement(element, item);
