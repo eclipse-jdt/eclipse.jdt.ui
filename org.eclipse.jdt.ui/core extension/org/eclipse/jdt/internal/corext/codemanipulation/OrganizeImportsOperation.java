@@ -466,8 +466,11 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 		
 		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound) throws JavaModelException {
-			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Strings.isLowerCase(simpleTypeName.charAt(0))) {
-				return;
+			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0) {
+				char ch= simpleTypeName.charAt(0);
+				if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
+					return;
+				}
 			}
 			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, null);
 			for (int i= 0; i < infos.length; i++) {
