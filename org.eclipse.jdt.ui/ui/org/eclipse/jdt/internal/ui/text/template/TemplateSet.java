@@ -316,16 +316,16 @@ public class TemplateSet {
 	/**
 	 * Returns templates matching a prefix.
 	 */
-	public Template[] getMatchingTemplates(String prefix, String partitionType) {
-		Assert.isNotNull(prefix);
-		Assert.isNotNull(partitionType);
+	public Template[] getMatchingTemplates(TemplateContext context) {
+		String prefix= context.getKey();
+		String type= context.getType();
 
 		List results= new ArrayList(fSortedTemplates.length);
 
 		for (int i= 0; i != fSortedTemplates.length; i++) {
 			Template template= fSortedTemplates[i];
 
-			if (template.matches(prefix, partitionType))
+			if (template.matches(prefix, type))
 				results.add(template);							
 		}
 

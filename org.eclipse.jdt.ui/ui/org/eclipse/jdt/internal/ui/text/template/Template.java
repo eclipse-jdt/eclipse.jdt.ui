@@ -30,10 +30,10 @@ public class Template {
 	 * @param pattern     the template pattern.
 	 */		
 	public Template(String name, String description, String context, String pattern) {
-		fName= new String(name);
-		fDescription= new String(description);
-		fContext= new String(context);
-		fPattern= new String(pattern);
+		fName= name;
+		fDescription= description;
+		fContext= context;
+		fPattern= pattern;
 	}
 	
 	public boolean equals(Object object) {

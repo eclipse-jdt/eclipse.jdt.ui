@@ -19,19 +19,17 @@ import org.eclipse.jdt.internal.core.Assert;
 
 public class TemplateEngine {
 
-	private static final char ARGUMENTS_BEGIN= '(';
-	private static final char ARGUMENTS_END= ')';
-	private static final char HTML_TAG_BEGIN= '<';
-	private static final char HTML_TAG_END= '>';
-	private static final char JAVADOC_TAG_BEGIN= '@';
-
-	private String fPartitionType;
+	private String fContextType;
 	
 	private ArrayList fProposals= new ArrayList();
 
-	public TemplateEngine(String partitionType) {
-		Assert.isNotNull(partitionType);
-		fPartitionType= new String(partitionType);
+	/**
+	 * Creates the template engine for a particular context type.
+	 * See <code>TemplateContext</code> for supported context types.
+	 */
+	public TemplateEngine(String contextType) {
+		Assert.isNotNull(contextType);
+		fContextType= new String(contextType);
 	}
 
 	/**
@@ -63,58 +61,14 @@ public class TemplateEngine {
 	{
 		Assert.isNotNull(viewer);
 
-		IDocument document= viewer.getDocument();
-		String source= document.get();
-
-		// template key
-		int end = completionPosition;
-		int start= guessStart(source, end, fPartitionType);				
-		String key= source.substring(start, end);
-
-		TemplateContext context= new TemplateContext(viewer, start, end, sourceUnit);
-
-		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(key, fPartitionType);
+		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
+		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(context);
 
 		for (int i= 0; i != templates.length; i++) {
 			TemplateProposal proposal= new TemplateProposal(templates[i], context);
 			fProposals.add(proposal);
 		}
 	}
-
-	private static final int guessStart(String source, int end, String partitionType) {
-		int start= end;
-
-		if (partitionType.equals(TemplateContext.JAVA)) {				
-			while ((start != 0) && Character.isUnicodeIdentifierPart(source.charAt(start - 1)))
-				start--;
-			
-			if ((start != 0) && Character.isUnicodeIdentifierStart(source.charAt(start - 1)))
-				start--;
-				
-		} else if (partitionType.equals(TemplateContext.JAVADOC)) {
-
-			// javadoc tag
-			if ((start != 0) && (source.charAt(start - 1) == HTML_TAG_END))
-				start--;
-
-			while ((start != 0) && Character.isUnicodeIdentifierPart(source.charAt(start - 1)))
-				start--;
-			
-			if ((start != 0) && Character.isUnicodeIdentifierStart(source.charAt(start - 1)))
-				start--;
-
-			// include html and javadoc tags
-			if ((start != 0) &&
-				(source.charAt(start - 1) == HTML_TAG_BEGIN) ||
-				(source.charAt(start - 1) == JAVADOC_TAG_BEGIN))				
-			{
-				start--;
-			}
-				
-		}
-
-		return start;		
-	}	
 
 }
 
