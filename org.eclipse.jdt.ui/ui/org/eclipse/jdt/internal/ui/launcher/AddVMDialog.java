@@ -217,20 +217,20 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected void setSystemLibraryFields(LibraryLocation description) {
-		fSystemLibrary.setText(description.getSystemLibrary().getAbsolutePath());
-		fSystemLibrarySource.setText(description.getSystemLibrarySource().getAbsolutePath());
+		fSystemLibrary.setText(description.getSystemLibrary().getPath());
+		fSystemLibrarySource.setText(description.getSystemLibrarySource().getPath());
 	}
 	
 	protected void setSystemLibraryDefaults(LibraryLocation description) {
 		File systemLibrary= description.getSystemLibrary();
 		if (systemLibrary.isFile())
-			fSystemLibrary.setText(systemLibrary.getAbsolutePath());
+			fSystemLibrary.setText(systemLibrary.getPath());
 		else 
 			fSystemLibrary.setText("");
 			
 		File librarySource= description.getSystemLibrarySource();
 		if (librarySource.isFile())
-			fSystemLibrarySource.setText(librarySource.getAbsolutePath());
+			fSystemLibrarySource.setText(librarySource.getPath());
 		else 
 			fSystemLibrarySource.setText("");
 	}
@@ -441,12 +441,12 @@ public class AddVMDialog extends StatusDialog {
 	}
 
 	protected void setFieldValuesToVM(IVMInstall vm) {
-		vm.setInstallLocation(new File(fJDKRoot.getText()));
+		vm.setInstallLocation(new File(fJDKRoot.getText()).getAbsoluteFile());
 		vm.setName(fVMName.getText());
 		vm.setDebuggerTimeout(getTimeout());
 		if (isCustomLibraryUsed()) {
-			File systemLibrary= new File(fSystemLibrary.getText());
-			File source= new File(fSystemLibrarySource.getText());
+			File systemLibrary= getAbsoluteFileOrEmpty(fSystemLibrary.getText());
+			File source= getAbsoluteFileOrEmpty(fSystemLibrarySource.getText());
 			String pathString= determinePackagePrefix(source);
 			if (pathString == null)
 				pathString= "";
@@ -455,5 +455,11 @@ public class AddVMDialog extends StatusDialog {
 		} else {
 			vm.setLibraryLocation(null);
 		}
+	}
+	
+	protected File getAbsoluteFileOrEmpty(String path) {
+		if (path == null || "".equals(path))
+			return new File("");
+		return new File(path).getAbsoluteFile();
 	}
 }
