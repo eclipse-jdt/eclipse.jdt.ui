@@ -14,6 +14,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * A LayoutEngine tuned to editing java code.
+ * TBD: This class is no longer used and should be removed!
  */
 public class JavaDebugLayout implements IPerspectiveFactory {
 	
@@ -28,17 +29,17 @@ public class JavaDebugLayout implements IPerspectiveFactory {
 		
  		String editorArea = layout.getEditorArea();
 		
-		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea);
+		IFolderLayout folder= layout.createFolder("left", IPageLayout.LEFT, (float)0.25, editorArea); //$NON-NLS-1$
 		folder.addView(IDebugUIConstants.ID_DEBUG_VIEW);
 		folder.addView(IDebugUIConstants.ID_PROCESS_VIEW);
 		folder.addView(JavaUI.ID_PACKAGES);
 
 		
-		folder= layout.createFolder("right", IPageLayout.RIGHT, (float)0.70, editorArea);
+		folder= layout.createFolder("right", IPageLayout.RIGHT, (float)0.70, editorArea); //$NON-NLS-1$
 		folder.addView(IDebugUIConstants.ID_BREAKPOINT_VIEW);
 		folder.addView(IPageLayout.ID_OUTLINE);
 
-		folder= layout.createFolder("right bottom", IPageLayout.BOTTOM, (float)0.5, "right");
+		folder= layout.createFolder("right bottom", IPageLayout.BOTTOM, (float)0.5, "right"); //$NON-NLS-2$ //$NON-NLS-1$
 		folder.addView(IDebugUIConstants.ID_INSPECTOR_VIEW);
 		folder.addView(IDebugUIConstants.ID_VARIABLE_VIEW);
 

@@ -11,17 +11,17 @@ package org.eclipse.jdt.internal.ui;
 public interface IPreferencesConstants {
 	
 	// keys 
-	static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor";
-	static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects";
-	static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy";
-	static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective";
-	static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart";
-	static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo";
+	static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
+	static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
+	static final String OPEN_TYPE_HIERARCHY= "org.eclipse.jdt.ui.openTypeHierarchy"; //$NON-NLS-1$
+	static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
+	static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
+	static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
 	
-	static final String ATTACH_LAUNCH_PORT= "org.eclipse.jdt.ui.attachlaunch.port";
-	static final String ATTACH_LAUNCH_HOST= "org.eclipse.jdt.ui.attachlaunch.host";
-	static final String ATTACH_LAUNCH_ALLOW_TERMINATE= "org.eclipse.jdt.ui.attachlaunch.allowTerminate";
+	static final String ATTACH_LAUNCH_PORT= "org.eclipse.jdt.ui.attachlaunch.port"; //$NON-NLS-1$
+	static final String ATTACH_LAUNCH_HOST= "org.eclipse.jdt.ui.attachlaunch.host"; //$NON-NLS-1$
+	static final String ATTACH_LAUNCH_ALLOW_TERMINATE= "org.eclipse.jdt.ui.attachlaunch.allowTerminate"; //$NON-NLS-1$
 	
-	static final String EDITOR_SHOW_HOVER= "org.eclipse.jdt.ui.editor.showHover";
-	static final String EDITOR_SHOW_SEGMENTS= "org.eclipse.jdt.ui.editor.showSegments";
+	static final String EDITOR_SHOW_HOVER= "org.eclipse.jdt.ui.editor.showHover"; //$NON-NLS-1$
+	static final String EDITOR_SHOW_SEGMENTS= "org.eclipse.jdt.ui.editor.showSegments"; //$NON-NLS-1$
 }

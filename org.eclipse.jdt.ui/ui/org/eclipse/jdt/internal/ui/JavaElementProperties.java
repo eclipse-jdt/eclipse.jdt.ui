@@ -24,7 +24,7 @@ public class JavaElementProperties implements IPropertySource {
 		PropertyDescriptor descriptor;
 
 		// resource name
-		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, "Name");
+		descriptor= new PropertyDescriptor(IBasicPropertyConstants.P_TEXT, JavaUIMessages.getString("JavaElementProperties.name")); //$NON-NLS-1$
 		descriptor.setAlwaysIncompatible(true);
 		fgPropertyDescriptors[0]= descriptor;
 	}
