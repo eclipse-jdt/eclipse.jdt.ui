@@ -37,7 +37,7 @@ public class EmptyInnerPackageFilter extends AbstractFilter {
 				return false;
 			}
 		}
-		// XXX: revisit, temporary fix to filter package declaration
+
 		if (element instanceof IPackageDeclaration)
 			return false;
 		return true;
