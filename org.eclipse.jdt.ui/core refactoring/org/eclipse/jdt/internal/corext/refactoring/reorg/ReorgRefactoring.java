@@ -385,7 +385,24 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * list <code>elements</code>.
 	 */
 	static boolean destinationIsParent(List elements, IJavaElement dest) throws JavaModelException{
-		return destinationIsParent(elements, dest.getCorrespondingResource());
+		if (dest.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT){
+			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+				Object element= (Object) iter.next();
+				if (!(element instanceof IPackageFragment))
+					return destinationIsParent(elements, dest.getCorrespondingResource());
+				IPackageFragment pack= (IPackageFragment) element;	
+				if (pack.getParent().equals(dest))
+					return true;
+			}
+			return false;
+		} else if (dest.getElementType() == IJavaElement.JAVA_PROJECT) {
+				IPackageFragmentRoot root= getPackageFragmentRoot((IJavaProject)dest);
+				if (root == null)
+					return destinationIsParent(elements, dest.getCorrespondingResource());
+				else
+					return destinationIsParent(elements, root);	
+		} else 
+			return destinationIsParent(elements, dest.getCorrespondingResource());
 	}
 	
 	/**
@@ -395,7 +412,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	private static boolean destinationIsParent(List elements, IResource parent) {
 		if (parent == null)
 			return false;
-			
+		
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IResource resource= convertToResource(iter.next());
 			if (resource == null)
