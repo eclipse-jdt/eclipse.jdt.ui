@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
@@ -58,8 +57,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 	private RetargetAction fRetargetShowJavaDoc;
 	private RetargetTextEditorAction fShowJavaDoc;
 	
-	private RetargetTextEditorAction fToggleInsertModeAction;
-	
 	private RetargetTextEditorAction fStructureSelectEnclosingAction;
 	private RetargetTextEditorAction fStructureSelectNextAction;
 	private RetargetTextEditorAction fStructureSelectPreviousAction;
@@ -91,9 +88,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		fShowJavaDoc= new RetargetTextEditorAction(b, "ShowJavaDoc."); //$NON-NLS-1$
 		fShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
-		
-		fToggleInsertModeAction= new RetargetTextEditorAction(b, "ToggleInsertMode.", IAction.AS_CHECK_BOX); //$NON-NLS-1$
-		fToggleInsertModeAction.setActionDefinitionId(ITextEditorActionDefinitionIds.TOGGLE_INSERT_MODE);
 		
 		fShowOutline= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ShowOutline."); //$NON-NLS-1$
 		fShowOutline.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
@@ -167,8 +161,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fToggleInsertModeAction);
-			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
@@ -212,8 +204,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
 		fOpenHierarchy.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY));
 		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
-
-		fToggleInsertModeAction.setAction(getAction(textEditor, ITextEditorActionConstants.TOGGLE_INSERT_MODE));
 		
 		fStructureSelectEnclosingAction.setAction(getAction(textEditor, StructureSelectionAction.ENCLOSING));
 		fStructureSelectNextAction.setAction(getAction(textEditor, StructureSelectionAction.NEXT));
