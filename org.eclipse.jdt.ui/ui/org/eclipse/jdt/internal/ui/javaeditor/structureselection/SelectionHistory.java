@@ -3,9 +3,6 @@ package org.eclipse.jdt.internal.ui.javaeditor.structureselection;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.text.DocumentEvent;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
