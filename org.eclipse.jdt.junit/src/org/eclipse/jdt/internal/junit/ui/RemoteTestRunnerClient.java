@@ -211,6 +211,8 @@ public class RemoteTestRunnerClient {
 
 		String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
 		if (message.startsWith(MessageIds.TEST_RUN_START)) {
+			// version < 2 format: count
+			// version >= 2 format: count+" "+version
 			int count= 0;
 			int v= arg.indexOf(' ');
 			if (v == -1) {

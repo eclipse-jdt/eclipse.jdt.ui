@@ -13,8 +13,11 @@ import org.eclipse.jdt.internal.junit.util.*;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
@@ -23,9 +26,11 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 /**
  * The wizard base class for JUnit creation wizards.
  */
-public abstract class JUnitWizard extends BasicNewResourceWizard {
+public abstract class JUnitWizard extends Wizard {
 
+	private IWorkbench fWorkbench;
 	protected static String DIALOG_SETTINGS_KEY= "JUnitWizards"; //$NON-NLS-1$
+	private IStructuredSelection fSelection;
 
 	public JUnitWizard() {
 		setNeedsProgressMonitor(true);
@@ -75,6 +80,22 @@ public abstract class JUnitWizard extends BasicNewResourceWizard {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IWorkbenchWizard#init(org.eclipse.ui.IWorkbench, org.eclipse.jface.viewers.IStructuredSelection)
+	 */
+	public void init(IWorkbench workbench, IStructuredSelection currentSelection) {
+		fWorkbench= workbench;
+		fSelection= currentSelection;
+	}
+	
+	public IStructuredSelection getSelection() {
+		return fSelection;
+	}
+
+	protected void selectAndReveal(IResource newResource) {
+		BasicNewResourceWizard.selectAndReveal(newResource, fWorkbench.getActiveWorkbenchWindow());
+	} 
+	
 	protected void initDialogSettings() {
 		IDialogSettings pluginSettings= JUnitPlugin.getDefault().getDialogSettings();
 		IDialogSettings wizardSettings= pluginSettings.getSection(DIALOG_SETTINGS_KEY);
@@ -84,5 +105,4 @@ public abstract class JUnitWizard extends BasicNewResourceWizard {
 		}
 		setDialogSettings(wizardSettings);
 	}
-
 }

@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 /**
  * A wizard for creating test cases.
