@@ -5,7 +5,7 @@ public class TR {
 		test.run(this);
 	}
 
-	private void startTest(TC test) {
+	void startTest(TC test) {
 	}
 
 }

@@ -5,13 +5,13 @@ public class TR {
 		test.run(this);
 	}
 
-	private void runProtected(TC test, P p) {
+	void runProtected(TC test, P p) {
 	}
 
-	private void endTest(TC test) {
+	void endTest(TC test) {
 	}
 
-	private void startTest(TC test) {
+	void startTest(TC test) {
 	}
 
 }
