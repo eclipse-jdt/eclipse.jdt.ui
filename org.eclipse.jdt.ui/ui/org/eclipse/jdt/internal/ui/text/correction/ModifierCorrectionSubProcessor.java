@@ -47,6 +47,9 @@ public class ModifierCorrectionSubProcessor {
 				break;
 			case ASTNode.SUPER_METHOD_INVOCATION:
 				binding= ((SuperMethodInvocation) selectedNode).getName().resolveBinding();
+				break;
+			case ASTNode.FIELD_ACCESS:
+				binding= ((FieldAccess) selectedNode).getName().resolveBinding();
 				break;								
 			case ASTNode.SUPER_FIELD_ACCESS:
 				binding= ((SuperFieldAccess) selectedNode).getName().resolveBinding();
