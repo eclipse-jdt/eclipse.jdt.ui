@@ -88,6 +88,9 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	 * @see IJavaSearchResultCollector#accept
 	 */
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
+		if (enclosingElement == null)
+			return;
+		
 		// ignore matches in import declarations
 		if (enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
 			return;
