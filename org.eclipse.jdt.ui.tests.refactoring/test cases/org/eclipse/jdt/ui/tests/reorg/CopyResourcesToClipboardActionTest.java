@@ -32,7 +32,8 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
-import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgActionFactory;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.PasteAction;
 
 public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 
@@ -112,15 +113,15 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elements), fClipboard);
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
+		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(elements), fClipboard);
+		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elements), fClipboard);
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
+		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(elements), fClipboard);
+		SelectionDispatchAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}
