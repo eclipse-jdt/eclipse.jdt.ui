@@ -14,13 +14,14 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.actions.*;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineConstantAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.InlineMethodAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 /**
  * Inlines a method, local variable or a static final field.
@@ -88,12 +89,12 @@ public class InlineAction extends SelectionDispatchAction {
 		if (cu == null)
 			return;
 
-		if (fInlineMethod.isEnabled() && tryInlineMethod(cu, selection))
-			return;
-		
 		if (fInlineTemp.isEnabled() && tryInlineTemp(cu, selection))
 			return;
 
+		if (fInlineMethod.isEnabled() && tryInlineMethod(cu, selection))
+			return;
+		
 		if (fInlineConstant.isEnabled() && tryInlineConstant(cu, selection))
 			return;
 	
