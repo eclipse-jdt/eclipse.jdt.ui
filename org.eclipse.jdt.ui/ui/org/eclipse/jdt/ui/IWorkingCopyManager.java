@@ -32,7 +32,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  * This interface is not intended to be implemented by clients.
  * </p>
  *
- * @see JavaUI#getWorkingCopyManager
+ * @see JavaUI#getWorkingCopyManager()
  */
 public interface IWorkingCopyManager {
 	
