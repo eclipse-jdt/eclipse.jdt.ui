@@ -488,7 +488,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		
 		switch (node.getNodeType()) {
 		case ASTNode.BLOCK:
-			return areBlocksConsistent(document, offset, fPartitioning);
+			return getBlockBalance(document, offset, fPartitioning) <= 0;
 
 		case ASTNode.IF_STATEMENT: 
 			{
@@ -1048,9 +1048,21 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return null;
 	}
 	
-	private static boolean areBlocksConsistent(IDocument document, int offset, String partitioning) {
-		if (offset < 1 || offset >= document.getLength())
-			return false;
+	/**
+	 * Returns the block balance, i.e. zero if the blocks are balanced at 
+	 * <code>offset</code>, a negative number if there are more closing than opening
+	 * braces, and a positive number if there are more opening than closing braces.
+	 * 
+	 * @param document
+	 * @param offset
+	 * @param partitioning
+	 * @return
+	 */
+	private static int getBlockBalance(IDocument document, int offset, String partitioning) {
+		if (offset < 1)
+			return -1;
+		if (offset >= document.getLength())
+			return 1;
 		
 		int begin= offset;
 		int end= offset - 1;
@@ -1061,9 +1073,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			begin= scanner.findOpeningPeer(begin - 1, '{', '}');
 			end= scanner.findClosingPeer(end + 1, '{', '}');
 			if (begin == -1 && end == -1)
-				return true;
-			if (begin == -1 || end == -1)
-				return false;
+				return 0;
+			if (begin == -1)
+				return -1;
+			if (end == -1)
+				return 1;
 		}		
 	}
 	
