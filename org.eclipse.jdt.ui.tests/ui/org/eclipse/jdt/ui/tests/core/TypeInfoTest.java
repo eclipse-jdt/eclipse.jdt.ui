@@ -117,7 +117,7 @@ public class TypeInfoTest extends TestCase {
 		findTypeRef(result, "java.util.Vector");
 		findTypeRef(result, "junit.samples.VectorTest");
 
-		assertTrue("Should find 9 elements, is " + result.size(), result.size() == 9);
+		
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			//System.out.println(ref.getTypeName());
@@ -126,6 +126,7 @@ public class TypeInfoTest extends TestCase {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
 			}
 		}
+		assertTrue("Should find 9 elements, is " + result.size(), result.size() == 9);
 
 
 	}

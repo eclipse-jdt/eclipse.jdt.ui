@@ -6,7 +6,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -110,10 +109,8 @@ public class RenameSourceFolderRefactoring	extends Refactoring implements IRenam
 		IJavaProject project= fSourceFolder.getJavaProject();
 		IPath p= project.getProject().getFullPath().append(newName);
 		if (project.findPackageFragmentRoot(p) != null)
-			return RefactoringStatus.createFatalErrorStatus("An element with this name already exists");
-		
-		if (project.getProject().findMember(new Path(newName)) != null)
-			return RefactoringStatus.createFatalErrorStatus("An element with this name already exists");
+			return RefactoringStatus.createFatalErrorStatus("The package or folder already exists");
+					
 		return result;		
 	}
 	
