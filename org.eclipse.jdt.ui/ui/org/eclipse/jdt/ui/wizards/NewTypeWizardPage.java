@@ -1155,7 +1155,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		monitor.worked(1);
 		
-		String clName= fTypeNameDialogField.getText();
+		String clName= getTypeName();
 		
 		boolean isInnerClass= isEnclosingTypeSelected();
 		
