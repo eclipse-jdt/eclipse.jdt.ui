@@ -62,7 +62,7 @@ public class SingleCommentLine extends CommentLine {
 
 		final CommentRegion parent= getParent();
 
-		parent.logEdit(getContentPrefix(), 0, range.getOffset() - parent.getOffset());
+		parent.logEdit(getContentPrefix(), 0, range.getOffset());
 	}
 
 	/**
