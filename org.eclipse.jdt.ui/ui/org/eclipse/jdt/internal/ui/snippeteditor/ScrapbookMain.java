@@ -1,10 +1,4 @@
-package org.eclipse.jdt.internal.ui.snippeteditor;import java.lang.reflect.InvocationTargetException;import java.lang.reflect.Method;import java.net.MalformedURLException;import java.net.URL;import java.net.URLClassLoader;
-
-/*
- * Licensed Materials - Property of IBM,
- * WebSphere Studio Workbench
- * (c) Copyright IBM Corp 1999, 2000
- */
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.snippeteditor;import java.lang.reflect.InvocationTargetException;import java.lang.reflect.Method;import java.net.MalformedURLException;import java.net.URL;import java.net.URLClassLoader;
  
 /**
  * Support class for launching a snippet evaluation
