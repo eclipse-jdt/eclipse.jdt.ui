@@ -68,7 +68,7 @@ public interface IJavaAnnotation {
 	
 	/**
 	 * Adds the given annotation to the list of
-	 * annotations which overlaid by this annotations.
+	 * annotations which are overlaid by this annotations.
 	 *  
 	 * @param annotation	the problem annoation
 	 */
