@@ -17,6 +17,8 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.test.performance.Dimension;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -26,6 +28,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -78,7 +81,10 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	public void testOpen() throws Exception {
 		tagAsGlobalSummary("Open Package Explorer", Dimension.CPU_TIME);
 		joinBackgroudActivities();
-		IWorkbenchPage page= PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		activeWorkbenchWindow.getActivePage().close();
+		activeWorkbenchWindow.openPage("org.eclipse.ui.resourcePerspective", ResourcesPlugin.getWorkspace().getRoot());
+		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		startMeasuring();
 		page.showView(JavaUI.ID_PACKAGES);
 		finishMeasurements();
