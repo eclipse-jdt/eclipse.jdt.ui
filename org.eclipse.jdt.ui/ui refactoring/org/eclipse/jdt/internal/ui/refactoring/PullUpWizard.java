@@ -29,14 +29,20 @@ public class PullUpWizard extends RefactoringWizard {
 			setPageTitle(); 
 			
 			//no input page if there are no methods
-			if (JavaElementUtil.getElementsOfType(getPullUpRefactoring().getElementsToPullUp(),  IJavaElement.METHOD).length != 0)
+			if (hasMethodsToPullUp())
 				addPage(new PullUpInputPage());
+			else
+				setChangeCreationCancelable(false);
 		} catch (JavaModelException e){
 			//log and try anyway
 			JavaPlugin.log(e);
 			addPage(new PullUpInputPage()); 
 		}		
 	}
+
+    private boolean hasMethodsToPullUp() throws JavaModelException {
+        return JavaElementUtil.getElementsOfType(getPullUpRefactoring().getElementsToPullUp(),  IJavaElement.METHOD).length != 0;
+    }
 
 	private void setPageTitle() throws JavaModelException {
 		IType initialSetting= getPullUpRefactoring().getDeclaringType();

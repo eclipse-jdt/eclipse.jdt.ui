@@ -40,6 +40,7 @@ public class RefactoringWizard extends Wizard {
 	private RefactoringStatus fStatus;
 	private boolean fHasUserInputPages;
 	private boolean fExpandFirstNode;
+	private boolean fIsChangeCreationCancelable;
 	
 	private String fErrorPageContextHelpId;
 	
@@ -50,11 +51,16 @@ public class RefactoringWizard extends Wizard {
 		fRefactoring= ref;
 		fPageTitle= pageTitle;
 		fErrorPageContextHelpId= errorPageContextHelpId;
+		fIsChangeCreationCancelable= true;
 		
 		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	}
 
+	protected void setChangeCreationCancelable(boolean isChangeCreationCancelable){
+		fIsChangeCreationCancelable= isChangeCreationCancelable;
+	}
+	
 	//---- Hooks to overide ---------------------------------------------------------------
 
 	/**
@@ -288,7 +294,7 @@ public class RefactoringWizard extends Wizard {
 
 		InvocationTargetException exception= null;
 		try {
-			context.run(true, true, op);
+			context.run(true, fIsChangeCreationCancelable, op);
 		} catch (InterruptedException e) {
 			setStatus(null);
 			return null;
