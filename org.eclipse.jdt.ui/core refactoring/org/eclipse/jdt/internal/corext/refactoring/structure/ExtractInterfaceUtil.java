@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -216,6 +217,8 @@ class ExtractInterfaceUtil {
 		Set cus= new HashSet();
 		Map cuToImportType= new HashMap();
 		for (int i= 0; i < ranges.length; i++) {
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			CompilationUnitRange range= ranges[i];
 			ICompilationUnit cu= range.getCompilationUnit();
 			if (updateInputTypeCu || ! cu.equals(typeWorkingCopy)){

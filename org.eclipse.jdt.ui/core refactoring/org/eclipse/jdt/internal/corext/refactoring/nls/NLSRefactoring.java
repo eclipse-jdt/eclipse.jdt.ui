@@ -22,12 +22,14 @@ import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
@@ -161,18 +163,24 @@ public class NLSRefactoring extends Refactoring {
 				return result;
 			}
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 
 			result.merge(checkSubstitutionPattern());
 			pm.worked(1);
 
 			result.merge(checkForDuplicateKeys());
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 
 			result.merge(checkForKeysAlreadyDefined());
 			pm.worked(1);
 
 			result.merge(checkKeys());
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 
 			if (!propertyFileExists() && willModifyPropertyFile()) {
 				String msg= NLSMessages.getFormattedString("NLSrefactoring.will_be_created", getPropertyFilePath().toString()); //$NON-NLS-1$

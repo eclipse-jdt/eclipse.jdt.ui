@@ -26,6 +26,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -435,14 +436,19 @@ public class ChangeTypeRefactoring extends Refactoring {
 										  " (" + fCv.getClass().getName() +  //$NON-NLS-1$
 										  ")");  //$NON-NLS-1$
 			
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			fRelevantVars= findRelevantConstraintVars(fCv, new SubProgressMonitor(pm, 50));
 			
 			if (DEBUG)
 				printCollection("relevant vars:", fRelevantVars); //$NON-NLS-1$
 	
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			fRelevantConstraints= findRelevantConstraints(fRelevantVars, new SubProgressMonitor(pm, 30));
 		
-			
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			fValidTypes.addAll(computeValidTypes(fOriginalTypeOfSelection, fRelevantVars, 
 												 fRelevantConstraints, new SubProgressMonitor(pm, 20)));
 	
@@ -489,6 +495,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 				addAllChangesFor(icu, cVars, cuChange);
 				result.add(cuChange);
 				pm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 			}
 			return result;
 		} finally {
@@ -1088,6 +1096,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 		for (int i= 0; i < referringCus.length; i++) {
 			result.addAll(getConstraints(referringCus[i]));
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		pm.done();
 		return result;

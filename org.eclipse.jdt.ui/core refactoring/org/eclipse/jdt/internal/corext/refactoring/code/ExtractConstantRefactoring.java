@@ -257,8 +257,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractConstantRefactoring.syntax_error")); //$NON-NLS-1$
 			pm.worked(1);
 	
-			initializeAST();
-			pm.worked(1);
+			initializeAST(new SubProgressMonitor(pm, 1));
 	
 			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
 			if ((! result.hasFatalError()) && isLiteralNodeSelected())
@@ -348,8 +347,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 		}
 	}
 
-	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+	private void initializeAST(IProgressMonitor pm) {
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, pm);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {

@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.core.resources.IFile;
 
@@ -216,7 +217,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		
-		CompilationUnit root= new RefactoringASTParser(AST.JLS2).parse(fCUnit, true);
+		CompilationUnit root= new RefactoringASTParser(AST.JLS2).parse(fCUnit, true, pm);
 		fAST= root.getAST();
 		root.accept(createVisitor());
 		
@@ -355,7 +356,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		RefactoringStatus result= checkMethodName();
 		result.merge(checkParameterNames());
 		pm.worked(1);
-		
+		if (pm.isCanceled())
+			throw new OperationCanceledException();
+
 		BodyDeclaration node= fAnalyzer.getEnclosingBodyDeclaration();
 		if (node != null) {
 			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject(), fAST);

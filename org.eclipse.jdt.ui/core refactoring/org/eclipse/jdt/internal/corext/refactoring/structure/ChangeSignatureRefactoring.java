@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -460,7 +461,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		try{
-			pm.beginTask("", 2); //$NON-NLS-1$
+			pm.beginTask("", 5); //$NON-NLS-1$
 			RefactoringStatus result= Checks.checkIfCuBroken(fMethod);
 			if (result.hasFatalError())
 				return result;
@@ -485,7 +486,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (result.hasFatalError())
 					return result;
 			}
-			fCU= new RefactoringASTParser(AST.JLS2).parse(getCu(), true);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+			
+			fCU= new RefactoringASTParser(AST.JLS2).parse(getCu(), true, new SubProgressMonitor(pm, 2));
 			result.merge(createExceptionInfoList());
 			
 			return result;
@@ -939,6 +943,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			pm.worked(1);
 		}
 		for (int i= 0; i < fOccurrences.length; i++) {
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			SearchResultGroup group= fOccurrences[i];
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu == null)

@@ -48,7 +48,6 @@ public class RefactoringSearchEngine {
 	}
 	
 	//TODO: throw CoreException
-	//TODO: reorder parameters: pattern, scope, monitor
 	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
 			IJavaSearchScope scope, final IProgressMonitor pm) throws JavaModelException {
 		

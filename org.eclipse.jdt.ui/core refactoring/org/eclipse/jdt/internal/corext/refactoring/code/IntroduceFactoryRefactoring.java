@@ -21,6 +21,7 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -906,6 +907,8 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					hitInCtorClass= true;
 
 				pm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 			}
 			if (!hitInFactoryClass) { // Handle factory class if no search hits there
 				CompilationUnitChange cuChange= new CompilationUnitChange(getName(), fFactoryUnitHandle);

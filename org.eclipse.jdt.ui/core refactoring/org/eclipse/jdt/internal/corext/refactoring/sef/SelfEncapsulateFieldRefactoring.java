@@ -24,6 +24,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -196,7 +197,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
 		
-		fRoot= new RefactoringASTParser(AST.JLS2).parse(fField.getCompilationUnit(), true);
+		fRoot= new RefactoringASTParser(AST.JLS2).parse(fField.getCompilationUnit(), true, pm);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -326,6 +327,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			if (!owner.equals(unit))
 				createEdits(unit, rewriter, descriptions);
 			sub.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		
 		TextBuffer buffer= TextBuffer.acquire(getFile(owner));

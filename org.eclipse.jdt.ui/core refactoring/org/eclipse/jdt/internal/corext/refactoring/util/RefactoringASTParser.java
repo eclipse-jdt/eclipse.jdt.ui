@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -31,14 +33,18 @@ public class RefactoringASTParser {
 	public static final String SOURCE_PROPERTY= "org.eclipse.jdt.ui.refactoring.ast_source"; //$NON-NLS-1$
 	
 	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings) {
+		return parse(unit, resolveBindings, null);
+	}
+	
+	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
 		fParser.setSource(unit);
 		fParser.setCompilerOptions(getCompilerOptions(unit));
-		CompilationUnit result= (CompilationUnit)fParser.createAST(null);
+		CompilationUnit result= (CompilationUnit)fParser.createAST(pm);
 		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
 	}
-	
+
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {
 		Object source= node.getRoot().getProperty(SOURCE_PROPERTY);
 		if (source instanceof ICompilationUnit)

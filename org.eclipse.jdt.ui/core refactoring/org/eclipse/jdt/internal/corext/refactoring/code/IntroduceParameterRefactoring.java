@@ -19,6 +19,7 @@ import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -369,6 +370,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			if (ast != fSource)
 				fChange.add(ast.createChange());
 			sub.worked(1);
+			if (sub.isCanceled())
+				throw new OperationCanceledException();
 		}
 		return new RefactoringStatus();
 	}

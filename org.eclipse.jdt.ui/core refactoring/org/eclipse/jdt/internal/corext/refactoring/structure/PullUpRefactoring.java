@@ -27,6 +27,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -711,6 +712,8 @@ public class PullUpRefactoring extends Refactoring {
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
 			result.merge(checkMembersInDestinationType());
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(pm, 1)));
 			if (shouldMakeTargetClassAbstract())
@@ -892,6 +895,8 @@ public class PullUpRefactoring extends Refactoring {
 				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		pm.done();
 		return result;
@@ -1241,6 +1246,8 @@ public class PullUpRefactoring extends Refactoring {
 					addMethodStubsToNonAbstractSubclassesOfTargetClass(subclasses, cuNode, declaringCuNode, rewrite, new SubProgressMonitor(subPm, 2));
 				}
 				addTextEditFromRewrite(manager, cu, rewrite);
+				if (subPm.isCanceled())
+					throw new OperationCanceledException();
 			}
 			subPm.done();
 			return manager;

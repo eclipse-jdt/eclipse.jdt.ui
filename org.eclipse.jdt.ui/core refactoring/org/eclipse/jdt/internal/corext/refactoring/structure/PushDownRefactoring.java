@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -774,7 +775,7 @@ public class PushDownRefactoring extends Refactoring {
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.preview"), 4); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.preview"), 8); //$NON-NLS-1$
 
 			addImportsToSubclasses(new SubProgressMonitor(pm, 1));
 
@@ -788,6 +789,8 @@ public class PushDownRefactoring extends Refactoring {
 			ICompilationUnit declaringCu= getDeclaringCU();
 			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.JLS2).parse(declaringCu, true);
 			ICompilationUnit[] cus= getCusToProcess(new SubProgressMonitor(pm, 1));
+			IProgressMonitor subPm= new SubProgressMonitor(pm, 4);
+			subPm.beginTask("", cus.length); //$NON-NLS-1$
 			for (int i= 0; i < cus.length; i++) {
 				ICompilationUnit cu= cus[i];
 				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: new RefactoringASTParser(AST.JLS2).parse(cu, true);
@@ -803,6 +806,9 @@ public class PushDownRefactoring extends Refactoring {
 				copyMembers(abstractMembersToCopyToSubclasses, destinationsForAbstract, declaringCuNode, cu, cuNode, rewrite);
 				copyMembers(nonAbstractMembersToCopyToSubclasses, destinationsForNonAbstract, declaringCuNode, cu, cuNode, rewrite);
 				addTextEditFromRewrite(manager, cu, rewrite);
+				subPm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 			}
 			return manager;
 		} finally{

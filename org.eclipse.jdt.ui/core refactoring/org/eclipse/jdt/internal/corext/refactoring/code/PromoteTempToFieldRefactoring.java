@@ -249,7 +249,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 
-		initAST();
+		initAST(pm);
 
 		if (fTempDeclarationNode == null)
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.select_declaration")); //$NON-NLS-1$
@@ -367,8 +367,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	return (fTempDeclarationNode.getParent() instanceof MethodDeclaration);
     }
     
-	private void initAST(){
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+	private void initAST(IProgressMonitor pm){
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, pm);
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 

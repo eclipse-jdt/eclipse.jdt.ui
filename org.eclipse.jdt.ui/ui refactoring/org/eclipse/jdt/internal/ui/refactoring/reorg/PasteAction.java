@@ -579,7 +579,7 @@ public class PasteAction extends SelectionDispatchAction{
 			public Change createChange(IProgressMonitor pm) throws CoreException {
 				ASTParser p= ASTParser.newParser(AST.JLS2);
 				p.setSource(getDestinationCu());
-				CompilationUnit cuNode= (CompilationUnit) p.createAST(null);
+				CompilationUnit cuNode= (CompilationUnit) p.createAST(pm);
 				OldASTRewrite rewrite= new OldASTRewrite(cuNode);
 				for (int i= 0; i < fSources.length; i++) {
 					pasteSource(fSources[i], rewrite, cuNode);

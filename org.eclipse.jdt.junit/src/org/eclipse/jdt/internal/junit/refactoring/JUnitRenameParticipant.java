@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationType;
@@ -47,7 +48,8 @@ public abstract class JUnitRenameParticipant extends RenameParticipant {
 			ILaunchConfigurationType type= manager.getLaunchConfigurationType(typeId);
 			ILaunchConfiguration configs[]= manager.getLaunchConfigurations(type);
 			createChangeForConfigs(changes, configs);
-			
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
 		if (changes.size() > 0)
 			return new CompositeChange(getChangeName(), (Change[]) changes.toArray(new Change[changes.size()])); //$NON-NLS-1$

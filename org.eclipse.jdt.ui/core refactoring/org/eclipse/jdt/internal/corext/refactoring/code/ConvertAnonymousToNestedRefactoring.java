@@ -177,7 +177,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		if (result.hasFatalError())
 		    return result;
 
-		initAST();
+		initAST(pm);
 
 		if (fAnonymousInnerClassNode == null)
 		    return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.place_caret")); //$NON-NLS-1$
@@ -196,8 +196,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         fDeclareStatic = mustInnerClassBeStatic();
     }
 
-    private void initAST() {
-    	fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+    private void initAST(IProgressMonitor pm) {
+    	fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, pm);
         fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
         if (fAnonymousInnerClassNode != null) {
             TypeDeclaration[] nestedtypes= getTypeDeclaration().getTypes();

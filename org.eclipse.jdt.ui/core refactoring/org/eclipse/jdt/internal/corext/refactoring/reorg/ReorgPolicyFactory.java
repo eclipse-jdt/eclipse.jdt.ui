@@ -979,10 +979,14 @@ class ReorgPolicyFactory {
 				composite.add(createChange(cus[i], nameProposer, copyQueries));
 				pm.worked(1);
 			}
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			for (int i= 0; i < file.length; i++) {
 				composite.add(createChange(file[i], nameProposer, copyQueries));
 				pm.worked(1);
 			}
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			for (int i= 0; i < folders.length; i++) {
 				composite.add(createChange(folders[i], nameProposer, copyQueries));
 				pm.worked(1);
@@ -1402,6 +1406,8 @@ class ReorgPolicyFactory {
 			for (int i= 0; i < fragments.length; i++) {
 				result.add(createChange(fragments[i], root));
 				pm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
 			}
 			pm.done();
 			return result;
@@ -1619,10 +1625,14 @@ class ReorgPolicyFactory {
 				result.add(createChange(files[i]));
 				pm.worked(1);
 			}
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			for (int i= 0; i < folders.length; i++) {
 				result.add(createChange(folders[i]));
 				pm.worked(1);
 			}
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 			for (int i= 0; i < cus.length; i++) {
 				result.add(createChange(cus[i]));
 				pm.worked(1);
@@ -1677,6 +1687,8 @@ class ReorgPolicyFactory {
 				typesMonitor.beginTask("", types.length); //$NON-NLS-1$
 				for (int j= 0; j < types.length; j++) {
 					handleType(types[j], destination, new SubProgressMonitor(typesMonitor, 1));
+					if (typesMonitor.isCanceled())
+						throw new OperationCanceledException();
 				}
 				typesMonitor.done();
 			}

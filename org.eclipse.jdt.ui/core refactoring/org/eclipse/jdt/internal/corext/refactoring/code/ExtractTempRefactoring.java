@@ -258,9 +258,9 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (! fCu.isStructureKnown())		
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.syntax_error")); //$NON-NLS-1$
 		
-			initializeAST();
+			initializeAST(new SubProgressMonitor(pm, 3));
 		
-			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
+			result.merge(checkSelection(new SubProgressMonitor(pm, 3)));
 			if ((! result.hasFatalError()) && isLiteralNodeSelected())
 				fReplaceAllOccurrences= false;
 			return result;
@@ -357,8 +357,8 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 	}
 
-	private void initializeAST() {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
+	private void initializeAST(IProgressMonitor monitor) {
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS2).parse(fCu, true, monitor);
 	}
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
