@@ -71,7 +71,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
-		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
+		layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
 		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
 				
 		// new actions - Java project creation wizard
@@ -105,7 +105,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addView(JavaUI.ID_MEMBERS_VIEW, IPageLayout.BOTTOM, (float)0.50, JavaUI.ID_TYPES_VIEW);
 		
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
@@ -136,7 +136,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		
 
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
-		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
+		placeHolderBottom.addPlaceholder(IPageLayout.ID_PROBLEM_VIEW);
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
 		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
