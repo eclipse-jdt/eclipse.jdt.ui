@@ -6,17 +6,13 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Table;
 
-import org.eclipse.swt.widgets.Widget;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
@@ -24,10 +20,8 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IMemento;
@@ -51,20 +45,17 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ProblemItemMapper;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
  * Method viewer shows a list of methods of a input type. 
  * Offers filter actions. 
  * No dependency to the type hierarchy view
  */
-public class MethodsViewer extends TableViewer implements IProblemChangedListener {
-	
-	private ProblemItemMapper fProblemItemMapper;
+public class MethodsViewer extends ProblemTableViewer {
 	
 	/**
 	 * Sorter that uses the unmodified labelprovider (No declaring class names)
@@ -108,8 +99,7 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 	public MethodsViewer(Composite parent, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fProblemItemMapper= new ProblemItemMapper();
-		
+	
 		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
 		
@@ -302,43 +292,6 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		tbm.add(fFilterActions[1]); // static
 		tbm.add(fFilterActions[2]); // public
 	}
-
-
-	/*
-	 * @see IProblemChangedListener#problemsChanged
-	 */
-	public void problemsChanged(final Set changed) {
-		Control control= getControl();
-		if (control != null && !control.isDisposed()) {
-			control.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					fProblemItemMapper.problemsChanged(changed, (ILabelProvider)getLabelProvider());
-				}
-			});
-		}
-	}
-		
-	
-	/*
-	 * @see StructuredViewer#mapElement(Object, Widget)
-	 */
-	protected void mapElement(Object element, Widget item) {
-		super.mapElement(element, item);
-		if (item instanceof Item) {
-			fProblemItemMapper.addToMap(element, (Item) item);
-		}
-	}
-
-	/*
-	 * @see StructuredViewer#unmapElement(Object, Widget)
-	 */
-	protected void unmapElement(Object element, Widget item) {
-		if (item instanceof Item) {
-			fProblemItemMapper.removeFromMap(element, (Item) item);
-		}		
-		super.unmapElement(element, item);
-	}	
-	
 
 	/*
 	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
