@@ -69,8 +69,8 @@ public class NodeFinder extends GenericVisitor {
 			return true;
 		} else if (nodeEnd == fStart && fLength == 0) {
 			fCandidate= node;
-		}
-		Assert.isTrue(false, "Should not end here");
-		return true;
+		} 
+		Assert.isTrue((nodeStart <= fStart && nodeEnd < fEnd) || (nodeStart > fStart && nodeEnd >= fEnd));
+		return false;
 	}
 }
