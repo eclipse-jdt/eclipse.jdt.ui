@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
@@ -54,19 +57,44 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
-	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+	public void apply(ITextViewer viewer, char trigger, int stateMask, final int offset) {
 		try {
 			// create full ast
 			CompilationUnit root= AST.parseCompilationUnit(fCompilationUnit, true);
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 
 			ASTNode[] sameNodes= LinkedNodeFinder.perform(root, nameNode.resolveBinding());
-			IDocument document= viewer.getDocument();
+			// sort for iteration order, starting with the node @ offset
+			Arrays.sort(sameNodes, new Comparator() {
+				/*
+				 * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
+				 */
+				public int compare(Object o1, Object o2) {
+					return rank((ASTNode) o1) - rank((ASTNode) o2);
+				}
+
+				/**
+				 * Returns the absolute rank of an <code>ASTNode</code>. Nodes 
+				 * preceding <code>offset</code> are ranked last.
+				 * 
+				 * @param node the node to compute the rank for
+				 * @return the rank of the node with respect to the invocation offset
+				 */
+				private int rank(ASTNode node) {
+					int relativeRank= node.getStartPosition() + node.getLength() - offset;
+					if (relativeRank < 0)
+						return Integer.MAX_VALUE + relativeRank;
+					else
+						return relativeRank;
+				}
+				
+			});
 			
+			IDocument document= viewer.getDocument();
 			LinkedPositionGroup group= new LinkedPositionGroup();
 			for (int i= 0; i < sameNodes.length; i++) {
 				ASTNode elem= sameNodes[i];
-				group.createPosition(document, elem.getStartPosition(), elem.getLength(), i); // let the user iterate over all the linked fields
+				group.createPosition(document, elem.getStartPosition(), elem.getLength(), i);
 			}
 			
 			LinkedEnvironment enviroment= LinkedEnvironment.createLinkedEnvironment(document);
