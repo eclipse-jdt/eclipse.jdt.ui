@@ -225,7 +225,7 @@ public class SemanticHighlightings {
 		public boolean consumes(SemanticToken token) {
 			SimpleName node= token.getNode();
 			ASTNode parent= node.getParent();
-			return node.getNodeType() == ASTNode.SIMPLE_NAME && parent != null && parent.getNodeType() == ASTNode.METHOD_DECLARATION;
+			return parent != null && parent.getNodeType() == ASTNode.METHOD_DECLARATION && node.isDeclaration();
 		}
 	}
 	
