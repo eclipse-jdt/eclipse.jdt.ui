@@ -8,13 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.Collection;
 import java.util.HashMap;
 
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
@@ -66,6 +68,13 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
  *   </code>
  */
 public class ASTRewrite {
+	
+	/** Constant used to create place holder nodes */
+	public static final int UNKNOWN= -1;
+	public static final int BODY_DECLARATION= 1;
+	public static final int BLOCK= 2;
+	public static final int EXPRESSION= 3;
+	public static final int STATEMENT= 4;
 	
 	private static final String CHANGEKEY= "ASTChangeData";
 	private static final String COPYSOURCEKEY= "ASTCopySource";
@@ -208,7 +217,7 @@ public class ASTRewrite {
 		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
 		node.setProperty(COPYSOURCEKEY, copySource);
-		return ASTWithExistingFlattener.getPlaceholder(node.getAST(), node, node);
+		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, getPlaceholderType(node));
 	}
 	
 	/**
@@ -228,20 +237,41 @@ public class ASTRewrite {
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
 		startNode.setProperty(COPYSOURCEKEY, copySource);
 		endNode.setProperty(COPYSOURCEKEY, copySource);
-		return ASTWithExistingFlattener.getPlaceholder(startNode.getAST(), startNode, startNode);
+		return ASTWithExistingFlattener.createPlaceholder(startNode.getAST(), startNode, getPlaceholderType(startNode));
 	}	
 	
 	/**
 	 * Creates a target node for a source string to be inserted without being formatted. A target node can
 	 * be inserted or used to replace at the target position.
 	 * @param code String that will be inserted. The string must have no extra indent.
-	 * @param similarNode A node that is similar to the code which is inserted. This node is only used to
-	 * find a similar placeholder (Expression, Statement, BodyDeclaration...). No operations are performed
-	 * on this node.
+	 * @param nodeType the type of the place holder. Valid values are <code>BODY_DECLARATION</code>,
+	 * <code>BLOCK</code>, <code>STATEMENT</code>, and <code>EXPRESSION</code>.
+	 * @return the place holder node
 	 */
-	public final ASTNode createPlaceholder(String code, ASTNode similarNode) {
-		return ASTWithExistingFlattener.getPlaceholder(fRootNode.getAST(), code, similarNode);
-	}	
+	public final ASTNode createPlaceholder(String code, int nodeType) {
+		return ASTWithExistingFlattener.createPlaceholder(fRootNode.getAST(), code, nodeType);
+	}
+	
+	/**
+	 * Returns the node type that should be used to create a place holder for the given node
+	 * <code>existingNode</code>.
+	 * 	 * @param existingNode an existing node for which a place holder is to be created	 * @return the node type of a potential place holder	 */
+	public static int getPlaceholderType(ASTNode existingNode) {
+		if (existingNode instanceof Expression) {
+			return EXPRESSION;
+		} else if (existingNode instanceof Statement) {
+			if (existingNode.getNodeType() == ASTNode.BLOCK) {
+				return BLOCK;
+			} else {
+				return STATEMENT;
+			}
+		} else if (existingNode instanceof BodyDeclaration) {
+			return BODY_DECLARATION;
+		} else {
+			return UNKNOWN;
+		}
+	}
+			
 	public final boolean isInserted(ASTNode node) {
 		return node.getProperty(CHANGEKEY) instanceof ASTInsert;
 	}
@@ -312,6 +342,5 @@ public class ASTRewrite {
 	
 	private static final class ASTModify extends ASTChange {
 		public ASTNode modifiedNode;
-	}		
-
+	}
 }

@@ -8,7 +8,6 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
@@ -17,9 +16,6 @@ import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
@@ -33,21 +29,25 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		public int length;		
 	}
 	
-	public static ASTNode getPlaceholder(AST ast, Object data, ASTNode existingNode) {
+	/* package */ static ASTNode createPlaceholder(AST ast, Object data, int nodeType) {
 		ASTNode placeHolder;
-		if (existingNode instanceof Expression) {
-			placeHolder= ast.newSimpleName("z");
-		} else if (existingNode instanceof Statement) {
-			if (existingNode.getNodeType() == ASTNode.BLOCK) {
-				placeHolder= ast.newBlock();
-			} else {
+		switch (nodeType) {
+			case ASTRewrite.EXPRESSION:
+				placeHolder= ast.newSimpleName("z");
+				break;
+			case ASTRewrite.STATEMENT:
 				placeHolder= ast.newReturnStatement();
-			}
-		} else if (existingNode instanceof BodyDeclaration) {
-			placeHolder= ast.newInitializer();
-		} else {
-			return null;
+				break;
+			case ASTRewrite.BLOCK:
+				placeHolder= ast.newBlock();
+				break;
+			case ASTRewrite.BODY_DECLARATION:
+				placeHolder= ast.newInitializer();
+				break;
+			default:
+				return null;
 		}
+		
 		NodeMarker marker= new NodeMarker();
 		marker.data= data;
 		marker.offset= -1;
@@ -56,7 +56,7 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		placeHolder.setProperty(KEY, marker);
 		return placeHolder;
 	}
-	
+
 	private static NodeMarker getMarker(ASTNode node) {
 		return (NodeMarker) node.getProperty(KEY);
 	} 
