@@ -71,7 +71,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Creates a new comment formatting strategy.
 	 * 
-	 * @param textMeasurement The text measurement
+	 * @param textMeasurement the text measurement
 	 */
 	public CommentFormattingStrategy(ITextMeasurement textMeasurement) {
 		super();

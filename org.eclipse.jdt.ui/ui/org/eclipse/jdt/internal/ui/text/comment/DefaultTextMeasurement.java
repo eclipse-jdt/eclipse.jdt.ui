@@ -29,7 +29,7 @@ public class DefaultTextMeasurement implements ITextMeasurement {
 	/**
 	 * Initialize with the given control.
 	 * 
-	 * @param control The control
+	 * @param control the control
 	 */
 	public DefaultTextMeasurement(Control control) {
 		fControl= control;
