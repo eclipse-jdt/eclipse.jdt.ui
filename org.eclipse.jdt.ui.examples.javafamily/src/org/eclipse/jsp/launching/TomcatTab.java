@@ -13,16 +13,27 @@ package org.eclipse.jsp.launching;
  
 import java.io.File;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.variables.LaunchVariableUtil;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 import org.eclipse.jsp.JspPluginImages;
+import org.eclipse.jsp.JspUIPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -37,6 +48,11 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
+import org.eclipse.ui.model.WorkbenchContentProvider;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 /**
  * Specifies the install location of Tomcat.
@@ -44,12 +60,18 @@ import org.eclipse.swt.widgets.Text;
 public class TomcatTab extends AbstractLaunchConfigurationTab {
 		
 		
+	// Tomcat location
 	private Button fBrowseButton;
-
 	private Text fTomcatDir;
-
+	
+	// WebApp location
+	private Button fWebAppButton;
+	private Text fWebAppDir;
+	
+	/**
+	 * Constructs a new Tomcat tab
+	 */
 	public TomcatTab() {
-
 	}
 		
 	/**
@@ -90,19 +112,91 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 			}
 		});
 		
-		fBrowseButton = createPushButton(composite, "&Browse...", null); //$NON-NLS-1$
+		fBrowseButton = createPushButton(composite, LaunchingMessages.getString("TomcatTab.21"), null); //$NON-NLS-1$
 		fBrowseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
-				handleBrowseButtonSelected();
+				handleTomcatBrowseButtonSelected();
 			}
 		});
 		
+		createVerticalSpacer(composite, 3);
+		
+		label = new Label(composite, SWT.NONE);
+		label.setText(LaunchingMessages.getString("TomcatTab.22")); //$NON-NLS-1$
+		gd = new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
+		gd.horizontalSpan = 3;
+		label.setLayoutData(gd);
+		label.setFont(font);
+				
+		fWebAppDir = new Text(composite, SWT.SINGLE | SWT.BORDER);
+		gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 2;
+		fWebAppDir.setLayoutData(gd);
+		fWebAppDir.setFont(font);
+		fWebAppDir.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent evt) {
+				updateLaunchConfigurationDialog();
+			}
+		});
+		
+		fWebAppButton = createPushButton(composite, LaunchingMessages.getString("TomcatTab.23"), null); //$NON-NLS-1$
+		fWebAppButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent evt) {
+				handleWebAppBrowseButtonSelected();
+			}
+		});		
 	}
 		
 	/**
-	 * Show a dialog that lets the user select a directory
+	 * Show a dialog that lets the user select a root WebApp directory
+	 * from the workspace
 	 */
-	protected void handleBrowseButtonSelected() {
+	protected void handleWebAppBrowseButtonSelected() {
+		ISelectionStatusValidator validator= new ISelectionStatusValidator() {
+			public IStatus validate(Object[] selection) {
+				if (selection.length != 1) {
+					return new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatTab.24"), null); //$NON-NLS-1$
+				}
+				if (!(selection[0] instanceof IContainer)) {
+					return new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatTab.25"), null); //$NON-NLS-1$
+				}
+				// check for "WEB-INF"
+				IContainer container = (IContainer)selection[0];
+				if (!container.getFolder(new Path("WEB-INF")).exists()) { //$NON-NLS-1$
+					return new Status(IStatus.WARNING, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatTab.27"), null); //$NON-NLS-1$
+				}		
+				return new Status(IStatus.OK, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, "", null); //$NON-NLS-1$
+			}			
+		};
+		
+		ILabelProvider lp= new WorkbenchLabelProvider();
+		ITreeContentProvider cp= new WorkbenchContentProvider();
+
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
+		dialog.addFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				return element instanceof IContainer;
+			}
+		});
+		dialog.setValidator(validator);
+		dialog.setTitle(LaunchingMessages.getString("TomcatTab.28")); //$NON-NLS-1$
+		dialog.setMessage(LaunchingMessages.getString("TomcatTab.29")); //$NON-NLS-1$
+		dialog.setInput(ResourcesPlugin.getWorkspace().getRoot());	
+
+		if (dialog.open() == Window.OK) {
+			Object[] elements= dialog.getResult();
+			if (elements != null && elements.length == 1) {
+				fWebAppDir.setText(((IResource)elements[0]).getFullPath().toString());
+			}
+		}
+		
+	}
+
+	/**
+	 * Show a dialog that lets the user select a tomcat install directory
+	 */
+	protected void handleTomcatBrowseButtonSelected() {
 		DirectoryDialog dialog = new DirectoryDialog(getShell());
 		dialog.setMessage(LaunchingMessages.getString("TomcatTab.4")); //$NON-NLS-1$
 		String currentWorkingDir = fTomcatDir.getText();
@@ -151,7 +245,21 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 				setErrorMessage(LaunchingMessages.getString("TomcatTab.6")); //$NON-NLS-1$
 				return false;
 			}
-		}		
+		}	
+		
+		String webappDirPath = fWebAppDir.getText().trim();
+		if (webappDirPath.length() > 0) {
+			IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(webappDirPath));
+			if (resource == null) {
+				setErrorMessage(LaunchingMessages.getString("TomcatTab.30")); //$NON-NLS-1$
+				return false;
+			}
+			if (!(resource instanceof IContainer)) {
+				setErrorMessage(LaunchingMessages.getString("TomcatTab.31")); //$NON-NLS-1$
+				return false;
+			}
+		}	
+					
 		return true;
 	}
 
@@ -161,7 +269,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
 		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}"); //$NON-NLS-1$
 		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, TomcatLaunchDelegate.ID_TOMCAT_CLASSPATH_PROVIDER);
-		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap"); //$NON-NLS-1$
 	}
 
 	/**
@@ -170,6 +278,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
 			fTomcatDir.setText(configuration.getAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "")); //$NON-NLS-1$
+			fWebAppDir.setText(configuration.getAttribute(TomcatLaunchDelegate.ATTR_WEB_APP_ROOT, "")); //$NON-NLS-1$
 			if (configuration.isWorkingCopy()) {
 				// set VM args
 				ILaunchConfigurationWorkingCopy workingCopy = (ILaunchConfigurationWorkingCopy)configuration;
@@ -203,6 +312,15 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	 */
 	public void performApply(ILaunchConfigurationWorkingCopy configuration) {
 		configuration.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, getAttributeValueFrom(fTomcatDir));
+		String webApp = getAttributeValueFrom(fWebAppDir);
+		configuration.setAttribute(TomcatLaunchDelegate.ATTR_WEB_APP_ROOT, webApp);
+		// set project (if there is one)
+		if (webApp != null) {
+			IResource resource = ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(webApp));
+			if (resource != null) {
+				configuration.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, resource.getProject().getName());
+			}
+		}		
 	}
 
 	/**

@@ -46,7 +46,7 @@ public class TomcatClasspathProvider extends StandardClasspathProvider {
 				List rtes = new ArrayList();
 				// add bootstrap.jar
 				String catalinaHome = TomcatLaunchDelegate.getCatalinaHome();
-				IPath path = new Path(catalinaHome).append("bin").append("bootstrap.jar");
+				IPath path = new Path(catalinaHome).append("bin").append("bootstrap.jar"); //$NON-NLS-1$ //$NON-NLS-2$
 				IRuntimeClasspathEntry r = JavaRuntime.newArchiveRuntimeClasspathEntry(path);
 				rtes.add(r);
 				// add class libraries to bootpath				

@@ -16,7 +16,6 @@ import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 import org.eclipse.debug.ui.ILaunchConfigurationTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaClasspathTab;
 import org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
-import org.eclipse.jdt.debug.ui.launchConfigurations.JavaSourceLookupTab;
 
 /**
  * Tab group for launching a local Tomcat server.
@@ -31,7 +30,7 @@ public class TomcatTabGroup extends AbstractLaunchConfigurationTabGroup {
 			new TomcatTab(),
 			new JavaJRETab(),
 			new JavaClasspathTab(),
-			new JavaSourceLookupTab(),
+			new TomcatSourceLookupTab(),
 			new CommonTab(),
 		};
 		setTabs(tabs);

@@ -164,5 +164,13 @@
          </action>
       </editorContribution>
    </extension>   
-   
+   <extension
+         point="org.eclipse.debug.core.sourceLocators">
+      <sourceLocator
+            name="%TomcatSourceLocator.name"
+            class="org.eclipse.jsp.launching.TomcatSourceLocator"
+            id="org.eclipse.jsp.TOMCAT_SOURCE_LOCATOR">
+      </sourceLocator>
+   </extension>
+      
 </plugin>
