@@ -60,7 +60,7 @@ class AccessorClass {
 	public static Change create(ICompilationUnit cu, String accessorClassname, IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath, IProgressMonitor pm) throws CoreException {
 		AccessorClass accessorClass= new AccessorClass(cu, accessorClassname, accessorPath, accessorPackage, resourceBundlePath);
 
-		return new CreateTextFileChange(accessorPath, accessorClass.createAccessorCUSource(pm), "java"); //$NON-NLS-1$
+		return new CreateTextFileChange(accessorPath, accessorClass.createAccessorCUSource(pm), null, "java"); //$NON-NLS-1$
 	}
 
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {

@@ -52,8 +52,9 @@ public class DeleteFileChange extends JDTChange {
 			Assert.isTrue(file.exists());
 			Assert.isTrue(!file.isReadOnly());
 			fSource= getSource(file);
+			CreateFileChange undo= createUndoChange(file, fPath, fSource);
 			file.delete(true, true, pm);
-			return new CreateFileChange(fPath, fSource);
+			return undo;
 		} finally {
 			pm.done();
 		}
@@ -89,6 +90,16 @@ public class DeleteFileChange extends JDTChange {
 			}	
 		}
 		return sb.toString();
+	}
+	
+	private static CreateFileChange createUndoChange(IFile file, IPath path, String source) {
+		String encoding;
+		try {
+			encoding= file.getCharset(false);
+		} catch (CoreException e) {
+			encoding= null;
+		}
+		return new CreateFileChange(path, source, encoding);
 	}
 
 	public String getName() {

@@ -24,11 +24,6 @@ public class CreateTextFileChange extends CreateFileChange {
 	
 	private final String fTextType;
 	
-	public CreateTextFileChange(IPath path, String source, String textType) {
-		super(path, source);
-		fTextType= textType;
-	}
-
 	public CreateTextFileChange(IPath path, String source, String encoding, String textType) {
 		super(path, source, encoding);
 		fTextType= textType;

@@ -34,24 +34,39 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CreateFileChange extends JDTChange {
 
+	private String fChangeName;
+	
 	private IPath fPath;
 	private String fSource;
-	private String fName;
 	private String fEncoding;
+	private boolean fExplicitEncoding;
 	
-	public CreateFileChange(IPath path, String source, String encoding){
+	public CreateFileChange(IPath path, String source, String encoding) {
 		Assert.isNotNull(path, "path"); //$NON-NLS-1$
 		Assert.isNotNull(source, "source"); //$NON-NLS-1$
 		fPath= path;
 		fSource= source;
 		fEncoding= encoding;
+		fExplicitEncoding= fEncoding != null;
 	}
 
-	public CreateFileChange(IPath path, String source){
-		this(path, source, ResourcesPlugin.getEncoding());
+	private CreateFileChange(IPath path, String source, String encoding, boolean explicit) {
+		Assert.isNotNull(path, "path"); //$NON-NLS-1$
+		Assert.isNotNull(source, "source"); //$NON-NLS-1$
+		Assert.isNotNull(encoding, "encoding"); //$NON-NLS-1$
+		fPath= path;
+		fSource= source;
+		fEncoding= encoding;
+		fExplicitEncoding= explicit;
+	}
+
+	protected void setEncoding(String encoding, boolean explicit) {
+		Assert.isNotNull(encoding, "encoding"); //$NON-NLS-1$
+		fEncoding= encoding;
+		fExplicitEncoding= explicit;
 	}
 	
-	protected void setSource(String source){
+	protected void setSource(String source) {
 		fSource= source;
 	}
 
@@ -73,16 +88,23 @@ public class CreateFileChange extends JDTChange {
 		try {
 			pm.beginTask(NLSChangesMessages.getString("createFile.creating_resource"), 2); //$NON-NLS-1$
 
+			initializeEncoding();
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
 			if (file.exists()){
 				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
-				composite.add(new CreateFileChange(fPath, fSource));
+				composite.add(new CreateFileChange(fPath, fSource, fEncoding, fExplicitEncoding));
 				return composite.perform(pm);
 			} else {
-				is= getInputStream(file);
-				file.create(is, false, pm);
-				return new DeleteFileChange(file);
+				try {
+					is= new ByteArrayInputStream(fSource.getBytes(fEncoding));
+					file.create(is, false, pm);
+					if (fExplicitEncoding)
+						file.setCharset(fEncoding);
+					return new DeleteFileChange(file);
+				} catch (UnsupportedEncodingException e) {
+					throw new JavaModelException(e, IJavaModelStatusConstants.IO_EXCEPTION);
+				}
 			}				
 		} finally {
 			pm.done();
@@ -104,29 +126,39 @@ public class CreateFileChange extends JDTChange {
 		}
 	}
 
-	private InputStream getInputStream(IFile file) {
-		String encoding= fEncoding;
-		if (encoding == null) {
-			try {
-				encoding= file.getCharset();
-			} catch (CoreException e1) {
-				// fall through. Take default encoding.
+	private void initializeEncoding() {
+		if (fEncoding == null) {
+			fExplicitEncoding= false;
+			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
+			if (file != null) {
+				try {
+					if (file.exists()) {
+						fEncoding= file.getCharset(false);
+						if (fEncoding == null) {
+							fEncoding= file.getCharset(true);
+						} else {
+							fExplicitEncoding= true;
+						}
+					} else {
+						fEncoding= file.getCharset(true);
+					}
+				} catch (CoreException e) {
+					fEncoding= ResourcesPlugin.getEncoding();
+					fExplicitEncoding= true;
+				}
+			} else {
+				fEncoding= ResourcesPlugin.getEncoding();
+				fExplicitEncoding= true;
 			}
 		}
-		if (encoding == null)
-			return new ByteArrayInputStream(fSource.getBytes());
-		try {
-			return new ByteArrayInputStream(fSource.getBytes(encoding));
-		} catch (UnsupportedEncodingException e) {
-			return new ByteArrayInputStream(fSource.getBytes());
-		}
+		Assert.isNotNull(fEncoding);
 	}
-	
+
 	public String getName() {
-		if (fName == null)
+		if (fChangeName == null)
 			return NLSChangesMessages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
 		else 
-			return fName;
+			return fChangeName;
 	}
 
 	public Object getModifiedElement() {
@@ -138,7 +170,7 @@ public class CreateFileChange extends JDTChange {
 	}
 
 	public void setName(String name) {
-		fName = name;
+		fChangeName = name;
 	}
 }
 

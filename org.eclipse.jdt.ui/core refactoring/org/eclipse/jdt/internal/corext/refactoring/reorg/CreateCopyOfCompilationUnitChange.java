@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -31,8 +32,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 
@@ -50,9 +50,31 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	private INewNameQuery fNameQuery;
 	
 	public CreateCopyOfCompilationUnitChange(IPath path, String source, ICompilationUnit oldCu, INewNameQuery nameQuery) {
-		super(path, source, "java"); //$NON-NLS-1$
+		super(path, source, null, "java"); //$NON-NLS-1$
 		fOldCu= oldCu;
 		fNameQuery= nameQuery;
+		setEncoding(oldCu);
+	}
+	
+	private void setEncoding(ICompilationUnit cunit) {
+		IResource resource= cunit.getResource();
+		// no file so the encoding is taken from the target
+		if (!(resource instanceof IFile))
+			return;
+		IFile file= (IFile)resource;
+		try {
+			String encoding= file.getCharset(false);
+			if (encoding != null) {
+				setEncoding(encoding, true);
+			} else {
+				encoding= file.getCharset(true);
+				if (encoding != null) {
+					setEncoding(encoding, false);
+				}
+			}
+		} catch (CoreException e) {
+			// do nothing. Take encoding from target
+		}
 	}
 
 	/*

@@ -864,7 +864,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		try{
 			newCuWC= WorkingCopyUtil.getNewWorkingCopy(getInputTypePackage(), getNameForNewCu());
 			String source= createSourceForNewCu(newCuWC, pm);
-			return new CreateTextFileChange(createPathForNewCu(), source, "java");	 //$NON-NLS-1$
+			return new CreateTextFileChange(createPathForNewCu(), source, null, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();

@@ -443,7 +443,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			Assert.isTrue(! fReplaceOccurrences || fSource != null);
 			Assert.isTrue(fSource == null || fReplaceOccurrences);
 			String formattedSource= fSource != null ? fSource: createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1));
-			return new CreateTextFileChange(interfaceCuPath, formattedSource, "java");	 //$NON-NLS-1$
+			return new CreateTextFileChange(interfaceCuPath, formattedSource, null, "java");	 //$NON-NLS-1$
 		} finally{
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();
