@@ -64,7 +64,7 @@ public class ToggleJspBreakpointAction extends Action implements IAction {
 		IResource resource = getResource();
 		int lineNumber = fRulerInfo.getLineOfLastMouseButtonActivity() + 1;
 		try {
-			JDIDebugModel.createStratumBreakpoint(resource, "JSP", resource.getName(), null, "*_jsp", lineNumber, -1, -1, 0, true, null); //$NON-NLS-1$ //$NON-NLS-2$
+			JDIDebugModel.createStratumBreakpoint(resource, null, resource.getName(), null, null, lineNumber, -1, -1, 0, true, null); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch (CoreException e) {
 			e.printStackTrace();
 		}
