@@ -62,6 +62,9 @@ import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateSet;
 import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
@@ -86,7 +89,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 				case 2:
 					return template.getDescription();
 				default:
-					return "";
+					return ""; //$NON-NLS-1$
 			}
 		}
 	}
@@ -95,7 +98,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 	// preference store keys
 	private static final String PREF_FORMAT_TEMPLATES= PreferenceConstants.TEMPLATES_USE_CODEFORMATTER;
 
-	private final String[] CONTEXTS= new String[] { "java", "javadoc" };
+	private final String[] CONTEXTS= new String[] { JavaContextType.NAME, JavaDocContextType.NAME };
 
 	private Templates fTemplates;
 

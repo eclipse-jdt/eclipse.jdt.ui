@@ -14,11 +14,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
  */
 public class JavaDocContextType extends CompilationUnitContextType {
 
+	public static final String NAME= "javadoc"; //$NON-NLS-1$
+
 	/**
 	 * Creates a java context type.
 	 */
 	public JavaDocContextType() {
-		super("javadoc"); //$NON-NLS-1$
+		super(NAME);
 		
 		// global
 		addVariable(new GlobalVariables.Cursor());

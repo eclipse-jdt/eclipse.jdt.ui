@@ -18,6 +18,8 @@ import org.eclipse.jdt.internal.corext.template.TemplateVariable;
  */
 public class JavaContextType extends CompilationUnitContextType {
 
+	public static final String NAME= "java"; //$NON-NLS-1$
+
 	protected static class Array extends TemplateVariable {
 		public Array() {
 			super(JavaTemplateMessages.getString("JavaContextType.variable.name.array"), JavaTemplateMessages.getString("JavaContextType.variable.description.array")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -110,7 +112,7 @@ public class JavaContextType extends CompilationUnitContextType {
 	 * Creates a java context type.
 	 */
 	public JavaContextType() {
-		super("java"); //$NON-NLS-1$
+		super(NAME);
 		
 		// global
 		addVariable(new GlobalVariables.Cursor());
