@@ -86,6 +86,8 @@ public class JUnitPreferencePage extends PreferencePage
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
 		composite.setLayout(layout);
 		GridData data= new GridData();
 		data.verticalAlignment= GridData.FILL;
