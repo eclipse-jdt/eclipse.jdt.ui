@@ -34,7 +34,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 	
 	private IEditorPart fEditor;
 	
-	private final int LABEL_FLAGS=  JavaElementLabels.T_CONTAINER_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.F_FULLY_QUALIFIED
+	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	
@@ -63,7 +63,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 		return null;
 	}
 	
-	private String getInfoText(IMember member) {		
+	private String getInfoText(IMember member) {
 		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 		
