@@ -26,6 +26,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
     private static final int COLUMN_INFO= 2;
         
     LocationLabelProvider() {
+        // Do nothing
     }
             
     /* (non-Javadoc)
@@ -97,8 +98,7 @@ class LocationLabelProvider extends LabelProvider implements ITableLabelProvider
                     if (lineNumber == CallLocation.UNKNOWN_LINE_NUMBER) {
 						return CallHierarchyMessages.getString("LocationLabelProvider.unknown");//$NON-NLS-1$
                     } else {
-                    	String[] values= {String.valueOf(lineNumber)};
-                        return CallHierarchyMessages.getFormattedString("LocationLabelProvider.lineNumber", values);//$NON-NLS-1$
+                    	return String.valueOf(lineNumber);
                     }
                 case COLUMN_INFO:
                     return removeWhitespaceOutsideStringLiterals(callLocation);

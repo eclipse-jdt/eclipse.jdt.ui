@@ -41,7 +41,7 @@ class LocationViewer extends TableViewer {
                                                 
     private ColumnLayoutData columnLayouts[] = {
         new ColumnPixelData(19, false),
-        new ColumnWeightData(75),
+        new ColumnWeightData(60),
         new ColumnWeightData(300)};
     
 
