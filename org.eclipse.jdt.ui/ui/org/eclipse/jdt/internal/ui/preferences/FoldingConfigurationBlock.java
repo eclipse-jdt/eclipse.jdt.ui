@@ -101,11 +101,13 @@ class FoldingConfigurationBlock {
 	private Combo fProviderCombo;
 	private Button fFoldingCheckbox;
 	private ComboViewer fProviderViewer;
-	private Map fProviderDescriptors;
 	private Composite fGroup;
-	private Map fProviderPreferences;
-	private Map fProviderControls;
 	private StackLayout fStackLayout;
+	
+	/* the model */
+	private final Map fProviderDescriptors;
+	private final Map fProviderPreferences;
+	private final Map fProviderControls;
 	
 
 	public FoldingConfigurationBlock(OverlayPreferenceStore store) {
@@ -179,29 +181,52 @@ class FoldingConfigurationBlock {
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		label.setLayoutData(gd);
 
-		/* list */
-		Composite comboComp= new Composite(composite, SWT.NONE);
-		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-		GridLayout gridLayout= new GridLayout(2, false);
+		if (fProviderDescriptors.size() > 1) {
+			/* list */
+			Composite comboComp= new Composite(composite, SWT.NONE);
+			gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			GridLayout gridLayout= new GridLayout(2, false);
+			gridLayout.marginWidth= 0;
+			comboComp.setLayout(gridLayout);
+		
+			Label comboLabel= new Label(comboComp, SWT.CENTER);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER);
+			comboLabel.setLayoutData(gd);
+			comboLabel.setText(PreferencesMessages.getString("FoldingConfigurationBlock.combo_caption")); //$NON-NLS-1$
+			
+			label= new Label(composite, SWT.CENTER);
+			gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			label.setLayoutData(gd);
+			
+			fProviderCombo= new Combo(comboComp, SWT.READ_ONLY | SWT.DROP_DOWN);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_CENTER);
+			fProviderCombo.setLayoutData(gd);
+
+			fProviderViewer= createProviderViewer();
+		}
+		
+		Composite groupComp= new Composite(composite, SWT.NONE);
+		gd= new GridData(GridData.FILL_BOTH);
+		gd.horizontalSpan= 2;
+		groupComp.setLayoutData(gd);
+		GridLayout gridLayout= new GridLayout(1, false);
 		gridLayout.marginWidth= 0;
-		comboComp.setLayout(gridLayout);
+		groupComp.setLayout(gridLayout);
 		
-		Label comboLabel= new Label(comboComp, SWT.CENTER);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_CENTER);
-		comboLabel.setLayoutData(gd);
-		comboLabel.setText(PreferencesMessages.getString("FoldingConfigurationBlock.combo_caption")); //$NON-NLS-1$
+		/* contributed provider preferences. */
+		fGroup= new Composite(groupComp, SWT.NONE);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
+		fGroup.setLayoutData(gd);
+		fStackLayout= new StackLayout();
+		fGroup.setLayout(fStackLayout);
 		
-		label= new Label(composite, SWT.CENTER);
-		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-		label.setLayoutData(gd);
+		return composite;
+	}
 
-		fProviderCombo= new Combo(comboComp, SWT.READ_ONLY | SWT.DROP_DOWN);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_CENTER);
-		fProviderCombo.setLayoutData(gd);
-
+	private ComboViewer createProviderViewer() {
 		/* list viewer */
-		fProviderViewer= new ComboViewer(fProviderCombo);
-		fProviderViewer.setContentProvider(new IStructuredContentProvider() {
+		ComboViewer viewer= new ComboViewer(fProviderCombo);
+		viewer.setContentProvider(new IStructuredContentProvider() {
 
 			/*
 			 * @see org.eclipse.jface.viewers.IContentProvider#dispose()
@@ -212,7 +237,7 @@ class FoldingConfigurationBlock {
 			/*
 			 * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
 			 */
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			public void inputChanged(Viewer v, Object oldInput, Object newInput) {
 			}
 
 			/*
@@ -222,7 +247,7 @@ class FoldingConfigurationBlock {
 				return fProviderDescriptors.values().toArray();
 			}
 		});
-		fProviderViewer.setLabelProvider(new LabelProvider() {
+		viewer.setLabelProvider(new LabelProvider() {
 			/*
 			 * @see org.eclipse.jface.viewers.LabelProvider#getImage(java.lang.Object)
 			 */
@@ -237,7 +262,7 @@ class FoldingConfigurationBlock {
 				return ((JavaFoldingStructureProviderDescriptor) element).getName();
 			}
 		});
-		fProviderViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection sel= (IStructuredSelection) event.getSelection();
@@ -247,25 +272,10 @@ class FoldingConfigurationBlock {
 				}
 			}
 		});
-		fProviderViewer.setInput(fProviderDescriptors);
-		fProviderViewer.refresh();
+		viewer.setInput(fProviderDescriptors);
+		viewer.refresh();
 		
-		Composite groupComp= new Composite(composite, SWT.NONE);
-		gd= new GridData(GridData.FILL_BOTH);
-		gd.horizontalSpan= 2;
-		groupComp.setLayoutData(gd);
-		gridLayout= new GridLayout(1, false);
-		gridLayout.marginWidth= 0;
-		groupComp.setLayout(gridLayout);
-		
-		/* contributed provider preferences. */
-		fGroup= new Composite(groupComp, SWT.NONE);
-		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
-		fGroup.setLayoutData(gd);
-		fStackLayout= new StackLayout();
-		fGroup.setLayout(fStackLayout);
-		
-		return composite;
+		return viewer;
 	}
 
 	private void updateCheckboxDependencies() {
@@ -346,8 +356,10 @@ class FoldingConfigurationBlock {
 		String id= fStore.getString(PreferenceConstants.EDITOR_FOLDING_PROVIDER);
 		Object provider= fProviderDescriptors.get(id);
 		if (provider != null) {
-			fProviderViewer.setSelection(new StructuredSelection(provider), true);
-			updateListDependencies();
+			if (fProviderViewer == null)
+				updateListDependencies();
+			else
+				fProviderViewer.setSelection(new StructuredSelection(provider), true);
 		}
 	}
 }
