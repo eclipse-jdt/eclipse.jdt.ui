@@ -245,12 +245,7 @@ public class SearchUsagesInFileAction extends Action {
 		IEditorInput input= fEditor.getEditorInput();
 		if (input instanceof IClassFileEditorInput) {
 			IClassFile classFile= ((IClassFileEditorInput)input).getClassFile();
-			try {
-				String source= classFile.getSource();
-				return AST.parseCompilationUnit(source.toCharArray(), classFile.getElementName(), classFile.getJavaProject());
-			} catch (JavaModelException e) {
-				return null;
-			}
+			return AST.parseCompilationUnit(classFile, true);
 		}
 		return AST.parseCompilationUnit(getCompilationUnit(), true);
 	}
