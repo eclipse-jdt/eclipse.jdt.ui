@@ -16,13 +16,21 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 public class CreateTextFileChange extends CreateFileChange implements ITextChange {
-
-	public CreateTextFileChange(IPath path, String source){
+	
+	private final boolean fIsJavaFile;
+	
+	public CreateTextFileChange(IPath path, String source, boolean isJava){
 		super(path, source);
+		fIsJavaFile= isJava;
 	}
 
-	public CreateTextFileChange(IPath path, String source, String encoding){
+	public CreateTextFileChange(IPath path, String source, String encoding, boolean isJava){
 		super(path, source, encoding);
+		fIsJavaFile= isJava;
+	}
+	
+	public boolean isJavaFile(){
+		return fIsJavaFile;
 	}
 	
 	/*

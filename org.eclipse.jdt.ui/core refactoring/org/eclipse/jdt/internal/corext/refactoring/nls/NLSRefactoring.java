@@ -607,7 +607,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	private IChange createPropertyFile() throws JavaModelException{
 		if (! propertyFileExists())
-			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource(), "8859_1");//$NON-NLS-1$
+			return new CreateTextFileChange(getPropertyFilePath(), createPropertyFileSource(), "8859_1", false);//$NON-NLS-1$
 			
 		String name= NLSMessages.getString("NLSrefactoring.Append_to_property_file") + getPropertyFilePath(); //$NON-NLS-1$
 		TextChange tfc= new TextFileChange(name, getPropertyFile());
@@ -719,7 +719,7 @@ public class NLSRefactoring extends Refactoring {
 	// ------------ accessor class creation
 	
 	private IChange createAccessorCU() throws JavaModelException{
-		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource());	
+		return new CreateTextFileChange(getAccessorCUPath(), createAccessorCUSource(), true);	
 	} 
 	
 	private IPackageFragment getPackage(){
