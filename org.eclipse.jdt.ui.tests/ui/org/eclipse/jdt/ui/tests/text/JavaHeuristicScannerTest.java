@@ -22,7 +22,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
@@ -50,7 +54,11 @@ public class JavaHeuristicScannerTest extends TestCase {
 			Hashtable options= JavaCore.getDefaultOptions();
 			options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.TAB);
 			options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+			options.put(DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_ARGUMENTS_ALIGNMENT, DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_EXPRESSIONS_ALIGNMENT, DefaultCodeFormatterConstants.FORMATTER_INDENT_ON_COLUMN);
+			options.put(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, "1");
 			JavaCore.setOptions(options);
+			PreferenceConstants.getPreferenceStore().setValue(WorkInProgressPreferencePage.PREF_FORMATTER, true);
 		}
 
 		fDocument= new Document();
@@ -662,6 +670,15 @@ public class JavaHeuristicScannerTest extends TestCase {
 		
 		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
 		Assert.assertEquals("	   ", indent);
+	}
+	
+	public void testListAlignmentArray2() {
+		// no prior art - probe system settings. 
+		fDocument.set(	"\tint[]= new int[] { 1, two,\n");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
+		Assert.assertEquals("\t\t\t\t\t   ", indent);
+		
 	}
 	
 	public void testBraceAlignmentOfMultilineDeclaration() {
