@@ -4,11 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -16,7 +17,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchOperation extends WorkspaceModifyOperation {
@@ -68,6 +69,8 @@ public class JavaSearchOperation extends WorkspaceModifyOperation {
 				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElementPattern);
 			else
 				desc= fElementPattern.getElementName();
+			if ("".equals(desc) && fElementPattern.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
 		}
 		else
 			desc= fStringPattern;

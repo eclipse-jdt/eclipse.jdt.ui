@@ -87,7 +87,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				String resourceName= ""; //$NON-NLS-1$
 				if (marker.getResource() != null)
 					resourceName= marker.getResource().getName();
-				if (resource == null && !handleContainsWrongCU(handle, resourceName)) {
+				if (resource == null && handleContainsWrongCU(handle, resourceName)) {
 				 	handle= computeFixedHandle(handle, resourceName);
 				 	fLastJavaElement= JavaCore.create(handle);
 				}
@@ -102,10 +102,10 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	private boolean handleContainsWrongCU(String handle, String resourceName) {
 		int start= handle.indexOf('{');
 		int end= handle.indexOf(".java"); //$NON-NLS-1$
-		if (start >= end)
+		if (start >= end || start == -1)
 			return false;
 		String name= handle.substring(start + 1, end + 5);
-		return name.equals(resourceName);
+		return !name.equals(resourceName);
 	}
 	
 	private String computeFixedHandle(String handle, String resourceName) {
