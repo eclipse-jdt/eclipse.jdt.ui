@@ -73,7 +73,7 @@ public abstract class OpenJavaElementAction extends Action {
 			return (ISourceReference) sourceReferences.get(0);
 		
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT
-						| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION
+						| JavaElementLabelProvider.SHOW_QUALIFIED
 							| JavaElementLabelProvider.SHOW_ROOT;
 						
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));

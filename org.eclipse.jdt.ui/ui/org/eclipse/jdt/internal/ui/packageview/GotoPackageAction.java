@@ -34,8 +34,7 @@ class GotoPackageAction extends Action {
 	}
 	
 	SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER;
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_ROOT));
 		dialog.setIgnoreCase(false);
 		dialog.setElements(collectPackages()); // XXX inefficient
 		return dialog;

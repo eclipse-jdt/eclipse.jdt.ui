@@ -40,7 +40,7 @@ public class JavaElementLabels {
 	
 	/**
 	 * Method names contain return type (appended)
-	 * e.g. <code>foo  int</code>
+	 * e.g. <code>foo int</code>
 	 */
 	public final static int M_APP_RETURNTYPE= 1 << 3;
 	
@@ -82,7 +82,7 @@ public class JavaElementLabels {
 	
 	/**
 	 * Field names contain the declared type (prepended)
-	 * e.g. <code>fHello  int</code>
+	 * e.g. <code>fHello:int</code>
 	 */
 	public final static int F_PRE_TYPE_SIGNATURE= 1 << 10;	
 
@@ -193,6 +193,9 @@ public class JavaElementLabels {
 	public final static int ALL_FULLY_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED;
 	public final static int ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
 	public final static int ALL_DEFAULT= M_PARAMETER_TYPES;
+	public final static int DEFAULT_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED;
+	public final static int DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
+
 
 
 

@@ -36,9 +36,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 	
 	private static class PackageRenderer extends JavaElementLabelProvider {
 		public PackageRenderer() {
-			super(JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION |
-				JavaElementLabelProvider.SHOW_CONTAINER |
-				JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);	
+			super(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_ROOT);	
 		}
 
 		public Image getImage(Object element) {

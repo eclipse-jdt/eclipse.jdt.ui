@@ -70,7 +70,7 @@ public class CompletionEvaluator {
 		fCurrentLength= length;
 		fResult= new ArrayList();
 		
-		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT + JavaElementLabelProvider.SHOW_CONTAINER);
+		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_POST_QUALIFIED | JavaElementLabelProvider.SHOW_PARAMETERS);
 	}
 	
 	private static boolean isWordPart(char ch) {

@@ -186,9 +186,9 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 			
 			JavaElementLabelProvider lprovider= (JavaElementLabelProvider) getLabelProvider();
 			if (on) {
-				lprovider.turnOn(JavaElementLabelProvider.SHOW_CONTAINER);
+				lprovider.turnOn(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 			} else {
-				lprovider.turnOff(JavaElementLabelProvider.SHOW_CONTAINER);
+				lprovider.turnOff(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
 			}
 			refresh();
 		} catch (JavaModelException e) {

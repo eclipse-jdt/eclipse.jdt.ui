@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
 /**
@@ -54,12 +55,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 	/**
 	 * Flag (bit mask) indicating that the label of a member should include the container.
 	 * For example, include the name of the type enclosing a field.
+	 * @deprecated Use SHOW_QUALIFIED ot SHOW_ROOT instead
 	 */
 	public final static int SHOW_CONTAINER=				0x004;
 
 	/**
 	 * Flag (bit mask) indicating that the label of a type should be fully qualified.
 	 * For example, include the fully qualified name of the type enclosing a type.
+	 * @deprecated Use SHOW_QUALIFIED instead
 	 */
 	public final static int SHOW_CONTAINER_QUALIFICATION=	0x008;
 
@@ -83,6 +86,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	/**
 	 * Flag (bit mask) indicating that the label qualification of a type should
 	 * be shown after the name.
+	 * @deprecated SHOW_POST_QUALIFIED instead
 	 */
 	public final static int SHOW_POSTIFIX_QUALIFICATION=		0x080;
 
@@ -96,7 +100,21 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * Flag (bit mask) indicating that the packagefragment roots from variables should
 	 * be rendered with the variable in the name
 	 */
-	public final static int SHOW_VARIABLE= 			0x200;	
+	public final static int SHOW_VARIABLE= 			0x200;
+	
+	/**
+	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
+	 * should be rendered qualified.
+	 * examples: java.lang.String, java.util.Vector.size()
+	 */
+	public final static int SHOW_QUALIFIED=				0x400;
+
+	/**
+	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
+	 * should be rendered qualified. The qualifcation is appended
+	 * examples: String - java.lang, size() - java.util.Vector
+	 */
+	public final static int SHOW_POST_QUALIFIED=	0x800;	
 	
 	
 	/**
@@ -108,16 +126,17 @@ public class JavaElementLabelProvider extends LabelProvider {
 	
 	/**
 	 * Constant indicating the default label rendering.
-	 * Currently the default is qquivalent to
+	 * Currently the default is equivalent to
 	 * <code>SHOW_PARAMETERS | SHOW_OVERLAY_ICONS</code>.
 	 */
 	public final static int SHOW_DEFAULT= new Integer(SHOW_PARAMETERS | SHOW_OVERLAY_ICONS).intValue();
 
-	private JavaTextLabelProvider fTextLabelProvider;
 	private JavaElementImageProvider fImageLabelProvider;
 	private WorkbenchLabelProvider fWorkbenchLabelProvider;
-	
+
 	private int fFlags;
+	private int fImageFlags;
+	private int fTextFlags;
 	
 	// map images for JarEntryFiles, key = extension - value = image
 	// the cached images will be disposed wen the label provider is disposed.
@@ -128,13 +147,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @param flags the initial options; a bitwise OR of <code>SHOW_* </code> constants
 	 */
 	public JavaElementLabelProvider(int flags) {
-		fTextLabelProvider= new JavaTextLabelProvider(flags);
 		fImageLabelProvider= new JavaElementImageProvider();
 		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
 		fFlags= flags;
+		updateImageProviderFlags();
+		updateTextProviderFlags();		
 	}
 	
-	private boolean getFlag(int flag) {
+	private boolean getFlag( int flag) {
 		return (fFlags & flag) != 0;
 	}
 	
@@ -145,7 +165,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public void turnOn(int flags) {
 		fFlags |= flags;
-		fTextLabelProvider.turnOn(flags);
+		updateImageProviderFlags();
+		updateTextProviderFlags();
 	}
 	
 	/**
@@ -155,8 +176,57 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public void turnOff(int flags) {
 		fFlags &= (~flags);
-		fTextLabelProvider.turnOff(flags);
+		updateImageProviderFlags();
+		updateTextProviderFlags();
 	}
+	
+	private void updateImageProviderFlags() {
+		fImageFlags= 0;
+		if (getFlag(SHOW_OVERLAY_ICONS)) {
+			fImageFlags |= JavaElementImageProvider.OVERLAY_ICONS;
+		}
+		if (getFlag(SHOW_SMALL_ICONS)) {
+			fImageFlags |= JavaElementImageProvider.SMALL_ICONS;
+		}
+	}	
+	
+	private void updateTextProviderFlags() {
+		fTextFlags= 0;
+		if (getFlag(SHOW_RETURN_TYPE)) {
+			fTextFlags |= JavaElementLabels.M_PRE_RETURNTYPE;
+		}
+		if (getFlag(SHOW_PARAMETERS)) {
+			fTextFlags |= JavaElementLabels.M_PARAMETER_TYPES;
+		}		
+		if (getFlag(SHOW_CONTAINER)) {
+			fTextFlags |= JavaElementLabels.P_POST_QUALIFIED | JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
+		}
+		if (getFlag(SHOW_POSTIFIX_QUALIFICATION)) {
+			fTextFlags |= (JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
+		} else if (getFlag(SHOW_CONTAINER_QUALIFICATION)) {
+			fTextFlags |=(JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED);
+		}
+		if (getFlag(SHOW_TYPE)) {
+			fTextFlags |= JavaElementLabels.F_APP_TYPE_SIGNATURE;
+		}
+		if (getFlag(SHOW_ROOT)) {
+			fTextFlags |= JavaElementLabels.APPEND_ROOT_PATH;
+		}			
+		if (getFlag(SHOW_VARIABLE)) {
+			fTextFlags |= JavaElementLabels.ROOT_VARIABLE;
+		}
+		if (getFlag(SHOW_QUALIFIED)) {
+			fTextFlags |= (JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.I_FULLY_QUALIFIED 
+				| JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.D_QUALIFIED | JavaElementLabels.CF_QUALIFIED  | JavaElementLabels.CU_QUALIFIED);
+		}
+		if (getFlag(SHOW_POST_QUALIFIED)) {
+			fTextFlags |= (JavaElementLabels.F_POST_QUALIFIED | JavaElementLabels.M_POST_QUALIFIED | JavaElementLabels.I_POST_QUALIFIED 
+			| JavaElementLabels.T_POST_QUALIFIED | JavaElementLabels.D_POST_QUALIFIED | JavaElementLabels.CF_POST_QUALIFIED  | JavaElementLabels.CU_POST_QUALIFIED);
+		}		
+		
+	}
+	
+	
 
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
@@ -165,14 +235,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 
 		if (element instanceof IJavaElement) {
 			IJavaElement e= (IJavaElement) element;
-			int imageFlags= 0;
-			if (getFlag(SHOW_OVERLAY_ICONS)) {
-				imageFlags |= JavaElementImageProvider.OVERLAY_ICONS;
-			}
-			if (getFlag(SHOW_SMALL_ICONS)) {
-				imageFlags |= JavaElementImageProvider.SMALL_ICONS;
-			}			
-			return fImageLabelProvider.getImageLabel(e, imageFlags);
+		
+			return fImageLabelProvider.getImageLabel(e, fImageFlags);
 		}
 
 		Image result= fWorkbenchLabelProvider.getImage(element);
@@ -193,7 +257,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 
 		if (element instanceof IJavaElement) {
 			IJavaElement e= (IJavaElement) element;
-			return fTextLabelProvider.getTextLabel(e);
+			return JavaElementLabels.getElementLabel(e, fTextFlags);
 		}
 	
 		String text= fWorkbenchLabelProvider.getText(element);

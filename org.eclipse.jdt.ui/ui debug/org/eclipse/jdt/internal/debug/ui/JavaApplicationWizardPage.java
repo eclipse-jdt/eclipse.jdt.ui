@@ -199,8 +199,8 @@ public class JavaApplicationWizardPage extends WizardPage {
 		list.setLayoutData(gd);
 
 		fElementsList.setContentProvider(new ElementsContentProvider());
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | 
-			JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION;
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_POST_QUALIFIED | 
+			JavaElementLabelProvider.SHOW_ROOT ;
 			
 		fElementsList.setLabelProvider(new JavaElementLabelProvider(flags));
 		fElementsList.setSorter(new SimpleSorter());

@@ -31,24 +31,10 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 /**
  * Add the <code>StatusBarUpdater</code> to your ViewPart to have the statusbar
  * describing the selected elements.
- * Java Elements are formatted like this:
- * <ul>
- * <li>IJavaProject: name</li>
- * <li>IPackageFragmentRoot: underlying path (contains project if internal)</li>
- * <li>IPackageFragment: package name '-' path of parent PackageFragmentRoot</li>
- * <li>ICompilationUnit: fully qualified name '-' path of parent PackageFragmentRoot</li>
- * <li>IClassFile: fully qualified name '-' path of parent PackageFragmentRoot</li>
- * <li>IType: fully qualified name '-' path of IClassFile/ICompilationUnit or
- * , if in archive, parent PackageFragmentRoot</li>
- * <li>Elements in ICompilationUnit: name '-' path of IClassFile/ICompilationUnit or
- * , if in archive, parent PackageFragmentRoot</li>
- * <li>Fiels, Methods: name with signature '-' fully qualified name of descaring type '-'
- * path of IClassFile/ICompilationUnit or if in archive, parent PackageFragmentRoot</li>
- * </ul>
  */
 public class StatusBarUpdater implements ISelectionChangedListener {
 	
-	private final int LABEL_FLAGS= JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
+	private final int LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH |
 			JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | 
 		 	JavaElementLabels.F_APP_TYPE_SIGNATURE;
 		 	

@@ -61,6 +61,9 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(IAnnotationModel model) {
+		if (fJavaEditor.getTitleImage() == null) {
+			return;
+		}
 		Shell shell= fJavaEditor.getEditorSite().getShell();
 		if (shell != null && !shell.isDisposed()) {
 			shell.getDisplay().asyncExec(new Runnable() {

@@ -189,7 +189,7 @@ public final class JavaUI {
 		
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
 		if (consideredRoots.size() > 1)
-			flags= flags | JavaElementLabelProvider.SHOW_CONTAINER;
+			flags= flags | JavaElementLabelProvider.SHOW_ROOT;
 
 		List packages= new ArrayList();
 		Iterator iter= consideredRoots.iterator();

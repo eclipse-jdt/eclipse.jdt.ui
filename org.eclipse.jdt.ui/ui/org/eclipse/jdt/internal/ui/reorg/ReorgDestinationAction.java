@@ -195,8 +195,7 @@ abstract class ReorgDestinationAction extends ReorgAction {
 	}
 
 	private static ListSelectionDialog createUnsavedEditorDialog(List unsavedElements) {
-		int labelFlags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION 
-					| JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION;
+		int labelFlags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_POST_QUALIFIED;
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();			
 		ListSelectionDialog dialog= new ListSelectionDialog(parent, unsavedElements, new ListContentProvider(), 
 			new JavaElementLabelProvider(labelFlags), getSaveTargetsMessage());
