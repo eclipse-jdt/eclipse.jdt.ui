@@ -194,6 +194,8 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddDelegateMethods.update(selection);
 		fAddUnimplementedConstructors.update(selection);	
 		fAddJavaDocStub.update(selection);
+		fAddToClasspathAction.update(selection);
+		fRemoveFromClasspathAction.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
 		fAddTaskAction.update(selection);
