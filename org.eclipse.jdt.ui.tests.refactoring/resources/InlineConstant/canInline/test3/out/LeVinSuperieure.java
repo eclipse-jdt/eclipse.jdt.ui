@@ -2,7 +2,6 @@
 package p;
 
 class LeVinSuperieure {
-	
 	public LeVinSuperieure(final String appelation) {
 		String leNom= appelation == null ? "Pharmacology" : appelation;
 		System.out.println("Nous avons cree un superieure vin, appelle " + leNom);
