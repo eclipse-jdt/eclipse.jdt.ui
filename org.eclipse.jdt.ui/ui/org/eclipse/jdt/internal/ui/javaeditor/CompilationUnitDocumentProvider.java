@@ -183,9 +183,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		protected class CompilationUnitAnnotationModel extends ResourceMarkerAnnotationModel implements IProblemRequestor {
 			
 			private List fCollectedProblems;
-			private List fGeneratedAnnotations;
-			private boolean fTemporaryProblemsChanged= false;
-			
+			private List fGeneratedAnnotations;			
 			
 			public CompilationUnitAnnotationModel(IResource resource, boolean collectProblems) {
 				super(resource);
@@ -213,16 +211,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#beginReporting()
 			 */
 			public void beginReporting() {
-				if (!isActive())
-					return;
-					
-				fTemporaryProblemsChanged= false;
-				
-				if (fGeneratedAnnotations.size() > 0) {
-					fTemporaryProblemsChanged= true;
-					removeAnnotations(fGeneratedAnnotations, false, true);
-					fGeneratedAnnotations.clear();
-				}
 			}
 			
 			/*
@@ -240,24 +228,37 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (!isActive())
 					return;
 					
-				if (fCollectedProblems.size() > 0) {
-					fTemporaryProblemsChanged= true;
-					Iterator e= fCollectedProblems.iterator();
-					while (e.hasNext()) {
-						IProblem problem= (IProblem) e.next();
-						ProblemAnnotation annotation= new ProblemAnnotation(problem);
-						fGeneratedAnnotations.add(annotation);
-						Position p= createPositionFromProblem(problem);
-						if (p != null)
-							addAnnotation(annotation, p, false);
+				boolean temporaryProblemsChanged= false;
+				
+				synchronized (fAnnotations) {
+					
+					if (fGeneratedAnnotations.size() > 0) {
+						temporaryProblemsChanged= true;
+						
+						removeAnnotations(fGeneratedAnnotations, false, true);
+						
+						fGeneratedAnnotations.clear();
 					}
-					fCollectedProblems.clear();
+
+					if (fCollectedProblems.size() > 0) {
+						temporaryProblemsChanged= true;
+						
+						Iterator e= fCollectedProblems.iterator();
+						while (e.hasNext()) {
+							IProblem problem= (IProblem) e.next();
+							ProblemAnnotation annotation= new ProblemAnnotation(problem);
+							fGeneratedAnnotations.add(annotation);
+							Position p= createPositionFromProblem(problem);
+							if (p != null)
+								addAnnotation(annotation, p, false);
+						}
+						
+						fCollectedProblems.clear();
+					}
 				}
 					
-				if (fTemporaryProblemsChanged) {
+				if (temporaryProblemsChanged)
 					fireModelChanged(new CompilationUnitAnnotationModelEvent(this, false));
-					fTemporaryProblemsChanged= false;
-				}
 			}
 			
 			/**
@@ -319,7 +320,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					
 				return internalCreateDocument(input);
 			}
-							
+			
 			public IBuffer createBuffer(IOpenable owner) {
 				if (owner instanceof ICompilationUnit) {
 					
