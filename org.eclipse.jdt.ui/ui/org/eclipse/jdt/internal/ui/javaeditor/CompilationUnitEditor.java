@@ -703,11 +703,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"ShowOutline.", this, JavaCorrectionSourceViewer.SHOW_OUTLINE); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_OUTLINE);
-		setAction("ShowOutline", action); //$NON-NLS-1$
+		setAction(IJavaEditorActionDefinitionIds.SHOW_OUTLINE, action);
 
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenStructure.", this, JavaCorrectionSourceViewer.OPEN_STRUCTURE); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
-		setAction("OpenStructure", action); //$NON-NLS-1$
+		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
 
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$

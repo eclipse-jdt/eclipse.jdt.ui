@@ -258,8 +258,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fGotoNextMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.NEXT_MEMBER));
 		fGotoPreviousMemberAction.setAction(getAction(textEditor, GoToNextPreviousMemberAction.PREVIOUS_MEMBER));
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
-		fShowOutline.setAction(getAction(textEditor, "ShowOutline")); //$NON-NLS-1$
-		fOpenStructure.setAction(getAction(textEditor, "OpenStructure")); //$NON-NLS-1$
+		fShowOutline.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.SHOW_OUTLINE));
+		fOpenStructure.setAction(getAction(textEditor, IJavaEditorActionDefinitionIds.OPEN_STRUCTURE));
 
 		IActionBars bars= getActionBars();		
 		
