@@ -58,12 +58,15 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 			l.setText(bundle.getString(NO_ARGS_LABEL));
 		} else {
 
+			GridData gd;
 			Label l= new Label(contents, SWT.NULL);
 			l.setLayoutData(new GridData());
 			l.setText(bundle.getString(PROGARGS_LABEL));
 
 			fProgramArgs= new Text(contents, SWT.BORDER);
-			fProgramArgs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.widthHint= convertWidthInCharsToPixels(60);
+			fProgramArgs.setLayoutData(gd);
 			fProgramArgs.setText(args.getProgramArguments());
 
 			l= new Label(contents, SWT.NULL);
@@ -71,7 +74,9 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 			l.setText(bundle.getString(VMARGS_LABEL));
 
 			fVMArgs= new Text(contents, SWT.BORDER);
-			fVMArgs.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.widthHint= convertWidthInCharsToPixels(60);
+			fVMArgs.setLayoutData(gd);
 			fVMArgs.setText(args.getVMArguments());
 
 		}
