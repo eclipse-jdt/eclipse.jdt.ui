@@ -105,5 +105,6 @@ class PackageExplorerLabelProvider extends LabelProvider {
 	public void dispose() {
 		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
+		fImageLabelProvider.dispose();
 	}
 }

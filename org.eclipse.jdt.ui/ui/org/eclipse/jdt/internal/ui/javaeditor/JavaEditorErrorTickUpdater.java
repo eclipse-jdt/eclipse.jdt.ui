@@ -27,7 +27,6 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		fJavaEditor= editor;
 		Assert.isNotNull(editor);
-		fImageProvider= new ErrorTickImageProvider();
 	}
 
 	/**
@@ -42,10 +41,17 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		}
 				
 		if (model != null) {
+			if (fImageProvider == null) {
+				fImageProvider= new ErrorTickImageProvider();
+			}
 			fAnnotationModel=model;
 			fAnnotationModel.addAnnotationModelListener(this);
 			modelChanged(fAnnotationModel);
 		} else {
+			if (fImageProvider != null) {
+				fImageProvider.dispose();
+			}
+			fImageProvider= null;
 			fAnnotationModel= null;
 		}	
 	}
@@ -61,7 +67,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
-			if (jelement != null) {
+			if (fImageProvider != null && jelement != null) {
 				Image newImage= fImageProvider.getImageLabel(jelement, ErrorTickImageProvider.OVERLAY_ICONS | ErrorTickImageProvider.SMALL_ICONS);
 				if (titleImage != newImage) {
 					updatedTitleImage(newImage);

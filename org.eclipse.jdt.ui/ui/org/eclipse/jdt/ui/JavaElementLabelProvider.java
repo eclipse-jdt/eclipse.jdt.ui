@@ -267,5 +267,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public void dispose() {
 		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
+		fImageLabelProvider.dispose();
 	}
 }

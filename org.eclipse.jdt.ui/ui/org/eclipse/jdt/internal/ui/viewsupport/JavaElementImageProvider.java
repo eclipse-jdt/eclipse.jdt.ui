@@ -327,5 +327,8 @@ public class JavaElementImageProvider {
 		}
 		return 0;
 	}
+	
+	public void dispose() {
+	}
 
 }

@@ -177,13 +177,16 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	 */
 	public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
 	 	fHierarchyRefreshNeeded= true;
-
 	}		
 
 	/*
 	 * @see IElementChangedListener#elementChanged(ElementChangedEvent)
 	 */
 	public void elementChanged(ElementChangedEvent event) {
+		if (fChangeListeners.isEmpty()) {
+			return;
+		}
+		
 		IJavaElement elem= event.getDelta().getElement();
 		if (elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
 			return;

@@ -103,5 +103,6 @@ public class JavaUILabelProvider extends LabelProvider {
 	public void dispose() {
 		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
+		fImageLabelProvider.dispose();
 	}
 }

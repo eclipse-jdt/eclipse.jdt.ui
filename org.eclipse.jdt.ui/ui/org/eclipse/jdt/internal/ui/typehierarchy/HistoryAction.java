@@ -35,7 +35,9 @@ public class HistoryAction extends Action {
 	
 	private ImageDescriptor getImageDescriptor(IJavaElement elem) {
 		JavaElementImageProvider imageProvider= new JavaElementImageProvider();
-		return imageProvider.getBaseImageDescriptor(elem, 0);
+		ImageDescriptor desc= imageProvider.getBaseImageDescriptor(elem, 0);
+		imageProvider.dispose();
+		return desc;
 	}
 	
 	/*

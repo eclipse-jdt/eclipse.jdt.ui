@@ -57,5 +57,13 @@ public class HierarchyLabelProvider extends LabelProvider {
 		return super.getText(obj);
 	}
 
+	/*
+	 * @see IBaseLabelProvider#dispose()
+	 */
+	public void dispose() {
+		fImageLabelProvider.dispose();
+		super.dispose();
+	}
+
 }
 
