@@ -14,11 +14,14 @@ package org.eclipse.jsp.launching;
 import java.io.File;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.variables.LaunchVariableUtil;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.jsp.JspPluginImages;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -153,12 +156,12 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	}
 
 	/**
-	 * Defaults are empty.
-	 * 
 	 * @see org.eclipse.debug.ui.ILaunchConfigurationTab#setDefaults(ILaunchConfigurationWorkingCopy)
 	 */
 	public void setDefaults(ILaunchConfigurationWorkingCopy config) {
-		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}");
+		config.setAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "${catalina_home}"); //$NON-NLS-1$
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, TomcatLaunchDelegate.ID_TOMCAT_CLASSPATH_PROVIDER);
+		config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, "org.apache.catalina.startup.Bootstrap");
 	}
 
 	/**
@@ -167,6 +170,28 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 	public void initializeFrom(ILaunchConfiguration configuration) {
 		try {
 			fTomcatDir.setText(configuration.getAttribute(TomcatLaunchDelegate.ATTR_CATALINA_HOME, "")); //$NON-NLS-1$
+			if (configuration.isWorkingCopy()) {
+				// set VM args
+				ILaunchConfigurationWorkingCopy workingCopy = (ILaunchConfigurationWorkingCopy)configuration;
+				String home = TomcatLaunchDelegate.getCatalinaHome();
+				IPath endorsed = new Path(home).append("common").append("endorsed");  //$NON-NLS-1$//$NON-NLS-2$
+				IPath temp = new Path(home).append("temp"); //$NON-NLS-1$
+				StringBuffer args = new StringBuffer();
+				args.append("-Djava.endorsed.dirs=\""); //$NON-NLS-1$
+				args.append(endorsed.toOSString());
+				args.append("\" "); //$NON-NLS-1$
+				args.append("-Dcatalina.base=\""); //$NON-NLS-1$
+				args.append(home);
+				args.append("\" "); //$NON-NLS-1$
+				args.append("-Dcatalina.home=\""); //$NON-NLS-1$
+				args.append(home);
+				args.append("\" "); //$NON-NLS-1$
+				args.append("-Djava.io.tmpdir=\""); //$NON-NLS-1$
+				args.append(temp.toOSString());
+				args.append("\"");  //$NON-NLS-1$
+				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_ARGUMENTS, args.toString());
+				workingCopy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, "start"); //$NON-NLS-1$
+			}
 		} catch (CoreException e) {
 			setErrorMessage(e.getMessage());
 			DebugPlugin.log(e);

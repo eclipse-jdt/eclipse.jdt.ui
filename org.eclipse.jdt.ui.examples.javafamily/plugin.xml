@@ -145,5 +145,11 @@
             description="%catalinaHomeDescription">
       </variable>
    </extension>   
+   <extension point="org.eclipse.jdt.launching.classpathProviders">
+   		<classpathProvider
+   			id="org.eclipse.jsp.tomcatClasspathProvider"
+   			class="org.eclipse.jsp.launching.TomcatClasspathProvider">
+   		</classpathProvider>
+   </extension>
    
 </plugin>
