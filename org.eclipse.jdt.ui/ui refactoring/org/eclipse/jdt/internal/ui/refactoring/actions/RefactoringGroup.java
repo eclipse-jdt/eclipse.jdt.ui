@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.ui.refactoring.AbstractOpenRefactoringWizardAction;
@@ -73,7 +73,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		if (!isSelectionOk(selectionProvider))
 			return;
 		
-		createActions(selectionProvider);
+		createActions();
 		
 		for (int i= 0; i < openWizardActions.length; i++) {
 			AbstractOpenWizardAction action= openWizardActions[i];
@@ -96,7 +96,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 	}
 	
-	private void createActions(ISelectionProvider provider) {
+	private void createActions() {
 		if (fIntitialized)
 			return;
 			
@@ -107,23 +107,23 @@ public class RefactoringGroup extends ContextMenuGroup {
 		ITextBufferChangeCreator changeCreator= new DocumentTextBufferChangeCreator(documentProvider);
 		
 		openWizardActions= new AbstractOpenRefactoringWizardAction[]{
-			createRenameParametersAction(provider, changeCreator),
-			createRenameMethodInClassAction(provider, changeCreator),
-			createRenamePrivateMethodAction(provider, changeCreator),
-			createRenameStaticMethodAction(provider, changeCreator),
-			createRenameMethodInInterfaceAction(provider, changeCreator),
-			createRenameTypeAction(provider, changeCreator),
-			createRenameFieldAction(provider, changeCreator),
-			createMoveCompilationUnitAction(provider, changeCreator),
+			createRenameParametersAction(changeCreator),
+			createRenameMethodInClassAction(changeCreator),
+			createRenamePrivateMethodAction(changeCreator),
+			createRenameStaticMethodAction(changeCreator),
+			createRenameMethodInInterfaceAction(changeCreator),
+			createRenameTypeAction(changeCreator),
+			createRenameFieldAction(changeCreator),
+			createMoveCompilationUnitAction(changeCreator),
 		};
 		fIntitialized= true;
 	}
 	
 	// -------------------- method refactorings ----------------------
 	
-	private AbstractOpenRefactoringWizardAction createRenameParametersAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createRenameParametersAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameParameters.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
 				return new RenameParametersWizard();
 			}
@@ -133,11 +133,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 	
-	private AbstractOpenRefactoringWizardAction createRenameMethodInClassAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createRenameMethodInClassAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
+				return w;
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameVirtualMethodRefactoring(changeCreator, (IMethod)obj);
@@ -145,11 +147,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 
-	private AbstractOpenRefactoringWizardAction createRenameMethodInInterfaceAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createRenameMethodInInterfaceAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
+				return w;
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameMethodInInterfaceRefactoring(changeCreator, (IMethod)obj);
@@ -157,11 +161,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 	
-	private AbstractOpenRefactoringWizardAction createRenamePrivateMethodAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createRenamePrivateMethodAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
+				return w;
 			}
 			
 			protected Refactoring createNewRefactoringInstance(Object obj){
@@ -170,11 +176,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		};
 	}
 	
-	private AbstractOpenRefactoringWizardAction createRenameStaticMethodAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createRenameStaticMethodAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IMethod.class) {
 			protected Wizard createWizard() {
-				return new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameMethod", IJavaHelpContextIds.RENAME_METHOD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_METHOD_ERROR_WIZARD_PAGE);
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD);
+				return w;
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameStaticMethodRefactoring(changeCreator, (IMethod)obj);
@@ -184,11 +192,13 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 	// -------------------- type refactorings ----------------------
 	
-	private AbstractOpenRefactoringWizardAction createRenameTypeAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+	private AbstractOpenRefactoringWizardAction createRenameTypeAction(final ITextBufferChangeCreator changeCreator) {	
 		String label= RefactoringResources.getResourceString("Refactoring.RenameType.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IType.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IType.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Refactoring.RenameType", IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_TYPE_ERROR_WIZARD_PAGE); 
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameType", IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, IJavaHelpContextIds.RENAME_TYPE_ERROR_WIZARD_PAGE); 
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE);
+				return w;
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameTypeRefactoring(changeCreator, (IType)obj);
@@ -198,11 +208,14 @@ public class RefactoringGroup extends ContextMenuGroup {
 		
 	// -------------------- field refactorings ----------------------
 	
-	private AbstractOpenRefactoringWizardAction createRenameFieldAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {	
+	private AbstractOpenRefactoringWizardAction createRenameFieldAction(final ITextBufferChangeCreator changeCreator) {	
 		String label= RefactoringResources.getResourceString("Refactoring.RenameField.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, IField.class) {
+		return new AbstractOpenRefactoringWizardAction(label, IField.class) {
 			protected Wizard createWizard() { 
-				return new RenameRefactoringWizard("Refactoring.RenameField", IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE); 
+				RenameRefactoringWizard w= new RenameRefactoringWizard("Refactoring.RenameField", IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, IJavaHelpContextIds.RENAME_FIELD_ERROR_WIZARD_PAGE); 
+				//XXX: missing icon for field
+				w.setInputPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
+				return w;
 			}
 			protected Refactoring createNewRefactoringInstance(Object obj){
 				return new RenameFieldRefactoring(changeCreator, (IField)obj);
@@ -212,9 +225,9 @@ public class RefactoringGroup extends ContextMenuGroup {
 			
 	// --------- compilation unit refactorings  --------------------
 	
-	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+	private AbstractOpenRefactoringWizardAction createMoveCompilationUnitAction(final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.MoveCompilationUnit.label");
-		return new AbstractOpenRefactoringWizardAction(provider, label, ICompilationUnit.class) {
+		return new AbstractOpenRefactoringWizardAction(label, ICompilationUnit.class) {
 			protected Wizard createWizard() { 
 				return new MoveCompilationUnitWizard(); 
 			}
