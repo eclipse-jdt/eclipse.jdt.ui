@@ -19,6 +19,7 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.progress.IProgressConstants;
 
 public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		
@@ -45,7 +46,7 @@ public class JavaHierarchyPerspectiveFactory implements IPerspectiveFactory {
 		outputfolder.addPlaceholder(IPageLayout.ID_BOOKMARKS);
 		outputfolder.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		outputfolder.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
-		outputfolder.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
+		outputfolder.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 		
 		layout.addActionSet(IDebugUIConstants.LAUNCH_ACTION_SET);
 		layout.addActionSet(JavaUI.ID_ACTION_SET);

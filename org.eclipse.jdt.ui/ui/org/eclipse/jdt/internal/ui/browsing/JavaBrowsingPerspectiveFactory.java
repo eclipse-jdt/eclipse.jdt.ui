@@ -16,13 +16,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPerspectiveFactory;
-
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
 import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.progress.IProgressConstants;
 
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
@@ -109,7 +108,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
-		placeHolderBottom.addPlaceholder(JavaPerspectiveFactory.ID_PROGRESS_VIEW);
+		placeHolderBottom.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 	}
 
 	private void createHorizontalLayout(IPageLayout layout) {
@@ -143,6 +142,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 		placeHolderBottom.addPlaceholder(JavaUI.ID_SOURCE_VIEW);
 		placeHolderBottom.addPlaceholder(JavaUI.ID_JAVADOC_VIEW);
+		placeHolderBottom.addPlaceholder(IProgressConstants.PROGRESS_VIEW_ID);
 	}
 	
 	private boolean shouldShowProjectsView() {
