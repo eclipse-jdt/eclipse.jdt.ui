@@ -457,7 +457,7 @@ public class JarPackage implements java.io.Serializable {
 	public boolean canCreateJar(Shell parent) {		File file= getJarLocation().toFile();
 		if (getJarLocation().toFile().canWrite() && allowOverwrite())
 			return true;		else if ((getJarLocation().toFile().canWrite() && !allowOverwrite()) && parent != null)
-			return askForOverwritePermission(parent);					// Test if directory exists		String path= file.getAbsolutePath();		int separatorIndex = path.lastIndexOf(File.separator);		if (separatorIndex == -1) // ie.- default dir, which is fine			return true;		File directory= new File(path.substring(0, separatorIndex));		if (!directory.exists()) {			if (askToCreateDirectory(parent))				return directory.mkdirs();		}		return false;
+			return askForOverwritePermission(parent);					// Test if directory exists		String path= file.getAbsolutePath();		int separatorIndex = path.lastIndexOf(File.separator);		if (separatorIndex == -1) // ie.- default dir, which is fine			return true;		File directory= new File(path.substring(0, separatorIndex));		if (!directory.exists()) {			if (askToCreateDirectory(parent))				return directory.mkdirs();		}		return true;
 	}
 	/**
 	 * Returns human readable form of this JarPackage
