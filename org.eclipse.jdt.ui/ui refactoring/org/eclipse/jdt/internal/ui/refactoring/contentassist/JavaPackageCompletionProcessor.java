@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 public class JavaPackageCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
 	
 	private IPackageFragmentRoot fPackageFragmentRoot;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 	private ILabelProvider fLabelProvider;
 
 	private String fErrorMessage;
@@ -64,7 +64,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
      * @param labelProvider Used for the popups.
      */
 	public JavaPackageCompletionProcessor(ILabelProvider labelProvider) {
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 		fLabelProvider= labelProvider;
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();

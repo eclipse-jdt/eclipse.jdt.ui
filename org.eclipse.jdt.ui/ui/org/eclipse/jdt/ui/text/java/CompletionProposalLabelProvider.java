@@ -31,16 +31,15 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * similar to the one provided by {@link org.eclipse.jdt.ui.JavaElementLabels},
  * but the based on signatures and {@link CompletionProposal}s.
  *
- * @deprecated renamed to CompletionProposalLabelProvider
  * @see Signature
  * @since 3.1
  */
-public class ProposalLabelProvider {
+public class CompletionProposalLabelProvider {
 	
 	/**
 	 * Creates a new label provider.
 	 */
-	public ProposalLabelProvider() {
+	public CompletionProposalLabelProvider() {
 	}
 	
 	/**

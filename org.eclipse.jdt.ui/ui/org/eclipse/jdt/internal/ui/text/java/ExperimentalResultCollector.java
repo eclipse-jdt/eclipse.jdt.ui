@@ -24,14 +24,14 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.ResultCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public final class ExperimentalResultCollector extends ResultCollector {
+public final class ExperimentalResultCollector extends CompletionProposalCollector {
 
 	public ExperimentalResultCollector(ICompilationUnit cu) {
 		super(cu);

@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
@@ -51,7 +51,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 
 	private char[] fProposalAutoActivationSet;
 	private IJavaModel fRoot;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 	private JavaElementLabelProvider fLabelProvider;
 
 	public JavaSourcePackageFragmentRootCompletionProcessor() {
@@ -59,7 +59,7 @@ public class JavaSourcePackageFragmentRootCompletionProcessor implements IConten
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet= triggers.toCharArray();
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS);
 	}
 

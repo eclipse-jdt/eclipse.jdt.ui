@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
@@ -52,7 +52,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
 	private IEditorPart fEditor;
 	private char[] fProposalAutoActivationSet;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 	private TemplateEngine fTemplateEngine;
 	private int fSubProcessorFlags;
 	private String fErrorMessage;
@@ -69,7 +69,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		fSubProcessorFlags= 0;
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 		fSubProcessors= null;
 		fErrorMessage= null;
 	}

@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 
 public class CUPositionCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
@@ -59,7 +59,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 	
 	private CompletionContextRequestor fCompletionContextRequestor;
 
@@ -73,7 +73,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	public CUPositionCompletionProcessor(CUPositionCompletionRequestor completionRequestor) {
 		fCompletionRequestor= completionRequestor;
 		
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);
 		fProposalAutoActivationSet = triggers.toCharArray();

@@ -21,17 +21,16 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
  * Comparator for java completion proposals. Completion proposals can be sorted
  * by relevance or alphabetically.
  * 
- * @deprecated renamed to CompletionProposalComparator
  * @since 3.1
  */
-public final class JavaCompletionProposalComparator implements Comparator {
+public final class CompletionProposalComparator implements Comparator {
 	
 	private boolean fOrderAlphabetically;
 
 	/**
 	 * Creates a comparator that sorts by relevance.
 	 */
-	public JavaCompletionProposalComparator() {
+	public CompletionProposalComparator() {
 		fOrderAlphabetically= false;
 	}
 	

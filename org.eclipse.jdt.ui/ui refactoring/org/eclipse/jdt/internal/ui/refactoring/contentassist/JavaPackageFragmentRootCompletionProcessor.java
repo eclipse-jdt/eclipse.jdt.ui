@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -49,7 +49,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	private static final ImageDescriptorRegistry IMAGE_DESC_REGISTRY= JavaPlugin.getImageDescriptorRegistry();
 	
 	private IPackageFragmentRoot fPackageFragmentRoot;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 
 	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
@@ -62,7 +62,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	 */
 	public JavaPackageFragmentRootCompletionProcessor(IPackageFragmentRoot packageFragmentRoot) {
 		fPackageFragmentRoot= packageFragmentRoot;
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		String triggers= preferenceStore.getString(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVA);

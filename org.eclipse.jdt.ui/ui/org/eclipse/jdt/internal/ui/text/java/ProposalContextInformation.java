@@ -21,7 +21,7 @@ import org.eclipse.jface.text.contentassist.IContextInformationExtension;
 
 import org.eclipse.jdt.core.CompletionProposal;
 
-import org.eclipse.jdt.ui.text.java.ProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -34,7 +34,7 @@ public final class ProposalContextInformation implements IContextInformation, IC
 	private final CompletionProposal fProposal;
 	
 	/* lazy cache */
-	private ProposalLabelProvider fLabelProvider;
+	private CompletionProposalLabelProvider fLabelProvider;
 	private String fContextDisplayString;
 	private String fInformationDisplayString;
 	private Image fImage;
@@ -101,9 +101,9 @@ public final class ProposalContextInformation implements IContextInformation, IC
 		return -1;
 	}
 	
-	private ProposalLabelProvider getLabelProvider() {
+	private CompletionProposalLabelProvider getLabelProvider() {
 		if (fLabelProvider == null)
-			fLabelProvider= new ProposalLabelProvider();
+			fLabelProvider= new CompletionProposalLabelProvider();
 		return fLabelProvider;
 	}
 }

@@ -44,7 +44,7 @@ import org.eclipse.ui.ide.IDE;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -139,7 +139,7 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 			}
 			
 			ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-			Arrays.sort(res, new JavaCompletionProposalComparator());
+			Arrays.sort(res, new CompletionProposalComparator());
 			return res;
 		} finally {
 			try {

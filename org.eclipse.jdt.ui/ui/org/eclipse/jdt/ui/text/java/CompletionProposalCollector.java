@@ -63,10 +63,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
  * <p>
  * Clients may instantiate or subclass.
  * </p>
- * @deprecated renamed to CompletionProposalCollector
  * @since 3.1
  */
-public class ResultCollector extends CompletionRequestor {
+public class CompletionProposalCollector extends CompletionRequestor {
 
 	/** Tells whether this class is in debug mode. */
 	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
@@ -80,7 +79,7 @@ public class ResultCollector extends CompletionRequestor {
 	/** Triggers for variables. Do not modify. */
 	protected final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';', '.' };
 	
-	private final ProposalLabelProvider fLabelProvider= new ProposalLabelProvider();
+	private final CompletionProposalLabelProvider fLabelProvider= new CompletionProposalLabelProvider();
 	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 
 	private final List fJavaProposals= new ArrayList();
@@ -108,7 +107,7 @@ public class ResultCollector extends CompletionRequestor {
 	 * 
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
-	public ResultCollector(ICompilationUnit cu) {
+	public CompletionProposalCollector(ICompilationUnit cu) {
 		this(cu.getJavaProject());
 		fCompilationUnit= cu;
 	}
@@ -118,19 +117,18 @@ public class ResultCollector extends CompletionRequestor {
 	 * for anonymous types and method declarations are not created when using
 	 * this constructor, as those need to know the compilation unit that they
 	 * are created on. Use
-	 * {@link ResultCollector#ResultCollector(ICompilationUnit)} instead to get
-	 * all proposals.
+	 * {@link CompletionProposalCollector#CompletionProposalCollector(ICompilationUnit)}
+	 * instead to get all proposals.
 	 * <p>
-	 * If the passed java project is <code>null</code>, no javadoc will be
+	 * If the passed Java project is <code>null</code>, no javadoc will be
 	 * available as
 	 * {@link org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo() additional info}
 	 * on the created (e.g. method and type) proposals.
 	 * </p>
-	 * 
 	 * @param project the project that the result collector will operate on, or
 	 *        <code>null</code>
 	 */
-	public ResultCollector(IJavaProject project) {
+	public CompletionProposalCollector(IJavaProject project) {
 		fJavaProject= project;
 		fCompilationUnit= null;
 
@@ -407,7 +405,7 @@ public class ResultCollector extends CompletionRequestor {
 	 * 
 	 * @return the proposal label provider used by the receiver
 	 */
-	protected final ProposalLabelProvider getLabelProvider() {
+	protected final CompletionProposalLabelProvider getLabelProvider() {
 		return fLabelProvider;
 	}
 

@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.ui.text.java.ResultCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
@@ -115,12 +115,12 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		EditorTestHelper.joinJobs(1000, 10000, 100);
 	}
 	
-	private IJavaCompletionProposal[] codeComplete(ResultCollector collector) throws JavaModelException {
+	private IJavaCompletionProposal[] codeComplete(CompletionProposalCollector collector) throws JavaModelException {
 		collector.setReplacementLength(0);
 
 		fCU.codeComplete(fCodeAssistOffset, collector);
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
-		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
+		CompletionProposalComparator comparator= new CompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
 		Arrays.sort(proposals, comparator);
 		return proposals;
@@ -147,7 +147,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			ResultCollector collector= new ResultCollector(fCU);
+			CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 
 			applyProposal(proposals[0], "clone()");
@@ -170,7 +170,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			ResultCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 
 			applyProposal(proposals[0], "clone()");
@@ -195,7 +195,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			ResultCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 
 			applyProposal(proposals[0], "clone()");
@@ -254,7 +254,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		for (int run= 0; run < runs; run++) {
 			meter.start();
 			
-			ResultCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 
 			applyProposal(proposals[0], "clone()");

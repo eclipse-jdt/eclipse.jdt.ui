@@ -38,8 +38,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
-import org.eclipse.jdt.ui.text.java.ResultCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -88,7 +88,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertEqualString(doc.get(), result);
 	}
 
-	private void codeComplete(ICompilationUnit cu, int offset, ResultCollector collector) throws JavaModelException {
+	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
 		cu.codeComplete(offset, collector);
 	}
 
@@ -142,7 +142,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -192,7 +192,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -246,7 +246,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector(cu);
+			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -310,7 +310,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -369,7 +369,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector(cu);
+			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -431,7 +431,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector(cu);
+			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -489,7 +489,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -497,7 +497,7 @@ public class CodeCompletionTest extends CoreTests {
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
 		assertEquals(12, proposals.length);
-		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
+		CompletionProposalComparator comparator= new CompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
 		Arrays.sort(proposals, comparator);
 
@@ -540,14 +540,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
+		CompletionProposalComparator comparator= new CompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
 		Arrays.sort(proposals, comparator);
 
@@ -589,14 +589,14 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
 
-		JavaCompletionProposalComparator comparator= new JavaCompletionProposalComparator();
+		CompletionProposalComparator comparator= new CompletionProposalComparator();
 		comparator.setOrderAlphabetically(true);
 		Arrays.sort(proposals, comparator);
 
@@ -635,7 +635,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -687,7 +687,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -749,7 +749,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -812,7 +812,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -888,7 +888,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 		JavaModelUtil.reconcile(cu);
 		codeComplete(cu, offset, collector);
@@ -950,7 +950,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		ResultCollector collector= new ResultCollector(cu);
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -1013,7 +1013,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			ResultCollector collector= new ResultCollector(cu);
+			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);

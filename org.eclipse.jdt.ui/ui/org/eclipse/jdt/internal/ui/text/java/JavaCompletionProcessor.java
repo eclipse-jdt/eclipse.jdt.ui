@@ -45,8 +45,8 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.ResultCollector;
-import org.eclipse.jdt.ui.text.java.JavaCompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -123,7 +123,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	private IContextInformationValidator fValidator;
 	
 	private char[] fProposalAutoActivationSet;
-	private JavaCompletionProposalComparator fComparator;
+	private CompletionProposalComparator fComparator;
 	
 	private TemplateEngine fTemplateEngine;
 	
@@ -142,7 +142,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);
 		
-		fComparator= new JavaCompletionProposalComparator();
+		fComparator= new CompletionProposalComparator();
 	}
 	
 	/**
@@ -318,11 +318,11 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
 		ICompletionProposal[] results;
 
-		ResultCollector collector;
+		CompletionProposalCollector collector;
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
 			collector= new ExperimentalResultCollector(unit);
 		} else {
-			collector= new ResultCollector(unit);
+			collector= new CompletionProposalCollector(unit);
 		}
 			
 		try {
