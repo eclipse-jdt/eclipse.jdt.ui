@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -43,6 +44,8 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 			for (int i= 0; i < javaElements.length; i++) {
 				IJavaElement element= javaElements[i];
 				if ((element instanceof IType) && ((IType)element).isLocal())
+					return false;
+				if ((element instanceof IPackageDeclaration))
 					return false;
 			}
 		}
