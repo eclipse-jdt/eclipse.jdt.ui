@@ -1,6 +1,6 @@
 /* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;
 import java.io.BufferedWriter;
-import java.io.InputStream;
+import java.io.File;import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
@@ -15,9 +15,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
@@ -454,12 +454,10 @@ public class JarPackage implements java.io.Serializable {
 	 * 			or <code>null</code> if no dialog should be presented
 	 * @return	<code>true</code> if it is OK to create the JAR
 	 */
-	public boolean canCreateJar(Shell parent) {
-		if (allowOverwrite() || !getJarLocation().toFile().canWrite())
-			return true;
-		else if (parent != null)
-			return askForOverwritePermission(parent);
-		return false;
+	public boolean canCreateJar(Shell parent) {		File file= getJarLocation().toFile();
+		if (getJarLocation().toFile().canWrite() && allowOverwrite())
+			return true;		else if ((getJarLocation().toFile().canWrite() && !allowOverwrite()) && parent != null)
+			return askForOverwritePermission(parent);					// Test if directory exists		String path= file.getAbsolutePath();		int separatorIndex = path.lastIndexOf(File.separator);		if (separatorIndex == -1) // ie.- default dir, which is fine			return true;		File directory= new File(path.substring(0, separatorIndex));		if (!directory.exists()) {			if (askToCreateDirectory(parent))				return directory.mkdirs();		}		return false;
 	}
 	/**
 	 * Returns human readable form of this JarPackage
@@ -484,8 +482,7 @@ public class JarPackage implements java.io.Serializable {
 		}
 		return out.toString();
 	}
-
-	private boolean askForOverwritePermission(final Shell parent) {
+	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, "Confirm Create", "The location for the JAR file does not exist. Would you like to create it?");	}	private boolean askForOverwritePermission(final Shell parent) {		return queryDialog(parent, "Confirm Replace", "The JAR '" + getJarLocation().toOSString() + "' already exists.\nDo you want to overwrite it?");	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
 		
 		class DialogReturnValue {
 			boolean value;
@@ -497,7 +494,7 @@ public class JarPackage implements java.io.Serializable {
 		final DialogReturnValue returnValue= new DialogReturnValue();
 		Runnable runnable= new Runnable() {
 			public void run() {
-				returnValue.value= MessageDialog.openQuestion(parent, "Confirm Replace", "The JAR '" + getJarLocation().toOSString() + "' already exists.\nDo you want to overwrite it?");
+				returnValue.value= MessageDialog.openQuestion(parent, title, message);
 			}
 		};
 		display.syncExec(runnable);	
