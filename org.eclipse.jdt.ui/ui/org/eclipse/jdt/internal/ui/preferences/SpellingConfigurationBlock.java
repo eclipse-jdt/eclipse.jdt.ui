@@ -313,7 +313,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		final Set locales= SpellCheckEngine.getAvailableLocales();
 
 		Combo combo= addComboBox(engine, label, PREF_SPELLING_LOCALE, getDictionaryCodes(locales), getDictionaryLabels(locales), 0);
-		combo.setEnabled(locales.size() > 0);
+		combo.setEnabled(locales.size() > 1);
 		
 		new Label(engine, SWT.NONE); // placeholder
 
