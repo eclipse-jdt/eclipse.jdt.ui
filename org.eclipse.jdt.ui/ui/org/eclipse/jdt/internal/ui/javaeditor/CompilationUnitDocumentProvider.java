@@ -172,22 +172,24 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			
 		IFileEditorInput input= (IFileEditorInput) element;
 		ICompilationUnit original= createCompilationUnit(input.getFile());
-		if (original == null)
-			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_CONTENTS));
-			
-		try {
-			
-			ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
-			IDocument d= createCompilationUnitDocument(c);
-			IAnnotationModel m= createAnnotationModel(element);
-			_FileSynchronizer f= new _FileSynchronizer(input);
-			f.install();
-			BufferSynchronizer b= new BufferSynchronizer(d, c);
-			b.install();
-			return new CompilationUnitInfo(d, m, f, c, b);
-			
-		} catch (JavaModelException x) {
-			throw new CoreException(x.getStatus());
+		if (original != null) {
+				
+			try {
+				
+				ICompilationUnit c= (ICompilationUnit) original.getWorkingCopy();
+				IDocument d= createCompilationUnitDocument(c);
+				IAnnotationModel m= createCompilationUnitAnnotationModel(element);
+				_FileSynchronizer f= new _FileSynchronizer(input);
+				f.install();
+				BufferSynchronizer b= new BufferSynchronizer(d, c);
+				b.install();
+				return new CompilationUnitInfo(d, m, f, c, b);
+				
+			} catch (JavaModelException x) {
+				throw new CoreException(x.getStatus());
+			}
+		} else {		
+			return super.createElementInfo(element);
 		}
 	}
 	
@@ -196,10 +198,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected void disposeElementInfo(Object element, ElementInfo info) {
 		
-		CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
-		if (cuInfo.fBufferSynchronizer != null)
-			cuInfo.fBufferSynchronizer.uninstall();
-		cuInfo.fCopy.destroy();
+		if (info instanceof CompilationUnitInfo) {
+			CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
+			
+			if (cuInfo.fBufferSynchronizer != null)
+				cuInfo.fBufferSynchronizer.uninstall();
+			
+			cuInfo.fCopy.destroy();
+		}
 		
 		super.disposeElementInfo(element, info);
 	}
@@ -208,8 +214,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * @see AbstractDocumentProvider#aboutToChange(Object)
 	 */
 	public void aboutToChange(Object element) {
-		CompilationUnitInfo info= (CompilationUnitInfo) getElementInfo(element);
-		if (info != null) {
+		
+		ElementInfo elementInfo= getElementInfo(element);		
+		if (elementInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
 			
 			if (info.fBufferSynchronizer != null)
 				info.fBufferSynchronizer.uninstall();
@@ -222,11 +230,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 * @see AbstractDocumentProvider#changed(Object)
 	 */
 	public void changed(Object element) {
-		CompilationUnitInfo info= (CompilationUnitInfo) getElementInfo(element);
 		
-		if (info != null && info.fBufferSynchronizer != null) 
-			info.fBufferSynchronizer.install();
-			
+		ElementInfo elementInfo= getElementInfo(element);		
+		if (elementInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+			if (info.fBufferSynchronizer != null) 
+				info.fBufferSynchronizer.install();
+		}
+		
 		super.changed(element);
 	}
 	
@@ -235,8 +246,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	 */
 	protected void doSaveDocument(IProgressMonitor monitor, Object element, IDocument document) throws CoreException {
 				
-		CompilationUnitInfo info= (CompilationUnitInfo) getElementInfo(element);
-		if (info != null) {							
+		ElementInfo elementInfo= getElementInfo(element);		
+		if (elementInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+			
 			try {					
 				// update structure, assumes lock on info.fCopy
 				info.fCopy.reconcile();
@@ -255,16 +268,17 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						
 			} catch (JavaModelException x) {
 				throw new CoreException(x.getStatus());
-			}			
+			}
+			
 		} else {
 			super.doSaveDocument(monitor, element, document);
 		}		
 	}
 		
 	/**
-	 * @see AbstractDocumentProvider#createAnnotationModel
+	 * Replaces createAnnotionModel of the super class
 	 */
-	protected IAnnotationModel createAnnotationModel(Object element) throws CoreException {
+	protected IAnnotationModel createCompilationUnitAnnotationModel(Object element) throws CoreException {
 		if ( !(element instanceof IFileEditorInput))
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE));
 		
@@ -272,14 +286,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return new CompilationUnitMarkerAnnotationModel(input.getFile());
 	}
 	
-	/**
-	 * @see AbstractDocumentProvider#createDocument
-	 */
-	protected IDocument createDocument(Object element) throws CoreException {
-		Assert.isTrue(false);
-		return null;
-	}
-		
 	/**
 	 * Replaces createDocument of the super class.
 	 */
@@ -310,22 +316,25 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		if (element == null)
 			return;
 			
-		CompilationUnitInfo info= (CompilationUnitInfo) getElementInfo(element);
-		if (info != null && info.fCanBeSaved) {
-			try {
-				
-				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
-				
-				fireElementContentAboutToBeReplaced(element);
-				
-				info.fDocument.set(original.getSource());
-				info.fCanBeSaved= false;
-				info.fDocument.addDocumentListener(info);
-				
-				fireElementContentReplaced(element);
-				
-			} catch (JavaModelException x) {
-				throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
+		ElementInfo elementInfo= getElementInfo(element);		
+		if (elementInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+			if (info.fCanBeSaved) {
+				try {
+					
+					ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+					
+					fireElementContentAboutToBeReplaced(element);
+					
+					info.fDocument.set(original.getSource());
+					info.fCanBeSaved= false;
+					info.fDocument.addDocumentListener(info);
+					
+					fireElementContentReplaced(element);
+					
+				} catch (JavaModelException x) {
+					throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, x));
+				}
 			}
 		} else {
 			super.resetDocument(element);
@@ -349,9 +358,15 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	/**
 	 * @see IWorkingCopyManager#getWorkingCopy(Object)
 	 */
-	public ICompilationUnit getWorkingCopy(IEditorInput input) {
-		CompilationUnitInfo info= (CompilationUnitInfo) getElementInfo(input);
-		return info == null ? null : info.fCopy;
+	public ICompilationUnit getWorkingCopy(IEditorInput element) {
+		
+		ElementInfo elementInfo= getElementInfo(element);		
+		if (elementInfo instanceof CompilationUnitInfo) {
+			CompilationUnitInfo info= (CompilationUnitInfo) elementInfo;
+			return info.fCopy;
+		}
+		
+		return null;
 	}
 	
 	/**

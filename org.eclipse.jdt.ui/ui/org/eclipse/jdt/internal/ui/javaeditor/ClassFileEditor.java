@@ -12,14 +12,14 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
-import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.IMemento;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -81,6 +81,14 @@ public class ClassFileEditor extends JavaEditor {
 	 * @see EditorPart#init(IEditorSite, IEditorInput)
 	 */
 	public void init(IEditorSite site, IEditorInput input) throws PartInitException {
+		
+		if (input instanceof IFileEditorInput) {
+			IFileEditorInput fileInput= (IFileEditorInput) input;
+			Object element= JavaCore.create(fileInput.getFile());
+			if (element instanceof IClassFile)
+				input= new ClassFileEditorInput((IClassFile) element);
+		}
+		
 		if (!(input instanceof ClassFileEditorInput))
 			throw new PartInitException(getResourceString("Editor.Error.invalid_input"));
 			
