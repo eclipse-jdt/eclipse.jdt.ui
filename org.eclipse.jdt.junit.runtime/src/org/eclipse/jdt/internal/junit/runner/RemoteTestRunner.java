@@ -595,6 +595,16 @@ public class RemoteTestRunner implements TestListener {
 	}
 	
 	private String getTestName(Test test) {
+		if (test instanceof TestCase) {
+			TestCase testCase= (TestCase) test;
+			return testCase.getName() + "(" + test.getClass().getName() + ")";
+		}
+		if (test instanceof TestSuite) {
+			TestSuite suite= (TestSuite) test;
+			if (suite.getName() != null)
+				return suite.getName();
+			return getClass().getName();
+		}
 		return test.toString();
 	}
 	
