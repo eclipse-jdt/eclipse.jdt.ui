@@ -20,6 +20,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
@@ -48,6 +49,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS  | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
+		fLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
 	}	
 
 	public String getText(Object o) {
