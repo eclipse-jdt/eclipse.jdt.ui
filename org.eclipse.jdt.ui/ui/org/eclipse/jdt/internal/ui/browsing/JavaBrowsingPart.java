@@ -380,11 +380,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return false;
 	}
 
-	boolean isAncestorOf(Object ancestor, Object element) {
+	protected boolean isAncestorOf(Object ancestor, Object element) {
 		if (element instanceof IJavaElement && ancestor instanceof IJavaElement)
-			return element.equals(ancestor) || isAncestorOf(ancestor, ((IJavaElement)element).getParent());
-
+			return !element.equals(ancestor) && internalIsAncestorOf((IJavaElement)ancestor, (IJavaElement)element);
 		return false;
+	}
+	
+	private boolean internalIsAncestorOf(IJavaElement ancestor, IJavaElement element) {
+		if (element != null)
+			return element.equals(ancestor) || internalIsAncestorOf(ancestor, element.getParent());
+		else
+			return false;
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {

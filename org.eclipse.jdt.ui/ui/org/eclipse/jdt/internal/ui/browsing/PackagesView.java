@@ -57,25 +57,14 @@ public class PackagesView extends JavaBrowsingPart {
 	}
 
 	/*
-	 * Gets suitable input and ensures that either projects
-	 * or package fragment roots are selected.
+	 * Gets suitable input.
 	 */
 	protected Set getInputFromSelection(ISelection selection) {
 		Set list= super.getInputFromSelection(selection);
-		Iterator iter= list.iterator();
-		boolean containsProject= false;
-		int i= 0;
-		while (iter.hasNext()) {
-			IJavaElement element= (IJavaElement)iter.next();
-			if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
-				if (i > 0 && !containsProject)
-					return Collections.EMPTY_SET;
-				containsProject= true;
-			} else if (i > 0 && containsProject)
-				return Collections.EMPTY_SET;
-			i++;
-		}
-		return list;
+		if (list.size() == 1)
+			return list;
+		else
+			return Collections.EMPTY_SET;
 	}
 
 	/**

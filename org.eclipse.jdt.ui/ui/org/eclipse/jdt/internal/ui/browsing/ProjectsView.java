@@ -29,7 +29,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	 * @param parent	the parent for the viewer
 	 */
 	protected StructuredViewer createViewer(Composite parent) {
-		return new ProblemTreeViewer(parent, SWT.SINGLE);
+		return new ProblemTreeViewer(parent, SWT.MULTI);
 	}
 	
 	/**
