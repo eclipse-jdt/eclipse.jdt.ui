@@ -123,28 +123,30 @@ public class UnresolvedElementsSubProcessor {
 		// new variables
 		ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
 		ITypeBinding senderBinding= binding != null ? binding : ASTResolving.getBindingOfParentType(node);
-		String label;
-		Image image;
-		if (binding == null) {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", simpleName.getIdentifier()); //$NON-NLS-1$
-			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
-		} else {
-			label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), binding.getName() } ); //$NON-NLS-1$
-			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+
+		if (senderBinding.isFromSource() && targetCU != null && JavaModelUtil.isEditable(targetCU)) {
+			String label;
+			Image image;
+			if (binding == null) {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.description", simpleName.getIdentifier()); //$NON-NLS-1$
+				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+			} else {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createfield.other.description", new Object[] { simpleName.getIdentifier(), binding.getName() } ); //$NON-NLS-1$
+				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+			}
+			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 2, image));
 		}
-		proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderBinding, 2, image));
-		
 		if (binding == null) {
 			BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
 			int type= bodyDeclaration.getNodeType();
 			if (type == ASTNode.METHOD_DECLARATION) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", simpleName.getIdentifier()); //$NON-NLS-1$
-				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createparameter.description", simpleName.getIdentifier()); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, 1, image));
 			}
 			if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
-				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
-				image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 				proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.LOCAL, simpleName, null, 3, image));
 			}
 		}
@@ -369,7 +371,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (binding != null && binding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, binding);
-			if (targetCU != null) {			
+			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {			
 				String label;
 				Image image;
 				if (cu.equals(targetCU)) {
@@ -421,7 +423,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 		if (targetBinding != null && targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
-			if (targetCU != null) {
+			if (targetCU != null && JavaModelUtil.isEditable(targetCU)) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", targetBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
 				proposals.add(new NewMethodCompletionProposal(label, targetCU, selectedNode, arguments, targetBinding, 1, image));
