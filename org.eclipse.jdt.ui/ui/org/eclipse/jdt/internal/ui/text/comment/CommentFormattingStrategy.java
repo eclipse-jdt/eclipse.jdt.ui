@@ -200,7 +200,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				fLastHeaderHash= document.get(0, mainTokenEnd).hashCode();
 			} catch (BadLocationException e) {
 				// should not happen -> recompute next time
-				fLastMainTokenEnd= -1;
+				mainTokenEnd= -1;
 			}
 			
 			fLastDocumentHash= document.hashCode();
