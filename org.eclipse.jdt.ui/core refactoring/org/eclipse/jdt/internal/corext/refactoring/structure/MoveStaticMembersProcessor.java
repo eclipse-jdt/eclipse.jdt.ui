@@ -171,7 +171,9 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			member.getElementType() != IJavaElement.FIELD &&
 			member.getElementType() != IJavaElement.TYPE)
 				return false;
-
+		if (JdtFlags.isEnum(member))
+			return false;
+		
 		if (member.getDeclaringType() == null)
 			return false;
 		
