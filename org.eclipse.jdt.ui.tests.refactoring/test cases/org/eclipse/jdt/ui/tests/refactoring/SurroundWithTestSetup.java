@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -21,10 +23,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.template.CodeTemplates;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 
 public class SurroundWithTestSetup extends TestSetup {
 	

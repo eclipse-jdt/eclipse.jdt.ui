@@ -13,12 +13,14 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jface.text.templates.Template;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
