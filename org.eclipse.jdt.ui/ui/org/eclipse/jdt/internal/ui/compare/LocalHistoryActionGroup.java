@@ -30,10 +30,22 @@ public class LocalHistoryActionGroup extends ActionGroup {
 	public LocalHistoryActionGroup(CompilationUnitEditor editor, String groupName) {
 		Assert.isNotNull(groupName);
 		fGroupName= groupName;
-		fCompareWith= new JavaHistoryEditorAction(editor, new JavaCompareWithEditionAction(), CompareMessages.getString("LocalHistoryActionGroup.action.compare_with")); //$NON-NLS-1$
-		fReplaceWithPrevious= new JavaHistoryEditorAction(editor, new JavaReplaceWithPreviousEditionAction(), CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous")); //$NON-NLS-1$
-		fReplaceWith= new JavaHistoryEditorAction(editor, new JavaReplaceWithEditionAction(), CompareMessages.getString("LocalHistoryActionGroup.action.replace_with")); //$NON-NLS-1$
-		fAddFrom= new JavaHistoryEditorAction(editor, new JavaAddElementFromHistory(), CompareMessages.getString("LocalHistoryActionGroup.action.add")); //$NON-NLS-1$
+		fCompareWith= new JavaHistoryEditorAction(editor, new JavaCompareWithEditionAction(), 
+			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.title"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.compare_with.message")); //$NON-NLS-1$
+		fReplaceWithPrevious= new JavaHistoryEditorAction(editor, new JavaReplaceWithPreviousEditionAction(), 
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.title"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with_previous.message")); //$NON-NLS-1$
+		fReplaceWith= new JavaHistoryEditorAction(editor, new JavaReplaceWithEditionAction(), 
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.title"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.replace_with.message")); //$NON-NLS-1$
+		fAddFrom= new JavaHistoryEditorAction(editor, new JavaAddElementFromHistory(), 
+			CompareMessages.getString("LocalHistoryActionGroup.action.add"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.add.title"), //$NON-NLS-1$
+			CompareMessages.getString("LocalHistoryActionGroup.action.add.message")); //$NON-NLS-1$
 	}
 
 	public void fillContextMenu(IMenuManager menu) {

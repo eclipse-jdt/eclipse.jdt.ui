@@ -166,13 +166,19 @@ public abstract class JavaHistoryAction implements IActionDelegate {
 		}
 		return null;
 	}
-			
+	
+	protected boolean isEnabled(IFile file) {
+		if (file == null)
+			return false;
+		return !(fModifiesFile && file.isReadOnly());
+	}
+	
 	protected boolean isEnabled(ISelection selection) {
 		IMember m= getEditionElement(selection);
 		if (m == null)
 			return false;
 		IFile file= getFile(m);
-		if (fModifiesFile && file != null && file.isReadOnly())
+		if (!isEnabled(file))
 			return false;
 		if (file != null && beingEdited(file))
 			return getWorkingCopy(m) != null;
