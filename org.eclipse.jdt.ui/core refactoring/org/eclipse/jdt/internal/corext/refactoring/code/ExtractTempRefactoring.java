@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -364,7 +365,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		        && selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
 	}
 
-	private TextEdit createAndInsertTempDeclaration() throws JavaModelException, CoreException {
+	private TextEdit createAndInsertTempDeclaration() throws CoreException {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
 		int insertOffset= insertBefore.getStartPosition();
 		String text= createTempDeclarationSource(getInitializerSource(), true) + getIndent(insertBefore);
@@ -616,6 +617,8 @@ public class ExtractTempRefactoring extends Refactoring {
     		if (node.equals(vdf.getName()))
     			return false;
     	}
+    	if (isMethodParameter(node))
+			return false;	
     	if (parent instanceof ExpressionStatement)
     		return false;	
     	if (isLeftValue(node))
@@ -623,7 +626,13 @@ public class ExtractTempRefactoring extends Refactoring {
         return true;
     }
     
-    private static boolean isLeftValue(ASTNode node){
+    private static boolean isMethodParameter(ASTNode node) {
+    	return (node instanceof SimpleName) 
+    		&& (node.getParent() instanceof SingleVariableDeclaration) 
+    		&& (node.getParent().getParent() instanceof MethodDeclaration);
+	}
+
+	private static boolean isLeftValue(ASTNode node){
 		ASTNode parent= node.getParent();
 		if (parent instanceof Assignment){
 			Assignment assignment= (Assignment)parent;
