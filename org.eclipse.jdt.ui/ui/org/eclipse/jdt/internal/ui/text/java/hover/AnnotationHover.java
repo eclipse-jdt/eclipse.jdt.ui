@@ -75,7 +75,7 @@ public class AnnotationHover extends AbstractJavaEditorTextHover {
 				}
 
 				Position p= model.getPosition(a);
-				if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+				if (p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 					String msg= ((IJavaAnnotation) a).getMessage();
 					if (msg != null && msg.trim().length() > 0)
 						return formatMessage(msg);

@@ -53,7 +53,7 @@ public class AnnotationTextHover implements ITextHover {
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
 			Position p= fModel.getPosition(a);
-			if (p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
+			if (p != null && p.overlapsWith(hoverRegion.getOffset(), hoverRegion.getLength())) {
 				if (a instanceof IAnnotationExtension)  {
 					String msg= ((IAnnotationExtension) a).getMessage();
 					if (msg != null && msg.trim().length() > 0)
