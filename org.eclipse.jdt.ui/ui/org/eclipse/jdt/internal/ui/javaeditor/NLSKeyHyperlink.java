@@ -16,9 +16,12 @@ import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPartitioningException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.hyperlink.IHyperlink;
 
 import org.eclipse.ui.IEditorPart;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertyKeyHyperlinkDetector;
 
 
@@ -129,6 +133,12 @@ public class NLSKeyHyperlink implements IHyperlink {
 									IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
 									found= keyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
 								}
+							} else if (document instanceof IDocumentExtension3) {
+								// Fall back: test partition
+								ITypedRegion partition= null;
+								partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
+								found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
+										&& keyName.equals(document.get(partition.getOffset(), partition.getLength()).trim()); 
 							}
 							// Prevent endless loop (panic code, shouldn't be needed)
 							if (offset == region.getOffset())
@@ -138,6 +148,9 @@ public class NLSKeyHyperlink implements IHyperlink {
 						}
 					}
 				} catch (BadLocationException ex) {
+					found= false;
+				} catch (BadPartitioningException e1) {
+					found= false;
 				}
 			}
 			if (found)
