@@ -48,6 +48,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -55,6 +56,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
@@ -166,9 +168,19 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsuccq.gif"); //$NON-NLS-1$
 	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
 	
+	// Persistance tags.
+	static final String TAG_PAGE= "page"; //$NON-NLS-1$
+	static final String TAG_RATIO= "ratio"; //$NON-NLS-1$
+	static final String TAG_TRACEFILTER= "tracefilter"; //$NON-NLS-1$
+
+	private IMemento fMemento;	
+
 	Image fOriginalViewImage;
 	IElementChangedListener fDirtyListener;
 	
+	
+	private CTabFolder fTabFolder;
+	private SashForm fSashForm;
 	
 	private class StopAction extends Action{
 		public StopAction() {
@@ -251,6 +263,20 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 			}
 			return true;			
 		}
+	}
+	
+	public void init(IViewSite site, IMemento memento) throws PartInitException {
+		super.init(site, memento);
+		fMemento= memento;
+	}
+
+	private void restoreLayoutState(IMemento memento) {
+		Integer page= memento.getInteger(TAG_PAGE);
+		fTabFolder.setSelection(page.intValue());
+		
+		Integer ratio= memento.getInteger(TAG_RATIO);
+		if (ratio != null) 
+			fSashForm.setWeights(new int[] { ratio.intValue(), 1000 - ratio.intValue() });
 	}
 	
 	/**
@@ -734,13 +760,13 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	private SashForm createSashForm(Composite parent) {
-		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);		
-		ViewForm top= new ViewForm(sashForm, SWT.NONE);
-		CTabFolder tabFolder= createTestRunViews(top);
-		tabFolder.setLayoutData(new TabFolderLayout());
-		top.setContent(tabFolder);
+		fSashForm= new SashForm(parent, SWT.VERTICAL);
+		ViewForm top= new ViewForm(fSashForm, SWT.NONE);
+		fTabFolder= createTestRunViews(top);
+		fTabFolder.setLayoutData(new TabFolderLayout());
+		top.setContent(fTabFolder);
 		
-		ViewForm bottom= new ViewForm(sashForm, SWT.NONE);
+		ViewForm bottom= new ViewForm(fSashForm, SWT.NONE);
 		ToolBar failureToolBar= new ToolBar(bottom, SWT.FLAT | SWT.WRAP);
 		bottom.setTopCenter(failureToolBar);
 		
@@ -756,8 +782,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		failureToolBarmanager.add(new EnableStackFilterAction(fFailureView));			
 		failureToolBarmanager.update(true);
 		
-		sashForm.setWeights(new int[]{50, 50});
-		return sashForm;
+		fSashForm.setWeights(new int[]{50, 50});
+		return fSashForm;
 	}
 
 	private void reset(final int testCount) {
@@ -812,8 +838,28 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
+		
+		if (fMemento != null)
+			restoreLayoutState(fMemento);
+		fMemento= null;
 	}
 
+	public void saveState(IMemento memento) {
+		if (fSashForm == null) {
+			// part has not been created
+			if (fMemento != null) //Keep the old state;
+				memento.putMemento(fMemento);
+			return;
+		}
+		
+		int activePage= fTabFolder.getSelectionIndex();
+		memento.putInteger(TAG_PAGE, activePage);
+
+		int weigths[]= fSashForm.getWeights();
+		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
+		memento.putInteger(TAG_RATIO, ratio);
+	}
+	
 	private void configureToolBar() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
