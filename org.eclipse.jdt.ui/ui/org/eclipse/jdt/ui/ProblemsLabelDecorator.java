@@ -152,6 +152,9 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 		return image;
 	}
 
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected int computeAdornmentFlags(Object obj) {
 		try {
 			if (obj instanceof IJavaElement) {
@@ -272,6 +275,8 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 	 * @param sourceElement Source element (must be a IJavaElement)
 	 * @return boolean Return <code>true</code> if position is located inside the source element.
 	 * @throws CoreException Exception thrown if element range could not be accessed.
+	 * 
+	 * @since 2.1
 	 */
 	protected boolean isInside(int pos, ISourceReference sourceElement) throws CoreException {
 		ISourceRange range= sourceElement.getSourceRange();

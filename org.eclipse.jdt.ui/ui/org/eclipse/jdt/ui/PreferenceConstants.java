@@ -612,11 +612,12 @@ public class PreferenceConstants {
 	 */
 	public final static String EDITOR_PROBLEM_INDICATION_COLOR= "problemIndicationColor"; //$NON-NLS-1$
 
-	/**PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
+	/**
 	 * A named preference that controls whether the editor shows warning indicators in text (squiggly lines). 
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @since 2.1
 	 */
 	public final static String EDITOR_WARNING_INDICATION= "warningIndication"; //$NON-NLS-1$
 
@@ -630,6 +631,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_WARNING_INDICATION
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 2.1
 	 */
 	public final static String EDITOR_WARNING_INDICATION_COLOR= "warningIndicationColor"; //$NON-NLS-1$
 	
@@ -638,6 +640,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @since 2.1
 	 */
 	public final static String EDITOR_TASK_INDICATION= "taskIndication"; //$NON-NLS-1$
 
@@ -651,6 +654,7 @@ public class PreferenceConstants {
 	 * @see #EDITOR_TASK_INDICATION
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 2.1
 	 */
 	public final static String EDITOR_TASK_INDICATION_COLOR= "taskIndicationColor"; //$NON-NLS-1$
 
@@ -972,6 +976,8 @@ public class PreferenceConstants {
 
 	/**
 	 * Preference key suffix for bold text style preference keys.
+	 * 
+	 * @since 2.1
 	 */
 	public static final String EDITOR_BOLD_SUFFIX= "_bold"; //$NON-NLS-1$
 
@@ -1094,6 +1100,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @since 2.1
 	 */
 	public final static String EDITOR_TASK_TAG_COLOR= IJavaColorConstants.TASK_TAG;
 
@@ -1102,6 +1109,7 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @since 2.1
 	 */
 	public final static String EDITOR_TASK_TAG_BOLD= IJavaColorConstants.TASK_TAG + EDITOR_BOLD_SUFFIX;
 
@@ -1359,6 +1367,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * 
+	 * @since 2.1
 	 */
 	public static final String EDITOR_BROWSER_LIKE_LINKS= "browserLikeLinks"; //$NON-NLS-1$
 
@@ -1367,6 +1377,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>String</code>.
 	 * </p>
+	 * 
+	 * @since 2.1
 	 */
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER= "browserLikeLinksKeyModifier"; //$NON-NLS-1$
 
@@ -1648,8 +1660,13 @@ public class PreferenceConstants {
 	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
 
 
-	
-	
+	/**
+	 * Initializes the given preference store with the default values.
+	 * 
+	 * @param store the preference store to be initialized
+	 * 
+	 * @since 2.1
+	 */
 	public static void initializeDefaultValues(IPreferenceStore store) {
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
 

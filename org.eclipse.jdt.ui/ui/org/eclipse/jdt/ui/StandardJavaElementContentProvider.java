@@ -265,6 +265,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return concatenate(fragments, nonJavaResources);
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected Object[] getPackageFragmentRoots(IJavaProject project) throws JavaModelException {
 		if (!project.getProject().isOpen())
 			return NO_CHILDREN;
@@ -287,6 +290,9 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 		return concatenate(list.toArray(), project.getNonJavaResources());
 	}
 
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	protected Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
 		return jm.getJavaProjects();
 	}

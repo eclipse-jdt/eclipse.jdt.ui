@@ -21,6 +21,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 /**
  * Class that offers access to the templates contained in the 'code generation' preference page.
+ * 
+ * @since 2.1
  */
 public class CodeGeneration {
 	

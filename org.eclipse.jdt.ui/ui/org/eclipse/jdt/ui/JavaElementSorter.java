@@ -230,7 +230,7 @@ public class JavaElementSorter extends ViewerSorter {
 		return 0;
 	}
 
-	public IPackageFragmentRoot getPackageFragmentRoot(Object element) {
+	private IPackageFragmentRoot getPackageFragmentRoot(Object element) {
 		if (element instanceof ClassPathContainer) {
 			// return first package fragment root from the container
 			ClassPathContainer cp= (ClassPathContainer)element;
