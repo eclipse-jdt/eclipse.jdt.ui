@@ -91,7 +91,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private static final String fDialogTitle= ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.title"); //$NON-NLS-1$
 	private static final int UP_INDEX= 0;
 	private static final int DOWN_INDEX= 1;
 
@@ -121,6 +121,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	}
 
 	//---- Structured Viewer -----------------------------------------------------------
+
+	private static String getDialogTitle() {
+		return DIALOG_TITLE;
+	}
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -164,31 +168,26 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 
 			IField[] selectedFields= getSelectedFields(selection);
-			// open an editor and work on a working copy
-			IEditorPart editor= null;
-			if (selectedFields != null)
-				editor= EditorUtility.openInEditor(selectedFields[0]);
-			else
-				editor= EditorUtility.openInEditor(getSelectedType(selection).getCompilationUnit());
 
 			if (canRunOn(selectedFields)) {
-				run((IType) EditorUtility.getWorkingCopy(selectedFields[0].getDeclaringType()), selectedFields, editor, false);
+				run(selectedFields[0].getDeclaringType(), selectedFields, false);
 				return;
 			}
 			Object firstElement= selection.getFirstElement();
 
-			if (firstElement instanceof IType)
-				run((IType) EditorUtility.getWorkingCopy((IType) firstElement), new IField[0], editor, false);
+			if (firstElement instanceof IType) {
+				run((IType) firstElement, new IField[0], false);
+			}
 			else if (firstElement instanceof ICompilationUnit) {
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsAction.interface_not_applicable")); //$NON-NLS-1$					
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.interface_not_applicable")); //$NON-NLS-1$					
 					return;
 				} else
-					run((IType) EditorUtility.getWorkingCopy(((ICompilationUnit) firstElement).findPrimaryType()), new IField[0], editor, false);
+					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.actionfailed")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 
@@ -275,7 +274,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
 				IField field= (IField) elements[0];
-				run(field.getDeclaringType(), new IField[] { field }, fEditor, false);
+				run(field.getDeclaringType(), new IField[] { field },false);
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
@@ -284,12 +283,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
 					if (type.getFields().length > 0) {
-						run(type, new IField[0], fEditor, true);
+						run(type, new IField[0], true);
 						return;
 					}
 				}
 			}
-			MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsAction.not_applicable")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.not_applicable")); //$NON-NLS-1$
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
 		}
@@ -301,7 +300,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	//---- Helpers -------------------------------------------------------------------
 
-	private void run(IType type, IField[] preselected, IEditorPart editor, boolean activatedFromEditor) throws CoreException {
+	private void run(IType type, IField[] preselected, boolean activatedFromEditor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
 			return;
 		}
@@ -332,7 +331,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 		}
 		if (constructorFieldsList.isEmpty()) {
-			MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsAction.typeContainsNoFields.message")); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
 		}
 		IMethod[] superConstructors= getSuperConstructors(type);
@@ -366,25 +365,33 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					result.add(curr);
 				}
 			}
-
+			IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
+			type = (IType) JavaModelUtil.toWorkingCopy(type);
+					
 			selected= (IField[]) result.toArray(new IField[result.size()]);
+			IField[] workingCopyFields= getWorkingCopyFields(selected);
 
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			settings.createComments= dialog.getGenerateComment();
 
 			IJavaElement elementPosition= dialog.getElementPosition();
-			IMethod selectedConstructor= dialog.getSuperConstructorChoice();
+			if (elementPosition != null)
+				elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
 			
-			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, selectedConstructor);
-			op.setVisbility(dialog.getVisibilityModifier());
-			// Ignore the omit super() checkbox if the default constructor is not chosen
-			if (selectedConstructor.getParameterNames().length == 0)
-				op.setOmitSuper(dialog.isOmitSuper());
+			IMethod selectedConstructor= dialog.getSuperConstructorChoice();
+
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
 				target.beginCompoundChange();
 			}
-			try {
+			try {						
+				AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, workingCopyFields, false, elementPosition, selectedConstructor);
+				op.setVisbility(dialog.getVisibilityModifier());
+				// Ignore the omit super() checkbox if the default constructor is not chosen
+				if (selectedConstructor.getParameterNames().length == 0)
+					op.setOmitSuper(dialog.isOmitSuper());
+				
+
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
@@ -445,8 +452,38 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		return validator;
 	}
 
-	private String getDialogTitle() {
-		return fDialogTitle;
+	private void showError(String title, String message) {
+		MessageDialog.openError(getShell(), title, message);
+	}
+
+	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException {
+		if (fields.length == 0)
+			return new IField[0];
+		ICompilationUnit cu= fields[0].getCompilationUnit();
+		
+		ICompilationUnit workingCopyCU;
+		IField[] workingCopyFields;
+		if (cu.isWorkingCopy()) {
+			workingCopyCU= cu;
+			workingCopyFields= fields;
+		} else {
+			workingCopyCU= EditorUtility.getWorkingCopy(cu);
+			if (workingCopyCU == null) {
+				showError(ActionMessages.getString("JavaSourceAction.error.actionfailed"), DIALOG_TITLE); //$NON-NLS-1$
+				return null;
+			}
+			workingCopyFields= new IField[fields.length];
+			for (int i= 0; i < fields.length; i++) {
+				IField field= fields[i];
+				IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
+				if (workingCopyField == null) {
+					showError(ActionMessages.getFormattedString("JavaSourceAction.error.fieldNotExisting", field.getElementName()), DIALOG_TITLE); //$NON-NLS-1$
+					return null;
+				}
+				workingCopyFields[i]= workingCopyField;
+			}
+		}
+		return workingCopyFields;	
 	}
 
 	private static class GenerateConstructorUsingFieldsValidator implements ISelectionStatusValidator {
@@ -678,7 +715,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return buttonComposite;
 		}
 
-		protected void createUpDownButtons(Composite buttonComposite) {
+		private void createUpDownButtons(Composite buttonComposite) {
 			int numButtons= 2; // up, down
 			fButtonControls= new Button[numButtons];
 			fButtonsEnabled= new boolean[numButtons];

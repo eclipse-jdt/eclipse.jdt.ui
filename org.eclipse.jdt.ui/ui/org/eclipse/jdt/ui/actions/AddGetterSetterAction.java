@@ -463,47 +463,13 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		IField[] workingCopyGetterFields= getWorkingCopyFields(getterFields);
 		IField[] workingCopySetterFields= getWorkingCopyFields(setterFields);
 		IField[] workingCopyGetterSetterFields= getWorkingCopyFields(getterSetterFields);
-		IJavaElement workingCopyElementPosition= getWorkingCopy(elementPosition);
+		if (elementPosition != null)
+			elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
 
 		if (workingCopyGetterFields != null && workingCopySetterFields != null && workingCopyGetterSetterFields != null)
-			run(workingCopyGetterFields, workingCopySetterFields, workingCopyGetterSetterFields, editor, workingCopyElementPosition);			
+			run(workingCopyGetterFields, workingCopySetterFields, workingCopyGetterSetterFields, editor, elementPosition);			
 	}
 	
-	private static IJavaElement getWorkingCopy(IJavaElement elementPosition) {
-		if(elementPosition instanceof IMember)
-			return JavaModelUtil.toWorkingCopy((IMember)elementPosition);
-		return elementPosition;
-	}
-
-	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException{
-		if (fields.length == 0)
-			return new IField[0];
-		ICompilationUnit cu= fields[0].getCompilationUnit();
-		
-		ICompilationUnit workingCopyCU;
-		IField[] workingCopyFields;
-		if (cu.isWorkingCopy()) {
-			workingCopyCU= cu;
-			workingCopyFields= fields;
-		} else {
-			workingCopyCU= EditorUtility.getWorkingCopy(cu);
-			if (workingCopyCU == null) {
-				showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
-				return null;
-			}
-			workingCopyFields= new IField[fields.length];
-			for (int i= 0; i < fields.length; i++) {
-				IField field= fields[i];
-				IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
-				if (workingCopyField == null) {
-					showError(ActionMessages.getFormattedString("AddGetterSetterAction.error.fieldNotExisting", field.getElementName())); //$NON-NLS-1$
-					return null;
-				}
-				workingCopyFields[i]= workingCopyField;
-			}
-		}
-		return workingCopyFields;	
-	}
 	//---- Java Editior --------------------------------------------------------------
     
     /* (non-Javadoc)
@@ -642,10 +608,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return returnVal < 0 ? IRequestQuery.CANCEL : returnCodes[returnVal];
 	}	
 
-	private void showError(String message) {
-		MessageDialog.openError(getShell(), DIALOG_TITLE, message);
-	}
-	
 	/*
 	 * Returns fields in the selection or <code>null</code> if the selection is 
 	 * empty or not valid.
@@ -759,6 +721,40 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return result;
 	}
 	
+	private void showError(String title, String message) {
+		MessageDialog.openError(getShell(), title, message);
+	}
+
+	private IField[] getWorkingCopyFields(IField[] fields) throws CoreException {
+		if (fields.length == 0)
+			return new IField[0];
+		ICompilationUnit cu= fields[0].getCompilationUnit();
+		
+		ICompilationUnit workingCopyCU;
+		IField[] workingCopyFields;
+		if (cu.isWorkingCopy()) {
+			workingCopyCU= cu;
+			workingCopyFields= fields;
+		} else {
+			workingCopyCU= EditorUtility.getWorkingCopy(cu);
+			if (workingCopyCU == null) {
+				showError(ActionMessages.getString("JavaSourceAction.error.actionfailed"), DIALOG_TITLE); //$NON-NLS-1$
+				return null;
+			}
+			workingCopyFields= new IField[fields.length];
+			for (int i= 0; i < fields.length; i++) {
+				IField field= fields[i];
+				IField workingCopyField= (IField) JavaModelUtil.findMemberInCompilationUnit(workingCopyCU, field);
+				if (workingCopyField == null) {
+					showError(ActionMessages.getFormattedString("JavaSourceAction.error.fieldNotExisting", field.getElementName()), DIALOG_TITLE); //$NON-NLS-1$
+					return null;
+				}
+				workingCopyFields[i]= workingCopyField;
+			}
+		}
+		return workingCopyFields;	
+	}
+
 	private static class AddGetterSetterContentProvider implements ITreeContentProvider {		
 		private static final Object[] EMPTY= new Object[0];
 		private Viewer fViewer;
@@ -875,7 +871,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 		}
 				
-		protected void createGetterSetterButtons(Composite buttonComposite) {
+		private void createGetterSetterButtons(Composite buttonComposite) {
 			createButton(buttonComposite, SELECT_GETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_getters"), false); //$NON-NLS-1$	
 			createButton(buttonComposite, SELECT_SETTERS_ID, ActionMessages.getString("GetterSetterTreeSelectionDialog.select_setters"), false); //$NON-NLS-1$				
 		}

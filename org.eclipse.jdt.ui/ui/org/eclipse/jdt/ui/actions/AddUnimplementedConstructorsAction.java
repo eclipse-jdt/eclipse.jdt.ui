@@ -94,7 +94,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class AddUnimplementedConstructorsAction extends SelectionDispatchAction {
 	
 	private CompilationUnitEditor fEditor;
-	private static final String dialogTitle= ActionMessages.getString("AddUnimplementedConstructorsAction.error.title"); //$NON-NLS-1$
+	private static final String DIALOG_TITLE= ActionMessages.getString("AddUnimplementedConstructorsAction.error.title"); //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>AddUnimplementedConstructorsAction</code>. The action requires
@@ -160,16 +160,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
 				return;
 			}		
-			// open an editor and work on a working copy
-			IEditorPart editor= EditorUtility.openInEditor(type);
-			type= (IType)EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
 				MessageDialog.openError(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.error.type_removed_in_editor")); //$NON-NLS-1$
 				return;
 			}
 			
-			run(shell, type, editor, false);
+			run(shell, type, false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null);
 		}			
@@ -180,7 +177,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 	}
 	
 	/* (non-Javadoc)
@@ -191,7 +188,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		try {
 			IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null)
-				run(shell, type, fEditor, true);
+				run(shell, type, true);
 			else
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("AddUnimplementedConstructorsAction.not_applicable")); //$NON-NLS-1$
 		} catch (JavaModelException e) {
@@ -207,7 +204,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	
 	//---- Helpers -------------------------------------------------------------------
 	
-	private void run(Shell shell, IType type, IEditorPart editor, boolean activatedFromEditor) throws CoreException {
+	private void run(Shell shell, IType type, boolean activatedFromEditor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
 			return;
 		}
@@ -255,16 +252,22 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			settings.createComments= dialog.getGenerateComment();
 	
+			IEditorPart editor= EditorUtility.openInEditor(type);
+			type = (IType) JavaModelUtil.toWorkingCopy(type);
+
 			IJavaElement elementPosition= dialog.getElementPosition();
-			AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, selected, false, elementPosition);
-			op.setVisbility(dialog.getVisibilityModifier());
-			op.setOmitSuper(dialog.isOmitSuper());
-			
+			if (elementPosition != null)
+				elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
+						
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
 				target.beginCompoundChange();		
 			}
 			try {
+				AddUnimplementedConstructorsOperation op= new AddUnimplementedConstructorsOperation(type, settings, selected, false, elementPosition);
+				op.setVisbility(dialog.getVisibilityModifier());
+				op.setOmitSuper(dialog.isOmitSuper());
+
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
@@ -316,7 +319,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 	}	
 	
 	private String getDialogTitle() {
-		return dialogTitle;
+		return DIALOG_TITLE;
 	}	
 
 	private static class AddUnimplementedConstructorsContentProvider implements ITreeContentProvider {
@@ -444,7 +447,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			}		
 		}
 				
-		protected Composite createOmitSuper(Composite composite) {
+		private Composite createOmitSuper(Composite composite) {
 			Composite omitSuperComposite= new Composite(composite, SWT.NONE);
 			GridLayout layout= new GridLayout();
 			layout.marginHeight= 0;

@@ -378,7 +378,6 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				IEditorPart part = EditorUtility.openInEditor(type);
 				type = (IType) JavaModelUtil.toWorkingCopy(type);
 				
-				
 				IRewriteTarget target= (IRewriteTarget) part.getAdapter(IRewriteTarget.class);
 				IMethod[] createdMethods= null;
 				try {
@@ -386,7 +385,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						target.beginCompoundChange();
 					}
 					// pass dialog based information to the operation 
-					IJavaElement elementPosition= dialog.getElementPosition();					
+					IJavaElement elementPosition= dialog.getElementPosition();
+					if (elementPosition != null)
+						elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
+							
 					CodeGenerationSettings settings = JavaPreferencesSettings.getCodeGenerationSettings();
 					settings.createComments= dialog.getGenerateComment();										
 					createdMethods= processResults(methods, type, elementPosition, settings);
@@ -408,8 +410,8 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}
-
 	}
+	
 	
 	/**creates methods in class*/
 	private IMethod[] processResults(List list, IType type, IJavaElement elementPosition, CodeGenerationSettings settings) throws InvocationTargetException {

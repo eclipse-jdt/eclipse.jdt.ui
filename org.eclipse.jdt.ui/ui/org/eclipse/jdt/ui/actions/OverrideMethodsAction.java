@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class OverrideMethodsAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;	
+	private static final String DIALOG_TITLE= ActionMessages.getString("OverrideMethodsAction.error.title"); //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>OverrideMethodsAction</code>. The action requires
@@ -139,19 +140,15 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
 				return;
 			}
-			
-			// open an editor and work on a working copy
-			IEditorPart editor= EditorUtility.openInEditor(type);
-			type= (IType)EditorUtility.getWorkingCopy(type);
-			
+						
 			if (type == null) {
 				MessageDialog.openError(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.type_removed_in_editor")); //$NON-NLS-1$
 				return;
 			}
 			
-			run(shell, type, editor);
+			run(shell, type);
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
+			ExceptionHandler.handle(e, shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.actionfailed"));  //$NON-NLS-1$
 		}			
 	}
 
@@ -179,18 +176,20 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
 					return;
 				}						
-				run(shell, type, fEditor);
+				run(shell, type);
 			} else {
 				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.not_applicable")); //$NON-NLS-1$
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), null);
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("OverrideMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}
 	}
 
 	//---- Helpers -------------------------------------------------------------------
 	
-	private void run(Shell shell, IType type, IEditorPart editor) throws JavaModelException {
+	private void run(Shell shell, IType type) throws JavaModelException, CoreException {
 		OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
 
 		IMethod[] selected= null;
@@ -215,14 +214,20 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			settings.createComments= dialog.getGenerateComment();
 	
-			IJavaElement elementPosition= dialog.getElementPosition();
-			AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selected, false, elementPosition);
-			
+			IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
+			type= (IType) JavaModelUtil.toWorkingCopy(type);
+
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
 				target.beginCompoundChange();		
 			}
 			try {
+				IJavaElement elementPosition= dialog.getElementPosition();
+				if (elementPosition != null)
+					elementPosition= JavaModelUtil.toWorkingCopy(elementPosition);
+				
+				AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(type, settings, selected, false, elementPosition);
+			
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null) {
 					context= new BusyIndicatorRunnableContext();
@@ -264,7 +269,8 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	}
 	
 	private String getDialogTitle() {
-		return ActionMessages.getString("OverrideMethodsAction.error.title"); //$NON-NLS-1$
-	}		
+		return DIALOG_TITLE;
+	}
+
 
 }
