@@ -43,6 +43,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 public class InferTypeArgumentsTests extends RefactoringTest {
 
 	private static final boolean BUG_84422= true;
+	private static final boolean BUG_86967_core_restore_binding= true;
 	
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
@@ -391,7 +392,19 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuMapEntry01() throws Exception {
-		printTestDisabledMessage("not implemented yet");
-//		performCuOK(); //TODO
+		if (BUG_86967_core_restore_binding) {
+			printTestDisabledMessage("BUG_86967_core_restore_binding");
+			return;
+		}
+		performCuOK();
 	}
+	
+	public void testCuFieldAccess01() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuFieldAccess02() throws Exception {
+		performCuOK();
+	}
+	
 }

@@ -84,10 +84,10 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private static ITypeSet getTypeEstimate(ConstraintVariable2 cv) {
-		return (ITypeSet) cv.getData(TYPE_ESTIMATE);
-	}
-	
+//	private static ITypeSet getTypeEstimate(ConstraintVariable2 cv) {
+//		return (ITypeSet) cv.getData(TYPE_ESTIMATE);
+//	}
+//	
 	private void runSolver() {
 		while (! fWorkList.isEmpty()) {
 			// Get a variable whose type estimate has changed
@@ -147,21 +147,19 @@ public class InferTypeArgumentsConstraintsSolver {
 		fDeclarationsToUpdate= new HashMap();
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
+				
+			TypeEquivalenceSet set= cv.getTypeEquivalenceSet();
+			if (set == null)
+				continue; //TODO: should not happen iff all unused constraint variables got pruned
+			//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
+			TType type= cv.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
+			setChosenType(cv, type);
+			
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-				TypeEquivalenceSet set= elementCv.getTypeEquivalenceSet();
-				if (set == null)
-					continue; //TODO: should not happen iff all unused constraint variables got pruned
-				//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
-				TType type= elementCv.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
-				setChosenType(elementCv, type);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				if (cu != null) //TODO: shouldn't be the case
 					addToMultiMap(fDeclarationsToUpdate, cu, cv);
-			} else {
-				ITypeSet typeSet= getTypeEstimate(cv);
-				if (typeSet != null)
-					setChosenType(cv, typeSet.chooseSingleType());
 			}
 		}
 	}

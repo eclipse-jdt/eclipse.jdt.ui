@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -40,12 +41,14 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
@@ -59,6 +62,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor {
 
@@ -103,11 +108,65 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	public void endVisit(SimpleName node) {
 		IBinding binding= node.resolveBinding();
 		if (binding instanceof IVariableBinding) {
-			VariableVariable2 cv= fTCModel.makeVariableVariable((IVariableBinding) binding, fCU);
+			//TODO: code is similar to handling of method return value
+			IVariableBinding variableBinding= (IVariableBinding) binding;
+			ITypeBinding declaredVariableType= variableBinding.getVariableDeclaration().getType();
+			if (declaredVariableType.isTypeVariable()) {
+				Expression receiver= getSimpleNameReceiver(node);
+				if (receiver != null) {
+					ConstraintVariable2 receiverCv= getConstraintVariable(receiver);
+					Assert.isNotNull(receiverCv); // the type variable must come from the receiver!
+					
+					ConstraintVariable2 elementCv= fTCModel.getElementVariable(receiverCv, declaredVariableType);
+					// [retVal] =^= Elem[receiver]:
+					setConstraintVariable(node, elementCv);
+					return;
+				}
+				
+			} else if (declaredVariableType.isParameterizedType()){
+				Expression receiver= getSimpleNameReceiver(node);
+				if (receiver != null) {
+					ConstraintVariable2 receiverCv= getConstraintVariable(receiver);
+					if (receiverCv != null) {
+						ITypeBinding genericVariableType= declaredVariableType.getTypeDeclaration();
+						ConstraintVariable2 returnTypeCv= fTCModel.makeParameterizedTypeVariable(genericVariableType);
+						setConstraintVariable(node, returnTypeCv);
+						// Elem[retVal] =^= Elem[receiver]
+						fTCModel.createTypeVariablesEqualityConstraints(receiverCv, Collections.EMPTY_MAP, returnTypeCv, declaredVariableType);
+						return;
+					}
+				}
+				
+			} else {
+				//TODO: array...
+				int i= -1;
+				//logUnexpectedNode(node, null);
+			}
+			
+			// default: 
+			VariableVariable2 cv= fTCModel.makeVariableVariable(variableBinding, fCU);
 			setConstraintVariable(node, cv);
 		}
 		// TODO else?
 	}
+
+	private Expression getSimpleNameReceiver(SimpleName node) {
+		Expression receiver;
+		if (node.getParent() instanceof QualifiedName && node.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+			receiver= ((QualifiedName) node.getParent()).getQualifier();
+		} else if (node.getParent() instanceof FieldAccess && node.getLocationInParent() == FieldAccess.NAME_PROPERTY) {
+			receiver= ((FieldAccess) node.getParent()).getExpression();
+		} else {
+			//TODO other cases? (ThisExpression, SuperAccessExpression, ...)
+			receiver= null;
+		}
+		if (receiver instanceof ThisExpression)
+			return null;
+		else
+			return receiver;
+	}
+	
+	//TODO: FieldAccess
 	
 	public void endVisit(QualifiedName node) {
 		ConstraintVariable2 cv= getConstraintVariable(node.getName());
@@ -319,7 +378,14 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
 		
 		Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeParameters(methodBinding);
-		doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
+		
+		if (isSpecialCloneInvocation(methodBinding, receiver)) {
+			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
+			// [retVal] =^= [receiver]:
+			setConstraintVariable(node, expressionCv);
+		} else {
+			doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
+		}
 		List arguments= node.arguments();
 		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, null);
 		
@@ -345,14 +411,8 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		return methodTypeVariables;
 	}
 	
-	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
+	private void doVisitMethodInvocationReturnType(/*MethodInvocation*/ASTNode node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
 		ITypeBinding declaredReturnType= methodBinding.getMethodDeclaration().getReturnType();
-		if (isSpecialCloneInvocation(methodBinding, receiver)) {
-			ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
-			// [retVal] =^= [receiver]:
-			setConstraintVariable(node, expressionCv);
-			return;
-		}
 		
 		if (declaredReturnType.isTypeVariable()) {
 			ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredReturnType.getKey());
@@ -493,6 +553,24 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						} else {
 							//TODO
 						}
+						
+					} else if (typeArgument.isTypeVariable()) {
+						if (createdType != null) {
+							CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
+							ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
+							ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, typeArgument);
+							fTCModel.createEqualsConstraint(argElementCv, elementCv);
+						}
+						if (receiver != null) {
+							CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
+							ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
+							ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, typeArgument);
+							fTCModel.createEqualsConstraint(argElementCv, elementCv);
+						} else {
+							//TODO: ???
+						}
+						
+						
 					} else {
 						//TODO
 					}
@@ -538,7 +616,6 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		Map methodTypeVariables= createMethodTypeParameters(methodBinding);
 		List arguments= node.arguments();
 		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables, createdType);
-		//TODO: return type?
 	}
 	
 	public void endVisit(ReturnStatement node) {
@@ -715,6 +792,16 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				fTCModel.createSubtypeConstraint(leftElementVariable, rightElementVariable);
 			}
 		}
+	}
+
+	private void logUnexpectedNode(ASTNode node, String msg) {
+		String message= msg == null ? "" : msg + ":\n";  //$NON-NLS-1$//$NON-NLS-2$
+		if (node == null) {
+			message+= "ASTNode was not expected to be null"; //$NON-NLS-1$
+		} else {
+			message+= "Found unexpected node (type: " + node.getNodeType() + "):\n" + node.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		JavaPlugin.log(new Exception(message).fillInStackTrace());
 	}
 
 }
