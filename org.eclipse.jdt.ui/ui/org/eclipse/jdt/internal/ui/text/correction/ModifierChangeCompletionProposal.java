@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -28,7 +30,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -50,12 +51,12 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
 		
-		GroupDescription selectionDescription= null;
+		TextEditGroup selectionDescription= null;
 		
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			selectionDescription= new GroupDescription("selection"); // in different CU, needs selection //$NON-NLS-1$
+			selectionDescription= new TextEditGroup("selection"); // in different CU, needs selection //$NON-NLS-1$
 			setSelectionDescription(selectionDescription);
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());

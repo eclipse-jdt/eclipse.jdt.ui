@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation;
+package org.eclipse.text.edits;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,23 +19,19 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class GroupDescription {
+public class TextEditGroup {
 
 	private String fDescription;
 	private List fEdits;
 
-	public GroupDescription() {
-		this( "NO_DESCRIPTION"); //$NON-NLS-1$
-	}
-
-	public GroupDescription(String description) {
+	public TextEditGroup(String description) {
 		super();
 		Assert.isNotNull(description);
 		fDescription= description;
 		fEdits= new ArrayList(3);
 	}
 
-	public GroupDescription(String description, TextEdit[] edits) {
+	public TextEditGroup(String description, TextEdit[] edits) {
 		super();
 		Assert.isNotNull(description);
 		Assert.isNotNull(edits);
@@ -43,11 +39,15 @@ public class GroupDescription {
 		fEdits= new ArrayList(Arrays.asList(edits));
 	}
 
+	public String getName() {
+		return fDescription;
+	}
+	
 	public void addTextEdit(TextEdit edit) {
 		fEdits.add(edit);
 	}
 	
-	public boolean hasTextEdits() {
+	public boolean isEmpty() {
 		return fEdits.isEmpty();
 	}
 	
@@ -60,16 +60,14 @@ public class GroupDescription {
 	 * group description. The method requires that the group description
 	 * manages at least one text edit.
 	 */
-	public IRegion getTextRange() {
+	public IRegion getRegion() {
 		int size= fEdits.size();
-		if (size == 1) {
+		if (size == 0) {
+			return null;
+		} else if (size == 1) {
 			return ((TextEdit)fEdits.get(0)).getRegion();
 		} else {
 			return TextEdit.getCoverage((TextEdit[])fEdits.toArray(new TextEdit[fEdits.size()]));
 		}
-	}
-	
-	public String getName() {
-		return fDescription;
-	}
+	}	
 }

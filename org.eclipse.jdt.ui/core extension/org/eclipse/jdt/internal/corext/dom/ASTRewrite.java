@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
@@ -147,7 +147,7 @@ public final class ASTRewrite extends NewASTRewrite {
 		}
 	}
 	
-	private void processChange(ASTNode nodeInAST, ASTNode originalNode, ASTNode newNode, GroupDescription desc, Set processedListEvents) {
+	private void processChange(ASTNode nodeInAST, ASTNode originalNode, ASTNode newNode, TextEditGroup desc, Set processedListEvents) {
 		ASTNode parent= nodeInAST.getParent();
 		int childProperty= ASTNodeConstants.getPropertyOfNode(nodeInAST);
 		if (ASTNodeConstants.isListProperty(childProperty)) {
@@ -205,7 +205,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInserted(ASTNode node, GroupDescription description) {
+	public final void markAsInserted(ASTNode node, TextEditGroup description) {
 		Assert.isTrue(!isCollapsed(node), "Tries to insert a collapsed node"); //$NON-NLS-1$
 		ASTInsert insert= new ASTInsert();
 		insert.isBoundToPrevious= isInsertBoundToPreviousByDefault(node);
@@ -221,7 +221,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 * @param node The node to be marked as inserted.
 	 */
 	public final void markAsInserted(ASTNode node) {
-		markAsInserted(node, (GroupDescription) null);
+		markAsInserted(node, (TextEditGroup) null);
 	}
 	
 	
@@ -354,7 +354,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	}
 		
 	private static class ASTInsert {
-		public GroupDescription description;
+		public TextEditGroup description;
 		public boolean isBoundToPrevious;	
 	}
 

@@ -24,6 +24,7 @@ import org.eclipse.text.edits.MoveTargetEdit;
 import org.eclipse.text.edits.RangeMarker;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -44,7 +45,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewriteFormatter.Prefix;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.CopyPlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.MovePlaceholderData;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite.StringPlaceholderData;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -175,7 +175,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return fEventStore.isInsertBoundToPrevious(node);
 	}	
 		
-	private final GroupDescription getDescription(ASTNode parent, int property) {
+	private final TextEditGroup getDescription(ASTNode parent, int property) {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null) {
 			return getDescription(event);
@@ -186,7 +186,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	private final RewriteEvent getEvent(ASTNode parent, int property) {
 		return fEventStore.getEvent(parent, property);
 	}
-	private final GroupDescription getDescription(RewriteEvent change) {
+	private final TextEditGroup getDescription(RewriteEvent change) {
 		return fEventStore.getEventDescription(change);
 	}
 	
@@ -207,7 +207,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return TextUtilities.getDefaultLineDelimiter(fDocument);
 	}
 	
-	private final void doTextInsert(int offset, String insertString, GroupDescription description) {
+	private final void doTextInsert(int offset, String insertString, TextEditGroup description) {
 		if (insertString.length() > 0) {
 			TextEdit edit= new InsertEdit(offset, insertString);
 			addEdit(edit);
@@ -217,12 +217,12 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 	
-	private final void addDescription(GroupDescription groupDesc, TextEdit edit) {
+	private final void addDescription(TextEditGroup groupDesc, TextEdit edit) {
 		groupDesc.addTextEdit(edit);
 	}
 
 	
-	private final TextEdit doTextRemove(int offset, int len, GroupDescription description) {
+	private final TextEdit doTextRemove(int offset, int len, TextEditGroup description) {
 		if (len == 0) {
 			return null;
 		}
@@ -234,7 +234,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return edit;
 	}
 	
-	private final void doTextRemoveAndVisit(int offset, int len, ASTNode node, GroupDescription description) {
+	private final void doTextRemoveAndVisit(int offset, int len, ASTNode node, TextEditGroup description) {
 		TextEdit edit= doTextRemove(offset, len, description);
 		if (edit != null) {
 			fCurrentEdit= edit;
@@ -264,7 +264,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 	
-	private final void doTextReplace(int offset, int len, String insertString, GroupDescription description) {
+	private final void doTextReplace(int offset, int len, String insertString, TextEditGroup description) {
 		if (len > 0 || insertString.length() > 0) {
 			TextEdit edit= new ReplaceEdit(offset, len, insertString);
 			addEdit(edit);
@@ -274,7 +274,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 		
-	private final TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, GroupDescription description) {
+	private final TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, TextEditGroup description) {
 		CopySourceEdit[] edits= getCopySources(copiedNode);
 		if (edits == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString()); //$NON-NLS-1$
@@ -303,7 +303,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 	}
 	
-	private final TextEdit doTextMove(ASTNode movedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, GroupDescription description) {
+	private final TextEdit doTextMove(ASTNode movedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, TextEditGroup description) {
 		MoveSourceEdit moveEdit= getMoveSource(movedNode);
 		if (moveEdit.getSourceModifier() != null) {
 			Assert.isTrue(false, "No move source available" + movedNode.toString()); //$NON-NLS-1$
@@ -414,7 +414,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		
 			if (currPos == -1) { // only inserts
 				if (keyword.length() > 0) {  // creating a new list -> insert keyword first (e.g. " throws ")
-					GroupDescription description= getDescription(fList[0]); // first node is insert
+					TextEditGroup description= getDescription(fList[0]); // first node is insert
 					doTextInsert(startPos, keyword, description);
 				}
 				currPos= startPos;
@@ -434,7 +434,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				int nextIndex= i + 1;
 
 				if (currMark == RewriteEvent.INSERTED) {
-					GroupDescription description= getDescription(currEvent);
+					TextEditGroup description= getDescription(currEvent);
 					ASTNode node= (ASTNode) currEvent.getNewValue();
 					
 					if (separatorState == NONE) { // element after last existing element (but not first)
@@ -477,7 +477,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 						ASTNode node= (ASTNode) currEvent.getOriginalValue();
 						int currEnd= getEndOfNode(node);
 						
-						GroupDescription description= getDescription(currEvent);
+						TextEditGroup description= getDescription(currEvent);
 						ASTNode changed= (ASTNode) currEvent.getNewValue();
 						doTextRemoveAndVisit(currPos, currEnd - currPos, node, getDescription(currEvent));
 						doTextInsert(currPos, changed, getNodeIndent(i), true, description);
@@ -514,7 +514,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		RewriteEvent event= getEvent(parent, property);
 		if (event != null && event.getChangeKind() == RewriteEvent.REPLACED) {
 			ASTNode node= (ASTNode) event.getOriginalValue();
-			GroupDescription description= getDescription(event);
+			TextEditGroup description= getDescription(event);
 			int offset= getExtendedOffset(node);
 			int length= getExtendedLength(node);
 			doTextRemoveAndVisit(offset, length, node, description);
@@ -530,7 +530,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
 					ASTNode node= (ASTNode) event.getNewValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					int indent= getIndent(offset);
 					doTextInsert(offset, prefix.getPrefix(indent, getLineDelimiter()), description);
 					doTextInsert(offset, node, indent, true, description);
@@ -538,7 +538,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REMOVED: {	
 					ASTNode node= (ASTNode) event.getOriginalValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					
 					int nodeEnd= getExtendedEnd(node);
 					// if there is a prefix, remove the prefix as well
@@ -548,7 +548,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					int nodeOffset= getExtendedOffset(node);
 					int nodeLen= getExtendedLength(node);
 					doTextRemoveAndVisit(nodeOffset, nodeLen, node, description);
@@ -570,7 +570,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
 					ASTNode node= (ASTNode) event.getNewValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					
 					String[] strings= context.getPrefixAndSuffix(indent, getLineDelimiter(), node);
 					
@@ -585,7 +585,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 						endPos= getExtendedEnd(node);
 					}
 					
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					// if there is a prefix, remove the prefix as well
 					int len= endPos - offset;
 					doTextRemoveAndVisit(offset, len, node, description);
@@ -596,7 +596,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					if (endPos == -1) {
 						endPos= getExtendedEnd(node);
 					}
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					int nodeLen= endPos - offset; 
 					
 					ASTNode replacingNode= (ASTNode) event.getNewValue();
@@ -625,7 +625,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
 					ASTNode node= (ASTNode) event.getNewValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					doTextInsert(startPos, node, getIndent(startPos), true, description);
 					doTextInsert(startPos, ".", description); //$NON-NLS-1$
 					return startPos;
@@ -633,7 +633,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				case RewriteEvent.REMOVED: {
 					try {
 						ASTNode node= (ASTNode) event.getOriginalValue();
-						GroupDescription description= getDescription(event);
+						TextEditGroup description= getDescription(event);
 						int dotEnd= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameDOT, node.getStartPosition() + node.getLength());
 						doTextRemoveAndVisit(startPos, dotEnd - startPos, node, description);
 						return dotEnd;
@@ -644,7 +644,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				}
 				case RewriteEvent.REPLACED: {
 					ASTNode node= (ASTNode) event.getOriginalValue();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					int offset= getExtendedOffset(node);
 					int length= getExtendedLength(node);
 					
@@ -788,7 +788,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			switch (event.getChangeKind()) {
 				case RewriteEvent.INSERTED: {
 					int endPos= parent.getStartPosition() + parent.getLength();
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					ASTNode body= (ASTNode) event.getNewValue();
 					doTextRemove(startPos, endPos - startPos, description);
 					int indent= getIndent(parent.getStartPosition());
@@ -798,7 +798,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					return;
 				}
 				case RewriteEvent.REMOVED: {
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					ASTNode body= (ASTNode) event.getOriginalValue();
 					int endPos= parent.getStartPosition() + parent.getLength();
 					doTextRemoveAndVisit(startPos, endPos - startPos, body, description);
@@ -806,7 +806,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					return;
 				}
 				case RewriteEvent.REPLACED: {
-					GroupDescription description= getDescription(event);
+					TextEditGroup description= getDescription(event);
 					ASTNode body= (ASTNode) event.getOriginalValue();
 					doTextRemoveAndVisit(body.getStartPosition(), body.getLength(), body, description);
 					doTextInsert(body.getStartPosition(), (ASTNode) event.getNewValue(), getIndent(body.getStartPosition()), true, description);
@@ -826,13 +826,13 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		int newDim= ((Integer) event.getNewValue()).intValue();
 		
 		if (oldDim != newDim) {
-			GroupDescription description= getDescription(event);
+			TextEditGroup description= getDescription(event);
 			rewriteExtraDimensions(oldDim, newDim, pos, description);
 		}
 		return oldDim;
 	}
 	
-	private void rewriteExtraDimensions(int oldDim, int newDim, int pos, GroupDescription description) {
+	private void rewriteExtraDimensions(int oldDim, int newDim, int pos, TextEditGroup description) {
 			
 		if (oldDim < newDim) {
 			for (int i= oldDim; i < newDim; i++) {
@@ -876,7 +876,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 	}
 
-	final void doTextInsert(int insertOffset, ASTNode node, int initialIndentLevel, boolean removeLeadingIndent, GroupDescription description) {		
+	final void doTextInsert(int insertOffset, ASTNode node, int initialIndentLevel, boolean removeLeadingIndent, TextEditGroup description) {		
 		ArrayList markers= new ArrayList();
 		String formatted= fFormatter.getFormattedResult(node, initialIndentLevel, markers);
 
@@ -897,10 +897,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 
 			Object data= curr.data;
-			if (data instanceof GroupDescription) { // tracking a node
+			if (data instanceof TextEditGroup) { // tracking a node
 				// need to split and create 2 edits as tracking node can surround replaced node.
 				TextEdit edit= new RangeMarker(insertOffset, 0);
-				addDescription((GroupDescription) data, edit);
+				addDescription((TextEditGroup) data, edit);
 				addEdit(edit);
 				if (curr.length != 0) {
 					int end= offset + curr.length;
@@ -960,7 +960,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		int oldModifiers= ((Integer) event.getOriginalValue()).intValue();
 		int newModifiers= ((Integer) event.getNewValue()).intValue();
-		GroupDescription description= getDescription(event);
+		TextEditGroup description= getDescription(event);
 		
 		try {
 			int tok= getScanner().readNext(offset, true);
@@ -1010,7 +1010,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		}		
 	}
 	
-	private void replaceOperation(int posBeforeOperation, String newOperation, GroupDescription description) {
+	private void replaceOperation(int posBeforeOperation, String newOperation, TextEditGroup description) {
 		try {
 			getScanner().readNext(posBeforeOperation, true);
 			doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), newOperation, description);
@@ -1024,7 +1024,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
 			try {
 				String newOperation= event.getNewValue().toString();
-				GroupDescription description= getDescription(event);
+				TextEditGroup description= getDescription(event);
 				getScanner().readNext(posBeforeOperation, true);
 				doTextReplace(getScanner().getCurrentStartOffset(), getScanner().getCurrentLength(), newOperation, description);
 			} catch (CoreException e) {
@@ -1037,7 +1037,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		GroupDescription description= fRewrite.getTrackedNodeData(node);
+		TextEditGroup description= fRewrite.getTrackedNodeData(node);
 		if (description != null) {
 			fCurrentEdit= fCurrentEdit.getParent();
 		}
@@ -1069,7 +1069,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				fCurrentEdit= edit;		
 			}
 		}
-		GroupDescription description= fRewrite.getTrackedNodeData(node);
+		TextEditGroup description= fRewrite.getTrackedNodeData(node);
 		if (description != null) {
 			int offset= getExtendedOffset(node);
 			int length= getExtendedLength(node);
@@ -1222,7 +1222,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					token= getScanner().readNext(true);
 				}
 				
-				GroupDescription description= getDescription(node, ASTNodeConstants.RETURN_TYPE);
+				TextEditGroup description= getDescription(node, ASTNodeConstants.RETURN_TYPE);
 				if (isConstructor || !returnTypeExists) { // insert
 					doTextInsert(startPos, " ", description); //$NON-NLS-1$
 					doTextInsert(startPos, newReturnType, getIndent(startPos), true, description);
@@ -1364,7 +1364,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		int nOldBrackets= getDimensions(arrayType); // number of total brackets
 		int nNewBrackets= nOldBrackets;
 		
-		GroupDescription description= null;
+		TextEditGroup description= null;
 		RewriteEvent typeEvent= getEvent(node, ASTNodeConstants.TYPE);
 		if (typeEvent != null && typeEvent.getChangeKind() == RewriteEvent.REPLACED) { // changed arraytype can have different dimension or type name
 			ArrayType replacingType= (ArrayType) typeEvent.getNewValue();
@@ -1897,7 +1897,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		if (needsNewOperation) {
 			int startPos= pos;
-			GroupDescription description= getDescription(node, ASTNodeConstants.OPERATOR);
+			TextEditGroup description= getDescription(node, ASTNodeConstants.OPERATOR);
 			
 			if (event != null && event.getChangeKind() != RewriteEvent.UNCHANGED) {
 				RewriteEvent[] extendedOperands= event.getChildren();

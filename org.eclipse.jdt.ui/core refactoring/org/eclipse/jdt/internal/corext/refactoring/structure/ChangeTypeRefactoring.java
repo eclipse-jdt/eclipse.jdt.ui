@@ -85,12 +85,12 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeCon
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * @author tip
@@ -516,7 +516,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		String description= 
 		  RefactoringCoreMessages.getString("ChangeTypeRefactoring.typeChange") //$NON-NLS-1$ 
 		  + oldName + RefactoringCoreMessages.getString("ChangeTypeRefactoring.to") + typeName;  //$NON-NLS-1$ //$NON-NLS-2$
-		GroupDescription gd= new GroupDescription(description); 
+		TextEditGroup gd= new TextEditGroup(description); 
 		AST	ast= cu.getAST();
 		//TODO handle types other than simple (e.g., arrays)
 		Type newType= ast.newSimpleType(ast.newSimpleName(typeName)); 

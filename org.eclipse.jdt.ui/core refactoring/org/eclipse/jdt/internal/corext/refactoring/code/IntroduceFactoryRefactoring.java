@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,7 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
@@ -604,7 +604,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param ctorCall the ClassInstanceCreation to be marked as replaced
 	 */
 	private MethodInvocation createFactoryMethodCall(AST ast, ClassInstanceCreation ctorCall,
-													 ASTRewrite unitRewriter, GroupDescription gd) {
+													 ASTRewrite unitRewriter, TextEditGroup gd) {
 		MethodInvocation	factoryMethodCall= ast.newMethodInvocation();
 
 		List	actualFactoryArgs= factoryMethodCall.arguments();
@@ -671,7 +671,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param root
 	 * @param buffer
 	 */
-	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, GroupDescription declGD) {
+	private boolean protectConstructor(CompilationUnit unitAST, ASTRewrite unitRewriter, TextEditGroup declGD) {
 		MethodDeclaration constructor= (MethodDeclaration) unitAST.findDeclaringNode(fCtorBinding.getKey());
 
 		// No need to rewrite the modifiers if the visibility is what we already want it to be.
@@ -708,7 +708,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			// First create the factory method
 			if (unitHandle.equals(fFactoryUnitHandle)) {
-				GroupDescription	factoryGD= new GroupDescription(RefactoringCoreMessages.getString("IntroduceFactory.addFactoryMethod")); //$NON-NLS-1$
+				TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.addFactoryMethod")); //$NON-NLS-1$
 
 				createFactoryChange(unitRewriter, unit, factoryGD);
 				unitChange.addGroupDescription(factoryGD);
@@ -722,7 +722,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			// Finally, make the constructor private, if requested.
 			if (shouldProtectConstructor() && isConstructorUnit(unitHandle)) {
-				GroupDescription	declGD= new GroupDescription(RefactoringCoreMessages.getString("IntroduceFactory.protectConstructor")); //$NON-NLS-1$
+				TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.protectConstructor")); //$NON-NLS-1$
 
 				if (protectConstructor(unit, unitRewriter, declGD)) {
 					unitChange.addGroupDescription(declGD);
@@ -788,7 +788,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			ClassInstanceCreation	creation= getCtorCallAt(hits[i].getStart(), hits[i].getEnd(), unit);
 
 			if (creation != null) {
-				GroupDescription gd= new GroupDescription(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$
+				TextEditGroup gd= new TextEditGroup(RefactoringCoreMessages.getString("IntroduceFactory.replaceCalls")); //$NON-NLS-1$
 
 				createFactoryMethodCall(ctorCallAST, creation, unitRewriter, gd);
 				unitChange.addGroupDescription(gd);
@@ -867,7 +867,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param unit
 	 * @param gd the <code>GroupDescription</code> to associate with the changes made
 	 */
-	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, GroupDescription gd) {
+	private void createFactoryChange(ASTRewrite unitRewriter, CompilationUnit unit, TextEditGroup gd) {
 		// ================================================================================
 		// First add the factory itself (method, class, and interface as needed/directed by user)
 		AST				ast= unit.getAST();

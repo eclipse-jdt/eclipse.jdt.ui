@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
@@ -40,7 +42,6 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComparator;
@@ -52,7 +53,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	
-	private GroupDescription fSelectionDescription;
+	private TextEditGroup fSelectionDescription;
 	private List fLinkedPositions;
 	private Map fLinkProposals;
 
@@ -66,22 +67,22 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
 	 */
-	protected GroupDescription getSelectionDescription() {
+	protected TextEditGroup getSelectionDescription() {
 		return fSelectionDescription;
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
 	 */
-	protected GroupDescription[] getLinkedRanges() {
+	protected TextEditGroup[] getLinkedRanges() {
 		if (fLinkedPositions != null && !fLinkedPositions.isEmpty()) {
-			return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
+			return (TextEditGroup[]) fLinkedPositions.toArray(new TextEditGroup[fLinkedPositions.size()]);
 		}
 		return null;
 	}
 	
-	public GroupDescription markAsSelection(ASTRewrite rewrite, ASTNode node) {
-		fSelectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
+	public TextEditGroup markAsSelection(ASTRewrite rewrite, ASTNode node) {
+		fSelectionDescription= new TextEditGroup("selection"); //$NON-NLS-1$
 		rewrite.markAsTracked(node, fSelectionDescription);
 		return fSelectionDescription;
 	}
@@ -125,8 +126,8 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		proposals.add(proposal);
 	}
 	
-	public GroupDescription markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String kind) {
-		GroupDescription description= new GroupDescription(kind);
+	public TextEditGroup markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String kind) {
+		TextEditGroup description= new TextEditGroup(kind);
 		rewrite.markAsTracked(node, description);
 		if (fLinkedPositions == null) {
 			fLinkedPositions= new ArrayList();
@@ -139,7 +140,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return description;
 	}
 	
-	public void setSelectionDescription(GroupDescription desc) {
+	public void setSelectionDescription(TextEditGroup desc) {
 		fSelectionDescription= desc;
 	}
 	

@@ -17,6 +17,7 @@ import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -59,7 +60,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -200,12 +200,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			if (!fImportRewrite.isEmpty()) {
 				TextEdit edit= fImportRewrite.createEdit(buffer);
 				root.addChild(edit);
-				result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {edit} ));
+				result.addGroupDescription(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}
 			MultiTextEdit change= new MultiTextEdit();
 			fRewriter.rewriteNode(buffer, change);
 			root.addChild(change);
-			result.addGroupDescription(new GroupDescription(NN, new TextEdit[] {change} ));
+			result.addGroupDescription(new TextEditGroup(NN, new TextEdit[] {change} ));
 			return result;
 		} finally {
 			fRewriter.removeModifications();

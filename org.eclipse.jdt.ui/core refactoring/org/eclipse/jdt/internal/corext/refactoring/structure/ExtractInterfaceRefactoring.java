@@ -15,12 +15,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -72,7 +72,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -291,7 +290,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			TypeDeclaration td= ASTNodeSearchUtil.getTypeDeclarationNode(theType, typeCuNode);
 
 			modifyInputTypeCu(typeCu, typeCuNode, typeCuRewrite, td);
-			GroupDescription description= trackReferenceNodes(typeCuNode, typeCuRewrite, td);
+			TextEditGroup description= trackReferenceNodes(typeCuNode, typeCuRewrite, td);
 			TextChange change= addTextEditFromRewrite(manager, typeCu, typeCuRewrite);
 			
 			if (! fReplaceOccurrences)
@@ -351,9 +350,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private GroupDescription trackReferenceNodes(CompilationUnit typeCuNode, ASTRewrite typeCuRewrite, TypeDeclaration td) {
+	private TextEditGroup trackReferenceNodes(CompilationUnit typeCuNode, ASTRewrite typeCuRewrite, TypeDeclaration td) {
 		ASTNode[] refs= getReferencesToType(typeCuNode, td.resolveBinding());
-		GroupDescription description= new GroupDescription();
+		TextEditGroup description= new TextEditGroup("N.N"); //$NON-NLS-1$
 		for (int i= 0; i < refs.length; i++) {
 			typeCuRewrite.markAsTracked(refs[i], description);
 		}

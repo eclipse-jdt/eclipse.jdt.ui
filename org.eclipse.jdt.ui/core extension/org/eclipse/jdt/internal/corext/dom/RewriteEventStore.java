@@ -15,10 +15,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 /**
  * Stores all rewrite events, descriptions of events and knows which nodes
@@ -263,14 +264,14 @@ public final class RewriteEventStore {
 		return ASTNodeConstants.getNodeChild(parent, childProperty);
 	}	
 	
-	public GroupDescription getEventDescription(RewriteEvent event) {
+	public TextEditGroup getEventDescription(RewriteEvent event) {
 		if (fEventDescriptions == null) {
 			return null;
 		}
-		return (GroupDescription) fEventDescriptions.get(event);
+		return (TextEditGroup) fEventDescriptions.get(event);
 	}
 	
-	public void setEventDescription(RewriteEvent event, GroupDescription desc) {
+	public void setEventDescription(RewriteEvent event, TextEditGroup desc) {
 		if (desc != null) {
 			if (fEventDescriptions == null) {
 				fEventDescriptions= new HashMap(5);

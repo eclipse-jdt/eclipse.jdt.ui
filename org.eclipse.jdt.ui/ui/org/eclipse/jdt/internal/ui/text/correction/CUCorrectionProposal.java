@@ -19,6 +19,7 @@ import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -141,7 +141,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fImportRewrite= rewrite;
 	}
 		
-	protected GroupDescription[] getLinkedRanges() {
+	protected TextEditGroup[] getLinkedRanges() {
 		return null;
 	}
 	
@@ -150,7 +150,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 	
 	
-	protected GroupDescription getSelectionDescription() {
+	protected TextEditGroup getSelectionDescription() {
 		return null;
 	}
 		
@@ -247,8 +247,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			
 			CompilationUnitChange change= getCompilationUnitChange();
 			
-			GroupDescription selection= getSelectionDescription();
-			GroupDescription[] linked= getLinkedRanges();
+			TextEditGroup selection= getSelectionDescription();
+			TextEditGroup[] linked= getLinkedRanges();
 			
 			IEditorPart part= null;
 			if (selection != null || linked != null) {
@@ -290,13 +290,13 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}		
 	}
 					
-	private void enterLinkedMode(CompilationUnitChange change, ITextViewer viewer, GroupDescription[] linked, GroupDescription selection) throws BadLocationException {
+	private void enterLinkedMode(CompilationUnitChange change, ITextViewer viewer, TextEditGroup[] linked, TextEditGroup selection) throws BadLocationException {
 		IDocument document= viewer.getDocument();
 		
 		HashMap map= new HashMap();
 		
 		for (int i= 0; i < linked.length; i++) {
-			GroupDescription curr= linked[i];
+			TextEditGroup curr= linked[i];
 			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
 			LinkedPositionGroup group= (LinkedPositionGroup) map.get(name);
 			if (group == null) {

@@ -25,8 +25,9 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditCopier;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
@@ -35,9 +36,9 @@ public abstract class TextChange extends AbstractTextChange {
 	public static class EditChange {
 		private boolean fIsActive;
 		private TextChange fTextChange;
-		private GroupDescription fDescription;
+		private TextEditGroup fDescription;
 		
-		/* package */ EditChange(GroupDescription description, TextChange change) {
+		/* package */ EditChange(TextEditGroup description, TextChange change) {
 			fTextChange= change;
 			fIsActive= true;
 			fDescription= description;
@@ -55,12 +56,12 @@ public abstract class TextChange extends AbstractTextChange {
 			return fTextChange;
 		}
 		public IRegion getTextRange() {
-			return fDescription.getTextRange();
+			return fDescription.getRegion();
 		}
 		public boolean isEmpty() {
-			return fDescription.hasTextEdits();
+			return fDescription.isEmpty();
 		}
-		/* package */ GroupDescription getGroupDescription() {
+		/* package */ TextEditGroup getGroupDescription() {
 			return fDescription;
 		}
 		public boolean coveredBy(IRegion sourceRegion) {
@@ -150,7 +151,7 @@ public abstract class TextChange extends AbstractTextChange {
 	public void addTextEdit(String name, TextEdit[] edits) {
 		Assert.isNotNull(name);
 		Assert.isNotNull(edits);
-		GroupDescription description= new GroupDescription(name, edits);
+		TextEditGroup description= new TextEditGroup(name, edits);
 		fTextEditChanges.add(new EditChange(description, this));
 		if (fEdit == null) {
 			fEdit= new MultiTextEdit();
@@ -190,7 +191,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * 
 	 * @param description the group description to be added
 	 */
-	public void addGroupDescription(GroupDescription description) {
+	public void addGroupDescription(TextEditGroup description) {
 		Assert.isTrue(fEdit != null, "Can only add a description if a root edit exists"); //$NON-NLS-1$
 		Assert.isTrue(!fAutoMode, "Group descriptions are only supported if root edit has been set by setEdit"); //$NON-NLS-1$
 		Assert.isTrue(description != null);
@@ -202,7 +203,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * 
 	 * @param descriptios the group descriptions to be added
 	 */
-	public void addGroupDescriptions(GroupDescription[] descriptions) {
+	public void addGroupDescriptions(TextEditGroup[] descriptions) {
 		for (int i= 0; i < descriptions.length; i++) {
 			addGroupDescription(descriptions[i]);
 		}
@@ -212,8 +213,8 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Returns the group descriptions that have been added to this change
 	 * @return GroupDescription[]
 	 */	
-	public GroupDescription[] getGroupDescriptions() {
-		GroupDescription[] res= new GroupDescription[fTextEditChanges.size()];
+	public TextEditGroup[] getGroupDescriptions() {
+		TextEditGroup[] res= new TextEditGroup[fTextEditChanges.size()];
 		for (int i= 0; i < res.length; i++) {
 			EditChange elem= (EditChange) fTextEditChanges.get(i);
 			res[i]= elem.getGroupDescription();
@@ -225,10 +226,10 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Returns the group description with the given name or <code>null</code> if no such
 	 * GroupDescription exists.
 	 */	
-	public GroupDescription getGroupDescription(String name) {
+	public TextEditGroup getGroupDescription(String name) {
 		for (int i= 0; i < fTextEditChanges.size(); i++) {
 			EditChange elem= (EditChange) fTextEditChanges.get(i);
-			GroupDescription description= elem.getGroupDescription();
+			TextEditGroup description= elem.getGroupDescription();
 			if (name.equals(description.getName())) {
 				return description;
 			}

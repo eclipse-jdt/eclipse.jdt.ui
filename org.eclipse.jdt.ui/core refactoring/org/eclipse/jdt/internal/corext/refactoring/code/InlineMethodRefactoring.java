@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -61,7 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /*
@@ -228,7 +228,7 @@ public class InlineMethodRefactoring extends Refactoring {
 							added= true;
 							TextEdit edit= inliner.perform();
 							change.addGroupDescription( 
-								new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
+								new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.inline"), new TextEdit[] { edit })); //$NON-NLS-1$
 							root.addChild(edit);
 						} else {
 							fDeleteSource= false;
@@ -243,7 +243,7 @@ public class InlineMethodRefactoring extends Refactoring {
 						TextEdit edit= rewrite.createEdit(inliner.getBuffer());
 						root.addChild(edit);
 						change.addGroupDescription(
-							new GroupDescription(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
+							new TextEditGroup(RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.import"), new TextEdit[] {edit})); //$NON-NLS-1$
 					}
 				}
 			} finally {
@@ -261,7 +261,7 @@ public class InlineMethodRefactoring extends Refactoring {
 		if (fDeleteSource && fCurrentMode == INLINE_ALL) {
 			TextChange change= fChangeManager.get(fSourceProvider.getCompilationUnit());
 			TextEdit delete= fSourceProvider.getDeleteEdit();
-			GroupDescription description= new GroupDescription(
+			TextEditGroup description= new TextEditGroup(
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.edit.delete"), new TextEdit[] { delete }); //$NON-NLS-1$
 			TextEdit root= change.getEdit();
 			if (root != null) {

@@ -18,6 +18,8 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -46,7 +48,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
@@ -96,8 +97,8 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
-	private GroupDescription getDescription(List all, String name) {
-		GroupDescription desc= new GroupDescription(name);
+	private TextEditGroup getDescription(List all, String name) {
+		TextEditGroup desc= new TextEditGroup(name);
 		all.add(desc);
 		return desc;
 	}
@@ -157,7 +158,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -232,7 +233,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -312,7 +313,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -389,7 +390,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -463,7 +464,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -525,7 +526,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());
@@ -591,7 +592,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		
 		CompilationUnitChange change= proposal.getCompilationUnitChange();
 		
-		GroupDescription[] descriptions= (GroupDescription[]) gd.toArray(new GroupDescription[gd.size()]);
+		TextEditGroup[] descriptions= (TextEditGroup[]) gd.toArray(new TextEditGroup[gd.size()]);
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			IRegion range= change.getNewTextRange(descriptions[i].getTextEdits());

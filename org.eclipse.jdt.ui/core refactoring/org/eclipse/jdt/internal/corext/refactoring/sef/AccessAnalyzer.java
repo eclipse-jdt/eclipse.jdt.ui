@@ -15,6 +15,8 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -45,7 +47,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 /**
  * Analyzer to find all references to the field and to determine how to convert 
@@ -259,8 +260,8 @@ class AccessAnalyzer extends ASTVisitor {
 		return invocation;
 	}
 	
-	private GroupDescription createGroupDescription(String name) {
-		GroupDescription result= new GroupDescription(name);
+	private TextEditGroup createGroupDescription(String name) {
+		TextEditGroup result= new TextEditGroup(name);
 		fGroupDescriptions.add(result);
 		return result;
 	}

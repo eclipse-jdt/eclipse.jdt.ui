@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -73,7 +74,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -323,7 +323,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			MultiTextEdit root= new MultiTextEdit(); 
 			rewriter.rewriteNode(buffer, root);
 			change.setEdit(root);
-			change.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
+			change.addGroupDescriptions((TextEditGroup[])groups.toArray(new TextEditGroup[groups.size()]));
 		} finally {
 			TextBuffer.release(buffer);
 		}
@@ -399,7 +399,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 			int newModifiers= ASTNodes.changeVisibility(decl.getModifiers(), Modifier.PRIVATE);
 
-			GroupDescription description= new GroupDescription(
+			TextEditGroup description= new TextEditGroup(
 				RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility")); //$NON-NLS-1$
 			result.add(description);
 			rewriter.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), description);
@@ -422,19 +422,19 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			}
 			position++;
 		}
-		GroupDescription description;
+		TextEditGroup description;
 		if (!JdtFlags.isFinal(fField)) {
-			description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
+			description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
 			result.add(description);
 			members.add(position++, createSetterMethod(ast, rewriter, description));
 		}
-		description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
+		description= new TextEditGroup(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
 		result.add(description);
 		members.add(position, createGetterMethod(ast, rewriter, description));
 		return result;
 	}
 
-	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, GroupDescription description) throws JavaModelException {
+	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();
@@ -464,7 +464,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, GroupDescription description) throws JavaModelException {
+	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter, TextEditGroup description) throws JavaModelException {
 		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
 		Type type= field.getType();
 		MethodDeclaration result= ast.newMethodDeclaration();

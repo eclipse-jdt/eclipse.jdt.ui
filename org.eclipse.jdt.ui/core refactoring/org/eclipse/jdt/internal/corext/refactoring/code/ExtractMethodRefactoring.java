@@ -55,6 +55,8 @@ import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -72,7 +74,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -387,14 +388,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 			
 			MethodDeclaration mm= createNewMethod(fMethodName, true, target, buffer.getLineDelimiter());
 
-			GroupDescription insertDesc= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
+			TextEditGroup insertDesc= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.add_method", fMethodName)); //$NON-NLS-1$
 			result.addGroupDescription(insertDesc);
 			
 			fRewriter.markAsInserted(mm, insertDesc);
 			List container= ASTNodes.getContainingList(declaration);
 			container.add(container.indexOf(declaration) + 1, mm);
 			
-			GroupDescription description= new GroupDescription(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
+			TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
 			result.addGroupDescription(description);
 			
 			ASTNode[] callNodes= createCallNodes(null);
@@ -415,7 +416,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (!fImportRewriter.isEmpty()) {
 				TextEdit edit= fImportRewriter.createEdit(buffer);
 				root.addChild(edit);
-				result.addGroupDescription(new GroupDescription(
+				result.addGroupDescription(new TextEditGroup(
 					RefactoringCoreMessages.getString("ExtractMethodRefactoring.organize_imports"), //$NON-NLS-1$
 					new TextEdit[] {edit}
 				));
@@ -617,7 +618,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		else
 			label= RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.duplicates.multi", fMethodName); //$NON-NLS-1$
 		
-		GroupDescription description= new GroupDescription(label);
+		TextEditGroup description= new TextEditGroup(label);
 		result.addGroupDescription(description);
 		
 		for (int d= 0; d < fDuplicates.length; d++) {

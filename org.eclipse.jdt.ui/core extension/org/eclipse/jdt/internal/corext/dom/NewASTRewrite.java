@@ -15,6 +15,7 @@ import java.util.HashSet;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -26,7 +27,6 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Statement;
 
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 /**
  * Work in progress.
@@ -116,7 +116,7 @@ public class NewASTRewrite {
 	 * @param insertedNode The node or attribute to insert.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInsert(ASTNode parent, int childProperty, ASTNode insertedNode, GroupDescription description) {
+	public final void markAsInsert(ASTNode parent, int childProperty, ASTNode insertedNode, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(insertedNode);
@@ -134,7 +134,7 @@ public class NewASTRewrite {
 	 * @param siblingInOriginalList The element to be directly after the newly inserted element or <code>null</code> to insert at the end.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInsertBeforeOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInOriginalList, GroupDescription description) {
+	public final void markAsInsertBeforeOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInOriginalList, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.insertBeforeOriginalSibling(insertedNode, siblingInOriginalList);
@@ -157,7 +157,7 @@ public class NewASTRewrite {
 	 * @param siblingInNewList The element to be directly after the newly inserted element or <code>null</code> to insert at the end.
 	 * @param description Description of the change.
 	 */
-	public final void markAsInsertBeforeNew(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInNewList, GroupDescription description) {
+	public final void markAsInsertBeforeNew(ASTNode parent, int childProperty, ASTNode insertedNode, ASTNode siblingInNewList, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.insertBeforeOriginalSibling(insertedNode, siblingInNewList);
@@ -180,7 +180,7 @@ public class NewASTRewrite {
 	 * @param indexInOriginalList
 	 * @param description Description of the change.
 	 */
-	public final void markAsInsertInOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInOriginalList, GroupDescription description) {
+	public final void markAsInsertInOriginal(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInOriginalList, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.insertAtOriginalIndex(insertedNode, indexInOriginalList);
@@ -203,7 +203,7 @@ public class NewASTRewrite {
 	 * @param indexInNewList
 	 * @param description Description of the change.
 	 */
-	public final void markAsInsertInNew(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInNewList, GroupDescription description) {
+	public final void markAsInsertInNew(ASTNode parent, int childProperty, ASTNode insertedNode, int indexInNewList, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.insertAtNewIndex(insertedNode, indexInNewList);
@@ -231,7 +231,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent or the property is not a node property.
 	 */
-	public final void markAsRemoved(ASTNode parent, int childProperty, GroupDescription description) {
+	public final void markAsRemoved(ASTNode parent, int childProperty, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(null);
@@ -250,7 +250,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
 	 */
-	public final void markAsRemoved(ASTNode parent, int childProperty, ASTNode nodeToRemove, GroupDescription description) {
+	public final void markAsRemoved(ASTNode parent, int childProperty, ASTNode nodeToRemove, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.removeEntry(nodeToRemove);
@@ -267,7 +267,7 @@ public class NewASTRewrite {
 	 * @param node The node to be marked as removed.
 	 * @param description Description of the change.
 	 */
-	public final void markAsRemoved(ASTNode node, GroupDescription description) {
+	public final void markAsRemoved(ASTNode node, TextEditGroup description) {
 		int property= ASTNodeConstants.getPropertyOfNode(node);
 		if (ASTNodeConstants.isListProperty(property)) {
 			markAsRemoved(node.getParent(), property, node, description);
@@ -281,7 +281,7 @@ public class NewASTRewrite {
 	 * @param node The node to be marked as removed.
 	 */	
 	public final void markAsRemoved(ASTNode node) {
-		markAsRemoved(node, (GroupDescription) null);
+		markAsRemoved(node, (TextEditGroup) null);
 	}
 
 	/**
@@ -295,7 +295,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent or the property is not a node property.
 	 */
-	public final void markAsReplaced(ASTNode parent, int childProperty, Object replacingNode, GroupDescription description) {
+	public final void markAsReplaced(ASTNode parent, int childProperty, Object replacingNode, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		NodeRewriteEvent nodeEvent= fEventStore.getNodeEvent(parent, childProperty, true);
 		nodeEvent.setNewValue(replacingNode);
@@ -315,7 +315,7 @@ public class NewASTRewrite {
 	 * @throws IllegalArgumentException An <code>IllegalArgumentException</code> is either the parent node is
 	 * not inside the rewriters parent, the property is not a list property or the given node is not in the specified list.
 	 */
-	public final void markAsReplaced(ASTNode parent, int childProperty, ASTNode nodeToReplace, ASTNode replacingNode, GroupDescription description) {
+	public final void markAsReplaced(ASTNode parent, int childProperty, ASTNode nodeToReplace, ASTNode replacingNode, TextEditGroup description) {
 		validateIsInsideAST(parent);
 		ListRewriteEvent listEvent= fEventStore.getListEvent(parent, childProperty, true);
 		RewriteEvent res= listEvent.replaceEntry(nodeToReplace, replacingNode);
@@ -334,7 +334,7 @@ public class NewASTRewrite {
 	 * @param replacingNode The node replacing the node.
 	 * @param description Description of the change. 
 	 */		
-	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, GroupDescription description) {
+	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, TextEditGroup description) {
 		int property= ASTNodeConstants.getPropertyOfNode(node);
 		if (ASTNodeConstants.isListProperty(property)) {
 			markAsReplaced(node.getParent(), property, node, replacingNode, description);
@@ -350,7 +350,7 @@ public class NewASTRewrite {
 	 * @param replacingNode The node replacing the node.
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode) {
-		markAsReplaced(node, replacingNode, (GroupDescription) null);
+		markAsReplaced(node, replacingNode, (TextEditGroup) null);
 	}
 	
 	/**
@@ -359,7 +359,7 @@ public class NewASTRewrite {
 	 * @param node The node to track
 	 * @param description The group description to collect the range markers describing the node position.
 	 */
-	public final void markAsTracked(ASTNode node, GroupDescription description) {
+	public final void markAsTracked(ASTNode node, TextEditGroup description) {
 		if (getTrackedNodeData(node) != null) {
 			throw new IllegalArgumentException("Node is already marked as tracked"); //$NON-NLS-1$
 		}
@@ -466,14 +466,14 @@ public class NewASTRewrite {
 		return false;	
 	}
 	
-	public final GroupDescription getTrackedNodeData(ASTNode node) {
+	public final TextEditGroup getTrackedNodeData(ASTNode node) {
 		if (fTrackedNodes != null) {
-			return (GroupDescription) fTrackedNodes.get(node);
+			return (TextEditGroup) fTrackedNodes.get(node);
 		}
 		return null;	
 	}
 	
-	protected void setTrackedNodeData(ASTNode node, GroupDescription description) {
+	protected void setTrackedNodeData(ASTNode node, TextEditGroup description) {
 		if (fTrackedNodes == null) {
 			fTrackedNodes= new HashMap();
 		}

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -78,7 +79,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -118,8 +118,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		public List groups;
 		public ImportRewrite imports;
 		
-		public GroupDescription createGroupDescription(String name) {
-			GroupDescription result= new GroupDescription(name);
+		public TextEditGroup createGroupDescription(String name) {
+			TextEditGroup result= new TextEditGroup(name);
 			groups.add(result);
 			return result;
 		}
@@ -140,7 +140,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				if (!imports.isEmpty())
 					edit.addChild(imports.createEdit(buffer));
 				result.setEdit(edit);
-				result.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
+				result.addGroupDescriptions((TextEditGroup[])groups.toArray(new TextEditGroup[groups.size()]));
 			} finally {
 				TextBuffer.release(buffer);
 			}
@@ -840,7 +840,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 					fSource.rewriter.markAsReplaced(fieldDecl, ASTNodeConstants.MODIFIERS, new Integer(psfModifiers), null);
 				}
 			}
-			fSource.rewriter.markAsTracked(declaration, new GroupDescription("moved member declaration"));
+			fSource.rewriter.markAsTracked(declaration, new TextEditGroup("moved member declaration"));
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
 		}
@@ -867,8 +867,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 	
 	private String getUpdatedMember(TextBuffer buffer, BodyDeclaration declaration) {
-		GroupDescription groupDescription= fSource.rewriter.getTrackedNodeData(declaration);
-		IRegion textRange= groupDescription.getTextRange();
+		TextEditGroup groupDescription= fSource.rewriter.getTrackedNodeData(declaration);
+		IRegion textRange= groupDescription.getRegion();
 		String newSource= buffer.getContent(textRange.getOffset(), textRange.getLength());
 		return Strings.trimIndentation(newSource, fPreferences.tabWidth, false);
 	}
@@ -878,8 +878,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		TypeDeclaration destination= getDestinationDeclaration();
 		List container= destination.bodyDeclarations();
 			
-		GroupDescription delete= fSource.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.deleteMembers")); //$NON-NLS-1$
-		GroupDescription add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
+		TextEditGroup delete= fSource.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.deleteMembers")); //$NON-NLS-1$
+		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			fSource.rewriter.markAsRemoved(declaration, delete);
