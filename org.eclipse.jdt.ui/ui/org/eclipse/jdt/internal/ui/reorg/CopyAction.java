@@ -129,8 +129,9 @@ public class CopyAction extends ReorgAction {
 	protected void processElements(Shell activeShell, final Object destination, final List elements) {
 		ArrayList toBeReplaced= new ArrayList();
 		final String[] names= getRenamings(activeShell, destination, elements, toBeReplaced);
-		if (!confirmIfUnsaved(toBeReplaced))
-			return;
+		// 1GEPGHH: ITPJUI:WINNT - Illogical behaviour when copying over dirty file
+		/*if (!confirmIfUnsaved(toBeReplaced))
+			return;*/
 		if (names == null)
 			return;
 		String id= JavaPlugin.getDefault().getDescriptor().getUniqueIdentifier();

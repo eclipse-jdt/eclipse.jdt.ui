@@ -82,8 +82,9 @@ public class MoveAction extends CopyAction {
 
 		ArrayList toBeReplaced= new ArrayList();
 		final String[] names= getRenamings(activeShell, destination, elements, toBeReplaced);
-		if (!confirmIfUnsaved(toBeReplaced))
-			return;
+		// 1GEPGHH: ITPJUI:WINNT - Illogical behaviour when copying over dirty file
+		/*if (!confirmIfUnsaved(toBeReplaced))
+			return;*/
 		if (names == null)
 			return;
 		final MultiStatus status= new MultiStatus(JavaPlugin.getPluginId(), IStatus.OK, JavaPlugin.getResourceString(ERROR_STATUS), null);
