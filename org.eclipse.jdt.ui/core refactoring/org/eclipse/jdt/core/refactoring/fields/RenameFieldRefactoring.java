@@ -201,7 +201,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 		return new SimpleReplaceTextChange("Field Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), getNewName()){
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
-				if (oldText.startsWith("this.")){
+				if (oldText.startsWith("this.") && (! getText().startsWith("this."))){
 					setText("this." + getText());
 					setLength(getLength());
 				}
