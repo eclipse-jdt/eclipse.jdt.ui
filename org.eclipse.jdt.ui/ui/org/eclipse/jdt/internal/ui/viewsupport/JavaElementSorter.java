@@ -5,9 +5,9 @@ import java.text.Collator;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
@@ -20,8 +20,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,7 +52,6 @@ public class JavaElementSorter extends ViewerSorter {
 	private static final int OTHERS= 20;	
 
 	private IClasspathEntry[] fClassPath;
-	private ILabelProvider fLabelProvider;
 	
 	public JavaElementSorter() {
 	}
@@ -64,15 +61,10 @@ public class JavaElementSorter extends ViewerSorter {
 	 */
 	public void sort(Viewer v, Object[] property) {
 		fClassPath= null;
-		fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		try {
 			super.sort(v, property);
 		} finally {
 			fClassPath= null;
-			// do not use the element sorter from the viewer to be independend of rendering options
-			// (type hierarchy method view relies on it)
-			fLabelProvider.dispose();
-			fLabelProvider= null;
 		}
 	}
 	
@@ -165,8 +157,30 @@ public class JavaElementSorter extends ViewerSorter {
 		}
 		
 		Collator collator= getCollator();
-		return collator.compare(fLabelProvider.getText(e1), fLabelProvider.getText(e2));
+		String name1;
+		String name2;
+		switch (cat1) {
+			case OTHERS:
+				return 0;
+			case RESOURCES:
+			case RESOURCEFOLDERS:
+				name1= ((IResource) e1).getName();
+				name2= ((IResource) e2).getName();
+				break;
+			case STORAGE:
+				name1= ((IStorage) e1).getName();
+				name2= ((IStorage) e2).getName();
+				break;
+			default:
+				name1= JavaElementLabels.getElementLabel((IJavaElement) e1, JavaElementLabels.M_PARAMETER_TYPES);
+				name2= JavaElementLabels.getElementLabel((IJavaElement) e2, JavaElementLabels.M_PARAMETER_TYPES);
+				break;
+		}
+		
+		return collator.compare(name1, name2);
 	}
+		
+	
 			
 	private int getClassPathIndex(IPackageFragmentRoot root) {
 		try {
