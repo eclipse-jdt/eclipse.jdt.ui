@@ -780,9 +780,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 //		}
 //		addOpenWithMenu(menu, selection);
 		
-		menu.appendToGroup(GROUP_FOCUS, fFocusOnTypeAction);
 		if (fFocusOnSelectionAction.canActionBeAdded())
 			menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
+		menu.appendToGroup(GROUP_FOCUS, fFocusOnTypeAction);
 
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
