@@ -37,7 +37,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
 	}
-		
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
+	 */
 	protected void addEdits(IDocument document) throws CoreException {
 		super.addEdits(document);
 		ASTRewrite rewrite= getRewrite();
@@ -52,13 +55,17 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		}
 	}
 	
-	protected ASTRewrite getRewrite() throws CoreException {
-		return fRewrite;
-	}
-	
 	/**
-	 * @deprecated
+	 * Returns the rewriter that has been passed in the constructor. Implemententors can override this
+	 * method to create the rewriter lazy. 
+	 * @return Returns the rewriter to be used.
+	 * @throws CoreException A core exception is thrown when the could not be created.
 	 */
-	public void ensureNoModifications() throws CoreException {
+	protected ASTRewrite getRewrite() throws CoreException {
+		if (fRewrite == null) {
+			IStatus status= JavaUIStatus.createError(IStatus.ERROR, "Rewriter not initialized", null); //$NON-NLS-1$
+			throw new CoreException(status);
+		}
+		return fRewrite;
 	}
 }

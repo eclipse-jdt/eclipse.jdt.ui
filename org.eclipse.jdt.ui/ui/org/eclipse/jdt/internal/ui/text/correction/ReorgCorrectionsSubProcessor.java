@@ -134,7 +134,7 @@ public class ReorgCorrectionsSubProcessor {
 		}
 		
 		String name= CorrectionMessages.getString("ReorgCorrectionsSubProcessor.organizeimports.description"); //$NON-NLS-1$
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
 				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
 				IWorkbenchPage p= JavaPlugin.getActivePage();
@@ -198,7 +198,7 @@ public class ReorgCorrectionsSubProcessor {
 						IClasspathEntry newEntry= JavaCore.newProjectEntry(other.getPath());
 						AddToClasspathChange change= new AddToClasspathChange(project, newEntry);
 						if (!change.entryAlreadyExists()) {
-							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8);					
+							ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 8, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));					
 							proposals.add(proposal);
 						}
 					}
@@ -207,7 +207,7 @@ public class ReorgCorrectionsSubProcessor {
 						if (label != null) {
 							AddToClasspathChange change= new AddToClasspathChange(project, entry);
 							if (!change.entryAlreadyExists()) {
-								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7);					
+								ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(label, change, 7, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));					
 								proposals.add(proposal);
 							}
 						}

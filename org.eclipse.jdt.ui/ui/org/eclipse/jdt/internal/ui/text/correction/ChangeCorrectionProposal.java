@@ -28,7 +28,6 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -40,10 +39,6 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	private String fName;
 	private int fRelevance;
 	private Image fImage;
-
-	public ChangeCorrectionProposal(String name, Change change, int relevance) {
-		this(name, change, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-	}
 	
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
 		fName= name;
@@ -158,7 +153,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	 * Sets the change element.
 	 * @param change the change
 	 */
-	protected void setChange(Change change) throws CoreException {
+	protected void setChange(Change change) {
 		fChange= change;
 	}	
 

@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 /**
  *  
  */
@@ -36,14 +37,14 @@ public class RenameNodeCompletionProposal extends CUCorrectionProposal {
 	private int fLength;
 
 	public RenameNodeCompletionProposal(String name, ICompilationUnit cu, int offset, int length, String newName, int relevance) {
-		super(name, cu, relevance);
+		super(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		fOffset= offset;
 		fLength= length;
 		fNewName= newName;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
+	/*(non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
 	protected void addEdits(IDocument doc) throws CoreException {
 		super.addEdits(doc);

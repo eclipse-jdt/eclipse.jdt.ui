@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
- *
+ * A quick fix / quick assist proposal with linked positions and linked position proposals.
  */
 public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -75,6 +75,14 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	private Map fLinkGroups;
 	private List fPositionOrder;
 
+	/**
+	 * Constructor.
+	 * @param name The display name of the proposal
+	 * @param cu The compilation unit that is modified
+	 * @param rewrite The AST rewrite that is used. <code>null</code> can be passed if {@link #getRewrite()} is overridden.
+	 * @param relevance The relevance of this proposal.
+	 * @param image The image shown for this proposal.
+	 */
 	public LinkedCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, rewrite, relevance, image);
 		fSelectionDescription= null;
@@ -85,7 +93,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	public void markAsSelection(ASTRewrite rewrite, ASTNode node) {
 		fSelectionDescription= rewrite.track(node);
 	}
-	
 	
 	public void addLinkedModeProposal(String name, String proposal) {
 		addLinkedModeProposal(name, new LinkedModeProposal(proposal));
@@ -124,7 +131,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return linkedGroup;
 	}
 	
-	/*(non-Javadoc)
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.jface.text.IDocument, org.eclipse.ui.IEditorPart)
 	 */
 	protected void performChange(IDocument document, IEditorPart part) throws CoreException {
@@ -209,7 +216,7 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 	
 	
-	public static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
+	private static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
 
 		private String fProposal;
 		private ITypeBinding fTypeProposal;

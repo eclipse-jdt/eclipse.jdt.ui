@@ -383,7 +383,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		String name= CorrectionMessages.getString("LocalCorrectionsSubProcessor.externalizestrings.description"); //$NON-NLS-1$
 		
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
 				try {
 					NLSRefactoring refactoring= NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());

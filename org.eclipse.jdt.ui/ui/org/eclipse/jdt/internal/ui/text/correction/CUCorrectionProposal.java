@@ -16,7 +16,6 @@ import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
@@ -30,7 +29,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -42,7 +40,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -51,17 +48,15 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
-
+/**
+ * A proposal for quick fixes and quack assist that work on a single compilation unit.
+ */
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 	private TextEdit fRootEdit;
 	private ImportRewrite fImportRewrite;
-	
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) {
-		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-	}
-	
+		
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
 		super(name, null, relevance, image);
 		fRootEdit= new MultiTextEdit();
@@ -73,14 +68,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		super(name, change, relevance, image);
 		fCompilationUnit= change.getCompilationUnit();
 	}	
-	
-	/**
-	 * @deprecated Override addEdits instead.
-	 */
-	protected final CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) {
-		return null;
-	}
-	
+		
 	private CompilationUnitChange createCompilationUnitChange(String name) throws CoreException {
 		CompilationUnitChange change= new CompilationUnitChange(name, getCompilationUnit());
 		change.setEdit(getRootTextEdit());
@@ -105,7 +93,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	/**
 	 * Called when the <code>CompilationUnitChange</code> is created. Subclasses can override to
 	 * add text edits to the change.
-	 * @param document Buffer of the underlying compilation unit. To be accessed read only.
+	 * @param document Content of the underlying compilation unit. To be accessed read only.
 	 * @throws CoreException
 	 */
 	protected void addEdits(IDocument document) throws CoreException {
@@ -134,20 +122,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public void setImportRewrite(ImportRewrite rewrite) {
 		fImportRewrite= rewrite;
 	}
-		
-	protected TextEditGroup[] getLinkedRanges() {
-		return null;
-	}
-	
-	protected ICompletionProposal[] getLinkedModeProposals(String name) {
-		return null;
-	}
-	
-	
-	protected TextEditGroup getSelectionDescription() {
-		return null;
-	}
-		
+				
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
@@ -254,7 +229,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 	}
 	
-	protected boolean performValidateEdit() {
+	private boolean performValidateEdit() {
 		ICompilationUnit unit= getCompilationUnit();
 		IStatus status= Resources.makeCommittable(unit.getResource(), null);
 		if (!status.isOK()) {
