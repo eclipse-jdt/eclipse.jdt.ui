@@ -43,9 +43,7 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer();
 		for (int i= 0; i < typedSources.length; i++) {
-			buff.append(typedSources[i].getSource());
-			if (i != typedSources.length)
-				buff.append(lineDelim);
+			buff.append(typedSources[i].getSource()).append(lineDelim);
 		}
 		return buff.toString();
 	}
