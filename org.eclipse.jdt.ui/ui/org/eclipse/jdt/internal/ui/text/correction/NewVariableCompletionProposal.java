@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 
-public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal {
+public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;

@@ -18,13 +18,16 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionProposal {
+public class MissingReturnTypeCorrectionProposal extends LinkedCorrectionProposal {
+
+	private static final String RETURN_EXPRESSION_KEY= "value"; //$NON-NLS-1$
 
 	private MethodDeclaration fMethodDecl;
 	private ReturnStatement fExistingReturn;
@@ -51,12 +54,12 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 		if (fExistingReturn != null) {
 			ASTRewrite rewrite= new ASTRewrite(fExistingReturn.getParent());
 			
-			Expression expression= getReturnExpresion(ast, fExistingReturn.getStartPosition());
+			Expression expression= evaluateReturnExpressions(ast, fExistingReturn.getStartPosition());
 			if (expression != null) {
 				fExistingReturn.setExpression(expression);
 				rewrite.markAsInserted(expression);
 				
-				markAsLinked(rewrite, expression, true, "value"); //$NON-NLS-1$
+				markAsLinked(rewrite, expression, true, RETURN_EXPRESSION_KEY);
 			}
 			return rewrite;
 		} else {
@@ -73,17 +76,23 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 				offset= lastStatement.getStartPosition() + lastStatement.getLength();
 			}
 			ReturnStatement returnStatement= ast.newReturnStatement();
-			returnStatement.setExpression(getReturnExpresion(ast, offset));
+			Expression expression= evaluateReturnExpressions(ast, offset);
+			returnStatement.setExpression(expression);
 			statements.add(returnStatement);
 			rewrite.markAsInserted(returnStatement);
 			
-			markAsLinked(rewrite, returnStatement.getExpression(), true, "value"); //$NON-NLS-1$
+			markAsLinked(rewrite, returnStatement.getExpression(), true, RETURN_EXPRESSION_KEY);
 			return rewrite;
 		}
 	}
 	
-	private Expression getReturnExpresion(AST ast, int returnOffset) {
+	/**
+	 * Evaluates possible return expressions. The favourite expression is returned.
+	 */
+	private Expression evaluateReturnExpressions(AST ast, int returnOffset) {
 		CompilationUnit root= (CompilationUnit) fMethodDecl.getRoot();
+	
+		Expression result= null;
 		
 		IMethodBinding methodBinding= fMethodDecl.resolveBinding();
 		if (methodBinding != null && methodBinding.getReturnType() != null) {
@@ -95,11 +104,19 @@ public class MissingReturnTypeCorrectionProposal extends ASTRewriteCorrectionPro
 				IVariableBinding curr= (IVariableBinding) bindings[i];
 				ITypeBinding type= curr.getType();
 				if (type != null && TypeRules.canAssign(type, returnBinding) && testModifier(curr)) {
-					return ast.newSimpleName(curr.getName());
+					if (result == null) {
+						result= ast.newSimpleName(curr.getName());
+					}
+					addLinkedModeProposal(RETURN_EXPRESSION_KEY, curr.getName());
 				}
 			}
 		}
-		return ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType(), fMethodDecl.getExtraDimensions());
+		Expression defaultExpression= ASTNodeFactory.newDefaultExpression(ast, fMethodDecl.getReturnType(), fMethodDecl.getExtraDimensions());
+		addLinkedModeProposal(RETURN_EXPRESSION_KEY, ASTNodes.asString(defaultExpression));
+		if (result == null) {
+			return defaultExpression;
+		}
+		return result;
 	}
 
 	private boolean testModifier(IVariableBinding curr) {

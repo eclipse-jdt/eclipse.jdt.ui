@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
-public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionProposal {
+public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal {
 
 	private TypeDeclaration fTypeNode;
 	private IMethodBinding fSuperConstructor;

@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public class AddArgumentCorrectionProposal extends ASTRewriteCorrectionProposal {
+public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
 	private List fArguments;
 	private int[] fInsertIndexes;

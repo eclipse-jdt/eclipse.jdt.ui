@@ -39,7 +39,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
-public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal {
+public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	
 	public static interface ChangeDescription {
 	}
@@ -110,7 +110,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 	protected void modifySignature(ASTRewrite rewrite, MethodDeclaration methodDecl, boolean isInDifferentCU) throws CoreException {
 		GroupDescription selectionDescription= null;
 		if (isInDifferentCU) {
-			selectionDescription= new GroupDescription();
+			selectionDescription= new GroupDescription("selection"); //$NON-NLS-1$
 			setSelectionDescription(selectionDescription);
 		}
 		

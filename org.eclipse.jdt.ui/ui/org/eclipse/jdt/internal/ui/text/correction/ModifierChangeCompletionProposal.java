@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
-public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionProposal {
+public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 
 	private IBinding fBinding;
 	private ASTNode fNode;
@@ -51,13 +51,13 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 		ASTNode boundNode= astRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
 		
-		GroupDescription selectionDescription= new GroupDescription();
-		setSelectionDescription(selectionDescription);
+		GroupDescription selectionDescription= null;
 		
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
 			selectionDescription= new GroupDescription("selection"); // in different CU, needs selection //$NON-NLS-1$
+			setSelectionDescription(selectionDescription);
 			CompilationUnit newRoot= AST.parseCompilationUnit(getCompilationUnit(), true);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}

@@ -10,21 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -35,58 +30,11 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
 	private ImportEdit fImportEdit;
-	
-	private GroupDescription fSelectionDescription;
-	private List fLinkedPositions;
 
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
 		fImportEdit= null;
-		fSelectionDescription= null;
-		fLinkedPositions= null;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getSelectionDescription()
-	 */
-	protected GroupDescription getSelectionDescription() {
-		return fSelectionDescription;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#getLinkedRanges()
-	 */
-	protected GroupDescription[] getLinkedRanges() {
-		if (fLinkedPositions != null && !fLinkedPositions.isEmpty()) {
-			return (GroupDescription[]) fLinkedPositions.toArray(new GroupDescription[fLinkedPositions.size()]);
-		}
-		return null;
-	}
-	
-	public GroupDescription markAsSelection(ASTRewrite rewrite, ASTNode node) {
-		fSelectionDescription= new GroupDescription();
-		rewrite.markAsTracked(node, fSelectionDescription);
-		return fSelectionDescription;
-	}
-	
-	
-	public GroupDescription markAsLinked(ASTRewrite rewrite, ASTNode node, boolean isFirst, String kind) {
-		GroupDescription description= new GroupDescription(kind);
-		rewrite.markAsTracked(node, description);
-		if (fLinkedPositions == null) {
-			fLinkedPositions= new ArrayList();
-		}
-		if (isFirst) {
-			fLinkedPositions.add(0, description);
-		} else {
-			fLinkedPositions.add(description);
-		}
-		return description;
-	}
-	
-	public void setSelectionDescription(GroupDescription desc) {
-		fSelectionDescription= desc;
 	}
 	
 

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
+public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 
 	private ASTNode fNode; // MethodInvocation, ConstructorInvocation, SuperConstructorInvocation, ClassInstanceCreation, SuperMethodInvocation
 	private List fArguments;

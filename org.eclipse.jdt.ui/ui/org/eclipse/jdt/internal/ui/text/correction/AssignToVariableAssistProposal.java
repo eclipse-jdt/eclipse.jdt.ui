@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal {
+public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 
 	public static final int LOCAL= 1;
 	public static final int FIELD= 2;

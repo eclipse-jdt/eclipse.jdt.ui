@@ -122,7 +122,7 @@ public class ReturnTypeSubProcessor {
 					
 				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 				String returnTypeName= proposal.addImport(binding);
 
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
@@ -179,7 +179,7 @@ public class ReturnTypeSubProcessor {
 			AST ast= astRoot.getAST();
 
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 6, image); //$NON-NLS-1$
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal("", cu, rewrite, 6, image); //$NON-NLS-1$
 
 			Type type;
 			String typeName;
