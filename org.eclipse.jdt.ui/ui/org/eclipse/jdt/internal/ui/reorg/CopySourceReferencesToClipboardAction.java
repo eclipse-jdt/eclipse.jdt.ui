@@ -111,12 +111,7 @@ public class CopySourceReferencesToClipboardAction extends SourceReferenceAction
 	}
 	
 	private static IResource getResource(IType type){
-		try {
-			return ResourceUtil.getResource(type);
-		} catch(JavaModelException e) {
-			JavaPlugin.log(e);//cannot show a dialog here
-			return null;
-		}
+		return ResourceUtil.getResource(type);
 	}
 
 }
