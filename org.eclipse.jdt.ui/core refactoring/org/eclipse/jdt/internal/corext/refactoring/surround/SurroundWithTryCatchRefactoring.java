@@ -204,6 +204,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		} finally {
+			fRewriter.removeModifications();
 			if (buffer != null)
 				TextBuffer.release(buffer);
 		}
