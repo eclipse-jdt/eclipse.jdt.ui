@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -783,27 +782,19 @@ public class DeleteRefactoring2 extends Refactoring{
 		private ReadOnlyResourceFinder(){
 		}
 		static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
-			//TODO make smarter
-			return getReadOnlyResourcesAndSubResources(javaElements, resources).length > 0;
+			return (hasReadOnlyResourcesAndSubResources(resources)||
+					  hasReadOnlyResourcesAndSubResources(javaElements));
 		}
-		static IResource[] getReadOnlyResourcesAndSubResources(IJavaElement[] javaElements, IResource[] resources) throws CoreException {
-			Set readOnlyResources= getReadOnlyResourcesAndSubResources(resources);
-			Set readOnlyResourcesForJavaElements= getReadOnlyResourcesAndSubResources(javaElements);
-			Set union= ReorgUtils2.union(readOnlyResources, readOnlyResourcesForJavaElements);
-			return (IResource[]) union.toArray(new IResource[union.size()]);
-		}
-
-		//return Set<IResource>
-		private static Set getReadOnlyResourcesAndSubResources(IJavaElement[] javaElements) throws CoreException {
-			Set result= new HashSet();
+		
+		private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement[] javaElements) throws CoreException {
 			for (int i= 0; i < javaElements.length; i++) {
-				result.addAll(getReadOnlyResourcesAndSubResources(javaElements[i]));
+				if (hasReadOnlyResourcesAndSubResources(javaElements[i]))
+					return true;
 			}
-			return result;
+			return false;
 		}
 
-		//return Collection<IResource>
-		private static Collection getReadOnlyResourcesAndSubResources(IJavaElement javaElement) throws CoreException {
+		private static boolean hasReadOnlyResourcesAndSubResources(IJavaElement javaElement) throws CoreException {
 			switch(javaElement.getElementType()){
 				case IJavaElement.CLASS_FILE:
 					//if this assert fails, it means that a precondition is missing
@@ -811,43 +802,37 @@ public class DeleteRefactoring2 extends Refactoring{
 					//fall thru
 				case IJavaElement.COMPILATION_UNIT:
 					IResource resource= ReorgUtils2.getResource(javaElement);
-					if (resource != null && resource.isReadOnly())
-						return Arrays.asList(new Object[]{resource});
-					return new ArrayList(0);
+					return (resource != null && resource.isReadOnly());
 				case IJavaElement.PACKAGE_FRAGMENT:
-					List result= new ArrayList();
 					IResource packResource= ReorgUtils2.getResource(javaElement);
 					if (packResource == null)
-						return result;
+						return false;
 					IPackageFragment pack= (IPackageFragment)javaElement;
 					if (packResource.isReadOnly())
-						result.add(packResource);
+						return true;
 					Object[] nonJava= pack.getNonJavaResources();
 					for (int i= 0; i < nonJava.length; i++) {
 						Object object= nonJava[i];
-						if (object instanceof IResource)
-							result.addAll(getReadOnlyResourcesAndSubResources((IResource)object));
+						if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
+							return true;
 					}
-					result.addAll(getReadOnlyResourcesAndSubResources(pack.getChildren()));
-					return result;
+					return hasReadOnlyResourcesAndSubResources(pack.getChildren());
 				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 					IPackageFragmentRoot root= (IPackageFragmentRoot) javaElement;
 					if (root.isArchive())
-						return new ArrayList(0);							
-					List result1= new ArrayList();
+						return false;
 					IResource pfrResource= ReorgUtils2.getResource(javaElement);
 					if (pfrResource == null)
-						return result1;
+						return false;
 					if (pfrResource.isReadOnly())
-						result1.add(pfrResource);
+						return true;
 					Object[] nonJava1= root.getNonJavaResources();
 					for (int i= 0; i < nonJava1.length; i++) {
 						Object object= nonJava1[i];
-						if (object instanceof IResource)
-							result1.addAll(getReadOnlyResourcesAndSubResources((IResource)object));
+						if (object instanceof IResource && hasReadOnlyResourcesAndSubResources((IResource)object))
+							return true;
 					}
-					result1.addAll(getReadOnlyResourcesAndSubResources(root.getChildren()));
-					return result1;	
+					return hasReadOnlyResourcesAndSubResources(root.getChildren());
 
 				case IJavaElement.FIELD:
 				case IJavaElement.IMPORT_CONTAINER:
@@ -856,30 +841,29 @@ public class DeleteRefactoring2 extends Refactoring{
 				case IJavaElement.METHOD:
 				case IJavaElement.PACKAGE_DECLARATION:
 				case IJavaElement.TYPE:
-					return new ArrayList(0);
+					return false;
 				default: 
 					Assert.isTrue(false);//not handled here
-					return null;
+					return false;
 			}
 		}
 
-		//return Set<IResource>
-		private static Set getReadOnlyResourcesAndSubResources(IResource[] resources) throws CoreException {
-			Set result= new HashSet();
+		private static boolean hasReadOnlyResourcesAndSubResources(IResource[] resources) throws CoreException {
 			for (int i= 0; i < resources.length; i++) {
-				result.addAll(getReadOnlyResourcesAndSubResources(resources[i]));
+				if (hasReadOnlyResourcesAndSubResources(resources[i]))
+					return true;
 			}
-			return result;
+			return false;
 		}
-	
-		//return Set<IResource>
-		private static Set getReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
-			Set result= new HashSet();		
+
+		private static boolean hasReadOnlyResourcesAndSubResources(IResource resource) throws CoreException {
+			if (resource.isLinked()) //we don't want to count these because we never actually delete linked resources
+				return false;
 			if (resource.isReadOnly())
-				result.add(resource);
+				return true;
 			if (resource instanceof IContainer)
-				result.addAll(getReadOnlyResourcesAndSubResources(((IContainer)resource).members()));
-			return result;
+				return hasReadOnlyResourcesAndSubResources(((IContainer)resource).members());
+			return false;
 		}
 	}
 }
