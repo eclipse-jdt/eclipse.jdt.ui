@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IResourceProxyVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.util.IClassFileReader;
@@ -255,25 +255,33 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		return null;
 	}
 
+	private boolean hasExtension(String name, String ext) {
+		return name.endsWith(ext) && (ext.length() != name.length()); 
+	}
+	
+	private boolean isValidCUName(String name) {
+		return !JavaConventions.validateCompilationUnitName(name).matches(IStatus.ERROR);
+	}	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.resources.IResourceProxyVisitor#visit(org.eclipse.core.resources.IResourceProxy)
 	 */
 	public boolean visit(IResourceProxy proxy) throws CoreException {
 		if (proxy.getType() == IResource.FILE) {
 			String name= proxy.getName();
-			String extension= Signature.getSimpleName(name);
-			if ("java".equalsIgnoreCase(extension)) { //$NON-NLS-1$
+			if (hasExtension(name, ".java") && isValidCUName(name)) { //$NON-NLS-1$
 				visitCompilationUnit((IFile) proxy.requestResource());
-			} else if ("class".equalsIgnoreCase(extension)) { //$NON-NLS-1$
+			} else if (hasExtension(name, ".class")) { //$NON-NLS-1$
 				fClassFiles.add((IFile) proxy.requestResource());
-			} else if ("jar".equalsIgnoreCase(extension)) { //$NON-NLS-1$
+			} else if (hasExtension(name, ".jar")) { //$NON-NLS-1$
 				fJARFiles.add(proxy.requestFullPath());
 			}
 			return false;
 		}
 		return true;
 	}
-		
+
+
 	public IPath getOutputLocation() {
 		return fResultOutputFolder;
 	}
