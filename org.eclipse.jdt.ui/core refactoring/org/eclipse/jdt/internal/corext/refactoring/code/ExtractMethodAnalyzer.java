@@ -51,9 +51,9 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer2;
+import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
-/* package */ class ExtractMethodAnalyzer extends CodeAnalyzer2 {
+/* package */ class ExtractMethodAnalyzer extends CodeAnalyzer {
 
 	public static final int ERROR=					-2;
 	public static final int UNDEFINED=				-1;

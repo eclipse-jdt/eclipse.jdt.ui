@@ -14,9 +14,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
-import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer2;
+import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
 
-/* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer2 {
+/* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	private MethodDeclaration fEnclosingMethod;
 	

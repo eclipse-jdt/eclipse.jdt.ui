@@ -44,6 +44,10 @@ public final class TextRange {
 		fLength= -1;
 	}
 	
+	public static TextRange createFromStartAndLength(int start, int length) {
+		return new TextRange(start, length);
+	}
+	
 	public static TextRange createFromStartAndInclusiveEnd(int start, int end) {
 		return new TextRange(start, end - start + 1);
 	}

@@ -8,61 +8,61 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
 /* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
-	private AbstractMethodDeclaration fEnclosingMethod;
+	private MethodDeclaration fEnclosingMethod;
 	private Selection fSelection;
 	
 	private static class ExceptionComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			int d1= getDepth((ReferenceBinding)o1);
-			int d2= getDepth((ReferenceBinding)o2);
+			int d1= getDepth((ITypeBinding)o1);
+			int d2= getDepth((ITypeBinding)o2);
 			if (d1 < d2)
 				return 1;
 			if (d1 > d2)
 				return -1;
 			return 0;
 		}
-		private int getDepth(ReferenceBinding binding) {
+		private int getDepth(ITypeBinding binding) {
 			int result= 0;
 			while (binding != null) {
-				binding= binding.superclass();
+				binding= binding.getSuperclass();
 				result++;
 			}
 			return result;
 		}
 	}
 	
-	private ExceptionAnalyzer(AbstractMethodDeclaration enclosingMethod, Selection selection) {
+	private ExceptionAnalyzer(MethodDeclaration enclosingMethod, Selection selection) {
 		Assert.isNotNull(enclosingMethod);
 		Assert.isNotNull(selection);
 		fEnclosingMethod= enclosingMethod;
 		fSelection= selection;
 	}
 	
-	public static TypeBinding[] perform(AbstractMethodDeclaration enclosingMethod, Selection selection, ClassScope scope) {
+	public static ITypeBinding[] perform(MethodDeclaration enclosingMethod, Selection selection) {
 		ExceptionAnalyzer analyzer= new ExceptionAnalyzer(enclosingMethod, selection);
-		enclosingMethod.traverse(analyzer, scope);
+		enclosingMethod.accept(analyzer);
 		List exceptions= analyzer.getCurrentExceptions();
 		Collections.sort(exceptions, new ExceptionComparator());
-		return (TypeBinding[]) exceptions.toArray(new TypeBinding[exceptions.size()]);
+		return (ITypeBinding[]) exceptions.toArray(new ITypeBinding[exceptions.size()]);
 	}
 
-	public boolean visit(ThrowStatement node, BlockScope scope) {
-		TypeBinding exception= node.exceptionType;
+	public boolean visit(ThrowStatement node) {
+		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (!isSelected(node) || exception == null) // Safety net for null bindings when compiling fails.
 			return false;
 		
@@ -70,19 +70,19 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 		return true;
 	}
 	
-	public boolean visit(MessageSend node, BlockScope scope) {
+	public boolean visit(MethodInvocation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.binding);
+		return handleExceptions(ASTNodes.getMethodBinding(node.getName()));
 	}
 	
-	public boolean visit(AllocationExpression node, BlockScope scope) {
+	public boolean visit(ClassInstanceCreation node) {
 		if (!isSelected(node))
 			return false;
-		return handleExceptions(node.binding);
+		return handleExceptions(node.resolveConstructorBinding());
 	}
 	
-	private boolean isSelected(AstNode node) {
+	private boolean isSelected(ASTNode node) {
 		return fSelection.getVisitSelectionMode(node) == Selection.SELECTED;
 	}
 }

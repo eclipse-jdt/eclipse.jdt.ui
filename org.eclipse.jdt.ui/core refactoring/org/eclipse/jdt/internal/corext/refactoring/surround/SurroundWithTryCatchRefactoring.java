@@ -8,40 +8,38 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jface.text.ITextSelection;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.DeleteNodeEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.util.AST;
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
-import org.eclipse.jdt.internal.corext.util.Bindings;
 
 public class SurroundWithTryCatchRefactoring extends Refactoring {
 
@@ -54,10 +52,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 
 	private static final class LocalDeclarationEdit extends MultiTextEdit {
 		private int fOffset;
-		public LocalDeclarationEdit(int offset, List locals) {
-			for (Iterator iter= locals.iterator(); iter.hasNext();) {
-				LocalDeclaration element= (LocalDeclaration)iter.next();
-				add(new DeleteNodeEdit(element, true));
+		public LocalDeclarationEdit(int offset, ASTNode[] locals) {
+			for (int i= 0; i < locals.length; i++) {
+				add(new DeleteNodeEdit(locals[i], true));
 			}
 			fOffset= offset;
 		}
@@ -101,23 +98,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		AST ast= new AST(fCUnit);
-		if (ast.isMalformed()) {
-			IProblem[] problems= ast.getProblems();
-			if (problems.length > 0 && problems[0].isError()) {
-				IProblem problem= problems[0];
-				return RefactoringStatus.createFatalErrorStatus(
-					RefactoringCoreMessages.getFormattedString("Refactoring.compilation_error", //$NON-NLS-1$
-						new Object[] {new Integer(problem.getSourceLineNumber()), problem.getMessage() }),
-					JavaSourceContext.create(fCUnit, new SourceRange(problem.getSourceStart(),
-						problem.getSourceEnd() - problem.getSourceStart() + 1)));
-			} else {
-				return RefactoringStatus.createFatalErrorStatus(
-					RefactoringCoreMessages.getString("Refactoring.generic_compilation_error")); //$NON-NLS-1$
-			}
-		}
-		fAnalyzer= new SurroundWithTryCatchAnalyzer(new ExtendedBuffer(fCUnit.getBuffer()), fSelection);
-		ast.accept(fAnalyzer);
+		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
+		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
+		rootNode.accept(fAnalyzer);
 		result.merge(fAnalyzer.getStatus());
 		return result;
 	}
@@ -140,7 +123,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			// We already have a text buffer since we start a surround with from the editor. So it is fast
 			// to acquire it here.
 			buffer= TextBuffer.acquire(getFile());
-			int start= buffer.getLineOfOffset(fAnalyzer.getStartOfFirstSelectedNode());
+			int start= buffer.getLineOfOffset(fAnalyzer.getFirstSelectedNode().getStartPosition());
 			String indent= TextUtil.createIndentString(buffer.getLineIndent(start, fTabWidth));
 			String delimiter= buffer.getLineDelimiter(start);
 			addEdits(result, buffer, delimiter, indent);
@@ -155,8 +138,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	
 	private void addEdits(TextChange change, TextBuffer buffer, String delimiter, String indent) throws JavaModelException {
 		final String NN= "";
-		final TypeBinding[] exceptions= fAnalyzer.getExceptions();
-		final LocalDeclaration[] locals= fAnalyzer.getAffectedLocals();
+		final ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		final VariableDeclaration[] locals= fAnalyzer.getAffectedLocals();
 		int start= getStartOffset();
 		int end= getEndOffset();
 		int firstLine= buffer.getLineOfOffset(start);
@@ -166,13 +149,12 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, createLocal(buffer, locals[i], delimiter, indent)));
 		}
 		change.addTextEdit(NN, SimpleTextEdit.createInsert(start, "try {"));
-		List affectedLocals= getLocals(buffer.getLineInformation(firstLine), locals);
-		if (affectedLocals.isEmpty()) {
+		ASTNode[] affectedLocals= getAffectedLocals(buffer.getLineInformation(firstLine), locals);
+		if (affectedLocals.length == 0) {
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(start, delimiter + indent + "\t"));
 		} else {
-			for (Iterator iter= affectedLocals.iterator(); iter.hasNext();) {
-				LocalDeclaration element= (LocalDeclaration)iter.next();
-				change.addTextEdit(NN, new DeleteNodeEdit(element, false));
+			for (int i= 0; i < affectedLocals.length; i++) {
+				change.addTextEdit(NN, new DeleteNodeEdit(affectedLocals[i], false));
 			}
 		}
 		for (int i= firstLine + 1; i <= lastLine; i++) {
@@ -181,9 +163,9 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		offset= end;
 		ImportEdit importEdit= new ImportEdit(fCUnit, fSettings);
 		for (int i= 0; i < exceptions.length; i++) {
-			TypeBinding exception= exceptions[i];
+			ITypeBinding exception= exceptions[i];
 			change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, createCatchBlock(exception, delimiter, indent)));
-			importEdit.addImport(Bindings.makeFullyQualifiedName(exception.qualifiedPackageName(), exception.qualifiedSourceName()));
+			importEdit.addImport(Bindings.asPackageQualifiedName(exception));
 		}
 		change.addTextEdit(NN, SimpleTextEdit.createInsert(offset, delimiter + indent + "}"));	
 		if (!importEdit.isEmpty())
@@ -191,56 +173,56 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	}
 	
 	private int getStartOffset() throws JavaModelException {
-		return fAnalyzer.getStartOfFirstSelectedNode();
+		return fAnalyzer.getFirstSelectedNode().getStartPosition();
 	}
 	
 	private int getEndOffset() throws JavaModelException {
-		ExtendedBuffer scanner= new ExtendedBuffer(fCUnit.getBuffer());
-		int offset= fAnalyzer.getEndOfLastSelectedNode() + 1;
-		int nextStatement= scanner.indexOfStatementCharacter(offset);
-		int semicolon= scanner.indexOf(Scanner.TokenNameSEMICOLON, offset);
-		if (semicolon != -1 && semicolon < nextStatement)
-			return semicolon + 1;
-		else
-			return offset;
+		return ASTNodes.getExclusiveEnd(fAnalyzer.getLastSelectedNode());
 	}
 	
-	private String createLocal(TextBuffer buffer, LocalDeclaration local, String delimiter, String indent) {
+	private String createLocal(TextBuffer buffer, VariableDeclaration local, String delimiter, String indent) {
 		StringBuffer result= new StringBuffer();
-		result.append(buffer.getContent(local.declarationSourceStart, local.declarationSourceEnd - local.declarationSourceStart + 1));
+		if (local instanceof VariableDeclarationFragment) {
+			result.append(ASTNodes.asString(ASTNodes.getType(local)));
+			result.append(" ");
+		}
+		result.append(buffer.getContent(local.getStartPosition(), local.getLength()));
 		result.append(';');
 		result.append(delimiter);
 		result.append(indent);
 		return result.toString();
 	}
 	
-	private void processLine(TextChange change, TextBuffer buffer, int line, LocalDeclaration[] locals) {
+	private void processLine(TextChange change, TextBuffer buffer, int line, VariableDeclaration[] locals) {
 		TextRegion region= buffer.getLineInformation(line);
-		List coveredLocals= getLocals(region, locals);
-		if (coveredLocals.isEmpty()) {
+		ASTNode[] coveredLocals= getAffectedLocals(region, locals);
+		if (coveredLocals.length == 0) {
 			change.addTextEdit("", SimpleTextEdit.createInsert(region.getOffset(), "\t"));			
 		} else {
 			change.addTextEdit("", new LocalDeclarationEdit(region.getOffset(), coveredLocals));
 		}
 	}
 	
-	private List getLocals(TextRegion region, LocalDeclaration[] locals) {
+	private ASTNode[] getAffectedLocals(TextRegion region, VariableDeclaration[] locals) {
 		List result= new ArrayList(1);
 		for (int i= 0; i < locals.length; i++) {
-			LocalDeclaration local= locals[i];
-			if (region.getOffset() <= local.declarationSourceStart && local.declarationSourceEnd < region.getOffset() + region.getLength()) {
-				result.add(local);
+			VariableDeclaration local= locals[i];
+			if (region.getOffset() <= local.getStartPosition() && ASTNodes.getInclusiveEnd(local) < region.getOffset() + region.getLength()) {
+				if (ASTNodes.isSingleDeclaration(local))
+					result.add(local.getParent());
+				else 
+					result.add(local);
 			}
 		}
-		return result;
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
 	}
 	
-	private String createCatchBlock(TypeBinding exception, String delimiter, String indent) {
+	private String createCatchBlock(ITypeBinding exception, String delimiter, String indent) {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(delimiter);
 		buffer.append(indent);
 		buffer.append("} catch(");
-		buffer.append(exception.sourceName());
+		buffer.append(exception.getName());
 		buffer.append(" e) {");
 		return buffer.toString();
 	}

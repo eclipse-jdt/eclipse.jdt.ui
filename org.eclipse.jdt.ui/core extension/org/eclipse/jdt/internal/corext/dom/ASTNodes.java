@@ -14,10 +14,13 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
@@ -98,13 +101,26 @@ public class ASTNodes {
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).getModifiers();
 		} else if (declaration instanceof VariableDeclarationFragment) {
-			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
+			ASTNode parent= declaration.getParent();
 			if (parent instanceof VariableDeclarationExpression)
 				return ((VariableDeclarationExpression)parent).getModifiers();
 			else if (parent instanceof VariableDeclarationStatement)
 				return ((VariableDeclarationStatement)parent).getModifiers();
 		}
 		return 0;		
+	}
+	
+	public static boolean isSingleDeclaration(VariableDeclaration declaration) {
+		if (declaration instanceof SingleVariableDeclaration) {
+			return true;
+		} else if (declaration instanceof VariableDeclarationFragment) {
+			ASTNode parent= declaration.getParent();
+			if (parent instanceof VariableDeclarationExpression)
+				return ((VariableDeclarationExpression)parent).fragments().size() == 1;
+			else if (parent instanceof VariableDeclarationStatement)
+				return ((VariableDeclarationStatement)parent).fragments().size() == 1;
+		}
+		return false;
 	}
 	
 	public static String getTypeName(Type type) {
@@ -150,6 +166,43 @@ public class ASTNodes {
 	
 	public static int getInclusiveEnd(ASTNode node){
 		return node.getStartPosition() + node.getLength() - 1;
+	}
+	
+	public static IMethodBinding getMethodBinding(Name node) {
+		IBinding binding= node.resolveBinding();
+		if (binding instanceof IMethodBinding)
+			return (IMethodBinding)binding;
+		return null;
+	}
+	
+	public static IVariableBinding getVariableBinding(Name node) {
+		IBinding binding= node.resolveBinding();
+		if (binding instanceof IVariableBinding)
+			return (IVariableBinding)binding;
+		return null;
+	}
+	
+	public static IVariableBinding getLocalVariableBinding(Name node) {
+		IVariableBinding result= getVariableBinding(node);
+		if (result == null || result.isField())
+			return null;
+		
+		return result;
+	}
+	
+	public static IVariableBinding getFieldBinding(Name node) {
+		IVariableBinding result= getVariableBinding(node);
+		if (result == null || !result.isField())
+			return null;
+		
+		return result;
+	}
+	
+	public static ITypeBinding getTypeBinding(Name node) {
+		IBinding binding= node.resolveBinding();
+		if (binding instanceof ITypeBinding)
+			return (ITypeBinding)binding;
+		return null;
 	}
 	
 	public static Message[] getMessages(ASTNode node, int flags) {

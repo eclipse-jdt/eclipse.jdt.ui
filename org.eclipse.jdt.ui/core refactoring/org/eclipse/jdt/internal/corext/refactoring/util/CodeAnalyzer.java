@@ -1,48 +1,35 @@
 /*
- * (c) Copyright IBM Corp. 2000, 2001, 2002.
+ * (c) Copyright 2002 IBM Corporation.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 
-public class CodeAnalyzer extends NewStatementAnalyzer {
-	
-	protected AbstractMethodDeclaration fEnclosingMethod;
-	protected ClassScope fClassScope;
-	protected MethodScope fOuterMostMethodScope;
-	
-	public CodeAnalyzer(ExtendedBuffer buffer, Selection selection) {
-		super(buffer, selection);
-	}
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
-	protected void initialize() {
-		AstNode[] parents= getParents();
-		for (int i= parents.length - 1; i >= 0; i--) {
-			AstNode parent= parents[i];
-			if (parent instanceof AbstractMethodDeclaration) {
-				fEnclosingMethod= (AbstractMethodDeclaration)parent;
-				break;
-			}
-		}
-		if (fEnclosingMethod != null) {
-			fOuterMostMethodScope= fEnclosingMethod.scope.outerMostMethodScope();
-			fClassScope= getClassScope(fEnclosingMethod.scope);
-			fStatus.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, fClassScope, fSelection));
-		}
+public class CodeAnalyzer extends StatementAnalyzer {
+
+	public CodeAnalyzer(ICompilationUnit cunit, Selection selection, boolean traverseSelectedNode) throws JavaModelException {
+		super(cunit, selection, traverseSelectedNode);
 	}
 	
-	private ClassScope getClassScope(Scope scope) {
-		while (scope != null) {
-			if (scope instanceof ClassScope)
-				return (ClassScope) scope;
-			scope= scope.parent;
+	protected final void checkSelectedNodes() {
+		super.checkSelectedNodes();
+		RefactoringStatus status= getStatus();
+		if (status.hasFatalError())
+			return;
+		ASTNode node= getFirstSelectedNode();
+		if (node instanceof ArrayInitializer) {
+			status.addFatalError(RefactoringCoreMessages.getString("CodeAnalyzer.array_initializer"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
-		return null;
-	}	
+	}
 }

@@ -79,7 +79,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		}
 	}
 	
-	protected RefactoringStatus getStatus() {
+	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
 	

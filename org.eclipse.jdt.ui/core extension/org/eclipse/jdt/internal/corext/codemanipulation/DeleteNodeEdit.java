@@ -4,13 +4,19 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.corext.refactoring.util.ASTUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -24,24 +30,17 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 public final class DeleteNodeEdit extends SimpleTextEdit {
 
 	private boolean fDeleteLine;
-	private int fLineDelimiterLength;
+	private int fDelimiterToken;
 
-	public DeleteNodeEdit(AstNode node, boolean deleteLine) {
-		super(TextRange.createFromStartAndInclusiveEnd(ASTUtil.getSourceStart(node), ASTUtil.getSourceEnd(node)), "");
+	public DeleteNodeEdit(ASTNode node, boolean deleteLine) {
+		super(TextRange.createFromStartAndLength(node.getStartPosition(), node.getLength()), "");
 		fDeleteLine= deleteLine;
+		fDelimiterToken= getDelimiterToken(node);
 	}
 
 	private DeleteNodeEdit(TextRange range, boolean deleteLine) {
 		super(range,"");
 		fDeleteLine= deleteLine;
-	}
-
-	public boolean deletesLineEnd() {
-		return fLineDelimiterLength != 0;
-	}
-	
-	public int getLineDelimiterLength() {
-		return fLineDelimiterLength;
 	}
 	
 	/* non Java-doc
@@ -58,7 +57,7 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		scanner.setSourceBuffer(buffer.getContent(startOffset, endOffset - startOffset + 1).toCharArray());
 		try {
 			int start= fDeleteLine ? getStart(buffer, scanner, startOffset) : range.getOffset();
-			int end= getEnd(buffer, scanner, startOffset);
+			int end= fDeleteLine ? getLineEnd(buffer, scanner, startOffset) : getEndIncludingDelimiter(buffer, scanner, startOffset);
 			setTextRange(new TextRange(start, end - start));
 		} catch (InvalidInputException e) {
 			// Only delete node range
@@ -89,28 +88,58 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 		return startOffset;
 	}
 	
-	private int getEnd(TextBuffer buffer, Scanner scanner, int startOffset) throws InvalidInputException {
-		int begin= getTextRange().getExclusiveEnd() - startOffset;
-		scanner.resetTo(begin, scanner.source.length - 1);
+	private int getLineEnd(TextBuffer buffer, Scanner scanner, int startOffset) throws InvalidInputException {
 		int result= getTextRange().getExclusiveEnd();
+		scanner.resetTo(result - startOffset, scanner.source.length - 1);
 		int token;
+		while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
+			if (token == Scanner.TokenNameCOMMENT_LINE || token == Scanner.TokenNameCOMMENT_BLOCK 
+					|| token == Scanner.TokenNameCOMMENT_JAVADOC || token == fDelimiterToken) {
+				continue;
+			} 
+			return result;
+		}
+		// we can remove the entire line
+		return startOffset + scanner.source.length+ buffer.getLineDelimiter(buffer.getLineOfOffset(result - 1)).length();
+	}
+	
+	private int getEndIncludingDelimiter(TextBuffer buffer, Scanner scanner, int startOffset) throws InvalidInputException {
+		int result= getTextRange().getExclusiveEnd();
+		if (fDelimiterToken == -1)
+			return result;
+		scanner.resetTo(result - startOffset, scanner.source.length);
+		int token;
+		boolean delimiterFound= false;
 		loop: while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-			switch (token) {
-				case Scanner.TokenNameCOMMENT_LINE:
-				case Scanner.TokenNameCOMMENT_BLOCK:
-				case Scanner.TokenNameCOMMENT_JAVADOC:
-					continue loop;
-				case TerminalSymbols.TokenNameSEMICOLON:
-					result= startOffset + scanner.currentPosition;
-					if (!fDeleteLine)
-						return result;
-					break;
-				default:
-					return result;
+			if (token == Scanner.TokenNameCOMMENT_LINE || token == Scanner.TokenNameCOMMENT_BLOCK 
+					|| token == Scanner.TokenNameCOMMENT_JAVADOC) {
+				if (delimiterFound) {
+					return startOffset + scanner.startPosition;
+				}
+				continue loop;
+			} else if (token == fDelimiterToken) {
+				delimiterFound= true;
+				result= startOffset + scanner.currentPosition;
+			} else {
+				if (delimiterFound)
+					result= startOffset + scanner.startPosition;
+				return result;
 			}
 		}
-		result= startOffset + scanner.source.length;
-		fLineDelimiterLength= buffer.getLineDelimiter(buffer.getLineOfOffset(result - 1)).length();
-		return result + fLineDelimiterLength;
+		return result;
+	}
+	
+	private static int getDelimiterToken(ASTNode node) {
+		if (node instanceof VariableDeclarationFragment)
+			return Scanner.TokenNameCOMMA;
+		if (node instanceof SingleVariableDeclaration)
+			return Scanner.TokenNameCOMMA;
+		ASTNode parent= node.getParent();
+		if (node instanceof Expression && parent instanceof ForStatement) {
+			List updaters= ((ForStatement)parent).updaters();
+			if (updaters.contains(node))
+				return Scanner.TokenNameCOMMA;
+		}
+		return -1;
 	}
 }

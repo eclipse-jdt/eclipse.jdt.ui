@@ -9,21 +9,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Stack;
 
-import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.AnonymousLocalTypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.LocalTypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.ThrowStatement;
-import org.eclipse.jdt.internal.compiler.ast.TryStatement;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
-public abstract class AbstractExceptionAnalyzer extends AbstractSyntaxTreeVisitorAdapter {
+public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	
 	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
 	private Stack fTryStack;
@@ -34,56 +33,55 @@ public abstract class AbstractExceptionAnalyzer extends AbstractSyntaxTreeVisito
 		fTryStack.push(fCurrentExceptions);
 	}
 
-	public boolean visit(LocalTypeDeclaration node, BlockScope scope) {
+	public abstract boolean visit(ThrowStatement node);
+	
+	public abstract boolean visit(MethodInvocation node);
+	
+	public abstract boolean visit(ClassInstanceCreation node);
+	
+	public boolean visit(TypeDeclaration node) {
+		// Don't dive into a local type.
+		if (node.isLocalTypeDeclaration())
+			return false;
+		return true;
+	}
+	
+	public boolean visit(AnonymousClassDeclaration node) {
 		// Don't dive into a local type.
 		return false;
-	}	
-
-	public boolean visit(AnonymousLocalTypeDeclaration node, BlockScope scope) {
-		// Don't dive into a anonymous type.
-		return false;
 	}
 	
-	public abstract boolean visit(ThrowStatement node, BlockScope scope);
-	
-	public abstract boolean visit(MessageSend node, BlockScope scope);
-	
-	public abstract boolean visit(AllocationExpression node, BlockScope scope);
-	
-	public boolean visit(TryStatement node, BlockScope scope) {
+	public boolean visit(TryStatement node) {
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
-		// Actually this is the wrong scope. But since tryBlock.scope is not visible we can't do any better. 
-		// The scope is only used to call getJavaLangRuntimeException so it doesn't matter.
-		node.tryBlock.traverse(this, scope);
-		// do not dive into. We have to do this in endVisit.
-		return false;
-	}
-	
-	public void endVisit(TryStatement node, BlockScope scope) {
-		if (node.catchArguments != null)
-			handleCatchArguments(node.catchArguments, scope);
+		
+		// visit try block
+		node.getBody().accept(this);
+		
+		// Remove those exceptions that get catch by following catch blocks
+		List catchClauses= node.catchClauses();
+		if (!catchClauses.isEmpty())
+			handleCatchArguments(catchClauses);
 		List current= (List)fTryStack.pop();
 		fCurrentExceptions= (List)fTryStack.peek();
 		for (Iterator iter= current.iterator(); iter.hasNext();) {
 			addException(iter.next());
 		}
-		// Actually we are using the wrong scope. But since tryBlock.scope is not visible we can't do any better. 
-		// The scope is only used to call getJavaLangRuntimeException so it doesn't matter.
-		if (node.catchBlocks != null) {
-			for (int i= 0; i < node.catchBlocks.length; i++) {
-				node.catchBlocks[i].traverse(this, scope);
-			}
+		
+		// visit catch and finally
+		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
+			((CatchClause)iter.next()).accept(this);
 		}
-		if (node.finallyBlock != null)
-			node.finallyBlock.traverse(this, scope);
+		if (node.getFinally() != null)
+			node.getFinally().accept(this);
+		return false;
 	}
 	
-	protected boolean handleExceptions(MethodBinding binding) {
+	protected boolean handleExceptions(IMethodBinding binding) {
 		if (binding == null)
 			return false;
 			
-		ReferenceBinding[] thrownExceptions= binding.thrownExceptions;
+		ITypeBinding[] thrownExceptions= binding.getExceptionTypes();
 		if (thrownExceptions != null) {
 			for (int i= 0; i < thrownExceptions.length;i++) {
 				addException(thrownExceptions[i]);
@@ -97,16 +95,15 @@ public abstract class AbstractExceptionAnalyzer extends AbstractSyntaxTreeVisito
 			fCurrentExceptions.add(exception);
 	}
 	
-	protected boolean isRuntimeException(TypeBinding binding, Scope scope) {
-		if (!(binding instanceof ReferenceBinding))
+	protected boolean isRuntimeException(ITypeBinding thrownException, AST ast) {
+		if (thrownException == null || thrownException.isPrimitive())
 			return false;
 		
-		ReferenceBinding thrownException= (ReferenceBinding)binding;	
-		TypeBinding runTimeException= scope.getJavaLangRuntimeException();
+		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException");
 		while (thrownException != null) {
 			if (runTimeException == thrownException)
 				return true;
-			thrownException= thrownException.superclass();
+			thrownException= thrownException.getSuperclass();
 		}
 		return false;
 	}
@@ -115,24 +112,25 @@ public abstract class AbstractExceptionAnalyzer extends AbstractSyntaxTreeVisito
 		return fCurrentExceptions;
 	}
 	
-	private void handleCatchArguments(Argument[] arguments, BlockScope scope) {
-		for (int i= 0; i < arguments.length; i++) {
-			Argument argument= arguments[i];
-			TypeBinding catchTypeBinding= argument.type.binding;
-			List exceptions= new ArrayList(fCurrentExceptions);
-			for (Iterator iter= exceptions.iterator(); iter.hasNext(); ) {
-				ReferenceBinding throwTypeBinding= (ReferenceBinding)iter.next();
+	private void handleCatchArguments(List catchClauses) {
+		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
+			CatchClause clause= (CatchClause)iter.next();
+			ITypeBinding catchTypeBinding= clause.getException().getType().resolveBinding();
+			if (catchTypeBinding == null)	// No correct type resolve.
+				continue;
+			for (Iterator exceptions= new ArrayList(fCurrentExceptions).iterator(); exceptions.hasNext(); ) {
+				ITypeBinding throwTypeBinding= (ITypeBinding)exceptions.next();
 				if (catches(catchTypeBinding, throwTypeBinding))
 					fCurrentExceptions.remove(throwTypeBinding);
 			}
 		}
 	}
 	
-	private boolean catches(TypeBinding catchTypeBinding, ReferenceBinding throwTypeBinding) {
+	private boolean catches(ITypeBinding catchTypeBinding, ITypeBinding throwTypeBinding) {
 		while(throwTypeBinding != null) {
 			if (throwTypeBinding == catchTypeBinding)
 				return true;
-			throwTypeBinding= throwTypeBinding.superclass();	
+			throwTypeBinding= throwTypeBinding.getSuperclass();	
 		}
 		return false;
 	}	
