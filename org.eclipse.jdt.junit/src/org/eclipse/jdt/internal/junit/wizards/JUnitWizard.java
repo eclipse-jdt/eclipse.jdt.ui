@@ -14,6 +14,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.DialogSettings;
@@ -28,6 +29,7 @@ import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
@@ -64,10 +66,7 @@ public abstract class JUnitWizard extends Wizard implements INewWizard {
 					((IAboutToRunOperation)page).aboutToRunOperation();
 				}
 			}
-			//run with false, false due to issue: 63854
-			//PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot()); 
-			//TO DO revisit false, false
-			getContainer().run(false, false, op);  
+			PlatformUI.getWorkbench().getProgressService().runInUI(getContainer(), op, ResourcesPlugin.getWorkspace().getRoot()); 
 			
 		} catch (InvocationTargetException e) {
 			Shell shell= getShell();
