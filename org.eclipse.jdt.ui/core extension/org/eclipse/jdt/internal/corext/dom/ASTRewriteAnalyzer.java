@@ -145,8 +145,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		// workaround: direct evaluation
 		addInsert(destOffset, edit.getContent(fTextBuffer), description);
 	}		
-	
-	
+
 	private IScanner getScanner(int pos) {
 		if (fScanner == null) {
 			fScanner= ToolFactory.createScanner(false, false, false, false);
@@ -158,6 +157,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fScanner.resetTo(pos, fTextBuffer.getLength());
 		return fScanner;
 	}
+	
+	private void checkNoModification(ASTNode node) {
+		Assert.isTrue(!isModified(node), "Can not modify " + node.getClass().getName());
+	}
+	
+	private void checkNoInsertOrReplace(ASTNode node) {
+		Assert.isTrue(!isInsertOrReplace(node), "Can not insert node in " + node.getParent().getClass().getName());
+	}	
+	
 	
 	private int rewriteNode(ASTNode node, int offset) {
 		if (isInserted(node)) {
@@ -812,6 +820,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ArrayType)
 	 */
 	public boolean visit(ArrayType node) {
+		checkNoModification(node);
+		checkNoInsertOrReplace(node.getComponentType());
 		// no changes possible // need to check
 		return false;
 	}
@@ -820,8 +830,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(AssertStatement)
 	 */
 	public boolean visit(AssertStatement node) {
-		// not yet supported
-		Assert.isTrue(!isInsertOrReplace(node.getExpression()) && !isInsertOrReplace(node.getMessage()), "Modifications on AssertStatement not yet supported");
+		checkNoInsertOrReplace(node.getExpression());
+		checkNoInsertOrReplace(node.getMessage());
 		return true;
 	}
 
@@ -861,14 +871,16 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BooleanLiteral)
 	 */
 	public boolean visit(BooleanLiteral node) {
-		return super.visit(node);
+		checkNoModification(node); // no modification possible
+		return false;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(BreakStatement)
 	 */
-	public boolean visit(BreakStatement node) { 
-		return super.visit(node);
+	public boolean visit(BreakStatement node) {
+		rewriteNode(node.getLabel(), node.getStartPosition() + node.getLength());
+		return false;
 	}
 
 	/* (non-Javadoc)
