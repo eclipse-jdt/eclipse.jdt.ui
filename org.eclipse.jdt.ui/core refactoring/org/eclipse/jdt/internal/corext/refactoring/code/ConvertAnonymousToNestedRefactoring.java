@@ -22,7 +22,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -66,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class ConvertAnonymousToNestedRefactoring extends Refactoring {
@@ -411,7 +411,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
-            String assignmentCode= ToolFactory.createDefaultCodeFormatter(null).format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator()); //$NON-NLS-1$ //$NON-NLS-2$
+            String unformattedAssigmentCode= "this." + local.getName() + "=" + local.getName();
+			String assignmentCode= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, unformattedAssigmentCode, 0, null, getLineSeparator(), null);
             Expression assignmentExpression= (Expression)rewrite.createPlaceholder(assignmentCode, ASTRewrite.EXPRESSION);
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
 	        constructorBody.statements().add(assignmentStatement);

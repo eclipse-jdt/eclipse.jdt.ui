@@ -20,11 +20,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -693,12 +691,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	// !!! similar to one in ExtractTempRefactoring
 	//*without the trailing indent*
 	private String createConstantDeclarationSource(String initializerSource) throws CoreException {
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(null);
 		String dummyInitializer= "0"; //$NON-NLS-1$
 		String semicolon= ";"; //$NON-NLS-1$
 		String dummyDeclaration= getModifier() + " " + getConstantTypeName() + " " + fConstantName + " = " + dummyInitializer + semicolon; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		int[] position= { dummyDeclaration.length() - dummyInitializer.length() - semicolon.length()};
-		StringBuffer formattedDummyDeclaration= new StringBuffer(formatter.format(dummyDeclaration, 0, position, getLineDelimiter()));
+		String formattedDeclaration= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, dummyDeclaration, 0, position, getLineDelimiter(), null);
+		StringBuffer formattedDummyDeclaration= new StringBuffer(formattedDeclaration);
 		return formattedDummyDeclaration.replace(position[0], position[0] + dummyInitializer.length(), initializerSource).toString();
 	}
 
