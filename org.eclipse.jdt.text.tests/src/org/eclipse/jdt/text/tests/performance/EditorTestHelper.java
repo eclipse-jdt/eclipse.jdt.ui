@@ -114,7 +114,7 @@ public class EditorTestHelper {
 		return window != null ? window.getShell().getDisplay() : null;
 	}
 
-	public static boolean calmDown(long minTime, long maxTime, long intervalTime) {
+	public static boolean joinJobs(long minTime, long maxTime, long intervalTime) {
 		long startTime= System.currentTimeMillis() + minTime;
 		runEventQueue();
 		while (System.currentTimeMillis() < startTime)
