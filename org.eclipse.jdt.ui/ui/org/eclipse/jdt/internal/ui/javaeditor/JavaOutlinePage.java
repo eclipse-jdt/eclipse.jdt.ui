@@ -14,7 +14,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.text.Assert;
-
+import org.eclipse.jface.text.ITextSelection;
+ 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.dnd.DND;
@@ -56,6 +57,7 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
+import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -366,7 +368,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							if (fReorderedMembers) {
 								refresh();
 								fReorderedMembers= false;
-							}
+						}
 						}
 					} else {
 						// just for now
@@ -513,7 +515,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 								updateItem(item, affectedElement);
 								
 							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
-								update(item, affectedDelta);
+								update(item, affectedDelta);															    
 							
 							if ((change & IJavaElementDelta.F_REORDER) != 0)
 								fReorderedMembers= true;
@@ -1049,6 +1051,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 			};
 		}
+		if (key == IShowInTarget.class) {
+			return getShowInTarget();
+		}
+
 		return null;
 	}
 
@@ -1133,6 +1139,26 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		};
 	}
 
+	/**
+	 * Returns the <code>IShowInTarget</code> for this view.
+	 */
+	protected IShowInTarget getShowInTarget() {
+		return new IShowInTarget() {
+			public boolean show(ShowInContext context) {
+				ISelection sel= context.getSelection();
+				if (sel instanceof ITextSelection) {
+					ITextSelection tsel= (ITextSelection) sel;
+					int offset= tsel.getOffset();
+					IJavaElement element= fEditor.getElementAt(offset);
+					if (element != null) {
+						setSelection(new StructuredSelection(element));
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+	}
 	
 	private void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
