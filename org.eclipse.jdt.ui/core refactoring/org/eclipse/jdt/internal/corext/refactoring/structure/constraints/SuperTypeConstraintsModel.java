@@ -368,7 +368,7 @@ public final class SuperTypeConstraintsModel {
 			if (method.getDeclaringClass().isFromSource())
 				variable= new ParameterTypeVariable2(fEnvironment.create(binding), index, method);
 			else
-				variable= new ImmutableTypeVariable2(fEnvironment.create(method.getParameterTypes()[index]));
+				variable= new ImmutableTypeVariable2(fEnvironment.create(binding));
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
 		return null;
