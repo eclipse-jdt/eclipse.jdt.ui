@@ -32,10 +32,8 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	public static final String LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 	public static final String OPEN_EDITOR_ON_SINGLE_CLICK= "org.eclipse.jdt.ui.browsing.openEditorOnSinglClick"; //$NON-NLS-1$
 	public static final String STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
-	public static final String EDITOR_THRESHOLD= "org.eclipse.jdt.ui.browsing.editorThreshold"; //$NON-NLS-1$
 
-	private IntegerFieldEditor fIntegerEditor;
-	
+
 	public JavaBrowsingPreferencePage() {
 		super(GRID);
 
@@ -47,7 +45,6 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 		store.setDefault(LINK_VIEW_TO_EDITOR, true);
 		store.setDefault(OPEN_EDITOR_ON_SINGLE_CLICK, true);
 		store.setDefault(STACK_VERTICALLY, false);
-		store.setDefault(EDITOR_THRESHOLD, 1);
 	}
 
 	public static boolean linkViewSelectionToEditor() {
@@ -64,11 +61,6 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	public static boolean stackHorizontal() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return !store.getBoolean(STACK_VERTICALLY);
-	}
-
-	public static int editorThreshold() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getInt(EDITOR_THRESHOLD);
 	}
 
 	/*
@@ -102,73 +94,11 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 			parent
         );
 		addField(boolEditor);
-		
-		fIntegerEditor= new IntegerFieldEditor(
-			EDITOR_THRESHOLD,
-			JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.reuseEditors"), //$NON-NLS-1$
-			parent);
-		fIntegerEditor.setPreferencePage(this);
-		fIntegerEditor.setTextLimit(2);
-		fIntegerEditor.setErrorMessage(JavaBrowsingMessages.getString("JavaBrowsingPreferencePage.reuseEditorsError")); //$NON-NLS-1$
-		fIntegerEditor.setValidateStrategy(StringFieldEditor.VALIDATE_ON_KEY_STROKE);
-		fIntegerEditor.setValidRange(1, 99);
-		addField(fIntegerEditor);
 	}
 
 	/*
 	 * Method declared on IWorkbenchPreferencePage
 	 */
 	public void init(IWorkbench workbench) {
-	}
-
-	/*
-	 * Method declared on IPreferencePage.
-	 */
-	public boolean okToLeave() {
-		return fIntegerEditor.isValid();
-	}
-
-	/*
-	 * Method declared on IPropertyChangeListener.
-	 */
-	public void propertyChange(PropertyChangeEvent event) {
-		if (fIntegerEditor.isValid())
-			super.setErrorMessage(null);
-		else
-			super.setErrorMessage(fIntegerEditor.getErrorMessage());
-		setValid(fIntegerEditor.isValid());
-	}
-
-	/*
-	 * Prevent clearing of error message if integer field loses focus
-	 */
-	public void setErrorMessage(String message) {
-		if (message == null && !fIntegerEditor.isValid())
-			return;
-		else
-			super.setErrorMessage(message);
-	}
-
-	/*
-	 * Method declared on IPreferencePage.
-	 */
-	public boolean performOk() {
-		if (!super.performOk())
-			return false;
-		updateJavaBrowsingPerspectives();
-		return true;
-	}
-
-	private void updateJavaBrowsingPerspectives() {
-		IWorkbenchWindow[] wbWindows= PlatformUI.getWorkbench().getWorkbenchWindows();
-		for (int i= 0; i < wbWindows.length; i++) {
-			IWorkbenchPage[] wbPages= wbWindows[i].getPages();
-			for (int j= 0; j < wbPages.length; j++) {
-				IWorkbenchPage wbPage= wbPages[j];
-				if (JavaPlugin.ID_BROWSING_PERSPECTIVE.equals(wbPage.getPerspective().getId()))
-					// XXX: See: http://bugs.eclipse.org/bugs/show_bug.cgi?id=9392
-					wbPage.setEditorReuseThreshold(editorThreshold());
-			}
-		}
 	}
 }

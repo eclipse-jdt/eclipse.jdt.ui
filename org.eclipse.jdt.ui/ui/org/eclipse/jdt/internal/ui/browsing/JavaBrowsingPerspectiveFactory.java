@@ -26,9 +26,6 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 
 	public void createInitialLayout(IPageLayout layout) {
 	
-		// Number of open editors
-		layout.setEditorReuseThreshold(JavaBrowsingPreferencePage.editorThreshold());
-
 		if (JavaBrowsingPreferencePage.stackHorizontal()) {
 			layout.addView(JavaPlugin.ID_PROJECTS_VIEW, IPageLayout.TOP, (float)0.25, IPageLayout.ID_EDITOR_AREA);
 			layout.addView(JavaPlugin.ID_PACKAGES_VIEW, IPageLayout.RIGHT, (float)0.25, JavaPlugin.ID_PROJECTS_VIEW);
