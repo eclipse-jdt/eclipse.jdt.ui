@@ -1,4 +1,4 @@
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.astrewrite;
 
 import java.util.Hashtable;
 import java.util.List;

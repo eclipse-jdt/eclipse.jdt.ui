@@ -1,4 +1,4 @@
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.astrewrite;
 
 import java.util.List;
 
@@ -26,6 +26,7 @@ public class ASTRewritingTest extends TestCase {
 		suite.addTest(ASTRewritingStatementsTest.suite());
 		suite.addTest(ASTRewritingTypeDeclTest.suite());
 		suite.addTest(ASTRewritingMoveCodeTest.suite());
+		suite.addTest(ASTRewritingExpressionsTest.suite());
 		return suite;
 	}
 

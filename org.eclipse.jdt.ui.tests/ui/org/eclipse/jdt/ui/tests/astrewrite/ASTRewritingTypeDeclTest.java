@@ -1,4 +1,4 @@
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.astrewrite;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -13,20 +13,23 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
-import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+
+import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
+import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	
@@ -385,6 +388,99 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		SimpleName name= innerType.getName();
 		assertTrue("Name positions not correct", name.getStartPosition() != -1 && name.getLength() > 0);
 		*/
-	}	
+	}
+	
+	public void testAnonymousClassDeclaration() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("        };\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            int i= 8;\n");
+		buf.append("        };\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            int i= 8;\n");
+		buf.append("        };\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E2");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 3", statements.size() == 3);
+		{	// insert body decl in AnonymousClassDeclaration
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
+			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
+			AnonymousClassDeclaration anonym= creation.getAnonymousClassDeclaration();
+			assertTrue("no anonym class decl", anonym != null);
+			
+			List decls= anonym.bodyDeclarations();
+			assertTrue("Number of bodyDeclarations not 0", decls.size() == 0);
+			
+			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
+			decls.add(newMethod);
+			
+			ASTRewriteAnalyzer.markAsInserted(newMethod);
+		}
+		{	// remove body decl in AnonymousClassDeclaration
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
+			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
+			AnonymousClassDeclaration anonym= creation.getAnonymousClassDeclaration();
+			assertTrue("no anonym class decl", anonym != null);
+			
+			List decls= anonym.bodyDeclarations();
+			assertTrue("Number of bodyDeclarations not 1", decls.size() == 1);
+
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) decls.get(0), null);
+		}		
+		{	// replace body decl in AnonymousClassDeclaration
+			ExpressionStatement stmt= (ExpressionStatement) statements.get(2);
+			ClassInstanceCreation creation= (ClassInstanceCreation) stmt.getExpression();
+			AnonymousClassDeclaration anonym= creation.getAnonymousClassDeclaration();
+			assertTrue("no anonym class decl", anonym != null);
+			
+			List decls= anonym.bodyDeclarations();
+			assertTrue("Number of bodyDeclarations not 1", decls.size() == 1);
+			
+			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
+
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) decls.get(0), newMethod);
+		}	
+					
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            private void newMethod(String str) {\n");
+		buf.append("            }\n");	
+		buf.append("        };\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("        };\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            private void newMethod(String str) {\n");
+		buf.append("            }\n");	
+		buf.append("        };\n");		
+		buf.append("    }\n");
+		buf.append("}\n");	
+			
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+			
 	
 }

@@ -1,4 +1,4 @@
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.astrewrite;
 
 import java.util.Hashtable;
 import java.util.List;
@@ -13,9 +13,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -307,6 +310,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			assertEqualString(cu.getSource(), buf.toString());
 		}
 	}
+	
 	
 	
 }
