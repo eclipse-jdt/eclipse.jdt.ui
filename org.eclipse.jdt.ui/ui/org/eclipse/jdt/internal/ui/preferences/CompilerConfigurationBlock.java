@@ -94,11 +94,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final String ENABLED= JavaCore.ENABLED;
 	private static final String DISABLED= JavaCore.DISABLED;
-	
-	private static final String PRIORITY_HIGH= JavaCore.COMPILER_TASK_PRIORITY_HIGH;
-	private static final String PRIORITY_NORMAL= JavaCore.COMPILER_TASK_PRIORITY_NORMAL;
-	private static final String PRIORITY_LOW= JavaCore.COMPILER_TASK_PRIORITY_LOW;		
-	
+		
 	private static final String DEFAULT= "default"; //$NON-NLS-1$
 	private static final String USER= "user";	 //$NON-NLS-1$
 
@@ -162,7 +158,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Composite othersComposite= createOthersTabContent(folder);
 
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.tabtitle")); //$NON-NLS-1$
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.tabtitle"));
 		item.setControl(problemsComposite);
 
 		item= new TabItem(folder, SWT.NONE);
@@ -274,22 +270,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_duplicate_resources.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 
-		Composite textField= new Composite(othersComposite, SWT.NULL);
-		gd= new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL);
-		gd.horizontalSpan= 2;
-		textField.setLayoutData(gd);
-		cl= new GridLayout();
-		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
-		textField.setLayout(cl);
-		
-		gd= new GridData();
-		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
-		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
-		Text text= addTextField(textField, label, PREF_PB_MAX_PER_UNIT, 0, 0);
-		text.setTextLimit(6);
-		text.setLayoutData(gd);
-		
+	
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 
@@ -304,7 +285,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		description.setLayoutData(gd);
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.resource_filter.label"); //$NON-NLS-1$
-		text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
+		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER, 0, 0);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(10);
@@ -373,6 +354,23 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
 		addCheckBox(problemsComposite, label, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, 0);
+
+		Composite textField= new Composite(problemsComposite, SWT.NULL);
+		gd= new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		textField.setLayoutData(gd);
+		cl= new GridLayout();
+		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
+		textField.setLayout(cl);
+		
+		gd= new GridData();
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_max_per_unit.label"); //$NON-NLS-1$
+		Text text= addTextField(textField, label, PREF_PB_MAX_PER_UNIT, 0, 0);
+		text.setTextLimit(6);
+		text.setLayoutData(gd);
+
 
 		return problemsComposite;
 	}
@@ -567,11 +565,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		}
 		return new StatusInfo();
 	}
-	
-	private IStatus validateTaskTags() {
-		return new StatusInfo();
-	}	
-	
+		
 	/*
 	 * Update the compliance controls' enable state
 	 */		
