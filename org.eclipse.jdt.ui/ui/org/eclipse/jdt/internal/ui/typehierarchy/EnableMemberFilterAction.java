@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -36,6 +38,10 @@ public class EnableMemberFilterAction extends Action {
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		fView.enableMemberFilter(isChecked());
+		BusyIndicator.showWhile(fView.getSite().getShell().getDisplay(), new Runnable() {
+			public void run() {
+				fView.enableMemberFilter(isChecked());
+			}
+		});
 	}
 }

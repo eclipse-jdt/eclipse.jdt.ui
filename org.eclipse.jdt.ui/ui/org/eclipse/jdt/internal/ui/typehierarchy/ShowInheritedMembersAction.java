@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.swt.custom.BusyIndicator;
+
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -40,6 +42,10 @@ public class ShowInheritedMembersAction extends Action {
 	 * @see Action#actionPerformed
 	 */	
 	public void run() {
-		fMethodsViewer.showInheritedMethods(isChecked());
+		BusyIndicator.showWhile(fMethodsViewer.getControl().getDisplay(), new Runnable() {
+			public void run() {
+				fMethodsViewer.showInheritedMethods(isChecked());
+			}
+		});		
 	}	
 }
