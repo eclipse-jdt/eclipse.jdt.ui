@@ -69,7 +69,7 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
         } else if (element == TreeTermination.SEARCH_CANCELED) {
             return CallHierarchyMessages.getString("CallHierarchyLabelProvider.searchCanceled"); //$NON-NLS-1$
         } else if (isPendingUpdate(element)) {
-            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.updatePending");
+            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.updatePending"); //$NON-NLS-1$
         }
 
         return CallHierarchyMessages.getString("CallHierarchyLabelProvider.noMethodSelected"); //$NON-NLS-1$
