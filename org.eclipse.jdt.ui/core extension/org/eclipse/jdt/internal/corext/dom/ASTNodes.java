@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+
 public class ASTNodes {
 
 	public static final int INCLUDE_FIRST_PARENT= 	0;
@@ -158,6 +160,16 @@ public class ASTNodes {
 			node= node.getParent();
 		} while (node != null && !parentClass.isInstance(node));
 		return node;
+	}
+	
+	public static boolean isParent(ASTNode node, ASTNode parent) {
+		Assert.isNotNull(parent);
+		do {
+			node= node.getParent();
+			if (node == parent)
+				return true;
+		} while (node != null);
+		return false;
 	}
 	
 	public static int getExclusiveEnd(ASTNode node){
