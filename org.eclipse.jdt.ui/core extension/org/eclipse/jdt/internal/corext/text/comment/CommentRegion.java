@@ -21,8 +21,6 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ConfigurableLineTracker;
 import org.eclipse.jface.text.IDocument;
@@ -32,11 +30,6 @@ import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
 
 /**
  * Comment region in a source code document.
@@ -111,7 +104,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 		fPreferences= preferences;
 		fDocument= document;
 		
-		fClear= fPreferences.get(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES) == IPreferenceStore.TRUE;
+		fClear= Boolean.toString(true).equals(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES));
 
 		fTextMeasurement= textMeasurement;
 		
@@ -212,7 +205,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 
 			int margin= 80;
 			try {
-				margin= Integer.parseInt(fPreferences.get(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH).toString());
+				margin= Integer.parseInt(fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH).toString());
 			} catch (Exception exception) {
 				// Do nothing
 			}
@@ -462,7 +455,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 			// Should not happen
 		} catch (MalformedTreeException exception) {
 			// Do nothing
-			JavaPlugin.log(exception);
+			CommentFormatterUtil.log(exception);
 		}
 		return child;
 	}

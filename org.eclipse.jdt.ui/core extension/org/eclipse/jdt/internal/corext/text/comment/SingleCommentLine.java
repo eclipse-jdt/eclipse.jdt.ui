@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.internal.corext.text.comment;
 
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSElement;
-
 /**
  * Single-line comment line in a comment region.
  * 
@@ -23,6 +21,9 @@ public class SingleCommentLine extends CommentLine {
 	/** Line prefix for single line comments */
 	public static final String SINGLE_COMMENT_PREFIX= "// "; //$NON-NLS-1$
 
+	/** NLS tag prefix */
+	private static final String NLS_TAG_PREFIX= "//$NON-NLS-"; //$NON-NLS-1$
+	
 	/** Is the comment a NLS locale tag sequence? */
 	private boolean fLocaleSequence= false;
 
@@ -97,7 +98,7 @@ public class SingleCommentLine extends CommentLine {
 		final int offset= content.indexOf(prefix);
 		if (offset >= 0) {
 
-			if (content.startsWith(NLSElement.TAG_PREFIX))
+			if (content.startsWith(NLS_TAG_PREFIX))
 				fLocaleSequence= true;
 
 			range.trimBegin(offset + prefix.length());

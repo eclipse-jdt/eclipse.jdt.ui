@@ -15,15 +15,9 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.Map;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.ui.text.javadoc.ICommentTagConstants;
 
 /**
  * Multi-comment region in a source code document.
@@ -61,10 +55,11 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 	protected MultiCommentRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
-		fIndentRoots= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS));
-		fIndentDescriptions= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION));
-		fSeparateRoots= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS));
-		fParameterNewLine= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
+		String trueProperty= Boolean.toString(true);
+		fIndentRoots= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS));
+		fIndentDescriptions= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION));
+		fSeparateRoots= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS));
+		fParameterNewLine= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER));
 	}
 
 	/**

@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
+/**
+ * NOTE: The comment formatter's partition names must be kept synchronized, see {@link org.eclipse.jdt.internal.corext.text.comment.IJavaPartitions}
+ */
 public interface IJavaPartitions {
 	
 	/**

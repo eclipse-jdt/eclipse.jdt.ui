@@ -16,8 +16,6 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
@@ -27,8 +25,6 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 
 /**
@@ -82,8 +78,9 @@ public class CommentFormatter { // TODO: extends CodeFormatter {
 	 * @return the text edit for formatting
 	 */
 	public TextEdit format(final IDocument document, final TypedPosition position) {
-		final boolean isFormmatingComments= fPreferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(IPreferenceStore.TRUE);
-		final boolean isFormattingHeader= fPreferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
+		String trueProperty= Boolean.toString(true);
+		final boolean isFormmatingComments= fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(trueProperty);
+		final boolean isFormattingHeader= fPreferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(trueProperty);
 		
 		int documentsHeaderEnd= computeHeaderEnd(document);
 		

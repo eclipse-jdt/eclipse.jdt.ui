@@ -19,8 +19,6 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ConfigurableLineTracker;
 import org.eclipse.jface.text.IDocument;
@@ -31,12 +29,6 @@ import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
 
 /**
  * Javadoc region in a source code document.
@@ -71,8 +63,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	protected JavaDocRegion(final IDocument document, final TypedPosition position, final String delimiter, final Map preferences, final ITextMeasurement textMeasurement) {
 		super(document, position, delimiter, preferences, textMeasurement);
 
-		fFormatSource= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE));
-		fFormatHtml= IPreferenceStore.TRUE.equals(preferences.get(PreferenceConstants.FORMATTER_COMMENT_FORMATHTML));
+		String trueProperty= Boolean.toString(true);
+		fFormatSource= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE));
+		fFormatHtml= trueProperty.equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHTML));
 	}
 
 	/**
@@ -149,7 +142,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				}
 			} catch (BadLocationException e) {
 				// Can not happen
-				JavaPlugin.log(e);
+				CommentFormatterUtil.log(e);
 			}
 		}
 	}
@@ -174,7 +167,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				lineOffset= tracker.getLineOffset(line);
 			} catch (BadLocationException e) {
 				// Can not happen
-				JavaPlugin.log(e);
+				CommentFormatterUtil.log(e);
 				return snippet;
 			}
 			int prefixOffset= buffer.indexOf(contentPrefix, lineOffset);
@@ -192,9 +185,9 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 	 */
 	private String formatCodeSnippet(String snippet) {
 		String lineDelimiter= TextUtilities.getDefaultLineDelimiter(getDocument());
-		TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_UNKNOWN, snippet, 0, lineDelimiter, getPreferences());
+		TextEdit edit= CommentFormatterUtil.format2(CodeFormatter.K_UNKNOWN, snippet, 0, lineDelimiter, getPreferences());
 		if (edit != null)
-			snippet= CodeFormatterUtil.evaluateFormatterEdit(snippet, edit, null);
+			snippet= CommentFormatterUtil.evaluateFormatterEdit(snippet, edit, null);
 		return snippet;
 	}
 
@@ -221,7 +214,7 @@ public class JavaDocRegion extends MultiCommentRegion implements IJavaDocTagCons
 				buffer.insert(tracker.getLineOffset(line), patch);
 			} catch (BadLocationException e) {
 				// Can not happen
-				JavaPlugin.log(e);
+				CommentFormatterUtil.log(e);
 				return snippet;
 			}
 		

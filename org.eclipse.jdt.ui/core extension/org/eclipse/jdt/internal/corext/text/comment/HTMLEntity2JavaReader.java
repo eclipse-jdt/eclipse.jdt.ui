@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Map;
-import org.eclipse.jdt.internal.ui.text.SubstitutionTextReader;
-
 
 /**
  * <code>SubstitutionTextReader</code> that will substitute plain text values

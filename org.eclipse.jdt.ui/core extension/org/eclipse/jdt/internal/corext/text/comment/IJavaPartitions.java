@@ -8,19 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.jdt.internal.ui.text.javadoc;
+package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
- * Link tag constants.
+ * Java partitions, these must be equal to those in {@link org.eclipse.jdt.internal.ui.text.IJavaPartitions}.
+ * TODO: remove this dependency
  * 
- * @since 3.0
+ * @since 3.1
  */
-public interface ILinkTagConstants {
-
-	/** Link tag postfix */
-	public static final char LINK_TAG_POSTFIX= '}';
-
-	/** Link tag prefix */
-	public static final String LINK_TAG_PREFIX= "{@"; //$NON-NLS-1$
+public interface IJavaPartitions {
+	
+	public final static String JAVA_SINGLE_LINE_COMMENT= "__java_singleline_comment"; //$NON-NLS-1$
+	public final static String JAVA_MULTI_LINE_COMMENT= "__java_multiline_comment"; //$NON-NLS-1$
+	public final static String JAVA_DOC= "__java_javadoc"; //$NON-NLS-1$
 }

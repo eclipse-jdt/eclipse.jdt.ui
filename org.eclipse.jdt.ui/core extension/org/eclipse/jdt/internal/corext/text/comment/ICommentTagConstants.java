@@ -9,7 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.javadoc;
+package org.eclipse.jdt.internal.corext.text.comment;
 
 /**
  * Comment tag constants.

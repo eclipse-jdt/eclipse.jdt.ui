@@ -16,8 +16,6 @@ import java.util.Map;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
 
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
-
 /**
  * Factory for comment related objects.
  * <p>

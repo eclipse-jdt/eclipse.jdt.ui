@@ -17,10 +17,6 @@ import java.util.Set;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
-import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
-import org.eclipse.jdt.internal.ui.text.javadoc.ILinkTagConstants;
-
 /**
  * Multi-line comment line in a comment region.
  * 
