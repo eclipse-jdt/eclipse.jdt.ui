@@ -68,14 +68,15 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	//----------- Conditions --------------
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("checking preconditions ...", 3);
+		pm.beginTask("", 3);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
-		pm.worked(1);
-		if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
-			result.addError(getMethod().getDeclaringType().getFullyQualifiedName() + " or a type in its hierarchy defines a method named " + getNewName());
-		pm.worked(1);	
-		result.merge(analyzeCompilationUnit(pm));
+		pm.subTask("analyzing hierarchy");
+		if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName()))
+			result.addError(getMethod().getDeclaringType().getFullyQualifiedName() + " or a type in its hierarchy defines a method named " + getNewName());	
+		pm.subTask("analyzing compilation unit");
+		result.merge(analyzeCompilationUnit(new SubProgressMonitor(pm, 1)));
 		pm.done();
 		return result;
 	}
@@ -97,7 +98,9 @@ public class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	}
 	
 	private RefactoringStatus analyzeCompilationUnit(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 1);
 		List grouped= getOccurrences(pm);
+		pm.done();
 		Assert.isTrue(grouped.size() <= 1 , "references to a private method found outside of its compilation unit");
 		if (grouped.isEmpty())
 			return null;

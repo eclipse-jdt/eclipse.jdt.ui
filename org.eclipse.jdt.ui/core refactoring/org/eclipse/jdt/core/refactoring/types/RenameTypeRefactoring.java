@@ -111,9 +111,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		Assert.isNotNull(fNewName, "newName");
 		RefactoringStatus result= new RefactoringStatus();
 		try{
-			pm.beginTask("checking preconditions...", 41);
-			HackFinder.fixMeSoon("why do i have to do this to make the task name visible?");
-			pm.subTask("");
+			pm.beginTask("", 73);
+			pm.subTask("checking preconditions");
 			result.merge(checkNewName());
 			if (result.hasFatalError())
 				return result;
@@ -155,12 +154,11 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 				return result;
 									
 			//if (Flags.isPublic(getType().getFlags()))
-			//	result.merge(analyzeImportDeclarations(new SubProgressMonitor(pm, 8, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			//	result.merge(analyzeImportDeclarations(new SubProgressMonitor(pm, 8)));
 				
 			pm.worked(1);
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11))));
-			pm.worked(1);
-			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 7)));
+			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 35))));
+			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
 		} finally {
 			pm.done();
 		}	
@@ -170,9 +168,11 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 	private List getOccurrences(IProgressMonitor pm) throws JavaModelException{
 		if (fOccurrences == null){
 			if (pm == null)
-				pm= new NullProgressMonitor();
+				pm= new NullProgressMonitor();	
+			//pm.beginTask("", 1);
 			pm.subTask("searching for references");	
 			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
+			pm.done();
 		}	
 		return fOccurrences;
 	}
@@ -424,7 +424,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			IResource resource= ((SearchResult)l.get(0)).getResource();
-			ITextBufferChange change= fTextBufferChangeCreator.create("Rename Type", (ICompilationUnit)JavaCore.create(resource));
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
+			ITextBufferChange change= fTextBufferChangeCreator.create("Type Reference Update in \"" + cu.getElementName() + "\"", cu );
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				change.addSimpleTextChange(createTextChange((SearchResult)subIter.next()));
 			}

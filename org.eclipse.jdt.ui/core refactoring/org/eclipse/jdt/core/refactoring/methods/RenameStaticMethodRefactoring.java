@@ -36,10 +36,12 @@ public class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 	//---------- Conditions --------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("checking preconditions ...", 2);
+		pm.beginTask("", 2);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
 		pm.worked(1);
+		pm.subTask("analyzing hierachy");
 		if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
 			result.addError("Hierarchy declares a method named " + getNewName() + " with the same number of paramters.");
 		pm.done();

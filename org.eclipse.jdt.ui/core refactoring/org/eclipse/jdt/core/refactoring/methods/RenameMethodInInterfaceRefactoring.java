@@ -46,14 +46,16 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	//---- Conditions ---------------------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("checking preconditions ...", 3);
+		pm.beginTask("", 10);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
-		pm.worked(1);
+		result.merge(super.checkInput(new SubProgressMonitor(pm, 6)));
+		pm.subTask("analyzing hierarchy");
 		if (isSpecialCase())
 			result.addError("Cannot rename this method - it is a special case (see the spec. 9.2)");
-		pm.worked(1);	
-		if (relatedTypeDeclaresMethodName(pm, getMethod(), getNewName()))
+		pm.worked(1);
+		pm.subTask("analyzing hierarchy");
+		if (relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 3), getMethod(), getNewName()))
 			result.addError("A related type declares a method with the new name (and same number of parameters)");
 		pm.done();
 		return result;
@@ -69,14 +71,17 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	}
 		
 	private boolean relatedTypeDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
-		HashSet types= getRelatedTypes(pm);
+		pm.beginTask("", 2);
+		HashSet types= getRelatedTypes(new SubProgressMonitor(pm, 1));
 		Iterator iter= types.iterator();
 		int parameterCount= method.getParameterTypes().length;
 		while (iter.hasNext()) {
 			if (null != findMethod(newName, parameterCount, false, (IType) iter.next())) {
+				pm.done();
 				return true;
 			}
 		}
+		pm.done();
 		return false;
 	}
 
@@ -112,9 +117,12 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	private HashSet getRelatedTypes(IProgressMonitor pm) throws JavaModelException {
 		
 		HackFinder.fixMeSoon("needs a better name");
-		
+		pm.beginTask("", 2);
 		IType type= getMethod().getDeclaringType();
-		return getRelatedTypes(new HashSet(), type.newTypeHierarchy(pm), type, getMethod(), pm);
+		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
+		HashSet result= getRelatedTypes(new HashSet(), hierarchy, type, getMethod(), new SubProgressMonitor(pm, 1));
+		pm.done();
+		return result;
 	}
 
 	private boolean containsNew(IMethod method, IType type) throws JavaModelException {
@@ -218,8 +226,13 @@ public class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring 
 	}
 	
 	/*package*/ HashSet getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 4);
 		IType type= method.getDeclaringType();
-		return doGetMethodsToRename(new HashSet(), type.newTypeHierarchy(pm), type, method, pm);
+		ITypeHierarchy hierarchy= type.newTypeHierarchy(new SubProgressMonitor(pm, 1));
+		HashSet result= doGetMethodsToRename(new HashSet(), hierarchy, type, method, pm);
+		pm.worked(3);
+		pm.done();
+		return result;
 	}
 	
 }

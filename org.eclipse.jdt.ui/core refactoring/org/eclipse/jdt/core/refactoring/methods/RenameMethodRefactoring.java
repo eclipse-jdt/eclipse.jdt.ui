@@ -105,13 +105,13 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 3);
-		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(pm)));
-		pm.worked(1);
+		pm.beginTask("", 6);
+		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 4))));
+		pm.subTask("checking new name");
 		result.merge(checkNewName());
 		pm.worked(1);
-		result.merge(checkRelatedMethods(pm));
-		pm.worked(1);
+		pm.subTask("analyzing hierarchy");
+		result.merge(checkRelatedMethods(new SubProgressMonitor(pm, 1)));
 		pm.done();
 		return result;
 	}
@@ -120,9 +120,13 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
-			pm.subTask("searching for references");	
-			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 3), getScope(), createSearchPattern(pm));	
-		}	
+			pm.beginTask("", 2);	
+			pm.subTask("creating the searching pattern");
+			ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
+			pm.subTask("searching for references");
+			fOccurrences= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), getScope(), pattern);	
+			pm.done();
+		}
 		return fOccurrences;
 	}
 			
@@ -185,6 +189,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			
 	/*package*/ HashSet getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
 		//method has been added in the caller	
+		pm.done();
 		return new HashSet(0);
 	}
 	
@@ -242,8 +247,8 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 
 	
 	/*package*/ ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1);
-		HashSet methods= methodsToRename(getMethod(), pm);
+		pm.beginTask("", 4);
+		HashSet methods= methodsToRename(getMethod(), new SubProgressMonitor(pm, 3));
 		Iterator iter= methods.iterator();
 		ISearchPattern pattern= SearchEngine.createSearchPattern((IMethod)iter.next(), IJavaSearchConstants.ALL_OCCURRENCES);
 		while (iter.hasNext()){
@@ -256,8 +261,11 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	
 	/*package*/ final HashSet methodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
 		HashSet methods= new HashSet();
+		pm.beginTask("", 3);
 		methods.add(method);
-		methods.addAll(getMethodsToRename(method, pm));
+		pm.worked(1);
+		methods.addAll(getMethodsToRename(method, new SubProgressMonitor(pm, 2)));
+		pm.done();
 		return methods;
 	}
 	/**

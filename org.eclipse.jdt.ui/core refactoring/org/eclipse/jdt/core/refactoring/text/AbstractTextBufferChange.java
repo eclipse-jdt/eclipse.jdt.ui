@@ -229,7 +229,8 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 			}
 			changes.addAll(newChanges);
 			
-			pm.beginTask(fName, changes.size());
+			pm.beginTask("", changes.size());
+			pm.subTask(fName);
 			
 			sortChanges(changes);
 			

@@ -53,21 +53,23 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	//------------ Conditions -------------
 		
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("checking preconditions ...", 5);
+		pm.beginTask("", 12);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkInput(new SubProgressMonitor(pm, 1)));
-		pm.worked(1);
-		if (overridesAnotherMethod(new SubProgressMonitor(pm, 1)))
+		pm.subTask("checking preconditions");
+		if (overridesAnotherMethod(new SubProgressMonitor(pm, 2)))
 			result.addError("Overrides another method - rename in the most abstract class or in an interface.");
-		if (isDeclaredInInterface(pm))
+		pm.subTask("analyzing hierarchy");
+		if (isDeclaredInInterface(new SubProgressMonitor(pm, 2)))
 			result.addError("Method " + getMethod().getElementName( ) + " is declared in an interface - rename it there.");
-		pm.worked(1);	
-		if (hierarchyDeclaresSimilarNativeMethod(pm))
+		pm.subTask("analyzing hierarchy");
+		if (hierarchyDeclaresSimilarNativeMethod(new SubProgressMonitor(pm, 2)))
 			result.addError("Renaming " + getMethod().getElementName() +" requires renaming a native method. Refactoring will cause UnsatisfiedLinkError on runtime.");
-		pm.worked(1);	
-		if (hierarchyDeclaresMethodName(pm, getMethod(), getNewName()))
+		pm.subTask("analyzing hierarchy");
+		if (hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName()))
 			result.addError("Hierarchy declares a method " + getNewName() + " and the same number of parameters.");		
-		result.merge(analyzeCompilationUnits(pm));	
+		result.merge(analyzeCompilationUnits(new SubProgressMonitor(pm, 3)));	
 		pm.done();
 		return result;
 	}
@@ -95,12 +97,13 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	private RefactoringStatus analyzeCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		List grouped= getOccurrences(pm);
 		if (grouped.isEmpty())
-			return null;
+			return null;	
 		RefactoringStatus result= new RefactoringStatus();	
 		RenameMethodASTAnalyzer analyzer= new RenameMethodASTAnalyzer(getNewName(), getMethod());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
 			List searchResults= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
+			pm.subTask("analyzing \"" + cu.getElementName() + "\"");
 			result.merge(analyzer.analyze(searchResults, cu));
 		}
 		return result;

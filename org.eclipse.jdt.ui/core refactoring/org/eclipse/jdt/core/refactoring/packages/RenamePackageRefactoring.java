@@ -127,20 +127,18 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		 * not checked preconditions:
 		 *  a. native methods in locally defined types in this package (too expensive - requires AST analysis)
 		 */
-		pm.beginTask("", 13);
-		pm.subTask("Checking preconditions");
+		pm.beginTask("", 14);
+		pm.subTask("checking preconditions");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkNewName());
 		pm.worked(1);
-		pm.subTask("Analyzing");
-		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK))));
-		pm.worked(1);
+		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 6))));
+		pm.subTask("analyzing");
 		result.merge(checkForNativeMethods());
 		pm.worked(1);
 		result.merge(checkForMainMethods());
 		pm.worked(1);
-		result.merge(analyzeAffectedCompilationUnits());
-		pm.worked(2);
+		result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 		result.merge(checkPackageName());
 		pm.worked(1);
 		pm.done();
@@ -151,7 +149,10 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		if (fOccurrences == null){
 			if (pm == null)
 				pm= new NullProgressMonitor();
-			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());		}	
+			pm.subTask("searching for references");	
+			fOccurrences= RefactoringSearchEngine.search(pm, getScope(), createSearchPattern());
+			pm.done();	
+		}	
 		return fOccurrences;
 	}
 	
@@ -239,19 +240,22 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * (non java-doc)
 	 * Analyzes all compilation units in which type is referenced
 	 */
-	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", fOccurrences.size());
 		RefactoringStatus result= new RefactoringStatus();
-		Iterator iter= getOccurrences(null).iterator();
+		Iterator iter= fOccurrences.iterator();
 		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
 		while (iter.hasNext()){
-			analyzeCompilationUnit(analyzer, (List)iter.next(), result);
+			analyzeCompilationUnit(pm, analyzer, (List)iter.next(), result);
+			pm.worked(1);
 		}
 		return result;
 	}
 	
-	private void analyzeCompilationUnit(RenamePackageASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
+	private void analyzeCompilationUnit(IProgressMonitor pm, RenamePackageASTAnalyzer analyzer, List searchResults, RefactoringStatus result)  throws JavaModelException {
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
+		pm.subTask("analyzing \"" + cu.getElementName() + "\"");
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzer.analyze(searchResults, cu));
@@ -260,7 +264,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	// ----------- Changes ---------------
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("creating rename package change", 1 + getOccurrences(null).size());
+		pm.beginTask("creating change", 1 + fOccurrences.size());
 		CompositeChange builder= new CompositeChange();
 		addOccurrences(pm, builder);
 		builder.addChange(new RenamePackageChange(fPackage, fNewName));
@@ -276,7 +280,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private void addOccurrences(IProgressMonitor pm, CompositeChange builder) throws JavaModelException{
-		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
+		for (Iterator iter= fOccurrences.iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			ITextBufferChange change= fTextBufferChangeCreator.create("Rename Package", (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource()));
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
