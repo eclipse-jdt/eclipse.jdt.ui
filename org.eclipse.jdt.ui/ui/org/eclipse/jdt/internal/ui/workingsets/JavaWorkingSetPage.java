@@ -101,6 +101,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	public void createControl(Composite parent) {
 		// XXX: workaround for: working set wizards override page title (bug 14492)
 		setTitle(PAGE_TITLE);
+
+		initializeDialogUnits(parent);
 		
 		Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
@@ -130,6 +132,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 		fTree= new CheckboxTreeViewer(composite, SWT.H_SCROLL | SWT.V_SCROLL);
 		gd= new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL);
+		gd.heightHint= convertHeightInCharsToPixels(10);
 		fTree.getControl().setLayoutData(gd);
 		
 		fTreeContentProvider= new JavaWorkingSetPageContentProvider();
