@@ -26,7 +26,7 @@ public class MultiMainTypeSelectionDialog extends ElementListSelectionDialog {
 	private int fStyle;
 		
 	/**
-	 * 
+	 * Constructor.
 	 */
 	public MultiMainTypeSelectionDialog(Shell shell, IRunnableContext context,
 		IJavaSearchScope scope, int style, boolean ignoreCase)

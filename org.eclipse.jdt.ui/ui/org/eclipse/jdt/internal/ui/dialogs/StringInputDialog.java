@@ -29,8 +29,10 @@ public class StringInputDialog extends StatusDialog {
 		
 	public StringInputDialog(Shell parent, String title, Image image, String message, String input, IInputValidator validator) {
 		super(parent);
+		
 		setTitle(title);
 		setImage(image);
+		
 		fValidator= validator;
 		fNameStatus= new StatusInfo();
 		fNameDialogField= new StringDialogField();

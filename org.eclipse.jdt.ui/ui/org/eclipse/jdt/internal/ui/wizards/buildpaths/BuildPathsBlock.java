@@ -575,7 +575,8 @@ public class BuildPathsBlock {
 			initSelection= fWorkspaceRoot.findMember(fOutputLocationPath);
 		}
 		
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title"), null, lp, cp); //$NON-NLS-1$
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setTitle(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.title")); //$NON-NLS-1$
 		dialog.setValidator(validator);
 		dialog.setMessage(NewWizardMessages.getString("BuildPathsBlock.ChooseOutputFolderDialog.description")); //$NON-NLS-1$
 		dialog.addFilter(filter);

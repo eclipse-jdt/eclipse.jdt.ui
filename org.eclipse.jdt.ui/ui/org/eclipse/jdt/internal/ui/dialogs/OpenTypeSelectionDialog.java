@@ -7,9 +7,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 
-	private boolean fShowInTypeHierarchy;
 	private static final String SECTION_NAME= "OpenTypeSelectionDialog"; //$NON-NLS-1$
 	private static final String SHOW_IN_TYPE_HIERARCHY= "showInTypeHierarchy"; //$NON-NLS-1$
+
+	private boolean fShowInTypeHierarchy;
 
 	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)

@@ -41,9 +41,9 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private TreeViewer fViewer;
 	private ILabelProvider fLabelProvider;
 	private ITreeContentProvider fContentProvider;
-	private boolean fAllowMultiple;
-	private boolean fDoubleClickSelects;
-	private ISelectionValidator fValidator;
+	private ISelectionValidator fValidator= null;
+	private boolean fAllowMultiple = true;
+	private boolean fDoubleClickSelects = true;
 	
 	private int fInitialCharWidth= 40;
 	private int fInitialCharHeight= 18;
@@ -56,58 +56,25 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	private Object fInput;
 		
 	private boolean fIsEmpty;
-	
-	/**
-	 * Constructor for the ElementTreeSelectionDialog.
-	 * @param labelProvider The label provider to render the entries
-	 * @param contentProvider The content provider to evaluate the tree structure
-	 * @param allowMultiple Specify the selection behaviour of the tree widget. Allows multiple selection or not 
-	 */	
-	public ElementTreeSelectionDialog(Shell parent, String title, Image image, ILabelProvider labelProvider, ITreeContentProvider contentProvider, boolean allowMultiple, boolean doubleClickSelects) {
-		super(parent);
-		setTitle(title);
-		setImage(image);
-		fLabelProvider= labelProvider;
-		fContentProvider= contentProvider;
-		fAllowMultiple= allowMultiple;
-		fDoubleClickSelects= doubleClickSelects;
-		
-		fValidator= null;
-		setResult(new ArrayList(0));
-		fCurrStatus= new StatusInfo();
-		fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$
-		setStatusLineAboveButtons(true);
-	}	
 
 	/**
 	 * Constructor for the ElementTreeSelectionDialog.
 	 * @param labelProvider The label provider to render the entries
 	 * @param contentProvider The content provider to evaluate the tree structure
-	 */		
-	public ElementTreeSelectionDialog(Shell parent, String title, Image image, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
-        this(parent, title, image, labelProvider, contentProvider, true, true);
-	}
-	
-	/**
-	 * Constructor for the ElementTreeSelectionDialog.
-	 * @param labelProvider The label provider to render the entries
-	 * @param contentProvider The content provider to evaluate the tree structure
-	 * @param allowMultiple Specify the selection behaviour of the tree widget. Allows multiple selection or not 
 	 */	
-	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, boolean allowMultiple, boolean doubleClickSelects) {
-		this(parent, "", null, labelProvider, contentProvider, allowMultiple, doubleClickSelects); //$NON-NLS-1$
-	}
-	
-	
-	/**
-	 * Constructor for the ElementTreeSelectionDialog.
-	 * @param labelProvider The label provider to render the entries
-	 * @param contentProvider The content provider to evaluate the tree structure
-	 */		
-	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
-        this(parent, "", null, labelProvider, contentProvider, true, true); //$NON-NLS-1$
-	}
-	
+	public ElementTreeSelectionDialog(Shell parent, ILabelProvider labelProvider,
+		ITreeContentProvider contentProvider)
+	{
+		super(parent);
+		
+		fLabelProvider= labelProvider;
+		fContentProvider= contentProvider;
+
+		setResult(new ArrayList(0));
+		fCurrStatus= new StatusInfo();
+		fEmptyListMessage= JavaUIMessages.getString("ElementTreeSelectionDialog.nothing_available"); //$NON-NLS-1$
+		setStatusLineAboveButtons(true);
+	}	
 	
 	/**
 	 * This message is shown when the tree has no entries at all
@@ -116,6 +83,18 @@ public class ElementTreeSelectionDialog extends SelectionStatusDialog {
 	public void setEmptyListMessage(String message) {
 		fEmptyListMessage= message;
 	}	
+
+	/**
+	 *
+	 * @param allowMultiple Specify the selection behaviour of the tree widget. Allows multiple selection or not 
+	 */
+	public void setAllowMultiple(boolean allowMultiple) {
+		fAllowMultiple= allowMultiple;
+	}
+	
+	public void setDoubleClickSelects(boolean doubleClickSelects) {
+		fDoubleClickSelects= doubleClickSelects;
+	}
 	
 	/**
 	 * Sets the sorter used by the tree viewer.

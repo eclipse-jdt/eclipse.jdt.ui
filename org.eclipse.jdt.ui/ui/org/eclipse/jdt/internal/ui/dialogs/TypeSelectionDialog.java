@@ -17,13 +17,23 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	private IJavaSearchScope fScope;
 	private int fStyle;
 	
-	public TypeSelectionDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString) {
-		super(parent, "", null, new TypeRefLabelProvider(0), new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX), ignoreCase, matchEmtpyString);		 //$NON-NLS-1$
+	/**
+	 * Constructor.
+	 */
+	public TypeSelectionDialog(Shell parent, IRunnableContext context,
+		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)
+	{
+		super(parent, new TypeRefLabelProvider(0),
+			new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX),
+			ignoreCase, matchEmtpyString);
+
+		Assert.isNotNull(context);
+		Assert.isNotNull(scope);
+
 		fRunnableContext= context;
-		Assert.isNotNull(fRunnableContext);
 		fScope= scope;
-		Assert.isNotNull(fScope);
 		fStyle= style;
+		
 		setUpperListLabel(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
 		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
 	}
@@ -53,27 +63,28 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 * @private
 	 */
 	protected void computeResult() {
-		TypeRef ref= (TypeRef)getWidgetSelection();
-		if (ref != null) {
-			try {
-				IType type= ref.resolveType(fScope);
-				if (type == null) {
-					String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-					String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
-					MessageDialog.openError(getShell(), title, message);
-					//XXX: java model
-					setResult(null);
-				} else {
-					List result= new ArrayList(1);
-					result.add(type);
-					setResult(result);
-				}
-			} catch (JavaModelException e) {
-				String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
-				String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
-				MessageDialog.openError(getShell(), title, message);
-				setResult(null);
+		TypeRef ref= (TypeRef) getWidgetSelection();
+
+		if (ref == null)
+			return;
+
+		try {
+			IType type= ref.resolveType(fScope);			
+			if (type != null) {
+				List result= new ArrayList(1);
+				result.add(type);
+				setResult(result);
+				return;				
 			}
+
+		// not a class file or compilation unit
+		} catch (JavaModelException e) {
+		} finally {
+			String title= JavaUIMessages.getString("TypeSelectionDialog.errorTitle"); //$NON-NLS-1$
+			String message= JavaUIMessages.getString("TypeSelectionDialog.errorMessage"); //$NON-NLS-1$
+			MessageDialog.openError(getShell(), title, message);
+			setResult(null);
 		}
 	}
+	
 }

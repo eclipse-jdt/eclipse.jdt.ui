@@ -589,7 +589,8 @@ public class SourceAttachmentBlock {
 			initSel= fRoot.findMember(fJARPath);
 		}
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp, false, true);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		dialog.setAllowMultiple(false);
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
 		dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.intjardialog.title")); //$NON-NLS-1$
@@ -621,7 +622,8 @@ public class SourceAttachmentBlock {
 			try {
 				ZipFile zipFile= new ZipFile(fResolvedFile);			
 				ZipContentProvider contentProvider= new ZipContentProvider(zipFile);
-				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider, false, true); 
+				ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), new ZipLabelProvider(), contentProvider); 
+				dialog.setAllowMultiple(false);
 				dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.title")); //$NON-NLS-1$
 				dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.prefixdialog.message")); //$NON-NLS-1$
 				dialog.setInput(zipFile);

@@ -32,9 +32,13 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		}
 	}
 	
-	public MainTypeSelectionDialog(Shell shell, IRunnableContext context, IJavaSearchScope scope, int style, boolean ignoreCase) {
-		super(shell, "", //$NON-NLS-1$
-			null, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
+	/**
+	 * Constructor.
+	 */
+	public MainTypeSelectionDialog(Shell shell, IRunnableContext context,
+		IJavaSearchScope scope, int style, boolean ignoreCase)
+	{
+		super(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS), 
 			new PackageRenderer(), ignoreCase, true);
 
 		Assert.isNotNull(context);
@@ -64,6 +68,7 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 			return CANCEL;
 		
 		IType[] types= (IType[])typesFound.toArray(new IType[typesFound.size()]);
+
 		setElements(types);
 		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();

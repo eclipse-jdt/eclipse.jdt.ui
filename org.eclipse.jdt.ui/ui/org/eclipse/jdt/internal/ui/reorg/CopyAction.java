@@ -214,7 +214,8 @@ public class CopyAction extends ReorgAction {
 		ILabelProvider labelProvider= new DestinationRenderer(
 			JavaElementLabelProvider.SHOW_SMALL_ICONS
 		);
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(parent, getActionName(), null, labelProvider, cp);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(parent, labelProvider, cp);
+		dialog.setTitle(getActionName());
 		dialog.setValidator(v);
 		dialog.addFilter(filter);
 		dialog.setSorter(new PackageViewerSorter());

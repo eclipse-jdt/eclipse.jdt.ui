@@ -818,7 +818,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 				return !(element instanceof IPackageFragment) && super.hasChildren(element);
 			}
 		};
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), cp, true, false);
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), cp);
+		dialog.setDoubleClickSelects(false);
 		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
 		dialog.addFilter(new EmptyInnerPackageFilter());		
 		dialog.addFilter(new LibraryFilter());
@@ -858,7 +859,8 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
 		ITreeContentProvider contentProvider= new JavaElementContentProvider();
 		ILabelProvider labelProvider= new JavaElementLabelProvider(labelFlags);
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider, false, true); 
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), labelProvider, contentProvider); 
+		dialog.setAllowMultiple(false);
 		dialog.setValidator(new ISelectionValidator() {
 			public IStatus validate(Object[] selection) {
 				StatusInfo res= new StatusInfo();

@@ -55,13 +55,11 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	/**
 	 *
 	 */
-	public TwoPaneElementSelector(Shell parent, String title, Image image, ILabelProvider elementRenderer, 
+	public TwoPaneElementSelector(Shell parent, ILabelProvider elementRenderer, 
 			ILabelProvider qualifierRenderer, boolean ignoreCase, boolean matchEmtpyString)
 	{
 		super(parent);
 		
-		setTitle(title);
-		setImage(image);
 		setMessage(""); //$NON-NLS-1$
 		
 		fElementRenderer= elementRenderer;
