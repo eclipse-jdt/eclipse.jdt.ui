@@ -409,7 +409,7 @@ public class SourceAttachmentBlock {
 			} else {
 				File file= filePath.toFile();
 				IResource res= fWorkspaceRoot.findMember(filePath);
-				if (res != null) {
+				if (res != null && res.getLocation() != null) {
 					file= res.getLocation().toFile();
 				}
 				if (!file.exists()) {

@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -112,8 +113,11 @@ public class JavaElementInfoPage extends PropertyPage {
 		} else if (element instanceof IJavaProject) {
 			Label packageLabel= new Label(composite, SWT.NONE);
 			packageLabel.setText(PreferencesMessages.getString("JavaElementInfoPage.location")); //$NON-NLS-1$
-			Label packageName= new Label(composite, SWT.NONE);
-			packageName.setText(((IJavaProject)element).getProject().getLocation().toOSString());
+			IPath location= ((IJavaProject)element).getProject().getLocation();
+			if (location != null) {
+				Label packageName= new Label(composite, SWT.NONE);
+				packageName.setText(location.toOSString());				
+			}
 		}
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_ELEMENT_INFO_PAGE);		
 		
