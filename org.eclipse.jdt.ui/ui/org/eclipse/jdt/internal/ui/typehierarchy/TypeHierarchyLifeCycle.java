@@ -226,10 +226,14 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 				processChildrenDelta(delta, changedTypes);
 				break;
 			case IJavaElement.COMPILATION_UNIT:
-				if (isWorkingCopyRemove((ICompilationUnit)element, delta.getKind()) || delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
+				ICompilationUnit cu= (ICompilationUnit) element;
+				boolean isWorkingCopyRemove= isWorkingCopyRemove(cu, delta.getKind());
+				if (isWorkingCopyRemove || delta.getKind() == IJavaElementDelta.CHANGED && isPossibleStructuralChange(delta.getFlags())) {
 					try {
-						if (element.exists()) {
-							IType[] types= ((ICompilationUnit) element).getAllTypes();
+						if (isWorkingCopyRemove)
+							cu= (ICompilationUnit)cu.getOriginalElement();
+						if (cu.exists()) {
+							IType[] types= cu.getAllTypes();
 							for (int i= 0; i < types.length; i++) {
 								processTypeDelta(types[i], changedTypes);
 							}
