@@ -82,8 +82,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.BuildGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -92,6 +90,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
@@ -163,7 +162,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IDialogSettings fDialogSettings;
 	
 	private ToggleViewAction[] fViewActions;
-	private IAction fDeleteAction;
 	
 	private HistoryDropDownAction fHistoryDropDownAction;
 	
@@ -178,6 +176,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private IPartListener fPartListener;
 	
 	private CompositeActionGroup fStandardActionGroups;
+
+	private CCPActionGroup fCCPActionGroup;
 	
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
@@ -495,8 +495,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 						updateHierarchyViewer();
 						return;
 					} else if (event.character == SWT.DEL){
-						if (fDeleteAction.isEnabled())
-							fDeleteAction.run();
+						if (fCCPActionGroup.getDeleteAction().isEnabled())
+							fCCPActionGroup.getDeleteAction().run();
 						return;	
 					}
  				}
@@ -647,9 +647,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
 		
-		fDeleteAction= ReorgGroup.createDeleteAction(UnifiedSite.create(getSite()), fSelectionProviderMediator);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE,  fDeleteAction);
-				
 		IJavaElement input= determineInputElement();
 		if (fMemento != null) {
 			restoreState(fMemento, input);
@@ -659,12 +656,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			setViewerVisibility(false);
 		}
 
-		ReorgGroup.addGlobalReorgActions(UnifiedSite.create(getSite()), getViewSite().getActionBars(), getViewSite().getSelectionProvider());
-		
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		
 		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
-				new OpenEditorActionGroup(this), new OpenViewActionGroup(this), new ShowActionGroup(this), 
+				new OpenEditorActionGroup(this), 
+				new OpenViewActionGroup(this), 
+				new ShowActionGroup(this), 
+				fCCPActionGroup= new CCPActionGroup(this), 
+				new RefactorActionGroup(this),
 				new GenerateActionGroup(this)});
 		
 		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
@@ -755,11 +754,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (fFocusOnSelectionAction.canActionBeAdded())
 			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fFocusOnSelectionAction);
 		
-		addRefactoring(menu, viewer);
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false), new ReorgGroup(UnifiedSite.create(getSite())) }, viewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, viewer);
 		
 		// XXX workaround until we have fully converted the code to use the new action groups
-		fStandardActionGroups.get(2).fillContextMenu(menu);			
+		fStandardActionGroups.get(2).fillContextMenu(menu);		
+		fStandardActionGroups.get(3).fillContextMenu(menu);		
+		fStandardActionGroups.get(4).fillContextMenu(menu);		
 	}
 
 	/**
@@ -774,18 +774,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		//menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, new JavaReplaceWithEditionAction(fMethodsViewer));	
 		addOpenWithMenu(menu, (IStructuredSelection)fMethodsViewer.getSelection());
-		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false), new ReorgGroup(UnifiedSite.create(getSite())) }, fMethodsViewer);
-		addRefactoring(menu, fMethodsViewer);
+		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, fMethodsViewer);
 		
 		// XXX workaround until we have fully converted the code to use the new action groups
 		fStandardActionGroups.get(2).fillContextMenu(menu);
-	}
-	
-	private void addRefactoring(IMenuManager menu, IInputSelectionProvider viewer){
-		MenuManager refactoring= new MenuManager(TypeHierarchyMessages.getString("TypeHierarchyViewPart.menu.refactor")); //$NON-NLS-1$
-		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup(UnifiedSite.create(getSite())) }, viewer);
-		if (!refactoring.isEmpty())
-			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
+		fStandardActionGroups.get(3).fillContextMenu(menu);		
+		fStandardActionGroups.get(4).fillContextMenu(menu);		
 	}
 	
 	private void addOpenWithMenu(IMenuManager menu, IStructuredSelection selection) {
