@@ -12,10 +12,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ITextChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
-public class CreateTextFileChange extends CreateFileChange implements ITextChange {
+public class CreateTextFileChange extends CreateFileChange {
 	
 	private final boolean fIsJavaFile;
 	
@@ -33,9 +32,6 @@ public class CreateTextFileChange extends CreateFileChange implements ITextChang
 		return fIsJavaFile;
 	}
 	
-	/*
-	 * @see ITextChange#getCurrentContent()
-	 */
 	public String getCurrentContent() throws JavaModelException {
 		IFile file= getOldFile(new NullProgressMonitor());
 		if (! file.exists())
@@ -48,9 +44,6 @@ public class CreateTextFileChange extends CreateFileChange implements ITextChang
 		}	
 	}
 	
-	/*
-	 * @see ITextChange#getPreview()
-	 */
 	public String getPreview() throws JavaModelException {
 		return getSource();
 	}
