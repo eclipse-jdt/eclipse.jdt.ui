@@ -6,7 +6,9 @@ import java.io.StringReader;
 
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class HTML2TextReaderTester extends TestCase {
 
@@ -15,6 +17,10 @@ public class HTML2TextReaderTester extends TestCase {
 
 	public HTML2TextReaderTester(String name) {
 		super(name);
+	}
+
+	public static Test suite() {
+		return new TestSuite(HTML2TextReaderTester.class);
 	}
 
 	private void verify(String input, String expectedOutput) throws IOException{

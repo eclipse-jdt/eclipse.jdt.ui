@@ -12,7 +12,9 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 public class JavaDoc2HTMLTextReaderTester extends TestCase {
 
@@ -20,6 +22,10 @@ public class JavaDoc2HTMLTextReaderTester extends TestCase {
 	
 	public JavaDoc2HTMLTextReaderTester(String name) {
 		super(name);
+	}
+
+	public static Test suite() {
+		return new TestSuite(JavaDoc2HTMLTextReaderTester.class);
 	}
 
 	private String getTransformedJavaDoc(String string) {
