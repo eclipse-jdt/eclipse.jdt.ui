@@ -736,11 +736,10 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 		String[] tags= getFilters(text);
 		for (int i= 0; i < tags.length; i++) {
-			IStatus status= JavaConventions.validateIdentifier(tags[i]);
-			if (status.matches(IStatus.ERROR)) {
-				String message= JavaUIMessages.getFormattedString("CompilerPreferencePage.task.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
-				return new StatusInfo(IStatus.ERROR, message);
-			}
+			if (tags[i].length() == 0) {
+				String message= JavaUIMessages.getString("CompilerPreferencePage.task.invalidsegment.error"); //$NON-NLS-1$
+				return new StatusInfo(IStatus.ERROR, message);			
+			}	
 		}
 		return new StatusInfo();
 	}	
