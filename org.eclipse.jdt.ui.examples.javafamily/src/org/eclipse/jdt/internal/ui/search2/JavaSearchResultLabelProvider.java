@@ -10,22 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search2;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.core.resources.IMarker;
+
+import org.eclipse.jface.viewers.ILabelDecorator;
+import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProvider;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.search.ui.ISearchResultViewEntry;
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.ui.ProblemsLabelDecorator;
-import org.eclipse.jface.viewers.ILabelDecorator;
-import org.eclipse.jface.viewers.ILabelProviderListener;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.search.ui.ISearchResultViewEntry;
-import org.eclipse.search.ui.SearchUI;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.PlatformUI;
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
 	public static final int SHOW_ELEMENT_CONTAINER= 1;
