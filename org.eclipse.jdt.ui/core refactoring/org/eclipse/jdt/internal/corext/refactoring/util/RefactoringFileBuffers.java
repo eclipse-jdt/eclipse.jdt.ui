@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
@@ -25,7 +23,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
  */
 public class RefactoringFileBuffers {
 	
-	public static ITextFileBuffer getTextFileBuffer(ICompilationUnit unit) throws CoreException {
+	public static ITextFileBuffer getTextFileBuffer(ICompilationUnit unit) {
 		IResource resource= unit.getResource();
 		if (resource == null || resource.getType() != IResource.FILE)
 			return null;

@@ -29,6 +29,8 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -50,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -357,6 +360,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
+			checkDirtyCompilationUnits(result);
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
 			IFile[] classPathFiles= getClassPathFiles();
 			checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
@@ -374,6 +378,38 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		}
 	}
 	
+	private void checkDirtyCompilationUnits(RefactoringStatus result) throws CoreException {
+		if (fJavaElements == null || fJavaElements.length == 0)
+			return;
+		for (int je= 0; je < fJavaElements.length; je++) {
+			IJavaElement element= fJavaElements[je];
+			if (element instanceof ICompilationUnit) {
+				checkDirtyCompilationUnit(result, (ICompilationUnit)element);	
+			} else if (element instanceof IPackageFragment) {
+				ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
+				for (int u = 0; u < units.length; u++) {
+					checkDirtyCompilationUnit(result, units[u]);
+				}
+			}
+		}
+	}
+	
+	private void checkDirtyCompilationUnit(RefactoringStatus result, ICompilationUnit cunit) {
+		IResource resource= cunit.getResource();
+		ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(cunit);
+		if (buffer != null && buffer.isDirty() && resource != null && resource.exists()) {
+			if (buffer.isStateValidated() && buffer.isSynchronized()) {
+				result.addWarning(RefactoringCoreMessages.getFormattedString(
+					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
+					resource.getFullPath().toString()));
+			} else {
+				result.addFatalError(RefactoringCoreMessages.getFormattedString(
+					"JavaDeleteProcessor.unsaved_changes", //$NON-NLS-1$
+					resource.getFullPath().toString()));
+			}
+		}
+	}
+
 	/*
 	 * The set of elements that will eventually be deleted may be very different from the set
 	 * originally selected - there may be fewer, more or different elements.

@@ -18,6 +18,7 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -77,14 +78,17 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 		if (element instanceof ICompilationUnit) {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			ICompilationUnit unit= (ICompilationUnit)element;
-			ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(unit);
-			int deleteTicks= 1;
-			if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
-				buffer.commit(new SubProgressMonitor(pm, 1), false);
-			} else {
-				deleteTicks= 2;
+			saveCUnitIfNeeded(unit, new SubProgressMonitor(pm, 1));
+			element.delete(false, new SubProgressMonitor(pm, 1));
+		// begin fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
+		} else if (element instanceof IPackageFragment) {
+			ICompilationUnit[] units= ((IPackageFragment)element).getCompilationUnits();
+			pm.beginTask("", units.length + 1); //$NON-NLS-1$
+			for (int i = 0; i < units.length; i++) {
+				saveCUnitIfNeeded(units[i], new SubProgressMonitor(pm, 1));
 			}
-			element.delete(false, new SubProgressMonitor(pm, deleteTicks));
+			element.delete(false, new SubProgressMonitor(pm, 1));
+		// end fix https://bugs.eclipse.org/bugs/show_bug.cgi?id=66835
 		} else {
 			element.delete(false, pm);
 		}
@@ -97,6 +101,17 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	private static IJavaElement getJavaElement(ISourceManipulation sm) {
 		//all known ISourceManipulations are IJavaElements
 		return (IJavaElement)sm;
+	}
+	
+	private static void saveCUnitIfNeeded(ICompilationUnit unit, IProgressMonitor pm) throws CoreException {
+		ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(unit);
+		if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
+			buffer.commit(pm, false);
+		} else {
+			pm.beginTask("", 1); //$NON-NLS-1$
+			pm.worked(1);
+			pm.done();
+		}
 	}
 }
 
