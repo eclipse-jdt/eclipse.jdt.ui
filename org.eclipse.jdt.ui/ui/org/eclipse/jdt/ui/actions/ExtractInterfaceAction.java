@@ -10,16 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
@@ -38,8 +41,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Extract a new interface from a class and tries to use the interface instead 
@@ -182,7 +183,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 		ExtractInterfaceRefactoring refactoring= ExtractInterfaceRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		Assert.isNotNull(refactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getExtractInterfaceProcessor().getType()))
 			return;
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
