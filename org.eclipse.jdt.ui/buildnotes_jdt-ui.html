@@ -36,7 +36,20 @@ shown if the method is already deprecated.</li>
 
 <li>
 New preference page to specify the sort order of members in Java views</li>
+
+<li><b>Move to Previous/Next Member</b> - use Ctrl+Shift+Down/Ctrl+Shift+Up to quickly navigate between methods, types, fields and initializers<br>
+The action is also available from the <i>Edit</i> menu</li>
+
+<li><b>Extract Interface</b> refactoring - creates a new interface with a set of method and makes the selected class implement the interface. <br>
+Also, an option is provided to change references to the class into references to the new interface (where possible).<br>
+The refactoring can be activated by selecting a class and choosing the appropriate entry from the context or global <i>Refactor</i> menu.</li>
+
+<li><b>Move Inner Class to Top Level</b> refactoring - select an inner class and choose the appropriate action from <br>
+the context or or global <i>Refactor</i> menu. A new compilation unit will be created and the inner class will be moved to that compilation unit.<br>
+Where necessary, references will be updated. If the class is not static, then a field is created to access the enclosing instance.</li>
+
 </ul>
+
 
 <h2>
 Problem Reports</h2>
