@@ -107,6 +107,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	private Set fExportedClassContainers;
 	private MessageMultiStatus fStatus;
 	private StandardJavaElementContentProvider fJavaElementContentProvider;
+	private boolean fFilesSaved;
 	
 	/**
 	 * Creates an instance of this class.
@@ -877,7 +878,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			if (!preconditionsOK())
 				throw new InvocationTargetException(null, JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailedSeeDetails")); //$NON-NLS-1$
 			int totalWork= countSelectedElements();
-			if (!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areGeneratedFilesExported()) {
+			if ((!isAutoBuilding() && fJarPackage.isBuildingIfNeeded() && fJarPackage.areGeneratedFilesExported()) || fFilesSaved) {
 				int subMonitorTicks= totalWork/10;
 				totalWork += subMonitorTicks;
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
@@ -1039,7 +1040,10 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				}
 	 		}
 		};
+		fFilesSaved= false;
 		display.syncExec(runnable);
+		if (retVal[0])
+			fFilesSaved= true;
 		return retVal[0];
 	}
 
