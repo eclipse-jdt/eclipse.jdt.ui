@@ -37,7 +37,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class DeleteWizard extends RefactoringWizard {
 
 	public DeleteWizard(Refactoring refactoring) {
-		super(refactoring, DIALOG_BASED_UESR_INTERFACE | YES_NO_BUTTON_STYLE | NO_PREVIEW_PAGE);
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE | YES_NO_BUTTON_STYLE | NO_PREVIEW_PAGE | NO_BACK_BUTTON_ON_STATUS_DIALOG);
 		setDefaultPageTitle(RefactoringMessages.getString("DeleteWizard.1")); //$NON-NLS-1$
 		((JavaDeleteProcessor)getDeleteRefactoring().getProcessor()).setQueries(new ReorgQueries(this));
 	}

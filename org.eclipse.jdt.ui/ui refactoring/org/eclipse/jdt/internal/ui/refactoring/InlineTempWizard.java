@@ -16,7 +16,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class InlineTempWizard extends RefactoringWizard {
 
 	public InlineTempWizard(InlineTempRefactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE | NO_BACK_BUTTON_ON_STATUS_DIALOG); 
 		setDefaultPageTitle(RefactoringMessages.getString("InlineTempWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
