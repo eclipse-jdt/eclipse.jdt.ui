@@ -101,6 +101,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
+	public void testInterruptedExecutionFlow() throws Exception {
+		performInvalidTest();
+	}
+	
 	public void testMultiLocal() throws Exception {
 		performInvalidTest();
 	}

@@ -31,10 +31,16 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
+import org.eclipse.jface.text.BadLocationException;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -53,20 +59,15 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jface.text.BadLocationException;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
@@ -318,48 +319,6 @@ public class CallInliner {
 	}
 
 	private void checkInvocationContext(RefactoringStatus result, int severity) {
-		if (ASTNodes.getParent(fInvocation, FieldDeclaration.class) != null) {
-			// it is allowed to inline a method used for field initialization
-			// if only it consists of single return statement
-			if(fSourceProvider.getNumberOfStatements() > 1) {
-				addEntry(result,
-					RefactoringCoreMessages.getString("CallInliner.field_initializer_simple"), //$NON-NLS-1$
-					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
-				return;
-			}
-			int argumentsCount= fContext.arguments.length;
-			for (int i= 0; i < argumentsCount; i++) {
-				ParameterData parameter= fSourceProvider.getParameterData(i);
-				if(parameter.isWrite()) {
-					addEntry(result,
-						RefactoringCoreMessages.getString("CallInliner.field_initialize_write_parameter"), //$NON-NLS-1$
-						RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
-					return;
-				}
-			}
-			if(fLocals.size() > 0) {
-				addEntry(result,
-					RefactoringCoreMessages.getString("CallInliner.field_initialize_new_local"), //$NON-NLS-1$
-					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
-				return;
-			}
-			// verify that the field is not referenced by the initializer method 
-			VariableDeclarationFragment variable= (VariableDeclarationFragment)ASTNodes.getParent(fInvocation, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
-			if(fSourceProvider.isVariableReferenced(variable.resolveBinding())) {
-				addEntry(result,
-					RefactoringCoreMessages.getString("CallInliner.field_initialize_self_reference"), //$NON-NLS-1$
-					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
-				return;
-			}
-		}
-		if (fSourceProvider.isExecutionFlowInterrupted()) {
-			VariableDeclaration vDecl= (VariableDeclaration)ASTNodes.getParent(fInvocation, VariableDeclaration.class);
-			if (vDecl != null) {
-				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
-					RefactoringStatusCodes.INLINE_METHOD_LOCAL_INITIALIZER, severity);
-				return;
-			}
-		}
 		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
 			Expression exp= ((MethodInvocation)fInvocation).getExpression();
 			if (exp != null && exp.resolveTypeBinding() == null) {
@@ -377,36 +336,71 @@ public class CallInliner {
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
 			ASTNode parent= fTargetNode.getParent();
-			if (parent.getNodeType() == ASTNode.ASSIGNMENT || isSingleDeclaration(parent)) {
-				// this is ok
-			} else if (isMultiDeclarationFragment(parent)) {
-				if (!fSourceProvider.isSimpleFunction()) {
-					addEntry(result, RefactoringCoreMessages.getString("CallInliner.multiDeclaration"), //$NON-NLS-1$
-						RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT, severity);
-					return;
-				}
-			} else if (fSourceProvider.getNumberOfStatements() > 1 ) {
-				addEntry(result, RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
-					RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS, severity);
+			if (isReturnStatement(parent)) {
+				//support inlining even if the execution flow is interrupted
 				return;
-			} else if (!fSourceProvider.isSimpleFunction()) {
+			}
+			if (fSourceProvider.isExecutionFlowInterrupted()) {
 				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
 				return;
 			}
+			if (isAssignment(parent) || isSingleDeclaration(parent)) {
+				// we support inlining expression in assigment and initializers as
+				// long as the execution flow isn't interrupted.
+				return;
+			} else {
+				boolean isFieldDeclaration= ASTNodes.getParent(fInvocation, FieldDeclaration.class) != null;
+				if (!fSourceProvider.isSimpleFunction()) {
+					if (isMultiDeclarationFragment(parent)) {
+						addEntry(result, RefactoringCoreMessages.getString("CallInliner.multiDeclaration"), //$NON-NLS-1$
+							RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT, severity);
+					} else if (isFieldDeclaration) {
+						addEntry(result,
+							RefactoringCoreMessages.getString("CallInliner.field_initializer_simple"), //$NON-NLS-1$
+							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+					} else {
+						addEntry(result, RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
+							RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS, severity);
+					}
+					return;
+				}
+				if (isFieldDeclaration) {
+					int argumentsCount= fContext.arguments.length;
+					for (int i= 0; i < argumentsCount; i++) {
+						ParameterData parameter= fSourceProvider.getParameterData(i);
+						if(parameter.isWrite()) {
+							addEntry(result,
+								RefactoringCoreMessages.getString("CallInliner.field_initialize_write_parameter"), //$NON-NLS-1$
+								RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+							return;
+						}
+					}
+					if(fLocals.size() > 0) {
+						addEntry(result,
+							RefactoringCoreMessages.getString("CallInliner.field_initialize_new_local"), //$NON-NLS-1$
+							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+						return;
+					}
+					// verify that the field is not referenced by the initializer method 
+					VariableDeclarationFragment variable= (VariableDeclarationFragment)ASTNodes.getParent(fInvocation, ASTNode.VARIABLE_DECLARATION_FRAGMENT);
+					if(fSourceProvider.isVariableReferenced(variable.resolveBinding())) {
+						addEntry(result,
+							RefactoringCoreMessages.getString("CallInliner.field_initialize_self_reference"), //$NON-NLS-1$
+							RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+						return;
+					}
+				}
+			}
 		}		
 	}
 
-	private static boolean isMultiDeclarationFragment(ASTNode node) {
-		int nodeType= node.getNodeType();
-		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			node= node.getParent();
-			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
-				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
-				return vs.fragments().size() > 1;
-			}
-		}
-		return false;
+	private static boolean isAssignment(ASTNode node) {
+		return node instanceof Assignment;
+	}
+	
+	private static boolean isReturnStatement(ASTNode node) {
+		return node instanceof ReturnStatement;
 	}
 	
 	private static boolean isSingleDeclaration(ASTNode node) {
@@ -418,6 +412,18 @@ public class CallInliner {
 			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
 				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
 				return vs.fragments().size() == 1;
+			}
+		}
+		return false;
+	}
+	
+	private static boolean isMultiDeclarationFragment(ASTNode node) {
+		int nodeType= node.getNodeType();
+		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			node= node.getParent();
+			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
+				return vs.fragments().size() > 1;
 			}
 		}
 		return false;

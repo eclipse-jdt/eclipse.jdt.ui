@@ -184,6 +184,13 @@ public class SourceProvider {
 		return statements.get(0) instanceof ReturnStatement;
 	}
 	
+	public boolean isLastStatementReturn() {
+		List statements= fDeclaration.getBody().statements();
+		if (statements.size() == 0)
+			return false;
+		return statements.get(statements.size() - 1) instanceof ReturnStatement;
+	}
+	
 	public MethodDeclaration getDeclaration() {
 		return fDeclaration;
 	}
