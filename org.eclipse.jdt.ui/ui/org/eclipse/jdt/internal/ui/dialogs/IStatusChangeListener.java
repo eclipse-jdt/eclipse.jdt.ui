@@ -9,8 +9,9 @@ import org.eclipse.core.runtime.IStatus;
 public interface IStatusChangeListener {
 	
 	/**
-	 * Called to annonce that the given status has changed
-	 * Status must not be <code>null</code>
+	 * Notifies this listener that the given status has changed.
+	 * 
+	 * @param	status	the new status
 	 */
 	void statusChanged(IStatus status);
 }
