@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.text;
 
+import java.util.Hashtable;
+
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -18,6 +20,8 @@ import junit.framework.TestSuite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.DefaultPartitioner;
+
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
@@ -42,6 +46,13 @@ public class JavaHeuristicScannerTest extends TestCase {
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() {
+		if (JavaCore.getPlugin() != null) {
+			Hashtable options= JavaCore.getDefaultOptions();
+			options.put(JavaCore.FORMATTER_TAB_CHAR, JavaCore.TAB);
+			options.put(JavaCore.FORMATTER_TAB_SIZE, "4");
+			JavaCore.setOptions(options);
+		}
+
 		fDocument= new Document();
 		String[] types= new String[] {
 			IJavaPartitions.JAVA_DOC,
