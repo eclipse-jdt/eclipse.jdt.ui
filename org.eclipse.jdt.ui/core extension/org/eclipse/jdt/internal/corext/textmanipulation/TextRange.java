@@ -174,7 +174,7 @@ public final class TextRange {
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("Offset: ");
 		buffer.append(fOffset);
-		buffer.append("Length: ");
+		buffer.append(" Length: ");
 		buffer.append(fLength);
 		return buffer.toString();
 	}
