@@ -539,7 +539,7 @@
 		<action id="org.eclipse.jdt.ui.actions.HexValues"
 			label="Show Hexadecimal Values"
 			toolbarPath="javaVariableFilters"
-			icon="icons/full/elcl16/hex_co.gif"
+			icon="icons/full/elcl16/hexad_co.gif"
 			tooltip="Show Hexadecimal Values"
 			state="false"
 			class="org.eclipse.jdt.internal.debug.ui.HexValuesAction">
