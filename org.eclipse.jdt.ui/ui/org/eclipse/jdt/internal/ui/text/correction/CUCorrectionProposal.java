@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -39,6 +38,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.link.LinkedEnvironment;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionGroup;
 import org.eclipse.jdt.internal.ui.text.link.LinkedUIControl;
@@ -61,6 +62,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 	private TextEdit fRootEdit;
+	private ImportRewrite fImportRewrite;
 	
 	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) {
 		this(name, cu, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
@@ -70,6 +72,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		super(name, null, relevance, image);
 		fRootEdit= new MultiTextEdit();
 		fCompilationUnit= cu;
+		fImportRewrite= null;
 	}
 	
 	public CUCorrectionProposal(String name, CompilationUnitChange change, int relevance, Image image) {
@@ -77,12 +80,41 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		fCompilationUnit= change.getCompilationUnit();
 	}	
 	
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
-		CompilationUnitChange change= new CompilationUnitChange(name, cu);
-		change.setEdit(rootEdit);
+	/**
+	 * @deprecated Override addEdits instead.
+	 */
+	protected final CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) {
+		return null;
+	}
+	
+	private CompilationUnitChange createCompilationUnitChange(String name) throws CoreException {
+		CompilationUnitChange change= new CompilationUnitChange(name, getCompilationUnit());
+		change.setEdit(getRootTextEdit());
 		change.setSave(false);
 		setChange(change);
+		
+		TextBuffer buffer= null;
+		try {
+			buffer= TextBuffer.acquire(change.getFile());
+			addEdits(buffer);
+			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
+				getRootTextEdit().addChild(fImportRewrite.createEdit(buffer));
+			}
+		} finally {
+			if (buffer != null) {
+				TextBuffer.release(buffer);
+			}
+		}
 		return change;
+	}
+	
+	/**
+	 * Called when the <code>CompilationUnitChange</code> is created. Subclasses can override to
+	 * add text edits to the change.
+	 * @param buffer Buffer of the underlying compilation unit. To be accessed read only.
+	 * @throws CoreException
+	 */
+	protected void addEdits(TextBuffer buffer) throws CoreException {
 	}
 
 	/*
@@ -91,14 +123,24 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	protected Change getChange() throws CoreException {
 		Change change= super.getChange();
 		if (change == null) {
-			return createCompilationUnitChange(getDisplayString(), fCompilationUnit, fRootEdit);
+			return createCompilationUnitChange(getDisplayString());
 		}
 		return change;
 	}
 	
-	protected final void addEdits(CompilationUnitChange change) throws CoreException {
+	// import management
+	
+	public ImportRewrite getImportRewrite() throws CoreException {
+		if (fImportRewrite == null) {
+			fImportRewrite= new ImportRewrite(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
+		}
+		return fImportRewrite;
 	}
 	
+	public void setImportRewrite(ImportRewrite rewrite) {
+		fImportRewrite= rewrite;
+	}
+		
 	protected GroupDescription[] getLinkedRanges() {
 		return null;
 	}
@@ -345,5 +387,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 		return super.toString();
 	}
+
+
 
 }

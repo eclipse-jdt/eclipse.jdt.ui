@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
@@ -165,7 +166,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			body= ast.newBlock();
 			String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), fSenderBinding.getName(), getMethodName(), isConstructor(), bodyStatement, String.valueOf('\n')); 	
 			if (placeHolder != null) {
-				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
+				ASTNode todoNode= rewrite.createPlaceholder(placeHolder, NewASTRewrite.STATEMENT);
 				body.statements().add(todoNode);
 			}
 		}
@@ -175,7 +176,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		if (settings.createComments && !fSenderBinding.isAnonymous()) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), fSenderBinding.getName(), decl, null, String.valueOf('\n'));
 			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, NewASTRewrite.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}
@@ -265,7 +266,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 	private Type evaluateMethodType(AST ast) throws CoreException {
 		ITypeBinding binding= ASTResolving.guessBindingForReference(fNode);
 		if (binding != null) {
-			String typeName= addImport(binding);
+			String typeName= getImportRewrite().addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);			
 		} else {
 			ASTNode parent= fNode.getParent();
@@ -287,7 +288,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedModeProposal(key, typeProposals[i]);
 			}		
-			String typeName= addImport(binding);
+			String typeName= getImportRewrite().addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$

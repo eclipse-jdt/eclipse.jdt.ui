@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -96,19 +97,21 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 	}
 	
 	private MethodDeclaration createNewMethodDeclaration(AST ast, IMethodBinding binding, ASTRewrite rewrite, String typeName, CodeGenerationSettings commentSettings) throws CoreException {
+		ImportRewrite imports= getImportRewrite();
+		
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setModifiers(binding.getModifiers() & ~Modifier.ABSTRACT);
 		decl.setName(ast.newSimpleName(binding.getName()));
 		decl.setConstructor(false);
 		
-		String returnTypeName= addImport(binding.getReturnType());
+		String returnTypeName= imports.addImport(binding.getReturnType());
 		decl.setReturnType(ASTNodeFactory.newType(ast, returnTypeName));
 		
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= getArgumentNames(binding);
 		for (int i= 0; i < params.length; i++) {
-			String paramTypeName= addImport(params[i]);
+			String paramTypeName= imports.addImport(params[i]);
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			var.setType(ASTNodeFactory.newType(ast, paramTypeName));
 			var.setName(ast.newSimpleName(paramNames[i]));
@@ -118,7 +121,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
 		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= addImport(excTypes[i]);
+			String excTypeName= imports.addImport(excTypes[i]);
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 		

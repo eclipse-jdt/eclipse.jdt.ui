@@ -24,13 +24,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
@@ -41,12 +40,15 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKDECL)); 
 		fLocation= location;
 	}
-
+	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit root) throws CoreException {
-		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, root);
+	protected void addEdits(TextBuffer buffer) throws CoreException {
+		super.addEdits(buffer);
+		
+		TextEdit root= getRootTextEdit();
+		ICompilationUnit cu= getCompilationUnit();
 		
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
@@ -56,17 +58,16 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 				ISourceRange range= decls[i].getSourceRange();
 				root.addChild(new DeleteEdit(range.getOffset(), range.getLength()));
 			}
-			return change;
+			return;
 		}
 		if (!parentPack.isDefaultPackage() && decls.length == 0) {
 			String lineDelim= StubUtility.getLineDelimiterUsed(cu);
-			String str= "package " + parentPack.getElementName() + ";" + lineDelim + lineDelim; //$NON-NLS-1$ //$NON-NLS-2$
+			String str= "package " + parentPack.getElementName() + ';' + lineDelim + lineDelim; //$NON-NLS-1$
 			root.addChild(new InsertEdit(0, str));
-			return change;
+			return;
 		}
 		
 		root.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), parentPack.getElementName()));
-		return change;
 	}
 	
 	/*

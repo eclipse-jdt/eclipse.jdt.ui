@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -21,14 +20,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -127,7 +125,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		ASTRewrite rewrite= new ASTRewrite(decl);
 		
-		SimpleName[] names= getAllReferences(cu, body);
+		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
 		
 		Statement dominantStatement= ASTResolving.findParentStatement(dominant);
@@ -173,7 +171,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			
 			return rewrite;
 		}
-		//	foo(x) -> int x= 0; foo(x)
+		//	foo(x) -> int x; foo(x)
 		
 		VariableDeclarationFragment newDeclFrag= ast.newVariableDeclarationFragment();
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
@@ -200,37 +198,12 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return rewrite;
 	}
 	
-	private SimpleName[] getAllReferences(CompilationUnit cu, Block body) {
-		IProblem[] problems= cu.getProblems();
-		
-		ArrayList res= new ArrayList();
-		
-		int bodyStart= body.getStartPosition();
-		int bodyEnd= bodyStart + body.getLength();
-		
-		String name= fOriginalNode.getIdentifier();
-
-		for (int i= 0; i < problems.length; i++) {
-			IProblem curr= problems[i];
-			int probStart= curr.getSourceStart();
-			int probEnd= curr.getSourceEnd() + 1;
-			
-			if (curr.getID() == IProblem.UndefinedName &&  probStart > bodyStart && probEnd < bodyEnd) {
-				if (name.equals(curr.getArguments()[0])) {
-					ASTNode node= NodeFinder.perform(body, probStart, probEnd - probStart);
-					if (node instanceof SimpleName) {
-						res.add(node);
-					}
-				}
-			}
+	private SimpleName[] getAllReferences(Block body) {
+		SimpleName[] names= LinkedNodeFinder.findByProblems(body, fOriginalNode);
+		if (names == null) {
+			return new SimpleName[] { fOriginalNode };
 		}
-		if (res.isEmpty()) {
-			res.add(fOriginalNode); // bug 48617 should fix that
-		}
-		
-		
-		SimpleName[] names= (SimpleName[]) res.toArray(new SimpleName[res.size()]);
-		if (res.size() > 0) {
+		if (names.length > 1) {
 			Arrays.sort(names, new Comparator() {
 				public int compare(Object o1, Object o2) {
 					return ((SimpleName) o1).getStartPosition() - ((SimpleName) o2).getStartPosition();
@@ -345,7 +318,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 					addLinkedModeProposal(KEY_TYPE, typeProposals[i]);
 				}
 			}
-			String typeName= addImport(binding);
+			String typeName= getImportRewrite().addImport(binding);
 			return ASTNodeFactory.newType(ast, typeName);			
 		}
 		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);

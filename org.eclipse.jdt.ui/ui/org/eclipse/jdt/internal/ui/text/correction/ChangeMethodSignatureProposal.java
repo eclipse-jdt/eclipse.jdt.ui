@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -121,7 +122,9 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaringClass().getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
 			usedNames.add(declaredFields[i].getName());
-		}		
+		}
+		
+		ImportRewrite imports= getImportRewrite();
 		
 		for (int i= 0; i < fParameterChanges.length; i++) {
 			ChangeDescription curr= fParameterChanges[i];
@@ -131,7 +134,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof InsertDescription) {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				String type= addImport(desc.type);
+				String type= imports.addImport(desc.type);
 				newNode.setType(ASTNodeFactory.newType(ast, type));
 				
 				// remember to set name later
@@ -148,7 +151,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				EditDescription desc= (EditDescription) curr;
 
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				String type= addImport(desc.type);
+				String type= imports.addImport(desc.type);
 				newNode.setType(ASTNodeFactory.newType(ast, type));
 				
 				// remember to set name later

@@ -129,7 +129,7 @@ public class LinkedNodeFinder  {
 	}
 	
 	
-	private static SimpleName[] findByProblems(ASTNode parent, SimpleName nameNode) {
+	public static SimpleName[] findByProblems(ASTNode parent, SimpleName nameNode) {
 		ArrayList res= new ArrayList();
 		
 		ASTNode astRoot = parent.getRoot();

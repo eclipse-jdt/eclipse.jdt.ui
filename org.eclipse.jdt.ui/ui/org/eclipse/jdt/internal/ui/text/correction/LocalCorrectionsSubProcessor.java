@@ -112,14 +112,17 @@ public class LocalCorrectionsSubProcessor {
 				}
 	
 				ASTRewrite rewrite= new ASTRewrite(methodDeclaration);
-	
-				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", currBinding.getName()); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-				String returnTypeName= proposal.addImport(currBinding);
+				ImportRewrite imports= new ImportRewrite(cu);
+
+				String returnTypeName= imports.addImport(currBinding);
 				
 				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
 				rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
+				
+				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changereturntype.description", currBinding.getName()); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
+				proposal.setImportRewrite(imports);
 				
 				String returnKey= "return"; //$NON-NLS-1$
 				proposal.markAsLinked(rewrite, newReturnType, true, returnKey);
@@ -127,6 +130,7 @@ public class LocalCorrectionsSubProcessor {
 				for (int i= 0; i < typeSuggestions.length; i++) {
 					proposal.addLinkedModeProposal(returnKey, typeSuggestions[i]);
 				}
+				
 				
 				proposal.ensureNoModifications();
 				proposals.add(proposal);
@@ -211,11 +215,10 @@ public class LocalCorrectionsSubProcessor {
 		CompilationUnit astRoot= context.getASTRoot();
 		
 		ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
+		ImportRewrite imports= new ImportRewrite(cu);
 		
 		String label;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, relevance, image); //$NON-NLS-1$
-		String simpleCastType= proposal.addImport(castType);
+		String simpleCastType= imports.addImport(castType);
 		
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changecast.description", castType); //$NON-NLS-1$
@@ -242,7 +245,10 @@ public class LocalCorrectionsSubProcessor {
 			
 			rewrite.markAsReplaced(nodeToCast, castExpression);
 		}
-		proposal.setDisplayName(label);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image); //$NON-NLS-1$
+		
+		proposal.setImportRewrite(imports);
 		proposal.ensureNoModifications();
 		
 		return proposal;
@@ -288,16 +294,19 @@ public class LocalCorrectionsSubProcessor {
 		TryStatement surroundingTry= ASTResolving.findParentTryStatement(selectedNode);
 		if (surroundingTry != null && ASTNodes.isParent(selectedNode, surroundingTry.getBody())) {
 			ASTRewrite rewrite= new ASTRewrite(surroundingTry);
+			ImportRewrite imports= new ImportRewrite(cu);
+			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addadditionalcatch.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 5, image);
+			proposal.setImportRewrite(imports);
 			
 			AST ast= astRoot.getAST();
 			List catchClauses= surroundingTry.catchClauses();
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
 				ITypeBinding excBinding= uncaughtExceptions[i];
 				String varName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.CODEGEN_EXCEPTION_VAR_NAME);
-				String imp= proposal.addImport(excBinding);
+				String imp= imports.addImport(excBinding);
 				Name name= ASTNodeFactory.newName(ast, imp);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 				var.setName(ast.newSimpleName(varName));
@@ -324,15 +333,18 @@ public class LocalCorrectionsSubProcessor {
 		
 		if (decl instanceof MethodDeclaration) {
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			ImportRewrite imports= new ImportRewrite(cu);
+			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
+			proposal.setImportRewrite(imports);
 			
 			AST ast= astRoot.getAST();
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			List exceptions= methodDecl.thrownExceptions();
 			for (int i= 0; i < uncaughtExceptions.length; i++) {
-				String imp= proposal.addImport(uncaughtExceptions[i]);
+				String imp= imports.addImport(uncaughtExceptions[i]);
 				Name name= ASTNodeFactory.newName(ast, imp);
 				rewrite.markAsInserted(name);
 				exceptions.add(name);
@@ -467,13 +479,15 @@ public class LocalCorrectionsSubProcessor {
 				ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 				if (declaringTypeBinding != null) {
 					ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+					ImportRewrite imports= new ImportRewrite(cu);
+
+					String typeName= imports.addImport(declaringTypeBinding);
+					rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
 
 					String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.indirectaccesstostatic.description", declaringTypeBinding.getName()); //$NON-NLS-1$
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-					String typeName= proposal.addImport(declaringTypeBinding);
-					rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
-				
+					proposal.setImportRewrite(imports);
 					proposal.ensureNoModifications();
 					proposals.add(proposal);					
 				}
@@ -487,11 +501,14 @@ public class LocalCorrectionsSubProcessor {
 			declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+				ImportRewrite imports= new ImportRewrite(cu);
 
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostaticdefining.description", declaringTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-				String typeName= proposal.addImport(declaringTypeBinding);
+				proposal.setImportRewrite(imports);
+				
+				String typeName= imports.addImport(declaringTypeBinding);
 				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
 				
 				proposal.ensureNoModifications();
@@ -503,11 +520,14 @@ public class LocalCorrectionsSubProcessor {
 			ITypeBinding instanceTypeBinding= Bindings.normalizeTypeBinding(qualifier.resolveTypeBinding());
 			if (instanceTypeBinding != null && instanceTypeBinding != declaringTypeBinding) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+				ImportRewrite imports= new ImportRewrite(cu);
 				
 				String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changeaccesstostatic.description", instanceTypeBinding.getName()); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
-				String typeName= proposal.addImport(instanceTypeBinding);
+				proposal.setImportRewrite(imports);
+				
+				String typeName= imports.addImport(instanceTypeBinding);
 				rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
 
 				
@@ -738,20 +758,18 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		ASTRewrite rewrite= new ASTRewrite(name.getParent());
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
-
+		ImportRewrite imports= new ImportRewrite(context.getCompilationUnit());
 		
 		ITypeBinding declaringClass= ((IVariableBinding) binding).getDeclaringClass();
 		String qualifier;
 		if (Modifier.isStatic(binding.getModifiers())) {
-			qualifier= proposal.addImport(declaringClass);
+			qualifier= imports.addImport(declaringClass);
 		} else {
 			ITypeBinding currType= Bindings.getBindingOfParentType(name);
 			if (Bindings.isSuperType(currType, declaringClass)) {
 				qualifier= "this"; //$NON-NLS-1$
 			} else {
-				String outer= proposal.addImport(declaringClass);
+				String outer= imports.addImport(declaringClass);
 				qualifier= outer + ".this"; //$NON-NLS-1$
 			}
 		}
@@ -760,7 +778,9 @@ public class LocalCorrectionsSubProcessor {
 		rewrite.markAsReplaced(name, rewrite.createPlaceholder(replacement, NewASTRewrite.NAME));
 
 		String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.unqualifiedfieldaccess.description", qualifier); //$NON-NLS-1$
-		proposal.setDisplayName(label);
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); //$NON-NLS-1$
+		proposal.setImportRewrite(imports);
 		proposals.add(proposal);
 	}
 		

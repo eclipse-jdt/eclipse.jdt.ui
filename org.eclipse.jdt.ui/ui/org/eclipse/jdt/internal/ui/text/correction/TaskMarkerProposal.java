@@ -16,22 +16,20 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jface.text.Position;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
   */
@@ -46,33 +44,24 @@ public class TaskMarkerProposal extends CUCorrectionProposal {
 		setDisplayName(CorrectionMessages.getString("TaskMarkerProposal.description")); //$NON-NLS-1$
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
-	
+		
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(java.lang.String, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.internal.corext.textmanipulation.TextEdit)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
 	 */
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
-		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, rootEdit);
-
-		Position pos= null;
-		TextBuffer buffer= null;
-		try {
-			buffer= TextBuffer.acquire(change.getFile());
-			pos= getUpdatedPosition(buffer);
-		} finally {
-			if (buffer != null) {
-				TextBuffer.release(buffer);
-			}
-		}
+	protected void addEdits(TextBuffer buffer) throws CoreException {
+		super.addEdits(buffer);
+		
+		TextEdit rootEdit= getRootTextEdit();
+		
+		Position pos= getUpdatedPosition(buffer);
 		if (pos != null) {
 			rootEdit.addChild(new ReplaceEdit(pos.getOffset(), pos.getLength(), "")); //$NON-NLS-1$
 		} else {
 			rootEdit.addChild(new ReplaceEdit(fLocation.getOffset(), fLocation.getLength(), "")); //$NON-NLS-1$
 		}
-		return change;
+		
 	}
 	
-		
-		
 	private Position getUpdatedPosition(TextBuffer buffer) {
 		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
 		scanner.setSource(buffer.getContent().toCharArray());

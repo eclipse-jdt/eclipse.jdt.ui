@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocTag;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -369,24 +368,6 @@ public class JavadocTagsSubProcessor {
 			fChangedList.add(insertPos, new Event(null, tag));
 		}	
 		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
-		 */
-		protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
-			CompilationUnitChange change= super.createCompilationUnitChange(name, cu, rootEdit);
-			TextBuffer buffer= null;
-			try {
-				buffer= TextBuffer.acquire(change.getFile());
-				createEdits(buffer, cu, rootEdit);
-			} finally {
-				if (buffer != null) {
-					TextBuffer.release(buffer);
-				}
-			}
-			return change;
-		}
-		
-		
 /*		private void createEditsNew(TextBuffer buffer, ICompilationUnit cu, TextEdit root) throws JavaModelException {
 			IBuffer cuBuffer= cu.getBuffer();
 			String comment= cuBuffer.getText(fJavadoc.getStartPosition(), fJavadoc.getLength());
@@ -441,7 +422,11 @@ public class JavadocTagsSubProcessor {
 		}*/
 		
 		
-		private void createEdits(TextBuffer buffer, ICompilationUnit cu, TextEdit root) {
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer)
+		 */
+		protected void addEdits(TextBuffer buffer) throws CoreException {
+			super.addEdits(buffer);
 			
 			//createEditsNew(buffer, cu, root);
 		
@@ -465,7 +450,7 @@ public class JavadocTagsSubProcessor {
 					if (isLast) {
 						str= "* " + str + buffer.getLineDelimiter() + getIndent(buffer) + ' ';//$NON-NLS-1$
 					}
-					root.addChild(new InsertEdit(currPos, str));
+					getRootTextEdit().addChild(new InsertEdit(currPos, str));
 				} else {
 					JavaDocTag original= curr.originalTag;
 					currPos= original.getOffset() + original.getLength();
@@ -495,14 +480,5 @@ public class JavadocTagsSubProcessor {
 			return indent;
 		}
 		
-		
-		
 	}
-	
-	
-	
-	
-		
-
-	
 }

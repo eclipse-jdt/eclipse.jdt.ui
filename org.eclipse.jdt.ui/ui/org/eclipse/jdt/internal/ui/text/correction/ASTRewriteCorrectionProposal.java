@@ -10,75 +10,34 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
   */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
-	private ImportRewrite fImportRewrite;
 
 	public ASTRewriteCorrectionProposal(String name, ICompilationUnit cu, ASTRewrite rewrite, int relevance, Image image) {
 		super(name, cu, relevance, image);
 		fRewrite= rewrite;
-		fImportRewrite= null;
 	}
-	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createCompilationUnitChange(String, ICompilationUnit, TextEdit)
-	 */
-	protected CompilationUnitChange createCompilationUnitChange(String name, ICompilationUnit cu, TextEdit rootEdit) throws CoreException {
-		CompilationUnitChange change= super.createCompilationUnitChange(name, cu, rootEdit);
-		TextBuffer buffer= null;
-		try {
-			buffer= TextBuffer.acquire(change.getFile());
-			ASTRewrite rewrite= getRewrite();
-			if (rewrite != null) {
-				rewrite.rewriteNode(buffer, rootEdit);
-				rewrite.removeModifications();
-			}
-			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				rootEdit.addChild(fImportRewrite.createEdit(buffer));
-			}
-		} finally {
-			if (buffer != null) {
-				TextBuffer.release(buffer);
-			}
+		
+	protected void addEdits(TextBuffer buffer) throws CoreException {
+		super.addEdits(buffer);
+		ASTRewrite rewrite= getRewrite();
+		if (rewrite != null) {
+			rewrite.rewriteNode(buffer, getRootTextEdit());
+			rewrite.removeModifications();
 		}
-		return change;
 	}
-	
-	private ImportRewrite getImportEdit() throws CoreException {
-		if (fImportRewrite == null) {
-			fImportRewrite= new ImportRewrite(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
-		}
-		return fImportRewrite;
-	}
-	
-	
-	public String addImport(String qualifiedTypeName) throws CoreException {
-		return getImportEdit().addImport(qualifiedTypeName);
-	}
-	
-	public String addImport(ITypeBinding binding) throws CoreException {
-		return getImportEdit().addImport(binding);
-	}	
 	
 	protected ASTRewrite getRewrite() throws CoreException {
 		return fRewrite;

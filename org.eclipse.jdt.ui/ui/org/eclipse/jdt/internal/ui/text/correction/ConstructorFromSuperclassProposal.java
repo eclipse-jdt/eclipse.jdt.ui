@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -135,7 +136,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			ITypeBinding[] params= binding.getParameterTypes();
 			String[] paramNames= getArgumentNames(binding);
 			for (int i= 0; i < params.length; i++) {
-				String paramTypeName= addImport(params[i]);
+				String paramTypeName= getImportRewrite().addImport(params[i]);
 				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 				var.setType(ASTNodeFactory.newType(ast, paramTypeName));				
 				var.setName(ast.newSimpleName(paramNames[i]));
@@ -145,7 +146,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= binding.getExceptionTypes();
 			for (int i= 0; i < excTypes.length; i++) {
-				String excTypeName= addImport(excTypes[i]);
+				String excTypeName= getImportRewrite().addImport(excTypes[i]);
 				thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 			}
 		
@@ -160,13 +161,13 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		}
 		String placeHolder= CodeGeneration.getMethodBodyContent(getCompilationUnit(), name, name, true, bodyStatement, String.valueOf('\n')); 	
 		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, ASTRewrite.STATEMENT);
+			ASTNode todoNode= rewrite.createPlaceholder(placeHolder, NewASTRewrite.STATEMENT);
 			body.statements().add(todoNode);
 		}
 		if (commentSettings != null) {
 			String string= CodeGeneration.getMethodComment(getCompilationUnit(), name, decl, null, String.valueOf('\n'));
 			if (string != null) {
-				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, ASTRewrite.JAVADOC);
+				Javadoc javadoc= (Javadoc) rewrite.createPlaceholder(string, NewASTRewrite.JAVADOC);
 				decl.setJavadoc(javadoc);
 			}
 		}

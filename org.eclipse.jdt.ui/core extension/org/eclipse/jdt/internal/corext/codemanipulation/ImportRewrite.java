@@ -10,19 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-
-import org.eclipse.jface.text.IRegion;
-
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.IRegion;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * A rewriter for imports that considers the organize import 
@@ -32,10 +36,18 @@ public final class ImportRewrite {
 	
 	private ImportsStructure fImportsStructure;
 	
+	public ImportRewrite(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
+		Assert.isNotNull(cu);
+		Assert.isNotNull(preferenceOrder);
+		fImportsStructure= new ImportsStructure(cu, preferenceOrder, importThreshold, true);
+	}
+	
+	public ImportRewrite(ICompilationUnit cunit) throws CoreException {
+		this(cunit, JavaPreferencesSettings.getImportOrderPreference(PreferenceConstants.getPreferenceStore()), JavaPreferencesSettings.getImportNumberThreshold(PreferenceConstants.getPreferenceStore()));
+	}
+	
 	public ImportRewrite(ICompilationUnit cunit, CodeGenerationSettings settings) throws CoreException {
-		Assert.isNotNull(cunit);
-		Assert.isNotNull(settings);
-		fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true);
+		this(cunit, settings.importOrder, settings.importThreshold);
 	}
 	
 	public final TextEdit createEdit(TextBuffer buffer) throws CoreException {
@@ -110,7 +122,7 @@ public final class ImportRewrite {
 	
 	/**
 	 * Removes an import declaration for a type or an on-demand import.
-	 * @param binding The qualified name the type to be removed as import
+	 * @param qualifiedTypeName The qualified name the type to be removed as import
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(String qualifiedTypeName) {

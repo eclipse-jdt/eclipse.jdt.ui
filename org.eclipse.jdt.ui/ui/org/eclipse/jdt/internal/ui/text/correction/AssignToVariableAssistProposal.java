@@ -200,7 +200,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedModeProposal(KEY_TYPE, proposals[i]);
 		}
-		String typeName= addImport(fTypeBinding);
+		String typeName= getImportRewrite().addImport(fTypeBinding);
 		return ASTNodeFactory.newType(ast, typeName);
 	}
 	
