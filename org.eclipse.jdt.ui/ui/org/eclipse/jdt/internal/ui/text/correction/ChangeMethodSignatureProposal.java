@@ -165,7 +165,7 @@ public class ChangeMethodSignatureProposal extends ASTRewriteCorrectionProposal 
 			}
 		}
 		
-		if (!createdVariables.isEmpty()) {
+		if (!createdVariables.isEmpty() && methodDecl.getBody() != null) {
 			// avoid take a name of a local variable inside
 			CompilationUnit root= (CompilationUnit) methodDecl.getRoot();
 			IBinding[] bindings= (new ScopeAnalyzer(root)).getDeclarationsAfter(methodDecl.getBody().getStartPosition(), ScopeAnalyzer.VARIABLES);
