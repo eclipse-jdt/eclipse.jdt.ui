@@ -27,6 +27,7 @@ import org.eclipse.jface.text.rules.ICharacterScanner;
 import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.IWordDetector;
 import org.eclipse.jface.text.rules.WordRule;
+import org.eclipse.jface.text.rules.Token;
 
 import org.eclipse.jdt.core.JavaCore;
 
@@ -278,7 +279,7 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 			isCaseSensitive= ENABLED.equals(fCorePreferenceStore.getString(COMPILER_TASK_CASE_SENSITIVE));
 		}
 		if (tasks != null) {
-			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG), getToken(fDefaultTokenProperty));
+			fTaskTagRule= new TaskTagRule(getToken(TASK_TAG), Token.UNDEFINED);
 			fTaskTagRule.addTaskTags(tasks);
 			fTaskTagRule.setCaseSensitive(isCaseSensitive);
 			list.add(fTaskTagRule);
