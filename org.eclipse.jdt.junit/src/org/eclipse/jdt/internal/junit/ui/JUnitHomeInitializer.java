@@ -35,7 +35,7 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 		URL local= null;
 		try {
 			try {
-				local= Platform.resolve(installLocation);
+				local= Platform.asLocalURL(installLocation);
 			} catch (IOException e) {
 				JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
 			}
