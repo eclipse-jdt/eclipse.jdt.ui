@@ -622,33 +622,27 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				if (owner instanceof ICompilationUnit) {
 					
 					ICompilationUnit unit= (ICompilationUnit) owner;
-					
-					try {
+					ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
+					IResource resource= original.getResource();
+					if (resource instanceof IFile) {
+						IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
 						
-						ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
-						IResource resource= original.getCorrespondingResource();
-						if (resource instanceof IFile) {
-							IFileEditorInput providerKey= new FileEditorInput((IFile) resource);
-							
-							IDocument document= null;
-							IStatus status= null;
-							
-							try {
-								document= internalGetDocument(providerKey);
-							} catch (CoreException x) {
-								status= x.getStatus();
-								document= new Document();
-								initializeDocument(document);
-							}
-							
-							DocumentAdapter adapter= new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
-							adapter.setStatus(status);
-							return adapter;
+						IDocument document= null;
+						IStatus status= null;
+						
+						try {
+							document= internalGetDocument(providerKey);
+						} catch (CoreException x) {
+							status= x.getStatus();
+							document= new Document();
+							initializeDocument(document);
 						}
 						
-					} catch (CoreException x) {
-						handleCoreException(x, JavaUIMessages.getString("CompilationUnitDocumentProvider.problemsCreatingBuffer")); //$NON-NLS-1$
+						DocumentAdapter adapter= new DocumentAdapter(unit, document, new DefaultLineTracker(), CompilationUnitDocumentProvider.this, providerKey);
+						adapter.setStatus(status);
+						return adapter;
 					}
+						
 				}
 				return DocumentAdapter.NULL;
 			}
