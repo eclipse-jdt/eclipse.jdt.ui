@@ -178,7 +178,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			result.merge(checkIfConstructorName(method));
 			
 			if (! method.exists()){
-				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.not_in_mode")); //$NON-NLS-1$
+				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.not_in_model")); //$NON-NLS-1$
 				continue;
 			}	
 			if (method.isBinary())

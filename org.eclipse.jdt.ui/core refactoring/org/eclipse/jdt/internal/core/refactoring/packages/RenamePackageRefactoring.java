@@ -263,7 +263,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		SearchResult searchResult= (SearchResult)searchResults.get(0);
 		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResult.getResource()));
 		//pm.subTask("analyzing \"" + cu.getElementName() + "\"");
-		pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
+		pm.subTask(RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.analyzing_formatted", cu.getElementName())); //$NON-NLS-1$
 		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
 			return;
 		result.merge(analyzer.analyze(searchResults, cu));

@@ -71,7 +71,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaProblemMarkerFilter;
 public class JavaPlugin extends AbstractUIPlugin {
 		
 	private static JavaPlugin fgJavaPlugin;
-	private static ResourceBundle fgResourceBundle;
 
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
@@ -148,52 +147,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		log(new Status(IStatus.ERROR, getPluginId(), IJavaUIStatus.INTERNAL_ERROR, JavaUIMessages.getString("JavaPlugin.internal_error"), e)); //$NON-NLS-1$
 	}
 	
-	// ---------- resource bundle -------------
-	
-	/**
-	 * Gets a string from the JavaPlugin resource bundle.
-	 * We don't want to crash because of a missing String.
-	 * Returns the key if not found.
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */
-	public static String getResourceString(String key) {
-		try {
-			return fgResourceBundle.getString(key);
-		} catch (MissingResourceException e) {
-			return key;
-		} catch (NullPointerException e) {
-			return "!" + key + "!"; //$NON-NLS-2$ //$NON-NLS-1$
-		}
-			
-	}
-	/**
-	 * Gets a string from the resource bundle and formats it with an argument
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */	
-	public static String getFormattedString(String key, String arg) {
-		return MessageFormat.format(getResourceString(key), new String[] { arg });
-	}
-	
-	/**
-	 * Gets a string from the resource bundle and formats it with arguments
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */	
-	public static String getFormattedString(String key, String[] args) {
-		return MessageFormat.format(getResourceString(key), args);
-	}
-	
-	/**
-	 * Gets the Java UI resource bundle
-	 * 
-	 * @deprecated Use a dedicated static resource bundle accessor class
-	 */
-	public static ResourceBundle getResourceBundle() {
-		return fgResourceBundle;
-	}	
-			
 	public static boolean isDebug() {
 		return getDefault().isDebugging();
 	}
@@ -205,12 +158,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public JavaPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
-		try {
-			fgResourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.internal.ui.JavaPluginResources"); //$NON-NLS-1$
-		} catch (MissingResourceException x) {
-			fgResourceBundle= null;
-		}		
-		
 	}
 	
 	/* (non - Javadoc)
