@@ -64,6 +64,8 @@ class TextMatchFinder {
 			addMatches(manager, newName, patternLength, javaDocMatches, RefactoringCoreMessages.getString("TextMatchFinder.javadoc")); //$NON-NLS-1$
 			addMatches(manager, newName, patternLength, commentsMatches, RefactoringCoreMessages.getString("TextMatchFinder.comment")); //$NON-NLS-1$
 			addMatches(manager, newName, patternLength, stringMatches, RefactoringCoreMessages.getString("TextMatchFinder.string")); //$NON-NLS-1$
+		} catch(JavaModelException e){
+			throw e;	
 		} catch (CoreException e){
 			throw new JavaModelException(e);
 		}
@@ -134,6 +136,8 @@ class TextMatchFinder {
 				pm.beginTask("", 1); //$NON-NLS-1$
 				if (!(element instanceof ICompilationUnit))
 					return;
+				if (! element.exists())
+					return;
 				if (! fScope.encloses((ICompilationUnit)element))
 					return;
 				addTextMatches((ICompilationUnit)element);
@@ -150,6 +154,8 @@ class TextMatchFinder {
 					addTextMatches(members[i], new SubProgressMonitor(pm, 1));
 				}	
 			}
+		} catch (JavaModelException e){
+			throw e;	
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
 		} finally{
