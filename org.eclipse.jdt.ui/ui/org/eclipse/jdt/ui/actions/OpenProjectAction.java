@@ -33,6 +33,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.SWT;
+
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
@@ -148,7 +150,7 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 	private void showWarningDialog(final List nonJavaProjects) {
 		int size= nonJavaProjects.size();
 		if (size > 0) {
-			ListDialog warningDialog= new ListDialog(fSite.getShell());
+			ListDialog warningDialog= new ListDialog(fSite.getShell(), SWT.DIALOG_TRIM | SWT.RESIZE);
 			warningDialog.setAddCancelButton(false);
 			warningDialog.setTitle(ActionMessages.getString("OpenProjectAction.dialog.title")); //$NON-NLS-1$
 			if (size == 1)
