@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public abstract class TypeSet implements ITypeSet {
 	
-	protected static class Universe extends TypeSet {
+	public static class TypeUniverse extends TypeSet {
 		
 		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
 			return restrictionSet;
@@ -41,7 +41,7 @@ public abstract class TypeSet implements ITypeSet {
 		}
 
 		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
-			if (restrictionSet instanceof Universe) {
+			if (restrictionSet instanceof TypeUniverse) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
 				TType restrictionType= ((SingleTypeSet)restrictionSet).fType;
@@ -72,15 +72,6 @@ public abstract class TypeSet implements ITypeSet {
 			}
 		}
 		
-		private ITypeSet commonLowerBound(SingleTypeSet other) {
-			//TODO: see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
-			//and org.eclipse.jdt.internal.compiler.lookup.Scope.mostSpecificCommonType(types)
-			//TODO: should either not collapse sets here or support multiple lower bounds
-			TType msct= TTypes.mostSpecificCommonType(new TType[] {fType, other.fType});
-			return new SingleTypeSet(msct);
-//			throw new IllegalStateException(this + " != " + other); //$NON-NLS-1$
-		}
-
 		public TType chooseSingleType() {
 			return fType;
 		}
@@ -90,6 +81,17 @@ public abstract class TypeSet implements ITypeSet {
 		}
 	}
 	
+	public static class EmptyTypeSet extends TypeSet {
+
+		public TType chooseSingleType() {
+			return null;
+		}
+
+		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
+			return this;
+		}
+	}
+
 	private static class MultiTypeSet extends TypeSet {
 		private final TType[] fTypes;
 		
@@ -98,7 +100,7 @@ public abstract class TypeSet implements ITypeSet {
 		}
 		
 		public ITypeSet restrictedTo(ITypeSet restrictionSet) {
-			if (restrictionSet instanceof Universe) {
+			if (restrictionSet instanceof TypeUniverse) {
 				return this;
 			} else if (restrictionSet instanceof SingleTypeSet) {
 				TType restrictionType= ((SingleTypeSet) restrictionSet).fType;
@@ -166,14 +168,20 @@ public abstract class TypeSet implements ITypeSet {
 			return names.toString();
 		}
 	}
-	
-	private final static Universe fgUniverse= new Universe();
-	
-	public static TypeSet getUniverse() {
+
+	private final static EmptyTypeSet fgEmpty= new EmptyTypeSet();
+
+	private final static TypeUniverse fgUniverse= new TypeUniverse();
+
+	public static ITypeSet getEmptySet() {
+		return fgEmpty;
+	}
+
+	public static ITypeSet getTypeUniverse() {
 		return fgUniverse;
 	}
 
-	public static TypeSet create(TType type) {
+	public static ITypeSet create(TType type) {
 		if (type == null)
 			return fgUniverse;
 		else
