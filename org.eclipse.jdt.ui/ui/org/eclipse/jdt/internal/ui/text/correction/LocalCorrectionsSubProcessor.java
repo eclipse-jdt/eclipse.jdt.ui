@@ -560,7 +560,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		if (typeNode instanceof TypeDeclaration) {
 			TypeDeclaration typeDeclaration= (TypeDeclaration) typeNode;
-			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeStaticProposal(cu, typeDeclaration, 5);
+			ASTRewriteCorrectionProposal proposal= ModifierCorrectionSubProcessor.getMakeTypeAbstractProposal(cu, typeDeclaration, 5);
 			proposals.add(proposal);
 		}
 	}

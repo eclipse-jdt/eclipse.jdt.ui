@@ -227,7 +227,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		
 		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
-			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, parentTypeDecl, 5);
+			ASTRewriteCorrectionProposal proposal= getMakeTypeAbstractProposal(cu, parentTypeDecl, 5);
 			proposals.add(proposal);
 		}		
 		
@@ -291,7 +291,7 @@ public class ModifierCorrectionSubProcessor {
 	
 	
 	
-	public static ASTRewriteCorrectionProposal getMakeTypeStaticProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) throws CoreException {
+	public static ASTRewriteCorrectionProposal getMakeTypeAbstractProposal(ICompilationUnit cu, TypeDeclaration typeDeclaration, int relevance) throws CoreException {
 		ASTRewrite rewrite= new ASTRewrite(typeDeclaration.getParent());
 				
 		int newModifiers= typeDeclaration.getModifiers() | Modifier.ABSTRACT;
@@ -313,31 +313,46 @@ public class ModifierCorrectionSubProcessor {
 			return;
 		}
 		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
-		
-		ASTRewrite rewrite= new ASTRewrite(decl);
-		
-		int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
-		rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);		
-		
-		Block body= ast.newBlock();
-		rewrite.markAsInsert(decl, ASTNodeConstants.BODY, body, null);
-		
-		Type returnType= decl.getReturnType();
-		if (!decl.isConstructor()) {
-			Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
-			if (expression != null) {
-				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(expression);
-				body.statements().add(returnStatement);				
+		{
+			ASTRewrite rewrite= new ASTRewrite(decl);
+			
+			int newModifiers= decl.getModifiers() & ~Modifier.ABSTRACT;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);		
+			
+			Block body= ast.newBlock();
+			rewrite.markAsInsert(decl, ASTNodeConstants.BODY, body, null);
+			
+			Type returnType= decl.getReturnType();
+			if (!decl.isConstructor()) {
+				Expression expression= ASTNodeFactory.newDefaultExpression(ast, returnType, decl.getExtraDimensions());
+				if (expression != null) {
+					ReturnStatement returnStatement= ast.newReturnStatement();
+					returnStatement.setExpression(expression);
+					body.statements().add(returnStatement);				
+				}
 			}
+	
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 9, image);
+			proposal.ensureNoModifications();
+	
+			proposals.add(proposal);
+		}
+		{
+			ASTRewrite rewrite= new ASTRewrite(decl);
+			
+			int newModifiers= decl.getModifiers() | Modifier.ABSTRACT;
+			rewrite.markAsReplaced(decl, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
+			
+			String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.setmethodabstract.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 8, image);
+			proposal.ensureNoModifications();
+			
+			proposals.add(proposal);
 		}
 
-		String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
-		proposal.ensureNoModifications();
-
-		proposals.add(proposal);
 	}
 	
 
