@@ -14,13 +14,16 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
@@ -39,19 +42,13 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
@@ -68,7 +65,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class JavadocStandardWizardPage extends JavadocWizardPage {
-
+	
+	
 	private final int STYLESHEETSTATUS= 1;
 	private final int LINK_REFERENCES= 2;
 	
@@ -235,6 +233,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.setDialogFieldListener(adapter);
 		fListDialogField.setCheckAllButtonIndex(0);
 		fListDialogField.setUncheckAllButtonIndex(1);
+		fListDialogField.setViewerSorter(new ViewerSorter());
 
 		createLabel(c, SWT.NONE, JavadocExportMessages.getString("JavadocStandardWizardPage.referencedclasses.label"), createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 4, 0)); //$NON-NLS-1$
 		fListDialogField.doFillIntoGrid(c, 3);
@@ -244,80 +243,64 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		fListDialogField.enableButton(2, false);
 	}
 
-	private List getCheckedReferences(List referencedClasses) {
+	private List getCheckedReferences(JavadocLinkRef[] referencesClasses) {
 		List checkedElements= new ArrayList();
 		
 		String hrefs[]= fStore.getHRefs();
-		if (hrefs.length > 0) { //$NON-NLS-1$
+		if (hrefs.length > 0) {
 			HashSet set= new HashSet();
 			for (int i= 0; i < hrefs.length; i++) {
 				set.add(hrefs[i]);
 			}
-			for (Iterator iterator= referencedClasses.iterator(); iterator.hasNext();) {
-				IJavaElement element= (IJavaElement) iterator.next();
-				try {
-					URL url= JavaUI.getJavadocBaseLocation(element);
-					if (url != null && set.contains(url.toExternalForm())) {
-						checkedElements.add(element);
-					}
-				} catch (JavaModelException ignore) {
-					// ignore
+			for (int i = 0; i < referencesClasses.length; i++) {
+				JavadocLinkRef curr= referencesClasses[i];
+				URL url= curr.getURL();
+				if (url != null && set.contains(url.toExternalForm())) {
+					checkedElements.add(curr);
 				}
 			}
 		}
 		return checkedElements;
-
 	}
+	
 
-	private void findReferencedElements(List result, IJavaProject[] checkedProjects, List visisted) throws JavaModelException {
-		for (int j= 0; j < checkedProjects.length; j++) {
-			IJavaProject iJavaProject= checkedProjects[j];
-			findReferencedElements(result, iJavaProject, new ArrayList());
-		}
-		for (int i= 0; i < checkedProjects.length; i++) {
-			result.remove(checkedProjects[i]);
-		}
-	}
-
+	
 	/**
-	 * Method finds a list of all referenced libararies and projects.
+	 * Returns IJavaProjects and IPaths that will be on the classpath  
 	 */
-	private void findReferencedElements(List referencedClasses, IJavaProject jproject, List visited) throws JavaModelException {
-
-		//to avoid loops
-
-		if (visited.contains(jproject)) {
-			return;
-		}
-		visited.add(jproject);
-		
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-
-		IClasspathEntry[] entries= jproject.getResolvedClasspath(true);
-		for (int i= 0; i < entries.length; i++) {
-			IClasspathEntry curr= entries[i];
-			switch (curr.getEntryKind()) {
-				case IClasspathEntry.CPE_LIBRARY :
-					IPackageFragmentRoot el= jproject.getPackageFragmentRoot(curr.getPath().toOSString());
-					if (el != null) {
-						if (!referencedClasses.contains(el)) {
-							referencedClasses.add(el);
+	private JavadocLinkRef[] getReferencedElements(IJavaProject[] checkedProjects) {
+		HashSet result= new HashSet();
+		for (int i= 0; i < checkedProjects.length; i++) {
+			IJavaProject project= checkedProjects[i];
+			try {
+				IRuntimeClasspathEntry[] unresolved = JavaRuntime.computeUnresolvedRuntimeClasspath(project);
+				// 1. remove bootpath entries
+				// 2. resolve & translate to local file system paths
+				for (int n = 0; n < unresolved.length; n++) {
+					IRuntimeClasspathEntry entry= unresolved[n];
+					if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
+						result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
+					} else {
+						IRuntimeClasspathEntry[] entries= JavaRuntime.resolveRuntimeClasspathEntry(entry, project);
+						for (int k = 0; k < entries.length; k++) {
+							entry= entries[n];
+							if (entry.getType() == IRuntimeClasspathEntry.PROJECT) {
+								result.add(new JavadocLinkRef(JavaCore.create((IProject) entry.getResource())));
+							} else if (entry.getType() == IRuntimeClasspathEntry.ARCHIVE) {
+								result.add(new JavadocLinkRef(entry.getPath()));
+							}
 						}
 					}
-					break;
-				case IClasspathEntry.CPE_PROJECT :
-					IProject reqProject= (IProject) root.findMember(curr.getPath());
-					IJavaProject javaProject= JavaCore.create(reqProject);
-
-					if (reqProject != null && reqProject.isOpen()) {
-						if (!referencedClasses.contains(javaProject)) {
-							findReferencedElements(referencedClasses, javaProject, visited);
-						}
-					}
-					break;
+				}
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				// ignore
 			}
 		}
+		return (JavadocLinkRef[]) result.toArray(new JavadocLinkRef[result.size()]);	
 	}
+	
+
 
 	final void doValidation(int VALIDATE) {
 		File file= null;
@@ -342,13 +325,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 				fLinkRefStatus= new StatusInfo();
 				List list= fListDialogField.getCheckedElements();
 				for (int i= 0; i < list.size(); i++) {
-					IJavaElement curr= (IJavaElement) list.get(i);
-					try {
-						if (JavaDocLocations.getJavadocBaseLocation(curr) == null) {
-							fLinkRefStatus.setWarning(JavadocExportMessages.getString("JavadocStandardWizardPage.nolinkref.error")); //$NON-NLS-1$
-						}
-					} catch (JavaModelException e) {
-						// ignore
+					JavadocLinkRef curr= (JavadocLinkRef) list.get(i);
+					URL url= curr.getURL();
+					if (url == null) {
+						fLinkRefStatus.setWarning(JavadocExportMessages.getString("JavadocStandardWizardPage.nolinkref.error")); //$NON-NLS-1$
+						break;
 					}
 				}
 				break;
@@ -394,15 +375,10 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		HashSet res= new HashSet();
 		List checked= fListDialogField.getCheckedElements();
 		for (Iterator iterator= checked.iterator(); iterator.hasNext();) {
-			try {
-				IJavaElement element= (IJavaElement) iterator.next();
-				URL url= JavaUI.getJavadocBaseLocation(element);
-				if (url != null) {
-					res.add(url.toExternalForm());
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				continue;
+			JavadocLinkRef element= (JavadocLinkRef) iterator.next();
+			URL url= element.getURL();
+			if (url != null) {
+				res.add(url.toExternalForm());
 			}
 		}
 		return (String[]) res.toArray(new String[res.size()]);
@@ -426,19 +402,11 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	 * TreeViewer on the JavadocTreeWizardPage.
 	 */
 	private void updateHRefList(IJavaProject[] checkedProjects) {
-
-		List references= new ArrayList();
-		try {
-
-			findReferencedElements(references, checkedProjects, new ArrayList());
-			fListDialogField.setElements(references);
+		JavadocLinkRef[] res= getReferencedElements(checkedProjects);
+		fListDialogField.setElements(Arrays.asList(res));
 			
-			List checked= getCheckedReferences(references);
-			fListDialogField.setCheckedElements(checked);
-
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
+		List checked= getCheckedReferences(res);
+		fListDialogField.setCheckedElements(checked);
 	}
 
 	public void init() {
@@ -518,9 +486,9 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		if (selected.isEmpty()) {
 			return;
 		}
-		Object obj= selected.get(0);
-		if (obj instanceof IJavaElement) {
-			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), (IJavaElement) obj);
+		JavadocLinkRef obj= (JavadocLinkRef) selected.get(0);
+		if (obj != null) {
+			JavadocPropertyDialog jdialog= new JavadocPropertyDialog(getShell(), obj);
 			jdialog.open();
 		}
 	}
@@ -528,20 +496,15 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
 
 		private JavadocConfigurationBlock fJavadocConfigurationBlock;
-		private IJavaElement fElement;
+		private JavadocLinkRef fElement;
 
-		public JavadocPropertyDialog(Shell parent, IJavaElement selection) {
+		public JavadocPropertyDialog(Shell parent, JavadocLinkRef selection) {
 			super(parent);
 			setTitle(JavadocExportMessages.getString("JavadocStandardWizardPage.javadocpropertydialog.title")); //$NON-NLS-1$
 
 			fElement= selection;
-			URL initialLocation= null;
-			try {
-				initialLocation= JavaUI.getJavadocBaseLocation(selection);
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-			boolean forProject= selection.getElementType() == IJavaElement.JAVA_PROJECT;
+			URL initialLocation= selection.getURL();
+			boolean forProject= selection instanceof IJavaProject;
 			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation, forProject);
 		}
 
@@ -563,11 +526,8 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		 */
 		protected void okPressed() {
 			URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
-			if (fElement instanceof IJavaProject) {
-				JavaUI.setProjectJavadocLocation((IJavaProject) fElement, javadocLocation);
-			} else {
-				JavaUI.setLibraryJavadocLocation(fElement.getPath(), javadocLocation);
-			}
+			fElement.setURL(javadocLocation);
+			
 			fListDialogField.refresh();
 			doValidation(LINK_REFERENCES);
 			super.okPressed();

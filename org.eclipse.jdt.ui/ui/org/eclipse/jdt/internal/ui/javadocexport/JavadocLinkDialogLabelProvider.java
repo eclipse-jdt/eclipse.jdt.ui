@@ -13,65 +13,53 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.net.URL;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 
-public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
+public class JavadocLinkDialogLabelProvider extends LabelProvider {
 
 	public String getText(Object element) {
-		String text = super.getText(element);
-		if ((element instanceof IJavaProject)
-			|| (element instanceof IPackageFragmentRoot)) {
-
-			String doc = ""; //$NON-NLS-1$
-			try {
-				URL url = JavaUI.getJavadocBaseLocation((IJavaElement) element);
-				if (url != null) {
-					doc = url.toExternalForm();
-					Object[] args= new Object[] { text, doc };
-					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args); //$NON-NLS-1$
-				} else {
-					return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text); //$NON-NLS-1$
-				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
+		if (element instanceof JavadocLinkRef) {
+			JavadocLinkRef ref= (JavadocLinkRef) element;
+			URL url= ref.getURL();
+			String text= ref.getFullPath().lastSegment();
+			if (url != null) {
+				Object[] args= new Object[] { text, url.toExternalForm() };
+				return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.configuredentry", args); //$NON-NLS-1$
+			} else {
+				return JavadocExportMessages.getFormattedString("JavadocLinkDialogLabelProvider.notconfiguredentry", text); //$NON-NLS-1$
 			}
 		}
-		return text;
+		return super.getText(element);
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getImage(java.lang.Object)
-	 */
 	public Image getImage(Object element) {
-		Image image= super.getImage(element);
-		if (element instanceof IJavaElement) {
-			try {
-				if (JavaUI.getJavadocBaseLocation((IJavaElement) element) == null) {
-					ImageDescriptor baseImage= new ImageImageDescriptor(image);
-					Rectangle bounds= image.getBounds();
-					return JavaPlugin.getImageDescriptorRegistry().get(new JavaElementImageDescriptor(baseImage, JavaElementImageDescriptor.WARNING, new Point(bounds.width, bounds.height)));
-				}
-			} catch (JavaModelException e) {
-				// ignore
+		if (element instanceof JavadocLinkRef) {
+			JavadocLinkRef ref= (JavadocLinkRef) element;
+			ImageDescriptor desc;
+			if (ref.isProjectRef()) {
+				desc= PlatformUI.getWorkbench().getSharedImages().getImageDescriptor(IDE.SharedImages.IMG_OBJ_PROJECT);
+			} else {
+				desc= JavaUI.getSharedImages().getImageDescriptor(ISharedImages.IMG_OBJS_JAR);
 			}
+			if (ref.getURL() == null) {
+				return JavaPlugin.getImageDescriptorRegistry().get(new JavaElementImageDescriptor(desc, JavaElementImageDescriptor.WARNING, JavaElementImageProvider.SMALL_SIZE));
+			}
+			return JavaPlugin.getImageDescriptorRegistry().get(desc);
 		}
-		return image;
+		return null;
 	}
 
 }
