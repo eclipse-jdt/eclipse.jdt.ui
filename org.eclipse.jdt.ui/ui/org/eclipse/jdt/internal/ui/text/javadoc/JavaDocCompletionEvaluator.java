@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -310,6 +311,12 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			if (elem instanceof IMethod) {
 				String[] names= ((IMethod)elem).getParameterNames();
 				addProposals(argument, names, JavaPluginImages.IMG_MISC_DEFAULT);
+				ITypeParameter[] typeParameters= ((IMethod)elem).getTypeParameters();
+				String[] typeParameterNames= new String[typeParameters.length];
+				for (int i= 0; i < typeParameters.length; i++) {
+					typeParameterNames[i]= "<"+typeParameters[i].getElementName()+">"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				addProposals(argument, typeParameterNames, JavaPluginImages.IMG_MISC_DEFAULT);
 			}
 			return true;
 		} else if ("@throws".equals(tag) || "@exception".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
