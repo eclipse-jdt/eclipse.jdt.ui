@@ -20,7 +20,7 @@ public class OpenPackageWizardAction extends AbstractOpenWizardAction {
 	}
 	
 	protected boolean shouldAcceptElement(Object obj) { 
-		return NewGroup.isOnBuildPath(obj) && !NewGroup.isInArchive(obj);
+		return isOnBuildPath(obj) && !isInArchive(obj);
 	}
 }
 

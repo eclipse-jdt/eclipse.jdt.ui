@@ -6,9 +6,6 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -19,12 +16,20 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.actions.NewProjectAction;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
@@ -200,5 +205,23 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 		return true;
 	}
 	
-
+	protected static boolean isOnBuildPath(Object obj) {
+		try {
+			if (obj instanceof IJavaElement) {
+				IJavaElement elem= (IJavaElement)obj;
+				return elem.getJavaProject().isOnClasspath(elem);
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e.getStatus());
+		}
+		return false;
+	}
+	
+	protected static boolean isInArchive(Object obj) {
+		if (obj instanceof IJavaElement) {
+			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot((IJavaElement)obj);
+			return (root != null) && root.isArchive();
+		}
+		return false;
+	}
 }

@@ -28,6 +28,9 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+/**
+ * @deprecated Use org.eclipse.ui.actions.NewWizardMenu instead
+ */
 public class NewGroup extends ContextMenuGroup {
 		
 	private AbstractOpenWizardAction fNewProjectAction;
@@ -86,7 +89,7 @@ public class NewGroup extends ContextMenuGroup {
 		fNewPackageRootAction= 
 			new AbstractOpenWizardAction(label, acceptedTypes, false) {
 				protected Wizard createWizard() { return new NewSourceFolderCreationWizard(); }
-				protected boolean shouldAcceptElement(Object obj) { return !isOnBuildPath(obj); }
+				protected boolean shouldAcceptElement(Object obj) { return !AbstractOpenWizardAction.isOnBuildPath(obj); }
 			};
 		fNewPackageRootAction.setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);	
 		fNewPackageRootAction.setToolTipText(NewWizardMessages.getString("NewGroup.wizards_add_packageroot.tooltip")); //$NON-NLS-1$

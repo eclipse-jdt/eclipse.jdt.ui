@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.core.resources.IWorkspaceRoot;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,7 +28,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 

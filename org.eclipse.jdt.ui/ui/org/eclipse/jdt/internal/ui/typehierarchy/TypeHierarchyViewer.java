@@ -34,12 +34,10 @@ import org.eclipse.jdt.ui.actions.OpenAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	

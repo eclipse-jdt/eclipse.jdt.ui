@@ -22,6 +22,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
  * Contribute Java search specific menu elements.
+ * 
+ * @deprecated Use org.eclipse.jdt.ui.actions.JavaSearchActionGroup instead
  */
 public class JavaSearchGroup extends ContextMenuGroup  {
 

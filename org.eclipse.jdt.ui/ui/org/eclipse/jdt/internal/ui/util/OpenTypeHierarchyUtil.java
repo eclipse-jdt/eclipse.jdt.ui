@@ -58,6 +58,9 @@ public class OpenTypeHierarchyUtil {
 	private OpenTypeHierarchyUtil() {
 	}
 
+	/**
+	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
+	 */
 	public static boolean canOperateOn(ISelection s) {
 		Object element= getElement(s);
 			
@@ -66,10 +69,16 @@ public class OpenTypeHierarchyUtil {
 			: false;
 	}
 	
+	/**
+	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
+	 */
 	public static void addToMenu(IWorkbenchWindow window, IMenuManager menu, ISelection s) {
 		addToMenu(window, menu, getElement(s));
 	}
 	
+	/**
+	 * @deprecated Use org.eclipse.jdt.ui.actions.OpenTypeHierarchyAction directly
+	 */
 	public static void addToMenu(IWorkbenchWindow window, IMenuManager menu, Object element) {	
 		IJavaElement[] candidates= getCandidates(element);
 		if (candidates != null) {

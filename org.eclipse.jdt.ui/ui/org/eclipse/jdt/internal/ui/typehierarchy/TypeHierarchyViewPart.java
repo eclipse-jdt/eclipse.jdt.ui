@@ -835,10 +835,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
 	}
 
-	private void addOpenPerspectiveItem(IMenuManager menu, IStructuredSelection selection) {
-		OpenTypeHierarchyUtil.addToMenu(getSite().getWorkbenchWindow(), menu, selection);
-	}
-
 	/**
 	 * Toggles between the empty viewer page and the hierarchy
 	 */

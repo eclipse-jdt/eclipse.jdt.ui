@@ -20,6 +20,6 @@ public class OpenSnippetWizardAction extends AbstractOpenWizardAction {
 	}
 	
 	protected boolean shouldAcceptElement(Object obj) { 
-		return !NewGroup.isInArchive(obj);
+		return !isInArchive(obj);
 	}
 }

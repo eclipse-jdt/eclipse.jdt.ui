@@ -31,6 +31,9 @@ import org.eclipse.jdt.internal.ui.actions.GroupContext;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
+/**
+ * @deprecated Use org.eclipse.jdt.ui.actions.BuildActionGroup instead
+ */
 public class BuildGroup extends ContextMenuGroup {
 
 	private BuildAction fBuildAction;
