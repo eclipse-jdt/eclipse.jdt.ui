@@ -48,6 +48,7 @@ public class JdtTextTestSuite {
 		suite.addTest(CommentsTestSuite.suite());
 		suite.addTest(SemanticHighlightingTest.suite());
 		suite.addTest(NewForLoopJavaContextTest.suite());
+		suite.addTest(JavaDoubleClickSelectorTest.suite());
 		//$JUnit-END$
 		
 		return suite;

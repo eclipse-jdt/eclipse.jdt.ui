@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -32,6 +34,10 @@ public class JavaDoubleClickSelectorTest extends TestCase {
 		public IRegion selectWord(IDocument document, int anchor) {
 			return super.selectWord(document, anchor);
 		}
+	}
+	
+	public static Test suite() {
+		return new TestSuite(JavaDoubleClickSelectorTest.class);
 	}
 	
 	private void assert14Selection(String content, int offset, int selOffset, int selLength) {
