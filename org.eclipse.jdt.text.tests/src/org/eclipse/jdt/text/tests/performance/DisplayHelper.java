@@ -189,7 +189,8 @@ final class DisplayWaiter {
 	 * Creates a new instance on the given display and timeout.
 	 * 
 	 * @param display the display to run the event loop of
-	 * @param keepRunning <code>true</code> if the thread should be kept running after timing out
+	 * @param keepRunning <code>true</code> if the thread should be kept
+	 *        running after timing out
 	 */
 	public DisplayWaiter(Display display, boolean keepRunning) {
 		Assert.assertNotNull(display);
@@ -249,7 +250,8 @@ final class DisplayWaiter {
 
 	/**
 	 * Stops the thread if it is running. If not, nothing happens. Another
-	 * thread may be started by calling {@link #start(long)} or {@link #restart(long)}.
+	 * thread may be started by calling {@link #start(long)} or
+	 * {@link #restart(long)}.
 	 */
 	public void stop() {
 		synchronized (fMutex) {
@@ -271,8 +273,8 @@ final class DisplayWaiter {
 	}
 
 	/**
-	 * Transition to RUNNING and clear the timed out flag. Assume current state
-	 * is IDLE.
+	 * Transition to <code>RUNNING</code> and clear the timed out flag. Assume
+	 * current state is <code>IDLE</code>.
 	 */
 	private void unhold() {
 		checkedTransition(IDLE, RUNNING);
@@ -281,7 +283,7 @@ final class DisplayWaiter {
 	}
 		
 	/**
-	 * Start the thread. Assume the current state is STOPPED.
+	 * Start the thread. Assume the current state is <code>STOPPED</code>.
 	 */
 	private void startThread() {
 		checkedTransition(STOPPED, RUNNING);
@@ -315,6 +317,12 @@ final class DisplayWaiter {
 				}
 			}
 			
+			/**
+			 * Runs the thread.
+			 * 
+			 * @throws InterruptedException if the thread was interrupted
+			 * @throws ThreadChangedException if the thread changed
+			 */
 			private void run2() throws InterruptedException, ThreadChangedException {
 				synchronized (fMutex) {
 					checkThread();
@@ -361,8 +369,9 @@ final class DisplayWaiter {
 			}
 
 			/**
-			 * Sets the timed out flag and wakes up the display. Transitions
-			 * to IDLE (if in keep-running mode) or STOPPED.
+			 * Sets the timed out flag and wakes up the display. Transitions to
+			 * <code>IDLE</code> (if in keep-running mode) or
+			 * <code>STOPPED</code>.
 			 */
 			private void timedOut() {
 				fCurrentTimeoutState.setTimedOut(true);
@@ -374,9 +383,10 @@ final class DisplayWaiter {
 			}
 			
 			/**
-			 * Waits while the state is IDLE, then returns. The state must not
-			 * be RUNNING when calling this method. The state is either STOPPED
-			 * or RUNNING when the method returns.
+			 * Waits while the state is <code>IDLE</code>, then returns. The
+			 * state must not be <code>RUNNING</code> when calling this
+			 * method. The state is either <code>STOPPED</code> or
+			 * <code>RUNNING</code> when the method returns.
 			 * 
 			 * @throws InterruptedException if the thread was interrupted
 			 * @throws ThreadChangedException if the thread has changed while on
@@ -395,9 +405,9 @@ final class DisplayWaiter {
 	}
 	
 	/**
-	 * Transitions to nextState if the current state is one of possibleStates.
-	 * Returns <code>true</code> if the transition happened,
-	 * <code>false</code> otherwise.
+	 * Transitions to <code>nextState</code> if the current state is one of
+	 * <code>possibleStates</code>. Returns <code>true</code> if the
+	 * transition happened, <code>false</code> otherwise.
 	 * 
 	 * @param possibleStates the states which trigger a transition
 	 * @param nextState the state to transition to
@@ -413,8 +423,8 @@ final class DisplayWaiter {
 	}
 	
 	/**
-	 * Checks the possible states and throws an assertion if it is not met, then
-	 * transitions to nextState
+	 * Checks the <code>possibleStates</code> and throws an assertion if it is
+	 * not met, then transitions to <code>nextState</code>.
 	 * 
 	 * @param possibleStates the allowed states
 	 * @param nextState the state to transition to
@@ -436,7 +446,8 @@ final class DisplayWaiter {
 	}
 
 	/**
-	 * Answers <code>true</code> if the current state is in the given states.
+	 * Answers <code>true</code> if the current state is in the given
+	 * <code>states</code>.
 	 * 
 	 * @param states the possible states
 	 * @return <code>true</code> if the current state is in the given states,
