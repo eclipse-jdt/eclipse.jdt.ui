@@ -25,17 +25,17 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 /**
  * On a selected method; opens the implementation in the super type (if existing)
  */
 public class OpenSuperImplementationAction extends Action implements IUpdate, IObjectActionDelegate {
-	private int fFoo;
+
 	private StructuredSelectionProvider fSelectionProvider;
 	
 	/**
