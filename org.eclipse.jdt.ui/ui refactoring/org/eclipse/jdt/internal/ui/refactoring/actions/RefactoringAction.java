@@ -19,8 +19,12 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -30,12 +34,15 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -93,28 +100,39 @@ public abstract class RefactoringAction extends Action {
 			setEnabled(canOperateOn(selection));
 	}	
 	
-	//--- wizard related methods + editor saving
+	//--- wizard and dialog related methods + editor saving
 	
 	public static void activateRefactoringWizard(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
-		if (mustSaveEditors && ! areAllEditorsSaved())
+		if (! canActivate(mustSaveEditors))
 			return;
-		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor());
-		if (! status.hasFatalError()){
-			wizard.setActivationStatus(status);
+		RefactoringStatus activationStatus= refactoring.checkActivation(new NullProgressMonitor());
+		if (! activationStatus.hasFatalError()){
+			wizard.setActivationStatus(activationStatus);
 			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();
 		} else{
-			if (status.getEntries().size() == 1){
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
-			}else{
-				ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
-				dialog.setInput(status);
-				dialog.setTitle(dialogTitle);
-				dialog.setMessage("The following errors prevent performing the refactoring.");
-				dialog.setContentProvider(new RefactoringStatusContentProvider());
-				dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
-				dialog.open();															
-			}	
+			openErrorDialog(dialogTitle, activationStatus);
 		}	
+	}
+
+	private static boolean canActivate(boolean mustSaveEditors) {
+		return ! mustSaveEditors || areAllEditorsSaved();
+	}
+
+	private static void openErrorDialog(String dialogTitle, RefactoringStatus status) {
+		if (status.getEntries().size() == 1)
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, status.getFirstMessage(RefactoringStatus.FATAL));
+		else
+			openListDialog(dialogTitle, status);	
+	}
+
+	private static void openListDialog(String dialogTitle, RefactoringStatus status) {
+		ListDialog dialog= new ListDialog(JavaPlugin.getActiveWorkbenchShell());
+		dialog.setInput(status);
+		dialog.setTitle(dialogTitle);
+		dialog.setMessage("The following errors prevent performing the refactoring.");
+		dialog.setContentProvider(new RefactoringStatusContentProvider());
+		dialog.setLabelProvider(new RefactoringStatusEntryLabelProvider());
+		dialog.open();	
 	}
 	
 	private static boolean areAllEditorsSaved(){
