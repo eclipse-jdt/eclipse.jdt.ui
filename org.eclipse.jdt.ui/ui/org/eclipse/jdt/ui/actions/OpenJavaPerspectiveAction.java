@@ -13,7 +13,10 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
 
@@ -37,9 +40,16 @@ public class OpenJavaPerspectiveAction extends Action {
 	}
 
 	public void run() {
-		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
+		IWorkbenchWindow window= workbench.getActiveWorkbenchWindow();
+		IWorkbenchPage page= window.getActivePage();
+		IAdaptable input;
+		if (page != null)
+			input= page.getInput();
+		else
+			input= ResourcesPlugin.getWorkspace().getRoot();
 		try {
-			window.openPage(JavaUI.ID_PERSPECTIVE, JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+			workbench.showPerspective(JavaUI.ID_PERSPECTIVE, window, input);
 		} catch (WorkbenchException e) {
 			ExceptionHandler.handle(e, window.getShell(), 
 				ActionMessages.getString("OpenJavaPerspectiveAction.dialog.title"), //$NON-NLS-1$
