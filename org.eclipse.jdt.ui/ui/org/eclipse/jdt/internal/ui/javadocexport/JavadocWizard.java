@@ -422,7 +422,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private void refresh(IPath path) {
-		if (fRoot.getContainerForLocation(path) != null) {
+		if (fRoot.findContainersForLocation(path).length > 0) {
 			try {
 				fRoot.refreshLocal(IWorkspaceRoot.DEPTH_INFINITE, null);
 			} catch (CoreException e) {

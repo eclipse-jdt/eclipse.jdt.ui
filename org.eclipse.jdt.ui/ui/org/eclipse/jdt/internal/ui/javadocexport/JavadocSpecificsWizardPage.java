@@ -161,11 +161,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			fAntText.setText(fStore.getSpecificAntpath((IJavaProject) fWizard.getSelectedProjects().iterator().next()));
 		} else
 			fAntText.setText(fStore.getGeneralAntpath());
-		fAntText.setEnabled(false);
+  
 		fAntBrowseButton= createButton(c, SWT.PUSH, JavadocExportMessages.getString("JavadocSpecificsWizardPage.antscriptbrowse.label"), createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0)); //$NON-NLS-1$
-
 		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
-		fAntBrowseButton.setEnabled(false);
+  
+		//set enabled
+		fAntButton.setEnabled(fWizard.getSelectedProjects().size() != 1);
+		fAntText.setEnabled(fAntButton.getEnabled());
+		fAntBrowseButton.setEnabled(fAntButton.getEnabled());
 
 		fCheckbrowser= createButton(c, SWT.CHECK, JavadocExportMessages.getString("JavadocSpecificsWizardPage.openbrowserbutton.label"), createGridData(3)); //$NON-NLS-1$
 		fCheckbrowser.setSelection(fStore.doOpenInBrowser());
@@ -271,6 +274,8 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	public void setVisible(boolean visible) {
 		super.setVisible(visible);
 		if (visible) {
+			//ant button only enabled if a single project selected
+			fAntButton.setEnabled(fWizard.getSelectedProjects().size() == 1);
 			doValidation(OVERVIEWSTATUS);
 			doValidation(ANTSTATUS);
 		}
