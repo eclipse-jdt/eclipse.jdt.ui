@@ -11,10 +11,13 @@ import java.util.ListIterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -25,6 +28,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -45,6 +49,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -97,7 +102,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private IMethod[] fTestMethods;
 	private IType fCreatedType;
 
-	private boolean fFirstTime;
+	private boolean fFirstTime;  
 
 	public NewTestCaseCreationWizardPage() {
 		super(true, PAGE_NAME);
@@ -198,6 +203,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 				validateSuperClass();
 				fClassToTestStatus= classToTestClassChanged();			
 				fTestClassStatus= testClassChanged();
+			}
+			if (fieldName.equals(CONTAINER)) {
+				validateJUnitOnBuildPath(); 
 			}
 		}
 		doStatusUpdate();
@@ -609,6 +617,22 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		
 		if (visible) setFocus();
 	}
+
+	private void validateJUnitOnBuildPath() {
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root == null)
+			return;
+		IJavaProject jp= root.getJavaProject();
+		
+		try {
+			if (jp.findType(JUnitPlugin.TEST_SUPERCLASS_NAME) != null)
+				return;
+		} catch (JavaModelException e) {
+		}
+		JUnitStatus status= new JUnitStatus();				
+		status.setError(WizardMessages.getString("NewTestClassWizPage.error.junitNotOnbuildpath")); //$NON-NLS-1$
+		fContainerStatus= status;
+	}
 	
 	/**
 	 * Returns the index of the first method that is a test method, i.e. excluding main, setUp() and tearDown().
@@ -650,12 +674,16 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 	
 	private void validateSuperClass() {
+		// disable due to: http://dev.eclipse.org/bugs/show_bug.cgi?id=16494
+		if (true)	
+			return; 
 		fMethodStubsButtons.setEnabled(2, true);//enable setUp() checkbox
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
 		String superClassName= getSuperClass();
+		
 		if (superClassName != null && !superClassName.equals("") && getPackageFragmentRoot() != null) { //$NON-NLS-1$
 			try {
-				IType type= NewTestCaseCreationWizardPage.resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
+				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);
 				JUnitStatus status = new JUnitStatus();				
 				if (type == null) {
 					status.setError(WizardMessages.getString("NewTestClassWizPage.error.superclass.not_exist")); //$NON-NLS-1$
