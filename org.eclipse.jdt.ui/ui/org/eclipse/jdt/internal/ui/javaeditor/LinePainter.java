@@ -76,16 +76,14 @@ public class LinePainter implements IPainter, LineBackgroundListener {
 	}
 	
 	private void clearHighlightLine() {
-		int length= fTextWidget.getCharCount();
-		
-		if (fLine[0] <= length) {
-			if (fLine[1] > length) 
-				fLine[1]= -1;
+		if (fLine[0] <=  fTextWidget.getCharCount())
 			drawHighlightLine();
-		}		
 	}
 	
 	private void drawHighlightLine() {
+		if (fLine[1] >= fTextWidget.getCharCount()) 
+			fLine[1]= -1;
+		
 		if (fLine[1] == -1) {
 			
 			Point upperLeft= fTextWidget.getLocationAtOffset(fLine[0]);
