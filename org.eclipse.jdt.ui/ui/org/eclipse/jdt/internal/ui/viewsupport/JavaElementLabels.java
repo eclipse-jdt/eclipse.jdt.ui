@@ -507,7 +507,9 @@ public class JavaElementLabels {
 	 */	
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
-			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists()) {
+			boolean isEnumConstant= Flags.isEnum(field.getFlags());
+			
+			if (!isEnumConstant && getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists()) {
 				buf.append(Signature.toString(field.getTypeSignature()));
 				buf.append(' ');
 			}
@@ -519,7 +521,7 @@ public class JavaElementLabels {
 			}
 			buf.append(field.getElementName());
 			
-			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists()) {
+			if (!isEnumConstant && getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists()) {
 				buf.append(DECL_STRING);
 				buf.append(Signature.toString(field.getTypeSignature()));
 			}
@@ -595,8 +597,12 @@ public class JavaElementLabels {
 		String typeName= type.getElementName();
 		if (typeName.length() == 0) { // anonymous
 			try {
-				String superclassName= Signature.getSimpleName(type.getSuperclassName());
-				typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
+				if (type.isEnum()) {
+					typeName= "{..}";  //$NON-NLS-1$
+				} else {
+					String superclassName= Signature.getSimpleName(type.getSuperclassName());
+					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
+				}
 			} catch (JavaModelException e) {
 				//ignore
 				typeName= JavaUIMessages.getString("JavaElementLabels.anonym"); //$NON-NLS-1$
