@@ -575,10 +575,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testEnabled22() throws Exception{
-		printTestDisabledMessage("bug 39410");
-//		Object classA= fCuA.getType("A");
-//		Object packDecl= fCuA.getPackageDeclarations()[0];
-//		Object[] elements= {classA, packDecl};
-//		checkEnabled(elements);
+//		printTestDisabledMessage("bug 39410");
+		Object classA= fCuA.getType("A");
+		Object packDecl= fCuA.getPackageDeclarations()[0];
+		Object[] elements= {classA, packDecl};
+		checkEnabled(elements);
 	}
 }
