@@ -1,5 +1,5 @@
 /*
- * (c) Copyright IBM Corp. 2002.
+ * (c) Copyright IBM Corp. 2001, 2002.
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
