@@ -551,11 +551,8 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		List statements= block.statements();
 		assertTrue("Number of statements not 1", statements.size() == 1);
 
-		{ // replace body
+		{ // replace body and expression
 			DoStatement doStatement= (DoStatement) statements.get(0);
-			
-			BooleanLiteral literal= ast.newBooleanLiteral(true);
-			ASTRewriteAnalyzer.markAsReplaced(doStatement.getExpression(), literal);
 			
 			Block newBody= ast.newBlock();
 			
@@ -566,6 +563,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			newBody.statements().add(ast.newExpressionStatement(invocation));
 			
 			ASTRewriteAnalyzer.markAsReplaced(doStatement.getBody(), newBody);
+
+			BooleanLiteral literal= ast.newBooleanLiteral(true);
+			ASTRewriteAnalyzer.markAsReplaced(doStatement.getExpression(), literal);
 		}
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
@@ -607,7 +607,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		
 		List statements= block.statements();
 		assertTrue("Number of statements not 1", statements.size() == 1);
-		{ // change left side & right side
+		{ // replace expression
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(0);
 			
 			Assignment assignment= (Assignment) stmt.getExpression();

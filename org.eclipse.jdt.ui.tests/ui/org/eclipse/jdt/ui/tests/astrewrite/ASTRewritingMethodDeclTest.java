@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -23,11 +24,13 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
@@ -653,6 +656,95 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		
+	}
+	
+	public void testFieldDeclaration() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    int i1= 1;\n");
+		buf.append("    int i2= 1, k2= 2, n2= 3;\n");
+		buf.append("    static final int i3= 1, k3= 2, n3= 3;\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "A");
+		
+		FieldDeclaration[] fieldDeclarations= type.getFields();
+		assertTrue("Number of fieldDeclarations not 3", fieldDeclarations.length == 3);
+		{	// add modifier, change type, add fragment
+			FieldDeclaration decl= fieldDeclarations[0];
+			
+			// add modifier
+			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(Modifier.FINAL);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+			
+			PrimitiveType newType= ast.newPrimitiveType(PrimitiveType.BOOLEAN);
+			ASTRewriteAnalyzer.markAsReplaced(decl.getType(), newType);
+			
+			List fragments= decl.fragments();
+			
+			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("k1"));
+			frag.setInitializer(null);
+			
+			ASTRewriteAnalyzer.markAsInserted(frag);
+			
+			fragments.add(frag);
+		}
+		{	// add modifiers, remove first two fragments, replace last
+			FieldDeclaration decl= fieldDeclarations[1];
+			
+			// add modifier
+			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(Modifier.FINAL | Modifier.STATIC | Modifier.TRANSIENT);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+			
+			List fragments= decl.fragments();
+			assertTrue("Number of fragments not 3", fragments.size() == 3);
+			
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) fragments.get(0));
+			ASTRewriteAnalyzer.markAsRemoved((ASTNode) fragments.get(1));
+			
+			VariableDeclarationFragment frag=	ast.newVariableDeclarationFragment();
+			frag.setName(ast.newSimpleName("k2"));
+			frag.setInitializer(null);
+			
+			ASTRewriteAnalyzer.markAsReplaced((ASTNode) fragments.get(2), frag);
+		}
+		{	// remove modifiers
+			FieldDeclaration decl= fieldDeclarations[2];
+			
+			// add modifier
+			FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+			modifiedNode.setModifiers(0);
+			
+			ASTRewriteAnalyzer.markAsModified(decl, modifiedNode);
+		}
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class A {\n");
+		buf.append("    final boolean i1= 1, k1;\n");
+		buf.append("    static final transient int k2;\n");
+		buf.append("    int i3= 1, k3= 2, n3= 3;\n");
+		buf.append("}\n");	
+			
+		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
 }
