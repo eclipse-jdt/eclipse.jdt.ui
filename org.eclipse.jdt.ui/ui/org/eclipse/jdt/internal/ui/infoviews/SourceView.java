@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.infoviews;
 
 import java.io.IOException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.graphics.Color;
@@ -18,7 +19,9 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -29,6 +32,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -37,23 +41,26 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextViewer;
 import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
@@ -115,6 +122,8 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 
 		/**
 		 * Creates the action.
+		 * 
+		 * @param textViewer the text viewer
 		 */
 		public SelectAllAction(TextViewer textViewer) {
 			super("selectAll"); //$NON-NLS-1$
@@ -225,6 +234,15 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			}
 		}; 
 	}
+	
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
+	 * @since 3.0
+	 */
+	protected IAction getSelectAllAction() {
+		return fSelectAllAction;
+	}
 
 	/*
 	 * @see AbstractInfoView#fillActionBars(IActionBars)
@@ -232,8 +250,6 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	protected void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.SELECT_ALL, fSelectAllAction);
-		
 	}
 
 	/*
@@ -248,7 +264,6 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 	 */
 	public void menuAboutToShow(IMenuManager menu) {
 		super.menuAboutToShow(menu);
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fSelectAllAction);
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
 	}
 

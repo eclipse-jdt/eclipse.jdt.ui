@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -34,9 +35,9 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
@@ -175,7 +176,10 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		fGotoInputAction= new GotoInputAction(this);
 		fGotoInputAction.setEnabled(false);
 		fCopyToClipboardAction= new CopyToClipboardAction(getViewSite());
-		getSelectionProvider().addSelectionChangedListener(fCopyToClipboardAction);
+
+		ISelectionProvider provider= getSelectionProvider();
+		if (provider != null)
+			provider.addSelectionChangedListener(fCopyToClipboardAction);
 	}
 
 	/**
@@ -197,8 +201,26 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		menu.add(new Separator(IContextMenuConstants.GROUP_OPEN));		
 		menu.add(new Separator(ITextEditorActionConstants.GROUP_EDIT));
 		menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, fCopyToClipboardAction);
+		
+		IAction action;
+		
+		action= getCopyToClipboardAction();
+		if (action != null)
+			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
+		
+		action= getSelectAllAction(); 
+		if (action != null)
+			menu.appendToGroup(ITextEditorActionConstants.GROUP_EDIT, action);
+
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoInputAction);
+	}
+
+	protected IAction getSelectAllAction() {
+		return null;
+	}
+	
+	protected IAction getCopyToClipboardAction() {
+		return fCopyToClipboardAction;
 	}
 
 	/**
@@ -219,17 +241,30 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Fills the actions bars.
 	 * <p>
 	 * Subclasses may extend.
+	 * 
+	 * @param actionBars the action bars
 	 */	
 	protected void fillActionBars(IActionBars actionBars) {
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.COPY, fCopyToClipboardAction);
+		
+		IAction action;
+		
+		action= getCopyToClipboardAction();
+		if (action != null)
+			actionBars.setGlobalActionHandler(ActionFactory.COPY.getId(), action);
+		
+		action= getSelectAllAction();
+		if (action != null)
+			actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), action);
 	}
 
 	/**
 	 * Fills the tool bar.
 	 * <p> 
 	 * Default is to do nothing.</p>
+	 * 
+	 * @param tbm the tool bar manager
 	 */	
 	protected void fillToolBar(IToolBarManager tbm) {
 		tbm.add(fGotoInputAction);
@@ -288,6 +323,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Finds and returns the Java element selected in the given part.
 	 * 
 	 * @param part the workbench part for which to find the selected Java element
+	 * @param selection the selection
 	 * @return the selected Java element
 	 */
 	protected IJavaElement findSelectedJavaElement(IWorkbenchPart part, ISelection selection) {
@@ -368,11 +404,15 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * @see IWorkbenchPart#dispose()
 	 */
 	final public void dispose() {
-		// cancel possiblle running computation
+		// cancel possible running computation
 		fComputeCount++;
 
 		getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
-		getSelectionProvider().removeSelectionChangedListener(fCopyToClipboardAction);
+		
+		ISelectionProvider provider= getSelectionProvider();
+		if (provider != null)
+			provider.removeSelectionChangedListener(fCopyToClipboardAction);
+		
 		internalDispose();
 	}
 
@@ -385,6 +425,8 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	/**
 	 * Determines all necessary details and delegates the computation into
 	 * a background thread.
+	 * 
+	 * @param part the workbench part
 	 */
 	private void computeAndSetInput(final IWorkbenchPart part) {
 

@@ -32,7 +32,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
@@ -54,9 +54,7 @@ import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchPart;
-import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -79,8 +77,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 /**
  * View which shows Javadoc for a given Java element.
  * 
- * XXX: As of 3.0 context menu is not yet supported in Browser widget
- * 		see https://bugs.eclipse.org/bugs/show_bug.cgi?id=59698
+ * FIXME: As of 3.0 selectAll() and getSelection() is not working
+ *			see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
  * 
  * @since 3.0
  */
@@ -116,7 +114,7 @@ public class JavadocView extends AbstractInfoView {
 	/**
 	 * The Javadoc view's select all action.
 	 */
-	private static class SelectAllAction extends Action {
+	private class SelectAllAction extends Action {
 
 		/** The control. */
 		private Control fControl;
@@ -137,6 +135,9 @@ public class JavadocView extends AbstractInfoView {
 			fControl= control;
 			fSelectionProvider= selectionProvider;
 
+			// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
+			setEnabled(!fIsUsingBrowserWidget);
+			
 			setText(InfoViewMessages.getString("SelectAllAction.label")); //$NON-NLS-1$
 			setToolTipText(InfoViewMessages.getString("SelectAllAction.tooltip")); //$NON-NLS-1$
 			setDescription(InfoViewMessages.getString("SelectAllAction.description")); //$NON-NLS-1$
@@ -151,9 +152,10 @@ public class JavadocView extends AbstractInfoView {
 			if (fControl instanceof StyledText)
 		        ((StyledText)fControl).selectAll();
 			else {
-				// FIXME, see
+				// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 //				((Browser)fControl).selectAll();
-				fSelectionProvider.fireSelectionChanged();
+				if (fSelectionProvider != null)
+					fSelectionProvider.fireSelectionChanged();
 			}
 		}
 	}
@@ -183,7 +185,7 @@ public class JavadocView extends AbstractInfoView {
 					}
 			    });
 			} else {
-				// FIXME, see bug
+				// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 //				((Browser)fControl).addSelectionListener(new SelectionAdapter() {
 //					public void widgetSelected(SelectionEvent e) {
 //						fireSelectionChanged();
@@ -218,7 +220,7 @@ public class JavadocView extends AbstractInfoView {
 				IDocument document= new Document(((StyledText)fControl).getSelectionText());
 				return new TextSelection(document, 0, document.getLength());
 			} else {
-				// FIXME, see bug
+				// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
 				return StructuredSelection.EMPTY;
 			}
 		}
@@ -303,6 +305,31 @@ public class JavadocView extends AbstractInfoView {
 	protected void createActions() {
 		super.createActions();
 		fSelectAllAction= new SelectAllAction(getControl(), (SelectionProvider)getSelectionProvider());
+	}
+	
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getSelectAllAction()
+	 * @since 3.0
+	 */
+	protected IAction getSelectAllAction() {
+		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
+		if (fIsUsingBrowserWidget)
+			return null;
+		
+		return fSelectAllAction;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getCopyToClipboardAction()
+	 * @since 3.0
+	 */
+	protected IAction getCopyToClipboardAction() {
+		// FIXME: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=63022
+		if (fIsUsingBrowserWidget)
+			return null;
+		
+		return super.getCopyToClipboardAction();
 	}
 
 	/*
@@ -479,23 +506,6 @@ public class JavadocView extends AbstractInfoView {
 		} catch (BadLocationException e) {
 			return null;
 		}
-	}
-
-	/*
-	 * @see org.eclipse.jface.action.IMenuListener#menuAboutToShow(org.eclipse.jface.action.IMenuManager)
-	 */
-	public void menuAboutToShow(IMenuManager menu) {
-		super.menuAboutToShow(menu);
-		menu.add(fSelectAllAction);
-	}
-	
-	/*
-	 * @see AbstractInfoView#fillActionBars(IActionBars)
-	 */
-	protected void fillActionBars(IActionBars actionBars) {
-		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(ActionFactory.SELECT_ALL.getId(), fSelectAllAction);
-		
 	}
 
 	/*
