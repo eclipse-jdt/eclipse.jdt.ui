@@ -93,7 +93,7 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 		if (canRun(selection)){
 			startRefactoring();	
 		} else {
-			String unavailable= "To activate this refactoring, please select the name of a class";
+			String unavailable= "To activate this refactoring, please select the name of an inner class";
 			MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable);
 		}
 		fRefactoring= null;
