@@ -1019,8 +1019,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					return null;
 				
 				fNLSKeyStringLiteral= (StringLiteral)node;
+				IRegion region= new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
+				AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, region);
+				if (ref != null)
+					return region;
 				
-				return new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
+				fNLSKeyStringLiteral= null;
+				return null;
+				
 					
 			} catch (JavaModelException e) {
 				return null;	
@@ -1257,12 +1263,15 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			deactivate();
 
 			if (wasActive) {
+				
+				// NLS key link
 				if (fNLSKeyStringLiteral != null) {
 					openPropertiesFile(fNLSKeyStringLiteral);
 					fNLSKeyStringLiteral= null;
 					return;
 				}
 				
+				// URL link
 				if (fURLString != null) {
 					String platform= SWT.getPlatform();
 					if ("motif".equals(platform) || "gtk".equals(platform)) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -1275,15 +1284,22 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 						Program.launch(fURLString);
 					fURLString= null;
 				
-				} else {
-					IAction action= getAction("OpenEditor");  //$NON-NLS-1$
-					if (action != null)
-						action.run();
 				}
+				
+				// Java element link
+				IAction action= getAction("OpenEditor");  //$NON-NLS-1$
+				if (action != null)
+					action.run();
 			}
 		}
 		
-		private void openPropertiesFile(StringLiteral stringLiteral) {
+		/**
+		 * Open the properties file in which the given NLS
+		 * key resides.
+		 * 
+		 * @since 3.1
+		 */
+		private void openPropertiesFile(StringLiteral nlsKeyStringLiteral) {
 
 			IJavaElement input= SelectionConverter.getInput(JavaEditor.this);
 			if (input == null)
@@ -1293,9 +1309,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (ast == null)
 				return;
 			
-			IRegion hoverRegion= new Region(stringLiteral.getStartPosition(), stringLiteral.getLength());
-
-			AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion);
+			IRegion literalRegion= new Region(nlsKeyStringLiteral.getStartPosition(), nlsKeyStringLiteral.getLength());
+			AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, literalRegion);
 			if (ref == null)
 				return;
 			
@@ -1307,9 +1322,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 			if (file == null) {
 				// Can't write to status line because it gets immediately cleared
-				MessageDialog.openError(JavaEditor.this.getEditorSite().getShell(),
-						"Open Properties File",
-						"Could not determine properties file.");
+				MessageDialog.openError(
+						JavaEditor.this.getEditorSite().getShell(),
+						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogTitle"), //$NON-NLS-1$
+						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.fileNotFound.dialogMessage")); //$NON-NLS-1$
 				
 				return;
 			}
@@ -1319,9 +1335,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				editor= IDE.openEditor(JavaEditor.this.getEditorSite().getPage(), file);
 			} catch (PartInitException e1) {
 				// Can't write to status line because it gets immediately cleared
-				MessageDialog.openError(JavaEditor.this.getEditorSite().getShell(),
-						"Open Properties File",
-						"Could not open the properties file editor for: " + file.getFullPath().toOSString());
+				MessageDialog.openError(
+						JavaEditor.this.getEditorSite().getShell(),
+						JavaEditorMessages.getString("Editor.OpenPropertiesFile.error.openEditor.dialogTitle"), //$NON-NLS-1$
+						JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.openEditor.dialogMessage", file.getFullPath().toOSString())); //$NON-NLS-1$
 				
 				return;
 			}
@@ -1334,7 +1351,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (buffer != null) {
 					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(buffer.getDocument());
 					try {
-						region= finder.find(0, stringLiteral.getLiteralValue(), true, true, false, false);
+						region= finder.find(0, nlsKeyStringLiteral.getLiteralValue(), true, true, false, false);
 					} catch (BadLocationException ex) {
 					}
 				}
@@ -1344,7 +1361,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					((ITextEditor)editor).selectAndReveal(0, 0);
 					IEditorStatusLine statusLine= (IEditorStatusLine) editor.getAdapter(IEditorStatusLine.class);
 					if (statusLine != null)
-						statusLine.setMessage(true, "The key \"" + stringLiteral.getLiteralValue() +  "\" is not defined in this properties file.", null);
+						statusLine.setMessage(true, JavaEditorMessages.getFormattedString("Editor.OpenPropertiesFile.error.keyNotFound", nlsKeyStringLiteral.getLiteralValue()), null); //$NON-NLS-1$
 				}
 			}
 		}
