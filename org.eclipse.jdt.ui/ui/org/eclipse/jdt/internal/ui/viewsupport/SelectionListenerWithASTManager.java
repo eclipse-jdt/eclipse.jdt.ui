@@ -103,7 +103,9 @@ public class SelectionListenerWithASTManager {
 			if (editorInput != null) {
 				IJavaElement element= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
 				if (element instanceof ICompilationUnit) {
-					return AST.parseCompilationUnit((ICompilationUnit) element, true);
+					synchronized (element) { // sychronize on cu to avoid conflict with reconciler: bug 
+						return AST.parseCompilationUnit((ICompilationUnit) element, true);
+					}
 				}
 				if (element instanceof IClassFile) {
 					return AST.parseCompilationUnit((IClassFile) element, true);
