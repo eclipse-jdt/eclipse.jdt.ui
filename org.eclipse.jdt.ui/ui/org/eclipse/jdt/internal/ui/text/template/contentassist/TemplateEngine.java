@@ -80,10 +80,6 @@ public class TemplateEngine {
 	{
 	    IDocument document= viewer.getDocument();
 	    
-		// prohibit recursion
-		if (LinkedEnvironment.hasEnvironment(document))
-			return;
-
 		if (!(fContextType instanceof CompilationUnitContextType))
 			return;
 

@@ -92,7 +92,7 @@
 }
 
 return ${name};</template>
-<template name="toarray" description="%Templates.toarray" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
+<template name="toarray" description="%Templates.toarray" context="java" enabled="true">(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()])</template>
 <template name="sysout" description="%Templates.sysout" context="java" enabled="true">System.out.println(${word_selection}${cursor});</template>
 <template name="syserr" description="%Templates.syserr" context="java" enabled="true">System.err.println(${word_selection}${cursor});</template>
 <template name="&lt;code&gt;" description="%Templates.code_tag" context="javadoc" enabled="true">&lt;code&gt;${word_selection}${cursor}&lt;/code&gt;</template>
