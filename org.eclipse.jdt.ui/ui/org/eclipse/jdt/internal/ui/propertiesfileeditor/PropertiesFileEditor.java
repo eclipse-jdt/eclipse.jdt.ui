@@ -23,6 +23,8 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
+import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -33,6 +35,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public class PropertiesFileEditor extends TextEditor {
+
+	/** Open action. */
+	protected OpenAction fOpenAction;
+
 
 	/**
 	 * Creates a new properties file editor.
@@ -45,6 +51,18 @@ public class PropertiesFileEditor extends TextEditor {
 		setSourceViewerConfiguration(new PropertiesFileSourceViewerConfiguration(textTools.getColorManager(), store, this, IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING));
 	}
 
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#createActions()
+	 */
+	protected void createActions() {
+		super.createActions();
+		
+		fOpenAction= new OpenAction(this);
+		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+		setAction(JdtActionConstants.OPEN, fOpenAction);
+	}
+	
 	/*
 	 * @see TextEditor#createAnnotationAccess()
 	 */
@@ -80,7 +98,6 @@ public class PropertiesFileEditor extends TextEditor {
 	
 	/*
 	 * @see org.eclipse.ui.editors.text.TextEditor#getAdapter(java.lang.Class)
-	 * @since 3.1
 	 */
 	public Object getAdapter(Class adapter) {
 		if (adapter == IShowInTargetList.class) {
