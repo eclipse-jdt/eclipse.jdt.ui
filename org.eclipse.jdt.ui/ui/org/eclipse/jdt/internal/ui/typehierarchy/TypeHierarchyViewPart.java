@@ -89,6 +89,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -368,31 +369,18 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 		KeyListener keyListener= new KeyAdapter() {
 			public void keyPressed(KeyEvent event) {
 				if (event.stateMask == SWT.NONE) {
-					if (event.keyCode == SWT.F3 || event.keyCode == SWT.F4) {
-						IStructuredSelection structSel= (IStructuredSelection)getCurrentViewer().getSelection();
-						if (structSel.size() == 1) {
-							Object firstSelection= structSel.getFirstElement();
-							if (event.keyCode == SWT.F4) {
-								if (firstSelection instanceof IType) {
-									new OpenTypeHierarchyHelper().open(
-										new IType[] { (IType) firstSelection }, 
-										getSite().getWorkbenchWindow());
-									return;
-								}
-							} else {
-								IAdaptable input= getSite().getPage().getInput();
-								if (firstSelection instanceof IMember && input.getAdapter(IResource.class) instanceof IContainer) {
-									PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-									if (view != null) {
-										view.selectReveal(new StructuredSelection(JavaModelUtility.getOpenable((IMember)firstSelection)));
-										return;
-									}
-								}
-							}						
+					if (event.keyCode == SWT.F4) {
+						Object elem= SelectionUtil.getSingleElement(getCurrentViewer().getSelection());
+						if (elem instanceof IType) {
+							IType[] arr= new IType[] { (IType) elem };
+							new OpenTypeHierarchyHelper().open(arr, getSite().getWorkbenchWindow());			
+						} else {
+							getCurrentViewer().getControl().getDisplay().beep();
 						}
-						getCurrentViewer().getControl().getDisplay().beep();
+						return;
 					} else if (event.keyCode == SWT.F5) {
 						updateTypesViewer();
+						return;
 					}
 				}
 				viewPartKeyShortcuts(event);					
