@@ -78,12 +78,16 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class ExtractInterfaceRefactoring extends Refactoring {
 
-	private static final String INTERFACE_METHOD_MODIFIERS = "public abstract "; //$NON-NLS-1$
+	public static final boolean DEFAULT_DECLARE_METHODS_PUBLIC= true;
+	public static final boolean DEFAULT_DECLARE_METHODS_ABSTRACT= true;
+
 	private final CodeGenerationSettings fCodeGenerationSettings;
 	private IType fInputType;
 	private String fNewInterfaceName;
 	private IMember[] fExtractedMembers;
 	private boolean fReplaceOccurrences= false;
+	private boolean fMarkInterfaceMethodsAsPublic= DEFAULT_DECLARE_METHODS_PUBLIC;
+	private boolean fMarkInterfaceMethodsAsAbstract= DEFAULT_DECLARE_METHODS_ABSTRACT;
 	private TextChangeManager fChangeManager;
 
     private final WorkingCopyOwner fWorkingCopyOwner;
@@ -133,6 +137,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return fReplaceOccurrences;
 	}
 
+	public boolean getMarkInterfaceMethodsAsPublic() {
+		return fMarkInterfaceMethodsAsPublic;
+	}
+
+	public boolean getMarkInterfaceMethodsAsAbstract() {
+		return fMarkInterfaceMethodsAsAbstract;
+	}
+
 	public void setNewInterfaceName(String newInterfaceName) {
 		Assert.isNotNull(newInterfaceName);
 		fNewInterfaceName= newInterfaceName;
@@ -140,6 +152,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	public void setReplaceOccurrences(boolean replaceOccurrences) {
 		fReplaceOccurrences= replaceOccurrences;
+	}
+
+	public void setMarkInterfaceMethodsAsPublic(boolean mark) {
+		fMarkInterfaceMethodsAsPublic= mark;
+	}
+
+	public void setMarkInterfaceMethodsAsAbstract(boolean mark) {
+		fMarkInterfaceMethodsAsAbstract= mark;
 	}
 	
 	public void setExtractedMembers(IMember[] extractedMembers) throws JavaModelException{
@@ -364,7 +384,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 		TextChange textChange= manager.get(cu);
 		//TODO fix the descriptions
-		String message= "Delete elements from " + cu.getElementName();
+		String message= "update";
 		textChange.addTextEdit(message, resultingEdits);
 		rewrite.removeModifications();
 		return textChange;
@@ -532,7 +552,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		
 		StringBuffer methodDeclarationSource= new StringBuffer();
 		methodDeclarationSource.append(getCommentContent(iMethod));
-		methodDeclarationSource.append(INTERFACE_METHOD_MODIFIERS);//$NON-NLS-1$
+		if (fMarkInterfaceMethodsAsPublic)
+			methodDeclarationSource.append("public ");//$NON-NLS-1$
+		if (fMarkInterfaceMethodsAsAbstract)
+			methodDeclarationSource.append("abstract ");//$NON-NLS-1$
 		methodDeclarationSource.append(iMethod.getCompilationUnit().getBuffer().getText(methodDeclarationOffset, length));
 		
 		if (methodDeclaration.getBody() != null)
