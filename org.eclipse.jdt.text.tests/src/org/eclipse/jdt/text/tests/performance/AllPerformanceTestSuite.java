@@ -29,6 +29,7 @@ public class AllPerformanceTestSuite extends TestSuite {
 		addTest(PerformanceTestSuite3.suite());
 		addTest(PerformanceTestSuite4.suite());
 		addTest(PerformanceTestSuite5.suite());
+		addTest(EventDrivenTestSuite.suite());
 		addTest(DebuggingPerformanceTestSuite.suite()); // run separately in debug mode for testing the InvocationCountPerformanceMeter
 	}
 }
