@@ -38,6 +38,8 @@ public class ListDialogField extends DialogField {
 	private Composite fButtonsControl;
 	private ISelection fSelectionWhenEnabled;
 	
+	private TableColumn fTableColumn;
+	
 	private IListAdapter fListAdapter;
 	
 	private Object fParentElement;
@@ -170,8 +172,9 @@ public class ListDialogField extends DialogField {
 			// Add a table column.
 			TableLayout tableLayout= new TableLayout();
 			tableLayout.addColumnData(new ColumnWeightData(100));
-			TableColumn tc= new TableColumn(fTableControl, SWT.NONE);
-			tc.setResizable(false);
+			fTableColumn= new TableColumn(fTableControl, SWT.NONE);
+			fTableColumn.setResizable(false);
+			//fTableColumn.setWidth(calcColumnWidth);
 			fTableControl.setLayout(tableLayout);
 			
 			fTable.setInput(fParentElement);
@@ -183,6 +186,19 @@ public class ListDialogField extends DialogField {
 		}
 		return fTableControl;
 	}
+	
+/*	private int calcColumnWidth() {
+		GC gc= new GC(fTableColumn);
+		for (int i= fElements.size() - 1; i >=0; i--) {
+			String label= 
+			
+		
+		
+		
+	
+	}*/
+	
+	
 	
 	public TableViewer getTableViewer() {
 		return fTable;
@@ -311,6 +327,9 @@ public class ListDialogField extends DialogField {
 	
 	public void dialogFieldChanged() {
 		super.dialogFieldChanged();
+		if (fTableColumn != null && !fTableColumn.isDisposed()) {
+			fTableColumn.pack();
+		}
 		updateButtonState();
 	}
 	
@@ -506,6 +525,7 @@ public class ListDialogField extends DialogField {
 			if (fTable != null) {
 				fTable.remove(element);
 			}
+			dialogFieldChanged();
 		} else {
 			throw new IllegalArgumentException();
 		}

@@ -79,7 +79,7 @@ public class SelectionProviderMediator implements ISelectionProvider {
 		if (fViewerInFocus != null) {
 			return fViewerInFocus.getSelection();
 		} else {
-			return new StructuredSelection(new Object[0]);
+			return StructuredSelection.EMPTY;
 		}
 	}
 	
@@ -139,6 +139,7 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	     * @see FocusListener#focusLost
 	     */
 	    public void focusLost(FocusEvent e) {
+	    	focusChanged(null);
 	    }		
 		
 		
