@@ -116,7 +116,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			setReplacementString(replacement);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
 			

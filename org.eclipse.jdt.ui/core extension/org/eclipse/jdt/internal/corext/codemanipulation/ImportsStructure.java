@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * has the best match.
  */
 public class ImportsStructure implements IImportsStructure {
-	
+		
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;
 	
@@ -46,7 +46,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * is matching best.
 	 * @deprecated Use ImportsStructure(cu, new String[0], Integer.MAX_VALUE, true) instead
 	 */
-	public ImportsStructure(ICompilationUnit cu) throws JavaModelException {
+	public ImportsStructure(ICompilationUnit cu) throws CoreException {
 		this(cu, new String[0], Integer.MAX_VALUE, true);
 	}
 
@@ -58,7 +58,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * import on demand instead (e.g. java.util.*)
 	 * @deprecated Use ImportsStructure(cu, preferenceOrder, importThreshold, false) instead
 	 */
-	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws JavaModelException {
+	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
 		this(cu, preferenceOrder, importThreshold, false);
 	}
 
@@ -70,7 +70,7 @@ public class ImportsStructure implements IImportsStructure {
 	 * import on demand instead (e.g. java.util.*).
 	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
 	 */	
-	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws JavaModelException {
+	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
 		
 		IImportContainer container= cu.getImportContainer();
@@ -82,8 +82,17 @@ public class ImportsStructure implements IImportsStructure {
 		fPackageEntries= new ArrayList(20);
 		
 		if (fRestoreExistingImports) {
-			addExistingImports(cu.getImports(), container.getSourceRange().getOffset());
-		}
+			TextBuffer buffer= null;
+			try {
+				buffer= aquireTextBuffer();
+				addExistingImports(buffer, cu.getImports());
+			} finally {
+				if (buffer != null) {
+					TextBuffer.release(buffer);
+				}
+			 }
+		}	
+		
 		addPreferenceOrderHolders(preferenceOrder);
 	}
 	
@@ -92,7 +101,7 @@ public class ImportsStructure implements IImportsStructure {
 		if (fPackageEntries.size() == 0) {
 			// all new: copy the elements
 			for (int i= 0; i < preferenceOrder.length; i++) {
-				PackageEntry entry= new PackageEntry(preferenceOrder[i], i, false);
+				PackageEntry entry= new PackageEntry(preferenceOrder[i], i);
 				fPackageEntries.add(entry);
 			}
 		} else {
@@ -116,7 +125,7 @@ public class ImportsStructure implements IImportsStructure {
 				}
 		
 				if (lastEntryFound == -1) {
-					PackageEntry newEntry= new PackageEntry(curr, i, false);
+					PackageEntry newEntry= new PackageEntry(curr, i);
 					fPackageEntries.add(currAppendIndex, newEntry);
 					currAppendIndex++;
 				} else {
@@ -125,18 +134,63 @@ public class ImportsStructure implements IImportsStructure {
 			}
 		}
 	}
+
 	
-	private void addExistingImports(IImportDeclaration[] decls, int containerOffset) throws JavaModelException {
-		PackageEntry curr= null;
-		for (int i= 0; i < decls.length; i++) {
-			String name= decls[i].getElementName();
+	private void addExistingImports(TextBuffer buffer, IImportDeclaration[] decls) throws CoreException {
+		if (decls.length == 0) {
+			return;
+		}				
+		PackageEntry currPackage= null;
+			
+		IImportDeclaration curr= decls[0];
+		int currOffset= curr.getSourceRange().getOffset();
+		int currLine= buffer.getLineOfOffset(currOffset);
+			
+		for (int i= 1; i < decls.length; i++) {
+			String name= curr.getElementName();
+				
 			String packName= Signature.getQualifier(name);
-			if (curr == null || !packName.equals(curr.getName())) {
-				curr= new PackageEntry(packName, -1, true);
-				fPackageEntries.add(curr);
+			if (currPackage == null || !packName.equals(currPackage.getName())) {
+				currPackage= new PackageEntry(packName, -1);
+				fPackageEntries.add(currPackage);
 			}
-			curr.add(new ImportDeclEntry(name, decls[i].getSourceRange().getOffset() - containerOffset, false));
+
+			IImportDeclaration next= decls[i];
+			int nextOffset= next.getSourceRange().getOffset();
+			int nextLine= buffer.getLineOfOffset(nextOffset);
+
+			// if next import is on a different line, modify the end position to the next line begin offset
+			if (currLine < nextLine) {
+				currLine++;
+				nextOffset= buffer.getLineInformation(currLine).getOffset();
+			}
+			currPackage.add(new ImportDeclEntry(name, buffer.getContent(currOffset, nextOffset - currOffset)));
+			currOffset= nextOffset;
+			curr= next;
+				
+			// add a comment entry for spacing between imports
+			if (currLine < nextLine) {
+				nextOffset= buffer.getLineInformation(nextLine).getOffset();
+				
+				currPackage= new PackageEntry(); // create a comment package entry for this
+				fPackageEntries.add(currPackage);
+				currPackage.add(new ImportDeclEntry(null, buffer.getContent(currOffset, nextOffset - currOffset)));
+					
+				currLine= nextLine;
+				currOffset= nextOffset;
+			}
 		}
+
+		String name= curr.getElementName();
+		String packName= Signature.getQualifier(name);
+		if (currPackage == null || !packName.equals(currPackage.getName())) {
+			currPackage= new PackageEntry(packName, -1);
+			fPackageEntries.add(currPackage);
+		}
+		ISourceRange range= curr.getSourceRange();			
+		int endOffset= range.getOffset() + range.getLength();
+		String content= buffer.getContent(currOffset, endOffset - currOffset) + buffer.getLineDelimiter();
+		currPackage.add(new ImportDeclEntry(name, content));
 	}		
 		
 	/**
@@ -199,6 +253,10 @@ public class ImportsStructure implements IImportsStructure {
 	}
 	
 	private boolean isBetterMatch(String newName, PackageEntry curr, PackageEntry bestMatch) {
+		if (curr.isComment()) {
+			return false;
+		}
+		
 		String currName= curr.getName();
 		String bestName= bestMatch.getName();
 		int currMatchLen= getCommonPrefixLength(currName, newName);
@@ -257,11 +315,11 @@ public class ImportsStructure implements IImportsStructure {
 	 */			
 	public void addImport(String typeContainerName, String typeName) {
 		String fullTypeName= JavaModelUtil.concatenateName(typeContainerName, typeName);
-		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, -1, false);
+		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, null);
 			
 		PackageEntry bestMatch= findBestMatch(typeContainerName);
 		if (bestMatch == null) {
-			PackageEntry packEntry= new PackageEntry(typeContainerName, -1, false);
+			PackageEntry packEntry= new PackageEntry(typeContainerName, -1);
 			packEntry.add(decl);
 			fPackageEntries.add(packEntry);
 		} else {
@@ -270,7 +328,7 @@ public class ImportsStructure implements IImportsStructure {
 				bestMatch.sortIn(decl);
 			} else {
 				// create a new packageentry
-				PackageEntry packEntry= new PackageEntry(typeContainerName, bestMatch.getGroupID(), false);
+				PackageEntry packEntry= new PackageEntry(typeContainerName, bestMatch.getGroupID());
 				packEntry.add(decl);
 				int index= fPackageEntries.indexOf(bestMatch);
 				if (cmp < 0) { 	// insert ahead of best match
@@ -319,13 +377,7 @@ public class ImportsStructure implements IImportsStructure {
 		
 		TextBuffer buffer= null;
 		try {
-			ICompilationUnit cu= fCompilationUnit;
-			if (cu.isWorkingCopy()) {
-				cu= (ICompilationUnit) cu.getOriginalElement();
-			}
-			
-			IFile file= (IFile) cu.getUnderlyingResource();
-			buffer= TextBuffer.acquire(file);
+			buffer= aquireTextBuffer();
 			
 			TextRange textRange= getReplaceRange(buffer);
 
@@ -342,8 +394,17 @@ public class ImportsStructure implements IImportsStructure {
 			}
 			monitor.done();
 		}
-	}	
-		
+	}
+	
+	private TextBuffer aquireTextBuffer() throws CoreException {
+		ICompilationUnit cu= fCompilationUnit;
+		if (cu.isWorkingCopy()) {
+			cu= (ICompilationUnit) cu.getOriginalElement();
+		}		
+		IFile file= (IFile) cu.getUnderlyingResource();
+		return TextBuffer.acquire(file);
+	}
+	
 		
 	/**
 	 * Get the replace positons.
@@ -374,54 +435,43 @@ public class ImportsStructure implements IImportsStructure {
 		// all (top level) types in this cu
 		IType[] topLevelTypes= fCompilationUnit.getTypes();
 	
-		int lastGroupID= -1;
 		int nCreated= 0;
+		PackageEntry lastPackage= null;
 		
-		if (fRestoreExistingImports) {
-			buf.append(textBuffer.getContent(importsStart, importsLen));
-			buf.append(lineDelim);
-		}
-		int posProcessed= buf.length();
-
-		// create from last to first to not invalidate positions
-		for (int i= fPackageEntries.size() -1; i >= 0; i--) {
+		int nPackageEntries= fPackageEntries.size();
+		for (int i= 0; i < nPackageEntries; i++) {
 			PackageEntry pack= (PackageEntry) fPackageEntries.get(i);
 			int nImports= pack.getNumberOfImports();
-			if (nImports > 0) {
-				if (fFilterImplicitImports && !isImportNeeded(pack.getName(), topLevelTypes)) {
-					continue;
+			if (nImports == 0 || (fFilterImplicitImports && !pack.isComment() && !isImportNeeded(pack.getName(), topLevelTypes))) {
+				continue;
+			}
+			
+			// add a space between two different groups by looking at the two adjacent imports
+			if (lastPackage != null && !pack.isComment() && pack.getGroupID() != lastPackage.getGroupID()) {
+				ImportDeclEntry last= lastPackage.getImportAt(lastPackage.getNumberOfImports() - 1);
+				ImportDeclEntry first= pack.getImportAt(0);
+				if (!lastPackage.isComment() && (last.isNew() || first.isNew())) {
+					buf.append(lineDelim);
 				}
-
-				// add empty line
-				if (pack.getGroupID() != lastGroupID) {
-					if (lastGroupID != -1) {
-						if (!fRestoreExistingImports || !pack.isExisting() || needsSpacer(textBuffer, importsStart, importsLen, importsStart + posProcessed)) {
-							buf.insert(posProcessed, lineDelim);
-						}
-					}
-					lastGroupID= pack.getGroupID();
-				}
-					
-				boolean starImport= pack.doesNeedStarImport(fImportOnDemandThreshold);
-				int starImportPos= posProcessed;
-				int currCreated= nCreated;
-				for (int j= nImports - 1; j >= 0; j--) {
-					ImportDeclEntry currDecl= pack.getImportAt(j);
-					int offset= currDecl.getOffset();
-					if (offset == -1) {
-						if (!starImport) {
-							insertImport(buf, posProcessed, currDecl.getElementName(), lineDelim);	
-						}
-						nCreated++;
-					} else {
-						posProcessed= offset;
-					}
-				}
-				// do it last -> goes to the top of the block
-				if (starImport && currCreated != nCreated) {
-					String starImportString= pack.getName() + ".*";
-					insertImport(buf, starImportPos, starImportString, lineDelim);
+			}
+			lastPackage= pack;
+							
+			if (pack.doesNeedStarImport(fImportOnDemandThreshold)) {
+				String starImportString= pack.getName() + ".*";
+				appendImportToBuffer(buf, starImportString, lineDelim);
+				nCreated++;
+			}
+			
+			for (int k= 0; k < nImports; k++) {
+				ImportDeclEntry currDecl= pack.getImportAt(k);
+				String content= currDecl.getContent();
+				
+				
+				if (content == null) { // new entry
+					appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
 					nCreated++;
+				} else {
+					buf.append(content);
 				}
 			}
 		}
@@ -437,8 +487,12 @@ public class ImportsStructure implements IImportsStructure {
 					buf.append(lineDelim);
 				}
 			}
-		} else if (buf.length() >= lineDelim.length()) {
-			buf.setLength(buf.length() - lineDelim.length());
+		} else {
+			// remove the line delimiter added in the end
+			int pos= buf.length() - lineDelim.length();
+			if (pos >= 0 && lineDelim.equals(buf.substring(pos))) {
+				buf.setLength(pos);
+			}
 		}
 		String newContent= buf.toString();
 		if (hasChanged(textBuffer, importsStart, importsLen, newContent)) {
@@ -475,34 +529,12 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return true;
 	}
-	
-	private boolean needsSpacer(TextBuffer buf, int importStart, int importLength, int pos) {
-		if (pos == importLength) {			
-			return true;
-		}
-		int currLine= buf.getLineOfOffset(pos);
-		if (currLine != -1) {
-			TextRegion lastLineRegion= buf.getLineInformation(currLine - 1);
-			if (lastLineRegion != null && lastLineRegion.getOffset() >= importStart) {
-				int end=  lastLineRegion.getOffset() + lastLineRegion.getLength();
-				for (int i= lastLineRegion.getOffset(); i < end; i++) {
-					if (!Character.isWhitespace(buf.getChar(i))) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-	
 
-	private void insertImport(StringBuffer buf, int pos, String importName, String lineDelim) {
-		StringBuffer name= new StringBuffer();
-		name.append("import "); //$NON-NLS-1$
-		name.append(importName);
-		name.append(';');
-		name.append(lineDelim);
-		buf.insert(pos, name.toString());
+	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
+		buf.append("import "); //$NON-NLS-1$
+		buf.append(importName);
+		buf.append(';');
+		buf.append(lineDelim);
 	}
 	
 	private int getPackageStatementEndPos(TextBuffer buffer) throws JavaModelException {
@@ -519,18 +551,13 @@ public class ImportsStructure implements IImportsStructure {
 	
 	
 	private static class ImportDeclEntry {
+		
 		private String fElementName;
-		private int fOffset;
-		private boolean fIsComment;
+		private String fContent;
 		
-		public ImportDeclEntry(String elementName, int existingOffset, boolean isComment) {
+		public ImportDeclEntry(String elementName, String existingContent) {
 			fElementName= elementName;
-			fOffset= existingOffset;
-			fIsComment= isComment;
-		}
-		
-		public int getOffset() {
-			return fOffset;
+			fContent= existingContent;
 		}
 		
 		public String getElementName() {
@@ -538,13 +565,21 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 		public boolean isOnDemand() {
-			return fElementName.endsWith(".*");
+			return fElementName != null && fElementName.endsWith(".*");
+		}
+			
+		public boolean isNew() {
+			return fContent == null;
 		}
 		
 		public boolean isComment() {
-			return fIsComment;
+			return fElementName == null;
 		}
 		
+		public String getContent() {
+			return fContent;
+		}
+				
 	}
 	
 	/*
@@ -556,10 +591,16 @@ public class ImportsStructure implements IImportsStructure {
 		private String fName;
 		private ArrayList fImportEntries;
 		private int fGroup;
-		private boolean fExisting;
-		private int fNumberOfComments;
-		
-		
+	
+	
+		/**
+		 * Comment package entry
+		 */
+		public PackageEntry() {
+			this("!", -1);
+		}
+	
+	
 		/**
 		 * @param name Name of the package entry. e.g. org.eclipse.jdt.ui, containing imports like
 		 * org.eclipse.jdt.ui.JavaUI.
@@ -567,12 +608,10 @@ public class ImportsStructure implements IImportsStructure {
 		 *    different group ids will result in spacers between the entries
 		 * @param existing Set if the group is existing in the imports to be restored.
 		 */
-		public PackageEntry(String name, int group, boolean existing) {
+		public PackageEntry(String name, int group) {
 			fName= name;
 			fImportEntries= new ArrayList(5);
 			fGroup= group;
-			fExisting= existing;
-			fNumberOfComments= 0;
 		}	
 		
 		public int findInsertPosition(String fullImportName) {
@@ -608,17 +647,11 @@ public class ImportsStructure implements IImportsStructure {
 			} else {
 				fImportEntries.add(insertPosition, imp);
 			}
-			if (imp.isComment()) {
-				fNumberOfComments++;
-			}
 		}
 		
 		
 		public void add(ImportDeclEntry imp) {
 			fImportEntries.add(imp);
-			if (imp.isComment()) {
-				fNumberOfComments++;
-			}			
 		}
 		
 		public void remove(String fullName) {
@@ -637,7 +670,24 @@ public class ImportsStructure implements IImportsStructure {
 		}	
 				
 		public boolean doesNeedStarImport(int threshold) {
-			return fImportEntries.size() - fNumberOfComments >= threshold;
+			if (isComment()) {
+				return false;
+			}
+			
+			int count= 0;
+			boolean containsNew= false;
+			int nImports= getNumberOfImports();
+			for (int i= 0; i < nImports; i++) {
+				ImportDeclEntry curr= getImportAt(i);
+				if (curr.isOnDemand()) {
+					return false;
+				}
+				if (!curr.isComment()) {
+					count++;
+					containsNew |= curr.isNew();
+				}
+			}		
+			return (count >= threshold) && containsNew;	
 		}
 		
 		public int getNumberOfImports() {
@@ -655,11 +705,19 @@ public class ImportsStructure implements IImportsStructure {
 		public void setGroupID(int groupID) {
 			fGroup= groupID;
 		}
-		
-		public boolean isExisting() {
-			return fExisting;
+				
+		public ImportDeclEntry getLast() {
+			int nImports= getNumberOfImports();
+			if (nImports > 0) {
+				return getImportAt(nImports - 1);
+			}
+			return null;
 		}
-	
+		
+		public boolean isComment() {
+			return "!".equals(fName);
+		}
+		
 	}	
 
 }
