@@ -81,7 +81,7 @@ public class ChkpiiTests extends TestCase {
 		assertTrue("Could not run chkpii test. See console for details.", testExecuted); //$NON-NLS-1$
 		boolean result3= !hasErrors(getOutputFile(PROPERTIES));
 
-		assertTrue("CHKPII errors in files. See the <workspace>/chkpiiResults/ for details.", (result1 && result2 && result3)); //$NON-NLS-1$
+		assertTrue("CHKPII warnings or errors in files. See " + fLogDirectoryName + " for details.", (result1 && result2 && result3)); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 		
 	private boolean testChkpii(int type) {
@@ -161,29 +161,19 @@ public class ChkpiiTests extends TestCase {
 	 */
 	private String getOutputFile(int type) {
 
-		new File(fLogDirectoryName).mkdirs();
-
-		String aString;
-		try {
-			aString= new File(fLogDirectoryName).getCanonicalPath();
-		} catch (IOException e) {
-			e.printStackTrace();
-			aString= new File(fLogDirectoryName).getPath();
-		}
-
 		switch (type) {
 
 			case HTML :
-				return aString + File.separator + "html.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + File.separator + "html.txt"; //$NON-NLS-1$
 
 			case PROPERTIES :
-				return aString + File.separator + "properties.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + File.separator + "properties.txt"; //$NON-NLS-1$
 		
 			case XML : 
-				return aString + File.separator + "xml.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + File.separator + "xml.txt"; //$NON-NLS-1$
 
 			default :
-				return aString + File.separator + "other.txt"; //$NON-NLS-1$
+				return fLogDirectoryName + File.separator + "other.txt"; //$NON-NLS-1$
 		}
 	}
 	
@@ -252,6 +242,14 @@ public class ChkpiiTests extends TestCase {
 	protected void setUp() throws Exception {
 		super.setUp();
 		fLogDirectoryName= getUserDirectory() + ".." + File.separator + "chkpiiResults" + File.separator; //$NON-NLS-1$ //$NON-NLS-2$
+		try {
+			fLogDirectoryName= new File(fLogDirectoryName).getCanonicalPath();
+		} catch (IOException e) {
+			e.printStackTrace();
+			fLogDirectoryName= new File(fLogDirectoryName).getPath();
+		}
+
+		new File(fLogDirectoryName).mkdirs();
 	}
 
 	/*
