@@ -71,23 +71,23 @@ public class ClasspathContainerWizard extends Wizard {
 			fPageDesc= findDescriptorPage(containers, fEntryToEdit);
 		}
 
+		IClasspathContainerPage containerPage= null;
 		if (fPageDesc != null) {
-			IClasspathContainerPage containerPage= null;
 			try {
 				containerPage= fPageDesc.createPage();
 			} catch (CoreException e) {
 				handlePageCreationFailed(e);
 			}
-
-			if (containerPage == null)	{
-				containerPage= new ClasspathContainerDefaultPage();
-			}
-			
-			containerPage.setSelection(fEntryToEdit);
-			fContainerPage= containerPage;
-
-			addPage(containerPage);
 		}
+
+		if (containerPage == null)	{
+			containerPage= new ClasspathContainerDefaultPage();
+		}
+		
+		containerPage.setSelection(fEntryToEdit);
+		fContainerPage= containerPage;
+
+		addPage(containerPage);
 
 		super.addPages();
 	}
@@ -101,7 +101,7 @@ public class ClasspathContainerWizard extends Wizard {
 	
 	private ClasspathContainerDescriptor findDescriptorPage(ClasspathContainerDescriptor[] containers, IClasspathEntry entry) {
 		for (int i = 0; i < containers.length; i++) {
-			if (containers[i].canEdit(fEntryToEdit)) {
+			if (containers[i].canEdit(entry)) {
 				return containers[i];
 			}
 		}

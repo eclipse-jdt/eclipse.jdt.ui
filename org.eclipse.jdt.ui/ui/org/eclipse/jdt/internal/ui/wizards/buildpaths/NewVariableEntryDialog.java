@@ -27,10 +27,9 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
-
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -114,18 +113,24 @@ public class NewVariableEntryDialog extends Dialog {
 	private Button fOkButton;
 	
 	private IPath[] fResultPaths;
+	
+	private IPath fExistingPath;
+	private String fTitle;
+	
 			
-	public NewVariableEntryDialog(Shell parent, String variableSelection) {
+	public NewVariableEntryDialog(Shell parent, String title, IPath existingPath) {
 		super(parent);
-		fVariableBlock= new VariableBlock(false, variableSelection);
+		fVariableBlock= new VariableBlock(false, existingPath == null ? null : existingPath.segment(1));
 		fResultPaths= null;
+		fExistingPath= existingPath;
+		fTitle= title;
 	}
 	
 	/* (non-Javadoc)
 	 * @see Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell shell) {
-		shell.setText(NewWizardMessages.getString("NewVariableEntryDialog.title")); //$NON-NLS-1$ 
+		shell.setText(fTitle);
 		super.configureShell(shell);
 	}	
 			
@@ -178,14 +183,18 @@ public class NewVariableEntryDialog extends Dialog {
 		boolean canExtend= false;
 		
 		if (nSelected > 0) {
-			fResultPaths= new Path[nSelected];
-			for (int i= 0; i < nSelected; i++) {
-				CPVariableElement curr= (CPVariableElement) selected.get(i);
-				fResultPaths[i]= new Path(curr.getName());
-				if (!curr.getPath().toFile().isFile()) {
-					isValidSelection= false;
+			if (fExistingPath != null && nSelected != 1) {
+				isValidSelection= false;
+			} else {
+				fResultPaths= new Path[nSelected];
+				for (int i= 0; i < nSelected; i++) {
+					CPVariableElement curr= (CPVariableElement) selected.get(i);
+					fResultPaths[i]= new Path(curr.getName());
+					if (!curr.getPath().toFile().isFile()) {
+						isValidSelection= false;
+					}
+						
 				}
-					
 			}
 		} else {
 			isValidSelection= false;
@@ -204,6 +213,10 @@ public class NewVariableEntryDialog extends Dialog {
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);
+		dialog.setAllowMultiple(fExistingPath == null);
+		if (fExistingPath != null) {
+			dialog.setInitialSelection(fExistingPath.toFile());
+		}
 		if (dialog.open() == dialog.OK) {
 			Object[] selected= dialog.getResult();
 			IPath[] paths= new IPath[selected.length];

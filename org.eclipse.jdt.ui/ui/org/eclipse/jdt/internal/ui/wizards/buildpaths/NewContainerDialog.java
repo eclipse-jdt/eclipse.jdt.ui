@@ -4,11 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -17,6 +12,12 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -24,7 +25,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.swt.layout.GridLayout;
 
 public class NewContainerDialog extends StatusDialog {
 	
@@ -35,7 +35,7 @@ public class NewContainerDialog extends StatusDialog {
 	private IContainer[] fExistingFolders;
 	private IProject fCurrProject;
 		
-	public NewContainerDialog(Shell parent, String title, IProject project, IContainer[] existingFolders) {
+	public NewContainerDialog(Shell parent, String title, IProject project, IContainer[] existingFolders, CPListElement entryToEdit) {
 		super(parent);
 		setTitle(title);
 		
@@ -49,14 +49,17 @@ public class NewContainerDialog extends StatusDialog {
 		fExistingFolders= existingFolders;
 		fCurrProject= project;
 		
-		fContainerDialogField.setText(""); //$NON-NLS-1$
+		if (entryToEdit == null) {
+			fContainerDialogField.setText(""); //$NON-NLS-1$
+		} else {
+			fContainerDialogField.setText(entryToEdit.getPath().removeFirstSegments(1).toString()); //$NON-NLS-1$
+		}
 	}
 	
 	public void setMessage(String message) {
 		fContainerDialogField.setLabelText(message);
 	}
 	
-		
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		

@@ -67,6 +67,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private StringDialogField fOutputLocationField;
 	
 	private boolean fIsProjSelected;
+	
+	private final int IDX_ADDNEW= 0;
+	private final int IDX_ADDEXIST= 1;
+	private final int IDX_EDIT= 3;
+	
+	private final int IDX_REMOVE= 5;	
 
 	public SourceContainerWorkbookPage(IWorkspaceRoot root, ListDialogField classPathList, StringDialogField outputLocationField) {
 		fWorkspaceRoot= root;
@@ -89,12 +95,14 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		String[] buttonLabels;
 		int removeIndex;
 		buttonLabels= new String[] { 
-			/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
-			/* 1 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
+			/* 0 = IDX_ADDNEW */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
+			/* 1 = IDX_ADDEXIST */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
 			/* 2 */ null,
-			/* 3 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+			/* 3 = IDX_EDIT */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.edit.button"), //$NON-NLS-1$
+			/* 4 */ null,			
+			/* 5 = IDX_REMOVE */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
 		};
-		removeIndex= 3;
+		removeIndex= IDX_REMOVE;
 		
 		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
@@ -187,7 +195,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			sourcePageCustomButtonPressed(field, index);
 		}
 		
-		public void selectionChanged(DialogField field) {}
+		public void selectionChanged(DialogField field) {
+			sourcePageSelectionChanged(field);
+		}
 		
 		// ---------- IDialogFieldListener --------
 		public void dialogFieldChanged(DialogField field) {
@@ -199,20 +209,23 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (field == fFoldersList) {
 			List elementsToAdd= new ArrayList(10);
 			switch (index) {
-			case 0: /* add new */
-				CPListElement srcentry= createNewSourceContainer();
+			case IDX_ADDNEW: /* add new */
+				CPListElement srcentry= openNewSourceContainerDialog(null);
 				if (srcentry != null) {
 					elementsToAdd.add(srcentry);
 				}
 				break;
-			case 1: /* add existing */
-				CPListElement[] srcentries= chooseSourceContainers();
+			case IDX_ADDEXIST: /* add existing */
+				CPListElement[] srcentries= openSourceContainerDialog(null);
 				if (srcentries != null) {
 					for (int i= 0; i < srcentries.length; i++) {
 						elementsToAdd.add(srcentries[i]);
 					}
 				}
 				break;
+			case IDX_EDIT: /* add existing */
+				editEntry();
+				return;
 			}
 			if (!elementsToAdd.isEmpty()) {
 				fFoldersList.addElements(elementsToAdd);
@@ -223,6 +236,35 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
+	}
+
+	private void editEntry() {
+		List selElements= fFoldersList.getSelectedElements();
+		if (selElements.size() != 1) {
+			return;
+		}
+		CPListElement elem= (CPListElement) selElements.get(0);
+		CPListElement res= null;
+		
+		IResource resource= elem.getResource();
+		if (resource.exists()) {
+			CPListElement[] arr= openSourceContainerDialog(elem);
+			if (arr != null) {
+				res= arr[0];
+			}
+		} else {
+			res= openNewSourceContainerDialog(elem);
+		}
+		
+		if (res != null) {
+			fFoldersList.replaceElement(elem, res);
+		}
+		
+	}
+	
+	private void sourcePageSelectionChanged(DialogField field) {
+		List selected= fFoldersList.getSelectedElements();
+		fFoldersList.enableButton(IDX_EDIT, selected.size() == 1);
 	}
 	
 	private void sourcePageDialogFieldChanged(DialogField field) {
@@ -292,10 +334,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 		
-	private CPListElement createNewSourceContainer() {	
+	private CPListElement openNewSourceContainerDialog(CPListElement existing) {	
+		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.edit.title");
+
 		IProject proj= fCurrJProject.getProject();
-		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.NewSourceFolderDialog.title"); //$NON-NLS-1$
-		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, proj, getExistingContainers());
+		NewContainerDialog dialog= new NewContainerDialog(getShell(), title, proj, getExistingContainers(existing), existing);
 		dialog.setMessage(NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.NewSourceFolderDialog.description", fProjPath.toString())); //$NON-NLS-1$
 		if (dialog.open() == dialog.OK) {
 			IFolder folder= dialog.getFolder();
@@ -322,22 +365,30 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 			
 			
-	private CPListElement[] chooseSourceContainers() {	
+	private CPListElement[] openSourceContainerDialog(CPListElement existing) {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
-		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
 			
 		acceptedClasses= new Class[] { IFolder.class };
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers());	
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers(existing));	
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
 
+		String title= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.title") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.title");
+		String message= (existing == null) ? NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.new.description") : NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.edit.description");
+
 		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setValidator(validator);
-		dialog.setTitle(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.title")); //$NON-NLS-1$
-		dialog.setMessage(NewWizardMessages.getString("SourceContainerWorkbookPage.ExistingSourceFolderDialog.description")); //$NON-NLS-1$
+		dialog.setTitle(title);
+		dialog.setMessage(message);
 		dialog.addFilter(filter);
 		dialog.setInput(fCurrJProject.getProject());
+		if (existing == null) {
+			dialog.setInitialSelection(fCurrJProject.getProject());
+		} else {
+			dialog.setInitialSelection(existing.getResource());
+		}		
 		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			CPListElement[] res= new CPListElement[elements.length];
@@ -347,17 +398,19 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 			return res;
 		}
-		return null;		
+		return null;
 	}
 	
-	private IContainer[] getExistingContainers() {
+	private IContainer[] getExistingContainers(CPListElement existing) {
 		List res= new ArrayList();
 		List cplist= fFoldersList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
 			CPListElement elem= (CPListElement)cplist.get(i);
-			IResource resource= elem.getResource();
-			if (resource instanceof IContainer) { // defensive code
-				res.add(resource);	
+			if (elem != existing) {
+				IResource resource= elem.getResource();
+				if (resource instanceof IContainer) { // defensive code
+					res.add(resource);	
+				}
 			}
 		}
 		return (IContainer[]) res.toArray(new IContainer[res.size()]);
