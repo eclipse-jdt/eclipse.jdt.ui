@@ -92,7 +92,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 
-		if (javaElement == null || javaElement instanceof ILocalVariable)
+		if (javaElement == null)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
 
 		Image image= fLabelProvider.getImage(javaElement);
