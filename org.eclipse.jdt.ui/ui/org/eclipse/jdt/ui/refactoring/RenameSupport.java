@@ -62,7 +62,7 @@ public class RenameSupport {
 	 * is an error then the refactoring can't be executed at all. However,
 	 * returning an OK status doesn't guarantee that the refactoring can be
 	 * executed. It may still fail while performing the exhaustive precondition
-	 * checking done via the methods <code>openDialog</code> or
+	 * checking done inside the methods <code>openDialog</code> or
 	 * <code>perform</code>.
 	 * 
 	 * The method is mainly used to determine enable/disablement of actions.
