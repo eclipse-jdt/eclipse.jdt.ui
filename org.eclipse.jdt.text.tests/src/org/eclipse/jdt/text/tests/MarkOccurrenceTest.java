@@ -17,23 +17,35 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.graphics.RGB;
+
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.FindReplaceDocumentAdapter;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -55,6 +67,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 public class MarkOccurrenceTest extends TestCase {
 	
 	private static final String OCCURRENCE_ANNOTATION= "org.eclipse.jdt.ui.occurrences";
+	private static final RGB fgHighlightRGB= getHighlightRGB();
 	
 	private JavaEditor fEditor;
 	private IDocument fDocument;
@@ -63,6 +76,8 @@ public class MarkOccurrenceTest extends TestCase {
 	private IAnnotationModel fAnnotationModel;
 	private ISelectionListenerWithAST fSelWASTListener;
 	private IRegion fMatch;
+	private StyledText fTextWidget;
+
 	
 
 	public static Test setUpTest(Test someTest) {
@@ -72,16 +87,19 @@ public class MarkOccurrenceTest extends TestCase {
 	public static Test suite() {
 		return setUpTest(new TestSuite(MarkOccurrenceTest.class));
 	}
-
+	
 	
 	/*
 	 * @see junit.framework.TestCase#setUp()
 	 * @since 3.1
 	 */
 	protected void setUp() throws Exception {
+		assertNotNull(fgHighlightRGB);
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.EDITOR_MARK_OCCURRENCES, true);
 		fEditor= openJavaEditor(new Path("/" + JUnitProjectTestSetup.getProject().getElementName() + "/src/junit/framework/TestCase.java"));
 		assertNotNull(fEditor);
+		fTextWidget= fEditor.getViewer().getTextWidget();
+		assertNotNull(fTextWidget);
 		fDocument= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 		assertNotNull(fDocument);
 		fFindReplaceDocumentAdapter= new FindReplaceDocumentAdapter(fDocument);
@@ -155,7 +173,9 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(8, fOccurrences);
+		assertOccurrencesInWidget();
 	}
+	
 	public void testMarkMethodOccurrences() {
 		try {
 			fMatch= fFindReplaceDocumentAdapter.find(0, "getClass", true, true, true, false);
@@ -178,6 +198,7 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(2, fOccurrences);
+		assertOccurrencesInWidget();
 	}
 	public void testMarkFieldOccurrences() {
 		try {
@@ -201,6 +222,7 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(9, fOccurrences);
+		assertOccurrencesInWidget();
 	}
 	
 	public void testMarkLocalOccurrences() {
@@ -225,6 +247,7 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(4, fOccurrences);
+		assertOccurrencesInWidget();
 	}
 	
 	public void testMarkMethodExitOccurrences() {
@@ -250,6 +273,7 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(6, fOccurrences);
+		assertOccurrencesInWidget();
 	}
 	
 	public void testMarkMethodExceptionOccurrences() {
@@ -274,6 +298,7 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(2, fOccurrences);
+		assertOccurrencesInWidget();
 	}
 	
 	public void testNoOccurrencesIfDisabled() {
@@ -300,5 +325,45 @@ public class MarkOccurrenceTest extends TestCase {
 			assertTrue(System.currentTimeMillis() < timeOut);
 		}
 		assertEquals(0, fOccurrences);
+		assertOccurrencesInWidget();
 	}
+	
+	private void assertOccurrencesInWidget() {
+		EditorTestHelper.runEventQueue(500);
+
+		Iterator iter= fAnnotationModel.getAnnotationIterator();
+		while (iter.hasNext()) {
+			Annotation annotation= (Annotation)iter.next();
+			if (OCCURRENCE_ANNOTATION.equals(annotation.getType()))
+				assertOccurrenceInWidget(fAnnotationModel.getPosition(annotation));
+		}
+	}
+
+	private void assertOccurrenceInWidget(Position position) {
+		StyleRange[] styleRanges= fTextWidget.getStyleRanges(position.offset, position.length);
+		for (int i= 0; i < styleRanges.length; i++) {
+			if (styleRanges[i].background != null) {
+				RGB rgb= styleRanges[i].background.getRGB();
+				if (fgHighlightRGB.equals(rgb))
+					return;
+			}
+		}
+		fail();
+		
+	}
+	/**
+	 * Returns the shared color for the given key.
+	 * 
+	 * @param key the color key string
+	 * @return the shared color for the given key
+	 */
+	private static RGB getHighlightRGB() {
+		AnnotationPreference annotationPref= EditorsPlugin.getDefault().getAnnotationPreferenceLookup().getAnnotationPreference(OCCURRENCE_ANNOTATION);
+		IPreferenceStore store= EditorsUI.getPreferenceStore();
+		if (store != null)
+			return PreferenceConverter.getColor(store, annotationPref.getColorPreferenceKey());
+		
+		return null;
+	}
+	
 }
