@@ -408,18 +408,18 @@ public class MoveMembersRefactoring extends Refactoring {
 
 			if (member.getElementType() != IJavaElement.METHOD && 
 				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.fields_methods"));			 //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.fields_methods")); //$NON-NLS-1$
 			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.exist"));			 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.exist")); //$NON-NLS-1$
 	
 			if (member.isBinary())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.binary_elements"));	 //$NON-NLS-1$
 
 			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.read_only_elements"));					 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.read_only_elements")); //$NON-NLS-1$
 
 			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.structure"));					 //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.structure")); //$NON-NLS-1$
 
 			if (member.getElementType() == IJavaElement.METHOD && member.getDeclaringType().isInterface())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.interface_methods")); //$NON-NLS-1$
@@ -430,17 +430,10 @@ public class MoveMembersRefactoring extends Refactoring {
 			if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.static_elements")); //$NON-NLS-1$
 			
-			if (member.getElementType() == IJavaElement.METHOD)
-				return checkMethod((IMethod)member);
+			if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.constructors"));	//$NON-NLS-1$
 		}
 		return null;
-	}
-	
-	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
-		if (method.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveMembersRefactoring.constructors"));			 //$NON-NLS-1$
-			
-		return null;	
 	}
 	
 	private RefactoringStatus checkDeclaringType() throws JavaModelException{
