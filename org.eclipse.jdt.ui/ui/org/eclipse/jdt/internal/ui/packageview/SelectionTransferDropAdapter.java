@@ -40,8 +40,8 @@ import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
-import org.eclipse.jdt.internal.ui.reorg.MockUnifiedSite;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
+import org.eclipse.jdt.internal.ui.reorg.MockUnifiedSite;
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -54,6 +54,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private int fCanMoveElements;
 	private CopyRefactoring fCopyRefactoring;
 	private int fCanCopyElements;
+	private static final int DROP_TIME_DIFF_TRESHOLD= 150;
 
 	public SelectionTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
@@ -87,6 +88,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	
 	public void validateDrop(Object target, DropTargetEvent event, int operation) {
 		event.detail= DND.DROP_NONE;
+		
+		if (tooFast(event)) 
+			return;
+		
 		if (fElements == null) {
 			ISelection s= LocalSelectionTransfer.getInstance().getSelection();
 			if (!(s instanceof IStructuredSelection))
@@ -104,6 +109,10 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			event.detail= DND.DROP_NONE;
 		}	
+	}
+
+	private boolean tooFast(DropTargetEvent event) {
+		return Math.abs(LocalSelectionTransfer.getInstance().getSelectionSetTime() - event.time) < DROP_TIME_DIFF_TRESHOLD;
 	}	
 
 	public void drop(Object target, DropTargetEvent event) {
