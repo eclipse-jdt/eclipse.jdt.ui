@@ -199,7 +199,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		} catch (InvocationTargetException e1) {
 			input= null;
 		} catch (InterruptedException e1) {
-			input= null;
+			dispose();
+			return;
 		}
 		TraditionalHierarchyContentProvider contentProvider= new TraditionalHierarchyContentProvider(fLifeCycle);
 		contentProvider.setMemberFilter(locked != null ? new IMember[] { locked } : null);
