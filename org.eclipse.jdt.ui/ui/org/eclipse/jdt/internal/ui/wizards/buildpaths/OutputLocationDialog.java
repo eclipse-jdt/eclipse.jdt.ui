@@ -136,6 +136,7 @@ public class OutputLocationDialog extends StatusDialog {
 		
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
+			fContainerFieldStatus.setOK();
 			return;
 		}
 				
@@ -145,12 +146,19 @@ public class OutputLocationDialog extends StatusDialog {
 			fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidpath", pathValidation.getMessage())); //$NON-NLS-1$
 			return;
 		}
-				
-		IResource res= workspace.getRoot().findMember(path);
+		
+		IWorkspaceRoot root= workspace.getRoot();
+		IResource res= root.findMember(path);
 		if (res != null) {
 			// if exists, must be a folder or project
 			if (res.getType() == IResource.FILE) {
 				fContainerFieldStatus.setError(NewWizardMessages.getString("OutputLocationDialog.error.existingisfile")); //$NON-NLS-1$
+				return;
+			}
+		} else {
+			String project= path.segment(0);
+			if (workspace.getRoot().findMember(project) == null) {
+				fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.projectdoesnotexist", project)); //$NON-NLS-1$
 				return;
 			}
 		}
