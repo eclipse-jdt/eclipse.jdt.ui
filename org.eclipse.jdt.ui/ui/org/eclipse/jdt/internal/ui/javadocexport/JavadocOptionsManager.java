@@ -370,7 +370,32 @@ public class JavadocOptionsManager {
 
 		fStylesheet= element.getAttribute(STYLESHEETFILE);
 		fTitle= element.getAttribute(TITLE);
-		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
+		
+
+		StringBuffer additionals= new StringBuffer();
+		StringBuffer vmargs= new StringBuffer();
+		String extraOptions= element.getAttribute(EXTRAOPTIONS);
+		if (extraOptions.length() > 0) {
+			ExecutionArguments tokens= new ExecutionArguments("", extraOptions); //$NON-NLS-1$
+			String[] args= tokens.getProgramArgumentsArray();
+
+			boolean vmarg= false;
+			for (int i= 0; i < args.length; i++) {
+				String curr= args[i];
+				if (curr.length() > 0 && curr.charAt(0) == '-') {
+					// an command
+					vmarg=(curr.length() > 1 && curr.charAt(1) == 'J');
+				}
+				if (vmarg) {
+					vmargs.append(curr).append(' ');
+				} else {
+					additionals.append(curr).append(' ');
+				}
+			}
+		}
+		
+		fAdditionalParams= additionals.toString();
+		fVMParams= vmargs.toString();
 		fOverview= element.getAttribute(OVERVIEW);
 
 		fUse= loadBoolean(element.getAttribute(USE));

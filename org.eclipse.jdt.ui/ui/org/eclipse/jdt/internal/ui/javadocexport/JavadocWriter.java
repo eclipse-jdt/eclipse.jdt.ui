@@ -150,9 +150,13 @@ public class JavadocWriter {
 		if (str.length() > 0) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.TITLE, str);
 
-		str= store.getAdditionalParams();
-		if (str.length() > 0) //$NON-NLS-1$
+		
+		String vmArgs= store.getVMParams();
+		String additionalArgs= store.getAdditionalParams();
+		if (vmArgs.length() + additionalArgs.length() > 0) {
+			str= vmArgs + ' ' + additionalArgs;
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
+		}
 
 		String[] hrefs= store.getHRefs();
 		for (int i= 0; i < hrefs.length; i++) {
