@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -322,8 +321,10 @@ public class PullUpInputPage2 extends UserInputWizardPage {
   }
 
 	public void setVisible(boolean visible) {
-		if (visible) 
+		if (visible) {
 			initializeTreeViewer();
+			setHierarchyLabelText();
+		}
 		super.setVisible(visible);
 	}
 
@@ -418,20 +419,18 @@ public class PullUpInputPage2 extends UserInputWizardPage {
   }
   
 	private void createTypeHierarchyLabel(Composite composite) {
-		  fTypeHierarchyLabel= new Label(composite, SWT.WRAP);
-		  GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		  fTypeHierarchyLabel.setLayoutData(gd);
+		fTypeHierarchyLabel= new Label(composite, SWT.WRAP);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		fTypeHierarchyLabel.setLayoutData(gd);
+	}
+	
+	private void setHierarchyLabelText() {
 		  String message= RefactoringMessages.getFormattedString("PullUpInputPage.subtypes", getSupertypeSignature()); //$NON-NLS-1$
 		  fTypeHierarchyLabel.setText(message);
 	}
 	
 	private String getSupertypeSignature(){
-		try{
-			return JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getSuperTypeOfDeclaringType(new NullProgressMonitor()));
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Pull Up", "Internal Error. See log for details");
-			return "";
-		}	
+			return JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getTargetClass());
 	}
 
 	private void createTreeViewer(Composite composite) {
@@ -463,7 +462,8 @@ public class PullUpInputPage2 extends UserInputWizardPage {
 	private void initializeTreeViewer(IProgressMonitor pm) {
 		try {
 			IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1));
-			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getTypeHierarchyOfDeclaringClassSuperclass(new SubProgressMonitor(pm, 1));
+			ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
+			removeAllTreeViewFilters();
 			fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
 			fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(getPullUpMethodsRefactoring().getDeclaringType(), matchingMethods));
 			fTreeViewer.setInput(hierarchy);
@@ -473,6 +473,13 @@ public class PullUpInputPage2 extends UserInputWizardPage {
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			fTreeViewer.setInput(null);
+		}
+	}
+	
+	private void removeAllTreeViewFilters() {
+		ViewerFilter[] filters= fTreeViewer.getFilters();
+		for (int i= 0; i < filters.length; i++) {
+			fTreeViewer.removeFilter(filters[i]);
 		}
 	}
 

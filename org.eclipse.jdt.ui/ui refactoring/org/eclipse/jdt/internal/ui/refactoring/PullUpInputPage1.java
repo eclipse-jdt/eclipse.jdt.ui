@@ -10,6 +10,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -50,6 +51,7 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	private static final int ROW_COUNT= 5;
 	private CheckboxTableViewer fTableViewer;
 	private Combo fSuperclassCombo;
+	private IType[] fSuperclasses;
 	
 	public PullUpInputPage1() {
 		super(PAGE_NAME, false);
@@ -107,12 +109,12 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 		label.setLayoutData(new GridData());
 		
 		fSuperclassCombo= new Combo(parent, SWT.READ_ONLY);
-		IType[] superclasses= getPullUpRefactoring().getPossibleSuperclasses(pm);
-		Assert.isTrue(superclasses.length > 0);
-		for (int i= 0; i < superclasses.length; i++) {
-			fSuperclassCombo.add(createComboLabel(superclasses[i]));
+		fSuperclasses= getPullUpRefactoring().getPossibleTargetClasses(pm);
+		Assert.isTrue(fSuperclasses.length > 0);
+		for (int i= 0; i < fSuperclasses.length; i++) {
+			fSuperclassCombo.add(createComboLabel(fSuperclasses[i]));
 		}
-		fSuperclassCombo.setText(createComboLabel(superclasses[superclasses.length - 1]));
+		fSuperclassCombo.setSelection(new Point(fSuperclasses.length - 1, fSuperclasses.length - 1));
 		fSuperclassCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
@@ -205,9 +207,12 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	private void createMemberTable(Composite parent) {
 		final Table table= new Table(parent, SWT.CHECK | SWT.MULTI | SWT.BORDER);
 		table.setHeaderVisible(false);
-		table.setLinesVisible(true);
+		table.setLinesVisible(false);
 		
-		table.setLayoutData(new GridData(GridData.FILL_BOTH));
+		GridData tableGD= new GridData(GridData.FILL_BOTH);
+		tableGD.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
+		tableGD.widthHint= 40;
+		table.setLayoutData(tableGD);
 		
 		fTableViewer= new CheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
@@ -283,6 +288,15 @@ public class PullUpInputPage1 extends UserInputWizardPage {
 	
 	private void initializeRefactoring() {
 		markCheckedMembersAsMembersToPullUp();
+		setSelectedClassAsTargetClass();
+	}
+	
+	private void setSelectedClassAsTargetClass() {
+		getPullUpRefactoring().setTargetClass(getSelectedClass());
+	}
+	
+	private IType getSelectedClass() {
+		return fSuperclasses[fSuperclassCombo.getSelectionIndex()];
 	}
 
 	private void markCheckedMembersAsMembersToPullUp() {
