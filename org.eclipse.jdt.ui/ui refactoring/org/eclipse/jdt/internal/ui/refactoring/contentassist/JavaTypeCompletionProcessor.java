@@ -14,13 +14,12 @@ package org.eclipse.jdt.internal.ui.refactoring.contentassist;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -101,42 +100,71 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 		public TypeCompletionRequestor(boolean enableBaseTypes, boolean enableVoid) {
 			fEnableBaseTypes= enableBaseTypes;
 			fEnableVoid= enableVoid;
+			setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+			setIgnored(CompletionProposal.FIELD_REF, true);
+			setIgnored(CompletionProposal.LABEL_REF, true);
+			setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
+			setIgnored(CompletionProposal.METHOD_DECLARATION, true);
+			setIgnored(CompletionProposal.METHOD_REF, true);
+			setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+//workaround for bug 80126:
+//			setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+//			setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
 		}
+		
+		public void accept(CompletionProposal proposal) {
+			switch (proposal.getKind()) {
+				case CompletionProposal.PACKAGE_REF :
+					addAdjustedCompletion(
+							new String(proposal.getDeclarationSignature()), //TODO bug 80384: Cannot decode package signature CompletionProposal - need API
+							new String(proposal.getCompletion()),
+							proposal.getReplaceStart(),
+							proposal.getReplaceEnd(),
+							proposal.getRelevance(),
+							JavaPluginImages.DESC_OBJS_PACKAGE);
+					break;
+					
+				case CompletionProposal.TYPE_REF :
+					char[] fullName= Signature.toCharArray(proposal.getSignature());
+					StringBuffer buf= new StringBuffer();
+					buf.append(Signature.getSimpleName(fullName));
+					if (buf.length() == 0)
+						return; // this is the dummy class, whose $ have been converted to dots
+					char[] typeQualifier= Signature.getQualifier(fullName);
+					if (typeQualifier.length > 0) {
+						buf.append(" - "); //$NON-NLS-1$
+						buf.append(typeQualifier);
+					}
+					String name= buf.toString();
+					
+					addAdjustedCompletion(
+							name,
+							new String(proposal.getCompletion()),
+							proposal.getReplaceStart(),
+							proposal.getReplaceEnd(),
+							proposal.getRelevance(),
+							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false));
+								//TODO: extract isInner and isInInterface from Signature?
+					break;
+					
+				case CompletionProposal.KEYWORD:
+					if (! fEnableBaseTypes)
+						return;
+					String keyword= new String(proposal.getName());
+					if ( (fEnableVoid && VOID.equals(keyword)) || (fEnableBaseTypes && BASE_TYPES.contains(keyword)) )
+						addAdjustedCompletion(
+								keyword,
+								new String(proposal.getCompletion()),
+								proposal.getReplaceStart(),
+								proposal.getReplaceEnd(),
+								proposal.getRelevance(),
+								null);
+					break;
 
-		public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-			if (isDummyClass(typeName))
-				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers, false);
-			addAdjustedTypeCompletion(packageName, typeName, completionName, start, end, relevance, descriptor);
-		}
-		
-		public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
-			if (isDummyClass(typeName))
-				return;
-			ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers | Flags.AccInterface, false);
-			addAdjustedTypeCompletion(packageName, typeName, completionName, start, end, relevance, descriptor);
-		}
-		
-		public void acceptKeyword(char[] keywordName, int start, int end, int relevance) {
-			if (! fEnableBaseTypes)
-				return;
-			String keyword= new String(keywordName);
-			if ( (fEnableVoid && VOID.equals(keyword)) || (fEnableBaseTypes && BASE_TYPES.contains(keyword)) )
-				addAdjustedCompletion(keyword, keyword, start, end, relevance, null);
-		}
-		
-		public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
-			addAdjustedCompletion(new String(packageName), new String(completionName), start, end, relevance, JavaPluginImages.DESC_OBJS_PACKAGE);
-		}
-		
-		public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
-			if (isDummyClass(typeName))
-				return;
-			addAdjustedTypeCompletion(packageName, typeName, completionName, start, end, relevance, JavaPluginImages.DESC_OBJS_CLASS);
-		}
-		
-		private static boolean isDummyClass(char[] typeName) {
-			return new String(typeName).equals(DUMMY_CLASS_NAME);
+				default :
+					break;
+			}
+			
 		}
 	}
 }

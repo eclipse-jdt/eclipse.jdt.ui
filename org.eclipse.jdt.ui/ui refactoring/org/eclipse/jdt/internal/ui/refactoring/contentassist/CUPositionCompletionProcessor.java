@@ -17,7 +17,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -204,7 +204,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		}
 	}
 
-	protected static class CUPositionCompletionRequestor extends CompletionRequestorAdapter {
+	protected abstract static class CUPositionCompletionRequestor extends CompletionRequestor {
 		private int fOffsetReduction;
 		private IJavaProject fJavaProject;
 		
@@ -224,7 +224,7 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			fProposals= new ArrayList();
 		}
 		
-		public final void acceptError(IProblem error) {
+		public final void completionFailure(IProblem error) {
 			fErrorMessage2= error.getMessage();
 		}
 
