@@ -218,6 +218,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (statement instanceof VariableDeclarationStatement) {
 			newStatement= ast.newExpressionStatement(assignment);
 			insertIndex+= 1; // add after declaration
+			
+			int modifiers= ((VariableDeclarationStatement) statement).getModifiers();
+			if (Modifier.isFinal(modifiers)) {
+				rewrite.markAsReplaced(statement, ASTNodeConstants.MODIFIERS, new Integer(modifiers & ~Modifier.FINAL), null);
+			}
 		} else {
 			rewrite.markAsReplaced(fragment.getParent(), assignment);
 			VariableDeclarationFragment newFrag= ast.newVariableDeclarationFragment();
@@ -228,7 +233,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
 			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
-			newVarDec.setModifiers(oldVarDecl.getModifiers());
+			newVarDec.setModifiers(oldVarDecl.getModifiers() & ~Modifier.FINAL);
 			newStatement= newVarDec;
 		}
 		
