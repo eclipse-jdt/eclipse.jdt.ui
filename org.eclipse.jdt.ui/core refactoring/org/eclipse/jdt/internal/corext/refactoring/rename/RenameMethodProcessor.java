@@ -370,7 +370,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				|| method.getReturnType().equals("QString;") //$NON-NLS-1$
 				|| method.getReturnType().equals("Qjava.lang.String;"))) //$NON-NLS-1$
 			return true;		
-		else return (method.isMainMethod());
+		else
+			return false;
 	}
 	
 	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName) {
