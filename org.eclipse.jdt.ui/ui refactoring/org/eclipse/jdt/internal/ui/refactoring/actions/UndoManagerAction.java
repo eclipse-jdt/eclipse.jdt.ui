@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 
+	private static final int MAX_LENGTH= 30;
+
 	private RefactoringStatus fPreflightStatus;
 	private IAction fAction;
 	private IWorkbenchWindow fWorkbenchWindow;
@@ -73,7 +75,21 @@ public abstract class UndoManagerAction implements IWorkbenchWindowActionDelegat
 		fAction= action;
 		fUndoManagerListener= createUndoManagerListener();
 		Refactoring.getUndoManager().addListener(fUndoManagerListener);
-	}		
+	}
+	
+	protected String shortenText(String text, int patternLength) {
+		int length= text.length();
+		final int finalLength = MAX_LENGTH + patternLength;
+		if (text.length() <= finalLength)
+			return text;
+		StringBuffer result= new StringBuffer();
+		int mid= finalLength / 2;
+		result.append(text.substring(0, mid));
+		result.append("..."); //$NON-NLS-1$
+		result.append(text.substring(length - mid));
+		return result.toString();
+	}
+			
 	/* (non-Javadoc)
 	 * Method declared in IActionDelegate
 	 */

@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class RedoRefactoringAction extends UndoManagerAction {
 
+	private int fPatternLength;
+
 	public RedoRefactoringAction() {
 	}
 
@@ -84,6 +86,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 	public void selectionChanged(IAction action, ISelection s) {
 		if (!isHooked()) {
 			hookListener(action);
+			fPatternLength= RefactoringMessages.getString("RedoRefactoringAction.extendedLabel").length(); //$NON-NLS-1$
 			IUndoManager undoManager = Refactoring.getUndoManager();
 			if (undoManager.anythingToRedo()) {
 				if (undoManager.peekRedoName() != null)
@@ -96,8 +99,8 @@ public class RedoRefactoringAction extends UndoManagerAction {
 	}	
 	
 	private String getActionText() {
-		return RefactoringMessages.getFormattedString(
+		return shortenText(RefactoringMessages.getFormattedString(
 			"RedoRefactoringAction.extendedLabel", //$NON-NLS-1$
-			Refactoring.getUndoManager().peekRedoName());
+			Refactoring.getUndoManager().peekRedoName()), fPatternLength);
 	}
 }
