@@ -86,7 +86,7 @@ public class SuperTypeHierarchyCache {
 	/**
 	 * Check if the given type is in the hierarchy
 	 */	
-	public static boolean hasInCache(IType type) throws JavaModelException {
+	public static boolean hasInCache(IType type) {
 		return findTypeHierarchyInCache(type) != null;
 	}
 	

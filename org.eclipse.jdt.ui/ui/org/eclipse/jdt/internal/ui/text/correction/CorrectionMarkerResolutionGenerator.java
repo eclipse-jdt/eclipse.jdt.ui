@@ -160,7 +160,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		return null;
 	}
 	
-	private IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) throws JavaModelException {
+	private IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) {
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) { // open in editor
 			Iterator iter= model.getAnnotationIterator();

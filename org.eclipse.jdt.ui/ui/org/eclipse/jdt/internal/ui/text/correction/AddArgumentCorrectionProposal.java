@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.lang.reflect.Modifier;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -49,7 +47,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	/*(non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
-	protected ASTRewrite getRewrite() throws CoreException {
+	protected ASTRewrite getRewrite() {
 		AST ast= fNameNode.getAST();
 		ASTRewrite rewrite= new ASTRewrite(fNameNode.getParent());
 
