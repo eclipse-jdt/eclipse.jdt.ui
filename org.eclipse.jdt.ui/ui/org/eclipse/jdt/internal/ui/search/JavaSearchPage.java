@@ -86,6 +86,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	private static List fgPreviousSearchPatterns= new ArrayList(20);
 
 	private SearchPatternData fInitialData;
+	private IStructuredSelection fStructuredSelection;
 	private IJavaElement fJavaElement;
 	private boolean fFirstTime= true;
 	private IDialogSettings fDialogSettings;
@@ -111,10 +112,9 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		SearchMessages.getString("SearchPage.limitTo.allOccurrences"), //$NON-NLS-1$
 		SearchMessages.getString("SearchPage.limitTo.readReferences"), //$NON-NLS-1$		
 		SearchMessages.getString("SearchPage.limitTo.writeReferences")}; //$NON-NLS-1$
-	
+
 
 	private class SearchPatternData {
-
 		int			searchFor;
 		int			limitTo;
 		String			pattern;
@@ -156,7 +156,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
@@ -469,10 +469,10 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}	
 	
 	private void initSelections() {
-		ISelection selection= getSelection();
-		fInitialData= tryStructuredSelection(selection);
+		fStructuredSelection= asStructuredSelection();
+		fInitialData= tryStructuredSelection(fStructuredSelection);
 		if (fInitialData == null)
-			fInitialData= trySimpleTextSelection(selection);
+			fInitialData= trySimpleTextSelection(getContainer().getSelection());
 		if (fInitialData == null)
 			fInitialData= getDefaultInitValues();
 
@@ -485,11 +485,11 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fPattern.setText(fInitialData.pattern);
 	}
 
-	private SearchPatternData tryStructuredSelection(ISelection selection) {
-		if (!(selection instanceof IStructuredSelection))
+	private SearchPatternData tryStructuredSelection(IStructuredSelection selection) {
+		if (selection == null)
 			return null;
 
-		Object o= ((IStructuredSelection)selection).getFirstElement();
+		Object o= selection.getFirstElement();
 		if (o instanceof IJavaElement) {
 			return determineInitValuesFrom((IJavaElement)o);
 		} else if (o instanceof ISearchResultViewEntry) {
@@ -660,18 +660,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 	
 	/**
-	 * Returns the current active selection.
+	 * Returns the structured selection from the selection.
 	 */
-	private ISelection getSelection() {
+	private IStructuredSelection asStructuredSelection() {
 		IWorkbenchWindow wbWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (wbWindow == null)
-			return fContainer.getSelection();
+			return StructuredSelection.EMPTY;
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(wbWindow.getSelectionService());
-		ISelection selection= provider.getSelection();
-		if (selection.equals(StructuredSelection.EMPTY))
-			return fContainer.getSelection();
-		else
-			return selection;
+		return provider.getSelection();
 	}
 	
 	/**
