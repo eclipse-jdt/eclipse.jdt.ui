@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -18,10 +19,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
@@ -147,10 +150,15 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	}
 	
 	/*
-	 * @see ICompletionProposalExtension#apply(IDocument, char)
+	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
 	 */
-	public void apply(IDocument document, char trigger) {
+	public void apply(IDocument document, char trigger, int offset) {
 		try {
+			
+			// patch replacement length
+			int delta= offset - (fReplacementOffset + fReplacementLength);
+			if (delta > 0)
+				fReplacementLength += delta;
 			
 			if (trigger == (char) 0) {
 				document.replace(fReplacementOffset, fReplacementLength, fReplacementString);
@@ -179,7 +187,7 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 	 * @see ICompletionProposal#apply
 	 */
 	public void apply(IDocument document) {
-		apply(document, (char) 0);
+		apply(document, (char) 0, fReplacementOffset + fReplacementLength);
 	}
 	
 	/*
@@ -292,4 +300,25 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		fImage= image;
 	}
 
+	/*
+	 * @see ICompletionProposalExtension#isValidFor(IDocument, int)
+	 */
+	public boolean isValidFor(IDocument document, int offset) {
+		
+		if (offset < fReplacementOffset)
+			return false;
+		
+		int replacementLength= fReplacementString == null ? 0 : fReplacementString.length();
+		if (offset >=  fReplacementOffset + replacementLength)
+			return false;
+		
+		try {
+			int length= offset - fReplacementOffset;
+			String start= document.get(fReplacementOffset, length);
+			return fReplacementString.substring(0, length).equalsIgnoreCase(start);
+		} catch (BadLocationException x) {
+		}		
+		
+		return false;
+	}
 }

@@ -53,8 +53,8 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
-	public void apply(IDocument document, char trigger) {
-		super.apply(document, trigger);
+	public void apply(IDocument document, char trigger, int offset) {
+		super.apply(document, trigger, offset);
 
 		int replacementOffset= getReplacementOffset();
 		int replacementLength= getReplacementLength();

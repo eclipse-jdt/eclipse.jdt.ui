@@ -84,7 +84,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 	/*
 	 * @see ICompletionProposalExtension#apply(IDocument, char)
 	 */
-	public void apply(IDocument document, char trigger) {
+	public void apply(IDocument document, char trigger, int offset) {
 		try {
 			String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
@@ -120,7 +120,7 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			JavaPlugin.log(e);
 		}
 			
-		super.apply(document, trigger);
+		super.apply(document, trigger, offset);
 	}
 	
 	private boolean createStubs(StringBuffer buf, ImportsStructure imports) throws JavaModelException {

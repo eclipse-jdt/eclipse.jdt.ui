@@ -42,8 +42,11 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		}
 	};
 
-	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-' };
-	private final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
+	private final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
+	private final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
+	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
+	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';' };
+
 	
 	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
 						fLabels= new ArrayList(), fMethods= new ArrayList(), 
@@ -111,6 +114,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		
 		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name));
+		proposal.setTriggerCharacters(VAR_TRIGGER);
 		
 		fFields.add(proposal);
 	}
@@ -149,7 +153,9 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 			buf.append("    "); //$NON-NLS-1$
 			buf.append(typeName);
 		}	
-		fVariables.add(createCompletion(start, end, new String(name), null, buf.toString()));
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(name), null, buf.toString());
+		proposal.setTriggerCharacters(VAR_TRIGGER);
+		fVariables.add(proposal);
 	}
 	
 	private String getParameterSignature(char[][] parameterTypeNames, char[][] parameterNames) {
@@ -193,7 +199,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		}
 	
 		boolean userMustCompleteParameters= (contextInformation != null && completionName.length > 0);
-		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : GENERAL_TRIGGERS;
+		char[] triggers= userMustCompleteParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS;
 		proposal.setTriggerCharacters(triggers);
 		
 		if (userMustCompleteParameters) {
@@ -254,7 +260,9 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 			buf.append(" - "); //$NON-NLS-1$
 			buf.append(typeName);
 		}	
-		fVariables.add(createCompletion(start, end, new String(completionName), null, buf.toString()));
+		JavaCompletionProposal proposal= createCompletion(start, end, new String(completionName), null, buf.toString());
+		proposal.setTriggerCharacters(VAR_TRIGGER);
+		fVariables.add(proposal);
 	}	
 	
 	public String getErrorMessage() {
@@ -407,6 +415,7 @@ public class ExperimentalResultCollector implements ICompletionRequestor {
 		JavaCompletionProposal proposal= createCompletion(start, end, completion, iconName, name);
 		proposal.setImportDeclaration(importDeclaration);
 		proposal.setProposalInfo(proposalInfo);
+		proposal.setTriggerCharacters(TYPE_TRIGGERS);
 		return proposal;
 	}
 	
