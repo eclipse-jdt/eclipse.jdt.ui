@@ -20,6 +20,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceRuleFactory;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -464,13 +466,12 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
-				
 				if (!isActive())
 					return;
-				
+					
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 					return;
-				
+					
 				
 				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
@@ -479,7 +480,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					
 					fPreviouslyOverlaid= fCurrentlyOverlaid;
 					fCurrentlyOverlaid= new ArrayList();
-					
+
 					if (fGeneratedAnnotations.size() > 0) {
 						temporaryProblemsChanged= true;	
 						removeAnnotations(fGeneratedAnnotations, false, true);
@@ -487,7 +488,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					}
 					
 					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
-						
+												
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
 							
@@ -497,7 +498,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 								isCanceled= true;
 								break;
 							}
-							
+								
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								
@@ -506,7 +507,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 									overlayMarkers(position, annotation);								
 									addAnnotation(annotation, position, false);
 									fGeneratedAnnotations.add(annotation);
-									
+								
 									temporaryProblemsChanged= true;
 								} catch (BadLocationException x) {
 									// ignore invalid position
@@ -521,7 +522,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					fPreviouslyOverlaid.clear();
 					fPreviouslyOverlaid= null;
 				}
-				
+					
 				if (temporaryProblemsChanged)
 					fireModelChanged();
 			}
@@ -918,9 +919,14 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider.DocumentProviderOperation#getSchedulingRule()
 				 */
 				public ISchedulingRule getSchedulingRule() {
-					if (info.fElement instanceof IFileEditorInput)
-						return ((IFileEditorInput)info.fElement).getFile().getParent();
-					else
+					if (info.fElement instanceof IFileEditorInput) {
+						IFile file= ((IFileEditorInput)info.fElement).getFile();
+						IResourceRuleFactory ruleFactory= ResourcesPlugin.getWorkspace().getRuleFactory();
+						if (file == null || !file.exists())
+							return ruleFactory.createRule(file);
+						else
+							return ruleFactory.modifyRule(file);
+					} else
 						return null;
 				}
 			};
