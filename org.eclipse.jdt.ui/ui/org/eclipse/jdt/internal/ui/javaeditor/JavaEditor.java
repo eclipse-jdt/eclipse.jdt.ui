@@ -1159,7 +1159,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setKeyBindingScopes(new String[] { "org.eclipse.ui.textEditorScope" });  //$NON-NLS-1$
+		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
 		
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE))
 			fUpdater= new OutlinePageSelectionUpdater();
