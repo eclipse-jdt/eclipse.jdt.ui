@@ -5,7 +5,9 @@
 package org.eclipse.jdt.internal.junit.wizards;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.core.resources.IMarker;
@@ -499,104 +501,99 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 
 	protected void createTestMethodStubs(IType type) throws JavaModelException {
 		IMethod[] methods= fPage2.getCheckedMethods();
-		if (methods.length > 0) {
-			/* find overloaded methods */
-			ArrayList allMethods= new ArrayList();
-			IMethod[] allMethodsArray= fPage2.getAllMethods();
-			for (int i= 0; i < allMethodsArray.length; i++) {
-				allMethods.add(allMethodsArray[i]);
+		if (methods.length == 0)
+			return;
+		/* find overloaded methods */
+		IMethod[] allMethodsArray= fPage2.getAllMethods();
+		List allMethods= new ArrayList();
+		allMethods.addAll(Arrays.asList(allMethodsArray));
+		List overloadedMethods= getOveloadedMethods(allMethods);
+		
+		/* used when for example both sum and Sum methods are present. Then
+		 * sum -> testSum
+		 * Sum -> testSum1
+		 */
+		List newMethodsNames= new ArrayList();				
+		for (int i = 0; i < methods.length; i++) {
+			IMethod method= methods[i];
+			String elementName= method.getElementName();
+			StringBuffer methodName= new StringBuffer(NewTestCaseCreationWizardPage2.PREFIX+Character.toUpperCase(elementName.charAt(0))+elementName.substring(1));
+			StringBuffer newMethod= new StringBuffer();
+
+			if (overloadedMethods.contains(method)) {
+				appendMethodComment(newMethod, method);
+				String[] params= method.getParameterTypes();
+				appendParameterNamesToMethodName(methodName, params);
 			}
-			ArrayList overloadedMethods= new ArrayList();
-			for (int i= 0; i < allMethods.size(); i++) {
-				IMethod current= (IMethod) allMethods.get(i);
-				String currentName= current.getElementName();
-				boolean currentAdded= false;
-				for (ListIterator iter= allMethods.listIterator(i+1); iter.hasNext(); ) {
-					IMethod iterMethod= (IMethod) iter.next();
-					if (iterMethod.getElementName().equals(currentName)) {
-						//method is overloaded
-						if (!currentAdded) {
-							overloadedMethods.add(current);
-							currentAdded= true;
-						}
-						overloadedMethods.add(iterMethod);
-						iter.remove();
-					}
-				}
-			}
-			
-			/* used when for example both sum and Sum methods are present. Then
-			 * sum -> testSum
-			 * Sum -> testSum1
+			/* Should I for examples have methods
+			 * 	void foo(java.lang.StringBuffer sb) {}
+			 *  void foo(mypackage1.StringBuffer sb) {}
+			 *  void foo(mypackage2.StringBuffer sb) {}
+			 * I will get in the test class:
+			 *  testFooStringBuffer()
+			 *  testFooStringBuffer1()
+			 *  testFooStringBuffer2()
 			 */
-			ArrayList newMethodsNames= new ArrayList();				
-			for (int i = 0; i < methods.length; i++) {
-				String elementName= methods[i].getElementName();
-				StringBuffer methodName= new StringBuffer(NewTestCaseCreationWizardPage2.PREFIX+Character.toUpperCase(elementName.charAt(0))+elementName.substring(1));
-				StringBuffer newMethod= new StringBuffer();
-	
-				if (overloadedMethods.contains(methods[i])) {
-					IMethod method= methods[i];
-					String returnType= Signature.toString(method.getReturnType());
-					String body= WizardMessages.getFormattedString("NewTestClassWizPage.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
-					newMethod.append("/*\n * "+body+"(");  //$NON-NLS-1$ //$NON-NLS-2$
-					String[] paramTypes= method.getParameterTypes();
-					if (paramTypes.length > 0) {
-						if (paramTypes.length > 1) {
-							for (int j= 0; j < paramTypes.length-1; j++) {
-								newMethod.append(Signature.toString(paramTypes[j])+", "); //$NON-NLS-1$
-							}
-						}
-						newMethod.append(Signature.toString(paramTypes[paramTypes.length-1]));
-					}
-					newMethod.append(")\n */\n"); //$NON-NLS-1$
-					String[] params= methods[i].getParameterTypes();
-					for (int j= 0; j < params.length; j++) {
-						String param= params[j];
-						int start= 0, end= param.length();
-						//using JDK 1.4:
-						// (new Character(Signature.C_ARRAY)).toString() --> Character.toString(Signature.C_ARRAY)
-						if (param.startsWith( (new Character(Signature.C_ARRAY)).toString() ))
-							start= 1;
-						
-						if (param.endsWith((new Character(Signature.C_NAME_END)).toString() ))
-							end--;
-						
-						if (param.startsWith((new Character(Signature.C_UNRESOLVED)).toString() ,start)
-							|| param.startsWith((new Character(Signature.C_RESOLVED)).toString() ,start))
-							start++;
-						String paramName= param.substring(start, end);
-						/* if parameter is qualified name, extract simple name */
-						if (paramName.indexOf('.') != -1) {
-							start += paramName.lastIndexOf('.')+1;
-						}
-						methodName.append(param.substring(start, end));
-						if (param.startsWith( (new Character(Signature.C_ARRAY)).toString() ))
-							methodName.append("Array"); //$NON-NLS-1$
-					}
-				}
-				/* Should I for examples have methods
-				 * 	void foo(java.lang.StringBuffer sb) {}
-				 *  void foo(mypackage1.StringBuffer sb) {}
-				 *  void foo(mypackage2.StringBuffer sb) {}
-				 * I will get in the test class:
-				 *  testFooStringBuffer()
-				 *  testFooStringBuffer1()
-				 *  testFooStringBuffer2()
-				 */
-				if (newMethodsNames.contains(methodName.toString())) {
-					int suffix= 1;
-					while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
-						suffix++;
-					methodName.append(Integer.toString(suffix));
-				}
-				newMethodsNames.add(new String(methodName));
-				if (fPage2.getCreateFinalMethodStubsButtonSelection())
-					newMethod.append("final "); //$NON-NLS-1$
-				newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
-				type.createMethod(newMethod.toString(), null, false, null);	
+			if (newMethodsNames.contains(methodName.toString())) {
+				int suffix= 1;
+				while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
+					suffix++;
+				methodName.append(Integer.toString(suffix));
+			}
+			newMethodsNames.add(methodName.toString());
+			if (fPage2.getCreateFinalMethodStubsButtonSelection())
+				newMethod.append("final "); //$NON-NLS-1$
+			newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			type.createMethod(newMethod.toString(), null, false, null);	
+		}
+	}
+
+	public void appendParameterNamesToMethodName(StringBuffer methodName, String[] params) {
+		for (int i= 0; i < params.length; i++) {
+			String param= params[i];
+			methodName.append(Signature.getSimpleName(Signature.toString(Signature.getElementType(param))));
+			for (int j= 0, arrayCount= Signature.getArrayCount(param); j < arrayCount; j++) {
+				methodName.append("Array"); //$NON-NLS-1$
 			}
 		}
+	}
+
+	private void appendMethodComment(StringBuffer newMethod, IMethod method) throws JavaModelException {
+		String returnType= Signature.toString(method.getReturnType());
+		String body= WizardMessages.getFormattedString("NewTestClassWizPage.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
+		newMethod.append("/*\n * "+body+"(");  //$NON-NLS-1$ //$NON-NLS-2$
+		String[] paramTypes= method.getParameterTypes();
+		if (paramTypes.length > 0) {
+			if (paramTypes.length > 1) {
+				for (int j= 0; j < paramTypes.length-1; j++) {
+					newMethod.append(Signature.toString(paramTypes[j])+", "); //$NON-NLS-1$
+				}
+			}
+			newMethod.append(Signature.toString(paramTypes[paramTypes.length-1]));
+		}
+		newMethod.append(")\n */\n"); //$NON-NLS-1$
+	}
+
+	private List getOveloadedMethods(List allMethods) {
+		List overloadedMethods= new ArrayList();
+		for (int i= 0; i < allMethods.size(); i++) {
+			IMethod current= (IMethod) allMethods.get(i);
+			String currentName= current.getElementName();
+			boolean currentAdded= false;
+			for (ListIterator iter= allMethods.listIterator(i+1); iter.hasNext(); ) {
+				IMethod iterMethod= (IMethod) iter.next();
+				if (iterMethod.getElementName().equals(currentName)) {
+					//method is overloaded
+					if (!currentAdded) {
+						overloadedMethods.add(current);
+						currentAdded= true;
+					}
+					overloadedMethods.add(iterMethod);
+					iter.remove();
+				}
+			}
+		}
+		return overloadedMethods;
 	}
 
 	/**
