@@ -1377,7 +1377,6 @@ JavaStructureDiffViewerCreator
 			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
       			label="%DeclarationsInWorkspace.label"
-      			accelerator="Ctrl+G"
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
 				retarget="true" />	
@@ -1403,7 +1402,6 @@ JavaStructureDiffViewerCreator
 			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
       			label="%ReferencesInWorkspace.label"
-      			accelerator="Ctrl+Shift+G"
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
 				retarget="true" />	
@@ -1714,20 +1712,62 @@ JavaStructureDiffViewerCreator
 	/>
 
 	<!-- search -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace"
+		name= "%ActionDefinition.referencesInWorkspace.name"
+		description="%ActionDefinition.referencesInWorkspace.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy"
+		name= "%ActionDefinition.referencesInHierarchy.name"
+		description="%ActionDefinition.referencesInHierarchy.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set"
+		name= "%ActionDefinition.referencesInWorkingSet.name"
+		description="%ActionDefinition.referencesInWorkingSet.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace"
+		name= "%ActionDefinition.readAccessInworkspace.name"
+		description="%ActionDefinition.readAccessInWorkspace.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy"
+		name= "%ActionDefinition.readAccessInHierarchy.name"
+		description="%ActionDefinition.readAccessInHierarchy.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set"
+		name= "%ActionDefinition.readAccessInWorkingSet.name"
+		description="%ActionDefinition.readAccessInWorkingSet.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace"
+		name= "%ActionDefinition.writeAccessInWorkspace.name"
+		description="%ActionDefinition.writeAccessInWorkspace.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy"
+		name= "%ActionDefinition.writeAccessInHierarchy.name"
+		description="%ActionDefinition.writeAccessInHierarchy.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set"
+		name= "%ActionDefinition.writeAccessInWorkingSet.name"
+		description="%ActionDefinition.writeAccessInWorkingSet.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace"
+		name= "%ActionDefinition.declarationsInWorkspace.name"
+		description="%ActionDefinition.declarationsInWorkspace.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy"
+		name= "%ActionDefinition.declarationsInHierarchy.name"
+		description="%ActionDefinition.declarationsInHierarchy.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set"
+		name= "%ActionDefinition.declarationsInWorkingSet.name"
+		description="%ActionDefinition.declarationsInWorkingSet.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace"
+		name= "%ActionDefinition.implementorsInWorkspace.name"
+		description="%ActionDefinition.implementorsInWorkspace.description"
+	/>
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
+		name= "%ActionDefinition.implementorsInWorkingSet.name"
+		description="%ActionDefinition.implementorsInWorkingSet.description"
+	/>
 
 	<!-- miscellaenous -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
@@ -1806,7 +1846,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
 
 		<!-- search -->
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
@@ -1815,7 +1855,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
+		<accelerator key="Alt+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
