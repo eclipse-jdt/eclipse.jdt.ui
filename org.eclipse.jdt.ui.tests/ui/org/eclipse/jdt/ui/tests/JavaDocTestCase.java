@@ -2,19 +2,48 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.ui.tests;
+package org.eclipse.jdt.ui.tests;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.net.URL;
 
-import java.io.BufferedReader;import java.io.File;import java.io.IOException;import java.io.Reader;import java.net.URL;import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.testplugin.JavaTestProject;
+import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;
+import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+
 
 public class JavaDocTestCase extends TestCase {
 	
 	private JavaTestProject fTestProject;
-
+
 	public JavaDocTestCase(String name) {
 		super(name);
 	}
-
+
 	public static void main(String[] args) {
 		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaDocTestCase.class, args);
 	}		
@@ -31,12 +60,12 @@ public class JavaDocTestCase extends TestCase {
 	 */	
 	protected void setUp() throws Exception {
 		fTestProject= JavaTestSetup.getTestProject();
-
+
 		IPackageFragmentRoot jdk= fTestProject.addRTJar();
 		File jdocDir= new File("M:\\JAVA\\jdk1.2\\docs\\api");
 		assert("Must be existing directory", jdocDir.isDirectory());
 		JavaDocAccess.setJavaDocLocation(jdk, jdocDir.toURL());
-
+
 		IPackageFragmentRoot root= fTestProject.addSourceContainer("src");
 		IPackageFragment pack= root.createPackageFragment("ibm.util", true, null);
 		
@@ -119,7 +148,7 @@ public class JavaDocTestCase extends TestCase {
 		assert("JavaDoc location must exist", jdocLocation != null);
 		
 		StandardDocletPageBuffer page= new StandardDocletPageBuffer(type);
-
+
 		Reader reader= page.getJavaDoc(type);
 		if (reader == null) {
 			System.out.println("JavaDoc not found for type " + type.getElementName());
@@ -128,7 +157,7 @@ public class JavaDocTestCase extends TestCase {
 			System.out.println("JavaDoc of type " + type.getElementName());
 			System.out.println(txtreader.getString());
 		}		
-
+
 
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
@@ -205,6 +234,6 @@ public class JavaDocTestCase extends TestCase {
 		}
 		return buf.toString();
 	}	
-
+
 			
 }

@@ -2,25 +2,25 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.ui.wizards.examples;
-
+package org.eclipse.jdt.ui.wizards.examples;
+
 import java.util.List;
 import java.util.Random;
-
+
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
+
 import org.eclipse.jface.viewers.LabelProvider;
-
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-
+
 public class CheckBoxExample {
 	private Shell fShell;
 	private Label fLabel;
@@ -40,7 +40,7 @@ public class CheckBoxExample {
 		fShell.setLayout(new GridLayout());
 		
 		Adapter adapter= new Adapter();
-
+
 		
 		String[] addButtons= new String[] { "Add1", "Check 0", "Print"};
 		CheckedListDialogField list= new CheckedListDialogField(adapter, addButtons, new LabelProvider(), 0);

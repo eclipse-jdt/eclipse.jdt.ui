@@ -2,8 +2,8 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.ui.wizards.examples;
-
+package org.eclipse.jdt.ui.wizards.examples;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,16 +13,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
-
+
 import org.eclipse.jface.viewers.LabelProvider;
-
+
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-
+
 public class TabTest {
 	private Shell fShell;
 	private Label fLabel;
@@ -62,7 +62,7 @@ public class TabTest {
 		ListDialogField list= new ListDialogField(new Adapter(), addButtons, new LabelProvider(), 0);
 		list.setRemoveButtonLabel("Remove");
 		list.setLabelText("List: ");
-
+
 		Composite c1= new Composite(folder, SWT.NONE);
 		LayoutUtil.doDefaultLayout(c1, new DialogField[] { list }, true);
 		
@@ -90,7 +90,7 @@ public class TabTest {
 		fShell.open ();
 		return this;
 	}
-
+
 	private class Adapter implements IStringButtonAdapter, IDialogFieldListener, IListAdapter {
 		
 		// -------- IStringButtonAdapter

@@ -2,21 +2,40 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.ui.tests;
+package org.eclipse.jdt.ui.tests;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.testplugin.JavaTestProject;
+import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+
+import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
+
 
 public class AddUnimplementedMethodsTest extends TestCase {
 	
 	private JavaTestProject fTestProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
-
+
 	public AddUnimplementedMethodsTest(String name) {
 		super(name);
 	}
-
+
 
 	public static void main(String[] args) {
 		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), AddUnimplementedMethodsTest.class, args);
@@ -36,7 +55,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	 */	
 	protected void setUp() throws Exception {
 		fTestProject= JavaTestSetup.getTestProject();
-
+
 		IPackageFragmentRoot root= fTestProject.addSourceContainer("src");
 		fPackage= root.createPackageFragment("ibm.util", true, null);
 		
@@ -53,7 +72,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fClassC= cu.createType("public abstract class C {\n}\n", null, true, null);
 		fClassC.createMethod("public void c(java.util.Hashtable h) {\n}\n", null, true, null);
 		fClassC.createMethod("public abstract java.util.Enumeration d(java.util.Hashtable h) {\n}\n", null, true, null);
-
+
 		cu= fPackage.getCompilationUnit("D.java");
 		fClassD= cu.createType("public abstract class D extends C {\n}\n", null, true, null);
 		fClassD.createMethod("public abstract void c(java.util.Hashtable h);\n", null, true, null);
@@ -63,7 +82,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		fInterfaceE.createMethod("void c(java.util.Hashtable h);\n", null, true, null);
 		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);	
 	}
-
+
 	/*
 	 * remove the source container
 	 */	
@@ -105,7 +124,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Enumeration", "java.util.Hashtable" }, imports);
 	}	
-
+
 	/*
 	 * method c() is implemented in C but made abstract again in class D
 	 */
@@ -160,7 +179,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 			assert("import " + impName + " expected", nameContained(impName, imports));
 		}
 	}
-
+
 	private boolean nameContained(String methName, IJavaElement[] methods) {
 		for (int i= 0; i < methods.length; i++) {
 			if (methods[i].getElementName().equals(methName)) {
@@ -169,5 +188,5 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		}
 		return false;
 	}	
-
+
 }

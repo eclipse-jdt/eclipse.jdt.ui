@@ -2,24 +2,24 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.internal.ui.dialogs.tests;
-
+package org.eclipse.jdt.internal.ui.dialogs.tests;
+
 import java.util.Random;
-
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
+
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-
+
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-
+
 public class MultiElementListSelectorTest {
-
+
 	public static void main(String[] args) {
-
+
 		ISelectionValidator validator= new ISelectionValidator() {
 			public void isValid(Object[] selection, StatusInfo res) {
 				if (selection != null && selection.length == 1) {
@@ -30,7 +30,7 @@ public class MultiElementListSelectorTest {
 				
 			}
 		};
-
+
 
 		Random random= new Random();
 		

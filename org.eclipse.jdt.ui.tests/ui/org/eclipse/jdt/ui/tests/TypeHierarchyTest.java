@@ -2,19 +2,37 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package com.ibm.jdt.ui.tests;
+package org.eclipse.jdt.ui.tests;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
 
-import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.testplugin.JavaTestPlugin;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.core.resources.IWorkspaceRoot;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.JavaTestProject;
+import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+
 
 public class TypeHierarchyTest extends TestCase {
 	
 	private JavaTestProject fTestProject;
-
+
 	public TypeHierarchyTest(String name) {
 		super(name);
 	}
-
+
 	public static void main(String[] args) {
 		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeHierarchyTest.class, args);
 	}		
@@ -27,7 +45,7 @@ public class TypeHierarchyTest extends TestCase {
 	
 	protected void setUp() throws Exception {
 	}
-
+
 	protected void tearDown () throws Exception {
 	}
 					
@@ -74,5 +92,5 @@ public class TypeHierarchyTest extends TestCase {
 		proj1.remove();
 	}	
 	
-
+
 }
