@@ -163,7 +163,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		if (nParams > 0) {
 			try {
 				IJavaProject project= getCompilationUnit().getJavaProject();
-				IMethod method= (IMethod) binding.getJavaElement();
+				IMethod method= Bindings.findMethod(binding, project);
 				if (method != null) {
 					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
 				}
