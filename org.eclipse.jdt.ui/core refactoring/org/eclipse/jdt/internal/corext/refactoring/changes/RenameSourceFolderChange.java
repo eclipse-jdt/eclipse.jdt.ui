@@ -3,12 +3,8 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -53,52 +49,31 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	 * @see AbstractRenameChange#doRename
 	 */	
 	protected void doRename(IProgressMonitor pm) throws Exception {
-		try{
-			pm.beginTask(RefactoringCoreMessages.getString("RenameSourceFolderChange.renaming"), 2); //$NON-NLS-1$
-			modifyClassPath(new SubProgressMonitor(pm, 1));
-			IPath path= getResource().getFullPath().removeLastSegments(1).append(getNewName());
-			getResource().move(path, getCoreMoveFlags(), new SubProgressMonitor(pm, 1));
-		} finally{
-			pm.done();
-		}	
+		getSourceFolder().move(getNewPath(), getCoreMoveFlags(), getJavaModelUpdateFlags(), null, pm);
 	}
 
-	protected int getCoreMoveFlags() {
+	private IPath getNewPath() {
+		return getResource().getFullPath().removeLastSegments(1).append(getNewName());
+	}
+
+	private IPackageFragmentRoot getSourceFolder() {
+		return (IPackageFragmentRoot)getModifiedLanguageElement();
+	}
+
+	private int getJavaModelUpdateFlags() {
+		return 	IPackageFragmentRoot.DESTINATION_PROJECT_CLASSPATH 
+				| 	IPackageFragmentRoot.ORIGINATING_PROJECT_CLASSPATH
+				| 	IPackageFragmentRoot.OTHER_REFERRING_PROJECTS_CLASSPATH
+				| 	IPackageFragmentRoot.REPLACE;
+	}
+
+	private int getCoreMoveFlags() {
 		if (getResource().isLinked())
 			return IResource.SHALLOW;
 		else
 			return IResource.NONE;
 	}
 	
-	private void modifyClassPath(IProgressMonitor pm) throws JavaModelException{
-		IClasspathEntry[] oldEntries= getJavaProject().getRawClasspath();
-		IClasspathEntry[] newEntries= new IClasspathEntry[oldEntries.length];
-		for (int i= 0; i < newEntries.length; i++) {
-			if (isOurEntry(oldEntries[i]))
-				newEntries[i]= createModifiedEntry();
-			else
-				newEntries[i]= oldEntries[i];	
-		}
-		getJavaProject().setRawClasspath(newEntries, pm);
-	}
-	
-	private boolean isOurEntry(IClasspathEntry cpe){
-		if (cpe.getEntryKind() != IClasspathEntry.CPE_SOURCE)
-			return false;
-		if (! cpe.getPath().equals(getResourcePath()))
-			return false;
-		return true;	
-	}
-	
-	private IClasspathEntry createModifiedEntry(){
-		IPath path= getJavaProject().getProject().getFullPath().append(getNewName());
-		return JavaCore.newSourceEntry(path);
-	}
-	
-	private IJavaProject getJavaProject(){
-		return ((IPackageFragmentRoot)getModifiedLanguageElement()).getJavaProject();
-	}
-
 	/* non java-doc
 	 * @see IChange#aboutToPerform(ChangeContext, IProgressMonitor)
 	 */	
