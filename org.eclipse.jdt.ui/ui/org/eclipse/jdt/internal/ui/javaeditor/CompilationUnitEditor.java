@@ -541,22 +541,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
 	/** Preference key for inserting spaces rather than tabs */
 	private final static String SPACES_FOR_TABS= PreferenceConstants.EDITOR_SPACES_FOR_TABS;
-	/** Preference key for linked position color */
-	private final static String LINKED_POSITION_COLOR= PreferenceConstants.EDITOR_LINKED_POSITION_COLOR;
 	/** Preference key for automatically closing strings */
 	private final static String CLOSE_STRINGS= PreferenceConstants.EDITOR_CLOSE_STRINGS;
-	/** Preference key for automatically wrapping Java strings */
-	private final static String WRAP_STRINGS= PreferenceConstants.EDITOR_WRAP_STRINGS;
 	/** Preference key for automatically closing brackets and parenthesis */
 	private final static String CLOSE_BRACKETS= PreferenceConstants.EDITOR_CLOSE_BRACKETS;
-	/** Preference key for automatically closing javadocs and comments */
-	private final static String CLOSE_JAVADOCS= PreferenceConstants.EDITOR_CLOSE_JAVADOCS;
-	/** Preference key for automatically adding javadoc tags */
-	private final static String ADD_JAVADOC_TAGS= PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS;
-	/** Preference key for automatically formatting javadocs */
-	private final static String FORMAT_JAVADOCS= PreferenceConstants.EDITOR_FORMAT_JAVADOCS;
-	/** Preference key for smart paste */
-	private final static String SMART_PASTE= PreferenceConstants.EDITOR_SMART_PASTE;
 	
 	
 	/** The editor's save policy */
