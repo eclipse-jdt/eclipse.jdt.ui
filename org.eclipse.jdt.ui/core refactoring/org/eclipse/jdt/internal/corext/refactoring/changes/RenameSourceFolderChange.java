@@ -27,8 +27,8 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) throws JavaModelException {
 		this(sourceFolder.getCorrespondingResource().getFullPath(), sourceFolder.getElementName(), newName);
-		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read-only"); 
-		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive"); 
+		Assert.isTrue(!sourceFolder.isReadOnly(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.readonly"));  //$NON-NLS-1$
+		Assert.isTrue(!sourceFolder.isArchive(), RefactoringCoreMessages.getString("RenameSourceFolderChange.assert.archive"));  //$NON-NLS-1$
 	}
 	
 	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName){
@@ -50,7 +50,8 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Rename Source Folder " + getOldName() + " to:" + getNewName();
+		return RefactoringCoreMessages.getFormattedString("RenameSourceFolderChange.rename", //$NON-NLS-1$
+			new String[]{getOldName(), getNewName()});
 	}
 
 	/* non java-doc
@@ -58,7 +59,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	 */	
 	protected void doRename(IProgressMonitor pm) throws Exception {
 		try{
-			pm.beginTask("Renaming source folder", 2);
+			pm.beginTask(RefactoringCoreMessages.getString("RenameSourceFolderChange.renaming"), 2); //$NON-NLS-1$
 			modifyClassPath(new SubProgressMonitor(pm, 1));
 			IPath path= getResource().getFullPath().removeLastSegments(1).append(getNewName());
 			getResource().move(path, false, new SubProgressMonitor(pm, 1));

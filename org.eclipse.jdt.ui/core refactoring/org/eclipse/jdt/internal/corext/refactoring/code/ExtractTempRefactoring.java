@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -88,11 +89,11 @@ public class ExtractTempRefactoring extends Refactoring {
 		
 		fReplaceAllOccurrences= true; //default
 		fDeclareFinal= false; //default
-		fTempName= "";
+		fTempName= ""; //$NON-NLS-1$
 	}
 
 	public String getName() {
-		return "Extract Local Variable";
+		return RefactoringCoreMessages.getString("ExtractTempRefactoring.name"); //$NON-NLS-1$
 	}
 
 	public boolean declareFinal() {
@@ -113,9 +114,9 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 7);
+			pm.beginTask("", 7); //$NON-NLS-1$
 			if (fSelectionStart < 0)
-				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression")); //$NON-NLS-1$
 			pm.worked(1);
 			
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
@@ -123,7 +124,7 @@ public class ExtractTempRefactoring extends Refactoring {
 				return result;
 				
 			if (! fCu.isStructureKnown())		
-				return RefactoringStatus.createFatalErrorStatus("This file has syntax errors - please fix them first");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.syntax_error")); //$NON-NLS-1$
 		
 			initializeAST();
 		
@@ -137,23 +138,23 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkSelection(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 8);
+			pm.beginTask("", 8); //$NON-NLS-1$
 	
 			if (getSelectedExpression() == null)
-				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.select_expression")); //$NON-NLS-1$
 
 			pm.worked(1);
 			
 			if (isUsedInExplicitConstructorCall())
-				return RefactoringStatus.createFatalErrorStatus("Code from explicit constructor calls cannot be extracted to a variable.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.explicit_constructor")); //$NON-NLS-1$
 			pm.worked(1);				
 			
 			if (getSelectedMethodNode() == null)
-				return RefactoringStatus.createFatalErrorStatus("An expression used in a method must be selected to activate this refactoring.");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.expression_in_method"));			 //$NON-NLS-1$
 			pm.worked(1);				
 			
 			if (getSelectedExpression().getParent() instanceof ExpressionStatement)
-				return RefactoringStatus.createFatalErrorStatus("Cannot extract expressions used as statements.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.statements")); //$NON-NLS-1$
 			pm.worked(1);				
 
 			RefactoringStatus result= new RefactoringStatus();
@@ -180,10 +181,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		Expression expression= getSelectedExpression();
 		ITypeBinding tb= expression.resolveTypeBinding();
 		if (tb == null)
-			return RefactoringStatus.createFatalErrorStatus("This expression cannot currenty be extracted.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.currently_no")); //$NON-NLS-1$
 		
-		if (tb.getName().equals("void"))
-			return RefactoringStatus.createFatalErrorStatus("Cannot extract an expression of type 'void'.");
+		if (tb.getName().equals("void")) //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.no_void")); //$NON-NLS-1$
 		
 		return null;	
 	}
@@ -199,16 +200,16 @@ public class ExtractTempRefactoring extends Refactoring {
 	private RefactoringStatus checkExpression() throws JavaModelException {
 		Expression selectedExpression= getSelectedExpression();
 		if (selectedExpression instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus("Cannot extract single null literals.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.null_literals")); //$NON-NLS-1$
 		} else if (selectedExpression instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus("Operation not applicable to an array initializer.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.array_initializer")); //$NON-NLS-1$
 		} else if (selectedExpression instanceof Assignment) {
 			if (selectedExpression.getParent() instanceof Expression)
-				return RefactoringStatus.createFatalErrorStatus("Cannot extract assignment that is part of another expression.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.assignment")); //$NON-NLS-1$
 			else
 				return null;	
 		} else if (selectedExpression instanceof ConditionalExpression) {
-			return RefactoringStatus.createFatalErrorStatus("Currently no support to extract a single conditional expression.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ExtractTempRefactoring.single_conditional_expression")); //$NON-NLS-1$
 		} else
 			return null;
 	}
@@ -216,9 +217,11 @@ public class ExtractTempRefactoring extends Refactoring {
 	public RefactoringStatus checkTempName(String newName) {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning("By convention, all names of local variables start with lowercase letters.");
-		if (fAlreadyUsedNameMap.containsKey(newName))
-			result.addError("Name '" + newName + "' is already used.", JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNameMap.get(newName)));
+			result.addWarning(RefactoringCoreMessages.getString("ExtractTempRefactoring.convention")); //$NON-NLS-1$
+		if (fAlreadyUsedNameMap.containsKey(newName)){
+			String message= RefactoringCoreMessages.getFormattedString("ExtractTempRefactoring.already_used", newName);//$NON-NLS-1$
+			result.addError(message, JavaSourceContext.create(fCu, (ISourceRange)fAlreadyUsedNameMap.get(newName)));
+		}	
 		return result;		
 	}
 	
@@ -228,7 +231,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Checking preconditions", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkTempName(fTempName));
 			return result;
@@ -238,7 +241,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	public String getTempSignaturePreview() throws JavaModelException{
-		return getTempTypeName() + " " + fTempName;
+		return getTempTypeName() + " " + fTempName; //$NON-NLS-1$
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
@@ -252,8 +255,8 @@ public class ExtractTempRefactoring extends Refactoring {
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
 		try{
-			pm.beginTask("Preparing preview", 3);	
-			TextChange change= new CompilationUnitChange("Extract Temp", fCu);
+			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.preview"), 3);	 //$NON-NLS-1$
+			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("ExtractTempRefactoring.extract_temp"), fCu); //$NON-NLS-1$
 			addTempDeclaration(change);
 			pm.worked(1);
 			addImportIfNeeded(change);
@@ -276,14 +279,14 @@ public class ExtractTempRefactoring extends Refactoring {
 		ImportEdit importEdit= new ImportEdit(fCu, fSettings);
 		importEdit.addImport(Bindings.getFullyQualifiedImportName(type));
 		if (!importEdit.isEmpty())
-			change.addTextEdit("Update imports", importEdit);
+			change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}
 	
 	private void addTempDeclaration(TextChange change) throws CoreException {
 		ASTNode insertBefore= getNodeToInsertTempDeclarationBefore();		
 		int insertOffset= insertBefore.getStartPosition();
 		String text= createTempDeclarationSource() + getIndent(insertBefore);
-		change.addTextEdit("Declare local variable", SimpleTextEdit.createInsert(insertOffset, text));
+		change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.declare_local_variable"), SimpleTextEdit.createInsert(insertOffset, text)); //$NON-NLS-1$
 	}
 
 	private ASTNode getNodeToInsertTempDeclarationBefore() throws JavaModelException {
@@ -364,27 +367,27 @@ public class ExtractTempRefactoring extends Refactoring {
 			ASTNode astNode= nodesToReplace[i];
 			int offset= astNode.getStartPosition();
 			int length= astNode.getLength();
-			change.addTextEdit("Replace expression with a local variable reference", SimpleTextEdit.createReplace(offset, length, fTempName));
+			change.addTextEdit(RefactoringCoreMessages.getString("ExtractTempRefactoring.replace"), SimpleTextEdit.createReplace(offset, length, fTempName)); //$NON-NLS-1$
 		}
 	}
 
 	//without the trailing indent
 	private String createTempDeclarationSource() throws CoreException {
-		String modifier= fDeclareFinal ? "final ": "";
-		return modifier + getTempTypeName() + " " + fTempName + getAssignmentString() + getInitializerSource() + ";" + getLineDelimiter();
+		String modifier= fDeclareFinal ? "final ": ""; //$NON-NLS-1$ //$NON-NLS-2$
+		return modifier + getTempTypeName() + " " + fTempName + getAssignmentString() + getInitializerSource() + ";" + getLineDelimiter(); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private String getTempTypeName() throws JavaModelException {
 		Expression expression= getSelectedExpression();
 		String name= expression.resolveTypeBinding().getName();
-		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation))
+		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
 			return name;
 			
 		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
 		if (cic.getAnonymousClassDeclaration() != null)
 			return getNameIdentifier(cic.getName());
 		else
-			return ""; //fallback
+			return ""; //fallback //$NON-NLS-1$
 	}
 	
 	//recursive
@@ -393,10 +396,10 @@ public class ExtractTempRefactoring extends Refactoring {
 			return ((SimpleName)name).getIdentifier();
 		if (name.isQualifiedName()){
 			QualifiedName qn= (QualifiedName)name;
-			return getNameIdentifier(qn.getQualifier()) + "." + qn.getName().getIdentifier(); 
+			return getNameIdentifier(qn.getQualifier()) + "." + qn.getName().getIdentifier();  //$NON-NLS-1$
 		}
 		Assert.isTrue(false);
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	private String getInitializerSource() throws JavaModelException {
@@ -406,7 +409,7 @@ public class ExtractTempRefactoring extends Refactoring {
 	//recursive
 	private static String removeTrailingSemicolons(String s){
 		String arg= s.trim();
-		if (! arg.endsWith(";"))
+		if (! arg.endsWith(";")) //$NON-NLS-1$
 			return arg;
 		return removeTrailingSemicolons(arg.substring(0, arg.length() - 1));	
 	}
@@ -487,9 +490,9 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private String getAssignmentString() {
 		if (isCompactingAssignment())
-			return "= ";
+			return "= "; //$NON-NLS-1$
 		else
-			return " = ";
+			return " = "; //$NON-NLS-1$
 	}
 
 	private boolean isCompactingAssignment() {

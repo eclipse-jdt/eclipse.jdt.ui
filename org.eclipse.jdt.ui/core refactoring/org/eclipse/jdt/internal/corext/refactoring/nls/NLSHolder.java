@@ -86,11 +86,11 @@ public class NLSHolder {
 		modifiedValue= removeTrailingDots(modifiedValue);
 		modifiedValue= unwindEscapeChars(modifiedValue);
 		
-		return "\"" + modifiedValue + "\"";
+		return "\"" + modifiedValue + "\""; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private static String removeTrailingDots(String s){
-		String dot= ".";
+		String dot= "."; //$NON-NLS-1$
 		String subString= s;
 		while (subString.endsWith(dot)){
 			subString= s.substring(0, subString.lastIndexOf(dot));

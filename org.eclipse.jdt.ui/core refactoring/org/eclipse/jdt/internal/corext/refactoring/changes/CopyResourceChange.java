@@ -34,7 +34,7 @@ public class CopyResourceChange extends ResourceReorgChange {
 	 */
 	protected void doPerform(IPath path, IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("copying", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("CopyResourceString.copying"), 1); //$NON-NLS-1$
 			getResource().copy(path, false, new SubProgressMonitor(pm, 1));
 		}catch(CoreException e){
 			throw new JavaModelException(e);
@@ -56,7 +56,8 @@ public class CopyResourceChange extends ResourceReorgChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Copy resource:" + getResource().getFullPath() + " to: " + getDestination().getName();
+		return RefactoringCoreMessages.getFormattedString("CopyResourceString.copy", //$NON-NLS-1$
+			new String[]{getResource().getFullPath().toString(), getDestination().getName()});
 	}
 }
 

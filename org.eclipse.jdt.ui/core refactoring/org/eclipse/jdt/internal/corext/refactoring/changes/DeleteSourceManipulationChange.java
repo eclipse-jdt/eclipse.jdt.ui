@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -29,7 +30,7 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Delete";
+		return RefactoringCoreMessages.getString("DeleteSourceManipulationChange.delete"); //$NON-NLS-1$
 	}
 
 	/*

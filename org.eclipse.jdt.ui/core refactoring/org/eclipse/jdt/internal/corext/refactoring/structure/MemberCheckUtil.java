@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
@@ -34,16 +35,16 @@ public class MemberCheckUtil {
 		IMethod found= findMethod(method, destinationTypeMethods);
 		if (found != null){
 			Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), found.getSourceRange());
-			result.addError("Method '" + method.getElementName() + "' (with the same signature) already exists in superclass '" + JavaModelUtil.getFullyQualifiedName(destinationType) 
-										+ "', which will result in compile errors if you proceed.",
-										context);
+			String message= RefactoringCoreMessages.getFormattedString("MemberChecksUtil.signature_exists", //$NON-NLS-1$
+					new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
+			result.addError(message, context);
 		} else {
 			IMethod similar= Checks.findMethod(method, destinationType);
 			if (similar != null){
+				String message= RefactoringCoreMessages.getFormattedString("MemberChecksUtil.same_param_count",//$NON-NLS-1$
+						 new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 				Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), similar.getSourceRange());
-				result.addWarning("Method '" + method.getElementName() + "' (with the same number of parameters) already exists in type '" 
-													+ JavaModelUtil.getFullyQualifiedName(destinationType) + "'",
-													context);
+				result.addWarning(message, context);
 			}										
 		}	
 	}
@@ -52,10 +53,10 @@ public class MemberCheckUtil {
 		IField destinationTypeField= destinationType.getField(field.getElementName());	
 		if (! destinationTypeField.exists())
 			return;
+		String message= RefactoringCoreMessages.getFormattedString("MemberChecksUtil.field_exists", //$NON-NLS-1$
+				new String[]{field.getElementName(), JavaModelUtil.getFullyQualifiedName(destinationType)});
 		Context context= JavaSourceContext.create(destinationType.getCompilationUnit(), destinationTypeField.getSourceRange());
-		result.addError("Field '" + field.getElementName() + "' already exists in superclass '" + JavaModelUtil.getFullyQualifiedName(destinationType) 
-									+ "', which will result in compile errors if you proceed.",
-									context);
+		result.addError(message, context);
 	}
 	
 	/**

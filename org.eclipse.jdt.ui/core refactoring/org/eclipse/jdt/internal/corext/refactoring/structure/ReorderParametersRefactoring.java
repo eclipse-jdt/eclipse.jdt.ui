@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -61,7 +62,7 @@ class ReorderParametersRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Reorder Parameters";
+		return RefactoringCoreMessages.getString("ReorderParametersRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	public IMethod getMethod(){
@@ -100,7 +101,7 @@ class ReorderParametersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Checking preconditions", 2);
+			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.checking_preconditions"), 2); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
 			
@@ -124,7 +125,7 @@ class ReorderParametersRefactoring extends Refactoring {
 		result.merge(checkAvailability(fMethod));
 
 		if (fOldParameterNames == null || fOldParameterNames.length < 2)
-			result.addFatalError("too few parameters"); 
+			result.addFatalError(RefactoringCoreMessages.getString("ReorderParametersRefactoring.too_few_parameters"));  //$NON-NLS-1$
 		
 		return result;
 	}
@@ -134,8 +135,10 @@ class ReorderParametersRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
-		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("The selected method has been deleted from '" + fMethod.getCompilationUnit().getElementName()+ "'.");
+		if (orig == null || ! orig.exists()){
+			String message= RefactoringCoreMessages.getFormattedString("ReorderParametersRefactoring.method_deleted", fMethod.getCompilationUnit().getElementName());//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}
 		fMethod= orig;
 		
 		
@@ -165,12 +168,9 @@ class ReorderParametersRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < fRippleMethods.length; i++) {
 			if (JdtFlags.isNative(fRippleMethods[i])){
-				String msg= "Method " + JavaElementUtil.createMethodSignature(fRippleMethods[i]) 
-									+ "' declared in type '" 
-									+ JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType()) 
-									+ "' is native.  Reordering parameters will cause UnsatisfiedLinkError on runtime if you do not update your native libraries.";
-									
-				result.addError(msg, JavaSourceContext.create(fRippleMethods[i]));			
+				String message= RefactoringCoreMessages.getFormattedString("ReorderParametersRefactoring.native", //$NON-NLS-1$
+					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType())});
+				result.addError(message, JavaSourceContext.create(fRippleMethods[i]));			
 			}								
 		}
 		return result;
@@ -199,7 +199,7 @@ class ReorderParametersRefactoring extends Refactoring {
 			if (el.equals(array[i]))
 				return i;
 		}
-		Assert.isTrue(false, "element not found");
+		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorderParametersRefactoring.not_found")); //$NON-NLS-1$
 		return -1;
 	}
 
@@ -290,12 +290,12 @@ class ReorderParametersRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		TextChangeManager manager= new TextChangeManager();
 		createChange(pm, manager);
-		return new CompositeChange("Reorder parameters", manager.getAllChanges());
+		return new CompositeChange(RefactoringCoreMessages.getString("ReorderParametersRefactoring.changeName"), manager.getAllChanges()); //$NON-NLS-1$
 	}
 	
 	public void createChange(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
 		try{
-			pm.beginTask("Preparing preview", fOccurrences.length);
+			pm.beginTask(RefactoringCoreMessages.getString("ReorderParametersRefactoring.preview"), fOccurrences.length); //$NON-NLS-1$
 			for (int i= 0; i < fOccurrences.length ; i++){
 				SearchResultGroup group= fOccurrences[i]; 
 				List regionArrays= getSourceRangeArrays(group);
@@ -306,7 +306,7 @@ class ReorderParametersRefactoring extends Refactoring {
 					if (cu == null)
 						continue;
 					MultiTextEdit edit= new PermuteSourceRangesTextEdit(sourceRanges, convertPermutation(fPermutation));	
-					manager.get(cu).addTextEdit("Reorder parameters", edit);			
+					manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"), edit);			 //$NON-NLS-1$
 				}
 				pm.worked(1);
 			}

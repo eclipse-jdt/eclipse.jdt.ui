@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -63,7 +64,7 @@ public class InlineTempRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Inline local variable";
+		return RefactoringCoreMessages.getString("InlineTempRefactoring.name"); //$NON-NLS-1$
 	}
 	
 	private String getTempName(){
@@ -75,14 +76,14 @@ public class InlineTempRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			
 			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
 			if (result.hasFatalError())
 				return result;
 				
 			if (! fCu.isStructureKnown())		
-				return RefactoringStatus.createFatalErrorStatus("This file has syntax errors - please fix them first");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.syntax_errors")); //$NON-NLS-1$
 				
 			initializeAST();
 							
@@ -99,7 +100,7 @@ public class InlineTempRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			return new RefactoringStatus();
 		} finally{
 			pm.done();
@@ -114,16 +115,18 @@ public class InlineTempRefactoring extends Refactoring {
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 		
 		if (fTempDeclaration == null)
-			return RefactoringStatus.createFatalErrorStatus("A local variable declaration or reference must be selected to activate this refactoring");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.select_temp")); //$NON-NLS-1$
 
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
-			return RefactoringStatus.createFatalErrorStatus("Cannot inline method parameters.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.method_parameter")); //$NON-NLS-1$
 		
 		if (fTempDeclaration.getParent() instanceof CatchClause)
-			return RefactoringStatus.createFatalErrorStatus("Cannot inline exceptions declared in 'catch' clauses.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("InlineTempRefactoring.exceptions_declared")); //$NON-NLS-1$
 		
-		if (fTempDeclaration.getInitializer() == null)
-			return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName() + "' is not initialized at declaration.");
+		if (fTempDeclaration.getInitializer() == null){
+			String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.not_initialized", getTempName());//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 				
 		return checkAssignments();
 	}
@@ -137,7 +140,8 @@ public class InlineTempRefactoring extends Refactoring {
 		int length= assignmentFinder.getFirstAssignment().getLength();
 		ISourceRange range= new SourceRange(start, length);
 		Context context= JavaSourceContext.create(fCu, range);	
-		return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName()+ "' is assigned to more than once", context);
+		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", getTempName());//$NON-NLS-1$
+		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}
 	
 	//----- changes
@@ -147,8 +151,8 @@ public class InlineTempRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Creating preview", 2);
-			TextChange change= new CompilationUnitChange("Inline local variable", fCu);
+			pm.beginTask(RefactoringCoreMessages.getString("InlineTempRefactoring.preview"), 2); //$NON-NLS-1$
+			TextChange change= new CompilationUnitChange(RefactoringCoreMessages.getString("InlineTempRefactoring.inline"), fCu); //$NON-NLS-1$
 			inlineTemp(change, new SubProgressMonitor(pm, 1));
 			removeTemp(change);
 			return change;
@@ -161,8 +165,8 @@ public class InlineTempRefactoring extends Refactoring {
 
 	private void inlineTemp(TextChange change, IProgressMonitor pm) throws JavaModelException {
 		Integer[] offsets= getOccurrenceOffsets();
-		pm.beginTask("", offsets.length);
-		String changeName= "Inline local variable:'" + getTempName() + "'";
+		pm.beginTask("", offsets.length); //$NON-NLS-1$
+		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.inline_edit_name") + getTempName(); //$NON-NLS-1$
 		int length= getTempName().length();
 		String initializerSource= getInitializerSource();
 		for(int i= 0; i < offsets.length; i++){
@@ -189,7 +193,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	private void removeDeclaration(TextChange change, int offset, int length)  throws JavaModelException {
-		String changeName= "Remove local variable '" + getTempName() + "'"; 
+		String changeName= RefactoringCoreMessages.getString("InlineTempRefactoring.remove_edit_name") + getTempName();  //$NON-NLS-1$
 		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
 	}
 	
@@ -201,7 +205,7 @@ public class InlineTempRefactoring extends Refactoring {
 		if (! needsBracketsAroundReferences(fTempDeclaration.getInitializer()))
 			return rawSource;
 		else 
-			return "(" + rawSource + ")";
+			return "(" + rawSource + ")"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	private Integer[] getOccurrenceOffsets() throws JavaModelException{

@@ -43,7 +43,8 @@ public class CopyPackageChange extends PackageReorgChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Copy package " + getPackage().getElementName() + " to " + getDestination().getElementName();
+		return RefactoringCoreMessages.getFormattedString("CopyPackageChange.copy", //$NON-NLS-1$
+			new String[]{ getPackage().getElementName(), getDestination().getElementName()});
 	}
 }
 

@@ -263,8 +263,10 @@ public class PullUpRefactoring extends Refactoring {
 			fElementsToPullUp= getOriginals(fElementsToPullUp);
 			for (int i= 0; i < fElementsToPullUp.length; i++) {
 				IMember orig= fElementsToPullUp[i];
-				if (orig == null || ! orig.exists())
-					result.addFatalError("Element " + orig.getElementName() + " does not exist in the saved version of the file.");
+				if (orig == null || ! orig.exists()){
+					String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.does_not_exist", orig.getElementName());//$NON-NLS-1$
+					result.addFatalError(message);
+				}	
 			}
 			return new RefactoringStatus();
 		} finally {
@@ -440,9 +442,9 @@ public class PullUpRefactoring extends Refactoring {
 				continue;
 			
 			if (! canBeAccessedFrom(iType, superType)){
-				String msg= "Type '" + JavaModelUtil.getFullyQualifiedName(iType) + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
-				result.addError(msg, JavaSourceContext.create(iType));
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.type_not_accessible", //$NON-NLS-1$
+					new String[]{JavaModelUtil.getFullyQualifiedName(iType), JavaModelUtil.getFullyQualifiedName(superType)});
+				result.addError(message, JavaSourceContext.create(iType));
 			}	
 		}
 		return result;
@@ -462,9 +464,9 @@ public class PullUpRefactoring extends Refactoring {
 				continue;
 			
 			if (! canBeAccessedFrom(iField, superType) && ! pulledUpList.contains(iField) && !deletedList.contains(iField)){
-				String msg= "Field '" + iField.getElementName() + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
-				result.addError(msg, JavaSourceContext.create(iField));
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.field_not_accessible", //$NON-NLS-1$
+					new String[]{iField.getElementName(), JavaModelUtil.getFullyQualifiedName(superType)});
+				result.addError(message, JavaSourceContext.create(iField));
 			}	
 		}
 		return result;
@@ -483,9 +485,9 @@ public class PullUpRefactoring extends Refactoring {
 			if (! iMethod.exists())
 				continue;
 			if (! canBeAccessedFrom(iMethod, superType) && ! pulledUpList.contains(iMethod) && !deletedList.contains(iMethod)){
-				String msg= "Method '" + JavaElementUtil.createMethodSignature(iMethod) + "' referenced in one of the pulled elements is not accessible from type '" 
-								+ JavaModelUtil.getFullyQualifiedName(superType) + "'.";
-				result.addError(msg, JavaSourceContext.create(iMethod));
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.method_not_accessible", //$NON-NLS-1$
+					new String[]{JavaElementUtil.createMethodSignature(iMethod), JavaModelUtil.getFullyQualifiedName(superType)});
+				result.addError(message, JavaSourceContext.create(iMethod));
 			}	
 		}
 		return result;
@@ -552,11 +554,11 @@ public class PullUpRefactoring extends Refactoring {
 					continue;
 				if (returnType.equals(getReturnTypeName(matchingMethod)))
 					continue;
-				String msg= "Method '" + JavaElementUtil.createMethodSignature(matchingMethod) + "' declared in type'"
-									 + JavaModelUtil.getFullyQualifiedName(matchingMethod.getDeclaringType())
-									 + "' has a different return type than its pulled up counterpart, which will result in compile errors if you proceed." ;
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_method_return_type", //$NON-NLS-1$
+					new String[]{JavaElementUtil.createMethodSignature(matchingMethod),
+								JavaModelUtil.getFullyQualifiedName(matchingMethod.getDeclaringType())});
 				Context context= JavaSourceContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
-				result.addError(msg, context);	
+				result.addError(message, context);	
 			}
 		}
 	}
@@ -573,11 +575,10 @@ public class PullUpRefactoring extends Refactoring {
 				IField matchingField= (IField) iter.next();
 				if (type.equals(getTypeName(matchingField)))
 					continue;
-				String msg= "Field '" + matchingField.getElementName() + "' declared in type'"
-									 + JavaModelUtil.getFullyQualifiedName(matchingField.getDeclaringType())
-									 + "' has a different type than its pulled up counterpart." ;
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_field_type", //$NON-NLS-1$
+					new String[]{matchingField.getElementName(), JavaModelUtil.getFullyQualifiedName(matchingField.getDeclaringType())});
 				Context context= JavaSourceContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
-				result.addError(msg, context);	
+				result.addError(message, context);	
 			}
 		}
 	}
@@ -595,16 +596,14 @@ public class PullUpRefactoring extends Refactoring {
 		Context errorContext= JavaSourceContext.create(method);
 		
 		if (JdtFlags.isStatic(method)){
-				String msg= "Method '" + JavaElementUtil.createMethodSignature(method) + "' declared in type '" 
-									 + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
-									 + "' is 'static', which will result in compile errors if you proceed." ;
-				result.addError(msg, errorContext);
+				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.static_method", //$NON-NLS-1$
+					new String[]{JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
+				result.addError(message, errorContext);
 		 } 
 		 if (isVisibilityLowerThanProtected(method)){
-			String msg= "Method '" + JavaElementUtil.createMethodSignature(method)+ "' declared in type '" 
-								 + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())
-								 + "' has visibility lower than 'protected', which will result in compile errors if you proceed." ;
-			result.addError(msg, errorContext);	
+		 	String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.lower_visibility", //$NON-NLS-1$
+		 		new String[]{JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
+			result.addError(message, errorContext);	
 		} 
 	}
 
@@ -653,7 +652,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("Preparing preview", 3);
+			pm.beginTask(RefactoringCoreMessages.getString("PullUpRefactoring.preview"), 3); //$NON-NLS-1$
 			
 			TextChangeManager manager= new TextChangeManager();
 			
@@ -688,19 +687,24 @@ public class PullUpRefactoring extends Refactoring {
 		String source= computeNewSource(member);
 		String changeName= getCopyChangeName(member);
 									
-		if (needsToChangeVisibility(member))
-			changeName += " (changing its visibility to '"+ "protected" + "')";
+		if (needsToChangeVisibility(member)){
+			changeName += RefactoringCoreMessages.getFormattedString("PullUpRefactoring.changing_visibility_to", //$NON-NLS-1$
+					"protected"); //$NON-NLS-1$
+		}	
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getSuperType(new NullProgressMonitor()).getCompilationUnit());
 		manager.get(cu).addTextEdit(changeName, createAddMemberEdit(source));
 	}
 
 	private String getCopyChangeName(IMember member) throws JavaModelException {
-		if (member.getElementType() == IJavaElement.METHOD)
-			return "copy method '" + JavaElementUtil.createMethodSignature((IMethod)member) 
-										+ "' to type '" + getDeclaringType().getElementName() + "'";
-		
-		else return "copy field '" + member.getElementName() 
-										+ "' to type '" + getDeclaringType().getElementName() + "'";
+		if (member.getElementType() == IJavaElement.METHOD){
+			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.copy_method", //$NON-NLS-1$
+				new String[]{JavaElementUtil.createMethodSignature((IMethod)member), getDeclaringType().getElementName()});
+			return message;
+		} else {
+			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.copy_field", //$NON-NLS-1$
+				new String[]{member.getElementName(), getDeclaringType().getElementName()});
+		 	return message;
+		}
 	}
 		
 	private TextEdit createAddMemberEdit(String methodSource) throws JavaModelException {
@@ -724,13 +728,13 @@ public class PullUpRefactoring extends Refactoring {
 	private static String getDeleteChangeName(IMember member) throws JavaModelException{
 		if (member.getElementType() == IJavaElement.METHOD){
 			IMethod method = (IMethod)member;
-			return "Delete method '"
-						+ JavaElementUtil.createMethodSignature(method)	 
-						+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()) + "'";
+			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Delete_method", //$NON-NLS-1$
+				new String[]{JavaElementUtil.createMethodSignature(method), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
+			return message;
 		} else {
-			return "Delete field '"
-						+ member.getElementName()	 
-						+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(member.getDeclaringType()) + "'";	
+			String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Delete_field", //$NON-NLS-1$
+				new String[]{member.getElementName(), JavaModelUtil.getFullyQualifiedName(member.getDeclaringType())});
+			return message;	
 		}
 	}
 	

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -29,7 +30,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	private IPath fPath;
 	
 	public DeleteFileChange(IFile file){
-		Assert.isNotNull(file, "file"); 
+		Assert.isNotNull(file, "file");  //$NON-NLS-1$
 		fPath= Utils.getResourcePath(file);
 	}
 	
@@ -41,7 +42,7 @@ public class DeleteFileChange extends AbstractDeleteChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Delete file " + fPath.lastSegment(); 
+		return RefactoringCoreMessages.getString("DeleteFileChange.delete_file") + fPath.lastSegment();  //$NON-NLS-1$
 	}
 
 	/* non java-doc

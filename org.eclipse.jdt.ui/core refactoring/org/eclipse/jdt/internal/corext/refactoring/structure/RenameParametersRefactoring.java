@@ -115,8 +115,10 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IMethod orig= (IMethod)WorkingCopyUtil.getOriginal(fMethod);
-		if (orig == null || ! orig.exists())
-			return RefactoringStatus.createFatalErrorStatus("The selected method has been deleted from '" + fMethod.getCompilationUnit().getElementName()+ "'.");
+		if (orig == null || ! orig.exists()){
+			String message= RefactoringCoreMessages.getFormattedString("RenameParametersRefactoring.deleted", fMethod.getCompilationUnit().getElementName());//$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(message);
+		}	
 		fMethod= orig;
 		
 		return Checks.checkIfCuBroken(fMethod);
@@ -259,7 +261,7 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 			TextEdit[] allEdits= getAllEdits(map);
 			
 			CompilationUnit compliationUnitNode= AST.parseCompilationUnit(getCu(), true);
-			TextChange change= new TextBufferChange("Rename Paremeters Variable", TextBuffer.create(getCu().getSource()));
+			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_Paremeters"), TextBuffer.create(getCu().getSource())); //$NON-NLS-1$
 			change.setTrackPositionChanges(true);
 		
 			ICompilationUnit wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(allEdits, change, getCu());
@@ -313,16 +315,16 @@ class RenameParametersRefactoring extends Refactoring implements IMultiRenameRef
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		TextChangeManager manager= new TextChangeManager();
 		createChange(pm, manager);
-		return new CompositeChange("Rename parameters", manager.getAllChanges());
+		return new CompositeChange(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_Parameters"), manager.getAllChanges()); //$NON-NLS-1$
 	}
 
 	public void createChange(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
 		try{
 			TextChange change= manager.get(WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit()));
 			TextEdit[] edits= getAllRenameEdits();
-			pm.beginTask("Preparing preview", edits.length); 
+			pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.preview"), edits.length);  //$NON-NLS-1$
 			for (int i= 0; i < edits.length; i++) {
-				change.addTextEdit("Rename method parameter.", edits[i]);
+				change.addTextEdit(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameter"), edits[i]); //$NON-NLS-1$
 			}
 		}catch (CoreException e)	{
 			throw new JavaModelException(e);

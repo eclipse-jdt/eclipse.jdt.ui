@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -26,7 +28,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	
 	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) throws JavaModelException {
 		this(project.getCorrespondingResource().getFullPath(), project.getElementName(), newName);
-		Assert.isTrue(!project.isReadOnly(), "should not be read-only"); 
+		Assert.isTrue(!project.isReadOnly(), RefactoringCoreMessages.getString("RenameJavaProjectChange.assert.read_only"));  //$NON-NLS-1$
 		
 		fUpdateReferences= updateReferences;
 	}
@@ -39,7 +41,8 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Rename Java Project " + getOldName() + " to:" + getNewName();
+		return RefactoringCoreMessages.getFormattedString("RenameJavaProjectChange.rename", //$NON-NLS-1$
+			 new String[]{getOldName(), getNewName()});
 	}
 
 	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
@@ -100,7 +103,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	
 	private void modifyClassPaths(IProgressMonitor pm) throws JavaModelException{
 		IProject[] referencing=getReferencingProjects();
-		pm.beginTask("Updating classpaths", referencing.length);	
+		pm.beginTask(RefactoringCoreMessages.getString("RenameJavaProjectChange.update"), referencing.length);	 //$NON-NLS-1$
 		for (int i= 0; i < referencing.length; i++) {
 			IJavaProject jp= JavaCore.create(referencing[i]);
 			if (jp != null){
@@ -113,7 +116,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 	
 	private void modifyClassPath(IJavaProject referencingProject, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		IClasspathEntry[] oldEntries= referencingProject.getRawClasspath();
 		IClasspathEntry[] newEntries= new IClasspathEntry[oldEntries.length];
 		for (int i= 0; i < newEntries.length; i++) {

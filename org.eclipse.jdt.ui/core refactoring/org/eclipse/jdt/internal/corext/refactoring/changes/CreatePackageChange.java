@@ -9,6 +9,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -28,7 +29,7 @@ public class CreatePackageChange extends Change {
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 		try {
-			pm.beginTask("Creating package...", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("CreatePackageChange.Creating_package"), 1); //$NON-NLS-1$
 
 			if (!isActive() || fPackageFragment.exists()) {
 				fUndoChange= new NullChange();	
@@ -58,7 +59,7 @@ public class CreatePackageChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Create package";
+		return RefactoringCoreMessages.getString("CreatePackageChange.Create_package"); //$NON-NLS-1$
 	}
 
 	/*

@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -100,7 +102,7 @@ public class AddToClasspathChange extends Change {
 			case IClasspathEntry.CPE_VARIABLE:
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);	
 			default:
-				Assert.isTrue(false, "not expected: " + fEntryKind);
+				Assert.isTrue(false, RefactoringCoreMessages.getString("AddToClasspathChange.assert.not_expected")); //$NON-NLS-1$
 				return null;	
 		}
 	}
@@ -124,7 +126,7 @@ public class AddToClasspathChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return "Add entry to classpath of Java project: '" + getJavaProject().getElementName() + "'";
+		return RefactoringCoreMessages.getString("AddToClasspathChange.add") + getJavaProject().getElementName(); //$NON-NLS-1$
 	}
 
 	/* non java-doc

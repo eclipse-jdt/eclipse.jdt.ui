@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -63,7 +64,7 @@ abstract class ResourceReorgChange extends Change {
 	}
 
 	private void deleteIfAlreadyExists(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		IResource current= getDestination().findMember(getNewResourceName());
 		if (current == null)
 			return;
@@ -74,7 +75,7 @@ abstract class ResourceReorgChange extends Change {
 		else if (current instanceof IFolder)
 			((IFolder)current).delete(false, true, new SubProgressMonitor(pm, 1));
 		else 
-			Assert.isTrue(false, "not expected to get here");	
+			Assert.isTrue(false, RefactoringCoreMessages.getString("ResourceReorgChange.assert"));	 //$NON-NLS-1$
 	}
 	
 	private String getNewResourceName(){

@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaElementUtil {
@@ -35,7 +36,7 @@ public class JavaElementUtil {
 	}
 	
 	public static String createInitializerSignature(IInitializer initializer){
-		String label= "initializer in " + JavaModelUtil.getFullyQualifiedName(initializer.getDeclaringType());
+		String label= RefactoringCoreMessages.getString("JavaElementUtil.initializer_in") + JavaModelUtil.getFullyQualifiedName(initializer.getDeclaringType()); //$NON-NLS-1$
 		try {
 			if (JdtFlags.isStatic(initializer))
 				return "static " + label; //$NON-NLS-1$
@@ -53,7 +54,7 @@ public class JavaElementUtil {
 			case IJavaElement.TYPE:
 				return JavaModelUtil.getFullyQualifiedName(((IType)member));
 			case IJavaElement.INITIALIZER:
-				return "initializer";
+				return RefactoringCoreMessages.getString("JavaElementUtil.initializer"); //$NON-NLS-1$
 			case IJavaElement.METHOD:
 				return createMethodSignature((IMethod)member);				
 			default:

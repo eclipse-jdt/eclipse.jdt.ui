@@ -35,7 +35,7 @@ public class ReferenceFinderUtil {
 	
 	private static SearchResult[] getTypeReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
-		pm.beginTask("", elements.length);
+		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedFields.addAll(getTypeReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
@@ -59,7 +59,7 @@ public class ReferenceFinderUtil {
 
 	private static SearchResult[] getFieldReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedFields= new ArrayList();
-		pm.beginTask("", elements.length);
+		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedFields.addAll(getFieldReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}
@@ -83,7 +83,7 @@ public class ReferenceFinderUtil {
 	
 	private static SearchResult[] getMethodReferencesIn(IMember[] elements, IProgressMonitor pm) throws JavaModelException {
 		List referencedMethods= new ArrayList();
-		pm.beginTask("", elements.length);
+		pm.beginTask("", elements.length); //$NON-NLS-1$
 		for (int i = 0; i < elements.length; i++) {
 			referencedMethods.addAll(getMethodReferencesIn(elements[i], new SubProgressMonitor(pm, 1)));
 		}

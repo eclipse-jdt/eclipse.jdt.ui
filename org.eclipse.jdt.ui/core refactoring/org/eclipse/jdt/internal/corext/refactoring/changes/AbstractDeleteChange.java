@@ -24,7 +24,7 @@ abstract class AbstractDeleteChange extends Change {
 	 */
 	public final void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 		try {
-			pm.beginTask("deleting", 1);
+			pm.beginTask(RefactoringCoreMessages.getString("AbstractDeleteChange.deleting"), 1); //$NON-NLS-1$
 			if (!isActive())
 				return;
 			doDelete(new SubProgressMonitor(pm, 1));

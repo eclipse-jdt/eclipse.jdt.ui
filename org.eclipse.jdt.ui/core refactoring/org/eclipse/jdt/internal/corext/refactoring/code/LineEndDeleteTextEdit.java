@@ -21,7 +21,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 	private String fFullSource;
 	
 	LineEndDeleteTextEdit(int offset, int length, String source){
-		super(offset, length, "");
+		super(offset, length, ""); //$NON-NLS-1$
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(length >= 0);
 		Assert.isTrue(offset + length <= source.length());
