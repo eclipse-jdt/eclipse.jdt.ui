@@ -14,21 +14,21 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.resources.IFile;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
@@ -124,7 +124,7 @@ public class CompilationUnitRewrite {
 		try {
 			cuChange.setEdit(multiEdit);
 			if (needsAstRewrite) {
-				TextEdit rewriteEdit= fRewrite.rewriteAST(document, null);
+				TextEdit rewriteEdit= fRewrite.rewriteAST(document, fCu.getJavaProject().getOptions(true));
 				if (! isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {

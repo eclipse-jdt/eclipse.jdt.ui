@@ -214,7 +214,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(expression.getAST());
 			final ITrackedNodePosition position= rewriter.track(expression);
 			expression.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Expression) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.METHOD_INVOCATION);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
@@ -231,7 +231,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			ModifierRewrite.create(rewriter, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			final IDocument document= new Document(getBufferText(declaringCuNode, declaringCu));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.UPDATE_REGIONS);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.UPDATE_REGIONS);
 			text= document.get(position.getStartPosition(), position.getLength());
 		} catch (BadLocationException exception) {
 			text= getNewText(bodyDeclaration, declaringCu, removeIndentation);
@@ -262,7 +262,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 					return true;
 				}
 			});
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
@@ -283,7 +283,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(declaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(declaration);
 			declaration.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (SingleVariableDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
@@ -304,7 +304,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(type.getAST());
 			final ITrackedNodePosition position= rewriter.track(type);
 			type.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (Type) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SIMPLE_TYPE);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
@@ -325,7 +325,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
 			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping));
-			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
+			rewriter.rewriteAST(document, declaringCu.getJavaProject().getOptions(true)).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);

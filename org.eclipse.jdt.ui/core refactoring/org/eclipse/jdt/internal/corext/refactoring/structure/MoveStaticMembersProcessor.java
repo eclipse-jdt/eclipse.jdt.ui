@@ -18,9 +18,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -28,6 +25,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -59,6 +59,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -79,9 +81,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
-import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -908,7 +907,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		String[] updatedMemberSources= new String[members.length];
 		TextBuffer buffer= TextBuffer.create(fSource.getCu().getSource());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
-		TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), null);
+		TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), fSource.getCu().getJavaProject().getOptions(true));
 		editor.add(edit);
 		editor.performEdits(new NullProgressMonitor());
 		for (int i= 0; i < members.length; i++) {

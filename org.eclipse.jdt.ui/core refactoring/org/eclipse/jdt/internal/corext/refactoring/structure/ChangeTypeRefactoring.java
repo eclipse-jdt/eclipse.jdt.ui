@@ -20,9 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -30,6 +27,9 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -65,7 +66,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -515,7 +514,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private void addAllChangesFor(ICompilationUnit icu, Set vars, CompilationUnitChange unitChange) throws CoreException {
 		CompilationUnit	unit=  ASTCreator.createAST(icu, null);
-		OldASTRewrite unitRewriter= new OldASTRewrite(unit);
+		ASTRewrite unitRewriter= ASTRewrite.create(unit.getAST());
 		TextBuffer buffer= null;
 		MultiTextEdit root= new MultiTextEdit();
 		 
@@ -524,7 +523,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			buffer= TextBuffer.acquire((IFile) icu.getResource());
 			String typeName= updateImports(icu, buffer, root);
 			updateCu(unit, vars, unitChange, unitRewriter, typeName);
-			unitRewriter.rewriteNode(buffer, root);
+			root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true)));
 		} finally {
 			if (buffer != null)
 				TextBuffer.release(buffer);
@@ -532,7 +531,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateCu(CompilationUnit unit, Set vars, CompilationUnitChange unitChange, 
-			OldASTRewrite unitRewriter, String typeName) throws JavaModelException {
+			ASTRewrite unitRewriter, String typeName) throws JavaModelException {
 		for (Iterator it=vars.iterator(); it.hasNext(); ){
 			ConstraintVariable cv = (ConstraintVariable)it.next();
 			ASTNode decl= findDeclaration(unit, cv);
@@ -546,7 +545,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	}
 
 	private void updateType(CompilationUnit cu, Type oldType, CompilationUnitChange unitChange, 
-							OldASTRewrite unitRewriter, String typeName) {
+							ASTRewrite unitRewriter, String typeName) {
 		
 		String oldName= oldType.resolveBinding().getName();
 		String description= 
@@ -1211,7 +1210,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
 				if (selectedMethod == null) {
-					// can't happens since we checked it upfront in check initial conditions
+					// can't happen since we checked it up front in check initial conditions
 					Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_method")); //$NON-NLS-1$
 				}
 				
@@ -1248,7 +1247,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (fFieldBinding != null) {
 			IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
 			if (iField == null) {
-				// can't happens since we checked it upfront in check initial conditions
+				// can't happen since we checked it up front in check initial conditions
 				Assert.isTrue(false, RefactoringCoreMessages.getString("ChangeTypeRefactoring.no_filed")); //$NON-NLS-1$
 			}
 			SearchPattern pattern= SearchPattern.createPattern(
@@ -1311,7 +1310,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
 			if (cu != null)
-				result.add(WorkingCopyUtil.getWorkingCopyIfExists(cu));
+				result.add(cu);
 				fCuToSearchResultGroup.put(cu, group);
 		}
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
