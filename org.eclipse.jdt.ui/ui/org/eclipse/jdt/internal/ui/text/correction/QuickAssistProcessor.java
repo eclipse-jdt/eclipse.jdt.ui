@@ -55,7 +55,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getJoinVariableProposals(context, coveringNode, null)
 				|| getAddFinallyProposals(context, coveringNode, null)
 				|| getAddElseProposals(context, coveringNode, null)
-				|| getSplitVariableProposals(context, coveringNode, null);
+				|| getSplitVariableProposals(context, coveringNode, null)
+				|| getAddBlockProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -80,6 +81,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getJoinVariableProposals(context, coveringNode, resultingCollections);
 				getAddFinallyProposals(context, coveringNode, resultingCollections);
 				getAddElseProposals(context, coveringNode, resultingCollections);
+				getAddBlockProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -573,6 +575,84 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 
+	
+	private boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
+		Statement statement= ASTResolving.findParentStatement(node);
+		
+		int selectionStart= context.getSelectionOffset();
+		int selectionEnd= context.getSelectionOffset() + context.getSelectionLength();
+		
+		int childProperty= -1;
+		ASTNode child= null;
+		switch (statement.getNodeType()) {
+			case ASTNode.IF_STATEMENT:
+				ASTNode then= ((IfStatement) statement).getThenStatement();
+				if (selectionEnd <= then.getStartPosition() + then.getLength()) {
+					if (!(then instanceof Block)) {
+						childProperty= ASTNodeConstants.THEN_STATEMENT;
+						child= then;
+					}
+				} else if (selectionStart >=  then.getStartPosition() + then.getLength()) {
+					ASTNode elseStatement= ((IfStatement) statement).getElseStatement();
+					if (!(elseStatement instanceof Block)) {
+						childProperty= ASTNodeConstants.ELSE_STATEMENT;
+						child= elseStatement;
+					}
+				}
+				break;
+			case ASTNode.WHILE_STATEMENT:
+				ASTNode whileBody= ((WhileStatement) statement).getBody();
+				if (!(whileBody instanceof Block)) {
+					childProperty= ASTNodeConstants.BODY;
+					child= whileBody;
+				}
+				break;
+			case ASTNode.FOR_STATEMENT:
+				ASTNode forBody= ((ForStatement) statement).getBody();
+				if (!(forBody instanceof Block)) {
+					childProperty= ASTNodeConstants.BODY;
+					child= forBody;
+				}
+				break;
+			case ASTNode.DO_STATEMENT:
+				ASTNode doBody= ((DoStatement) statement).getBody();
+				if (!(doBody instanceof Block)) {
+					childProperty= ASTNodeConstants.BODY;
+					child= doBody;
+				}
+				break;			
+		}
+		if (child == null) {
+			return false;
+		}
+
+		if (resultingCollections == null) {
+			return true;
+		}
+		AST ast= statement.getAST();
+		ASTRewrite rewrite= new ASTRewrite(statement);
+
+		ASTNode childPlaceholder= rewrite.createMove(child);
+		Block replacingBody= ast.newBlock();
+		replacingBody.statements().add(childPlaceholder);
+		rewrite.markAsInsert(statement, childProperty, replacingBody, null);
+
+		String label;
+		if (childProperty == ASTNodeConstants.THEN_STATEMENT) {
+			label = CorrectionMessages.getString("QuickAssistProcessor.replacethenwithblock.description");//$NON-NLS-1$
+		} else if (childProperty == ASTNodeConstants.ELSE_STATEMENT) {
+			label = CorrectionMessages.getString("QuickAssistProcessor.replaceelsewithblock.description");//$NON-NLS-1$
+		} else {
+			label = CorrectionMessages.getString("QuickAssistProcessor.replacebodywithblock.description");//$NON-NLS-1$
+		}
+		
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
+		proposal.ensureNoModifications();
+		resultingCollections.add(proposal);
+		return true;
+	}
+	
 
 
 }
