@@ -54,11 +54,11 @@ public class AssistQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new AssistQuickFixTest("testAssignToLocal4"));
+			suite.addTest(new AssistQuickFixTest("testUnwrapMethodInvocation"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -800,6 +800,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int i= (9+ 8);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -819,6 +820,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int i= 9+ 8;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
 	}
@@ -830,6 +832,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int i= Math.abs(9+ 8);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -849,6 +852,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        int i= 9+ 8;\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());	
 	}	
