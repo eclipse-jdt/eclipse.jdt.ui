@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
@@ -772,19 +773,29 @@ public class ExtractTempRefactoring extends Refactoring {
 														.append(tail)
 														.toString();
 	}
-	
+
 	private String getTempTypeName() throws JavaModelException {
-		Expression expression= getSelectedExpression().getAssociatedExpression();
-		String name= expression.resolveTypeBinding().getName();
-		if (! "".equals(name) || ! (expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
+		final Expression expression= getSelectedExpression().getAssociatedExpression();
+		final ITypeBinding binding= expression.resolveTypeBinding();
+		String name= ""; //$NON-NLS-1$
+		if (binding.isTopLevel() || binding.isPrimitive() || binding.isLocal())
+			name= binding.getName();
+		else if (!binding.isAnonymous()) {
+			final IPackageBinding pack= binding.getPackage();
+			if (pack != null) {
+				final String qualified= binding.getQualifiedName();
+				name= qualified.substring(pack.getName().length() + 1);
+			} else
+				name= binding.getName();
+		}
+		if (!"".equals(name) || !(expression instanceof ClassInstanceCreation)) //$NON-NLS-1$
 			return name;
-			
-			
-		ClassInstanceCreation cic= (ClassInstanceCreation)expression;
+
+		ClassInstanceCreation cic= (ClassInstanceCreation) expression;
 		Assert.isTrue(cic.getAnonymousClassDeclaration() != null);
 		return ASTNodes.asString(cic.getType());
 	}
-	
+
 	private String getInitializerSource() throws JavaModelException {
 		IExpressionFragment fragment= getSelectedExpression();
 		return removeTrailingSemicolons(fCu.getBuffer().getText(fragment.getStartPosition(), fragment.getLength()));
