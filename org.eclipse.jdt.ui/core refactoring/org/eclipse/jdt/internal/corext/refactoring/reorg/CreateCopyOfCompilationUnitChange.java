@@ -102,9 +102,12 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			SearchResult searchResult= results[j];
 			if (searchResult.getAccuracy() == IJavaSearchResultCollector.POTENTIAL_MATCH)
 				continue;
+			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49994 , 49774
+			if (searchResult.getEnd() <= 1)
+				continue;
 			String oldName= wc.findPrimaryType().getElementName();
-			int offset= searchResult.getEnd() - oldName.length();
 			int length= oldName.length();
+			int offset= searchResult.getEnd() - length;
 			TextChangeCompatibility.addTextEdit(manager.get(wc), name, new ReplaceEdit(offset, length, newName));
 		}
 		return manager;
