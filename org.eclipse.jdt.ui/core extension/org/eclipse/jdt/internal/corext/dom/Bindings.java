@@ -28,13 +28,17 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -436,6 +440,27 @@ public class Bindings {
 			}			
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the binding of the variable written in an Assignment.
+	 * @param assignment The assignment 
+	 * @return The binding or <code>null</code> if no bindings are available.
+	 */
+	public static IVariableBinding getAssignedVariable(Assignment assignment) {
+		Expression leftHand = assignment.getLeftHandSide();
+		switch (leftHand.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+				return (IVariableBinding) ((SimpleName) leftHand).resolveBinding();
+			case ASTNode.QUALIFIED_NAME:
+				return (IVariableBinding) ((QualifiedName) leftHand).getName().resolveBinding();				
+			case ASTNode.FIELD_ACCESS:
+				return ((FieldAccess) leftHand).resolveFieldBinding();
+			case ASTNode.SUPER_FIELD_ACCESS:
+				return ((SuperFieldAccess) leftHand).resolveFieldBinding();
+			default:
+				return null;
+		}
 	}
 	
 	/**
