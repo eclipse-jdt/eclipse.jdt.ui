@@ -41,7 +41,7 @@ public class JavaDocAccess {
 	 * Gets a reader for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
-	 * @param allowInherited For methods with no comment, the comment of the overriden class
+	 * @param allowInherited For methods with no comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
 	 */
 	public static JavaDocCommentReader getJavaDoc(IMember member, boolean allowInherited) throws JavaModelException {
