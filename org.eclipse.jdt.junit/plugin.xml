@@ -281,7 +281,7 @@
       <propertyTester
             properties="isTest"
             namespace="org.eclipse.jdt.junit"
-            type="org.eclipse.jdt.core.IJavaElement"
+            type="org.eclipse.core.runtime.IAdaptable"
             class="org.eclipse.jdt.internal.junit.ui.JavaTypeExtender"
             id="org.eclipse.jdt.junit.ITypeExtender">
       </propertyTester>
