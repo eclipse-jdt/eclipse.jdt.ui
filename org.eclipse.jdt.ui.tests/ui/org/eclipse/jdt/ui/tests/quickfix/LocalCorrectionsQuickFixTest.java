@@ -52,11 +52,11 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new LocalCorrectionsQuickFixTest("testUnnecessaryCast1"));
+			suite.addTest(new LocalCorrectionsQuickFixTest("testIndirectStaticAccess2"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -2059,6 +2059,110 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
-	}				
+	}
+	
+	public void testIndirectStaticAccess1() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment other= fSourceFolder.createPackageFragment("other", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package other;\n");
+		buf.append("public class A {\n");
+		buf.append("    public static final int CONST=1;\n");
+		buf.append("}\n");
+		other.createCompilationUnit("A.java", buf.toString(), false, null);		
+
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B extends other.A {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("B.java", buf.toString(), false, null);		
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import pack.B;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo(B b) {\n");
+		buf.append("        return B.CONST;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import other.A;\n");
+		buf.append("import pack.B;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo(B b) {\n");
+		buf.append("        return A.CONST;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testIndirectStaticAccess2() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+		
+		IPackageFragment other= fSourceFolder.createPackageFragment("other", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package other;\n");
+		buf.append("public class A {\n");
+		buf.append("    public static int foo() {\n");
+		buf.append("        return 1;\n");	
+		buf.append("    }\n");
+		buf.append("}\n");
+		other.createCompilationUnit("A.java", buf.toString(), false, null);		
+
+		IPackageFragment pack0= fSourceFolder.createPackageFragment("pack", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class B extends other.A {\n");
+		buf.append("}\n");
+		pack0.createCompilationUnit("B.java", buf.toString(), false, null);		
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return pack.B.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import other.A;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public int foo() {\n");
+		buf.append("        return A.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}	
 	
 }

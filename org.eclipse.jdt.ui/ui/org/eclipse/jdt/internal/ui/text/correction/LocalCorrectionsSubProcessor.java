@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
@@ -430,17 +431,9 @@ public class LocalCorrectionsSubProcessor {
 	}
 	
 	/**
-	 * A static field or method is accessed using a non-static reference. E.g.
-     * <pre>
-     * File f = new File();
-     * f.pathSeparator;
-     * </pre>
-     * This correction changes <code>f</code> above to <code>File</code>.
-     * 
-	 * @param context
-	 * @param proposals
+	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
-	public static void addInstanceAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
@@ -471,13 +464,31 @@ public class LocalCorrectionsSubProcessor {
 			qualifier= fieldAccess.getExpression();
 			accessBinding= fieldAccess.getName().resolveBinding();
 		}
+		
+		if (problem.getProblemId() == IProblem.IndirectAccessToStaticField || problem.getProblemId() == IProblem.IndirectAccessToStaticMethod) {
+			// indirectAccessToStaticProposal
+			if (accessBinding != null) {
+				ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
+				if (declaringTypeBinding != null) {
+					ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
+
+					String label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.indirectaccesstostatic.description", declaringTypeBinding.getName()); //$NON-NLS-1$
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+					String typeName= proposal.addImport(declaringTypeBinding);
+					rewrite.markAsReplaced(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName));
+				
+					proposal.ensureNoModifications();
+					proposals.add(proposal);					
+				}
+			}
+			return;
+		}
+
+		
 		ITypeBinding declaringTypeBinding= null;
 		if (accessBinding != null) {
-			if (accessBinding instanceof IMethodBinding) {
-				declaringTypeBinding= ((IMethodBinding) accessBinding).getDeclaringClass();
-			} else if (accessBinding instanceof IVariableBinding) {
-				declaringTypeBinding= ((IVariableBinding) accessBinding).getDeclaringClass();
-			}
+			declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
 
@@ -511,6 +522,17 @@ public class LocalCorrectionsSubProcessor {
 		}
 		ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, 4);
 	}
+	
+	private static ITypeBinding getDeclaringTypeBinding(IBinding accessBinding) {
+		if (accessBinding instanceof IMethodBinding) {
+			return ((IMethodBinding) accessBinding).getDeclaringClass();
+		} else if (accessBinding instanceof IVariableBinding) {
+			return ((IVariableBinding) accessBinding).getDeclaringClass();
+		}
+		return null;
+	}
+	
+	
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -646,6 +668,9 @@ public class LocalCorrectionsSubProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
 			proposals.add(proposal);
 		}
-	}	
+	}
+
+
+
 	
 }
