@@ -770,9 +770,10 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		if (cuInfo.fModel instanceof CompilationUnitAnnotationModel)   {
 			CompilationUnitAnnotationModel model= (CompilationUnitAnnotationModel) cuInfo.fModel;
 			model.setCompilationUnit(cuInfo.fCopy);
-		} else if (cuInfo.fModel != null) {
+		} 
+		
+		if (cuInfo.fModel != null)
 			cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
-		}
 		
 		if (requestor instanceof IProblemRequestorExtension) {
 			IProblemRequestorExtension extension= (IProblemRequestorExtension) requestor;
