@@ -61,6 +61,13 @@ New API class: <tt>IClasspathContainerPageExtension</tt>: Classpath container
 pages that implement <tt>IClasspathContainerPage</tt> can optionally implement
 <tt>IClasspathContainerPageExtension</tt> to get additional information
 about the context when the page is opened.</li>
+
+<li>
+JUnit Plugin Tests (not part of the SDK, but available as an optional plugin). 
+The launching was changed to be more compatible with PDE. This avoids plugin version conflicts
+and supports running tests with references to external plug-ins (not all referenced plugins have
+to be available as binary projects).</li>
+
 </ul>
 
 <h2>
