@@ -807,4 +807,13 @@ public abstract class JavaEditor extends StatusTextEditor {
 			ruler.addDecorator(1, createLineNumberRulerColumn());
 		return ruler;
 	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updatePropertyDependentActions()
+	 */
+	protected void updatePropertyDependentActions() {
+		super.updatePropertyDependentActions();
+		if (fEncodingSupport != null)
+			fEncodingSupport.reset();
+	}
 }

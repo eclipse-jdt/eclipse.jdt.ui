@@ -31,6 +31,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
@@ -237,7 +238,9 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		// Navigate menu	
 		if (part instanceof CompilationUnitEditor) {
 			CompilationUnitEditor cuEditor= (CompilationUnitEditor)part;
-			cuEditor.getActionGroup().fillActionBars(bars);
+			ActionGroup group= cuEditor.getActionGroup();
+			if (group != null)
+				group.fillActionBars(bars);
 		}
 	}
 }
