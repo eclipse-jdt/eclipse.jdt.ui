@@ -101,7 +101,7 @@ public class AllTypesCacheTest extends TestCase {
 		
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
-		fLibrary= JavaProjectHelper.addLibrary(fJProject1, new Path(lib.getPath())); // add library to proj1
+		fLibrary= JavaProjectHelper.addLibrary(fJProject1, Path.fromOSString(lib.getPath())); // add library to proj1
 		
 		
 		fJProject2= JavaProjectHelper.createJavaProject("TestProject2", "bin");

@@ -554,7 +554,7 @@ public class JavaProjectHelper {
 		Assert.assertNotNull(rtStubs);
 		Assert.assertTrue(rtStubs.exists());
 		return new IPath[] {
-			new Path(rtStubs.getPath()),
+			Path.fromOSString(rtStubs.getPath()),
 			null,
 			null
 		};

@@ -157,7 +157,7 @@ public class ClassPathDetectorTest extends TestCase {
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());
 
-		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
+		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 		
 		IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
 		for (int i= 0; i < jreEntries.length; i++) {

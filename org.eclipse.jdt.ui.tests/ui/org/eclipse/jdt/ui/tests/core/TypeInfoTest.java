@@ -281,8 +281,8 @@ public class TypeInfoTest extends TestCase {
 	public void test_bug44772() throws Exception {
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 
-		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(lib.getPath()), null, null); // as internal 
-		JavaProjectHelper.addLibrary(fJProject1, new Path(lib.getPath())); // and as external
+		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(lib.getPath()), null, null); // as internal 
+		JavaProjectHelper.addLibrary(fJProject1, Path.fromOSString(lib.getPath())); // and as external
 		
 		ArrayList result= new ArrayList();
 

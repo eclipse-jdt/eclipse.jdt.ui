@@ -343,7 +343,7 @@ public class ContentProviderTests3 extends TestCase {
 		
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", mylibJar != null && mylibJar.exists());//$NON-NLS-1$
-		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
+		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
 		//set up project #2: file system structure with in a source folder
 

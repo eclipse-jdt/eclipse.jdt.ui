@@ -96,7 +96,7 @@ public class JavaModelUtilTest extends TestCase {
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(LIB);
 		assertTrue("lib not found", junitSrcArchive != null && junitSrcArchive.exists());
 		
-		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
+		JavaProjectHelper.addLibraryWithImport(fJProject1, Path.fromOSString(mylibJar.getPath()), null, null);
 
 		JavaProjectHelper.addVariableEntry(fJProject2, new Path("JRE_LIB_TEST"), null, null);
 

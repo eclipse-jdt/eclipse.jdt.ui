@@ -236,7 +236,7 @@ public class ContentProviderTests4 extends TestCase{
 		//add an internal jar
 		myInternalLibJar = JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar"));//$NON-NLS-1$
 		assertTrue("lib not found", myInternalLibJar != null && myInternalLibJar.exists()); //$NON-NLS-1$
-		fInternalRoot1= JavaProjectHelper.addLibraryWithImport(fJProject3, new Path(myInternalLibJar.getPath()), null, null);
+		fInternalRoot1= JavaProjectHelper.addLibraryWithImport(fJProject3, Path.fromOSString(myInternalLibJar.getPath()), null, null);
 	
 		//create internal PackageFragments
 		fA= fInternalRoot1.getPackageFragment("a");//$NON-NLS-1$
