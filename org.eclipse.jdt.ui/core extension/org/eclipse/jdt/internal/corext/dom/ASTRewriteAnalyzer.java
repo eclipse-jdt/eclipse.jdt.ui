@@ -1804,10 +1804,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		
 		int pos= rewriteRequiredNode(node, ASTNodeConstants.EXPRESSION); // statement
 		
-		int thenChange= getChangeKind(node, ASTNodeConstants.THEN_STATEMENT);
+		RewriteEvent thenEvent= getEvent(node, ASTNodeConstants.THEN_STATEMENT);
 		int elseChange= getChangeKind(node, ASTNodeConstants.ELSE_STATEMENT);
 
-		if (thenChange != RewriteEvent.UNCHANGED) {
+		if (thenEvent != null && thenEvent.getChangeKind() != RewriteEvent.UNCHANGED) {
 			try {
 				pos= getScanner().getTokenEndOffset(ITerminalSymbols.TokenNameRPAREN, pos); // after the closing parent
 				int indent= getIndent(node.getStartPosition());
@@ -1815,9 +1815,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				int endPos= -1;
 				Object elseStatement= getOriginalValue(node, ASTNodeConstants.ELSE_STATEMENT);
 				if (elseStatement != null) {
-					endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameelse, pos); // else keyword
+					ASTNode thenStatement = (ASTNode) thenEvent.getOriginalValue();
+					endPos= getScanner().getTokenStartOffset(ITerminalSymbols.TokenNameelse, thenStatement.getStartPosition() + thenStatement.getLength()); // else keyword
 				}
-				if ((elseChange != RewriteEvent.UNCHANGED) || (elseStatement == null)) {
+				if (elseStatement == null || elseChange != RewriteEvent.UNCHANGED) {
 					pos= rewriteBodyNode(node, ASTNodeConstants.THEN_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_NO_ELSE); 
 				} else {
 					pos= rewriteBodyNode(node, ASTNodeConstants.THEN_STATEMENT, pos, endPos, indent, ASTRewriteFormatter.IF_BLOCK_WITH_ELSE); 
