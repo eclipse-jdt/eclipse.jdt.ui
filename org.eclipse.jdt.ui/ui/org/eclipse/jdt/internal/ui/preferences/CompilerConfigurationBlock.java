@@ -89,12 +89,15 @@ public class CompilerConfigurationBlock {
 
 	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
 	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
+	private static final String PREF_BUILD_CLEAN_OUTPUT_FOLDER= JavaCore.CORE_JAVA_BUILD_CLEAN_OUTPUT_FOLDER;
+
 	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
 	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	private static final String PREF_COMPILER_TASK_PRIORITIES= JavaCore.COMPILER_TASK_PRIORITIES;
 	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
+
 
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
@@ -114,6 +117,8 @@ public class CompilerConfigurationBlock {
 	private static final String WARNING= JavaCore.WARNING;
 	private static final String IGNORE= JavaCore.IGNORE;
 	private static final String ABORT= JavaCore.ABORT;
+	
+	private static final String CLEAN= JavaCore.CLEAN;
 
 	private static final String ENABLED= JavaCore.ENABLED;
 	private static final String DISABLED= JavaCore.DISABLED;
@@ -133,7 +138,7 @@ public class CompilerConfigurationBlock {
 			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
-			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE,
+			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_BUILD_CLEAN_OUTPUT_FOLDER,
 			PREF_COMPILER_TASK_TAGS, PREF_COMPILER_TASK_PRIORITIES, PREF_PB_DUPLICATE_RESOURCE, PREF_PB_NO_EFFECT_ASSIGNMENT
 		};	
 	}
@@ -442,6 +447,7 @@ public class CompilerConfigurationBlock {
 
 	private Composite createOthersTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
+		String[] cleanIgnoreValues= new String[] { CLEAN, IGNORE };
 		
 		String[] errorWarning= new String[] { ERROR, WARNING };
 		
@@ -482,6 +488,9 @@ public class CompilerConfigurationBlock {
 		
 		label= JavaUIMessages.getString("CompilerConfigurationBlock.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
+
+		label= JavaUIMessages.getString("CompilerConfigurationBlock.build_clean_outputfolder.label"); //$NON-NLS-1$
+		addCheckBox(othersComposite, label, PREF_BUILD_CLEAN_OUTPUT_FOLDER, cleanIgnoreValues, 0);
 		
 		description= new Label(othersComposite, SWT.WRAP);
 		description.setText(JavaUIMessages.getString("CompilerConfigurationBlock.resource_filter.description")); //$NON-NLS-1$
