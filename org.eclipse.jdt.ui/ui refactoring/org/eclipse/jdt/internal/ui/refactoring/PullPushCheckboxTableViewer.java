@@ -63,8 +63,11 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	 * @see org.eclipse.jface.viewers.Viewer#refresh()
 	 */
 	public void refresh() {
+		int topIndex = getTable().getTopIndex();
 		super.refresh();
 		// XXX workaround for http://bugs.eclipse.org/bugs/show_bug.cgi?id=9390
-		setCheckState((IMemberActionInfo[])getInput());			
+		setCheckState((IMemberActionInfo[])getInput());
+		if (topIndex < getTable().getItemCount())
+			getTable().setTopIndex(topIndex); //see bug 31645
 	}
 }
