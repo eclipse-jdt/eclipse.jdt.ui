@@ -12,6 +12,7 @@ import org.eclipse.core.internal.utils.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -123,6 +124,9 @@ public class TextBufferEditor {
 	 * @exception JavaModelException if the edits cannot be executed.
 	 */
 	public IUndoTextEdits performEdits(IProgressMonitor pm) throws CoreException {
+		if (pm == null)
+			pm= new NullProgressMonitor();
+			
 		int size= fEdits.size();
 		if (size == 0)
 			return new UndoTextEdits(0);
