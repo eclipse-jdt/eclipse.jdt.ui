@@ -485,6 +485,8 @@ public class CompilationUnitEditor extends JavaEditor {
 		super.createActions();
 		
 		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
+		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION));			 //$NON-NLS-1$ //$NON-NLS-2$
+
 		setAction("AddImportOnSelection", new AddImportOnSelectionAction(this));		 //$NON-NLS-1$
 		setAction("OrganizeImports", new OrganizeImportsAction(this)); //$NON-NLS-1$
 		

@@ -204,10 +204,10 @@ public class ResultCollector implements ICompletionRequestor {
 		JavaCompletionProposal proposal= createMethodCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
 
-		boolean hasClosingBracket= completionName.length > 0 && completionName[completionName.length - 1] == ')';
+		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
 	
 		ProposalContextInformation contextInformation= null;
-		if (hasClosingBracket && parameterTypeNames.length > 0) {
+		if (hasOpeningBracket && parameterTypeNames.length > 0) {
 			contextInformation= new ProposalContextInformation();
 			contextInformation.setInformationDisplayString(getParameterSignature(parameterTypeNames, parameterNames));		
 			contextInformation.setContextDisplayString(proposal.getDisplayString());			

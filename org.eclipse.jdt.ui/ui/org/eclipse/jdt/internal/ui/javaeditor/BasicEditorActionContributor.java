@@ -83,6 +83,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 	};	
 	
 	protected RetargetTextEditorAction fContentAssist;	
+	protected RetargetTextEditorAction fContextInformation;	
 	protected SelectionAction fShiftRight;
 	protected SelectionAction fShiftLeft;
 	
@@ -91,6 +92,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		super();
 		
 		fContentAssist= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal."); //$NON-NLS-1$
+		fContextInformation= new RetargetTextEditorAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation."); //$NON-NLS-1$
 		fShiftRight= new SelectionAction("ShiftRight.", ITextOperationTarget.SHIFT_RIGHT);		 //$NON-NLS-1$
 		fShiftLeft= new SelectionAction("ShiftLeft.", ITextOperationTarget.SHIFT_LEFT); //$NON-NLS-1$
 		
@@ -118,6 +120,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_GENERATE));
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContentAssist);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
 		}
 		
 	}
@@ -138,6 +141,7 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 			textEditor= (ITextEditor) part;
 			
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
+		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fShiftRight.setEditor(textEditor);
 		fShiftLeft.setEditor(textEditor);
 	}
