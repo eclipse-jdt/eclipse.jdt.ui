@@ -19,16 +19,11 @@ import org.eclipse.core.runtime.CoreException;
 public interface IAssistProcessor {
 	
 	/**
-	 * Returns true if the processor has propsals for the given location. This test can used the passed AST
-	 * and should be precice (to a guess). 
-	 */
-	boolean hasAssists(IAssistContext context) throws CoreException;
-
-	/**
 	 * Collects assists for the given context
 	 * @param context Defines current compilation unit, position and a shared AST
-	 * @param resultingCollections 
+	 * @param resultingCollections The resulting proposals. The proposals must be of type
+	 * <code>IJavaCompletionProposal</code>
 	 */
-	void process(IAssistContext context, List resultingCollections) throws CoreException;
+	void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException;
 	
 }

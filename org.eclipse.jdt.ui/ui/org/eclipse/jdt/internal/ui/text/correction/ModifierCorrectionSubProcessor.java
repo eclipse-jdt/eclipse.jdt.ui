@@ -35,10 +35,10 @@ public class ModifierCorrectionSubProcessor {
 	public static final int TO_NON_PRIVATE= 3;
 	public static final int TO_NON_STATIC= 4;
 	
-	public static void addNonAccessibleMemberProposal(ICorrectionContext context, List proposals, int kind) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(IAssistContext context, IProblemLocation problem, List proposals, int kind) throws JavaModelException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -117,10 +117,10 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addNonFinalLocalProposal(ICorrectionContext context, List proposals) {
+	public static void addNonFinalLocalProposal(IAssistContext context, IProblemLocation problem, List proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}
@@ -159,12 +159,12 @@ public class ModifierCorrectionSubProcessor {
 		return Modifier.PUBLIC;
 	}
 
-	public static void addAbstractMethodProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addAbstractMethodProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
 
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -186,7 +186,7 @@ public class ModifierCorrectionSubProcessor {
 		}
 		boolean hasNoBody= (decl.getBody() == null);
 		
-		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
+		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass || parentIsAbstractClass) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			
 			AST ast= astRoot.getAST();
@@ -215,7 +215,7 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal);
 		}
 		
-		if (!hasNoBody && context.getProblemId() == IProblem.BodyForAbstractMethod) {
+		if (!hasNoBody && problem.getProblemId() == IProblem.BodyForAbstractMethod) {
 			ASTRewrite rewrite= new ASTRewrite(decl.getParent());
 			rewrite.markAsRemoved(decl.getBody());
 			
@@ -226,19 +226,19 @@ public class ModifierCorrectionSubProcessor {
 			proposals.add(proposal2);
 		}
 		
-		if (context.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
+		if (problem.getProblemId() == IProblem.AbstractMethodInAbstractClass && (parentTypeDecl != null)) {
 			ASTRewriteCorrectionProposal proposal= getMakeTypeStaticProposal(cu, parentTypeDecl);
 			proposals.add(proposal);
 		}		
 		
 	}
 	
-	public static void addNativeMethodProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addNativeMethodProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		CompilationUnit astRoot= context.getASTRoot();
 
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -309,11 +309,11 @@ public class ModifierCorrectionSubProcessor {
 		return proposal;
 	}
 
-	public static void addMethodRequiresBodyProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addMethodRequiresBodyProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		AST ast= context.getASTRoot().getAST();
 		
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (!(selectedNode instanceof MethodDeclaration)) {
 			return;
 		}
@@ -350,10 +350,10 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 
-	public static void addNeedToEmulateProposal(ICorrectionContext context, List proposals) {
+	public static void addNeedToEmulateProposal(IAssistContext context, IProblemLocation problem, List proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
 		}

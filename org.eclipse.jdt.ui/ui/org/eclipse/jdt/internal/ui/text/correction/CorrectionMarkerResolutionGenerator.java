@@ -48,14 +48,18 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 	public static class CorrectionMarkerResolution implements IMarkerResolution {
 	
-		private CorrectionContext fCorrectionContext;
+		private ICompilationUnit fCompilationUnit;
+		private int fOffset;
+		private int fLength;
 		private IJavaCompletionProposal fProposal;
 	
 		/**
 		 * Constructor for CorrectionMarkerResolution.
 		 */
-		public CorrectionMarkerResolution(CorrectionContext context, IJavaCompletionProposal proposal) {
-			fCorrectionContext= context;
+		public CorrectionMarkerResolution(ICompilationUnit cu, int offset, int length, IJavaCompletionProposal proposal) {
+			fCompilationUnit= cu;
+			fOffset= offset;
+			fLength= length;
 			fProposal= proposal;
 		}
 	
@@ -70,14 +74,12 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		 * @see IMarkerResolution#run(IMarker)
 		 */
 		public void run(IMarker marker) {
-			try {
-				ICompilationUnit cu= fCorrectionContext.getCompilationUnit();
-				
-				IEditorPart part= EditorUtility.isOpenInEditor(cu);
+			try {				
+				IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
 				if (part == null) {
-					part= EditorUtility.openInEditor(cu);
+					part= EditorUtility.openInEditor(fCompilationUnit);
 					if (part instanceof ITextEditor) {
-						((ITextEditor) part).selectAndReveal(fCorrectionContext.getOffset(), fCorrectionContext.getLength());
+						((ITextEditor) part).selectAndReveal(fOffset, fLength);
 					}					
 				}
 				if (part != null) {				
@@ -123,14 +125,16 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			if (cu != null) {
 				IEditorInput input= EditorUtility.getEditorInput(cu);
 				if (input != null) {
-					CorrectionContext context= findCorrectionContext(input, marker);
-					if (context != null) {
+					IProblemLocation location= findProblemLocation(input, marker);
+					if (location != null) {
+						
+						IAssistContext context= new AssistContext(JavaModelUtil.toWorkingCopy(cu),  location.getOffset(), location.getLength());
 						ArrayList proposals= new ArrayList();
-						JavaCorrectionProcessor.collectCorrections(context, proposals);
+						JavaCorrectionProcessor.collectCorrections(context, new IProblemLocation[] { location }, proposals);
 						int nProposals= proposals.size();
 						IMarkerResolution[] resolutions= new IMarkerResolution[nProposals];
 						for (int i= 0; i < nProposals; i++) {
-							resolutions[i]= new CorrectionMarkerResolution(context, (IJavaCompletionProposal) proposals.get(i));
+							resolutions[i]= new CorrectionMarkerResolution(context.getCompilationUnit(), location.getOffset(), location.getLength(), (IJavaCompletionProposal) proposals.get(i));
 						}
 						return resolutions;
 					}
@@ -150,7 +154,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		return null;
 	}
 	
-	private CorrectionContext findCorrectionContext(IEditorInput input, IMarker marker) throws JavaModelException {
+	private IProblemLocation findProblemLocation(IEditorInput input, IMarker marker) throws JavaModelException {
 		IAnnotationModel model= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getAnnotationModel(input);
 		if (model != null) { // open in editor
 			Iterator iter= model.getAnnotationIterator();
@@ -162,8 +166,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					if (marker.equals(annot.getMarker())) {
 						Position pos= model.getPosition(annot);
 						if (pos != null) {
-							ICompilationUnit cu= getCompilationUnit(marker);
-							return new CorrectionContext(JavaModelUtil.toWorkingCopy(cu), pos.getOffset(), pos.getLength(), annot.getId(), annot.getArguments());
+							return new ProblemLocation(pos.getOffset(), pos.getLength(), annot);
 						}
 					}
 				}
@@ -175,7 +178,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			int end= marker.getAttribute(IMarker.CHAR_END, -1);
 			String[] arguments= Util.getProblemArgumentsFromMarker(marker.getAttribute(IJavaModelMarker.ARGUMENTS, "")); //$NON-NLS-1$
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
-				return new CorrectionContext(JavaModelUtil.toWorkingCopy(cu), start, end - start, id, arguments);
+				return new ProblemLocation(start, end - start, id, arguments);
 			}			
 		}
 		return null;

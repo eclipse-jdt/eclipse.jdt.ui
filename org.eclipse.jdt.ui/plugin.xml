@@ -31,6 +31,8 @@
 <extension-point name="%elementFiltersName" id="javaElementFilters" schema="schema/javaElementFilters.exsd"/>
 <extension-point name="%javaEditorTextHoversName" id="javaEditorTextHovers" schema="schema/javaEditorTextHovers.exsd"/>
 <extension-point name="%javadocCompletionProcessor" id="javadocCompletionProcessor" schema="schema/javadocCompletionProcessor.exsd"/>
+<extension-point name="%quickFixProcessor" id="quickFixProcessor" schema="schema/quickFixProcessor.exsd"/>
+<extension-point name="%quickAssistProcessor" id="quickAssistProcessor" schema="schema/quickAssistProcessor.exsd"/>
 <extension-point name="%classpathContainerPageExtensionPoint" id="classpathContainerPage" schema="schema/classpathContainerPage.exsd"/>
 
 <extension
@@ -49,6 +51,33 @@
          class="org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionEvaluator"
          name="%defaultJavadocCompletionProcessor">
    </javadocCompletionProcessor>
+</extension>
+
+<extension
+      point="org.eclipse.jdt.ui.quickFixProcessor">
+   <quickFixProcessor
+         id= "org.eclipse.jdt.ui.text.correction.QuickFixProcessor"
+         class="org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor"
+         name="%defaultQuickFixProcessor">
+   </quickFixProcessor>
+</extension>
+
+<extension
+      point="org.eclipse.jdt.ui.quickAssistProcessor">
+   <quickAssistProcessor
+         id= "org.eclipse.jdt.ui.text.correction.QuickAssistProcessor"
+         class="org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor"
+         name="%defaultQuickAssistProcessor">
+   </quickAssistProcessor>
+</extension>
+
+<extension
+      point="org.eclipse.jdt.ui.quickAssistProcessor">
+   <quickAssistProcessor
+         id= "org.eclipse.jdt.ui.text.correction.QuickTemplateProcessor"
+         class="org.eclipse.jdt.internal.ui.text.correction.QuickTemplateProcessor"
+         name="%quickTemplateAssistProcessor">
+   </quickAssistProcessor>
 </extension>
 
 <extension

@@ -59,8 +59,8 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		IDocument document= getDocument(cu);
 			
-		int offset= context.getOffset();
-		int length= context.getLength();
+		int offset= context.getSelectionOffset();
+		int length= context.getSelectionLength();
 
 		try {
 			int startLine= document.getLineOfOffset(offset);
@@ -73,15 +73,15 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 	}	
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#process(org.eclipse.jdt.internal.ui.text.correction.ICorrectionContext, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
 	 */
-	public void process(IAssistContext context, List resultingCollections) throws CoreException {
+	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
 		try {
 			ICompilationUnit cu= context.getCompilationUnit();
 			IDocument document= getDocument(cu);
 			
-			int offset= context.getOffset();
-			int length= context.getLength();
+			int offset= context.getSelectionOffset();
+			int length= context.getSelectionLength();
 			// test if selection is either a full line or spans over multiple lines
 			int startLine= document.getLineOfOffset(offset);
 			int endLine= document.getLineOfOffset(offset + length);
@@ -132,5 +132,5 @@ public class QuickTemplateProcessor implements IAssistProcessor {
 			}
 		}
 	}
-	
+
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -118,8 +119,26 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 	}	
 	
 	
-	public void process(ICorrectionContext context, List proposals) throws CoreException {
-		int id= context.getProblemId();
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ICorrectionProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
+	 */
+	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
+		if (locations == null || locations.length == 0) {
+			return;
+		}
+		
+		HashSet handledProblems= new HashSet(locations.length);
+		for (int i= 0; i < locations.length; i++) {
+			IProblemLocation curr= locations[i];
+			Integer id= new Integer(curr.getProblemId());
+			if (handledProblems.add(id)) {
+				process(context, curr, resultingCollections);
+			}
+		}
+	}
+	
+	private void process(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
+		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;
 		}
@@ -127,7 +146,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 		switch (id) {
 			case IProblem.UnterminatedString:
 				String quoteLabel= CorrectionMessages.getString("JavaCorrectionProcessor.addquote.description"); //$NON-NLS-1$
-				int pos= moveBack(context.getOffset() + context.getLength(), context.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
+				int pos= moveBack(problem.getOffset() + problem.getLength(), problem.getOffset(), "\n\r", context.getCompilationUnit()); //$NON-NLS-1$
 				proposals.add(new ReplaceCorrectionProposal(quoteLabel, context.getCompilationUnit(), pos, 0, "\"", 0)); //$NON-NLS-1$ 
 				break;
 			case IProblem.UnusedImport:
@@ -135,23 +154,23 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.CannotImportPackage:
 			case IProblem.ConflictingImport:
 			case IProblem.ImportNotFound:
-				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, proposals);
+				ReorgCorrectionsSubProcessor.removeImportStatementProposals(context, problem, proposals);
 				break;
 			case IProblem.UndefinedMethod:
-				UnresolvedElementsSubProcessor.getMethodProposals(context, false, proposals);
+				UnresolvedElementsSubProcessor.getMethodProposals(context, problem, false, proposals);
 				break;
 			case IProblem.UndefinedConstructor:
-				UnresolvedElementsSubProcessor.getConstructorProposals(context, proposals);
+				UnresolvedElementsSubProcessor.getConstructorProposals(context, problem, proposals);
 				break;					
 			case IProblem.ParameterMismatch:
-				UnresolvedElementsSubProcessor.getMethodProposals(context, true, proposals); 
+				UnresolvedElementsSubProcessor.getMethodProposals(context, problem, true, proposals); 
 				break;
 			case IProblem.MethodButWithConstructorName:	
-				ReturnTypeSubProcessor.addMethodWithConstrNameProposals(context, proposals);
+				ReturnTypeSubProcessor.addMethodWithConstrNameProposals(context, problem, proposals);
 				break;
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
-				UnresolvedElementsSubProcessor.getVariableProposals(context, proposals);
+				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
 				break;
 			case IProblem.FieldTypeAmbiguous:
 			case IProblem.ArgumentTypeAmbiguous:
@@ -160,13 +179,13 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.SuperclassAmbiguous:
 			case IProblem.InterfaceAmbiguous:
 			case IProblem.AmbiguousType:	
-				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, proposals);
+				UnresolvedElementsSubProcessor.getAmbiguosTypeReferenceProposals(context, problem, proposals);
 				break;	
 			case IProblem.PublicClassMustMatchFileName:
-				ReorgCorrectionsSubProcessor.getWrongTypeNameProposals(context, proposals);
+				ReorgCorrectionsSubProcessor.getWrongTypeNameProposals(context, problem, proposals);
 				break;
 			case IProblem.PackageIsNotExpectedPackage:
-				ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(context, proposals);
+				ReorgCorrectionsSubProcessor.getWrongPackageDeclNameProposals(context, problem, proposals);
 				break;
 			case IProblem.UndefinedType:
 			case IProblem.FieldTypeNotFound:
@@ -175,38 +194,38 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.SuperclassNotFound:
 			case IProblem.ExceptionTypeNotFound:
 			case IProblem.InterfaceNotFound: 
-				UnresolvedElementsSubProcessor.getTypeProposals(context, proposals);
+				UnresolvedElementsSubProcessor.getTypeProposals(context, problem, proposals);
 				break;	
 			case IProblem.TypeMismatch:
-				LocalCorrectionsSubProcessor.addCastProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addCastProposals(context, problem, proposals);
 				break;
 			case IProblem.UnhandledException:
-				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
 			case IProblem.UnreachableCatch:
-				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addUnreachableCatchProposals(context, problem, proposals);
 				break;
 			case IProblem.VoidMethodReturnsValue:
-				ReturnTypeSubProcessor.addVoidMethodReturnsProposals(context, proposals);
+				ReturnTypeSubProcessor.addVoidMethodReturnsProposals(context, problem, proposals);
 				break;
 			case IProblem.MissingReturnType:
-				ReturnTypeSubProcessor.addMissingReturnTypeProposals(context, proposals);
+				ReturnTypeSubProcessor.addMissingReturnTypeProposals(context, problem, proposals);
 				break;
 			case IProblem.ShouldReturnValue:
-				ReturnTypeSubProcessor.addMissingReturnStatementProposals(context, proposals);
+				ReturnTypeSubProcessor.addMissingReturnStatementProposals(context, problem, proposals);
 				break;
 			case IProblem.NonExternalizedStringLiteral:
-				LocalCorrectionsSubProcessor.addNLSProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addNLSProposals(context, problem, proposals);
 				break;
 			case IProblem.NonStaticAccessToStaticField:
 			case IProblem.NonStaticAccessToStaticMethod:
-				LocalCorrectionsSubProcessor.addInstanceAccessToStaticProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addInstanceAccessToStaticProposals(context, problem, proposals);
 				break;
 			case IProblem.StaticMethodRequested:
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_STATIC); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_STATIC); 
 				break;				
 			case IProblem.NotVisibleMethod:
 			case IProblem.NotVisibleConstructor:
@@ -219,31 +238,31 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ExceptionTypeNotVisible:
 			case IProblem.NotVisibleField:
 			case IProblem.ImportNotVisible:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE); 
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE); 
 				break;
 			case IProblem.BodyForAbstractMethod:
 			case IProblem.AbstractMethodInAbstractClass:
-				ModifierCorrectionSubProcessor.addAbstractMethodProposals(context, proposals); 
+				ModifierCorrectionSubProcessor.addAbstractMethodProposals(context, problem, proposals); 
 				break;
 			case IProblem.AbstractMethodMustBeImplemented:
-				LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(context, proposals);
+				LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(context, problem, proposals);
 				break;
 			case IProblem.BodyForNativeMethod:
-				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, proposals);
+				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, problem, proposals);
 				break;
 			case IProblem.MethodRequiresBody:
-				ModifierCorrectionSubProcessor.addMethodRequiresBodyProposals(context, proposals);
+				ModifierCorrectionSubProcessor.addMethodRequiresBodyProposals(context, problem, proposals);
 				break;					
 			case IProblem.OuterLocalMustBeFinal:				
-				ModifierCorrectionSubProcessor.addNonFinalLocalProposal(context, proposals);
+				ModifierCorrectionSubProcessor.addNonFinalLocalProposal(context, problem, proposals);
 				break;
 			case IProblem.UninitializedLocalVariable:
-				LocalCorrectionsSubProcessor.addUninitializedLocalVariableProposal(context, proposals);
+				LocalCorrectionsSubProcessor.addUninitializedLocalVariableProposal(context, problem, proposals);
 				break;
 			case IProblem.UnhandledExceptionInDefaultConstructor:
 			case IProblem.UndefinedConstructorInDefaultConstructor:
 			case IProblem.NotVisibleConstructorInDefaultConstructor:
-				LocalCorrectionsSubProcessor.addConstructorFromSuperclassProposal(context, proposals);
+				LocalCorrectionsSubProcessor.addConstructorFromSuperclassProposal(context, problem, proposals);
 				break;
 			case IProblem.UnusedPrivateMethod:
 			case IProblem.UnusedPrivateConstructor:
@@ -251,16 +270,18 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateType:
 			case IProblem.LocalVariableIsNeverUsed:
 			case IProblem.ArgumentIsNeverUsed:			
-				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, proposals);
+				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, problem, proposals);
 				break;
 			case IProblem.NeedToEmulateFieldReadAccess:
 			case IProblem.NeedToEmulateFieldWriteAccess:
 			case IProblem.NeedToEmulateMethodAccess:
 			case IProblem.NeedToEmulateConstructorAccess:
-				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE);
+				ModifierCorrectionSubProcessor.addNonAccessibleMemberProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_PRIVATE);
 				break;
 			default:
 		}
 	}
+
+
 
 }

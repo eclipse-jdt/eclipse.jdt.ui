@@ -15,11 +15,12 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
@@ -49,6 +50,9 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
+	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessor"; //$NON-NLS-1$
+	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessor"; //$NON-NLS-1$
+
 
 	private static class CorrectionsComparator implements Comparator {
 		
@@ -74,18 +78,37 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	
 	private static ICorrectionProcessor[] getCorrectionProcessors() {
 		if (fCorrectionProcessors == null) {
-			fCorrectionProcessors= new ICorrectionProcessor[] {
-				new QuickFixProcessor()			};
+			try {
+				IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, QUICKFIX_PROCESSOR_CONTRIBUTION_ID);
+				ICorrectionProcessor[] result= new ICorrectionProcessor[elements.length];
+				for (int i= 0; i < elements.length; i++) {
+					result[i]= (ICorrectionProcessor) elements[i].createExecutableExtension("class"); //$NON-NLS-1$
+				}
+				fCorrectionProcessors= result;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				fCorrectionProcessors= new ICorrectionProcessor[] { new QuickFixProcessor() };
+			}
 		}
 		return fCorrectionProcessors;
 	}
 	
 	private static IAssistProcessor[] getAssistProcessors() {
 		if (fAssistProcessors == null) {
-			fAssistProcessors= new IAssistProcessor[] {
-				new QuickAssistProcessor(),
-				new QuickTemplateProcessor()
-			};
+			try {
+				IConfigurationElement[] elements= Platform.getPluginRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, QUICKASSIST_PROCESSOR_CONTRIBUTION_ID);
+				IAssistProcessor[] result= new IAssistProcessor[elements.length];
+				for (int i= 0; i < elements.length; i++) {
+					result[i]= (IAssistProcessor) elements[i].createExecutableExtension("class"); //$NON-NLS-1$
+				}
+				fAssistProcessors= result;
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+				fAssistProcessors= new IAssistProcessor[] { // defaults
+					new QuickAssistProcessor(),
+					new QuickTemplateProcessor()
+				};
+			}
 		}
 		return fAssistProcessors;
 	}	
@@ -146,13 +169,12 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput());
 
+		int length= viewer != null ? viewer.getSelectedRange().y : 0;
+		AssistContext context= new AssistContext(cu, documentOffset, length);
+
 		ArrayList proposals= new ArrayList();
 		if (model != null) {
-			processProblemAnnotations(cu, model, viewer, documentOffset, proposals);
-		}
-		
-		if (proposals.isEmpty()) {
-			proposals.add(new NoCorrectionProposal(null, null));
+			processProblemAnnotations(context, model, proposals);
 		}
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
@@ -164,10 +186,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 	
 
-	private void processProblemAnnotations(ICompilationUnit cu, IAnnotationModel model, ITextViewer viewer, int offset, ArrayList proposals) {
-		CorrectionContext context= new CorrectionContext(cu);
+	private void processProblemAnnotations(IAssistContext context, IAnnotationModel model, ArrayList proposals) {
+		int offset= context.getSelectionOffset();
 		
-		HashSet idsProcessed= new HashSet();
+		ArrayList problems= new ArrayList();
 		Iterator iter= new JavaAnnotationIterator(model, true);
 		while (iter.hasNext()) {
 			IJavaAnnotation annot= (IJavaAnnotation) iter.next();
@@ -175,13 +197,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			if (isAtPosition(offset, pos)) {
 				int problemId= annot.getId();
 				if (problemId != -1) {
-					if (idsProcessed.add(new Integer(problemId))) { // collect only once per problem id
-						context.initialize(pos.getOffset(), pos.getLength(), annot.getId(), annot.getArguments());
-						collectCorrections(context, proposals);
-						if (proposals.isEmpty()) {
-							//proposals.add(new NoCorrectionProposal(pp, annot.getMessage()));
-						}
-					}	
+					problems.add(new ProblemLocation(pos.getOffset(), pos.getLength(), annot));
 				} else {
 					if (annot instanceof MarkerAnnotation) {
 						IMarker marker= ((MarkerAnnotation) annot).getMarker();
@@ -195,33 +211,35 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				}
 			}
 		}
-
-		int length= viewer != null ? viewer.getSelectedRange().y : 0;
-		context.initialize(offset, length, 0, null);
-		collectAssists(context, proposals);
+		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
+		collectCorrections(context, problemLocations, proposals);
+		collectAssists(context, problemLocations, proposals);
 	}
-	
-	public static void collectCorrections(CorrectionContext context, ArrayList proposals) {
+
+	public static void collectCorrections(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
 		ICorrectionProcessor[] processors= getCorrectionProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				processors[i].process(context, proposals);
+				processors[i].process(context, locations, proposals);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
 		}
 	}
 	
-	public static void collectAssists(CorrectionContext context, ArrayList proposals) {
+	public static void collectAssists(IAssistContext context, IProblemLocation[] locations, ArrayList proposals) {
 		IAssistProcessor[] processors= getAssistProcessors();
 		for (int i= 0; i < processors.length; i++) {
 			try {
-				processors[i].process(context, proposals);
+				processors[i].process(context, locations, proposals);
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
 		}
 	}	
+
+
+
 	
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)

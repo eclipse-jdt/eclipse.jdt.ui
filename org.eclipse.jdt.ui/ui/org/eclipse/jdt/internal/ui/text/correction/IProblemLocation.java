@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.jdt.core.dom.ASTNode;
+
 /**
-  */
-public interface ICorrectionContext extends IAssistContext {
+ *
+ */
+public interface IProblemLocation {
 	
 	/**
 	 * Returns the id of problem that is associated with this context. See {@link org.eclipse.jdt.core.compiler.IProblem} for
@@ -26,6 +29,29 @@ public interface ICorrectionContext extends IAssistContext {
 	 * if no problem exists. 
 	 * @return String[]
 	 */
-	String[] getProblemArguments();	
+	String[] getProblemArguments();
+	
+	/**
+	 * Returns the length of the problem
+	 * @return int
+	 */
+	int getLength();
+	
+	/**
+	 * Returns the offset of the problem
+	 * @return int
+	 */
+	int getOffset();
+	
+	/**
+	 * Returns the node that covers the location of the problem
+	 */
+	public ASTNode getCoveringNode(IAssistContext context);
+
+	/**
+	 * Returns the node that is covered by the location of the problem
+	 */	
+	public ASTNode getCoveredNode(IAssistContext context);
+	
 
 }

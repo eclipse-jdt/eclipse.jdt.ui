@@ -46,12 +46,12 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 
 public class UnresolvedElementsSubProcessor {
 	
-	public static void getVariableProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void getVariableProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= context.getCoveredNode();
+		ASTNode selectedNode= problem.getCoveredNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -227,10 +227,10 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 
-	public static void getTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void getTypeProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -399,12 +399,12 @@ public class UnresolvedElementsSubProcessor {
 		} while (node != null);
 	}
 	
-	public static void getMethodProposals(ICorrectionContext context, boolean needsNewName, List proposals) throws CoreException {
+	public static void getMethodProposals(IAssistContext context, IProblemLocation problem, boolean needsNewName, List proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		
 		if (!(selectedNode instanceof SimpleName)) {
 			return;
@@ -444,11 +444,11 @@ public class UnresolvedElementsSubProcessor {
 				parameterMismatchs.add(binding);
 			} else if (binding.getParameterTypes().length == nArguments && NameMatcher.isSimilarName(methodName, curr)) {
 				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changemethod.description", curr); //$NON-NLS-1$
-				proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), context.getOffset(), context.getLength(), curr, 2));
+				proposals.add(new ReplaceCorrectionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), curr, 2));
 			}
 		}
 			
-		addParameterMissmatchProposals(context, parameterMismatchs, arguments, proposals);
+		addParameterMissmatchProposals(context, problem, parameterMismatchs, arguments, proposals);
 		
 		// new method
 		ITypeBinding binding= null;
@@ -492,7 +492,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	private static void addParameterMissmatchProposals(ICorrectionContext context, List similarElements, List arguments, List proposals) throws CoreException {
+	private static void addParameterMissmatchProposals(IAssistContext context, IProblemLocation problem, List similarElements, List arguments, List proposals) throws CoreException {
 		int nSimilarElements= similarElements.size();
 		ITypeBinding[] argTypes= getArgumentTypes(arguments);
 		if (argTypes == null || nSimilarElements == 0)  {
@@ -509,14 +509,14 @@ public class UnresolvedElementsSubProcessor {
 					return; // only suggest for one method (avoid duplicated proposals)
 				}
 			} else if (diff > 0) {
-				doMoreParameters(context, arguments, argTypes, elem, proposals);
+				doMoreParameters(context, problem, arguments, argTypes, elem, proposals);
 			} else {
-				doMoreArguments(context, arguments, argTypes, elem, proposals);
+				doMoreArguments(context, problem, arguments, argTypes, elem, proposals);
 			}
 		}
 	}
 	
-	private static void doMoreParameters(ICorrectionContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doMoreParameters(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= paramTypes.length - argTypes.length;
@@ -544,7 +544,7 @@ public class UnresolvedElementsSubProcessor {
 			} else {
 				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.addarguments.description", arg); //$NON-NLS-1$
 			}			
-			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), context.getCoveredNode(), arguments, indexSkipped, paramTypes, 8);
+			AddArgumentCorrectionProposal proposal= new AddArgumentCorrectionProposal(label, context.getCompilationUnit(), problem.getCoveredNode(context), arguments, indexSkipped, paramTypes, 8);
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
 			proposal.ensureNoModifications();
 			proposals.add(proposal);				
@@ -595,7 +595,7 @@ public class UnresolvedElementsSubProcessor {
 		return buf.toString();
 	}
 
-	private static void doMoreArguments(ICorrectionContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doMoreArguments(IAssistContext context, IProblemLocation problem, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int k= 0, nSkipped= 0;
 		int diff= argTypes.length - paramTypes.length;
@@ -616,7 +616,7 @@ public class UnresolvedElementsSubProcessor {
 		
 		// remove arguments
 		{
-			ASTNode selectedNode= context.getCoveringNode();
+			ASTNode selectedNode= problem.getCoveringNode(context);
 			ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
 			
 			for (int i= diff - 1; i >= 0; i--) {
@@ -711,7 +711,7 @@ public class UnresolvedElementsSubProcessor {
 	}	
 	
 
-	private static void doEqualNumberOfParameters(ICorrectionContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
+	private static void doEqualNumberOfParameters(IAssistContext context, List arguments, ITypeBinding[] argTypes, IMethodBinding methodBinding, List proposals) throws CoreException {
 		ITypeBinding[] paramTypes= methodBinding.getParameterTypes();
 		int[] indexOfDiff= new int[paramTypes.length];
 		int nDiffs= 0;
@@ -820,11 +820,11 @@ public class UnresolvedElementsSubProcessor {
 		return res;
 	}
 
-	public static void getConstructorProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void getConstructorProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -878,7 +878,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 		
-		addParameterMissmatchProposals(context, similarElements, arguments, proposals);
+		addParameterMissmatchProposals(context, problem, similarElements, arguments, proposals);
 		
 		if (targetBinding.isFromSource()) {
 			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, targetBinding);
@@ -891,10 +891,10 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
-	public static void getAmbiguosTypeReferenceProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void getAmbiguosTypeReferenceProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		final ICompilationUnit cu= context.getCompilationUnit();
-		int offset= context.getOffset();
-		int len= context.getLength();
+		int offset= problem.getOffset();
+		int len= problem.getLength();
 		
 		IJavaElement[] elements= cu.codeSelect(offset, len);
 		for (int i= 0; i < elements.length; i++) {

@@ -79,10 +79,10 @@ public class ReturnTypeSubProcessor {
 	}	
 	
 	
-	public static void addMethodWithConstrNameProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addMethodWithConstrNameProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 	
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode instanceof MethodDeclaration) {
 			MethodDeclaration declaration= (MethodDeclaration) selectedNode;
 			
@@ -98,11 +98,11 @@ public class ReturnTypeSubProcessor {
 	
 	}
 	
-	public static void addVoidMethodReturnsProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addVoidMethodReturnsProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -155,11 +155,11 @@ public class ReturnTypeSubProcessor {
 	
 
 	
-	public static void addMissingReturnTypeProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addMissingReturnTypeProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}
@@ -213,10 +213,10 @@ public class ReturnTypeSubProcessor {
 		}
 	}
 
-	public static void addMissingReturnStatementProposals(ICorrectionContext context, List proposals) throws CoreException {
+	public static void addMissingReturnStatementProposals(IAssistContext context, IProblemLocation problem, List proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
-		ASTNode selectedNode= context.getCoveringNode();
+		ASTNode selectedNode= problem.getCoveringNode(context);
 		if (selectedNode == null) {
 			return;
 		}

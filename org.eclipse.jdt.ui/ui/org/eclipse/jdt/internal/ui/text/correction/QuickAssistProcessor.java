@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -35,30 +35,28 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		super();
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#hasAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext)
-	 */
-	public boolean hasAssists(IAssistContext context) throws CoreException {
-		ArrayList list= new ArrayList();
-		process(context, list);
-		return !list.isEmpty();
-	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, java.util.List)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#process(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[], java.util.List)
 	 */
-	public void process(IAssistContext context, List resultingCollections) throws CoreException {
-		// quick assists that show up also if there is an error/warning
-		getCatchClauseToThrowsProposals(context, resultingCollections);
-		getRenameLocalProposals(context, resultingCollections);
-
-		getAssignToVariableProposals(context, resultingCollections);
-		getUnWrapProposals(context, resultingCollections);
+	public void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException {
+		NodeFinder finder= new NodeFinder(context.getSelectionOffset(), context.getSelectionLength());
+		context.getASTRoot().accept(finder);
+		ASTNode coveringNode= finder.getCoveringNode();
+		if (coveringNode != null) {
+		
+			// quick assists that show up also if there is an error/warning
+			getCatchClauseToThrowsProposals(context, coveringNode, resultingCollections);
+			getRenameLocalProposals(context, coveringNode, resultingCollections);
+		
+			if (locations == null || locations.length == 0) {
+				getAssignToVariableProposals(context, coveringNode, resultingCollections);
+				getUnWrapProposals(context, coveringNode, resultingCollections);
+			}
+		}
 	}
 	
-	private void getAssignToVariableProposals(IAssistContext context, List resultingCollections) throws CoreException {
-		ASTNode node= context.getCoveringNode();
-		
+	private void getAssignToVariableProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
 		Statement statement= ASTResolving.findParentStatement(node);
 		if (!(statement instanceof ExpressionStatement)) {
 			return;
@@ -88,8 +86,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 		}				
 	}
 	
-	private void getCatchClauseToThrowsProposals(IAssistContext context, List resultingCollections) throws CoreException {
-		ASTNode node= context.getCoveringNode();
+	private void getCatchClauseToThrowsProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
 		CatchClause catchClause= (CatchClause) ASTResolving.findAncestor(node, ASTNode.CATCH_CLAUSE);
 		if (catchClause == null) {
 			return;
@@ -152,8 +149,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private void getRenameLocalProposals(IAssistContext context, List resultingCollections) throws CoreException {
-		ASTNode node= context.getCoveringNode();
+	private void getRenameLocalProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
 		if (!(node instanceof SimpleName)) {
 			return;
 		}
@@ -184,11 +180,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 	}
 	
 	
-	private void getUnWrapProposals(IAssistContext context, List resultingCollections) throws CoreException {
-		ASTNode node= context.getCoveringNode();
-		if (node == null) {
-			return;
-		}
+	private void getUnWrapProposals(IAssistContext context, ASTNode node, List resultingCollections) throws CoreException {
 		ASTNode outer= node;
 			
 		Block block= null;
@@ -275,5 +267,7 @@ public class QuickAssistProcessor implements IAssistProcessor {
 			resultingCollections.add(proposal);
 		}				
 	}
+
+
 
 }

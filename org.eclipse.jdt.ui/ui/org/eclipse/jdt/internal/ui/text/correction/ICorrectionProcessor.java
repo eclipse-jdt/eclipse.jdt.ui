@@ -27,8 +27,9 @@ public interface ICorrectionProcessor {
 	/**
 	 * Collects corrections or code manipulations for the given context
 	 * @param context Defines current compilation unit, position and the problem ID.
-	 * @param resultingCollections 
+	 * @param resultingCollections The resulting proposals. The proposals must be of type
+	 * <code>IJavaCompletionProposal</code>
 	 */
-	void process(ICorrectionContext context, List resultingCollections) throws CoreException;
+	void process(IAssistContext context, IProblemLocation[] locations, List resultingCollections) throws CoreException;
 	
 }
