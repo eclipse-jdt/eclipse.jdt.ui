@@ -429,63 +429,6 @@
 <!-- =========================================================================== -->
 
 <extension
-	point="org.eclipse.ui.popupMenus">
-
-	<objectContribution
-		id="org.eclipse.jdt.ui.compare.JavaElementContributions"
-		objectClass="org.eclipse.jdt.core.IJavaElement">
-		<menu
-			id="compareWithMenu"
-			path="additions"
-			label="%CompareWithMenu.label">
-			<separator name="compareWithGroup"/>
-		</menu>
-		<action
-			id="org.eclipse.jdt.ui.actions.CompareWithEachOther"
-			label="%CompareWithEachOtherAction.label"
-			tooltip="%CompareWithEachOtherAction.tooltip"
-			menubarPath="compareWithMenu/compareWithGroup"
-			enablesFor="2+"
-			class="org.eclipse.compare.internal.CompareAction">
-		</action>
-		<action
-			id="compareWithPatch"
-			label="%CompareWithPatchAction.label"
-			tooltip="%CompareWithPatchAction.tooltip"
-			menubarPath="compareWithMenu/compareWithGroup"
-			class="org.eclipse.compare.patch.CompareWithPatchAction">
-		</action>
-	</objectContribution>
-	
-	<objectContribution
-		id="org.eclipse.jdt.ui.compare.CompilationUnitContributions"
-		objectClass="org.eclipse.jdt.core.ICompilationUnit">
-		<menu
-			id="replaceWithMenu"
-			path="additions"
-			label="%ReplaceWithMenu.label">
-			<separator name="replaceWithGroup"/>
-		</menu>
-		<action
-			id="org.eclipse.jdt.ui.actions.ReplaceFromHistory"
-			label="%ReplaceFromHistoryAction.label"
-			tooltip="%ReplaceFromHistoryAction.tooltip"
-			menubarPath="replaceWithMenu/replaceWithGroup"
-			enablesFor="1"
-			class="org.eclipse.compare.internal.ReplaceWithEditionAction">
-		</action>
-		<action
-			id="compareWithHistory"
-			label="%CompareWithHistoryAction.label"
-			tooltip="%CompareWithHistoryAction.tooltip"
-			menubarPath="compareWithMenu/compareWithGroup"
-			enablesFor="1"
-			class="org.eclipse.compare.internal.CompareWithEditionAction">
-		</action>
-	</objectContribution>
-</extension>
-
-<extension
 	point="org.eclipse.compare.structureCreators">
 	<structureCreator
 		extensions="java"
