@@ -1184,16 +1184,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
-	public void testAddRecursive1()throws Exception{
-		printTestDisabledMessage("strange NPE: method binding for super.m(1) in class Super " +
-				"is not resolved in JUnit Plugin Test (but is OK in Eclipse Runtime...).");
-//		String[] signature= {"I"};
-//		String[] newNames= {"bool"};
-//		String[] newTypes= {"boolean"};
-//		String[] newDefaultValues= {"true"};
-//		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
-//		int[] newIndices= {1};
-//		helperAdd(signature, newParamInfo, newIndices);
+	public void testAddRecursive1()throws Exception{ //bug 42100
+		String[] signature= {"I"};
+		String[] newNames= {"bool"};
+		String[] newTypes= {"boolean"};
+		String[] newDefaultValues= {"true"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		helperAdd(signature, newParamInfo, newIndices);
 	}
 	
 	public void testException01() throws Exception {
@@ -1203,4 +1201,31 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperException(signature, remove, add);
 	}
 	
+	public void testInStatic01() throws Exception { //bug 47062
+		String[] signature= {"QString;", "QString;"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"arg1", "arg2"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		int[] deleted= null;
+		String newReturnTypeName= null;
+		helperDoAll("Example", "Example", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deleted, newReturnTypeName);
+	}
+
+	public void testInStatic02() throws Exception { //bug 47062
+		String[] signature= {"QString;", "QString;"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"arg1", "arg2"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		int[] deleted= null;
+		String newReturnTypeName= null;
+		helperDoAll("Example", "getExample", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deleted, newReturnTypeName);
+	}
 }

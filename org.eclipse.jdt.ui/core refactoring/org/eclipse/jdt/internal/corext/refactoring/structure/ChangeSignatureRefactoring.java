@@ -1398,35 +1398,39 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private static boolean isRecursiveReference(ASTNode node) {
-		IMethodBinding enclosing= getMethodDeclaration(node).resolveBinding();
+		MethodDeclaration enclosingMethodDeclaration= getMethodDeclaration(node);
+		if (enclosingMethodDeclaration == null)
+			return false;
+		
+		IMethodBinding enclosingMethodBinding= enclosingMethodDeclaration.resolveBinding();
 
 		if (node instanceof SimpleName && node.getParent() instanceof MethodInvocation)
-			return enclosing == ((MethodInvocation)node.getParent()).resolveMethodBinding();
+			return enclosingMethodBinding == ((MethodInvocation)node.getParent()).resolveMethodBinding();
 
 		if (node instanceof SimpleName && node.getParent() instanceof SuperMethodInvocation) {
 			IMethodBinding methodBinding= ((SuperMethodInvocation)node.getParent()).resolveMethodBinding();
-			return isSameMethod(methodBinding, enclosing);
+			return isSameMethod(methodBinding, enclosingMethodBinding);
 		}
 			
 		if (node instanceof SimpleName && node.getParent() instanceof ClassInstanceCreation)
-			return enclosing == ((ClassInstanceCreation)node.getParent()).resolveConstructorBinding();
+			return enclosingMethodBinding == ((ClassInstanceCreation)node.getParent()).resolveConstructorBinding();
 			
 		if (node instanceof ExpressionStatement && isReferenceNode(((ExpressionStatement)node).getExpression()))
 			return isRecursiveReference(((ExpressionStatement)node).getExpression());
 			
 		if (node instanceof MethodInvocation)	
-			return enclosing == ((MethodInvocation)node).resolveMethodBinding();
+			return enclosingMethodBinding == ((MethodInvocation)node).resolveMethodBinding();
 			
 		if (node instanceof SuperMethodInvocation) {
 			IMethodBinding methodBinding= ((SuperMethodInvocation)node).resolveMethodBinding();
-			return isSameMethod(methodBinding, enclosing);
+			return isSameMethod(methodBinding, enclosingMethodBinding);
 		}
 			
 		if (node instanceof ClassInstanceCreation)	
-			return enclosing == ((ClassInstanceCreation)node).resolveConstructorBinding();
+			return enclosingMethodBinding == ((ClassInstanceCreation)node).resolveConstructorBinding();
 			
 		if (node instanceof ConstructorInvocation)	
-			return enclosing == ((ConstructorInvocation)node).resolveConstructorBinding();
+			return enclosingMethodBinding == ((ConstructorInvocation)node).resolveConstructorBinding();
 			
 		if (node instanceof SuperConstructorInvocation) {
 			return false; //Constructors don't override -> enclosing has not been changed -> no recursion

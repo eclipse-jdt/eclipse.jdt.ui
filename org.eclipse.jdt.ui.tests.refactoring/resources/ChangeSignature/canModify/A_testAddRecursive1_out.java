@@ -1,6 +1,6 @@
 package p;
 
-public class A {
+class A {
 	int i;
 	void m(int i, boolean bool) {this.i = i;}
 }
