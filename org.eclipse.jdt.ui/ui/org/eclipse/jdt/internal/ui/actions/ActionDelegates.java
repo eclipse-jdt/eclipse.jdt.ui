@@ -196,5 +196,11 @@ public class ActionDelegates {
 			return RetargetActionIDs.MOVE; 
 		}
 	}
+
+	public static class Rename extends RetargetActionDelegator {
+		protected String getId() {
+			return RetargetActionIDs.RENAME; 
+		}
+	}
 	
 }
