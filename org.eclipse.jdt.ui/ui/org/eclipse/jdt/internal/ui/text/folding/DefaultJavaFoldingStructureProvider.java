@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -602,12 +604,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					additions.put(annotation, position);
 					
 				} else {
-					
 					Iterator x= annotations.iterator();
 					while (x.hasNext()) {
-						JavaProjectionAnnotation a= (JavaProjectionAnnotation) x.next();
+						Object[] annotationPosition= (Object[]) x.next();
+						JavaProjectionAnnotation a= (JavaProjectionAnnotation) annotationPosition[0];
+						Position p= (Position) annotationPosition[1];
 						if (annotation.isComment() == a.isComment()) {
-							Position p= model.getPosition(a);
 							if (p != null && !position.equals(p)) {
 								p.setOffset(position.getOffset());
 								p.setLength(position.getLength());
@@ -721,13 +723,24 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			Object annotation= e.next();
 			if (annotation instanceof JavaProjectionAnnotation) {
 				JavaProjectionAnnotation java= (JavaProjectionAnnotation) annotation;
+				Position position= model.getPosition(java);
 				List list= (List) map.get(java.getElement());
 				if (list == null) {
 					list= new ArrayList(2);
 					map.put(java.getElement(), list);
 				}
-				list.add(java);
+				list.add(new Object[] {java, position});
 			}
+		}
+		
+		Comparator comparator= new Comparator() {
+			public int compare(Object o1, Object o2) {
+				return ((Position)((Object[]) o1)[1]).getOffset() - ((Position)((Object[]) o2)[1]).getOffset();
+			}
+		};
+		for (Iterator it= map.values().iterator(); it.hasNext();) {
+			List list= (List) it.next();
+			Collections.sort(list, comparator);
 		}
 		return map;
 	}
