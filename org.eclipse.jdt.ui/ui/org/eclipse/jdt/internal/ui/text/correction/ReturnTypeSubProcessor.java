@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -227,7 +228,22 @@ public class ReturnTypeSubProcessor {
 			}
 			ReturnStatement existingStatement= (selectedNode instanceof ReturnStatement) ? (ReturnStatement) selectedNode : null;
 			proposals.add( new MissingReturnTypeCorrectionProposal(cu, methodDecl, existingStatement, 3));			
+				
+			Type returnType= methodDecl.getReturnType();
+			if (!"void".equals(ASTNodes.asString(returnType))) { //$NON-NLS-1$
+				ASTRewrite rewrite= new ASTRewrite(methodDecl);
+				AST ast= methodDecl.getAST();
+				rewrite.markAsReplaced(returnType, ast.newPrimitiveType(PrimitiveType.VOID));
+
+				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changetovoid.description"); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				proposal.ensureNoModifications();
+				proposals.add(proposal);				
+			}
 		}
+		
+
 	
 	}
 
