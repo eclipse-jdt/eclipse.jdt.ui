@@ -41,11 +41,6 @@ public class StandardVMType extends AbstractVMInstallType {
 			return null;
 		if ("J9".equals(System.getProperty("java.vm.name")))
 			return null;
-		String version= System.getProperty("java.version");
-		if (version == null)
-			return null;
-		if (version.startsWith("1.2") || version.startsWith("1.3"))
-			return null;
 		return javaHome;
 	}
 

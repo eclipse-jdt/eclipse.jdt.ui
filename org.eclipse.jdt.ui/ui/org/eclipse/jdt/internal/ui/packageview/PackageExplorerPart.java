@@ -228,7 +228,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 		IMenuManager menu = actionBars.getMenuManager();
 		menu.add(fFilterAction);
-		menu.add(fShowLibrariesAction);
+		menu.add(fShowLibrariesAction);  
 	}
 		
 	void frameChanged(PackageFrame frame) { //&&&

@@ -24,7 +24,7 @@ public class J9VMType extends AbstractVMInstallType {
 	 */
 	public File detectInstallLocation() {
 		if (!"J9".equals(System.getProperty("java.vm.name")))
-			return null;	
+			return null;	 
 		return new File (System.getProperty("java.home"));
 	}
 

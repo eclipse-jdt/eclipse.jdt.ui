@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.snippeteditor;
  */
 
 
-import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorSite;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
+import java.io.ByteArrayOutputStream;import java.io.PrintStream;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.List;import java.util.ResourceBundle;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IncrementalProjectBuilder;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.debug.core.DebugEvent;import org.eclipse.debug.core.DebugException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IDebugEventListener;import org.eclipse.debug.core.ILaunchManager;import org.eclipse.debug.core.ILauncher;import org.eclipse.debug.core.model.IDebugElement;import org.eclipse.debug.core.model.IDebugTarget;import org.eclipse.debug.ui.DebugUITools;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.eval.IEvaluationContext;import org.eclipse.jdt.debug.core.IJavaEvaluationListener;import org.eclipse.jdt.debug.core.IJavaEvaluationResult;import org.eclipse.jdt.debug.core.IJavaStackFrame;import org.eclipse.jdt.debug.core.IJavaThread;import org.eclipse.jdt.debug.core.IJavaValue;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.java.ResultCollector;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jface.action.Action;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.text.BadLocationException;import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextSelection;import org.eclipse.jface.text.source.ISourceViewer;import org.eclipse.jface.util.Assert;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IEditorSite;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.part.EditorActionBarContributor;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.ui.texteditor.AbstractTextEditor;import org.eclipse.ui.texteditor.ITextEditorActionConstants;import org.eclipse.ui.texteditor.MarkerUtilities;import org.eclipse.ui.texteditor.TextOperationAction;import org.omg.CORBA.UNKNOWN;import com.sun.jdi.InvocationException;import com.sun.jdi.ObjectReference;
 
 /**
  * An editor for Java snippets.
@@ -83,7 +83,6 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		setAction("Stop", a);
 
 		setAction("RunInPackage", new RunInPackageAction(this));
-		setAction("Import", new ImportAction(this));
 		setAction("ContentAssistProposal", new TextOperationAction(getResourceBundle(), "Editor.ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			
 		setAction("OpenOnSelection", new SnippetOpenOnSelectionAction(this, getResourceBundle(), "Editor.OpenOnSelection."));			
 	}
@@ -119,6 +118,11 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	}
 	
 	public void evalSelection(final int resultMode) {
+		if (isEvaluating()) {
+			return;
+		}
+		evaluationStarts();
+		fireEvalStateChanged();
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				pm.beginTask(JavaPlugin.getResourceString(EVALUATING), IProgressMonitor.UNKNOWN);
@@ -152,6 +156,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 			return;
 		}
 		if (fVM == null) {
+			evaluationEnds();
 			return;
 		}
 		fireEvalStateChanged();
@@ -160,12 +165,12 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
 		String snippet= selection.getText();
 		if (snippet.length() == 0) {
+			evaluationEnds();
 			return;
 		}
 		fSnippetStart= selection.getOffset();
 		fSnippetEnd= fSnippetStart + selection.getLength();
 		
-		evaluationStarts();
 		evaluate(snippet);			
 	}	
 	
@@ -259,59 +264,65 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		} catch (DebugException e) {
 			ErrorDialog.openError(getShell(), JavaPlugin.getResourceString(ERROR + "problemseval"), null, e.getStatus());
 			evaluationEnds();
-		} finally {
-			try {
-				fThread.resume();
-			} catch (DebugException e) {
-				// XXX: error
-			}
 		}
 	}
 
 	public void evaluationComplete(final IJavaEvaluationResult result) {
+		try {
+			fThread.resume();
+			int count= 0;
+			while (!fThread.isSuspended() && count < 20) {
+				try {
+					count++;
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+				}
+			}
+		} catch (DebugException e) {
+			// XXX: error
+		}
 		Runnable r = new Runnable() {
 			public void run() {
-				evaluationEnds();
 				if (result.hasProblems()) {
 					IMarker[] problems = result.getProblems();
 					int count= problems.length;
 					if (count == 0) {
 						showException(result.getException());
-						return;
 					} else {
 						for (int i = 0; i < count; i++) {
 							showProblem(problems[i]);
 						}
-						return;
 					}
-				}
-				final IJavaValue value = result.getValue();
-				if (value != null) {
-					switch (fResultMode) {
-					case RESULT_DISPLAY:
-						Runnable r = new Runnable() {
-							public void run() {
-								displayResult(value);
+				} else {
+					final IJavaValue value = result.getValue();
+					if (value != null) {
+						switch (fResultMode) {
+						case RESULT_DISPLAY:
+							Runnable r = new Runnable() {
+								public void run() {
+									displayResult(value);
+								}
+							};
+							getSite().getShell().getDisplay().asyncExec(r);
+							break;
+						case RESULT_INSPECT:
+							String snippet = result.getSnippet().trim();
+							int snippetLength = snippet.length();
+							if (snippetLength > 30) {
+								snippet = snippet.substring(0, 15) + "..." + snippet.substring(snippetLength - 15, snippetLength); 
 							}
-						};
-						getSite().getShell().getDisplay().asyncExec(r);
-						break;
-					case RESULT_INSPECT:
-						String snippet = result.getSnippet().trim();
-						int snippetLength = snippet.length();
-						if (snippetLength > 30) {
-							snippet = snippet.substring(0, 15) + "..." + snippet.substring(snippetLength - 15, snippetLength); 
+							snippet = snippet.replace('\n', ' ');
+							snippet = snippet.replace('\r', ' ');
+							snippet = snippet.replace('\t', ' ');
+							DebugUITools.inspect(snippet, value);
+							break;
+						case RESULT_RUN:
+							// no action
+							break;
 						}
-						snippet = snippet.replace('\n', ' ');
-						snippet = snippet.replace('\r', ' ');
-						snippet = snippet.replace('\t', ' ');
-						DebugUITools.inspect(snippet, value);
-						break;
-					case RESULT_RUN:
-						// no action
-						break;
 					}
 				}
+				evaluationEnds();
 			}
 		};
 		Control control= getVerticalRuler().getControl();
@@ -390,8 +401,13 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 	
 	protected void showException(Throwable exception) {
 		if (exception instanceof DebugException) {
-			showException((DebugException)exception);
-			return;
+			DebugException de = (DebugException)exception;
+			Throwable t= de.getStatus().getException();
+			if (t != null) {
+				// show underlying exception
+				showUnderlyingException(t);
+				return;
+			}
 		}
 		ByteArrayOutputStream bos= new ByteArrayOutputStream();
 		PrintStream ps= new java.io.PrintStream(bos, true);
@@ -403,18 +419,17 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		selectAndReveal(fSnippetEnd, bos.size());
 	}
 	
-	protected void showException(DebugException exception) {
-		IStatus status= exception.getStatus();
-		Throwable t= status.getException();
+	protected void showUnderlyingException(Throwable t) {
 		if (t instanceof com.sun.jdi.InvocationException) {
 			InvocationException ie= (InvocationException)t;
 			ObjectReference ref= ie.exception();
 			String eName= ref.referenceType().name();
+			String message = getResourceString(ERROR + "exceptioneval") + eName;
 			try {
-				getSourceViewer().getDocument().replace(fSnippetEnd, 0, getResourceString(ERROR + "exceptioneval") + eName);
+				getSourceViewer().getDocument().replace(fSnippetEnd, 0, message);
 			} catch (BadLocationException e) {
 			}
-			
+			selectAndReveal(fSnippetEnd, message.length());
 		} else {
 			showException(t);
 		}
