@@ -270,7 +270,7 @@ public class SemanticHighlightingTest extends TestCase {
 	}
 
 	public void testTypeParameterHighlighting() throws Exception {
-		setUpSemanticHighlighting(SemanticHighlightings.TYPE_PARAMETER);
+		setUpSemanticHighlighting(SemanticHighlightings.TYPE_VARIABLE);
 		Position[] actual= getSemanticHighlightingPositions();
 		Position[] expected= new Position[] {
 				createPosition(39, 15, 1),

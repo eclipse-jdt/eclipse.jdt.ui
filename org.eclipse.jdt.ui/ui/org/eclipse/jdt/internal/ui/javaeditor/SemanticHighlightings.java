@@ -111,7 +111,7 @@ public class SemanticHighlightings {
 	 * A named preference part that controls the highlighting of type parameters.
 	 * @since 3.1
 	 */
-	public static final String TYPE_PARAMETER="typeParameter"; //$NON-NLS-1$
+	public static final String TYPE_VARIABLE="typeParameter"; //$NON-NLS-1$
 
 	/**
 	 * Semantic highlightings
@@ -853,13 +853,13 @@ public class SemanticHighlightings {
 	 * Semantic highlighting for generic type parameters.
 	 * @since 3.1
 	 */
-	private static class TypeParameterHighlighting extends SemanticHighlighting {
+	private static class TypeVariableHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return TYPE_PARAMETER;
+			return TYPE_VARIABLE;
 		}
 
 		/*
@@ -894,7 +894,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString("SemanticHighlighting.typeParameter"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.typeVariables"); //$NON-NLS-1$
 		}
 
 		/*
@@ -972,7 +972,7 @@ public class SemanticHighlightings {
 				new ParameterVariableHighlighting(),
 				new LocalVariableDeclarationHighlighting(),
 				new LocalVariableHighlighting(),
-				new TypeParameterHighlighting(),
+				new TypeVariableHighlighting(),
 			};
 		return fgSemanticHighlightings;
 	}

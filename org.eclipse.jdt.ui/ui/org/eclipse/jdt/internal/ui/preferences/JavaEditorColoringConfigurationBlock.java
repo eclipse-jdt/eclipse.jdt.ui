@@ -698,10 +698,10 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
 			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER) },
-			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_PARAMETER) },
+			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE) },
 			{ createHighlightedRange( 7, 26,  8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange( 9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_PARAMETER) },
+			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
 			{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(13, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
 			{ createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD_DECLARATION) },
