@@ -1322,14 +1322,6 @@ JavaStructureDiffViewerCreator
 
 		<action
 			id="org.eclipse.ui.texteditor.BookmarkRulerAction"
-			actionID="ConvertLineDelimitersToDOS"
-			label="%Dummy.label"
-            helpContextId="org.eclipse.ui.bookmark_action_context"
-			class="org.eclipse.ui.texteditor.BookmarkRulerAction">
-		</action>
-
-		<action
-			id="org.eclipse.ui.texteditor.BookmarkRulerAction"
 			actionID="RulerDoubleClick"
 			label="%Dummy.label"
             helpContextId="org.eclipse.ui.bookmark_action_context"
@@ -1353,6 +1345,212 @@ JavaStructureDiffViewerCreator
 		name="%JavaWorkingSetPage.name"
 		pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage">
 	</workingSet>
+</extension>
+
+<!-- =========================================================================== -->
+<!-- Java Editor Action Definition IDs -->
+<!-- =========================================================================== -->
+<extension point="org.eclipse.ui.actionDefinitions">
+	<!-- edit -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.next" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.last" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
+
+	<!-- source -->
+<!--
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.comment" />
+-->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.format" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.import" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
+
+	<!-- refactor -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.element" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+
+	<!-- navigate -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
+
+	<!-- search -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.referebces.in.workspace" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set" />
+
+	<!-- miscellaenous -->
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
+	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
+</extension>
+
+<!-- =========================================================================== -->
+<!-- Java Editor Key Bindings -->
+<!-- =========================================================================== -->
+   
+<extension point="org.eclipse.ui.acceleratorSets">
+	<acceleratorSet
+		scopeId="org.eclipse.jdt.ui.globalScope"
+		configurationId="org.eclipse.jdt.ui.emacsAcceleratorConfiguration">
+
+		<!-- edit -->
+		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
+		<accelerator key="Alt+Shift+ARROW_RIGHT" id="org.eclipse.jdt.ui.edit.text.java.select.next" />
+		<accelerator key="Alt+Shift+ARROW_LEFT" id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
+		<accelerator key="Alt+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.select.last" />
+		<accelerator key="Ctrl+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
+		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
+		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
+		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
+
+		<!-- source -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.comment" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.format" />
+		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
+		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
+	
+		<!-- refactor -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+	
+		<!-- navigate -->
+		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
+		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
+		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
+
+		<!-- search -->
+		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
+		<accelerator key="Ctrl+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set" />
+	
+		<!-- miscellaenous -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
+	</acceleratorSet>	
+	
+	<acceleratorSet
+		scopeId="org.eclipse.ui.globalScope"
+		configurationId="org.eclipse.ui.defaultAcceleratorConfiguration">
+
+		<!-- edit -->
+		<accelerator key="Alt+Shift+ARROW_UP" id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
+		<accelerator key="Alt+Shift+ARROW_RIGHT" id="org.eclipse.jdt.ui.edit.text.java.select.next" />
+		<accelerator key="Alt+Shift+ARROW_LEFT" id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
+		<accelerator key="Alt+Shift+ARROW_DOWN" id="org.eclipse.jdt.ui.edit.text.java.select.last" />
+		<accelerator key="Ctrl+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
+		<accelerator key="Ctrl+Shift+Space" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
+		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
+		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
+
+		<!-- source -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.comment" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
+		<accelerator key="Ctrl+O" id="org.eclipse.jdt.ui.edit.text.java.format" />
+		<accelerator key="Ctrl+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.add.import" />
+		<accelerator key="Ctrl+Shift+O" id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
+	
+		<!-- refactor -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+	
+		<!-- navigate -->
+		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
+		<accelerator key="Shift+F2" id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
+		<accelerator key="F4" id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
+
+		<!-- search -->
+		<accelerator key="Ctrl+Shift+G" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.references.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.read.access.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.write.access.in.working.set" />
+		<accelerator key="Ctrl+G" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.hierarchy" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.declarations.in.working.set" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.workspace" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.working.set" />
+	
+		<!-- miscellaenous -->
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.presentation" />
+		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.toggle.text.hover" />
+	</acceleratorSet>
 </extension>
 
 </plugin>

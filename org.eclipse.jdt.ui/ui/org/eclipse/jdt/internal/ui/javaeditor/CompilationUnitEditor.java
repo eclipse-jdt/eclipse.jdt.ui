@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -87,6 +88,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -461,12 +463,29 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		super.createActions();
 
-		setAction("CorrectionAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$		
-		setAction("ContentAssistProposal", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS));			 //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("ContentAssistContextInformation", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true));			 //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
-		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
+		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "CorrectionAssistProposal.", this, JavaCorrectionSourceViewer.CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);		
+		setAction("CorrectionAssistProposal", action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistProposal.", this, ISourceViewer.CONTENTASSIST_PROPOSALS); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);		
+		setAction("ContentAssistProposal", action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ContentAssistContextInformation.", this, ISourceViewer.CONTENTASSIST_CONTEXT_INFORMATION, true);	//$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONTENT_ASSIST_CONTEXT_INFORMATION);		
+		setAction("ContentAssistContextInformation", action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.COMMENT);		
+		setAction("Comment", action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.UNCOMMENT);		
+		setAction("Uncomment", action);
+
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);		
+		setAction("Format", action);
 
 		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
@@ -475,10 +494,21 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		markAsStateDependentAction("Format", true); //$NON-NLS-1$
 		
 		fSelectionHistory= new SelectionHistory(this);
-		setAction(StructureSelectionAction.ENCLOSING, new StructureSelectEnclosingAction(this, fSelectionHistory));
-		setAction(StructureSelectionAction.NEXT, new StructureSelectNextAction(this, fSelectionHistory));
-		setAction(StructureSelectionAction.PREVIOUS, new StructureSelectPreviousAction(this, fSelectionHistory));
+
+		action= new StructureSelectEnclosingAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_ENCLOSING);				
+		setAction(StructureSelectionAction.ENCLOSING, action);
+
+		action= new StructureSelectNextAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_NEXT);
+		setAction(StructureSelectionAction.NEXT, action);
+
+		action= new StructureSelectPreviousAction(this, fSelectionHistory);
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_PREVIOUS);
+		setAction(StructureSelectionAction.PREVIOUS, action);
+
 		StructureSelectHistoryAction historyAction= new StructureSelectHistoryAction(this, fSelectionHistory);
+		historyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELECT_LAST);		
 		setAction(StructureSelectionAction.HISTORY, historyAction);
 		fSelectionHistory.setHistoryAction(historyAction);		
 

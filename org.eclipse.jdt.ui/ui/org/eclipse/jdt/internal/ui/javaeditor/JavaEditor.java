@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
@@ -510,11 +512,9 @@ public abstract class JavaEditor extends AbstractTextEditor {
 				new JavaSearchActionGroup(this)});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg});
 		
-		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION)); //$NON-NLS-1$ //$NON-NLS-2$
-		
-		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(this)); //$NON-NLS-1$
-		setAction("OpenExternalJavadoc", new OpenExternalJavadocAction(this)); //$NON-NLS-1$
-		setAction("ShowInPackageView", new ShowInPackageViewAction(this)); //$NON-NLS-1$
+		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION); //$NON-NLS-1$
+		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		setAction("ShowJavaDoc", action);				
 	}
 	
 	private boolean isTextSelectionEmpty() {

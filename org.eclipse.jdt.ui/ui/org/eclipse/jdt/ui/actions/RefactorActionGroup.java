@@ -88,28 +88,44 @@ public class RefactorActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fRenameAction= new RenameAction(editor);
+		fRenameAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
 		fRenameAction.update(selection);
+		editor.setAction("RenameElement", fRenameAction); //$NON-NLS-1$
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(editor);
+		fSelfEncapsulateField.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 		fSelfEncapsulateField.update(selection);
+		editor.setAction("SelfEncapsulateField", fSelfEncapsulateField); //$NON-NLS-1$
 		
 		fModifyParametersAction= new ModifyParametersAction(editor);
+		fModifyParametersAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 		fModifyParametersAction.update(selection);
+		editor.setAction("ModifyParameters", fModifyParametersAction); //$NON-NLS-1$
 
 		fPullUpAction= new PullUpAction(editor);
+		fPullUpAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PULL_UP);
 		fPullUpAction.update(selection);
+		editor.setAction("PullUp", fPullUpAction); //$NON-NLS-1$
 		
 		fMoveAction= new MoveAction(editor);
+		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
 		fMoveAction.update(selection);
+		editor.setAction("MoveElement", fMoveAction); //$NON-NLS-1$
 		
 		fInlineTempAction= new InlineTempAction(editor);
+		fInlineTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_LOCAL_VARIABLE);
 		fInlineTempAction.update(selection);
+		editor.setAction("InlineLocalVariable", fInlineTempAction); //$NON-NLS-1$
 		
 		fExtractTempAction= new ExtractTempAction(editor);
+		fExtractTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_LOCAL_VARIABLE);
 		initAction(fExtractTempAction, provider, selection);
+		editor.setAction("ExtractLocalVariable", fExtractTempAction); //$NON-NLS-1$
 
 		fExtractMethodAction= new ExtractMethodAction(editor);
+		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 		initAction(fExtractMethodAction, provider, selection);
+		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site) {

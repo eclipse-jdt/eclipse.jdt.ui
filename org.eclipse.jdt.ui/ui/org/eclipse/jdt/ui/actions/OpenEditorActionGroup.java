@@ -73,6 +73,8 @@ public class OpenEditorActionGroup extends ActionGroup {
 	public OpenEditorActionGroup(JavaEditor part) {
 		fIsEditorOwner= true;
 		fOpen= new OpenAction(part);
+		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+		part.setAction("OpenEditor", fOpen);
 		fSite= part.getEditorSite();
 		initialize(fSite.getSelectionProvider());
 	}

@@ -81,32 +81,52 @@ public class GenerateActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 
 		fAddImport= new AddImportOnSelectionAction(editor);
+		fAddImport.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_IMPORT);
 		fAddImport.update();
+		editor.setAction("AddImport", fAddImport); //$NON-NLS-1$
 		
 		fOrganizeImports= new OrganizeImportsAction(editor);
+		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
 		fOrganizeImports.editorStateChanged();
+		editor.setAction("OrganizeImports", fOrganizeImports); //$NON-NLS-1$
 
 		fOverrideMethods= new OverrideMethodsAction(editor);
+		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
 		fOverrideMethods.editorStateChanged();
+		editor.setAction("OverrideMethods", fOverrideMethods); //$NON-NLS-1$
 		
-		fAddGetterSetter= new AddGetterSetterAction(editor);
+		fAddGetterSetter= new AddGetterSetterAction(editor);		
 		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(editor);
+		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
 		fAddUnimplementedConstructors.editorStateChanged();
+		editor.setAction("AddUnimplementedConstructors", fAddUnimplementedConstructors); //$NON-NLS-1$		
 		
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.editorStateChanged();
 		
 		fSurroundWithTryCatch= new SurroundWithTryCatchAction(editor);
+		fSurroundWithTryCatch.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
 		fSurroundWithTryCatch.update(selection);
 		provider.addSelectionChangedListener(fSurroundWithTryCatch);
+		editor.setAction("SurroundWithTryCatch", fSurroundWithTryCatch); //$NON-NLS-1$		
 		
 		fExternalizeStrings= new ExternalizeStringsAction(editor);
+		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
 		fExternalizeStrings.editorStateChanged();
+		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$		
 		
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
+		fConvertToWindows.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
+		editor.setAction("ConvertLineDelimitersToWindows", fConvertToWindows); //$NON-NLS-1$		
+		
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
+		fConvertToUNIX.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
+		editor.setAction("ConvertLineDelimitersToUNIX", fConvertToUNIX); //$NON-NLS-1$		
+
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
+		fConvertToMac.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
+		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$		
 	}
 	
 	/**
