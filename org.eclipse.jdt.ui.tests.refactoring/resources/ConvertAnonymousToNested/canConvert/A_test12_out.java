@@ -1,13 +1,5 @@
 package p;
 class A{
-	A(int x){
-	}
-	void f(){
-		final int u= 9;
-		int s= 2;
-		new Inner(s, u);
-	}
-
 	private static final class Inner extends A {
 		int k;
 		private final int u;
@@ -17,5 +9,12 @@ class A{
 			this.u = u;
 			k= u;
 		}
+	}
+	A(int x){
+	}
+	void f(){
+		final int u= 9;
+		int s= 2;
+		new Inner(s, u);
 	}
 }

@@ -1,6 +1,6 @@
 package p;
 class A{
-	private static final class Inner extends A{
+	private static final class Inner extends A {
 		private Inner(Object s){
 			super(s);
 		}

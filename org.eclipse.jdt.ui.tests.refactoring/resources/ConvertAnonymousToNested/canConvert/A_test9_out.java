@@ -1,7 +1,7 @@
 package p;
-//private, static, final
+//private, nonstatic, final
 class A{
-	private final class Inner extends A{
+	private final class Inner extends A {
 		private Inner(int i){
 			super(i);
 		}
