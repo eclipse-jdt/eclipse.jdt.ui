@@ -18,7 +18,6 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -28,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -36,12 +36,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Central access point for the Java UI plug-in (id <code>"org.eclipse.jdt.ui"</code>).
@@ -446,6 +446,16 @@ public final class JavaUI {
 		return JavaPlugin.getDefault().getWorkingCopyManager();
 	}
 	
+	/**
+	 * Answers the shared working copies currently registered for the Java plug-in. 
+	 * 
+	 * @return the list of shared working copies this plug-in
+	 * @see org.eclipse.jdt.core.JavaCore#getSharedWorkingCopies(org.eclipse.jdt.core.IBufferFactory)
+	 * @since 2.0
+	 */
+	public static IWorkingCopy[] getSharedWorkingCopies() {
+		return JavaCore.getSharedWorkingCopies(getBufferFactory());
+	}
 	
 	/**
 	 * Returns the BufferFactory for the Java UI plug-in.
