@@ -56,8 +56,8 @@ public class ImageDescriptorRegistry {
 		Image result= (Image)fRegistry.get(descriptor);
 		if (result != null)
 			return result;
-
-		Assert.isTrue(fDisplay == Display.getCurrent(), "Allocating image for wrong display.");
+	
+		Assert.isTrue(fDisplay == SWTUtil.getStandardDisplay(), "Allocating image for wrong display.");
 		result= descriptor.createImage();
 		if (result != null)
 			fRegistry.put(descriptor, result);
