@@ -506,15 +506,24 @@ public class JavadocConfigurationBlock {
 						return status;
 					} else {
 						File dir= new File(url.getFile());
-						if (!dir.isDirectory()) {
-							status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
-							return status;
+						if (dir.exists()) {
+							if (!dir.isDirectory()) {
+								status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
+								return status;
+							}
+							File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
+							if (!packagesFile.exists()) {
+								status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.warning.packagelistnotfound")); //$NON-NLS-1$
+								// only a warning, go on
+							}
+						} else {
+							if (fIsForSource) {
+								status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
+							} else {
+								status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
+								return status;
+							}
 						}
-						File packagesFile= new File(dir, "package-list"); //$NON-NLS-1$
-						if (!packagesFile.exists()) {
-							status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.warning.packagelistnotfound")); //$NON-NLS-1$
-							// only a warning, go on
-						}						
 					}
 				}
 				fURLResult= url;
