@@ -163,7 +163,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	abstract boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException;
 
 	public final boolean isValidDestination(Object dest) throws JavaModelException{
-
+	
 		if (dest instanceof IProject && ! ((IProject)dest).isAccessible())
 			return false;
 		
@@ -174,9 +174,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 			} else {
 				if ((!(dest instanceof IJavaProject)) && (! (dest instanceof IProject)))
 					return false;
+				IResource destResource= ResourceUtil.getResource(dest);
 				for (Iterator iter= getLinkedResources().iterator(); iter.hasNext();) {
 					IResource linkedResource= (IResource) iter.next();
-					if (dest.equals(linkedResource.getParent()))
+					if (ReorgUtils.isParent(linkedResource, destResource))
 						return false;
 				}
 			}
@@ -459,7 +460,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 				if (!(element instanceof IPackageFragment))
 					return destinationIsParent(elements, dest.getResource());
 				IPackageFragment pack= (IPackageFragment) element;	
-				if (pack.getParent().equals(dest))
+				if (ReorgUtils.isParent(pack, (IPackageFragmentRoot)dest))
 					return true;
 			}
 			return false;
@@ -483,10 +484,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			IResource resource= convertToResource(iter.next());
-			if (resource == null)
-				return false;
-			if (parent.equals(resource.getParent()))
-				return true;	
+			return ReorgUtils.isParent(resource, parent);
 		}
 		return false;
 	}
@@ -504,51 +502,51 @@ public abstract class ReorgRefactoring extends Refactoring {
 			
 		return null;	
 	}	
-	//---
-	
-	private Object getConflictingElementFromDestination(Object o) throws JavaModelException{
-		String newName= ReorgUtils.getName(o);
+		//---
 		
-		if (o instanceof ICompilationUnit){
-			Object dest= getDestinationForCusAndFiles(getDestination());
-			ICompilationUnit cu= (ICompilationUnit)o;
-			if (dest instanceof IPackageFragment){
-				if (cu.getParent().equals(dest))
-					return null;
-				return getConflictingElementFromDestination((IPackageFragment)dest, newName);
+		private Object getConflictingElementFromDestination(Object o) throws JavaModelException{
+			String newName= ReorgUtils.getName(o);
+			
+			if (o instanceof ICompilationUnit){
+				Object dest= getDestinationForCusAndFiles(getDestination());
+				ICompilationUnit cu= (ICompilationUnit)o;
+				if (dest instanceof IPackageFragment){
+					if (ReorgUtils.isParent(cu, (IPackageFragment)dest))
+						return null;
+					return getConflictingElementFromDestination((IPackageFragment)dest, newName);
+				}	
+				if (dest instanceof IContainer){
+					if (ReorgUtils.isParent(ResourceUtil.getResource(cu), (IContainer)dest))
+						return null;
+					return getConflictingElementFromDestination((IContainer)dest, newName);
+				}		
+				return null;
 			}	
-			if (dest instanceof IContainer){
-				if (ResourceUtil.getResource(cu).getParent().equals(dest))
+	
+			if (o instanceof IPackageFragmentRoot){
+				IProject dest= getDestinationForSourceFolders(getDestination());
+				if (((IPackageFragmentRoot)o).getJavaProject().getProject().equals(dest))
 					return null;
-				return getConflictingElementFromDestination((IContainer)dest, newName);
-			}		
-			return null;//XXX can i get here?	
-		}	
-
-		if (o instanceof IPackageFragmentRoot){
-			IProject dest= getDestinationForSourceFolders(getDestination());
-			if (((IPackageFragmentRoot)o).getJavaProject().getProject().equals(dest))
-				return null;
-			return getConflictingElementFromDestination(dest, newName);
-		}	
-		
-		if (o instanceof IPackageFragment){
-			IPackageFragmentRoot dest= getDestinationForPackages(getDestination());
-			if (((IPackageFragment)o).getParent().equals(dest))
-				return null;
-			return getConflictingElementFromDestination(dest, newName);
-		}	
-		
-		if (o instanceof IResource){
-			IContainer dest= getDestinationForResources(getDestination());
-			if (((IResource)o).getParent().equals(dest))
-				return null;
-			return getConflictingElementFromDestination(dest, newName);
-		}	
-
-		Assert.isTrue(false);
-		return null;
-	}
+				return getConflictingElementFromDestination(dest, newName);
+			}	
+			
+			if (o instanceof IPackageFragment){
+				IPackageFragmentRoot dest= getDestinationForPackages(getDestination());
+				if (ReorgUtils.isParent((IPackageFragment)o, dest))
+					return null;
+				return getConflictingElementFromDestination(dest, newName);
+			}	
+			
+			if (o instanceof IResource){
+				IContainer dest= getDestinationForResources(getDestination());
+				if (ReorgUtils.isParent((IResource)o, dest))
+					return null;
+				return getConflictingElementFromDestination(dest, newName);
+			}	
+	
+			Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
+			return null;
+		}
 	
 	private Object getConflictingElementFromDestination(IContainer c, String name){
 		if (c == null)
