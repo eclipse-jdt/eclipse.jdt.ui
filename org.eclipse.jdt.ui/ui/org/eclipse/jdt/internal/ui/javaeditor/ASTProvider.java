@@ -435,8 +435,7 @@ public final class ASTProvider {
 
 		try {
 			CompilationUnit root= (CompilationUnit)parser.createAST(progressMonitor);
-
-			// mark as unmodifiable and original (see bug 57203)
+			// mark as unmodifiable
 			ASTNodes.setFlagsToAST(root, ASTNode.PROTECT);
 
 			return root;

@@ -87,7 +87,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 							if (fIsJavaReconcilingListener) {
 								ast= unit.reconcile(AST.JLS2, true, null, fProgressMonitor);
 								if (ast != null) {
-									// mark as unmodifiable and original (see bug 57203)
+									// mark as unmodifiable
 									ASTNodes.setFlagsToAST(ast, ASTNode.PROTECT);
 								}
 							} else
