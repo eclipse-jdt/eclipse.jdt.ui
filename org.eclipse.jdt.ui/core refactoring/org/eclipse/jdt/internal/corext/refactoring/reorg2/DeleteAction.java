@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -68,9 +66,13 @@ public class DeleteAction extends SelectionDispatchAction{
 			return;
 		}
 		try {
-			IResource[] resources= getResources(selection);
-			IJavaElement[] javaElements= getJavaElements(selection);
-			setEnabled(canEnable(resources, javaElements));
+			List elements= selection.toList();
+			IResource[] resources= ReorgUtils2.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
+			if (elements.size() != resources.length + javaElements.length)
+				setEnabled(false);
+			else
+				setEnabled(canEnable(resources, javaElements));
 		} catch (JavaModelException e) {
 			//no ui here - this happens on selection changes
 			setEnabled(false);
@@ -100,8 +102,9 @@ public class DeleteAction extends SelectionDispatchAction{
 			return;
 		}
 		try {
-			IResource[] resources= getResources(selection);
-			IJavaElement[] javaElements= getJavaElements(selection);
+			List elements= selection.toList();
+			IResource[] resources= ReorgUtils2.getResources(elements);
+			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
 			if (canEnable(resources, javaElements)) 
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
@@ -130,25 +133,4 @@ public class DeleteAction extends SelectionDispatchAction{
 		ref.setSuggestGetterSetterDeletion(fSuggestGetterSetterDeletion);
 		return ref;
 	}
-
-	private static IResource[] getResources(IStructuredSelection selection) {
-		List resources= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IResource)
-				resources.add(element);
-		}
-		return (IResource[]) resources.toArray(new IResource[resources.size()]);
-	}
-
-	private static IJavaElement[] getJavaElements(IStructuredSelection selection) {
-		List resources= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IJavaElement)
-				resources.add(element);
-		}
-		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
-	}
-
 }
