@@ -47,6 +47,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -78,6 +79,7 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -96,6 +98,25 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
  */
 public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyViewPart,
     ISelectionChangedListener {
+	
+	private class CallHierarchySelectionProvider extends SelectionProviderMediator {
+		
+		public CallHierarchySelectionProvider(StructuredViewer[] viewers) {
+			super(viewers);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.typehierarchy.SelectionProviderMediator#getSelection()
+		 */
+		public ISelection getSelection() {
+			ISelection selection= super.getSelection();
+			if (!selection.isEmpty()) {
+				return CallHierarchyUI.convertSelection(selection);
+			}
+			return selection;
+		}
+	}
+	
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
     private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
@@ -122,7 +143,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private MethodWrapper fCallerRoot;
     private IMemento fMemento;
     private IMethod fShownMethod;
-    private SelectionProviderMediator fSelectionProviderMediator;
+    private CallHierarchySelectionProvider fSelectionProviderMediator;
     private List fMethodHistory;
     private LocationViewer fLocationViewer;
     private SashForm fHierarchyLocationSplitter;
@@ -321,7 +342,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
         
-        fSelectionProviderMediator = new SelectionProviderMediator(new Viewer[] {
+        fSelectionProviderMediator = new CallHierarchySelectionProvider(new StructuredViewer[] {
                     fCallHierarchyViewer, fLocationViewer
                 });
 
@@ -596,7 +617,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * Returns the current selection.
      */
     protected ISelection getSelection() {
-        return fSelectionProviderMediator.getRawSelection();
+    	StructuredViewer viewerInFocus= fSelectionProviderMediator.getViewerInFocus();
+		if (viewerInFocus != null) {
+			return viewerInFocus.getSelection();
+		}
+		return StructuredSelection.EMPTY;
     }
 
     protected void fillLocationViewerContextMenu(IMenuManager menu) {
