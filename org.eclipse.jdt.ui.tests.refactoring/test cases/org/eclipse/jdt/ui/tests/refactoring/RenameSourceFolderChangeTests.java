@@ -6,6 +6,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
+import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -27,21 +28,57 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		String oldName= "oldName";
 		String newName= "newName";
 		
-		IJavaProject testProject= MySetup.getProject();
-		IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName);
-		//testProject.addSourceContainer(oldName);
-		
-		assertTrue("old folder should exist here", oldRoot.exists());
-		
-		RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot, newName);
-		performChange(change);
-		
-		assertTrue("old folder should not exist", ! oldRoot.exists());
-		assertEquals("expected 2 pfr's", 2, testProject.getPackageFragmentRoots().length);
-		IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
-		for (int i= 0; i < newRoots.length; i++){
-			assertTrue("should exist " + i, newRoots[i].exists());
-		}
+		try{
+			IJavaProject testProject= MySetup.getProject();
+			IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName);
+			
+			assertTrue("old folder should exist here", oldRoot.exists());
+			
+			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot, newName);
+			performChange(change);
+			
+			assertTrue("old folder should not exist", ! oldRoot.exists());
+			assertEquals("expected 3 pfr's", 3, testProject.getPackageFragmentRoots().length);
+			IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
+			for (int i= 0; i < newRoots.length; i++){
+				assertTrue("should exist " + i, newRoots[i].exists());
+			}
+		} finally{
+			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), newName);
+		}	
 	}
+	
+	public void test1() throws Exception {
+		String oldName1= "oldName1";
+		String oldName2= "oldName2";
+		String newName1= "newName";
+		
+		try{
+			
+			IJavaProject testProject= MySetup.getProject();
+			IPackageFragmentRoot oldRoot1= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName1);
+			IPackageFragmentRoot oldRoot2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName2);
+			
+			assertTrue("old folder should exist here", oldRoot1.exists());
+			assertTrue("old folder 2 should exist here", oldRoot2.exists());
+			
+			RenameSourceFolderChange change= new RenameSourceFolderChange(oldRoot1, newName1);
+			performChange(change);
+			
+			assertTrue("old folder should not exist", ! oldRoot1.exists());
+			assertEquals("expected 4 pfr's", 4, testProject.getPackageFragmentRoots().length);
+			IPackageFragmentRoot[] newRoots= testProject.getPackageFragmentRoots();
+			for (int i= 0; i < newRoots.length; i++){
+				//DebugUtils.dump(newRoots[i].getElementName());
+				assertTrue("should exist " + i, newRoots[i].exists());
+				if (i == 2)
+					assertEquals("3rd position should be:" + newName1, newName1, newRoots[i].getElementName());
+			} 
+		}finally{		
+			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), newName1);
+			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), oldName2);
+		}	
+	}
+	
 }
 
