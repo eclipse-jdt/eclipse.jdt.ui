@@ -157,43 +157,12 @@ public class FileTool {
 	 * @param dst the given destination file
 	 */
 	public static void copy(File src, File dst) throws IOException {
-		copy(src.getParentFile(), src, dst);
-	}
-	/**
-	 * Copies the given source file to the given destination file.
-	 * 
-	 * @param root
-	 * @param src the given source file
-	 * @param dst the given destination file
-	 */
-	public static void copy(File root, File src, File dst) throws IOException {
-		if(src.isDirectory()){
-			String[] children = src.list();
-			for(int i = 0; i < children.length; ++i){
-				File child = new File(src, children[i]);
-				copy(root, child, dst);
-			}
-		} else {
-			String rootString = root.toString();
-			String srcString = src.toString();
-			File dstFile = new File(dst, srcString.substring(rootString.length() + 1));
-			transferData(src, dstFile);
-		}
-	}
-
-	/**
-	 * Copies the given source file to the given destination file.
-	 * 
-	 * @param src the given source file
-	 * @param dst the given destination file
-	 */
-	public static void duplicate(File src, File dst) throws IOException {
 		if(src.isDirectory()){
 			String[] srcChildren = src.list();
 			for(int i = 0; i < srcChildren.length; ++i){
 				File srcChild= new File(src, srcChildren[i]);
 				File dstChild= new File(dst, srcChildren[i]);
-				duplicate(srcChild, dstChild);
+				copy(srcChild, dstChild);
 			}
 		} else
 			transferData(src, dst);

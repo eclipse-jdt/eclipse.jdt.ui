@@ -12,15 +12,8 @@
 package org.eclipse.jdt.text.tests.performance;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
 import junit.framework.TestCase;
@@ -35,7 +28,6 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -48,109 +40,43 @@ public class OpenEditorTestSetup extends TestCase {
 	
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
-	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
-
 	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
 	
-	public void testSetup() throws IOException, CoreException {
+	public void testSetup() throws Exception {
 		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
-		IWorkbenchPage activePage= activeWindow.getActivePage();
+		IWorkbenchPage activePage= workbench.getActiveWorkbenchWindow().getActivePage();
 		
 		activePage.hideView(activePage.findViewReference(INTRO_VIEW));
-		
-		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		
 		boolean autobuild= ResourcesPlugin.getWorkspace().getDescription().isAutoBuilding();
 		if (autobuild)
 			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(false);
 		
+		setUpProject();
+		
+		setUpTestCases();
+
+		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
+		if (autobuild)
+			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
+		
+		workbench.close(); // ensures the workbench state gets saved during the Automated Test Suite (not needed when run from Plug-in Test launch configuration)
+	}
+	
+	private void setUpTestCases() throws Exception {
+		OpenJavaEditorTest.setUpWorkspace();
+		OpenTextEditorTest.setUpWorkspace();
+	}
+
+	private void setUpProject() throws IOException, ZipException, CoreException {
 		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
 		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(JdtTextTestPlugin.getDefault(), new Path(PROJECT_ZIP))), new File(workspacePath));
 		File oldFile= new File(workspacePath + PROJECT + "/.classpath_win32");
 		File newFile= new File(workspacePath + PROJECT + "/.classpath");
 		assertTrue(oldFile.renameTo(newFile));
-		duplicate(workspacePath + PROJECT + OpenEditorTest.PATH, OpenEditorTest.FILE_PREFIX, OpenEditorTest.FILE_SUFFIX, OpenEditorTest.N_OF_COPIES);
+
 		IProject project= createExistingProject(PROJECT);
 		assertTrue(JavaCore.create(project).exists());
-		
-		ResourcesPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, null);
-		if (autobuild)
-			ResourcesPlugin.getWorkspace().getDescription().setAutoBuilding(true);
-		
-		workbench.close();
-	}
-	
-	private void duplicate(String origPrefix, String origName, String origPostfix, int n) throws IOException {
-		StringBuffer s= read(origPrefix + origName + origPostfix);
-		
-		List positions= identifierPositions(s, origName);
-		
-		for (int j= 0; j < n; j++) {
-			StringBuffer c= new StringBuffer(s.toString());
-			replacePositions(c, origName.length(), origName + Integer.toString(j), positions);
-			write(origPrefix + origName + j + origPostfix, c);
-		}
-	}
-
-	private void write(String fileName, StringBuffer c) throws IOException {
-		Writer writer= null;
-		try {
-			writer= new FileWriter(fileName);
-			writer.write(c.toString());
-		} finally {
-			try {
-				if (writer != null)
-					writer.close();
-			} catch (IOException e) {
-			}
-		}
-	}
-
-	private void replacePositions(StringBuffer c, int origLength, String string, List positions) {
-		int offset= 0;
-		for (Iterator iter= positions.iterator(); iter.hasNext();) {
-			int position= ((Integer) iter.next()).intValue();
-			c.replace(offset + position, offset + position + origLength, string);
-			offset += string.length() - origLength;
-		}
-	}
-
-	private List identifierPositions(StringBuffer buffer, String identifier) {
-		List positions= new ArrayList();
-		int i= -1;
-		while (true) {
-			i= buffer.indexOf(identifier, i + 1);
-			if (i == -1)
-				break;
-			if (i > 0 && Character.isJavaIdentifierPart(buffer.charAt(i - 1)))
-				continue;
-			if (i < buffer.length() - 1 && Character.isJavaIdentifierPart(buffer.charAt(i + identifier.length())))
-				continue;
-			positions.add(new Integer(i));
-		}
-		return positions;
-	}
-
-	private StringBuffer read(String fileName) throws FileNotFoundException, IOException {
-		StringBuffer s= new StringBuffer();
-		Reader reader= null;
-		try {
-			reader= new FileReader(fileName);
-			char[] buffer= new char[8196];
-			int chars= reader.read(buffer);
-			while (chars != -1) {
-				s.append(buffer, 0, chars);
-				chars= reader.read(buffer);
-			}
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-			}
-		}
-		return s;
 	}
 
 	private IProject createExistingProject(String projectName) throws CoreException {

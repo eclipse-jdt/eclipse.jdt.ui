@@ -7,7 +7,7 @@
 <stringAttribute key="org.eclipse.jdt.junit.CONTAINER" value=""/>
 <booleanAttribute key="org.eclipse.jdt.junit.KEEPRUNNING_ATTR" value="false"/>
 <booleanAttribute key="clearws" value="false"/>
-<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.text.tests.performance.OpenEditorTest"/>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.eclipse.jdt.text.tests.performance.OpenTextEditorTest"/>
 <booleanAttribute key="default" value="true"/>
 <stringAttribute key="vmargs" value="-Xms250M -Xmx250M -Detools_perf_ctrl=testname=OpenEditorTest;log=C:\local\eclipse\perfmsr;driver=3.0-runtime2;driverdate=200407220001;driverstream=3.0.0;driverlabel=I200407220001;uploadhost=eclipseperf.torolab.ibm.com;uploadport=9080;uploaduserid=chm"/>
 <booleanAttribute key="clearConfig" value="false"/>

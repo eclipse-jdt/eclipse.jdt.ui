@@ -29,15 +29,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.ide.IDE;
 
-public class OpenEditorTest extends TestCase {
-	
-	public static final int N_OF_COPIES= 20;
-
-	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
-	
-	public static final String FILE_PREFIX= "TextLayout";
-
-	public static final String FILE_SUFFIX= ".java";
+public abstract class OpenEditorTest extends TestCase {
 	
 	private PerformanceMeterFactory fPerformanceMeterFactory= new OSPerformanceMeterFactory();
 
@@ -45,20 +37,9 @@ public class OpenEditorTest extends TestCase {
 		runEventQueue(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell());
 	}
 	
-	public void testOpenJavaEditor1() throws PartInitException {
-		// cold run
-		measure();
-	}
-
-	public void testOpenJavaEditor2() throws PartInitException {
-		// warm run
-		measure();
-	}
-
-	private void measure() throws PartInitException {
+	protected void measureOpenInEditor(IFile[] files) throws PartInitException {
 		PerformanceMeter performanceMeter= fPerformanceMeterFactory.createPerformanceMeter(this);
 		try {
-			IFile[] files= findFiles(OpenEditorTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, N_OF_COPIES);
 			for (int i= 0, n= files.length; i < n; i++) {
 				performanceMeter.start();
 				openInEditor(files[i]);
@@ -71,17 +52,17 @@ public class OpenEditorTest extends TestCase {
 		}
 	}
 
-	private void openInEditor(IFile file) throws PartInitException {
-		IEditorPart part= IDE.openEditor(getActivePage(), file);
-		runEventQueue(part.getSite().getShell());
-	}
-
-	private IFile[] findFiles(String prefix, String suffix, int i, int n) {
+	protected IFile[] findFiles(String prefix, String suffix, int i, int n) {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		List types= new ArrayList(n);
 		for (int j= i; j < i + n; j++)
 			types.add(root.getFile(new Path(root.getLocation().toString() + "/" + prefix + j + suffix)));
 		return (IFile[]) types.toArray(new IFile[types.size()]);
+	}
+
+	private void openInEditor(IFile file) throws PartInitException {
+		IEditorPart part= IDE.openEditor(getActivePage(), file);
+		runEventQueue(part.getSite().getShell());
 	}
 
 	private void runEventQueue(Shell shell) {
