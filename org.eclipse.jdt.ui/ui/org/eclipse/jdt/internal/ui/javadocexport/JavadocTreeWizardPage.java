@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.StringTokenizer;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -43,7 +45,6 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -54,8 +55,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -637,10 +636,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			return new Path(fDestinationText.getText());
 		}
 		return null;
-	}
-
-	public IWizardPage getNextPage() {
-		return super.getNextPage();
 	}
 
 }
