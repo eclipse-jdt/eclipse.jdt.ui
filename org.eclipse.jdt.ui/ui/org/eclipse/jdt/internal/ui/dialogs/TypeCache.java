@@ -26,8 +26,7 @@ public class TypeCache{
 				return;
 	
 			IJavaElementDelta delta= event.getDelta();
-			IJavaElement element= delta.getElement();
-			int type= element.getElementType();
+			IJavaElement element= delta.getElement();			int type= element.getElementType();
 	
 			if (type == IJavaElement.CLASS_FILE)
 				return;
@@ -41,8 +40,7 @@ public class TypeCache{
 	
 			//if it's a cu we wait
 			if (delta.getElement().getElementType() == IJavaElement.COMPILATION_UNIT)
-				return false;
-	
+				return false;					
 			//must be only children
 			if (delta.getFlags() != IJavaElementDelta.F_CHILDREN)
 				return true;
@@ -81,7 +79,7 @@ public class TypeCache{
 		}
 	
 		private static boolean shouldStopProcessing(IJavaElementDelta delta) {
-			int type= delta.getElement().getElementType();
+			int type= delta.getElement().getElementType();			if (type == IJavaElement.CLASS_FILE)				return true;
 			if (type == IJavaElement.FIELD)
 				return true;
 			if (type == IJavaElement.METHOD)
