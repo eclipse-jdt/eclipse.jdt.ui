@@ -113,6 +113,8 @@ import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
+import org.eclipse.search.ui.ISearchResultView;
+
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
 
@@ -525,12 +527,12 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		
-		if (!fProcessSelectionEvents || part == this || !(selection instanceof IStructuredSelection))
+		if (!fProcessSelectionEvents || part == this || part instanceof ISearchResultView || !(selection instanceof IStructuredSelection))
 			return;
 		
 		// Set selection
 		Object selectedElement= getSingleElementFromSelection(selection);
-
+		
 		if (selectedElement != null && part.equals(fPreviousSelectionProvider) && selectedElement.equals(fPreviousSelectedElement))
 			return;
 		fPreviousSelectedElement= selectedElement;
