@@ -79,23 +79,21 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 		for (int i= 0; i < runs; i++) {
 			performanceMeter.start();
 			SWTEventHelper.pressKeyCode(display, SWT.CR);
+			long timeout= System.currentTimeMillis() + 5000;			
+			while (originalNumberOfLines + 1 != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			performanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
 			runAction(undo);
+			timeout= System.currentTimeMillis() + 1000;
+			while (originalNumberOfLines != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
-			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
 	}
 
 	private void runAction(IAction action) {
 		action.run();
 		EditorTestHelper.runEventQueue();
-	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
 	}
 }

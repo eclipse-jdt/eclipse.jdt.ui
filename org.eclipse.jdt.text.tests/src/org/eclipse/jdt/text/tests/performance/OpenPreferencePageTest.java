@@ -59,26 +59,25 @@ public class OpenPreferencePageTest extends TestCase {
 		Control control= display.getFocusControl();
 		assertTrue(control instanceof Tree);
 		Tree tree= (Tree) control;
-		TreeItem item= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
-		assertTrue(item != null);
-		tree.setSelection(new TreeItem[] {item});
+		TreeItem javaNode= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
+		assertTrue(javaNode != null);
+		tree.setSelection(new TreeItem[] {javaNode});
 		EditorTestHelper.runEventQueue();
 		
 		// setExpanded does not work - use keyboard events
 		// item.setExpanded(true);
 		SWTEventHelper.pressKeyCode(display, SWT.KEYPAD_ADD);
 		long timeout= System.currentTimeMillis() + 1000;
-		TreeItem[] items= item.getItems();
-		item= null;
-		while (item == null && System.currentTimeMillis() < timeout) {
+		TreeItem editorNode= null;
+		while (editorNode == null && System.currentTimeMillis() < timeout) {
 			EditorTestHelper.runEventQueue();
-			item= findTreeItem(items, "Editor");
+			editorNode= findTreeItem(javaNode.getItems(), "Editor");
 		}
-		assertNotNull(item);
+		assertNotNull(editorNode);
 		
 		EditorTestHelper.runEventQueue();
 		
-		Rectangle bounds= item.getBounds();
+		Rectangle bounds= editorNode.getBounds();
 		Point p= new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
 		p= tree.toDisplay(p);
 		Event event= new Event();
