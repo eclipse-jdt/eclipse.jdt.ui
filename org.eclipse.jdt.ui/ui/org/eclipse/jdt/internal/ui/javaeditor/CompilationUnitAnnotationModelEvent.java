@@ -46,7 +46,8 @@ public class CompilationUnitAnnotationModelEvent  extends AnnotationModelEvent {
 	private void testIfProblemMarker(Annotation annotation) {
 		if (!fIncludesProblemMarkerAnnotations && annotation instanceof MarkerAnnotation) {
 			try {
-				if (((MarkerAnnotation) annotation).getMarker().isSubtypeOf(IMarker.PROBLEM)) {
+				IMarker marker= ((MarkerAnnotation) annotation).getMarker();
+				if (!marker.exists() || marker.isSubtypeOf(IMarker.PROBLEM)) {
 					fIncludesProblemMarkerAnnotations= true;
 				}
 			} catch (CoreException e) {
