@@ -129,8 +129,10 @@ public class ImportsStructure implements IImportsStructure {
 		PackageEntry currPackage= null;
 			
 		IImportDeclaration curr= decls[0];
-		int currOffset= curr.getSourceRange().getOffset();
-		int currLine= buffer.getLineOfOffset(currOffset);
+		ISourceRange sourceRange= curr.getSourceRange();
+		int currOffset= sourceRange.getOffset();
+		int currLength= sourceRange.getLength();
+		int currEndLine= buffer.getLineOfOffset(currLength);
 			
 		for (int i= 1; i < decls.length; i++) {
 			String name= curr.getElementName();
@@ -142,29 +144,31 @@ public class ImportsStructure implements IImportsStructure {
 			}
 
 			IImportDeclaration next= decls[i];
-			int nextOffset= next.getSourceRange().getOffset();
-			int nextLine= buffer.getLineOfOffset(nextOffset);
+			sourceRange= next.getSourceRange();
+			int nextOffset= sourceRange.getOffset();
+			int nextLength= sourceRange.getLength();
+			int nextOffsetLine= buffer.getLineOfOffset(nextOffset);
 
 			// if next import is on a different line, modify the end position to the next line begin offset
-			if (currLine < nextLine) {
-				currLine++;
-				nextOffset= buffer.getLineInformation(currLine).getOffset();
+			if (currEndLine < nextOffsetLine) {
+				currEndLine++;
+				nextOffset= buffer.getLineInformation(currEndLine).getOffset();
 			}
 			currPackage.add(new ImportDeclEntry(name, buffer.getContent(currOffset, nextOffset - currOffset)));
 			currOffset= nextOffset;
 			curr= next;
 				
 			// add a comment entry for spacing between imports
-			if (currLine < nextLine) {
-				nextOffset= buffer.getLineInformation(nextLine).getOffset();
+			if (currEndLine < nextOffsetLine) {
+				nextOffset= buffer.getLineInformation(nextOffsetLine).getOffset();
 				
 				currPackage= new PackageEntry(); // create a comment package entry for this
 				fPackageEntries.add(currPackage);
 				currPackage.add(new ImportDeclEntry(null, buffer.getContent(currOffset, nextOffset - currOffset)));
 					
-				currLine= nextLine;
 				currOffset= nextOffset;
 			}
+			currEndLine= buffer.getLineOfOffset(nextOffset + nextLength);
 		}
 
 		String name= curr.getElementName();
@@ -346,7 +350,6 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-//		System.out.println("Add " + fullTypeName + " from " + fCompilationUnit.getElementName());
 
 		fHasChanges= true;
 		return typeName;
@@ -357,7 +360,6 @@ public class ImportsStructure implements IImportsStructure {
 	 */
 	public void removeImport(String qualifiedTypeName) {
 		String typeContainerName= Signature.getQualifier(qualifiedTypeName);
-//		System.out.println("Remove " + qualifiedTypeName + " from " + fCompilationUnit.getElementName());
 		int nPackages= fPackageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
@@ -543,16 +545,15 @@ public class ImportsStructure implements IImportsStructure {
 	}
 
 	private void appendImportToBuffer(StringBuffer buf, String importName, String lineDelim) {
-		buf.append("import "); //$NON-NLS-1$
-		buf.append(importName);
-		buf.append(';');
-		buf.append(lineDelim);
+		String str= "import " + importName + ";\n";
+		buf.append(StubUtility.codeFormat(str, 0, lineDelim));
 	}
 	
 	private int getPackageStatementEndPos(TextBuffer buffer) throws JavaModelException {
 		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
 		if (packDecls != null && packDecls.length > 0) {
-			int line= buffer.getLineOfOffset(packDecls[0].getSourceRange().getOffset());
+			ISourceRange range= packDecls[0].getSourceRange();
+			int line= buffer.getLineOfOffset(range.getOffset() + range.getLength());
 			TextRegion region= buffer.getLineInformation(line + 1);
 			if (region != null) {
 				return region.getOffset();
