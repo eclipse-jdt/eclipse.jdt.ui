@@ -13,17 +13,13 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.part.ResourceTransfer;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 
@@ -91,9 +87,6 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 		}
 		return (IType[]) mainTypes.toArray(new IType[mainTypes.size()]);
 	}
-	
-	
-	
 	
 	private static IResource getResource(IType type){
 		try {
