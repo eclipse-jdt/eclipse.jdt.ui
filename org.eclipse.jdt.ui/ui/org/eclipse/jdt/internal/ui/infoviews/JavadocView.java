@@ -27,7 +27,8 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.MessageDialogWithToggle;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,6 +36,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
@@ -60,6 +62,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -74,6 +77,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  */
 public class JavadocView extends AbstractInfoView {
 
+	/**
+	 * Preference key for the preference whether to show a dialog
+	 * when the SWT Browser widget is not available.
+	 * @since 3.0
+	 */
+	private static final String DO_NOT_WARN_PREFERENCE_KEY= "JavadocView.error.doNotWarn"; //$NON-NLS-1$
 
 	/** Flags used to render a label in the text widget. */
 	private static final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
@@ -90,7 +99,6 @@ public class JavadocView extends AbstractInfoView {
 	private TextPresentation fPresentation= new TextPresentation();
 	/** The select all action */
 	private SelectAllAction fSelectAllAction;
-
 
 
 	private boolean fIsUsingBrowserWidget;
@@ -235,9 +243,17 @@ public class JavadocView extends AbstractInfoView {
 			 * Platform requirements for the SWT Browser widget are available
 			 * from the SWT FAQ web site. 
 			 */
-			String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
-			String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
-			MessageDialog.openError(parent.getShell(), title, message);
+			
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			boolean doNotWarn= store.getBoolean(DO_NOT_WARN_PREFERENCE_KEY);
+			if (!doNotWarn) {
+				String title= InfoViewMessages.getString("JavadocView.error.noBrowser.title"); //$NON-NLS-1$
+				String message= InfoViewMessages.getString("JavadocView.error.noBrowser.message"); //$NON-NLS-1$
+				String toggleMessage= InfoViewMessages.getString("JavadocView.error.noBrowser.doNotWarn"); //$NON-NLS-1$"Do not warn me again.";
+				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); //$NON-NLS-1$
+				if (dialog.getReturnCode() == Window.OK)
+					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());
+			}
 			
 			fText= new StyledText(parent, SWT.V_SCROLL | SWT.H_SCROLL);
 			fIsUsingBrowserWidget= false;
