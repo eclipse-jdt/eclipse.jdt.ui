@@ -30,7 +30,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -38,16 +37,17 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationMessages;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Auto indent strategy for java doc comments
@@ -154,19 +154,32 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return null;
 		}		
 	}
+	
+	/*
+	 * Removes start and end of a comment and corrects indentation and line delimiters.
+	 */
+	private String prepareTemplateComment(String comment, String indentation, String lineDelimiter) {
+		//	trim comment start and end if any
+		if (comment.endsWith("*/")) //$NON-NLS-1$
+			comment= comment.substring(0, comment.length() - 2);
+		comment= comment.trim();
+		if (comment.startsWith("/*")) { //$NON-NLS-1$
+			if (comment.length() > 2 && comment.charAt(2) == '*') {
+				comment= comment.substring(3); // remove '/**'
+			} else {
+				comment= comment.substring(2); // remove '/*'
+			}
+		}
+		return Strings.changeIndent(comment, 0, CodeFormatterUtil.getTabWidth(), indentation, lineDelimiter);
+	}
+	
 
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
 		throws CoreException, BadLocationException
 	{
 		String comment= StubUtility.getTypeComment(type.getCompilationUnit(), type.getElementName());
-		// trim comment start and end if any
 		if (comment != null) {
-			comment= comment.trim();
-			if (comment.endsWith("*/")) //$NON-NLS-1$
-				comment= comment.substring(0, comment.length() - 2);
-			comment= comment.trim();
-			if (comment.startsWith("/**")) //$NON-NLS-1$
-				comment= comment.substring(3);
+			comment= prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
 		}
 
 		return (comment == null || comment.length() == 0)
@@ -175,25 +188,23 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	}
 	
 	private String createMethodTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IMethod method)
-		throws BadLocationException, JavaModelException
+		throws CoreException, BadLocationException
 	{
 		IRegion partition= document.getPartition(command.offset);
 		ISourceRange sourceRange= method.getSourceRange();
 		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
 			return null;
-				
-		boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
 			
 		IMethod inheritedMethod= getInheritedMethod(method);
-		if (inheritedMethod == null) {
-			if (isJavaDoc)
-				return createJavaDocMethodTags(method, lineDelimiter + indentation, ""); //$NON-NLS-1$
-				
-		} else {
-			if (isJavaDoc || JavaPreferencesSettings.getCodeGenerationSettings().createNonJavadocComments)
-				return createJavaDocInheritedMethodTags(inheritedMethod, lineDelimiter + indentation, ""); //$NON-NLS-1$
+		String comment= StubUtility.getMethodComment(method, inheritedMethod);
+		if (comment != null) {
+			comment= comment.trim();
+			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
+			boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
+			if (javadocComment == isJavaDoc) {
+				return prepareTemplateComment(comment, indentation, lineDelimiter);
+			}
 		}
-		
 		return null;
 	}
 
@@ -202,7 +213,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private static IMethod getInheritedMethod(IMethod method) throws JavaModelException {
 		IType declaringType= method.getDeclaringType();
-		ITypeHierarchy typeHierarchy= declaringType.newSupertypeHierarchy(null);
+		ITypeHierarchy typeHierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
 		return JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, declaringType,
 			method.getElementName(), method.getParameterTypes(), method.isConstructor());
 	}
@@ -377,29 +388,6 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			if (!wrapAlways)	
 				command.offset= caretOffset[0];
-		}
-	}
-
-	private static String trim(String string, boolean trimBegin, boolean trimEnd) {
-
-		if (!trimBegin && !trimEnd)
-			return string;
-
-		if (trimBegin && trimEnd)
-			return string.trim();
-
-		final int length= string.length();
-		if (trimBegin) {
-			int i= 0;			
-			while (i < length && Character.isWhitespace(string.charAt(i)))
-				i++;						
-			return string.substring(i);
-
-		} else {
-			int i= length;
-			while (i > 0 && Character.isWhitespace(string.charAt(i - 1)))
-				i--;
-			return string.substring(0, i);	
 		}
 	}
 
@@ -815,85 +803,5 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 		return unit;
 	}
-
-	/**
-	 * Creates tags for a newly declared or defined method.
-	 */
-	private static String createJavaDocMethodTags(IMethod method, String preFix, String postFix) throws JavaModelException {
-
-		final StringBuffer buffer= new StringBuffer();
-
-		final String[] parameterNames= method.getParameterNames();
-		for (int i= 0; i < parameterNames.length; i++)
-			appendJavaDocLine(buffer, preFix, "param", parameterNames[i], postFix); //$NON-NLS-1$
-
-		final String returnType= method.getReturnType();
-		if (returnType != null && !returnType.equals(Signature.SIG_VOID)) {
-			String name= Signature.getSimpleName(Signature.toString(returnType));
-			appendJavaDocLine(buffer, preFix, "return", name, postFix); //$NON-NLS-1$
-		}
-
-		final String[] exceptionTypes= method.getExceptionTypes();
-		if (exceptionTypes != null) {
-			for (int i= 0; i < exceptionTypes.length; i++) {
-				String name= Signature.getSimpleName(Signature.toString(exceptionTypes[i]));
-				appendJavaDocLine(buffer, preFix, "throws", name, postFix); //$NON-NLS-1$
-			}
-		}
-		
-		return buffer.toString();
-	}
-
-	/**
-	 * Creates tags for an inherited method.
-	 * 
-	 * @param method the method it was inherited from.
-	 */
-	private static String createJavaDocInheritedMethodTags(IMethod method, String preFix, String postFix) throws JavaModelException {
-
-		final StringBuffer buffer= new StringBuffer();
-		
-		appendJavaDocLine(buffer, preFix, "see", createSeeTagLink(method), postFix); //$NON-NLS-1$
-
-		if (Flags.isDeprecated(method.getFlags()))
-			appendJavaDocLine(buffer, preFix, "deprecated", "", postFix); //$NON-NLS-1$ //$NON-NLS-2$
 			
-		return buffer.toString();
-	}
-	
-	/**
-	 * Creates a see tag link string of the form type#method(arguments).
-	 */
-	private static String createSeeTagLink(IMethod method) {
-
-		final StringBuffer buffer= new StringBuffer();	
-		
-		buffer.append(JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()));
-		buffer.append('#');
-		buffer.append(method.getElementName());
-		buffer.append('(');
-		String[] parameterTypes= method.getParameterTypes();
-		for (int i= 0; i < parameterTypes.length; i++) {
-			if (i > 0)
-				buffer.append(", "); //$NON-NLS-1$
-			buffer.append(Signature.getSimpleName(Signature.toString(parameterTypes[i])));
-		}
-		buffer.append(')');
-
-		return buffer.toString();
-	}
-
-	/**
-	 * Appends a single javadoc tag line to the string buffer.
-	 */
-	private static void appendJavaDocLine(StringBuffer buffer, String preFix, String token, String name, String postFix) {
-		buffer.append(preFix);
-		buffer.append(" * "); //$NON-NLS-1$
-		buffer.append('@');
-		buffer.append(token);
-		buffer.append(' ');
-		buffer.append(name);
-		buffer.append(postFix);		
-	}
-		
 }
