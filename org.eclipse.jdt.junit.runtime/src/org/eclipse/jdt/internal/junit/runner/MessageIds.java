@@ -25,21 +25,39 @@ public class MessageIds {
 	
 	/**
 	 * Notification that a test trace has started.
-	 * The end of the trace is signaled by a Trace_END
+	 * The end of the trace is signaled by a TRACE_END
 	 * message. In between the TRACE_START and TRACE_END
 	 * the stack trace is submitted as multiple lines.
 	 */
 	public static final String TRACE_START= "%TRACES "; //$NON-NLS-1$
+	/**
+	 * Notification that a trace ends.
+	 */
+	public static final String TRACE_END=   "%TRACEE "; //$NON-NLS-1$
+	/**
+	 * Notification that the expected result has started.
+	 * The end of the expected result is signaled by a Trace_END.
+	 */
+	public static final String EXPECTED_START= "%EXPECTS"; //$NON-NLS-1$
+	/**
+	 * Notification that an expected result ends.
+	 */
+	public static final String EXPECTED_END=   "%EXPECTE"; //$NON-NLS-1$
+	/**
+	 * Notification that the expected result has started.
+	 * The end of the expected result is signaled by a Trace_END.
+	 */
+	public static final String ACTUAL_START= "%ACTUALS"; //$NON-NLS-1$
+	/**
+	 * Notification that an expected result ends.
+	 */
+	public static final String ACTUAL_END=   "%ACTUALE"; //$NON-NLS-1$
 	/**
 	 * Notification that a trace for a reran test has started.
 	 * The end of the trace is signaled by a RTrace_END
 	 * message.
 	 */
 	public static final String RTRACE_START= "%RTRACES"; //$NON-NLS-1$
-	/**
-	 * Notification that a trace ends.
-	 */
-	public static final String TRACE_END=   "%TRACEE "; //$NON-NLS-1$
 	/**
 	 * Notification that a trace of a reran trace ends.
 	 */

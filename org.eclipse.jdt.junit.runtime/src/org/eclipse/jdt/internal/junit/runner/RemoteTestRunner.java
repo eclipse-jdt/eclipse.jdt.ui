@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -27,6 +28,7 @@ import java.util.Vector;
 
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
+import junit.framework.ComparisonFailure;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestFailure;
@@ -39,7 +41,6 @@ import junit.framework.TestSuite;
  * See MessageIds for more information about the protocl.
  */
 public class RemoteTestRunner implements TestListener {
-	private static final String SET_UP_TEST_METHOD_NAME= "setUpTest"; //$NON-NLS-1$
 	/**
 	 * Holder for information for a rerun request
 	 */
@@ -56,7 +57,10 @@ public class RemoteTestRunner implements TestListener {
 
 	}
 	
+	private static final String SET_UP_TEST_METHOD_NAME= "setUpTest"; //$NON-NLS-1$
+	
 	private static final String SUITE_METHODNAME= "suite";	 //$NON-NLS-1$
+	
 	/**
 	 * The name of the test classes to be executed
 	 */
@@ -70,6 +74,11 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private TestResult fTestResult;
 
+	/**
+	 * The version expected by the client
+	 */
+	private String fVersion= "";
+	
 	/**
 	 * The client socket.
 	 */
@@ -235,7 +244,11 @@ public class RemoteTestRunner implements TestListener {
 				fKeepAlive= true;
 			}
 			else if(args[i].toLowerCase().equals("-debugging") || args[i].toLowerCase().equals("-debug")){ //$NON-NLS-1$ //$NON-NLS-2$
-				fDebugMode= true;
+			    fDebugMode= true;
+			}
+			else if(args[i].toLowerCase().equals("-version")){ //$NON-NLS-1$
+			    fVersion= args[i+1];
+			    i++;
 			}
 		}
 		if(fTestClassNames == null || fTestClassNames.length == 0)
@@ -516,6 +529,17 @@ public class RemoteTestRunner implements TestListener {
 	 * @see TestListener#addFailure(Test, AssertionFailedError)
 	 */
 	public final void addFailure(Test test, AssertionFailedError assertionFailedError) {
+		if ("3".equals(fVersion)) {
+		    if (assertionFailedError instanceof ComparisonFailure) {
+		        // transmit the expected and the actual string
+		        String expected = getField(assertionFailedError, "fExpected");
+		        String actual = getField(assertionFailedError, "fActual");
+		        if (expected != null && actual != null) {
+		            notifyTestFailed2(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError), expected, actual);
+		            return;
+		       }
+		    }
+		} 
 		notifyTestFailed(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError));
 	}
 
@@ -700,6 +724,24 @@ public class RemoteTestRunner implements TestListener {
 		fWriter.flush();
 	}
 
+	private void notifyTestFailed2(Test test, String status, String trace, String expected, String actual) {
+	    sendMessage(status + getTestId(test) + ',' + getTestName(test));
+	    
+	    sendMessage(MessageIds.EXPECTED_START);
+	    sendMessage(expected);
+	    sendMessage(MessageIds.EXPECTED_END);
+	    
+	    sendMessage(MessageIds.ACTUAL_START);
+	    sendMessage(actual);
+	    sendMessage(MessageIds.ACTUAL_END);
+	    
+	    sendMessage(MessageIds.TRACE_START);
+	    sendMessage(trace);
+	    sendMessage(MessageIds.TRACE_END);
+	    
+	    fWriter.flush();
+	}
+	
 	private void notifyTestTreeEntry(String treeEntry) {
 		sendMessage(MessageIds.TEST_TREE + treeEntry);
 	}
@@ -729,5 +771,18 @@ public class RemoteTestRunner implements TestListener {
 			sendMessage(MessageIds.TEST_RERAN + testId+ " "+testClass+" "+testName+" "+status); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			fWriter.flush();
 		}
+	}
+	
+	private String getField(Object object, String fieldName) {
+	    Class clazz= object.getClass();
+	    try {
+	        Field field= clazz.getDeclaredField(fieldName);
+	        field.setAccessible(true);
+	        Object result= field.get(object);
+	        return result.toString();
+	    } catch (Exception e) {
+	        // fall through
+	    }
+	    return null;
 	}
 }	
