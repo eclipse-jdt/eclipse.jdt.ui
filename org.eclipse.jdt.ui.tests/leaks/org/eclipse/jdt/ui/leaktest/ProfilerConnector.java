@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.leaktest;
 
-import java.util.Vector;
 
 /**
  *
@@ -32,27 +31,6 @@ public class ProfilerConnector {
 	}
 	
 	public void close() {
-	}
-	
-	
-	private static Vector fgReference;
-	
-	public static void main(String[] str) {
-		try {
-			ProfilerConnector pc= new ProfilerConnector(); //$NON-NLS-1$
-			System.out.println("Connection installed.\n"); //$NON-NLS-1$
-			System.out.println("instance count Vector: " + pc.getInstanceCount(Vector.class));
-			fgReference= new Vector();
-			fgReference.add(fgReference);
-			
-			System.out.println("instance count Vector: " + pc.getInstanceCount(Vector.class));
-			fgReference= null;
-			System.out.println("instance count Vector: " + pc.getInstanceCount(Vector.class));
-			
-			pc.close();
-		} catch (ProfileException e) {
-			e.printStackTrace();
-		}
 	}
 
 }
