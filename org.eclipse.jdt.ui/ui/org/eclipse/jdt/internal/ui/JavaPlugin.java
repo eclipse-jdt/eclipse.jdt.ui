@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBrowsingPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBuilderPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
@@ -296,7 +295,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		JavaBuilderPreferencePage.initDefaults(store);
 		
 		WorkInProgressPreferencePage.initDefaults(store);
-		JavaBrowsingPreferencePage.initDefaults(store);
 	}
 	
 	private ImageDescriptorRegistry internalGetImageDescriptorRegistry() {

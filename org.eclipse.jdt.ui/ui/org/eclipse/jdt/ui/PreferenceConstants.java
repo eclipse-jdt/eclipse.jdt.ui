@@ -15,7 +15,6 @@ import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBrowsingPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
@@ -529,12 +528,12 @@ public class PreferenceConstants {
 	/**
 	 * Link Java Browsing views to the active editor. Boolean value.
 	 */
-	public static final String BROWSING_LINK_VIEW_TO_EDITOR= JavaBrowsingPreferencePage.LINK_VIEW_TO_EDITOR;
+	public static final String BROWSING_LINK_VIEW_TO_EDITOR= JavaBasePreferencePage.LINK_VIEW_TO_EDITOR;
 
 	/**
 	 * Stack Java Browsing views vertically. Boolean value.
 	 */
-	public static final String BROWSING_STACK_VERTICALLY= JavaBrowsingPreferencePage.STACK_VERTICALLY;
+	public static final String BROWSING_STACK_VERTICALLY= AppearancePreferencePage.STACK_VERTICALLY;
 	
 	
 	/**

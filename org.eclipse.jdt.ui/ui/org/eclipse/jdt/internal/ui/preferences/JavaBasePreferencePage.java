@@ -63,6 +63,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE="org.eclipse.jdt.ui.typeHierarchy.reusePerspective"; //$NON-NLS-1$
+	public static final String LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 	
 	public static final String DOUBLE_CLICK= "packageview.doubleclick"; //$NON-NLS-1$
 	public static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
@@ -72,6 +73,11 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static boolean useSrcAndBinFolders() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(SRCBIN_FOLDERS_IN_NEWPROJ);
+	}
+	
+	public static boolean linkBrowsingViewSelectionToEditor() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return store.getBoolean(JavaBasePreferencePage.LINK_VIEW_TO_EDITOR);
 	}
 	
 	public static String getSourceFolderName() {
@@ -162,7 +168,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(JavaBrowsingPreferencePage.LINK_VIEW_TO_EDITOR, true);
+		store.setDefault(LINK_VIEW_TO_EDITOR, true);
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 
@@ -266,7 +272,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		
 		new Label(composite, SWT.NONE); // spacer
 		new Label(composite, SWT.NONE).setText("Java Browsing Settings");
-		addCheckBox(composite, "&Link Java Browsing views selection to active editor", JavaBrowsingPreferencePage.LINK_VIEW_TO_EDITOR);
+		addCheckBox(composite, "&Link Java Browsing views selection to active editor", LINK_VIEW_TO_EDITOR);
 		
 		new Label(composite, SWT.NONE).setText("Package view settings");
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
@@ -417,7 +423,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
-
 }
 
 

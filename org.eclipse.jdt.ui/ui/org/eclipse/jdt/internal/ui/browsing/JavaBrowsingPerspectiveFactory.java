@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaBrowsingPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 
 public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	
@@ -36,7 +36,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 	}
 
 	public void createInitialLayout(IPageLayout layout) {
-		if (JavaBrowsingPreferencePage.stackHorizontal())
+		if (AppearancePreferencePage.stackBrowsingViewsHorizontally())
 			createHorizontalLayout(layout);
 		else
 			createVerticalLayout(layout);

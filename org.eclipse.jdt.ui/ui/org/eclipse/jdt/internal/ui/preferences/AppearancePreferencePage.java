@@ -35,6 +35,12 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	public static final String PREF_OVERRIDE_INDICATOR= JavaUI.ID_PLUGIN + ".overrideindicator"; //$NON-NLS-1$
 	public static final String PREF_COMPRESS_PACKAGE_NAMES= JavaUI.ID_PLUGIN + ".compresspackagenames"; //$NON-NLS-1$
 	public static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= "PackagesView.pkgNamePatternForPackagesView"; //$NON-NLS-1$
+	public static final String STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically"; //$NON-NLS-1$
+
+	public static boolean stackBrowsingViewsHorizontally() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		return !store.getBoolean(AppearancePreferencePage.STACK_VERTICALLY);
+	}
 
 	public static boolean showMethodReturnType() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_METHOD_RETURNTYPE);
@@ -66,7 +72,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setDefault(PREF_METHOD_RETURNTYPE, false);
 		prefs.setDefault(PREF_OVERRIDE_INDICATOR, true);
 		prefs.setDefault(JavaBasePreferencePage.SHOW_CU_CHILDREN, true);
-		prefs.setDefault(JavaBrowsingPreferencePage.STACK_VERTICALLY, false);
+		prefs.setDefault(STACK_VERTICALLY, false);
 		prefs.setDefault(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
 	}
 	
@@ -117,7 +123,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.setSelection(prefs.getBoolean(PREF_METHOD_RETURNTYPE));
 		fShowOverrideIndicator.setSelection(prefs.getBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getBoolean(JavaBasePreferencePage.SHOW_CU_CHILDREN));
-		fStackBrowsingViewsVertically.setSelection(prefs.getBoolean(JavaBrowsingPreferencePage.STACK_VERTICALLY));
+		fStackBrowsingViewsVertically.setSelection(prefs.getBoolean(STACK_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		fPackageNamePattern.setEnabled(fCompressPackageNames.isSelected());
@@ -201,7 +207,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		prefs.setValue(PREF_METHOD_RETURNTYPE, fShowMethodReturnType.isSelected());
 		prefs.setValue(PREF_OVERRIDE_INDICATOR, fShowOverrideIndicator.isSelected());
 		prefs.setValue(JavaBasePreferencePage.SHOW_CU_CHILDREN, fShowMembersInPackageView.isSelected());
-		prefs.setValue(JavaBrowsingPreferencePage.STACK_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
+		prefs.setValue(STACK_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
 		prefs.setValue(PREF_COMPRESS_PACKAGE_NAMES, fCompressPackageNames.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -216,7 +222,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.setSelection(prefs.getDefaultBoolean(PREF_METHOD_RETURNTYPE));
 		fShowOverrideIndicator.setSelection(prefs.getDefaultBoolean(PREF_OVERRIDE_INDICATOR));
 		fShowMembersInPackageView.setSelection(prefs.getDefaultBoolean(JavaBasePreferencePage.SHOW_CU_CHILDREN));
-		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(JavaBrowsingPreferencePage.STACK_VERTICALLY));
+		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getDefaultBoolean(PREF_COMPRESS_PACKAGE_NAMES));
 		super.performDefaults();

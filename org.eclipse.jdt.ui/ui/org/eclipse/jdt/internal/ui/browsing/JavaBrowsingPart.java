@@ -114,7 +114,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavaBrowsingPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
@@ -863,7 +863,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	private void setSelectionFromEditor(IWorkbenchPart part, ISelection selection) {
-		if (part instanceof IEditorPart && JavaBrowsingPreferencePage.linkViewSelectionToEditor()) {
+		if (part instanceof IEditorPart && JavaBasePreferencePage.linkBrowsingViewSelectionToEditor()) {
 			IEditorInput ei= ((IEditorPart)part).getEditorInput();
 			if (selection instanceof ITextSelection) {
 				int offset= ((ITextSelection)selection).getOffset();
