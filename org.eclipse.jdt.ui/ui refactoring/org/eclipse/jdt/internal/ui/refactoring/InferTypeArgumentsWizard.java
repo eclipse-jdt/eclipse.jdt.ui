@@ -75,7 +75,6 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			setControl(result);
 			GridLayout layout= new GridLayout();
 			layout.numColumns= 1;
-			layout.verticalSpacing= 8;
 			result.setLayout(layout);
 			
 			Label doit= new Label(result, SWT.WRAP);
