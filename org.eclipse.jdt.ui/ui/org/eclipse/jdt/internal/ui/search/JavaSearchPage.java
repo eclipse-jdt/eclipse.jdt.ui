@@ -50,7 +50,9 @@ import org.eclipse.search.ui.ISearchPage;
 import org.eclipse.search.ui.ISearchPageContainer;
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
@@ -466,10 +468,47 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				limitTo= REFERENCES;
 				pattern= JavaModelUtility.getFullyQualifiedName((IType)element);
 				break;
+			case IJavaElement.COMPILATION_UNIT:
+				ICompilationUnit cu= (ICompilationUnit)element;
+				String mainTypeName= element.getElementName().substring(0, element.getElementName().length() - 5);
+				IType mainType= cu.getType(mainTypeName);
+				mainTypeName= JavaModelUtility.getTypeQualifiedName(mainType);
+				try {					
+					mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
+					if (mainType == null) {
+						// fetch type which is declared first in the file
+						IType[] types= cu.getTypes();
+						if (types.length > 0)
+							mainType= types[0];
+						else
+							break;
+					}
+				} catch (JavaModelException ex) {
+					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					break;
+				}
+				searchFor= TYPE;
+				limitTo= REFERENCES;
+				pattern= JavaModelUtility.getFullyQualifiedName((IType)mainType);
+				break;
+			case IJavaElement.CLASS_FILE:
+				IClassFile cf= (IClassFile)element;
+				try {					
+					mainType= cf.getType();
+				} catch (JavaModelException ex) {
+					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					break;
+				}
+				if (mainType == null)
+					break;
+				searchFor= TYPE;
+				limitTo= REFERENCES;
+				pattern= JavaModelUtility.getFullyQualifiedName(mainType);
+				break;
 			case IJavaElement.FIELD:
-				IType type= ((IField)element).getDeclaringType();
 				searchFor= FIELD;
 				limitTo= REFERENCES;
+				IType type= ((IField)element).getDeclaringType();
 				StringBuffer buffer= new StringBuffer();
 				buffer.append(JavaModelUtility.getFullyQualifiedName(type));
 				buffer.append('.');
@@ -484,6 +523,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 						searchFor= CONSTRUCTOR;
 				} catch (JavaModelException ex) {
 					ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.javaElementAccess.");
+					break;
 				}		
 				limitTo= REFERENCES;
 				pattern= PrettySignature.getMethodSignature((IMethod)element);

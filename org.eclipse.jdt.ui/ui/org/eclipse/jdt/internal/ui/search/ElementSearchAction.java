@@ -31,7 +31,10 @@ import org.eclipse.search.ui.ISearchResultViewEntry;
 import org.eclipse.search.ui.SearchUI;
 
 import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -137,12 +141,21 @@ public abstract class ElementSearchAction extends Action {
 	}
 
 	private IJavaElement getJavaElement(IJavaElement o) {
+		if (o == null)
+			return null;
+
+		switch (o.getElementType()) {
+			case IJavaElement.COMPILATION_UNIT:
+				return findType((ICompilationUnit)o);
+			case IJavaElement.CLASS_FILE:
+				return findType((IClassFile)o);			
+		}
 		return o;
 	}
 
 	private IJavaElement getJavaElement(IMarker o) {
 		try {
-			return JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
+			return getJavaElement(JavaCore.create((String) ((IMarker) o).getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID)));
 		} catch (CoreException ex) {
 			ExceptionHandler.handle(ex, JavaPlugin.getResourceBundle(), "Search.Error.createJavaElement.");
 			return null;
@@ -249,4 +262,34 @@ public abstract class ElementSearchAction extends Action {
 		if (shell != null && shell.getDisplay() != null)
 			shell.getDisplay().beep();
 	}	
+
+	protected IType findType(ICompilationUnit cu) {
+		String mainTypeName= cu.getElementName().substring(0, cu.getElementName().length() - 5);
+		IType mainType= cu.getType(mainTypeName);
+		mainTypeName= JavaModelUtility.getTypeQualifiedName((IType)mainType);
+		try {					
+			mainType= JavaModelUtility.findTypeInCompilationUnit(cu, mainTypeName);
+			if (mainType == null) {
+				// fetch type which is declared first in the file
+				IType[] types= cu.getTypes();
+				if (types.length > 0)
+					mainType= types[0];
+				else
+					return null;
+			}
+		} catch (JavaModelException ex) {
+			return null;
+		}
+		return mainType;
+	}
+
+	protected IType findType(IClassFile cf) {
+		IType mainType;
+		try {					
+			mainType= cf.getType();
+		} catch (JavaModelException ex) {
+			return null;
+		}
+		return mainType;
+	}
 }
