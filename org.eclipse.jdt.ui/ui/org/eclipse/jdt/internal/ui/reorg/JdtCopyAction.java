@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.reorg;
 
 import java.util.List;
 
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.actions.CopyProjectAction;
@@ -17,12 +18,11 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
 public class JdtCopyAction extends ReorgDestinationAction {
 	
-	public JdtCopyAction(StructuredSelectionProvider provider) {
-		super(ReorgMessages.getString("copyAction.label"), provider); //$NON-NLS-1$
-		setDescription(ReorgMessages.getString("copyAction.description")); //$NON-NLS-1$
+	public JdtCopyAction(String name, StructuredSelectionProvider provider) {
+		super(name, provider);
 	}
 	
-	public JdtCopyAction(String name, StructuredSelectionProvider provider) {
+	public JdtCopyAction(String name, ISelectionProvider provider) {
 		super(name, provider);
 	}
 	
