@@ -162,13 +162,18 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				NLSSubstitution substitution= (NLSSubstitution) element;
 				if (PROPERTIES[KEY_PROP].equals(property))
 					return substitution.getKeyWithoutPrefix();
-				if (PROPERTIES[VAL_PROP].equals(property))
-					return substitution.getValue();
+				if (PROPERTIES[VAL_PROP].equals(property)) {
+					String value= substitution.getValue();
+					if (value != null) {
+						return value;
+					}
+					return ""; //$NON-NLS-1$
+				}
 				if (PROPERTIES[STATE_PROP].equals(property)) {
 					return new Integer(substitution.getState());
 				}
 			}
-			return null;
+			return ""; //$NON-NLS-1$
 		}
 
 		/**

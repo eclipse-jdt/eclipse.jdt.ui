@@ -12,22 +12,21 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaSourcePackageFragmentRootCompletionProcessor;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
-class SourceFolderSelectionDialogButtonField extends StringButtonDialogField {
+class SourceFolderSelectionDialogButtonField extends StringButtonDialogField implements IDialogFieldListener {
 
 	private IPackageFragmentRoot fRoot;
 	private SourceChangeListener fListener;
@@ -41,6 +40,19 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField {
 		fProject= root;
 		setLabelText(descriptionLabel);
 		setButtonLabel(browseLabel);
+		setDialogFieldListener(this);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+	 */
+	public void dialogFieldChanged(DialogField field) {
+		// propagate a textchange to the fragment root of this
+		String rootString= getRootString();
+		String newString= getText();
+		if (!rootString.equals(newString)) {
+			setRootFromString(newString);
+		}
 	}
 
 	public void setUpdateListener(IDialogFieldListener updateListener) {
@@ -51,16 +63,6 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField {
 		Control[] res= super.doFillIntoGrid(parent, nColumns);
 
 		final Text text= getTextControl(null);
-		text.addModifyListener(new ModifyListener() {
-			public void modifyText(ModifyEvent e) {
-				// propagate a textchange to the fragment root of this
-				String rootString= getRootString();
-				String newString= text.getText();
-				if (rootString.equals(newString) == false) {
-					setRootFromString(newString);
-				}
-			}
-		});
 		LayoutUtil.setWidthHint(text, textWidth);
 		LayoutUtil.setHorizontalGrabbing(text);
 
@@ -81,13 +83,13 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField {
 		String projectName= getProjectName(rootString);
 		String fragmentRootName= getFragmentRootName(rootString);
 
+		IPackageFragmentRoot root= null;
 		if ((projectName != null) && (fragmentRootName != null)) {
-
-			if (projectName.equals(fProject.getElementName()) == true) {
-				IPackageFragmentRoot root= findFragmentRoot(fProject, getFragmentRootName(rootString));
-				setRoot(root);
+			if (projectName.equals(fProject.getElementName())) {
+				root= findFragmentRoot(fProject, getFragmentRootName(rootString));
 			}
 		}
+		setRoot(root);
 	}
 
 	public void setRoot(IPackageFragmentRoot root) {
@@ -150,4 +152,6 @@ class SourceFolderSelectionDialogButtonField extends StringButtonDialogField {
 	private String getRootString() {
 		return (fRoot == null) ? "" : fRoot.getPath().makeRelative().toString(); //$NON-NLS-1$
 	}
+
+
 }

@@ -11,17 +11,34 @@
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
+import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -99,13 +116,72 @@ class SourceFirstPackageSelectionDialogField {
 	class SFStringButtonAdapter implements IStringButtonAdapter {
 		public void changeControlPressed(DialogField field) {
 
-			IPackageFragmentRoot newSourceContainer= SourceContainerDialog.getSourceContainer(fShell, ResourcesPlugin
-				.getWorkspace().getRoot(), (IJavaElement)getInitElement());
+			IPackageFragmentRoot newSourceContainer= chooseSourceContainer(fSourceFolderSelection.getRoot());
 			if (newSourceContainer != null) {
 				fSourceFolderSelection.setRoot(newSourceContainer);
 			}
 		}
 	}
+	
+	private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
+		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
+			public boolean isSelectedValid(Object element) {
+				try {
+					if (element instanceof IJavaProject) {
+						IJavaProject jproject= (IJavaProject)element;
+						IPath path= jproject.getProject().getFullPath();
+						return (jproject.findPackageFragmentRoot(path) != null);
+					} else if (element instanceof IPackageFragmentRoot) {
+						return (((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE);
+					}
+					return true;
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e.getStatus()); // just log, no ui in validation
+				}
+				return false;
+			}
+		};
+		
+		acceptedClasses= new Class[] { IJavaModel.class, IPackageFragmentRoot.class, IJavaProject.class };
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses) {
+			public boolean select(Viewer viewer, Object parent, Object element) {
+				if (element instanceof IPackageFragmentRoot) {
+					try {
+						return (((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE);
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus()); // just log, no ui in validation
+						return false;
+					}
+				}
+				return super.select(viewer, parent, element);
+			}
+		};		
+
+		StandardJavaElementContentProvider provider= new StandardJavaElementContentProvider();
+		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT); 
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(fShell, labelProvider, provider);
+		dialog.setValidator(validator);
+		dialog.setSorter(new JavaElementSorter());
+		dialog.setTitle(NLSUIMessages.getString("SourceFirstPackageSelectionDialogField.ChooseSourceContainerDialog.title")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("SourceFirstPackageSelectionDialogField.ChooseSourceContainerDialog.description")); //$NON-NLS-1$
+		dialog.addFilter(filter);
+		dialog.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+		dialog.setInitialSelection(initElement);
+		
+		if (dialog.open() == Window.OK) {
+			Object element= dialog.getFirstResult();
+			if (element instanceof IJavaProject) {
+				IJavaProject jproject= (IJavaProject)element;
+				return jproject.getPackageFragmentRoot(jproject.getProject());
+			} else if (element instanceof IPackageFragmentRoot) {
+				return (IPackageFragmentRoot)element;
+			}
+			return null;
+		}
+		return null;
+	}	
+
 
 	public IPackageFragment getSelected() {
 		IPackageFragment res= fPackageSelection.getPackageFragment();
@@ -125,10 +201,6 @@ class SourceFirstPackageSelectionDialogField {
 		fShell= parent.getShell();
 		fSourceFolderSelection.doFillIntoGrid(parent, nOfColumns, textWidth);
 		fPackageSelection.doFillIntoGrid(parent, nOfColumns, textWidth);
-	}
-
-	public Object getInitElement() {
-		return fSourceFolderSelection.getRoot();
 	}
 
 }
