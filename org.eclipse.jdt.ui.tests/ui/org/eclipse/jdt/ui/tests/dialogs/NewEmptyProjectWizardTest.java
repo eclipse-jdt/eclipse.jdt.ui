@@ -26,8 +26,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.core.JavaProject;
-
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
 
@@ -49,7 +47,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     protected void setUp() throws Exception {
-        fProject= (JavaProject)fTestSetup.getWorkspaceProject();
+        fProject= fTestSetup.getWorkspaceProject();
         defaultOutputFolder= fProject.getOutputLocation().append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
         testProjectIsOnClasspath(true);
     }
