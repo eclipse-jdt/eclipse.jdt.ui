@@ -84,6 +84,7 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
+import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
@@ -92,6 +93,7 @@ import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.information.IInformationProvider;
@@ -226,7 +228,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		/**
 		 * Removes this selection changed listener from the given selection provider.
 		 * 
-		 * @param selectionProvider
+		 * @param selectionProviderstyle
 		 */
 		public void uninstall(ISelectionProvider selectionProvider) {
 			if (selectionProvider == null)
@@ -277,7 +279,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
-		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {
+		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener, ITextPresentationListener {
 
 		/** The session is active. */
 		private boolean fActive;
@@ -294,17 +296,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		/** The key modifier mask. */
 		private int fKeyModifierMask;
 
-		/**
-		 * Style ranges before link mode.
-		 * @since 3.0
-		 */
-		private StyleRange[] fOldStyleRanges;
-		/**
-		 * Link mode style ranges region.
-		 * @since 3.0
-		 */
-		IRegion fOldStyleRangeRegion;
-
 		
 		public void deactivate() {
 			deactivate(false);
@@ -319,7 +310,6 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 
 		public void install() {
-
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
@@ -341,6 +331,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			text.addMouseMoveListener(this);
 			text.addFocusListener(this);
 			text.addPaintListener(this);
+			
+			((ITextViewerExtension4)sourceViewer).addTextPresentationListener(this);
 			
 			updateKeyModifierMask();
 			
@@ -410,6 +402,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			text.removeMouseMoveListener(this);
 			text.removeFocusListener(this);
 			text.removePaintListener(this);
+			
+			((ITextViewerExtension4)sourceViewer).removeTextPresentationListener(this);
 			}
 				
 		/*
@@ -474,27 +468,25 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 			ISourceViewer viewer= getSourceViewer();
 			if (viewer != null) {
+				
 				resetCursor(viewer);
 				
-				// remove style
+				// Invalidate ==> remove applied text presentation
 				if (!redrawAll && viewer instanceof ITextViewerExtension2)
 					((ITextViewerExtension2) viewer).invalidateTextPresentation(offset, length);
 				else
 					viewer.invalidateTextPresentation();
-
+				
+				// Remove underline
 				if (viewer instanceof ITextViewerExtension3) {
 					ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 					offset= extension.modelOffset2WidgetOffset(offset);
 				} else {
 					offset -= viewer.getVisibleRegion().getOffset();
 				}
-				
 				try {
 					StyledText text= viewer.getTextWidget();
-					// Removes style
-					text.replaceStyleRanges(fOldStyleRangeRegion.getOffset(), fOldStyleRangeRegion.getLength(), fOldStyleRanges);
-//					text.replaceStyleRanges(offset, length, fOldStyleRanges);
-					// Causes underline to disappear
+
 					text.redrawRange(offset, length, false);
 				} catch (IllegalArgumentException x) {
 					JavaPlugin.log(x);
@@ -591,6 +583,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			}			
 		}
 
+		public void applyTextPresentation(TextPresentation textPresentation, IRegion region) {
+			if (fActiveRegion == null)
+				return;
+
+			if (fActiveRegion.getOffset() + fActiveRegion.getLength() >= region.getOffset() && region.getOffset() + region.getLength() > fActiveRegion.getOffset())
+				textPresentation.mergeStyleRange(new StyleRange(fActiveRegion.getOffset(), fActiveRegion.getLength(), fColor, null));
+		}
+		
 		private void highlightRegion(ISourceViewer viewer, IRegion region) {
 
 			if (region.equals(fActiveRegion))
@@ -602,10 +602,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (text == null || text.isDisposed())
 				return;
 
-			// highlight region
+			
+			// Underline
 			int offset= 0;
 			int length= 0;
-			
 			if (viewer instanceof ITextViewerExtension3) {
 				ITextViewerExtension3 extension= (ITextViewerExtension3) viewer;
 				IRegion widgetRange= extension.modelRange2WidgetRange(region);
@@ -619,40 +619,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				offset= region.getOffset() - viewer.getVisibleRegion().getOffset();
 				length= region.getLength();
 			}
-			
-			fOldStyleRanges = text.getStyleRanges(offset, length);
-			fOldStyleRangeRegion= new Region(offset, length);
-			
-			applyForgroundStyle(text, offset, length);
 			text.redrawRange(offset, length, false);
-
+			
+			// Invalidate region ==> apply text presentation
 			fActiveRegion= region;
-		}
-		
-		private void applyForgroundStyle(StyledText fTextWidget, int offset, int length) {
-			StyleRange[] styleRanges= fTextWidget.getStyleRanges(offset, length);
-			ArrayList newStyleRanges= new ArrayList(styleRanges.length + 10); 
-			int rangeOffset= offset;
-			for (int i= 0, max= styleRanges.length; i < max; i++) {
-				StyleRange sr= styleRanges[i]; 
-				if (rangeOffset < sr.start) {
-					// Unstyled range
-					StyleRange usr= new StyleRange(rangeOffset, sr.start - rangeOffset, fColor, null);
-					newStyleRanges.add(usr);
-				}
-				rangeOffset= sr.start + sr.length;
-				// Important: Must create a new one
-				sr= new StyleRange(sr.start, sr.length, fColor, sr.background, sr.fontStyle);
-				newStyleRanges.add(sr);
-			}
-			int endOffset= offset + length;
-			if (rangeOffset < endOffset) {
-				// Last unstyled range
-				StyleRange usr= new StyleRange(rangeOffset, endOffset - rangeOffset, fColor, null);
-				newStyleRanges.add(usr);
-			}
-			styleRanges= (StyleRange[])newStyleRanges.toArray(new StyleRange[newStyleRanges.size()]);
-			fTextWidget.replaceStyleRanges(offset, length, styleRanges);
+			if (viewer instanceof ITextViewerExtension2)
+				((ITextViewerExtension2) viewer).invalidateTextPresentation(region.getOffset(), region.getLength());
+			else
+				viewer.invalidateTextPresentation();
 		}
 		
 		private void activateCursor(ISourceViewer viewer) {
@@ -805,7 +779,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				return;
 			}
 			
-			highlightRegion(viewer, region);	
+			highlightRegion(viewer, region);
 			activateCursor(viewer);												
 		}
 
