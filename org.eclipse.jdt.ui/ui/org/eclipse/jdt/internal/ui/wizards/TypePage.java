@@ -8,6 +8,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -15,12 +21,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
@@ -49,6 +49,12 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -59,8 +65,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.text.template.Template;
-import org.eclipse.jdt.internal.ui.text.template.Templates;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -1322,7 +1326,7 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doFileComments()) {
-			return getTemplate("filecomment");
+			return getTemplate("filecomment", parentCU);
 		}
 		return null;
 	}
@@ -1333,20 +1337,43 @@ public abstract class TypePage extends ContainerPage {
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
 		if (CodeGenerationPreferencePage.doCreateComments()) {
-			return getTemplate("typecomment");
+			return getTemplate("typecomment", parentCU);
 		}
 		return null;
 	}
 	
-	protected String getTemplate(String name) {
+	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		Template[] templates= Templates.getInstance().getTemplates();
 		for (int i= 0; i < templates.length; i++) {
 			if (name.equals(templates[i].getName())) {
-				return templates[i].getPattern();
+				return evaluateTemplate(templates[i], parentCU);
+//				return templates[i].getPattern();
 			}
 		}
 		return null;
 	}	
+
+	private String evaluateTemplate(Template template, ICompilationUnit compilationUnit) {
+		
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java");
+		if (contextType == null)
+			return null;
+
+		try {
+			String string= compilationUnit.getSource();
+			int position= 0;
+
+			JavaContext context= new JavaContext(contextType, string, position, compilationUnit);
+			context.setForceEvaluation(true);
+
+			TemplateBuffer buffer= context.evaluate(template);
+			return buffer.getString();
+
+		} catch (CoreException e) {
+			JavaPlugin.log(e);			
+			return null;
+		}
+	}
 	
 	/**
 	 * Creates the bodies of all unimplemented methods or/and all constructors

@@ -1,4 +1,8 @@
-package org.eclipse.jdt.internal.ui.text.template;
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.corext.template;
 
 import java.io.File;
 import java.io.InputStream;
@@ -17,6 +21,7 @@ public class Templates extends TemplateSet {
 	private static final String DEFAULT_FILE= "default-templates.xml"; //$NON-NLS-1$
 	private static final String TEMPLATE_FILE= "templates.xml"; //$NON-NLS-1$
 
+	/** Singleton. */
 	private static Templates fgTemplates;
 
 	/**

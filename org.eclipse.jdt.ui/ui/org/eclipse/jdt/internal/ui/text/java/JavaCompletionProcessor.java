@@ -29,8 +29,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
 
 
@@ -69,7 +70,9 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		fTemplateEngine= new TemplateEngine(TemplateContext.JAVA);
+		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java");
+		if (contextType != null)
+			fTemplateEngine= new TemplateEngine(contextType);
 		fExperimentalCollector= new ExperimentalResultCollector();
 		fAllowAddImports= true;
 	}
@@ -218,26 +221,29 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			results= fCollector.getResults();
 		}
 
-		try {
-			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, offset, unit);
-		} catch (JavaModelException x) {
-			Shell shell= viewer.getTextWidget().getShell();
-			ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
-		}				
-		
-		ICompletionProposal[] templateResults= fTemplateEngine.getResults();
-
-		// concatenate arrays
-		ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
-		System.arraycopy(templateResults, 0, total, 0, templateResults.length);
-		System.arraycopy(results, 0, total, templateResults.length, results.length);
+		if (fTemplateEngine != null) {
+			try {
+				fTemplateEngine.reset();
+				fTemplateEngine.complete(viewer, offset, unit);
+			} catch (JavaModelException x) {
+				Shell shell= viewer.getTextWidget().getShell();
+				ErrorDialog.openError(shell, JavaTextMessages.getString("CompletionProcessor.error.accessing.title"), JavaTextMessages.getString("CompletionProcessor.error.accessing.message"), x.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			}				
+			
+			ICompletionProposal[] templateResults= fTemplateEngine.getResults();
+	
+			// concatenate arrays
+			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
+			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
+			System.arraycopy(results, 0, total, templateResults.length, results.length);
+			results= total;
+		}
 		
 		/*
 		 * Order here and not in result collector to make sure that the order
 		 * applies to all proposals and not just those of the compilation unit. 
 		 */
-		return order(total);
+		return order(results);
 	}
 	
 	/**

@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
+import java.util.Iterator;
 import java.util.Vector;
 
 import org.eclipse.swt.widgets.Shell;
@@ -12,27 +13,42 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.TemplateVariable;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TemplateVariableProcessor implements IContentAssistProcessor {	
+	
+	/** the context type */
+	private ContextType fContextType;
+	
+	/**
+	 * Sets the context type.
+	 */
+	public void setContextType(ContextType contextType) {
+		fContextType= contextType;	
+	}
 	
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
 	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer,	int documentOffset) {
 
-		Vector vector= new Vector();
+		if (fContextType == null)
+			return null;
+
+		Vector vector= new Vector();		
 
 		try {
 			int offset= (documentOffset > 0) && (viewer.getDocument().get(documentOffset - 1, 1).equals("$")) //$NON-NLS-1$
 				? documentOffset - 1
 				: documentOffset;		
 			int length= documentOffset - offset;
-	
-			String[][] variables= TemplateCollector.getVariables();					
-			for (int i= 0; i < variables.length; i++) {
-				String[] variable= variables[i];
-				vector.add(new TemplateVariableProposal(variable[0], variable[1], offset, length, viewer));
+
+			for (Iterator iterator= fContextType.variableIterator(); iterator.hasNext(); ) {
+				TemplateVariable variable= (TemplateVariable) iterator.next();
+				vector.add(new TemplateVariableProposal(variable, offset, length, viewer));
 			}
 
 		} catch (BadLocationException e) {

@@ -2,7 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.text.template;
+package org.eclipse.jdt.internal.corext.template;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -194,7 +194,7 @@ public class TemplateSet {
 				attributes.setNamedItem(description);
 	
 				Attr context= document.createAttribute(CONTEXT_ATTRIBUTE);
-				context.setValue(template.getContext());
+				context.setValue(template.getContextTypeName());
 				attributes.setNamedItem(context);			
 
 				Attr enabled= document.createAttribute(ENABLED_ATTRIBUTE);
@@ -219,13 +219,13 @@ public class TemplateSet {
 
 	private static void throwReadException(Throwable t) throws CoreException {
 		IStatus status= new JavaUIStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
-			t.getMessage(), t);
+			TemplateMessages.getString("TemplateSet.error.read"), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}
 	
 	private static void throwWriteException(Throwable t) throws CoreException {
 		IStatus status= new JavaUIStatus(JavaStatusConstants.TEMPLATE_IO_EXCEPTION,
-			t.getMessage(), t); //$NON-NLS-1$
+			TemplateMessages.getString("TemplateSet.error.write"), t); //$NON-NLS-1$
 		throw new JavaUIException(status);
 	}
 
@@ -274,25 +274,6 @@ public class TemplateSet {
 		return (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
 	}
 	
-	/**
-	 * Returns templates matching a prefix.
-	 */
-	public Template[] getMatchingTemplates(TemplateContext context) {
-		String prefix= context.getKey();
-		String type= context.getType();
-
-		List results= new ArrayList(fSortedTemplates.length);
-
-		for (int i= 0; i != fSortedTemplates.length; i++) {
-			Template template= fSortedTemplates[i];
-
-			if (template.matches(prefix, type))
-				results.add(template);							
-		}
-
-		return (Template[]) results.toArray(new Template[results.size()]);
-	}
-
 	private void sort() {
 		fSortedTemplates= (Template[]) fTemplates.toArray(new Template[fTemplates.size()]);
 		Arrays.sort(fSortedTemplates, fTemplateComparator);

@@ -10,6 +10,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Vector;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.KeyEvent;
@@ -32,6 +34,8 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -47,6 +51,7 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
@@ -61,15 +66,16 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateContext;
+import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.text.template.Template;
-import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
-import org.eclipse.jdt.internal.ui.text.template.TemplateInterpolator;
-import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
-import org.eclipse.jdt.internal.ui.text.template.VariableEvaluator;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -79,8 +85,11 @@ public class EditTemplateDialog extends StatusDialog {
 
 	private static class SimpleJavaSourceViewerConfiguration extends JavaSourceViewerConfiguration {
 
-		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor) {
+		private final IContentAssistProcessor fProcessor;
+
+		SimpleJavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, IContentAssistProcessor processor) {
 			super(tools, editor);
+			fProcessor= processor;
 		}
 		
 		/*
@@ -89,7 +98,7 @@ public class EditTemplateDialog extends StatusDialog {
 		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
 			ContentAssistant assistant= new ContentAssistant();
-			assistant.setContentAssistProcessor(new TemplateVariableProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
+			assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 
 			assistant.enableAutoActivation(true);
 			assistant.setAutoActivationDelay(500);
@@ -106,46 +115,6 @@ public class EditTemplateDialog extends StatusDialog {
 		}	
 	}
 
-	private static class TemplateVerifier implements VariableEvaluator {		
-		private String fErrorMessage;
-		private boolean fHasAdjacentVariables;
-		private boolean fEndsWithVariable;
-		
-		public void reset() {
-			fErrorMessage= null;
-			fHasAdjacentVariables= false;
-			fEndsWithVariable= false;
-		}
-
-		public void acceptError(String message) {
-			if (fErrorMessage == null)
-				fErrorMessage= message;
-		}
-
-		public void acceptText(String text) {
-			if (text.length() > 0)
-				fEndsWithVariable= false;
-		}
-		
-		public void acceptVariable(String variable) {
-			if (fEndsWithVariable)
-				fHasAdjacentVariables= true;
-			
-			fEndsWithVariable= true;
-		}
-
-		public boolean hasErrors() {
-			return fHasAdjacentVariables || (fErrorMessage != null);	
-		}
-		
-		public String getErrorMessage() {
-			if (fHasAdjacentVariables)
-				return TemplateMessages.getString("EditTemplateDialog.error.adjacent.variables"); //$NON-NLS-1$
-
-			return fErrorMessage;
-		}
-	}
-	
 	private static class TextViewerAction extends Action implements IUpdate {
 	
 		private int fOperationCode= -1;
@@ -193,13 +162,15 @@ public class EditTemplateDialog extends StatusDialog {
 	
 	private Button fInsertVariableButton;
 
-	private TemplateInterpolator fInterpolator= new TemplateInterpolator();
-	private TemplateVerifier fVerifier= new TemplateVerifier();
+	private TemplateTranslator fTranslator= new TemplateTranslator();
 	
 	private boolean fSuppressError= true; // #4354
 	
 	private Map fGlobalActions= new HashMap(10);
-	private List fSelectionActions = new ArrayList(3);
+	private List fSelectionActions = new ArrayList(3);	
+	private Vector fContextTypes= new Vector();
+	
+	private final TemplateVariableProcessor fProcessor= new TemplateVariableProcessor();
 		
 	public EditTemplateDialog(Shell parent, Template template, boolean edit) {
 		super(parent);
@@ -213,6 +184,13 @@ public class EditTemplateDialog extends StatusDialog {
 			setTitle(TemplateMessages.getString("EditTemplateDialog.title.new")); //$NON-NLS-1$
 
 		fTemplate= template;
+		
+		ContextTypeRegistry registry= ContextTypeRegistry.getInstance();
+		for (Iterator iterator= registry.iterator(); iterator.hasNext(); )
+			fContextTypes.add(iterator.next());
+			
+		if (fContextTypes.size() > 0)
+			fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType((String) fContextTypes.get(0)));
 	}
 	
 	/*
@@ -247,7 +225,16 @@ public class EditTemplateDialog extends StatusDialog {
 
 		createLabel(composite, TemplateMessages.getString("EditTemplateDialog.context")); //$NON-NLS-1$		
 		fContextCombo= new Combo(composite, SWT.READ_ONLY);
-		fContextCombo.setItems(new String[] {TemplateContext.JAVA, TemplateContext.JAVADOC});
+
+		for (Iterator iterator= fContextTypes.iterator(); iterator.hasNext(); )
+			fContextCombo.add((String) iterator.next());
+
+		fContextCombo.addModifyListener(new ModifyListener() {
+			public void modifyText(ModifyEvent e) {
+				String name= fContextCombo.getText();
+				fProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));				
+			}
+		});
 		
 		createLabel(parent, TemplateMessages.getString("EditTemplateDialog.description")); //$NON-NLS-1$		
 		fDescriptionText= createText(parent);
@@ -278,7 +265,7 @@ public class EditTemplateDialog extends StatusDialog {
 
 		fNameText.setText(fTemplate.getName());
 		fDescriptionText.setText(fTemplate.getDescription());
-		fContextCombo.select(getIndex(fTemplate.getContext()));
+		fContextCombo.select(getIndex(fTemplate.getContextTypeName()));
 
 		initializeActions();
 
@@ -310,7 +297,7 @@ public class EditTemplateDialog extends StatusDialog {
 	private SourceViewer createEditor(Composite parent) {
 		SourceViewer viewer= new SourceViewer(parent, null, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
 		JavaTextTools tools= JavaPlugin.getDefault().getJavaTextTools();
-		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null));
+		viewer.configure(new SimpleJavaSourceViewerConfiguration(tools, null, fProcessor));
 		viewer.setEditable(true);
 		viewer.setDocument(new Document(fTemplate.getPattern()));
 		
@@ -325,7 +312,12 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		viewer.addTextListener(new ITextListener() {
 			public void textChanged(TextEvent event) {
-				fInterpolator.interpolate(event.getDocumentEvent().getDocument().get(), fVerifier);
+			    try {
+					fTranslator.translate(event.getDocumentEvent().getDocument().get());
+			    } catch (CoreException e) {
+			     	JavaPlugin.log(e);
+			     	// XXX dialog   
+			    }
 				
 				updateUndoAction();
 				updateButtons();
@@ -440,13 +432,14 @@ public class EditTemplateDialog extends StatusDialog {
 			((IUpdate) action).update();
 	}
 
-	private static int getIndex(String context) {
-		if (context.equals(TemplateContext.JAVA))
-			return 0;
-		else if (context.equals(TemplateContext.JAVADOC))
-			return 1;
-		else
+	private int getIndex(String context) {
+		ContextTypeRegistry registry= ContextTypeRegistry.getInstance();
+		registry.getContextType(context);
+		
+		if (context == null)
 			return -1;
+			
+		return fContextTypes.indexOf(context);
 	}
 	
 	protected void okPressed() {
@@ -468,8 +461,8 @@ public class EditTemplateDialog extends StatusDialog {
 				status.setError(""); //$NON-NLS-1$							
 			else
 				status.setError(TemplateMessages.getString("EditTemplateDialog.error.noname")); //$NON-NLS-1$
- 		} else if (fVerifier.hasErrors()) {
- 			status.setError(fVerifier.getErrorMessage());	
+ 		} else if (fTranslator.getErrorMessage() != null) {
+ 			status.setError(fTranslator.getErrorMessage());	
 		}
 
 		updateStatus(status);

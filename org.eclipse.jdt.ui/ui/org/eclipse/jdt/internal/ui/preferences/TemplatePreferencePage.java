@@ -50,15 +50,17 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateContext;
+import org.eclipse.jdt.internal.corext.template.TemplateMessages;
+import org.eclipse.jdt.internal.corext.template.TemplateSet;
+import org.eclipse.jdt.internal.corext.template.Templates;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.template.Template;
 import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
-import org.eclipse.jdt.internal.ui.text.template.TemplateContext;
 import org.eclipse.jdt.internal.ui.text.template.TemplateLabelProvider;
-import org.eclipse.jdt.internal.ui.text.template.TemplateMessages;
-import org.eclipse.jdt.internal.ui.text.template.TemplateSet;
-import org.eclipse.jdt.internal.ui.text.template.Templates;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class TemplatePreferencePage	extends PreferencePage implements IWorkbenchPreferencePage {
@@ -343,9 +345,14 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		fDisableAllButton.setEnabled(itemCount > 0);
 	}
 	
-	private void add() {
+	private void add() {		
+		
 		Template template= new Template();
-		template.setContext(TemplateContext.JAVA); //$NON-NLS-1$
+
+		ContextTypeRegistry registry=ContextTypeRegistry.getInstance();
+		Iterator iterator= registry.iterator();
+		String contextTypeName= (String) iterator.next();
+		template.setContext(contextTypeName); //$NON-NLS-1$
 
 		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, false);
 		if (dialog.open() == dialog.OK) {

@@ -9,6 +9,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
+import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class TemplateLabelProvider implements ITableLabelProvider {
@@ -22,7 +23,7 @@ public class TemplateLabelProvider implements ITableLabelProvider {
 		
 		Template template= (Template) element;
 		
-		if (template.getContext().equals("javadoc") && //$NON-NLS-1$
+		if (template.getContextTypeName().equals("javadoc") && //$NON-NLS-1$
 			template.getName().startsWith("<")) //$NON-NLS-1$ 
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HTMLTAG);
 		else
@@ -39,7 +40,7 @@ public class TemplateLabelProvider implements ITableLabelProvider {
 			case 0:
 				return template.getName();
 			case 1:
-				return template.getContext();
+				return template.getContextTypeName();
 			case 2:
 				return template.getDescription();
 			default:

@@ -6,7 +6,11 @@ package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 
@@ -14,11 +18,19 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.corext.template.ContextType;
+import org.eclipse.jdt.internal.corext.template.Template;
+import org.eclipse.jdt.internal.corext.template.TemplateContext;
+import org.eclipse.jdt.internal.corext.template.Templates;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
+import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
 
-	private String fContextType;
+	private ContextType fContextType;
 	private ITableLabelProvider fLabelProvider= new TemplateLabelProvider();
 	
 	private ArrayList fProposals= new ArrayList();
@@ -27,7 +39,7 @@ public class TemplateEngine {
 	 * Creates the template engine for a particular context type.
 	 * See <code>TemplateContext</code> for supported context types.
 	 */
-	public TemplateEngine(String contextType) {
+	public TemplateEngine(ContextType contextType) {
 		Assert.isNotNull(contextType);
 		fContextType= contextType;
 	}
@@ -59,16 +71,22 @@ public class TemplateEngine {
 	public void complete(ITextViewer viewer, int completionPosition, ICompilationUnit sourceUnit)
 		throws JavaModelException
 	{
+	    IDocument document= viewer.getDocument();
+	    
 		// prohibit recursion
-		if (LinkedPositionManager.hasActiveManager(viewer.getDocument()))
+		if (LinkedPositionManager.hasActiveManager(document))
 			return;
 
-		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
-		Template[] templates= Templates.getInstance().getMatchingTemplates(context);
+		JavaContext context= new JavaContext(fContextType, document.get(), completionPosition, sourceUnit);
+		Template[] templates= Templates.getInstance().getTemplates();
+
+		int start= context.getStart();
+		int end= context.getEnd();
+		IRegion region= new Region(start, end - start);
 
 		for (int i= 0; i != templates.length; i++)
-			fProposals.add(new TemplateProposal(templates[i], context, fLabelProvider.getColumnImage(templates[i], 0)));
+			if (context.canEvaluate(templates[i]))
+				fProposals.add(new TemplateProposal(templates[i], context, region, viewer, fLabelProvider.getColumnImage(templates[i], 0)));
 	}
-	
 }
 

@@ -5,8 +5,9 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.internal.corext.template.TemplateSet;
 
 public class TemplateContentProvider implements IStructuredContentProvider {
 
