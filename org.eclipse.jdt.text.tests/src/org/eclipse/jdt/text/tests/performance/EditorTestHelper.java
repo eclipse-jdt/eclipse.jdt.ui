@@ -18,6 +18,7 @@ import junit.framework.Assert;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -43,7 +44,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -88,9 +88,13 @@ public class EditorTestHelper {
 		}
 	}
 
+	public static final String TEXT_EDITOR_ID= "org.eclipse.ui.DefaultTextEditor";
+
 	public static final String COMPILATION_UNIT_EDITOR_ID= "org.eclipse.jdt.ui.CompilationUnitEditor";
 	
-	public static final String TEXT_EDITOR_ID= "org.eclipse.ui.DefaultTextEditor";
+	public static final String RESOURCE_PERSPECTIVE= "org.eclipse.ui.resourcePerspective";
+
+	public static final String JAVA_PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
@@ -342,13 +346,14 @@ public class EditorTestHelper {
 		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0])).booleanValue();
 	}
 
-	public static void showPerspective(String perspective) throws WorkbenchException {
-		IPerspectiveDescriptor current= getActivePage().getPerspective();
-		if (current != null && !current.getId().equals(perspective)) {
+	public static String showPerspective(String perspective) throws WorkbenchException {
+		String shownPerspective= getActivePage().getPerspective().getId();
+		if (!perspective.equals(shownPerspective)) {
 			IWorkbench workbench= PlatformUI.getWorkbench();
 			IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
 			workbench.showPerspective(perspective, activeWindow);
 		}
+		return shownPerspective;
 	}
 
 	public static void closeAllPopUps(SourceViewer sourceViewer) {
@@ -381,5 +386,14 @@ public class EditorTestHelper {
 		Assert.assertTrue(folder.exists());
 		JavaProjectHelper.addSourceContainer(javaProject, "src");
 		return javaProject;
+	}
+
+	public static boolean projectExists(String projectName) {
+		return getProject(projectName).exists();
+	}
+
+	public static IProject getProject(String projectName) {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		return workspace.getRoot().getProject(projectName);
 	}
 }

@@ -38,8 +38,6 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 public class PerformanceTestSetup extends TestSetup {
 
-	public static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
-
 	public static final String PROJECT= "org.eclipse.swt";
 	
 	public static final String TEXT_LAYOUT= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
@@ -74,9 +72,9 @@ public class PerformanceTestSetup extends TestSetup {
 			activePage.hideView(viewReference);
 		
 		if (fSetPerspective)
-			EditorTestHelper.showPerspective(PERSPECTIVE);
+			EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
 		
-		if (!projectExists(PROJECT)) {
+		if (!EditorTestHelper.projectExists(PROJECT)) {
 			boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 			setUpProject();
 			ResourceTestHelper.fullBuild();
@@ -115,11 +113,5 @@ public class PerformanceTestSetup extends TestSetup {
 		project.create(description, null);
 		project.open(null);
 		return project;
-	}
-	
-	private boolean projectExists(String projectName) {
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		IProject project= workspace.getRoot().getProject(projectName);
-		return project.exists();
 	}
 }

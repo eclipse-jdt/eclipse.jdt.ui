@@ -46,12 +46,12 @@ public class OpenTextEditorTest extends OpenEditorTest {
 		protected void setUp() throws Exception {
 			ResourceTestHelper.replicate("/" + PerformanceTestSetup.PROJECT + ORIG_FILE, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, ResourceTestHelper.SKIP_IF_EXISTS);
 			ResourceTestHelper.copy(ORIG_LARGE_FILE, LARGE_FILE, ResourceTestHelper.SKIP_IF_EXISTS);
-			EditorTestHelper.showPerspective(PERSPECTIVE);
+			EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE);
 		}
 		
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
-				EditorTestHelper.showPerspective(PerformanceTestSetup.PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
 				ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
 				ResourceTestHelper.delete(LARGE_FILE);
 			}
@@ -65,8 +65,6 @@ public class OpenTextEditorTest extends OpenEditorTest {
 	private static final String SHORT_NAME_WARM_RUN= "Open text editor (reopen)";
 
 	private static final String SHORT_NAME_WARM_RUN_FIRST= "Open text editor (reopen first)";
-
-	private static final String PERSPECTIVE= "org.eclipse.ui.resourcePerspective";
 
 	private static final int WARM_UP_RUNS= 10;
 	

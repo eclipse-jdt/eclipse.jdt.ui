@@ -43,7 +43,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 		protected void setUp() throws Exception {
 			if (fSetUp) {
 				ResourceTestHelper.copy(ORIG_FILE, FILE);
-				EditorTestHelper.showPerspective(PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.RESOURCE_PERSPECTIVE);
 				EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
 			}
 		}
@@ -51,7 +51,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 		protected void tearDown() throws Exception {
 			if (fTearDown) {
 				EditorTestHelper.closeAllEditors();
-				EditorTestHelper.showPerspective(PerformanceTestSetup.PERSPECTIVE);
+				EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
 				ResourceTestHelper.delete(FILE);
 			}
 		}
@@ -60,8 +60,6 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 	private static final Class THIS= OpenTextEditorStartupTest.class;
 
 	private static final String SHORT_NAME= "Startup with open text editor";
-
-	private static final String PERSPECTIVE= "org.eclipse.ui.resourcePerspective";
 
 	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + "/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout";
 	
