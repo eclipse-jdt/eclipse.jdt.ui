@@ -8,13 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -53,6 +46,13 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -64,8 +64,10 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
@@ -95,15 +97,10 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
@@ -128,6 +125,15 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 
 /**
@@ -190,6 +196,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private IMemento fMemento;
 	
 	private ISelectionChangedListener fSelectionListener;
+	
+	private ActionGroup fStandardActionGroups;
 	
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
@@ -322,7 +330,12 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menuMgr.addMenuListener(this);
 		fContextMenu= menuMgr.createContextMenu(fViewer.getTree());
 		fViewer.getTree().setMenu(fContextMenu);
-		getSite().registerContextMenu(menuMgr, fViewer);
+		
+		// Register viewer with site. This must be done before making the actions.
+		IWorkbenchPartSite site= getSite();
+		site.registerContextMenu(menuMgr, fViewer);
+		site.setSelectionProvider(fViewer);
+		site.getPage().addPartListener(fPartListener);
 		
 		makeActions(); // call before registering for selection changes
 			
@@ -339,9 +352,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 		});
 
-		getSite().setSelectionProvider(fViewer);
-		getSite().getPage().addPartListener(fPartListener);
-
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
 		fViewer.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		fViewer.addTreeListener(fExpansionListener);
@@ -354,7 +364,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		JavaUIHelp.setHelp(fViewer, IJavaHelpContextIds.PACKAGES_VIEW);
 		
 		fillActionBars();
-
 	}
 
 	private void fillActionBars() {
@@ -374,6 +383,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
+		
+		fStandardActionGroups.fillActionBars(actionBars);
+		
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
 	
 	private void fillToolBar(IToolBarManager toolBar) {
@@ -569,6 +583,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			new JavaSearchGroup()
 		};
 		
+		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+		
 		fDeleteAction= ReorgGroup.createDeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
 		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
@@ -584,9 +601,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		fGotoTypeAction= new GotoTypeAction(this);
 		fGotoPackageAction= new GotoPackageAction(this);
-		IActionBars actionService= getViewSite().getActionBars();
-		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
-		ReorgGroup.addGlobalReorgActions(actionService, getSelectionProvider());
 	}
 	
 	private void addRefactoring(IMenuManager menu){
@@ -989,13 +1003,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				(IStructuredSelection) fViewer.getSelection());
 			if (fRefreshAction.isEnabled())
 				fRefreshAction.run();
-		} else if (key == SWT.F4) {
-			OpenTypeHierarchyUtil.open(getSelection(), getSite().getWorkbenchWindow());
-		} else if (key == SWT.F3) {
-			fOpenCUAction.update();
-			if (fOpenCUAction.isEnabled())
-				fOpenCUAction.run();
-		} else if (event.character == SWT.DEL){
+		} if (event.character == SWT.DEL){
 			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();

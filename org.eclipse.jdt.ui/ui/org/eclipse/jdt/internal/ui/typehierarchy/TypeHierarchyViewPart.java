@@ -7,10 +7,6 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
@@ -48,6 +44,10 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
@@ -56,6 +56,7 @@ import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
@@ -69,12 +70,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -89,6 +88,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 /**
  * view showing the supertypes/subtypes of its input.
@@ -167,6 +172,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private FocusOnSelectionAction fFocusOnSelectionAction;
 	
 	private IPartListener fPartListener;
+	
+	private ActionGroup fStandardActionGroups;
 	
 	public TypeHierarchyViewPart() {
 		fSelectedType= null;
@@ -480,10 +487,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		return new KeyAdapter() {
 			public void keyReleased(KeyEvent event) {
 				if (event.stateMask == 0) {
-					if (event.keyCode == SWT.F4) {
-						OpenTypeHierarchyUtil.open(getSite().getSelectionProvider().getSelection(), getSite().getWorkbenchWindow());
-						return;
-					} else if (event.keyCode == SWT.F5) {
+					if (event.keyCode == SWT.F5) {
 						updateHierarchyViewer();
 						return;
 					} else if (event.character == SWT.DEL){
@@ -655,6 +659,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		ReorgGroup.addGlobalReorgActions(getViewSite().getActionBars(), getViewSite().getSelectionProvider());
 		
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
+		
+		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+		
+		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
 	}
 
 

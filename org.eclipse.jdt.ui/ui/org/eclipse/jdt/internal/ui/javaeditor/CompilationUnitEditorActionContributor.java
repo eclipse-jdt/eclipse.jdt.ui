@@ -11,6 +11,7 @@ import java.util.ResourceBundle;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
+import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelectionAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jface.action.IAction;
@@ -86,44 +87,28 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		}		
 	}
 	
-	protected OpenOnSelectionAction fOpenOnSelection;
-	protected OpenOnSelectionAction fOpenOnTypeSelection;
-	protected RetargetTextEditorAction fAddImportOnSelection;
-	protected RetargetTextEditorAction fOrganizeImports;
+	private boolean fListenersRegistered;
+	
+	private RetargetTextEditorAction fStructureSelectEnclosingAction;
+	private RetargetTextEditorAction fStructureSelectNextAction;
+	private RetargetTextEditorAction fStructureSelectPreviousAction;
+	private RetargetTextEditorAction fStructureSelectHistoryAction;
+	
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
-	/** The global actions to be connected with editor actions */
-	private final static String[] ACTIONS= {
-	};
-
-	private RetargetAction fRetargetOpenOnSelection;	
-	private RetargetAction fRetargetOpenOnTypeSelection;	
 	private RetargetAction fRetargetPreviousError;	
 	private RetargetAction fRetargetNextError;
-	private RetargetEditorAction fRetargetShowJavadoc;
-	private RetargetEditorAction fRetargetOpenExternalJavadoc;
 	private RetargetAction fRetargetTogglePresentation;
 	private RetargetAction fRetargetToggleTextHover;	
-	private RetargetTextEditorAction fStructureSelectEnclosingAction;
-	private RetargetTextEditorAction fStructureSelectNextAction;
-	private RetargetTextEditorAction fStructureSelectPreviousAction;
-	private RetargetTextEditorAction fStructureSelectHistoryAction;
-	//protected RetargetTextEditorAction fDisplay;
-	//protected RetargetTextEditorAction fInspect;
-	
 	
 	public CompilationUnitEditorActionContributor() {
 		super();
 		
 		ResourceBundle bundle= JavaEditorMessages.getResourceBundle();
 				
-		fOpenOnSelection= new OpenOnSelectionAction();
-		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();
-		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction."); //$NON-NLS-1$
-		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction."); //$NON-NLS-1$
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
@@ -131,22 +116,16 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 
-		fRetargetOpenOnSelection= new RetargetEditorAction(IJavaEditorActionConstants.OPEN_SELECTION, fOpenOnSelection);
-		fRetargetOpenOnTypeSelection= new RetargetEditorAction(IJavaEditorActionConstants.OPEN_TYPE_HIERARCHY, fOpenOnTypeSelection);
 		fRetargetTogglePresentation= new RetargetEditorAction(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		fRetargetToggleTextHover= new RetargetEditorAction(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		fRetargetPreviousError= new RetargetEditorAction(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
-		fRetargetNextError= new RetargetEditorAction(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
-		fRetargetShowJavadoc= new RetargetEditorAction(IJavaEditorActionConstants.SHOW_JAVADOC, getLabel(bundle, "ShowJavaDoc."));
-		fRetargetOpenExternalJavadoc= new RetargetEditorAction(IJavaEditorActionConstants.OPEN_JAVADOC, getLabel(bundle, "OpenExternalJavadoc."));
+		
+		fRetargetPreviousError= new RetargetEditorAction(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		fRetargetNextError= new RetargetEditorAction(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
 		
 		fStructureSelectEnclosingAction= new RetargetTextEditorAction(bundle, "StructureSelectEnclosing.");
 		fStructureSelectNextAction= new RetargetTextEditorAction(bundle, "StructureSelectNext.");
 		fStructureSelectPreviousAction= new RetargetTextEditorAction(bundle, "StructureSelectPrevious.");
 		fStructureSelectHistoryAction= new RetargetTextEditorAction(bundle, "StructureSelectHistory.");
-		
-		//fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
-		//Inspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
 	}
 
 	private String getLabel(ResourceBundle bundle, String prefix) {
@@ -158,28 +137,25 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		}
 	}
 	
+	public void init(IActionBars bars) {
+		super.init(bars);
+		// register actions that have a dynamic editor. 
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
+		
+		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
+		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+	}
+
 	/**
 	 * @see EditorActionBarContributor#contributeToMenu(IMenuManager)
 	 */
-	public void contributeToMenu(IMenuManager menu) {
-		
+	public void contributeToMenu(IMenuManager menu) {		
 		super.contributeToMenu(menu);
 		
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 			addStructureSelection(editMenu);
-			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetOpenOnSelection);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetOpenOnTypeSelection);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetNextError);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetPreviousError);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetShowJavadoc);			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fRetargetOpenExternalJavadoc);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
-			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
-			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
-			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
 	}
 
@@ -191,7 +167,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		structureSelection.add(fStructureSelectHistoryAction);
 		editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 	}
-	
+
 	/**
 	 * @see EditorActionBarContributor#contributeToToolBar(IToolBarManager)
 	 */
@@ -206,68 +182,56 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	/**
 	 * @see IEditorActionBarContributor#setActiveEditor(IEditorPart)
 	 */
-	public void setActiveEditor(IEditorPart part) {
-		
+	public void setActiveEditor(IEditorPart part) {		
 		super.setActiveEditor(part);
+		
+		registerListeners(part);
 		
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
 			textEditor= (ITextEditor) part;
+
+		CompilationUnitEditor cueditor= null;		
+		if (part instanceof CompilationUnitEditor)
+			cueditor= (CompilationUnitEditor)part;
 		
-		if (part instanceof CompilationUnitEditor){
-			CompilationUnitEditor editor= (CompilationUnitEditor)part;
-			fStructureSelectEnclosingAction.setAction(editor.getAction(StructureSelectionAction.ENCLOSING));
-			fStructureSelectNextAction.setAction(editor.getAction(StructureSelectionAction.NEXT));
-			fStructureSelectPreviousAction.setAction(editor.getAction(StructureSelectionAction.PREVIOUS));
-			fStructureSelectHistoryAction.setAction(editor.getAction(StructureSelectionAction.HISTORY));
-		}	
-		
-		fOpenOnSelection.setContentEditor(textEditor);
-		fOpenOnTypeSelection.setContentEditor(textEditor);
-		
-		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection")); //$NON-NLS-1$
-		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
+
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
-
-		TextOperationAction showJavadoc= (TextOperationAction) getAction(textEditor, "ShowJavaDoc");
-		fRetargetShowJavadoc.setAction(showJavadoc);		
-
-		OpenExternalJavadocAction openExternalJavadoc= (OpenExternalJavadocAction) getAction(textEditor, "OpenExternalJavadoc");
-		openExternalJavadoc.setActivePart(null, textEditor);
-		fRetargetOpenExternalJavadoc.setAction(openExternalJavadoc);
+		
+		fStructureSelectEnclosingAction.setAction(getAction(textEditor, StructureSelectionAction.ENCLOSING));
+		fStructureSelectNextAction.setAction(getAction(textEditor, StructureSelectionAction.NEXT));
+		fStructureSelectPreviousAction.setAction(getAction(textEditor, StructureSelectionAction.PREVIOUS));
+		fStructureSelectHistoryAction.setAction(getAction(textEditor, StructureSelectionAction.HISTORY));		
 
 		IActionBars bars= getActionBars();		
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_SELECTION, fOpenOnSelection);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_TYPE_HIERARCHY, fOpenOnTypeSelection);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.SHOW_JAVADOC, showJavadoc);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_JAVADOC, openExternalJavadoc);
+		// Source menu.
 
+		bars.setGlobalActionHandler(RetargetActionIDs.COMMENT, getAction(textEditor, "Comment"));
+		bars.setGlobalActionHandler(RetargetActionIDs.UNCOMMENT, getAction(textEditor, "Uncomment"));
+		bars.setGlobalActionHandler(RetargetActionIDs.FORMAT, getAction(textEditor, "Format"));
+
+		bars.setGlobalActionHandler(RetargetActionIDs.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection"));
+		bars.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports"));
+		bars.setGlobalActionHandler(RetargetActionIDs.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch"));
+		
+		// Navigate menu
+	
+		if (cueditor != null) {
+			cueditor.fStandardActionGroups.fillActionBars(bars);
+		}										
+	}
+	
+	private void registerListeners(IEditorPart part) {
+		if (fListenersRegistered)
+			return;
 		IWorkbenchPage page = part.getSite().getPage();	
-		page.addPartListener(fRetargetOpenOnSelection);		
-		page.addPartListener(fRetargetOpenOnTypeSelection);		
 		page.addPartListener(fRetargetTogglePresentation);
 		page.addPartListener(fRetargetToggleTextHover);
 		page.addPartListener(fRetargetNextError);
 		page.addPartListener(fRetargetPreviousError);		
-		page.addPartListener(fRetargetShowJavadoc);		
-		page.addPartListener(fRetargetOpenExternalJavadoc);		
-		
-		//IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
-		//if (updateAction instanceof IUpdate) {
-			//((IUpdate)updateAction).update();
-		//}
-		//fDisplay.setAction(updateAction); 
-		//updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
-		//if (updateAction instanceof IUpdate) {
-			//((IUpdate)updateAction).update();
-		//}
-		//fInspect.setAction(updateAction);
+		fListenersRegistered= true;
 	}
 }

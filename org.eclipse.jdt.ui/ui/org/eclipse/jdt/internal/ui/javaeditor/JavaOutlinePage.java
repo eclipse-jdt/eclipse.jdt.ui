@@ -43,8 +43,9 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -63,16 +64,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementSorter;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
 import org.eclipse.jdt.internal.ui.actions.OpenHierarchyAction;
+import org.eclipse.jdt.internal.ui.actions.RetargetActionIDs;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
@@ -83,6 +82,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.OverrideAdornmentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 
 /**
@@ -587,14 +592,13 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
 	
-	private OpenOnSelectionAction fOpenOnSelection;
-	private OpenOnSelectionAction fOpenOnTypeSelection;
 	private TogglePresentationAction fTogglePresentation;
 	private ToggleTextHoverAction fToggleTextHover;
 	private GotoErrorAction fPreviousError;
 	private GotoErrorAction fNextError;
-	private OpenExternalJavadocAction fOpenExternalJavadoc;
 	private TextOperationAction fShowJavadoc;
+	
+	private ActionGroup fStandardActionGroups;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -604,24 +608,24 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fContextMenuID= contextMenuID;
 		fEditor= editor;
 		
-		fOpenOnSelection= new OpenOnSelectionAction();
-		fOpenOnTypeSelection= new OpenHierarchyOnSelectionAction();		
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fOpenExternalJavadoc= new OpenExternalJavadocAction();
 		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc");
 		
-		fOpenOnSelection.setContentEditor(editor);
-		fOpenOnTypeSelection.setContentEditor(editor);		
 		fTogglePresentation.setEditor(editor);
 		fToggleTextHover.setEditor(editor);
 		fPreviousError.setEditor(editor);
 		fNextError.setEditor(editor);
-		fOpenExternalJavadoc.setActivePart(null, editor);
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared on Page
+	 */
+	public void init(IPageSite pageSite) {
+		super.init(pageSite);
+	}
 	/*
 	 * @see ISelectionProvider#addSelectionChangedListener(ISelectionChangedListener)
 	 */
@@ -709,16 +713,20 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		getSite().registerContextMenu(JavaPlugin.getDefault().getPluginId() + ".outline", manager, fOutlineViewer);
 		getSite().setSelectionProvider(fOutlineViewer);
 
+		// we must create the groups after we have set the selection provider to the site
+		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+				
 		// register global actions
 		IActionBars bars= getSite().getActionBars();
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_SELECTION, fOpenOnSelection);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_TYPE_HIERARCHY, fOpenOnTypeSelection);
+		
+		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
+		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
+		bars.setGlobalActionHandler(RetargetActionIDs.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fPreviousError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fNextError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.OPEN_JAVADOC, fOpenExternalJavadoc);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.SHOW_JAVADOC, fShowJavadoc);
+		
+		fStandardActionGroups.fillActionBars(bars);
 
 		IStatusLineManager statusLineManager= getSite().getActionBars().getStatusLineManager();
 		if (statusLineManager != null) {
@@ -901,9 +909,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				if (! action.isEnabled())
 					return;
 			}	
-		} else if (event.keyCode == SWT.F4) {
-			// Special case since Open Type Hierarchy is no action.
-			OpenTypeHierarchyUtil.open(getSelection(), fEditor.getSite().getWorkbenchWindow());
 		}
 			
 		if (action != null && action.isEnabled())

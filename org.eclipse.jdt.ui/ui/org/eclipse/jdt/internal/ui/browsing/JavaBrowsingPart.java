@@ -8,11 +8,6 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -44,6 +39,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -58,6 +58,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -77,18 +78,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -108,6 +103,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 
 
@@ -136,6 +139,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 //	private GotoPackageAction fGotoPackageAction;
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Image fOriginalTitleImage;
+	
+	private ActionGroup fStandardActionGroups;
 		
 	/*
 	 * Ensure selection changed events being processed only if
@@ -238,6 +243,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getWorkbenchWindow().getSelectionService().addSelectionListener(this);
 		getViewSite().getPage().addPartListener(fPartListener);
 		
+		fStandardActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new OpenActionGroup(this), new ShowActionGroup(this), new GenerateActionGroup(this)});
+		
+		fStandardActionGroups.fillActionBars(getViewSite().getActionBars());
+		
 		setHelp();
 	}
 	
@@ -279,14 +289,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				(IStructuredSelection) fViewer.getSelection());
 			if (fRefreshAction.isEnabled())
 				fRefreshAction.run();
-		} else if (key == SWT.F4) {
-			OpenTypeHierarchyUtil.open(getSelectionProvider().getSelection(), getSite().getWorkbenchWindow());
-		} else if (key == SWT.F3) {
-			fOpenCUAction.update();
-			if (fOpenCUAction.isEnabled())
-				fOpenCUAction.run();
-		}
-		else if (event.character == SWT.DEL) {
+		} if (event.character == SWT.DEL) {
 			fDeleteAction.update();
 			if (fDeleteAction.isEnabled())
 				fDeleteAction.run();

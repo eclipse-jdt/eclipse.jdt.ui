@@ -5,14 +5,15 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
+import org.eclipse.jface.action.IMenuManager;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.jface.action.IMenuManager;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -24,12 +25,18 @@ import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 
+import org.eclipse.jdt.ui.actions.OpenActionGroup;
+import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 /**
  * Java specific text editor.
  */
 public class ClassFileEditor extends JavaEditor {
+	
+	/** The standard action groups added to the menu */
+	/* package */ ActionGroup fStandardActionGroups;
 	
 	/**
 	 * Default constructor.
@@ -70,6 +77,9 @@ public class ClassFileEditor extends JavaEditor {
 		setAction(ITextEditorActionConstants.RULER_MANAGE_TASKS, null);
 		
 		setAction(ITextEditorActionConstants.RULER_DOUBLE_CLICK, getAction("ManageBreakpoints"));		 //$NON-NLS-1$
+		
+		fStandardActionGroups= new CompositeActionGroup(
+			new ActionGroup[] {new OpenActionGroup(this), new ShowActionGroup(this) });
 	}
 	
 	/**

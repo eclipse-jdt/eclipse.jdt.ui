@@ -9,7 +9,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-class ExternalizeWizard extends RefactoringWizard {
+public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(Refactoring refactoring) {
 		//XXX needs help context

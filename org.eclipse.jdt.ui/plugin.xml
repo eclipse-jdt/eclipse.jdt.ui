@@ -343,19 +343,6 @@
 
 <extension point="org.eclipse.ui.actionSets">
 	<actionSet
-		id="org.eclipse.jdt.ui.JavaActionSet"
-        label="%JavaActionSet.label"
-		visible="false"
-		description="%JavaActionSet.description">
-		<action id="org.eclipse.jdt.ui.actions.OpenType"
-			menubarPath="workbench/wbEnd"
-			toolbarPath="Normal/Java"			
-			label="%OpenTypeAction.label"
-			tooltip="%OpenTypeAction.tooltip"
-			icon="icons/full/ctool16/opentype.gif"
-			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
-    </actionSet>
-	<actionSet
 		id="org.eclipse.jdt.ui.JavaElementCreationActionSet"
         label="%JavaElementCreationActionSet.label"
 		visible="false"
@@ -402,7 +389,7 @@
 			label="%OpenSuperImplementationAction.label"
 			tooltip="%OpenSuperImplementationAction.tooltip"
 			menubarPath="group.open"
-			class="org.eclipse.jdt.internal.ui.actions.OpenSuperImplementationAction"
+			class="org.eclipse.jdt.ui.actions.OpenSuperImplementationAction$ObjectDelegate"
 			enablesFor="1">
 		</action>
 	</objectContribution>
@@ -609,8 +596,9 @@
 JavaStructureDiffViewerCreator
 <!-- End Java Compare -->
 
+
 <!-- =========================================================================== -->
-<!-- Refactoring                                                                 -->
+<!-- Refactoring (for action set see below                                       -->
 <!-- =========================================================================== -->
 
 <extension
@@ -621,75 +609,8 @@ JavaStructureDiffViewerCreator
 		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
 </extension>
-
-<extension
-	point="org.eclipse.ui.actionSets">
-	<actionSet
-		id="org.eclipse.jdt.ui.refactoring.actionSet"
-        label="%Refactoring.actionSet.label"
-		visible="false"
-		description="%Refactoring.actionSet.description">
-      	<menu
-            id="org.eclipse.jdt.ui.RefactoringMenu"
-            label="%Refactoring.menu.label"
-            path="edit">
-         	<separator name="undoRedoGroup"/>
-         	<separator name="reorgGroup"/>
-         	<separator name="codingGroup"/>
-      	</menu>
-      	
-      	<!-- undo/redo group  -->		
-		<action id="RedoAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
-			label="%Refactoring.redoAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RedoRefactoringAction"/>
-		<action id="UndoAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/undoRedoGroup"
-			label="%Refactoring.undoAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
-				
-		<!-- reorg group  -->		
-		<action id="MoveAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.moveAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
-		</action>
-		<action id="ModifyParametersAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.modifyParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersActionDelegate">
-		</action>
-		<action id="RenameAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.renameAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
-		<action id="PullUpAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/reorgGroup"
-			label="%Refactoring.pullUpAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.PullUpActionDelegate"/>	
-		
-		<!-- coding group  -->	
-		<action id="ExtractMethodAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.extractMethodAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction">
-		</action>
-		<action id="SelfEncapsulateFieldAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.selfEncapsulateFieldAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.SelfEncapsulateFieldActionDelegate"/>	
-		<action id="InlineTempAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.inlineTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction"/>
-		<action id="ExtractTempAction"
-			menubarPath="org.eclipse.jdt.ui.RefactoringMenu/codingGroup"
-			label="%Refactoring.extractTempAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction"/>
-     </actionSet>
-</extension>
-
 <!-- End Refactoring -->
+
 
 <!-- =========================================================================== -->
 <!-- Java Launching and debugging                                                -->
@@ -964,4 +885,237 @@ JavaStructureDiffViewerCreator
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>
 </extension>
+
+
+
+<!-- =========================================================================== -->
+<!-- Java Action Set (Adding the source, refactor and navigate menu              -->
+<!-- =========================================================================== -->
+<extension point="org.eclipse.ui.actionSets">
+	<actionSet
+		id="org.eclipse.jdt.ui.JavaActionSet"
+        label="%JavaActionSet.label"
+		visible="false"
+		description="%JavaActionSet.description">
+
+		<!-- =========================================================================== -->
+		<!-- Navigate Menu                                                               -->
+		<!-- =========================================================================== -->
+			
+      	<menu
+            id="org.eclipse.jdt.ui.navigate.menu"
+            label="Navigate"
+            path="edit">
+            <separator name="goGroup" />
+         	<separator name="openGroup"/>
+         	<separator name="showGroup"/>
+         	<separator name="problemGroup"/>
+      	</menu>
+		<action id="openType"
+			menubarPath="org.eclipse.jdt.ui.navigate.menu/openGroup"
+			toolbarPath="Normal/Java"			
+			label="%OpenTypeAction.label"
+			tooltip="%OpenTypeAction.tooltip"
+			icon="icons/full/ctool16/opentype.gif"
+			class="org.eclipse.jdt.internal.ui.actions.OpenTypeAction"/>
+		<action id="openExternalJavadoc"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/openGroup"
+      		label="%OpenExternalJavadocAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenExternalJavadoc" />
+		<action id="openSuperImplementation"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/openGroup"
+      		label="%OpenSuperImplementationAction.label"
+			tooltip="%OpenSuperImplementationAction.tooltip"
+			description="%OpenSuperImplementationAction.description"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenSuperImplementation" />
+		<action id="openTypeHierarchy"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/openGroup"
+      		label="%OpenTypeHierarchyAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenTypeHierarchy" />
+		<action id="openSelection"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/openGroup"
+      		label="%OpenAction.label"
+			tooltip="%OpenAction.tooltip"
+			description="%OpenAction.description"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OpenAction" />
+		<action id="showInNavigatorView"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/showGroup"
+      		label="%ShowInNavigatorViewAction.label"
+      		tooltip="%ShowInNavigatorViewAction.tooltip"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowInNavigatorView" />
+		<action id="showInPackageView"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/showGroup"
+      		label="%ShowInPackageViewAction.label"
+      		tooltip="%ShowInPackageViewAction.tooltip"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowInPackageView" />
+		<action id="previousProblem"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/problemGroup"
+      		label="%ShowPreviousProblemAction.label"
+      		icon="icons/full/ctool16/prev_error_nav.gif"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowPreviousProblem" />
+		<action id="nextProblem"
+      		menubarPath="org.eclipse.jdt.ui.navigate.menu/problemGroup"
+      		label="%ShowNextProblemAction.label"
+      		icon="icons/full/ctool16/next_error_nav.gif"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShowNextProblem" />
+		
+		
+		<!-- =========================================================================== -->
+		<!-- Refactoring Menu                                                            -->
+		<!-- =========================================================================== -->
+		
+      	<menu
+            id="org.eclipse.jdt.ui.refactoring.menu"
+            label="%Refactoring.menu.label"
+            path="edit">
+         	<separator name="undoRedoGroup"/>
+         	<separator name="reorgGroup"/>
+         	<separator name="codingGroup"/>
+      	</menu>
+      	
+      	<!-- undo/redo group  -->		
+		<action id="RedoAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
+			label="%Refactoring.redoAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RedoRefactoringAction"/>
+		<action id="UndoAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/undoRedoGroup"
+			label="%Refactoring.undoAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.UndoRefactoringAction"/>
+				
+		<!-- reorg group  -->		
+		<action id="MoveAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+			label="%Refactoring.moveAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
+		</action>
+		<action id="ModifyParametersAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+			label="%Refactoring.modifyParametersAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersActionDelegate">
+		</action>
+		<action id="RenameAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+			label="%Refactoring.renameAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
+		<action id="PullUpAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+			label="%Refactoring.pullUpAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.PullUpActionDelegate"/>	
+		
+		<!-- coding group  -->	
+		<action id="ExtractMethodAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+			label="%Refactoring.extractMethodAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction">
+		</action>
+		<action id="SelfEncapsulateFieldAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+			label="%Refactoring.selfEncapsulateFieldAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.SelfEncapsulateFieldActionDelegate"/>	
+		<action id="InlineTempAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+			label="%Refactoring.inlineTempAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction"/>
+		<action id="ExtractTempAction"
+			menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+			label="%Refactoring.extractTempAction.label"
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction"/>
+
+		<!-- =========================================================================== -->
+		<!-- Source Menu                                                                 -->
+		<!-- =========================================================================== -->
+
+      	<menu
+            id="org.eclipse.jdt.ui.source.menu"
+            label="%SourceMenu.label"
+            path="edit">
+         	<separator name="editGroup"/>
+         	<separator name="generateGroup"/>
+         	<separator name="nlsGroup"/>
+      	</menu>
+      	
+      	<!-- NLS Group -->
+      	
+		<action id="externalizeStrings"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/nlsGroup"
+      		label="%ExternalizeStringsAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ExternalizeStrings" />
+		<action id="findStringsToExternalize"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/nlsGroup"
+      		label="%FindStringsToExternalizeAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$FindStringsToExternalize" />
+			
+		<!-- Generate Group -->	
+			
+		<action id="addJavaDocComment"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%AddJavaDocCommentAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddJavaDocComment" />
+		<action id="addConstructorFromSuperclass"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%AddConstructorFromSuperclassAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddConstructorFromSuperclass" />
+		<action id="generateGetterSetter"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%GenerateGetterSetterAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$GenerateGetterSetter" />
+		<action id="overrideMethods"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%OverrideMethodsAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OverrideMethods" />
+		<action id="surroundWithTryCatch"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%SurroundWithTryCatchAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$SurroundWithTryCatch" />
+		<action id="organizeImports"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%OrganizeImportsAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$OrganizeImports" />
+		<action id="addImport"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%AddImportAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$AddImport" />
+			
+		<!-- edit group -->	
+			
+		<action id="format"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%FormatAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Format" />			
+		<action id="shiftLeft"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%ShiftLeftAction.label"
+      		icon="icons/full/ctool16/shift_l_edit.gif"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShiftLeft" />			
+		<action id="shiftRight"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%ShiftRightAction.label"
+      		icon="icons/full/ctool16/shift_r_edit.gif"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ShiftRight" />			
+		<action id="uncomment"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%UncommentAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Uncomment" />
+		<action id="comment"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/editGroup"
+      		label="%CommentAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$Comment" />
+	</actionSet>			
+</extension>
+
+<extension point="org.eclipse.ui.actionSetPartAssociations">
+	<actionSetPartAssociation 
+		targetID="org.eclipse.jdt.ui.JavaActionSet">
+		<part id="org.eclipse.jdt.ui.PackageExplorer"/>
+		<part id="org.eclipse.jdt.ui.TypeHierarchy" />
+		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
+		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
+		<part id="org.eclipse.jdt.ui.ProjectsView"/>
+		<part id="org.eclipse.jdt.ui.PackagesView"/>
+		<part id="org.eclipse.jdt.ui.TypesView"/>
+		<part id="org.eclipse.jdt.ui.MembersView"/>
+	</actionSetPartAssociation>
+</extension>
+
 </plugin>
