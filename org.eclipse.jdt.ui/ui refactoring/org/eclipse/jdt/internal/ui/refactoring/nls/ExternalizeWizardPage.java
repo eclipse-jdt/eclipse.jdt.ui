@@ -500,7 +500,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		//new Label(composite, SWT.NONE); // placeholder
 		
 		Button configure= new Button(accessorComposite, SWT.PUSH);
-		configure.setText("Configure...");
+		configure.setText("&Configure...");
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
 		data.widthHint= SWTUtil.getButtonWidthHint(configure);
 		data.heightHint= SWTUtil.getButtonHeightHint(configure);
@@ -763,7 +763,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		l.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		fFilterCheckBox= new Button(labelComp, SWT.CHECK);
-		fFilterCheckBox.setText("Filter all existing ignored and externalized entries");
+		fFilterCheckBox.setText("&Filter all existing ignored and externalized entries");
 		fFilterCheckBox.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
 		fFilterCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
