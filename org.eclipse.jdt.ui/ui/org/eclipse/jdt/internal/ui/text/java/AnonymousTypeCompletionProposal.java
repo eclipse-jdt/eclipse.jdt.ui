@@ -92,9 +92,14 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();					
 			fImportStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			
+			String replacementString= getReplacementString();
+			
 			// construct replacement text
 			StringBuffer buf= new StringBuffer();
-			buf.append(getReplacementString());
+			buf.append(replacementString);
+			if (!replacementString.endsWith(")")) {
+				buf.append(')');
+			}	
 			buf.append(" {\n");
 			createStubs(buf, fImportStructure);
 			buf.append("};");
