@@ -101,8 +101,8 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 
 		/**
 		 * This comparator follows the contract defined in CompilationUnitSorter.sort.
-		 * @see Comparator#compare
-		 * @see CompilationUnitSorter#sort
+		 * @see Comparator#compare(java.lang.Object, java.lang.Object)
+		 * @see CompilationUnitSorter#sort(org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public int compare(Object e1, Object e2) {
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;

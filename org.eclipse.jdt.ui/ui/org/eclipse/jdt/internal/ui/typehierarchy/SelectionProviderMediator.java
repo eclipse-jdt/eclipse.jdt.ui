@@ -61,7 +61,7 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	private ListenerList fSelectionChangedListeners;
 	
 	/**
-	 * @param All viewers that can provide a selection
+	 * @param viewers All viewers that can provide a selection
 	 */
 	public SelectionProviderMediator(Viewer[] viewers) {
 		Assert.isNotNull(viewers);

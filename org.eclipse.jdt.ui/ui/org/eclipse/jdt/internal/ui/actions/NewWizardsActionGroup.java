@@ -43,7 +43,7 @@ public class NewWizardsActionGroup extends ActionGroup {
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
-	 * @param part the view part that owns this action group
+	 * @param site the view part that owns this action group
 	 */
 	public NewWizardsActionGroup(IWorkbenchSite site) {
 		fSite= site;
