@@ -20,15 +20,16 @@ import java.util.Set;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
+import org.eclipse.jface.contentassist.IContentAssistSubject;
+import org.eclipse.jface.contentassist.IContextInformationValidatorExtension;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.text.contentassist.IContentAssistSubject;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.contentassist.IContextInformationValidatorExtension;
 
 
 /**
@@ -347,7 +348,7 @@ public class CompoundContentAssistProcessor implements IContentAssistProcessor, 
 	 * The returned objects are wrapper objects around the real information containers.
 	 * </p>
 	 * 
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
+	 * @see org.eclipse.jface.contentassist.IContentAssistProcessorExtension#computeContextInformation(org.eclipse.jface.text.contentassist.IContentAssistSubject, int)
 	 */
 	public IContextInformation[] computeContextInformation(IContentAssistSubject contentAssistSubject,
 															int documentOffset) {

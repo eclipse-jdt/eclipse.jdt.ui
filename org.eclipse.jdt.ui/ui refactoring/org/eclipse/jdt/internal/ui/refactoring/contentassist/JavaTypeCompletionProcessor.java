@@ -27,13 +27,13 @@ import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.contentassist.IContentAssistProcessorExtension;
+import org.eclipse.jface.contentassist.IContentAssistSubject;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessorExtension;
-import org.eclipse.jface.text.contentassist.IContentAssistSubject;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
