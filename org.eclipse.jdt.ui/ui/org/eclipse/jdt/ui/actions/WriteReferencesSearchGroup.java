@@ -83,6 +83,7 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 	 */
 	public WriteReferencesSearchGroup(JavaEditor editor) {
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		fGroupId= ITextEditorActionConstants.GROUP_FIND;
 
 		fFindWriteReferencesAction= new FindWriteReferencesAction(fEditor);

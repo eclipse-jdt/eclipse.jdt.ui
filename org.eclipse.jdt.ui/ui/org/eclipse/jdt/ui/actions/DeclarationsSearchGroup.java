@@ -85,6 +85,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 	public DeclarationsSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		fGroupId= ITextEditorActionConstants.GROUP_FIND;
 
 		fFindDeclarationsAction= new FindDeclarationsAction(fEditor);

@@ -80,6 +80,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	 */
 	public ImplementorsSearchGroup(JavaEditor editor) {
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		fGroupId= ITextEditorActionConstants.GROUP_FIND;
 
 		fFindImplementorsAction= new FindImplementorsAction(fEditor);

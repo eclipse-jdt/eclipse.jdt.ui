@@ -74,6 +74,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	public JavaSearchActionGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		
 		fReferencesGroup= new ReferencesSearchGroup(fEditor);
 		fReadAccessGroup= new ReadReferencesSearchGroup(fEditor);
@@ -88,6 +89,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fWriteAccessGroup= new WriteReferencesSearchGroup(site);
 		fDeclarationsGroup= new DeclarationsSearchGroup(site);
 		fImplementorsGroup= new ImplementorsSearchGroup(site);
+		fSite= site;
 	}
 
 	/* 

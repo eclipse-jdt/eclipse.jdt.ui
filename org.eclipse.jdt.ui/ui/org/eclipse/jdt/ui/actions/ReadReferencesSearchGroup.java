@@ -83,6 +83,7 @@ public class ReadReferencesSearchGroup extends ActionGroup  {
 	 */
 	public ReadReferencesSearchGroup(JavaEditor editor) {
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		fGroupId= ITextEditorActionConstants.GROUP_FIND;
 
 		fFindReadReferencesAction= new FindReadReferencesAction(fEditor);

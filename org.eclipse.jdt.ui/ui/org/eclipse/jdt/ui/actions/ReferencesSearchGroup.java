@@ -86,6 +86,7 @@ public class ReferencesSearchGroup extends ActionGroup  {
 	public ReferencesSearchGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
+		fSite= fEditor.getSite();
 		fGroupId= ITextEditorActionConstants.GROUP_FIND;
 
 		fFindReferencesAction= new FindReferencesAction(editor);
