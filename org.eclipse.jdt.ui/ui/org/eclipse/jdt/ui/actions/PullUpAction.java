@@ -136,10 +136,13 @@ public class PullUpAction extends SelectionDispatchAction{
 	}
 
 	private PullUpRefactoring createNewRefactoringInstance(Object[] obj){
+		return new PullUpRefactoring(convertToMemberArray(obj), JavaPreferencesSettings.getCodeGenerationSettings());
+	}
+
+	private IMember[] convertToMemberArray(Object[] obj) {
 		Set memberSet= new HashSet();
 		memberSet.addAll(Arrays.asList(obj));
-		IMember[] members= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-		return new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
+		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
 	private boolean shouldAcceptElements(Object[] elements) {
