@@ -10,9 +10,16 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -27,6 +34,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -68,6 +77,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 	private static final String FIND_STRINGS_CHECKBOX= "FindStringAction.checkbox"; //$NON-NLS-1$
 	
+	private NonNLSElement[] fElements;
+	
 	/**
 	 * Creates a new <code>FindStringsToExternalizeAction</code>.
 	 * 
@@ -76,6 +87,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	public FindStringsToExternalizeAction(UnifiedSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
+		fElements= new NonNLSElement[0];
 	}
 	
 	
@@ -105,51 +117,70 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(final IStructuredSelection selection) {
-		new BusyIndicator().showWhile(getShell().getDisplay(), new Runnable() {
-			public void run() {
-				doRun(selection);
+		try {
+			new ProgressMonitorDialog(getShell()).run(true, true, createRunnable(selection));
+		} catch(InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), 
+				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
+				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+			return;
+		} catch(InterruptedException e) {
+			//ok
+			return;
+		}
+		showResults();
+	}
+	
+	private IRunnableWithProgress createRunnable(final IStructuredSelection selection) {
+		return new IRunnableWithProgress() {
+			public void run(IProgressMonitor pm) {
+				fElements= doRun(selection, pm);
 			}
-		});
+		};
 	}
 
-	private void doRun(IStructuredSelection selection) {
+	private NonNLSElement[] doRun(IStructuredSelection selection, IProgressMonitor pm) {
 		List elements= getSelectedElementList(selection);
 		if (elements == null || elements.isEmpty())
-			return;
-		
+			return new NonNLSElement[0];
+
+		pm.beginTask("Finding not externalized strings...", elements.size());
+					
 		try{
 			List l= new ArrayList();	
 			for (Iterator iter= elements.iterator(); iter.hasNext();) {
 				IJavaElement element= (IJavaElement) iter.next();
 				if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
-					l.addAll(analyze((IPackageFragment) element));
+					l.addAll(analyze((IPackageFragment) element, new SubProgressMonitor(pm, 1)));
 				else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT)
-					l.addAll(analyze((IPackageFragmentRoot) element));
-				 if (element.getElementType() == IJavaElement.JAVA_PROJECT)
-					l.addAll(analyze((IJavaProject) element));
+					l.addAll(analyze((IPackageFragmentRoot) element, new SubProgressMonitor(pm, 1)));
+				if (element.getElementType() == IJavaElement.JAVA_PROJECT)
+					l.addAll(analyze((IJavaProject) element, new SubProgressMonitor(pm, 1)));
 			}
-			showResults(l);
+			return (NonNLSElement[]) l.toArray(new NonNLSElement[l.size()]);
 		} catch(JavaModelException e) {
 			ExceptionHandler.handle(e, 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
 				ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
+			return new NonNLSElement[0];	
+		} finally{
+			pm.done();
 		}
 	}
 	
-	private void showResults(List l) {
-		if (noStrings(l))
+	private void showResults() {
+		if (noStrings())
 			MessageDialog.openInformation(getShell(), 
 				ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"), //$NON-NLS-1$
 				ActionMessages.getString("FindStringsToExternalizeAction.noStrings")); //$NON-NLS-1$
 		else	
-			new NonNLSListDialog(getShell(), l, countStrings(l)).open();
+			new NonNLSListDialog(getShell(), fElements, countStrings()).open();
 	}
 	
-	private boolean noStrings(List l) {
-		for (Iterator iter= l.iterator(); iter.hasNext();) {
-			NonNLSElement element= (NonNLSElement)iter.next();
-			if (element.count != 0)
-				return false;
+	private boolean noStrings() {
+		for (int i = 0; i < fElements.length; i++) {
+			if (fElements[i].count != 0)
+				return false;	
 		}
 		return true;
 	}
@@ -157,31 +188,41 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IPackageFragment pack) throws JavaModelException{
+	private List analyze(IPackageFragment pack, IProgressMonitor pm) throws JavaModelException{
 		if (pack == null)
 			return new ArrayList(0);
 			
 		ICompilationUnit[] cus= pack.getCompilationUnits();
+
+		pm.beginTask("", cus.length);
 		
 		List l= new ArrayList(cus.length);
-		for (int i= 0; i < cus.length; i++)
+		for (int i= 0; i < cus.length; i++){
 			l.add(analyze(cus[i]));
+			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
+		}	
 		return l;					
 	}
 
 	/*
 	 * returns List of Strings
 	 */	
-	private List analyze(IPackageFragmentRoot sourceFolder) throws JavaModelException{
+	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws JavaModelException{
 		IJavaElement[] children= sourceFolder.getChildren();
+		pm.beginTask("", children.length);
 		List result= new ArrayList();
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement iJavaElement= children[i];
 			if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
 				IPackageFragment pack= (IPackageFragment)iJavaElement;
 				if (! pack.isReadOnly())
-					result.addAll(analyze(pack));
-			}	
+					result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+				else
+					pm.worked(1);	
+			} else	
+				pm.worked(1);
 		}
 		return result;
 	}
@@ -189,24 +230,24 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	/*
 	 * returns List of Strings
 	 */
-	private List analyze(IJavaProject project) throws JavaModelException{
+	private List analyze(IJavaProject project, IProgressMonitor pm) throws JavaModelException{
 		IPackageFragment[] packs= project.getPackageFragments();
+		pm.beginTask("", packs.length);
 		List result= new ArrayList();
 		for (int i= 0; i < packs.length; i++) {
 			if (! packs[i].isReadOnly())
-				result.addAll(analyze(packs[i]));
+				result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
+			else 
+				pm.worked(1);	
 		}
 		return result;		
 	}
 	
-	/*
-	 * @param List of NonNLSElements
-	 */
-	private static int countStrings(List elements){
-		int i= 0;
-		for (Iterator iter= elements.iterator(); iter.hasNext(); )
-			i += (((NonNLSElement)iter.next()).count);
-		return i;	
+	private int countStrings(){
+		int found= 0;
+		for (int i= 0; i < fElements.length; i++)
+			found += fElements[i].count;
+		return found;			
 	} 
 	
 	private NonNLSElement analyze(ICompilationUnit cu) throws JavaModelException{
@@ -252,37 +293,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			
 		return selection.toList();
 	}
-		
-	private static LabelProvider createLabelProvider() {
-		return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
-			public String getText(Object element) {
-				NonNLSElement nlsel= (NonNLSElement)element;
-				String elementName= nlsel.cu.getElementName();
-				try{
-					elementName= Refactoring.getResource(nlsel.cu).getProjectRelativePath().toString();
-				}catch (JavaModelException e){
-				}	
-				return ActionMessages.getFormattedString(
-					"FindStringsToExternalizeAction.foundStrings", //$NON-NLS-1$
-					new Object[] {new Integer(nlsel.count), elementName} );
-			}		
-			public Image getImage(Object element) {
-				return super.getImage(((NonNLSElement)element).cu);
-			}
-		};
-	}
-	
-	private static boolean loadCheckboxState(boolean defaultValue){
-		String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
-		if (res == null)
-			return defaultValue;
-		return Boolean.valueOf(res).booleanValue();	
-	}
-	
-	private static void storeCheckboxState(boolean selected){
-		JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
-	}
-		
+			
 	//-------private classes --------------
 		
 	private static class NonNLSListDialog extends ListDialog {
@@ -292,9 +303,9 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		private Button fCheckbox;
 		private Button fOpenButton;
 		
-		NonNLSListDialog(Shell parent, Object input, int count) {
+		NonNLSListDialog(Shell parent, NonNLSElement[] input, int count) {
 			super(parent);
-			setInput(input);
+			setInput(Arrays.asList(input));
 			setTitle(ActionMessages.getString("FindStringsToExternalizeAction.dialog.title"));  //$NON-NLS-1$
 			setMessage(ActionMessages.getFormattedString("FindStringsToExternalizeAction.not_externalized", new Object[] {new Integer(count)} )); //$NON-NLS-1$
 			setContentProvider(new ListContentProvider());
@@ -312,7 +323,6 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 
 		protected Control createDialogArea(Composite parent) {
 			Composite result= (Composite)super.createDialogArea(parent);
-			addCheckbox(result);
 			getTableViewer().addSelectionChangedListener(new ISelectionChangedListener(){
 				public void selectionChanged(SelectionChangedEvent event){
 					if (fOpenButton != null){
@@ -326,6 +336,8 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					openWizard(element.cu);
 				}
 			});
+			addCheckbox(result);
+			getTableViewer().getTable().setFocus();
 			return result;
 		}
 		
@@ -377,6 +389,37 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					ActionMessages.getString("FindStringsToExternalizeAction.error.message")); //$NON-NLS-1$
 			}
 		}
+		
+		private static boolean loadCheckboxState(boolean defaultValue){
+			String res= JavaPlugin.getDefault().getDialogSettings().get(FIND_STRINGS_CHECKBOX);
+			if (res == null)
+				return defaultValue;
+			return Boolean.valueOf(res).booleanValue();	
+		}
+	
+		private static void storeCheckboxState(boolean selected){
+			JavaPlugin.getDefault().getDialogSettings().put(FIND_STRINGS_CHECKBOX, selected);	
+		}
+		
+		private static LabelProvider createLabelProvider() {
+			return new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT){ 
+				public String getText(Object element) {
+					NonNLSElement nlsel= (NonNLSElement)element;
+					String elementName= nlsel.cu.getElementName();
+					try{
+						elementName= Refactoring.getResource(nlsel.cu).getProjectRelativePath().toString();
+					}catch (JavaModelException e){
+					}	
+					return ActionMessages.getFormattedString(
+						"FindStringsToExternalizeAction.foundStrings", //$NON-NLS-1$
+						new Object[] {new Integer(nlsel.count), elementName} );
+				}		
+				public Image getImage(Object element) {
+					return super.getImage(((NonNLSElement)element).cu);
+				}
+			};
+		}
+		
 	}
 		
 	private static class NonNLSElement{
