@@ -10,12 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
+
 interface ICopyPolicy extends IReorgEnablementPolicy{
-	public boolean canCopyTo(IJavaElement javaElement) throws JavaModelException;
-	public boolean canCopyTo(IResource resource) throws JavaModelException;
+	public IFile[] getAllModifiedFiles();
+	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
+	public RefactoringStatus setDestination(IJavaElement javaElement)throws JavaModelException;
+	public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries);
 }
