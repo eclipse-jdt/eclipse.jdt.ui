@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 
-class ASTNodeSearchUtil {
+public class ASTNodeSearchUtil {
 
 	private ASTNodeSearchUtil() {
 	}
@@ -69,6 +69,10 @@ class ASTNodeSearchUtil {
 	
 	public static ASTNode[] searchNodes(IJavaSearchScope scope, ISearchPattern pattern, ASTNodeMappingManager astManager, IProgressMonitor pm) throws JavaModelException{
 		SearchResultGroup[] searchResultGroups= RefactoringSearchEngine.search(pm, scope, pattern);
+		return getAstNodes(searchResultGroups, astManager);	
+	}
+
+	public static ASTNode[] getAstNodes(SearchResultGroup[] searchResultGroups, ASTNodeMappingManager astManager) {
 		List result= new ArrayList();
 		for (int i= 0; i < searchResultGroups.length; i++) {
 			ICompilationUnit referencedCu= searchResultGroups[i].getCompilationUnit();
@@ -76,7 +80,7 @@ class ASTNodeSearchUtil {
 				continue;
 			result.addAll(Arrays.asList(getAstNodes(searchResultGroups[i].getSearchResults(), astManager.getAST(referencedCu))));
 		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);		
+		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);	
 	}	
 	
 	public static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
