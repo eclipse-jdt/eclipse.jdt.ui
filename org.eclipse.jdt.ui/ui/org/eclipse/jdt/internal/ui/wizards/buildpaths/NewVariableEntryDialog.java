@@ -70,22 +70,27 @@ public class NewVariableEntryDialog extends StatusDialog {
 	
 	private boolean fFirstInvocation= true;
 	
+	/**
+	 * @deprecated Use NewVariableEntryDialog(Shell) and setTitle instead	 */
+	public NewVariableEntryDialog(Shell parent, String title, Object exsting) {
+		this(parent);
+		setTitle(title);
+	}
+	
 			
-	public NewVariableEntryDialog(Shell parent, String title) {
+	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
 		int shellStyle= getShellStyle();
 		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
 		
 		fVariableBlock= new VariableBlock(false, null);
 		fResultPaths= null;
-		fTitle= title;
 	}
 	
 	/* (non-Javadoc)
 	 * @see Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell shell) {
-		shell.setText(fTitle);
 		super.configureShell(shell);
 		WorkbenchHelp.setHelp(shell, IJavaHelpContextIds.NEW_VARIABLE_ENTRY_DIALOG);
 	}	

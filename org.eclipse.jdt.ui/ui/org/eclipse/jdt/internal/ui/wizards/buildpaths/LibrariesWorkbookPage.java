@@ -505,7 +505,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
 		if (existing == null) {
-			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), "");
+			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell());
 			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title"));
 			if (dialog.open() == dialog.OK) {
 				List existingElements= fLibrariesList.getElements();
