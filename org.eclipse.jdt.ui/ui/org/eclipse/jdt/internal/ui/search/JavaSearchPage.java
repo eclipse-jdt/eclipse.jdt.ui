@@ -663,132 +663,109 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			return null;
 
 		Object o= selection.getFirstElement();
+		SearchPatternData res= null;
 		if (o instanceof IJavaElement) {
-			return determineInitValuesFrom((IJavaElement)o);
-		} else if (SearchUtil.isISearchResultViewEntry(o)) {
-			IJavaElement element= SearchUtil.getJavaElement(o);
-			return determineInitValuesFrom(element);
+			res= determineInitValuesFrom((IJavaElement) o);
 		} else if (o instanceof LogicalPackage) {
 			LogicalPackage lp= (LogicalPackage)o;
 			return new SearchPatternData(PACKAGE, REFERENCES, fIsCaseSensitive, lp.getElementName(), null);
 		} else if (o instanceof IAdaptable) {
-			IJavaElement element= (IJavaElement)((IAdaptable)o).getAdapter(IJavaElement.class);
+			IJavaElement element= (IJavaElement) ((IAdaptable) o).getAdapter(IJavaElement.class);
 			if (element != null) {
-				return determineInitValuesFrom(element);
-			} else {
-				IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
-				if (adapter != null)
-					return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null);
+				res= determineInitValuesFrom(element);
+			}
+		}
+		if (res == null && o instanceof IAdaptable) {
+			IWorkbenchAdapter adapter= (IWorkbenchAdapter)((IAdaptable)o).getAdapter(IWorkbenchAdapter.class);
+			if (adapter != null) {
+				return new SearchPatternData(TYPE, REFERENCES, fIsCaseSensitive, adapter.getLabel(o), null);
 			}
 		}
 		return null;
 	}
 
 	private SearchPatternData determineInitValuesFrom(IJavaElement element) {
-		if (element == null)
-			return null;
 		int searchFor= UNKNOWN;
 		int limitTo= UNKNOWN;
-		String pattern= null; 
-		switch (element.getElementType()) {
-			case IJavaElement.PACKAGE_FRAGMENT:
-				searchFor= PACKAGE;
-				limitTo= REFERENCES;
-				pattern= element.getElementName();
-				break;
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				searchFor= PACKAGE;
-				limitTo= REFERENCES;
-				pattern= element.getElementName();
-				break;
-			case IJavaElement.PACKAGE_DECLARATION:
-				searchFor= PACKAGE;
-				limitTo= REFERENCES;
-				pattern= element.getElementName();
-				break;
-			case IJavaElement.IMPORT_DECLARATION:
-				pattern= element.getElementName();
-				IImportDeclaration declaration= (IImportDeclaration)element;
-				if (declaration.isOnDemand()) {
+		String pattern= null;
+		try {
+			switch (element.getElementType()) {
+				case IJavaElement.PACKAGE_FRAGMENT:
 					searchFor= PACKAGE;
-					int index= pattern.lastIndexOf('.');
-					pattern= pattern.substring(0, index);
-				} else {
-					searchFor= TYPE;
-				}
-				limitTo= DECLARATIONS;
-				break;
-			case IJavaElement.TYPE:
-				searchFor= TYPE;
-				limitTo= REFERENCES;
-				pattern= JavaModelUtil.getFullyQualifiedName((IType)element);
-				break;
-			case IJavaElement.COMPILATION_UNIT:
-				ICompilationUnit cu= (ICompilationUnit)element;
-				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
-				IType mainType= cu.getType(mainTypeName);
-				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
-				try {					
-					mainType= JavaModelUtil.findTypeInCompilationUnit(cu, mainTypeName);
-					if (mainType == null) {
-						// fetch type which is declared first in the file
-						IType[] types= cu.getTypes();
-						if (types.length > 0)
-							mainType= types[0];
-						else
-							break;
+					limitTo= REFERENCES;
+					pattern= element.getElementName();
+					break;
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					searchFor= PACKAGE;
+					limitTo= REFERENCES;
+					pattern= element.getElementName();
+					break;
+				case IJavaElement.PACKAGE_DECLARATION:
+					searchFor= PACKAGE;
+					limitTo= REFERENCES;
+					pattern= element.getElementName();
+					break;
+				case IJavaElement.IMPORT_DECLARATION:
+					pattern= element.getElementName();
+					IImportDeclaration declaration= (IImportDeclaration)element;
+					if (declaration.isOnDemand()) {
+						searchFor= PACKAGE;
+						int index= pattern.lastIndexOf('.');
+						pattern= pattern.substring(0, index);
+					} else {
+						searchFor= TYPE;
 					}
-				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					limitTo= DECLARATIONS;
+					break;
+				case IJavaElement.TYPE:
+					searchFor= TYPE;
+					limitTo= REFERENCES;
+					pattern= JavaModelUtil.getFullyQualifiedName((IType)element);
+					break;
+				case IJavaElement.COMPILATION_UNIT: {
+					ICompilationUnit cu= (ICompilationUnit) element;
+					IType mainType= cu.findPrimaryType();
+					if (mainType != null) {
+						searchFor= TYPE;
+						element= mainType;
+						limitTo= REFERENCES;
+						pattern= JavaModelUtil.getFullyQualifiedName(mainType);
+					}
 					break;
 				}
-				searchFor= TYPE;
-				element= mainType;
-				limitTo= REFERENCES;
-				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
-				break;
-			case IJavaElement.CLASS_FILE:
-				IClassFile cf= (IClassFile)element;
-				try {					
-					mainType= cf.getType();
-				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				case IJavaElement.CLASS_FILE: {
+					IClassFile cf= (IClassFile)element;
+					IType mainType= cf.getType();
+					if (mainType.exists()) {
+						element= mainType;
+						searchFor= TYPE;
+						limitTo= REFERENCES;
+						pattern= JavaModelUtil.getFullyQualifiedName(mainType);
+					}
 					break;
 				}
-				if (mainType == null)
+				case IJavaElement.FIELD:
+					IField field= (IField) element;
+					searchFor= FIELD;
+					limitTo= REFERENCES;
+					pattern= PrettySignature.getFieldSignature(field);
 					break;
-				element= mainType;
-				searchFor= TYPE;
-				limitTo= REFERENCES;
-				pattern= JavaModelUtil.getFullyQualifiedName(mainType);
-				break;
-			case IJavaElement.FIELD:
-				searchFor= FIELD;
-				limitTo= REFERENCES;
-				IType type= ((IField)element).getDeclaringType();
-				StringBuffer buffer= new StringBuffer();
-				buffer.append(JavaModelUtil.getFullyQualifiedName(type));
-				buffer.append('.');
-				buffer.append(element.getElementName());
-				pattern= buffer.toString();
-				break;
-			case IJavaElement.METHOD:
-				searchFor= METHOD;
-				try {
-					IMethod method= (IMethod)element;
-					if (method.isConstructor())
-						searchFor= CONSTRUCTOR;
-				} catch (JavaModelException ex) {
-					ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+				case IJavaElement.METHOD:
+					IMethod method= (IMethod) element;
+					searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
+					limitTo= REFERENCES;
+					pattern= PrettySignature.getMethodSignature(method);
 					break;
-				}		
-				limitTo= REFERENCES;
-				pattern= PrettySignature.getMethodSignature((IMethod)element);
-				break;
-		}
-		if (searchFor != UNKNOWN && limitTo != UNKNOWN && pattern != null)
-			return new SearchPatternData(searchFor, limitTo, true, pattern, element);
+			}
+			if (searchFor != UNKNOWN && limitTo != UNKNOWN && pattern != null)
+				return new SearchPatternData(searchFor, limitTo, true, pattern, element);
 			
+		} catch (JavaModelException e) {
+			if (!e.isDoesNotExist()) {
+				ExceptionHandler.handle(e, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
+			}
+			// element might not exist
+		}
 		return null;	
 	}
 	

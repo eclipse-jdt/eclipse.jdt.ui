@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -43,12 +44,8 @@ public class PrettySignature {
 		
 		return buffer.toString();
 	}
-
-	public static String getUnqualifiedTypeSignature(IType type) {
-		return type.getElementName();
-	}
 	
-	public static String getUnqualifiedMethodSignature(IMethod method, boolean includeName) {
+	private static String getUnqualifiedMethodSignature(IMethod method, boolean includeName) {
 		StringBuffer buffer= new StringBuffer();
 		if (includeName) {
 			buffer.append(method.getElementName());
@@ -70,5 +67,11 @@ public class PrettySignature {
 
 	public static String getUnqualifiedMethodSignature(IMethod method) {
 		return getUnqualifiedMethodSignature(method, true);
+	}
+
+	public static String getFieldSignature(IField field) {
+		IType type= field.getDeclaringType();
+		return 	JavaModelUtil.concatenateName(JavaModelUtil.getFullyQualifiedName(type), field.getElementName());
+
 	}	
 }

@@ -12,6 +12,11 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
 
+import org.eclipse.search.ui.ISearchQuery;
+import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.NewSearchUI;
+import org.eclipse.search.ui.text.Match;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
@@ -21,6 +26,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -28,21 +36,16 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.ui.search.IQueryParticipant;
 import org.eclipse.jdt.ui.search.ISearchRequestor;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.search.internal.ui.SearchPreferencePage;
-import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.text.Match;
+
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class JavaSearchQuery implements ISearchQuery {
 	private ISearchResult fResult;
@@ -104,7 +107,7 @@ public class JavaSearchQuery implements ISearchQuery {
 			monitor.beginTask(SearchMessages.getString("JavaSearchQuery.task.label"), totalTicks); //$NON-NLS-1$
 			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
 
-			boolean ignorePotentials= SearchPreferencePage.arePotentialMatchesIgnored();
+			boolean ignorePotentials= NewSearchUI.arePotentialMatchesIgnored();
 			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, ignorePotentials);
 			
 			SearchPattern pattern;
