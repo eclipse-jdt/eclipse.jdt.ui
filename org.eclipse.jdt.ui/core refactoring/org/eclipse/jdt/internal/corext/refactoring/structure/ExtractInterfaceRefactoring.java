@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.template.Template;
@@ -246,15 +247,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus checkInterfaceTypeName() throws JavaModelException {
-		ICompilationUnit[] cus= getInputClassPackage().getCompilationUnits();
-		for (int i= 0; i < cus.length; i++) {
-			if (cus[i].getType(fNewInterfaceName).exists()){
-				String pattern= "Type named ''{0}'' already exists in package ''{1}''";
-				String message= MessageFormat.format(pattern, new String[]{fNewInterfaceName, getInputClassPackage().getElementName()});
-				return RefactoringStatus.createFatalErrorStatus(message);
-			}	
-		}
-		return null;
+		IType type= Checks.findTypeInPackage(getInputClassPackage(), fNewInterfaceName);
+		if (type == null || ! type.exists())
+			return null;
+		String pattern= "Type named ''{0}'' already exists in package ''{1}''";
+		String message= MessageFormat.format(pattern, new String[]{fNewInterfaceName, getInputClassPackage().getElementName()});
+		return RefactoringStatus.createFatalErrorStatus(message);
 	}
 	
 	public RefactoringStatus checkNewInterfaceName(String newName){
@@ -285,7 +283,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			return builder;	
 		} catch(CoreException e){
 			throw new JavaModelException(e);
-		}	
+		}	finally{
+			pm.done();
+		}
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
@@ -785,7 +785,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private IPackageFragment getInputClassPackage() {
-		return (IPackageFragment)fInputClass.getCompilationUnit().getParent();
+		return fInputClass.getPackageFragment();
 	}
 
 	private static String getLineSeperator() {
@@ -842,12 +842,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createExtractedInterfaceCUSource(ICompilationUnit newCu) throws CoreException {
 		StringBuffer buffer= new StringBuffer();
 		if (fCodeGenerationSettings.createFileComments)
-			buffer.append(createFileCommentsSource(newCu));
+			buffer.append(TemplateUtil.createFileCommentsSource(newCu));
 		buffer.append(createPackageDeclarationSource());
 		buffer.append(createImportsSource());
 		if (fCodeGenerationSettings.createComments){
 			buffer.append(getLineSeperator());
-			buffer.append(createTypeCommentSource(newCu));
+			buffer.append(TemplateUtil.createTypeCommentSource(newCu));
 		}	
 		buffer.append(createInterfaceSource());
 		return buffer.toString();
@@ -986,24 +986,6 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private String createPackageDeclarationSource() {
 		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
-	}
-
-	private String createTypeCommentSource(ICompilationUnit newCu) throws CoreException {
-		return getTemplate("typecomment", 0, newCu);//$NON-NLS-1$
-	}
-
-	private String createFileCommentsSource(ICompilationUnit newCu) throws CoreException {
-		return getTemplate("filecomment", 0, newCu);//$NON-NLS-1$
-	}
-
-	private static String getTemplate(String name, int pos, ICompilationUnit newCu) throws CoreException {
-		Template[] templates= Templates.getInstance().getTemplates(name);
-		if (templates.length == 0)
-			return ""; //$NON-NLS-1$	
-		String template= JavaContext.evaluateTemplate(templates[0], newCu, pos);
-		if (template == null)
-			return ""; //$NON-NLS-1$
-		return template;
 	}
 
 	private static VariableDeclarationFragment[] getVariableDeclarationFragments(VariableDeclarationStatement vds){
