@@ -20,6 +20,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
@@ -73,7 +76,7 @@ public class CopyRefactoring2 extends Refactoring{
 		}
 	}
 	
-	public RefactoringStatus setDestination(IJavaElement destination){
+	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException{
 		Assert.isNotNull(destination);
 		resetDestinations();
 		fJavaElementDestination= destination;
@@ -84,7 +87,7 @@ public class CopyRefactoring2 extends Refactoring{
 			return RefactoringStatus.createFatalErrorStatus("The selected elements cannot be copied to the specified destination");
 	}
 
-	public RefactoringStatus setDestination(IResource destination){
+	public RefactoringStatus setDestination(IResource destination) throws JavaModelException{
 		Assert.isNotNull(destination);
 		resetDestinations();
 		fResourceDestination= destination;
@@ -212,24 +215,21 @@ public class CopyRefactoring2 extends Refactoring{
 				fPackageFragmentRoots= roots;
 			}
 			public boolean canCopyTo(IJavaElement javaElement) {
-				// TODO implement me
-				return false;
+				if (javaElement == null || ! javaElement.exists())
+					return false;
+				return ! javaElement.isReadOnly() && javaElement instanceof IJavaProject;
 			}
 
 			public boolean canCopyTo(IResource resource) {
-				// TODO implement me
 				return false;
 			}
 
 			public boolean canEnable() throws JavaModelException {
 				for (int i= 0; i < fPackageFragmentRoots.length; i++) {
-					if (! isSourceFolder(fPackageFragmentRoots[i]))
+					if (! ReorgUtils2.isSourceFolder(fPackageFragmentRoots[i]))
 						return false;
 				}
 				return true;
-			}
-			private static boolean isSourceFolder(IPackageFragmentRoot root) throws JavaModelException{
-				return root.getKind() == IPackageFragmentRoot.K_SOURCE;
 			}
 		}
 		
@@ -240,13 +240,16 @@ public class CopyRefactoring2 extends Refactoring{
 				Assert.isNotNull(packageFragments);
 				fPackageFragments= packageFragments;
 			}
-			public boolean canCopyTo(IJavaElement javaElement) {
-				// TODO implement me
-				return false;
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.ICopyPolicy#canCopyTo(org.eclipse.jdt.core.IJavaElement)
+			 */
+			public boolean canCopyTo(IJavaElement javaElement) throws JavaModelException {
+				if (javaElement == null || ! javaElement.exists())
+					return false;
+				return !javaElement.isReadOnly() && ReorgUtils2.isSourceFolder(javaElement);
 			}
 
 			public boolean canCopyTo(IResource resource) {
-				// TODO implement me
 				return false;
 			}
 
@@ -270,13 +273,46 @@ public class CopyRefactoring2 extends Refactoring{
 				fCus= cus;
 			}
 
-			public boolean canCopyTo(IJavaElement javaElement) {
-				// TODO implement me
-				return false;
+			public boolean canCopyTo(IJavaElement javaElement) throws JavaModelException {
+				if (javaElement == null || ! javaElement.exists())
+					return false;
+				if (javaElement instanceof IJavaModel)
+					return false;
+				if (javaElement.isReadOnly())
+					return false;
+				if (! javaElement.isStructureKnown())
+					return false;
+				if (javaElement instanceof IOpenable){
+					IOpenable openable= (IOpenable)javaElement;
+					if (! openable.isConsistent())
+						return false;
+				}				
+				if (javaElement instanceof IPackageFragmentRoot){
+					IPackageFragmentRoot root= (IPackageFragmentRoot)javaElement;
+					if (root.isArchive() || root.isExternal())
+						return false;
+				}
+				if (ReorgUtils2.isInsideCompilationUnit(javaElement))
+					return false;
+				return true;
 			}
 
 			public boolean canCopyTo(IResource resource) {
-				// TODO implement me
+				if (resource == null || ! resource.exists() || resource.isPhantom())
+					return false;
+				if (resource.getType() == IResource.ROOT)
+					return false;
+				if (isChildOfOrEqualToAnyFolder(resource))
+					return false;
+				return true;
+			}
+
+			private boolean isChildOfOrEqualToAnyFolder(IResource resource) {
+				for (int i= 0; i < fFolders.length; i++) {
+					IFolder folder= fFolders[i];
+					if (folder.equals(resource) || ParentChecker.isChildOf(resource, folder))
+						return true;
+				}
 				return false;
 			}
 
