@@ -56,7 +56,7 @@ public class StubUtility {
 	public static String genStub(IType parenttype, IMethod method, IImportsStructure imports) throws JavaModelException {
 		boolean callSuper= !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags())
 			&& method.getDeclaringType().isClass();
-		return genStub(parenttype, method, callSuper, imports);
+		return genStub(parenttype, method, callSuper, true, imports);
 	}
 
 	/**
@@ -68,7 +68,7 @@ public class StubUtility {
 	 * @param imports Imports required by the sub are added to the imports structure
 	 * @throws JavaModelException
 	 */
-	public static String genStub(IType parenttype, IMethod method, boolean callSuper, IImportsStructure imports) throws JavaModelException {
+	public static String genStub(IType parenttype, IMethod method, boolean callSuper, boolean addSeeTag, IImportsStructure imports) throws JavaModelException {
 		IType declaringtype= method.getDeclaringType();	
 		StringBuffer buf= new StringBuffer();
 		String[] paramTypes= method.getParameterTypes();
@@ -79,7 +79,7 @@ public class StubUtility {
 		int lastParam= paramTypes.length -1;		
 		if (!method.isConstructor()) {
 			// java doc
-			if (callSuper) {
+			if (addSeeTag) {
 				// create a @see link 
 				buf.append("\t/**\n\t"); //$NON-NLS-1$
 				buf.append(" * @see "); buf.append(declaringtype.getElementName()); buf.append('#'); //$NON-NLS-1$

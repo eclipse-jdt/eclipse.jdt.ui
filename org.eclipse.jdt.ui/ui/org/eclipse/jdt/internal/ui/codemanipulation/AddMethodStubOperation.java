@@ -119,7 +119,7 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 					IMethod inheritedMethod= StubUtility.findInHierarchy(typeHierarchy, curr);
 					if (inheritedMethod == null) {
 						// create method without super call
-						content= StubUtility.genStub(fType, curr, false, imports);
+						content= StubUtility.genStub(fType, curr, false, false, imports);
 					} else {
 						int flags= inheritedMethod.getFlags();
 						if (Flags.isFinal(flags) || Flags.isPrivate(flags)) {

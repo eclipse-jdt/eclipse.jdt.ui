@@ -122,7 +122,7 @@ public class ImportsStructure implements IImportsStructure {
 			if (currMatchLen > bestMatchLen) {
 				isBetterMatch= true;
 			} else if (currMatchLen == bestMatchLen) {		
-				if (currMatchLen == newName.length() && currMatchLen == currName.length()) {
+				if (currMatchLen == newName.length() && currMatchLen == currName.length() && currMatchLen == bestName.length()) {
 					// dulicate entry and complete match
 					isBetterMatch= curr.getNumberOfImports() > bestMatch.getNumberOfImports();
 				} else {
@@ -315,21 +315,16 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		
 		try {
-			String newContent;
-			if (!created.isEmpty()) {
-				if (!container.exists()) {
-					buf.append(lineDelim);	// nl after import (<nl+>)
-					if (importsStart > 0) { // package statement
-						buf.insert(0, lineDelim);
-						buf.insert(0, lineDelim);  //<pack><nl*><nl*><import><nl+><nl-pack><cl>
-					} else {
-						buf.append(lineDelim);
-					}
+			if (!container.exists()) {
+				buf.append(lineDelim);	// nl after import (<nl+>)
+				if (importsStart > 0) { // package statement
+					buf.insert(0, lineDelim);
+					buf.insert(0, lineDelim);  //<pack><nl*><nl*><import><nl+><nl-pack><cl>
+				} else {
+					buf.append(lineDelim);
 				}
-				newContent= buf.toString();
-			} else {
-				newContent= ""; //$NON-NLS-1$
 			}
+			String newContent= buf.toString();
 			if (hasChanged(doc, importsStart, importsLen, newContent)) {
 				doc.replace(importsStart, importsLen, newContent);
 			}
