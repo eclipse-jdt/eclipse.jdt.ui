@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 			status.addFatalError(fMessage);
 		} else {
 			if (!fIsCompleteStatementRange)
-				status.addError("TextSelection doesn't completely cover a set of statements");
+				status.addFatalError("TextSelection ends in the middle of a statement");
 		}
 		status.merge(fStatus);
 		fLocalVariableAnalyzer.checkActivation(status);
@@ -280,23 +280,13 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 		return null;
 	}
 	
-	private void endVisitCompoundStatement(AstNode node, Scope scope) {
-		int realEnd= fBuffer.indexOfStatementCharacter(node.sourceEnd + 1) - 1;
-		if (fSelection.covers(node) || fSelection.coveredBy(node.sourceStart, realEnd)) {
-			fLastEnd= node.sourceEnd;
-		} else {
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
-		}
-	}
-	
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
 		if (fMode != UNDEFINED) {
 			reset();
 			fLastEnd= Integer.MAX_VALUE;
-			fStatus.addFatalError("Compilation unit has compile error. " + problem.getMessage());
+			fStatus.addFatalError("Compilation unit has compile error: " + problem.getMessage());
 		}
 	}
 	
@@ -530,26 +520,28 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(DoStatement doStatement, BlockScope scope) {
-		// skip the string "do"
-		int actionStart= doStatement.sourceStart + DO_LENGTH;		
-		int actionEnd= fBuffer.indexOfStatementCharacter(doStatement.action.sourceEnd + 1);
-		// Either the selection covers the whole do statement or the section lies
-		// inside the do statement's action.	
-		if (fSelection.start != actionStart && // Selection doesn't start right after do. This avoid dofoo();
-		    (fSelection.covers(doStatement) || fSelection.coveredBy(actionStart, actionEnd))) {
-			boolean result= visitImplicitBranchTarget(doStatement, scope);
-			if (result && fSelection.end >= doStatement.sourceStart) {
-				// skip the do.
-				fLastEnd= actionStart;
-			}
-			return result;
-		} else {
-			// Push it anyway since we pop it during end visit.
-			fImplicitBranchTargets.push(doStatement);
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
+		if (!visitImplicitBranchTarget(doStatement, scope))
 			return false;
+		
+		int nextStart= fBuffer.indexOfStatementCharacter(doStatement.sourceEnd + 1);	
+		// Either the selection covers the whole do statement or the section lies
+		// inside the do statement's action.
+		if (fMode == BEFORE && fSelection.end < nextStart) {
+			// skip the string "do"
+			int actionStart= doStatement.sourceStart + DO_LENGTH;		
+			int actionEnd= fBuffer.indexOfStatementCharacter(doStatement.action.sourceEnd + 1) - 1;
+			if (fSelection.start == actionStart) {
+				invalidSelection("Selection may not start right after the do keyword");
+				return false;
+			} else if (fSelection.coveredBy(++actionStart, actionEnd)) {
+				fLastEnd= actionStart;
+				return true;
+			} else {
+				invalidSelection("Selection must either cover whole do-while statement or parts of the action block");
+				return false;
+			}
 		}
+		return true;
 	}
 	
 	public void endVisit(DoStatement doStatement, BlockScope scope) {
@@ -583,9 +575,13 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 
 	public boolean visit(ForStatement forStatement, BlockScope scope) {
 		boolean result= visitImplicitBranchTarget(forStatement, scope);
+		if (!result)
+			return false;
+			
+		int nextStart= fBuffer.indexOfStatementCharacter(forStatement.sourceEnd + 1);	
 		// forStatement.sourceEnd includes the statement's action. Since the
 		// selection can be the statements body adjust last end if so.
-		if (result && fSelection.end >= forStatement.sourceStart) {
+		if (fMode == BEFORE && fSelection.end < nextStart) {
 			int start= forStatement.sourceStart;
 			if (forStatement.increments != null) {
 				start= forStatement.increments[forStatement.increments.length - 1].sourceEnd;
@@ -601,13 +597,15 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 
 	public void endVisit(ForStatement forStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(forStatement, scope);
-		endVisitCompoundStatement(forStatement, scope);
 	}
 	
 	public boolean visit(IfStatement ifStatement, BlockScope scope) {
 		boolean result= visitStatement(ifStatement, scope);
+		if (!result)
+			return false;
+			
 		int nextStart= fBuffer.indexOfStatementCharacter(ifStatement.sourceEnd + 1);
-		if (fMode == BEFORE && fSelection.end <= nextStart) {
+		if (fMode == BEFORE && fSelection.end < nextStart) {
 			int lastEnd= getIfElseBodyStart(ifStatement, nextStart) - 1;
 			if (lastEnd < 0) {
 				invalidSelection("Selection must either cover whole if-then-else statement or statements of then or else block");
@@ -702,18 +700,20 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	public boolean visit(SwitchStatement switchStatement, BlockScope scope) {
 		// Include "}" into switch statement
 		switchStatement.sourceEnd++;
-		int lastEnd= switchStatement.sourceEnd;
-		boolean result= false;
-		if (fSelection.covers(switchStatement) || (lastEnd= getCaseBodyStart(switchStatement) - 1) >= 0) {
-			result= visitImplicitBranchTarget(switchStatement, scope);
-			fLastEnd= lastEnd;
-			
-		} else {
-			reset();
-			fLastEnd= Integer.MAX_VALUE;
-			fImplicitBranchTargets.push(switchStatement);
+		if (!visitImplicitBranchTarget(switchStatement, scope))
+			return false;
+		
+		int nextStart= fBuffer.indexOfStatementCharacter(switchStatement.sourceEnd + 1);
+		if (fMode == BEFORE && fSelection.end < nextStart) {
+			int lastEnd= getCaseBodyStart(switchStatement) - 1;
+			if (lastEnd < 0) {
+				invalidSelection("Selection must either cover whole switch statement or parts of a single case block");
+				return false;
+			} else {
+				fLastEnd= lastEnd;
+			}
 		}
-		return result;
+		return true;
 	}
 
 	public void endVisit(SwitchStatement switchStatement, BlockScope scope) {
@@ -817,7 +817,11 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 
 	public boolean visit(WhileStatement whileStatement, BlockScope scope) {
 		boolean result= visitImplicitBranchTarget(whileStatement, scope);
-		if (result && fSelection.end >= whileStatement.sourceStart) {
+		if (!result)
+			return false;
+			
+		int nextStart= fBuffer.indexOfStatementCharacter(whileStatement.sourceEnd + 1);	
+		if (fMode == BEFORE && fSelection.end < nextStart) {
 			int start= whileStatement.sourceStart;
 			if (whileStatement.condition != null) {
 				start= whileStatement.condition.sourceEnd;
@@ -829,6 +833,5 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 
 	public void endVisit(WhileStatement whileStatement, BlockScope scope) {
 		endVisitImplicitBranchTarget(whileStatement, scope);
-		endVisitCompoundStatement(whileStatement, scope);
 	}
 }
