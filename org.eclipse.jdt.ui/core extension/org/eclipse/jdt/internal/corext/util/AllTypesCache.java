@@ -109,7 +109,10 @@ public class AllTypesCache {
 		}
 		
 		private Collection doSearchTypes() {
-
+			
+			if (ResourcesPlugin.getWorkspace() == null)
+				return null;
+			
 			final ArrayList typesFound= new ArrayList(fSizeHint);
 			final TypeInfoFactory factory= new TypeInfoFactory();
 
@@ -508,9 +511,15 @@ public class AllTypesCache {
 		synchronized(fgLock) {
 			fgTerminated= true;
 			fgAsyncMode= false;
-			if (fgTypeCacherThread != null)
+			if (fgTypeCacherThread != null) {
 				fgTypeCacherThread.abort();
-			fgTypeCacherThread= null;
+				try {
+					fgTypeCacherThread.join(1000);
+				} catch (InterruptedException e) {
+					JavaPlugin.log(e);
+				}
+				fgTypeCacherThread= null;
+			}
 		}
 	}
 }
