@@ -78,6 +78,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
+	public static final String SIMPLE_TEST_INTERFACE_NAME= "Test"; //$NON-NLS-1$
 	
 	/**
 	 * The class path variable referring to the junit home location
@@ -102,6 +103,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * List storing the registered JUnit launch configuration types
 	 */
 	private List fJUnitLaunchConfigTypeIDs;
+
 
 	public JUnitPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
