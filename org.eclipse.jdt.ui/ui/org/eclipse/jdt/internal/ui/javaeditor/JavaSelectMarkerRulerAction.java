@@ -66,9 +66,8 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	}
 	
 	public void update() {
-		boolean hasLightBulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
 		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		if (!hasLightBulb || !(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
+		if (!(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
 			fPosition= null;
 			super.update();
 			return;
@@ -86,6 +85,11 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 		IDocument document= getDocument();
 		if (model == null)
 			return null;
+		ICompilationUnit cu= getCompilationUnit();
+		if (cu == null) {
+			return null;
+		}
+			
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
 			Annotation annotation= (Annotation) iter.next();
@@ -93,20 +97,19 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 				IJavaAnnotation javaAnnotation= (IJavaAnnotation)annotation;
 				if (javaAnnotation.isRelevant()) {
 					Position position= model.getPosition(annotation);
-					if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(javaAnnotation))
+					if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(cu, javaAnnotation))
 						return position;
 				}
 			}
 		}
-		ISelection sel= fTextEditor.getSelectionProvider().getSelection();
-		if (sel instanceof ITextSelection) {
-			ITextSelection selection= (ITextSelection) sel;
-			Position position= new Position(selection.getOffset(), selection.getLength());
-			if (!includesRulerLine(position, document)) {
-				return null;
-			}
-			ICompilationUnit cu= getCompilationUnit();
-			if (cu != null) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
+			ISelection sel= fTextEditor.getSelectionProvider().getSelection();
+			if (sel instanceof ITextSelection) {
+				ITextSelection selection= (ITextSelection) sel;
+				Position position= new Position(selection.getOffset(), selection.getLength());
+				if (!includesRulerLine(position, document)) {
+					return null;
+				}
 				AssistContext context= new AssistContext(cu, position.getOffset(), position.getLength());
 				if (JavaCorrectionProcessor.hasAssists(context)) {
 					return position;
