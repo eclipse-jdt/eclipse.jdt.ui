@@ -82,13 +82,13 @@ public class NLSScanner {
 			try {
 				i= Integer.parseInt(index) - 1; 	// Tags are one based not zero based.
 			} catch (NumberFormatException e) {
-				new InvalidInputException(Messages.getString("nlsscanner.Invalid_NON-NLS_tag__1") + s.substring(pos, end + 1)); //$NON-NLS-1$
+				new InvalidInputException(Messages.getString("nlsscanner.invalid_tag") + s.substring(pos, end + 1)); //$NON-NLS-1$
 			}
 			if (line.exists(i)) {
 				NLSElement element= line.get(i);
 				element.setTagPosition(scanner.startPosition + pos, end - pos + 1);
 			} else {
-				new InvalidInputException(Messages.getString("nlsscanner.No_String_found_for_tag__2") + s.substring(pos, end + 1));				 //$NON-NLS-1$
+				new InvalidInputException(Messages.getString("nlsscanner.no_string_for_tag") + s.substring(pos, end + 1));				 //$NON-NLS-1$
 			}
 			pos= s.indexOf(NLSElement.TAG_PREFIX, start);
 		}

@@ -46,7 +46,7 @@ public class CreateFileChange extends Change {
 		
 		InputStream is= null;
 		try {
-			pm.beginTask(Messages.getString("createFile.creating_resource_3"), 1); //$NON-NLS-1$
+			pm.beginTask(Messages.getString("createFile.creating_resource"), 1); //$NON-NLS-1$
 
 			if (!isActive()){
 				fUndoChange= new NullChange();	
@@ -100,7 +100,7 @@ public class CreateFileChange extends Change {
 	 */
 	public String getName() {
 		if (fName == null)
-			return Messages.getString("createFile.Create_file__4") + fPath.toString(); //$NON-NLS-1$
+			return Messages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
 		else 
 			return fName;
 	}

@@ -75,16 +75,16 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		super(PAGE_NAME, true);
 		fErrorMap= new OrderedMap();
 		
-		fPropertyPackage= 	createStringButtonField(Messages.getString("wizardPage2.Package__2"), Messages.getString("wizardPage2.Browse..._3"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyPackage= 	createStringButtonField(Messages.getString("wizardPage2.package"), Messages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyPackageBrowseAdapter());
-		fPropertyFile= 		createStringButtonField(Messages.getString("wizardPage2.Property_file_name__4"), Messages.getString("wizardPage2.Browse..._3"),  //$NON-NLS-2$ //$NON-NLS-1$
+		fPropertyFile= 		createStringButtonField(Messages.getString("wizardPage2.property_file_name"), Messages.getString("wizardPage2.browse"),  //$NON-NLS-2$ //$NON-NLS-1$
 									createPropertyFileBrowseAdapter());				
-		fUseDefaultPattern= createCheckBoxField(Messages.getString("wizardPage2.Use_default_code_pattern_5")); //$NON-NLS-1$
-		fAccessorClassName= createStringField(Messages.getString("wizardPage2.Accessor_class_name__1")); //$NON-NLS-1$
-		fCodePattern= 		createStringField(Messages.getString("wizardPage2.Code_pattern__6")); //$NON-NLS-1$
-		fCreateAccessorClass= createCheckBoxField(Messages.getString("wizardPage2.Create_accessor_class_7")); //$NON-NLS-1$
-		fNewImport= 		createStringButtonField(Messages.getString("wizardPage2.Add_import_declaration_1"),  //$NON-NLS-1$
-									Messages.getString("wizardPage2.Browse..._3"), //$NON-NLS-1$
+		fUseDefaultPattern= createCheckBoxField(Messages.getString("wizardPage2.default_pattern")); //$NON-NLS-1$
+		fAccessorClassName= createStringField(Messages.getString("wizardPage2.class_name")); //$NON-NLS-1$
+		fCodePattern= 		createStringField(Messages.getString("wizardPage2.code_pattern")); //$NON-NLS-1$
+		fCreateAccessorClass= createCheckBoxField(Messages.getString("wizardPage2.create_accessor")); //$NON-NLS-1$
+		fNewImport= 		createStringButtonField(Messages.getString("wizardPage2.add_import"),  //$NON-NLS-1$
+									Messages.getString("wizardPage2.browse"), //$NON-NLS-1$
 									createClassBrowseAdapter());
 	}
 		
@@ -189,7 +189,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		Separator s= new Separator(SWT.SEPARATOR | SWT.HORIZONTAL);
 		s.doFillIntoGrid(parent, 3);
 		
-		fCreateAccessorClass.setLabelText(Messages.getString("wizardPage2.Create_accessor_class_7")  //$NON-NLS-1$
+		fCreateAccessorClass.setLabelText(Messages.getString("wizardPage2.create_accessor")  //$NON-NLS-1$
 										+ "\"" + getPackageName(getCu()) + "\""  //$NON-NLS-2$ //$NON-NLS-1$
 										+ Messages.getString("wizardPage2.if_needed")); //$NON-NLS-1$
 		fCreateAccessorClass.doFillIntoGrid(parent, 3);		
@@ -265,7 +265,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		}
 		
 		if (className.indexOf(".") != -1){ //$NON-NLS-1$
-			setInvalid(fAccessorClassName, Messages.getString("wizardPage2.Class_name_should_not_contain_a_dot_3")); //$NON-NLS-1$
+			setInvalid(fAccessorClassName, Messages.getString("wizardPage2.no_dot")); //$NON-NLS-1$
 			return;
 		}
 		
@@ -329,8 +329,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private void browseForPropertyPackage(){
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), getLabelProvider());
 		dialog.setIgnoreCase(false);
-		dialog.setTitle(Messages.getString("wizardPage2.Package_Selection_8")); //$NON-NLS-1$
-		dialog.setMessage(Messages.getString("wizardPage2.Choose_the_package__9")); //$NON-NLS-1$
+		dialog.setTitle(Messages.getString("wizardPage2.package_selection")); //$NON-NLS-1$
+		dialog.setMessage(Messages.getString("wizardPage2.choose_package")); //$NON-NLS-1$
 		dialog.setElements(createPackageListInput());
 		dialog.setFilter(""); //$NON-NLS-1$
 		if (dialog.open() == ElementListSelectionDialog.OK) { 
@@ -357,7 +357,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.Externalizing_Strings_10"), Messages.getString("wizardPage2.Unexpected_exception_11")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return new Object[0];
 		}
 	}	
@@ -381,7 +381,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			}
 			return result.toArray();
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.Externalizing_Strings_10"), Messages.getString("wizardPage2.Unexpected_exception_11")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception")); //$NON-NLS-2$ //$NON-NLS-1$
 			return new Object[0];
 		}
 	}
@@ -446,16 +446,16 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		try {
 			IJavaElement element= project.findElement(pkgPath);
 			if (element == null || !element.exists()) {
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.The_package_must_exist_12")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.must_exist")); //$NON-NLS-1$
 				return;
 			}
 			fPkgFragment= (IPackageFragment)element;
 			if (! canAddPackage(fPkgFragment)){
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.Incorrect_package_13")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 			if (! canAddPackageRoot((IPackageFragmentRoot)fPkgFragment.getParent())){
-				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.Incorrect_package_14")); //$NON-NLS-1$
+				setInvalid(fPropertyPackage, Messages.getString("wizardPage2.incorrect_package")); //$NON-NLS-1$
 				return;
 			}
 		} catch (JavaModelException e) {
@@ -469,13 +469,13 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	private void validatePropertyFilename() {
 		String fileName= fPropertyFile.getText();
 		if (fileName == null || "".equals(fileName)) { //$NON-NLS-1$
-			setInvalid(fPropertyFile, Messages.getString("wizardPage2.must_enter_a_name_16")); //$NON-NLS-1$
+			setInvalid(fPropertyFile, Messages.getString("wizardPage2.enter_name")); //$NON-NLS-1$
 			return;
 		}
 		
 		int dotIndex= fileName.indexOf(NLSRefactoring.PROPERTY_FILE_EXT);
 		if (dotIndex < 0 || fileName.lastIndexOf('.') != dotIndex) {
-			setInvalid(fPropertyFile, Messages.getString("wizardPage2.The_property_file_name_must_end_with___17") + NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-2$ //$NON-NLS-1$
+			setInvalid(fPropertyFile, Messages.getString("wizardPage2.file_name_must_end") + NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
 		setValid(fPropertyFile);
@@ -543,7 +543,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			getNLSRefactoring().setAddedImportDeclaration(fNewImport.getText());
 			getNLSRefactoring().setCreateAccessorClass(fCreateAccessorClass.isSelected());
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, Messages.getString("wizardPage2.Externalizing_Strings_19"), Messages.getString("wizardPage2.Unexpected_exception_20")); //$NON-NLS-2$ //$NON-NLS-1$
+			ExceptionHandler.handle(e, Messages.getString("wizardPage2.externalizing"), Messages.getString("wizardPage2.exception_change")); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 	}
 }

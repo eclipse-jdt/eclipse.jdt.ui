@@ -41,7 +41,7 @@ public class DeleteFileChange extends Change {
 		try {
 			if (!isActive())
 				return;
-			pm.beginTask(Messages.getString("deleteFile.deleting_resource__2"), 1); //$NON-NLS-1$
+			pm.beginTask(Messages.getString("deleteFile.deleting_resource"), 1); //$NON-NLS-1$
 			IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 			Assert.isNotNull(file);
 			Assert.isTrue(file.exists());
@@ -91,7 +91,7 @@ public class DeleteFileChange extends Change {
 	 * @see IChange#getName()
 	 */
 	public String getName() {
-		return Messages.getString("deleteFile.Delete_File_3"); //$NON-NLS-1$
+		return Messages.getString("deleteFile.Delete_File"); //$NON-NLS-1$
 	}
 
 	/*
