@@ -92,7 +92,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 	 * Clients can override this method and are free to decide whether they want to call
 	 * the inherited method.
 	 *
-	 * @param toolbarManager the toolbar manager for which to add the buttons
+	 * @param toolBarManager the toolbar manager for which to add the buttons
 	 */
 	protected void createToolItems(ToolBarManager toolBarManager) {
 		

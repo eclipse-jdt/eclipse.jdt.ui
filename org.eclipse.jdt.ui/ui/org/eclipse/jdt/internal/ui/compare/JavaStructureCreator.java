@@ -20,9 +20,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
-import org.eclipse.jdt.internal.compiler.*;
-import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
@@ -32,36 +29,6 @@ import org.eclipse.compare.structuremergeviewer.*;
 
 public class JavaStructureCreator implements IStructureCreator {
 	
-	/**
-	 * Used to bail out from ProblemFactory.
-	 */
-	private static class ParseError extends RuntimeException {
-	}
-	
-	/**
-	 * This problem factory aborts parsing on first syntax error.
-	 * tod
-	 */
-	static class ProblemFactory implements IProblemFactory {
-		
-		public IProblem createProblem(char[] originatingFileName, int problemId, String[] arguments,
-						String[] messageArguments, int severity, int startPosition, int endPosition, int lineNumber) {
-			IProblem problem= new DefaultProblem(originatingFileName, "", problemId, arguments, severity, //$NON-NLS-1$
-				startPosition, endPosition, lineNumber);
-			if (problem.isError() && ((problemId & IProblem.Syntax) != 0))
-				throw new ParseError();
-			return problem;
-		}
-		
-		public Locale getLocale() {
-			return Locale.getDefault();
-		}
-		
-		public String getLocalizedMessage(int problemId, String[] problemArguments) {
-			return "" + problemId; //$NON-NLS-1$
-		}
-	}
-
 	/**
 	 * RewriteInfos are used temporarily when rewriting the diff tree
 	 * in order to combine similar diff nodes ("smart folding").
@@ -176,16 +143,10 @@ public class JavaStructureCreator implements IStructureCreator {
 				buffer= new char[n];
 				contents.getChars(0, n, buffer, 0);
 			}
-			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
-			SourceElementParser parser= new SourceElementParser(builder,
-						new ProblemFactory(), new CompilerOptions(JavaCore.getOptions()));
-			try {
-				parser.parseCompilationUnit(builder, false);
-			} catch (ParseError ex) {
-				// NeedWork
-				// parse error: bail out
-				return null;
-			}
+			
+			JavaParseTreeBuilder p= new JavaParseTreeBuilder();
+			p.parse(root, buffer);
+			
 			return root;
 		}
 		return null;

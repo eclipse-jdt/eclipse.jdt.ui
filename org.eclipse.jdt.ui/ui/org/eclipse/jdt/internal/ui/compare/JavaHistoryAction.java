@@ -363,10 +363,7 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		run(fSelection);
 	}
 	
-	static CompilationUnit parsePartialCompilationUnit(
-		ICompilationUnit unit,
-		int position,
-		boolean resolveBindings) {
+	static CompilationUnit parsePartialCompilationUnit(ICompilationUnit unit) {
 				
 		if (unit == null) {
 			throw new IllegalArgumentException();
@@ -374,8 +371,8 @@ public abstract class JavaHistoryAction extends Action implements IActionDelegat
 		try {
 			ASTParser c= ASTParser.newParser(AST.JLS3);
 			c.setSource(unit);
-			c.setFocalPosition(position);
-			c.setResolveBindings(resolveBindings);
+			c.setFocalPosition(0);
+			c.setResolveBindings(false);
 			c.setWorkingCopyOwner(null);
 			ASTNode result= c.createAST(null);
 			return (CompilationUnit) result;

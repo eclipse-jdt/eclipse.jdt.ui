@@ -99,7 +99,7 @@ class JavaCompareUtilities {
 			return JavaPluginImages.DESC_OBJS_IMPCONT;
 		case IJavaElement.COMPILATION_UNIT:
 			return JavaPluginImages.DESC_OBJS_CUNIT;
-		}	
+		}
 		return ImageDescriptor.getMissingImageDescriptor();
 	}
 	
@@ -107,6 +107,10 @@ class JavaCompareUtilities {
 		if (isClass)
 			return JavaPluginImages.DESC_OBJS_CLASS;
 		return JavaPluginImages.DESC_OBJS_INTERFACE;
+	}
+
+	static ImageDescriptor getEnumImageDescriptor() {
+		return JavaPluginImages.DESC_OBJS_ENUM;
 	}
 
 	static ImageDescriptor getImageDescriptor(IMember element) {
@@ -184,6 +188,7 @@ class JavaCompareUtilities {
 			break;
 		case JavaNode.CLASS:
 		case JavaNode.INTERFACE:
+		case JavaNode.ENUM:
 			sb.append(JavaElement.JEM_TYPE);
 			sb.append(name);
 			break;

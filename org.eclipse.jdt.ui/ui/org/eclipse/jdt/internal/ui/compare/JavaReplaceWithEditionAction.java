@@ -113,7 +113,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					return;
 				}
 				
-				CompilationUnit root= parsePartialCompilationUnit(input.getCompilationUnit(), 0, false);
+				CompilationUnit root= parsePartialCompilationUnit(input.getCompilationUnit());
 				BodyDeclaration node= (BodyDeclaration)ASTNodes.getParent(NodeFinder.perform(root, input.getNameRange()), BodyDeclaration.class);
 				if (node == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);

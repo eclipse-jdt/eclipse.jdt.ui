@@ -10,199 +10,195 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.Iterator;
 import java.util.Stack;
 
-import org.eclipse.jdt.internal.compiler.*;
-import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-class JavaParseTreeBuilder extends SourceElementRequestorAdapter implements ICompilationUnit {
-	
+class JavaParseTreeBuilder extends ASTVisitor {
+
 	private static final boolean SHOW_COMPILATIONUNIT= true;
 
-	private char[] fBuffer;
-	private JavaNode fImportContainer;
+	//private char[] fBuffer;
+    private ASTParser fParser;
 	private Stack fStack= new Stack();
-	
-	/**
+	private JavaNode fImportContainer;
+   
+	JavaParseTreeBuilder() {
+	}
+
+	/*
 	 * Parsing is performed on the given buffer and the resulting tree
 	 * (if any) hangs below the given root.
 	 */
-	JavaParseTreeBuilder(JavaNode root, char[] buffer) {
-		fImportContainer= null;
+    public void parse(JavaNode root, char[] buffer) {
+        
+        //fBuffer= buffer;
+        
 		fStack.clear();
 		fStack.push(root);
-		fBuffer= buffer;
+
+		if (fParser == null)
+	        fParser= ASTParser.newParser(AST.JLS3);
+	    fParser.setSource(buffer);
+	    fParser.setFocalPosition(0);
+	    CompilationUnit cu= (CompilationUnit) fParser.createAST(null);
+	    cu.accept(this);
+    }
+
+    public boolean visit(PackageDeclaration node) {
+        	new JavaNode(getCurrentContainer(), JavaNode.PACKAGE, null, node.getStartPosition(), node.getLength());
+		return false;
 	}
-			
-	//---- ICompilationUnit
-	/* (non Java doc)
-	 * @see ICompilationUnit#getContents
-	 */
-	public char[] getContents() {
-		return fBuffer;
+
+	public boolean visit(CompilationUnit node) {
+	    if (SHOW_COMPILATIONUNIT)
+	        push(JavaNode.CU, null, 0, node.getLength());
+	    return true;
 	}
-	
-	/* (non Java doc)
-	 * @see ICompilationUnit#getFileName
-	 */
-	public char[] getFileName() {
-		return new char[0];
+	public void endVisit(CompilationUnit node) {
+	    if (SHOW_COMPILATIONUNIT)
+	        pop();
 	}
-	
-	/* (non Java doc)
-	 * @see ICompilationUnit#getMainTypeName
-	 */
-	public char[] getMainTypeName() {
-		return new char[0];
+
+	public boolean visit(TypeDeclaration node) {
+		push(node.isInterface() ? JavaNode.INTERFACE : JavaNode.CLASS, node.getName().toString(), node.getStartPosition(), node.getLength());
+		return true;
 	}
-	
-	/* (non Java doc)
-	 * @see ICompilationUnit#getMainTypeName
-	 */
-	public char[][] getPackageName() {
-		return null;
-	}
-	
-	//---- ISourceElementRequestor
-	
-	public void enterCompilationUnit() {
-		if (SHOW_COMPILATIONUNIT)
-			push(JavaNode.CU, null, 0);
+	public void endVisit(TypeDeclaration node) {
+		pop();
 	}
 	
-	public void exitCompilationUnit(int declarationEnd) {
-		if (SHOW_COMPILATIONUNIT)
-			pop(declarationEnd);
+	public boolean visit(EnumDeclaration node) {
+		push(JavaNode.ENUM, node.getName().toString(), node.getStartPosition(), node.getLength());
+		return true;
+	}
+	public void endVisit(EnumDeclaration node) {
+		pop();
+	}
+
+	public boolean visit(MethodDeclaration node) {
+	    String signature= getSignature(node);
+		push(node.isConstructor() ? JavaNode.CONSTRUCTOR : JavaNode.METHOD, signature, node.getStartPosition(), node.getLength());
+		return false;
+	}
+	public void endVisit(MethodDeclaration node) {
+		pop();
 	}
 	
-	public void acceptPackage(int declarationStart, int declarationEnd, char[] p3) {
-		push(JavaNode.PACKAGE, null, declarationStart);
-		pop(declarationEnd);
+	public boolean visit(Initializer node) {
+		push(JavaNode.INIT, getCurrentContainer().getInitializerCount(), node.getStartPosition(), node.getLength());
+		return false;
 	}
-	
-	//TODO: (andre) remove on 2003/04/23
-	public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand) {
-		acceptImport(declarationStart, declarationEnd, name, onDemand, 0);
+	public void endVisit(Initializer node) {
+		pop();
 	}
+
 	
-	public void acceptImport(int declarationStart, int declarationEnd, char[] name, boolean onDemand, int modifiers) {
-		int length= declarationEnd-declarationStart+1;
+	public boolean visit(ImportDeclaration node) {
+	    int s= node.getStartPosition();
+	    int l= node.getLength();
+	    int declarationEnd= s+l;
 		if (fImportContainer == null)
-			fImportContainer= new JavaNode(getCurrentContainer(), JavaNode.IMPORT_CONTAINER, null, declarationStart, length);
-		String nm= new String(name);
-		if (onDemand)
-			nm+= ".*"; //$NON-NLS-1$
-		new JavaNode(fImportContainer, JavaNode.IMPORT, nm, declarationStart, length);
+			fImportContainer= new JavaNode(getCurrentContainer(), JavaNode.IMPORT_CONTAINER, null, s, l);
+		String nm= node.getName().toString();
+		if (node.isOnDemand())
+		    nm+= ".*"; //$NON-NLS-1$
+		new JavaNode(fImportContainer, JavaNode.IMPORT, nm, s, l);
 		fImportContainer.setLength(declarationEnd-fImportContainer.getRange().getOffset()+1);
 		fImportContainer.setAppendPosition(declarationEnd+2);		// FIXME
+		return false;
 	}
 	
-	public void enterClass(int declarationStart, int p2, char[] name, int p4, int p5, char[] p6, char[][] p7, char[][] typeParameterNames, char[][][] typeParameterBounds) {
-		push(JavaNode.CLASS, new String(name), declarationStart);
+	public boolean visit(VariableDeclarationFragment node) {
+	    ASTNode parent= node.getParent();
+		push(JavaNode.FIELD, node.getName().toString(), parent.getStartPosition(), parent.getLength());
+		return false;
 	}
-	
-	public void exitClass(int declarationEnd) {
-		pop(declarationEnd);
+	public void endVisit(VariableDeclarationFragment node) {
+		pop();
+	}
+ 
+	public boolean visit(EnumConstantDeclaration node) {
+		push(JavaNode.FIELD, node.getName().toString(), node.getStartPosition(), node.getLength());
+		return false;
+	}
+	public void endVisit(EnumConstantDeclaration node) {
+		pop();
 	}
 
-	public void enterInterface(int declarationStart, int p2, char[] name, int p4, int p5, char[][] p6, char[][] typeParameterNames, char[][][] typeParameterBounds) {
-		push(JavaNode.INTERFACE, new String(name), declarationStart);
-	}
-	
-	public void exitInterface(int declarationEnd) {
-		pop(declarationEnd);
-	}
-	
-	public void enterInitializer(int declarationStart, int modifiers) {
-		push(JavaNode.INIT, getCurrentContainer().getInitializerCount(), declarationStart);
-	}
-
-	public void exitInitializer(int declarationEnd) {
-		pop(declarationEnd);
-	}
-	
-	public void enterConstructor(int declarationStart, int p2, char[] name, int p4, int p5, char[][] parameterTypes, char[][] p7, char[][] p8, char[][] typeParameterNames, char[][][] typeParameterBounds) {
-		push(JavaNode.CONSTRUCTOR, getSignature(name, parameterTypes), declarationStart);
-	}
-	
-	public void exitConstructor(int declarationEnd) {
-		pop(declarationEnd);
-	}
-	
-	public void enterMethod(int declarationStart, int p2, char[] p3, char[] name, int p5, int p6, char[][] parameterTypes, char[][] p8, char[][] p9, char[][] typeParameterNames, char[][][] typeParameterBounds){
-		push(JavaNode.METHOD, getSignature(name, parameterTypes), declarationStart);
-	}
-	
-	public void exitMethod(int declarationEnd) {
-		pop(declarationEnd);
-	}
-	
-	public void enterField(int declarationStart, int p2, char[] p3, char[] name, int p5, int p6) {
-		push(JavaNode.FIELD, new String(name), declarationStart);
-	}
-	
-	public void exitField(int initializationStart, int declarationEnd, int declarationSourceEnd) {
-		pop(declarationSourceEnd);
-	}
-	
-	private JavaNode getCurrentContainer() {
-		return (JavaNode) fStack.peek();
-	}
-	
 	/**
 	 * Adds a new JavaNode with the given type and name to the current container.
 	 */
-	private void push(int type, String name, int declarationStart) {
-						
+	private void push(int type, String name, int declarationStart, int length) {
+	    
+	    /*
 		while (declarationStart > 0) {
 			char c= fBuffer[declarationStart-1];
 			if (c != ' ' && c != '\t')
 				break;
 			declarationStart--;
 		}
-					
-		fStack.push(new JavaNode(getCurrentContainer(), type, name, declarationStart, 0));
+		*/
+	    
+		JavaNode node= new JavaNode(getCurrentContainer(), type, name, declarationStart, length);
+		if (type == JavaNode.CU)
+		    node.setAppendPosition(declarationStart+length+1);
+		else
+		    node.setAppendPosition(declarationStart+length);
+		
+		fStack.push(node);
 	}
 	
 	/**
 	 * Closes the current Java node by setting its end position
 	 * and pops it off the stack.
 	 */
-	private void pop(int declarationEnd) {
-		
-		JavaNode current= getCurrentContainer();
-		if (current.getTypeCode() == JavaNode.CU)
-			current.setAppendPosition(declarationEnd+1);
-		else
-			current.setAppendPosition(declarationEnd);
-			
-		current.setLength(declarationEnd - current.getRange().getOffset() + 1);
-
+	private void pop() {		
 		fStack.pop();
 	}
+
+	private JavaNode getCurrentContainer() {
+		return (JavaNode) fStack.peek();
+	}
 	
-	/**
-	 * Builds a signature string from the given name and parameter types.
-	 */
-	private String getSignature(char[] name, char[][] parameterTypes) {
+	private String getSignature(MethodDeclaration node) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(name);
+		buffer.append(node.getName().toString());
 		buffer.append('(');
-		if (parameterTypes != null) {
-			for (int p= 0; p < parameterTypes.length; p++) {
-				String parameterType= new String(parameterTypes[p]);
+		boolean first= true;
+	    Iterator iterator= node.parameters().iterator();
+		while (iterator.hasNext()) {
+		    Object object= iterator.next();
+		    
+		    if (object instanceof SingleVariableDeclaration) {
+		        SingleVariableDeclaration svd= (SingleVariableDeclaration) object;
+				String parameterType= svd.getType().toString();
 				
 				int pos= parameterType.lastIndexOf('.');
 				if (pos >= 0)
 					parameterType= parameterType.substring(pos+1);
 				
-				buffer.append(parameterType);
-				if (p < parameterTypes.length-1)
+				if (! first)
 					buffer.append(", "); //$NON-NLS-1$
-			}
+				first= false;
+				buffer.append(parameterType);
+		    }
 		}
 		buffer.append(')');
 		return buffer.toString();
 	}
 }
-

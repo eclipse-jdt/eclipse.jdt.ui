@@ -33,10 +33,11 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	public static final int IMPORT= 3;
 	public static final int INTERFACE= 4;
 	public static final int CLASS= 5;
-	public static final int FIELD= 6;
-	public static final int INIT= 7;
-	public static final int CONSTRUCTOR= 8;
-	public static final int METHOD= 9;
+	public static final int ENUM= 6;
+	public static final int FIELD= 7;
+	public static final int INIT= 8;
+	public static final int CONSTRUCTOR= 9;
+	public static final int METHOD= 10;
 
 	private int fInitializerCount= 1;
 	private boolean fIsEditable;
@@ -169,6 +170,9 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		case FIELD:
 			id= JavaCompareUtilities.getImageDescriptor(IJavaElement.FIELD);
 			break;					
+		case ENUM:
+			id= JavaCompareUtilities.getEnumImageDescriptor();
+			break;
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);
 	}
@@ -179,11 +183,6 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	}
 	
 	public ITypedElement replace(ITypedElement child, ITypedElement other) {
-		/* commented out for #34745
-		ITypedElement e= super.replace(child, other);
-		nodeChanged(this);
-		return e;
-		*/
 		nodeChanged(this);
 		return child;
 	}

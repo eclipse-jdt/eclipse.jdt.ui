@@ -141,7 +141,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			if (parent instanceof IMember)
 				cu2= ((IMember)parent).getCompilationUnit();
 			
-			CompilationUnit root= parsePartialCompilationUnit(cu2, 0, false);
+			CompilationUnit root= parsePartialCompilationUnit(cu2);
 			OldASTRewrite rewriter= new OldASTRewrite(root);
 			List list= null;
 			int pos= getIndex(root, input, list);
