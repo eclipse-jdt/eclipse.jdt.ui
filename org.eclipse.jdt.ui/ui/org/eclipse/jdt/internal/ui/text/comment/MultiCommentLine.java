@@ -169,16 +169,26 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 		if (line == 0) {
 
 			offset= text.indexOf(start);
+			if (offset >= 0 && text.substring(0, offset).trim().length() != 0)
+				offset= -1;
+			
 			if (offset >= 0) {
 
 				offset += start.length();
 				range.trimBegin(offset);
 
 				postfix= text.lastIndexOf(end);
-				if (postfix > offset)
+				if (postfix >= 0 && text.substring(postfix + end.length()).trim().length() != 0)
+					postfix= -1;
+				
+				if (postfix >= offset)
+					// comment ends on same line
 					range.setLength(postfix - offset);
 				else {
 					postfix= text.lastIndexOf(content);
+					if (postfix >= 0 && text.substring(postfix + content.length()).trim().length() != 0)
+						postfix= -1;
+					
 					if (postfix >= offset) {
 
 						range.setLength(postfix - offset);
@@ -198,34 +208,41 @@ public class MultiCommentLine extends CommentLine implements ICommentAttributes,
 		} else if (line == lines - 1) {
 
 			offset= text.indexOf(content);
-			if (offset >= 0) {
+			if (offset >= 0 && text.substring(0, offset).trim().length() != 0)
+				offset= -1;
+			postfix= text.lastIndexOf(end);
+			if (postfix >= 0 && text.substring(postfix + end.length()).trim().length() != 0)
+				postfix= -1;
+			
+			if (offset >= 0 && offset == postfix)
+				// no content on line, only the comment postfix
+				range.setLength(0);
+			else {
+				if (offset >= 0)
+					// omit the content prefix
+					range.trimBegin(offset + content.length());
+				
+				if (postfix >= 0)
+					// omit the comment postfix
+					range.trimEnd(-end.length());
+				
+				text= parent.getText(range.getOffset(), range.getLength());
+				final IRegion region= trimLine(text, content);
+				if (region.getOffset() != 0 || region.getLength() != text.length()) {
 
-				range.trimBegin(offset + 1);
-				if (text.startsWith(end, offset))
-					range.setLength(0);
-				else {
+					range.move(region.getOffset());
+					range.setLength(region.getLength());
 
-					postfix= text.lastIndexOf(end);
-					if (postfix > offset) {
-
-						range.trimEnd(-end.length());
-						text= parent.getText(range.getOffset(), range.getLength());
-
-						final IRegion region= trimLine(text, content);
-						if (region.getOffset() != 0 || region.getLength() != text.length()) {
-
-							range.move(region.getOffset());
-							range.setLength(region.getLength());
-
-							parent.setBorder(BORDER_UPPER);
-							parent.setBorder(BORDER_LOWER);
-						}
-					}
+					parent.setBorder(BORDER_UPPER);
+					parent.setBorder(BORDER_LOWER);
 				}
 			}
 		} else {
 
 			offset= text.indexOf(content);
+			if (offset >= 0 && text.substring(0, offset).trim().length() != 0)
+				offset= -1;
+			
 			if (offset >= 0) {
 
 				offset += content.length();
