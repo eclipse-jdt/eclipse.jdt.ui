@@ -76,7 +76,7 @@ public class ExtractTempAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(JavaTextSelection selection) {
-		return (selection.resolveInMethodBody() || selection.resolveInInitializer()) && 
+		return (selection.resolveInMethodBody() || selection.resolveInStaticInitializer()) && 
 			ExtractTempRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
 	}
 	

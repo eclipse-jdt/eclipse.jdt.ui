@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -49,8 +51,11 @@ public class JavaTextSelection extends TextSelection {
 	private boolean fInMethodBodyRequested;
 	private boolean fInMethodBody;
 	
-	private boolean fInInitializeRequested;
-	private boolean fInInitializer;
+	private boolean fInStaticInitializerRequested;
+	private boolean fInStaticInitializer;
+	
+	private boolean fInVariableInitializerRequested;
+	private boolean fInVariableInitializer;
 	
 	/**
 	 * Creates a new text selection at the given offset and length.
@@ -143,31 +148,61 @@ public class JavaTextSelection extends TextSelection {
 		return fInMethodBody;
 	}
 	
-	public boolean resolveInInitializer() {
-		if (fInInitializeRequested)
-			return fInInitializer;
-		fInInitializeRequested= true;
+	public boolean resolveInStaticInitializer() {
+		if (fInStaticInitializerRequested)
+			return fInStaticInitializer;
+		fInStaticInitializerRequested= true;
 		resolveSelectedNodes();
 		ASTNode node= getStartNode();
 		if (node == null) {
-			fInInitializer= true;
+			fInStaticInitializer= true;
 		} else {
 			while (node != null) {
 				int nodeType= node.getNodeType();
 				if (node instanceof AbstractTypeDeclaration) {
-					fInInitializer= false;
+					fInStaticInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
-					fInInitializer= false;
+					fInStaticInitializer= false;
 					break;
 				} else if (nodeType == ASTNode.INITIALIZER) {
-					fInInitializer= true;
+					fInStaticInitializer= true;
 					break;
 				}
 				node= node.getParent();
 			}
 		}
-		return fInInitializer;
+		return fInStaticInitializer;
+	}
+	
+	public boolean resolveInVariableInitializer() {
+		if (fInVariableInitializerRequested)
+			return fInVariableInitializer;
+		fInVariableInitializerRequested= true;
+		resolveSelectedNodes();
+		ASTNode node= getStartNode();
+		ASTNode last= null;
+		while (node != null) {
+			int nodeType= node.getNodeType();
+			if (node instanceof AbstractTypeDeclaration) {
+				fInVariableInitializer= false;
+				break;
+			} else if (nodeType == ASTNode.ANONYMOUS_CLASS_DECLARATION) {
+				fInVariableInitializer= false;
+				break;
+			} else if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&
+					   ((VariableDeclarationFragment)node).getInitializer() == last) {
+				fInVariableInitializer= true;
+				break;
+			} else if (nodeType == ASTNode.SINGLE_VARIABLE_DECLARATION &&
+				       ((SingleVariableDeclaration)node).getInitializer() == last) {
+				fInVariableInitializer= true;
+				break;
+			}
+			last= node;
+			node= node.getParent();
+		}
+		return fInVariableInitializer;
 	}
 	
 	private ASTNode getStartNode() {

@@ -76,7 +76,7 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 	}
 	
 	private boolean canEnable(JavaTextSelection selection) {
-		return (selection.resolveInInitializer() || selection.resolveInMethodBody()) && 
+		return (selection.resolveInStaticInitializer() || selection.resolveInMethodBody() || selection.resolveInVariableInitializer()) && 
 			ExtractConstantRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
 	}
 	
