@@ -67,6 +67,7 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(MarkerResolutionTest.allTests());
 		suite.addTest(JavadocQuickFixTest.allTests());
 		suite.addTest(ConvertForLoopQuickFixTest.allTests());
+		suite.addTest(AdvancedQuickAssistTest.allTests());
 		return new ProjectTestSetup(suite);
 	}
 
