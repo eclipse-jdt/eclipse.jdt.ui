@@ -12,18 +12,18 @@ package org.eclipse.jdt.text.tests.comments;
 
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.text.comment.CommentFormatter;
 import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 
 /**
  * Utilities for the comment formatter.
@@ -53,9 +53,9 @@ public class CommentFormatterUtil {
 	 * @param textMeasurement
 	 *                   Optional text measurement for font specific formatting. Can be
 	 *                   <code>null</code>.
-	 * @return The text edit of the formatting process
+	 * @return the formatted source string
 	 */
-	public static TextEdit format(String type, String source, int offset, int length, Map preferences, ITextMeasurement textMeasurement) {
+	public static String format(String type, String source, int offset, int length, Map preferences, ITextMeasurement textMeasurement) {
 		Assert.isTrue(IJavaPartitions.JAVA_DOC.equals(type) || IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type) || IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type));
 
 		Assert.isNotNull(source);
@@ -65,9 +65,18 @@ public class CommentFormatterUtil {
 		Assert.isTrue(length <= source.length());
 
 		final IDocument document= new Document(source);
-		final TypedPosition position= new TypedPosition(offset, length, type);
 
-		CommentFormattingContext.mapOptions(preferences);
-		return new CommentFormatter(textMeasurement, preferences).format(document, position);
+		IFormattingContext context= new CommentFormattingContext();
+		context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, preferences);
+		context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.TRUE);
+		context.setProperty(FormattingContextProperties.CONTEXT_MEDIUM, document);
+		context.setProperty(FormattingContextProperties.CONTEXT_PARTITION, new TypedPosition(offset, length, type));
+		
+		CommentFormattingStrategy strategy= new CommentFormattingStrategy(textMeasurement);
+		strategy.formatterStarts(context);
+		strategy.format();
+		strategy.formatterStops();
+		
+		return document.get();
 	}
 }

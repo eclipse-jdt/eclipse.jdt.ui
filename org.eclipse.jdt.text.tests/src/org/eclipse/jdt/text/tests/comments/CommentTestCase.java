@@ -16,14 +16,10 @@ import java.util.Map;
 
 import junit.framework.TestCase;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.TextUtilities;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
@@ -83,8 +79,6 @@ public abstract class CommentTestCase extends TestCase {
 		assertTrue(type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT) || type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT));
 
 		final CommentFormattingContext context= new CommentFormattingContext();
-		final TextEdit edit= CommentFormatterUtil.format(type, text, offset, length, createOptions(context), null);
-
-		return CodeFormatterUtil.evaluateFormatterEdit(text, edit, null);
+		return CommentFormatterUtil.format(type, text, offset, length, createOptions(context), null);
 	}
 }
