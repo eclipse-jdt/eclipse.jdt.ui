@@ -18,7 +18,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 
-class MockReorgQueries implements IReorgQueries {
+public class MockReorgQueries implements IReorgQueries {
 	private final List fQueriesRun= new ArrayList();
 
 	public IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID) {
