@@ -48,11 +48,11 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
-	    return new MySetup(someTest);
+	    return new RefactoringTestSetup(someTest);
 	}
 	
 	private String getSimpleTestFileName(boolean canInline, boolean input){

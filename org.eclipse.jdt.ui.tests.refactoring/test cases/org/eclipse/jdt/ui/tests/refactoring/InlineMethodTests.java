@@ -47,7 +47,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new RefactoringTestSetup(someTest);
 	}	
 	
 	protected String getResourceLocation() {

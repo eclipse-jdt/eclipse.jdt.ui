@@ -6,13 +6,13 @@ import java.util.Set;
 
 class B extends A{
 
-	public Collection i;
+	public Set m() {
+		return null;
+	}
 
 	public List f() { 
 		return null;
 	}
 
-	public Set m() {
-		return null;
-	}
+	public Collection i;
 }

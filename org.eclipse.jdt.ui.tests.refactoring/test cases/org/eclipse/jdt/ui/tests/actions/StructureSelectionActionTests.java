@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectEn
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.ui.tests.refactoring.AbstractSelectionTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
@@ -42,11 +42,11 @@ public class StructureSelectionActionTests extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test test) {
-		return new MySetup(test);
+		return new RefactoringTestSetup(test);
 	}
 	
 	private String getSimpleTestFileName(boolean input){

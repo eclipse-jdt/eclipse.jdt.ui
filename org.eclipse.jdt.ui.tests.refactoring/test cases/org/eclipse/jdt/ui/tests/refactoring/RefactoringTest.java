@@ -79,8 +79,8 @@ public abstract class RefactoringTest extends TestCase {
 	}
 
 	protected void setUp() throws Exception {
-		fRoot= MySetup.getDefaultSourceFolder();
-		fPackageP= MySetup.getPackageP();
+		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
+		fPackageP= RefactoringTestSetup.getPackageP();
 		
 		if (fIsVerbose){
 			System.out.println("\n---------------------------------------------");

@@ -28,9 +28,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 
-public class MySetup extends TestSetup {
+public class RefactoringTestSetup extends TestSetup {
 	
-	public MySetup(Test test) {
+	public RefactoringTestSetup(Test test) {
 		super(test);
 	}
 	public static final String CONTAINER= "src";
@@ -41,19 +41,19 @@ public class MySetup extends TestSetup {
 	public static IPackageFragmentRoot getDefaultSourceFolder() throws Exception {
 		if (fgRoot != null) 
 			return fgRoot;
-		throw new Exception("MySetup not initialized");
+		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
 	}
 	
 	public static IJavaProject getProject()throws Exception {
 		if (fgJavaTestProject != null)
 			return fgJavaTestProject;
-		throw new Exception("MySetup not initialized");
+		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
 	}
 	
 	public static IPackageFragment getPackageP()throws Exception {
 		if (fgPackageP != null) 
 			return fgPackageP;
-		throw new Exception("MySetup not initialized");
+		throw new Exception(RefactoringTestSetup.class.getName() + " not initialized");
 	}
 	
 	protected void setUp() throws Exception {

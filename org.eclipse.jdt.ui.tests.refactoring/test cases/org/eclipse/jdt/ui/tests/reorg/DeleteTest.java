@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
@@ -54,11 +54,11 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new RefactoringTestSetup(someTest);
 	}
 
 	protected String getRefactoringPath() {
@@ -78,7 +78,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	private IPackageFragmentRoot getArchiveRoot() throws JavaModelException, Exception {
-		IPackageFragmentRoot[] roots= MySetup.getProject().getPackageFragmentRoots();
+		IPackageFragmentRoot[] roots= RefactoringTestSetup.getProject().getPackageFragmentRoots();
 		IPackageFragmentRoot archive= null;
 		for (int i= 0; i < roots.length; i++) {
 			IPackageFragmentRoot root= roots[i];
@@ -130,7 +130,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDisabled_projectAndNonProject() throws Exception{
-		IJavaElement[] javaElements= {MySetup.getProject(), getPackageP()};
+		IJavaElement[] javaElements= {RefactoringTestSetup.getProject(), getPackageP()};
 		verifyDisabled(javaElements);
 	}
 
@@ -150,7 +150,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDisabled_nullResource() throws Exception{
-		Object[] elements= {MySetup.getProject(), null};
+		Object[] elements= {RefactoringTestSetup.getProject(), null};
 		verifyDisabled(elements);
 	}
 	
@@ -201,7 +201,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDisabled_javaProject() throws Exception{
-		Object[] elements= {MySetup.getProject()};
+		Object[] elements= {RefactoringTestSetup.getProject()};
 		verifyDisabled(elements);
 	}
 
@@ -221,7 +221,7 @@ public class DeleteTest extends RefactoringTest{
 	}
 	
 	public void testDisabled_simpleProject() throws Exception{
-		Object[] elements= {MySetup.getProject().getProject()};
+		Object[] elements= {RefactoringTestSetup.getProject().getProject()};
 		verifyDisabled(elements);
 	}
 
@@ -745,7 +745,7 @@ public class DeleteTest extends RefactoringTest{
 	
 	public void testDeleteSourceFolder() throws Exception{
 		ParticipantTesting.reset();
-		IPackageFragmentRoot fredRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "fred");
+		IPackageFragmentRoot fredRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "fred");
 		assertTrue("not created", fredRoot.exists());
 
 		Object[] elements= {fredRoot};
@@ -763,7 +763,7 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.reset();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
-		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(MySetup.getProject(), new Path(lib.getPath()), null, null);
+		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(RefactoringTestSetup.getProject(), new Path(lib.getPath()), null, null);
 
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);			

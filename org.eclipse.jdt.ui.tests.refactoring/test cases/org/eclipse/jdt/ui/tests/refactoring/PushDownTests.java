@@ -47,9 +47,13 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test someTest) {
+		return new Java15Setup(someTest);
+	}	
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -1135,5 +1139,429 @@ public class PushDownTests extends RefactoringTest {
 		IType typeB= cu.getType("B");
 		IMember[] members= {typeA, typeB};
 		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement4() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement5() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement6() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement7() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement8() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be enabled", PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement9() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement10() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement11() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeA= cu.getType("A");
+		IMember[] members= {typeA};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement12() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement13() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement14() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement15() throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PushDownRefactoring.isAvailable(members));
+	}
+
+	public void testGenerics0() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics1() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics2() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics3() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics4() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics5() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics6() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics7() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics8() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics9() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics10() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics11() throws Exception{
+		String[] selectedMethodNames= {"m"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics12() throws Exception{
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"f"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {"f"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics13() throws Exception{
+		String[] selectedMethodNames= {};
+		String[][] selectedMethodSignatures= {};
+		String[] selectedFieldNames= {"f"};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {"f"};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics14() throws Exception{
+		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics15() throws Exception{
+		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics16() throws Exception{
+		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics17() throws Exception{
+		String[] selectedMethodNames= {"f"};
+		String[][] selectedMethodSignatures= {new String[0]};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics18() throws Exception{
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[] {"QT;"}};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= selectedMethodNames;
+		String[][] signaturesOfMethodsToPushDown= selectedMethodSignatures;
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= {};
+		String[][] signaturesOfMethodsToDeclareAbstract= {};
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
+	}
+
+	public void testGenerics19() throws Exception{
+		String[] selectedMethodNames= {"f", "m"};
+		String[][] selectedMethodSignatures= {new String[0], new String[]{"QT;"}};
+		String[] selectedFieldNames= {};
+		String[] namesOfMethodsToPushDown= {};
+		String[][] signaturesOfMethodsToPushDown= {};
+		String[] namesOfFieldsToPushDown= {};
+		String[] namesOfMethodsToDeclareAbstract= selectedMethodNames;
+		String[][] signaturesOfMethodsToDeclareAbstract= selectedMethodSignatures;
+		
+		helper(selectedMethodNames, selectedMethodSignatures, 
+			   selectedFieldNames,	
+			   namesOfMethodsToPushDown, signaturesOfMethodsToPushDown, 
+			   namesOfFieldsToPushDown, 
+			   namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract, null, null);
 	}
 }

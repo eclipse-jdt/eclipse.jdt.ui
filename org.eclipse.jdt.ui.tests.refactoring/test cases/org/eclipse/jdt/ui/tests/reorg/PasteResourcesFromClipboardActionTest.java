@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
@@ -64,11 +64,11 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test test) {
-		return new MySetup(test);
+		return new RefactoringTestSetup(test);
 	}
 
 	private IFile createFile(IFolder folder, String fileName) throws Exception {
@@ -92,8 +92,8 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
 		fCuB= createCU(getPackageP(), CU_B_NAME + ".java", "package p; class B{}");
 		
-		fPackageQ= MySetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
-		fPackageQ_R= MySetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 		
@@ -193,14 +193,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	}
 	
 	public void testProject() throws Exception{
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{getPackageP()});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fPackageQ});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fSimpleProject});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fAnotherProject});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{MySetup.getProject()});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{getRoot()});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fCuA});
-		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{faTxt});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{getPackageP()});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{fPackageQ});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{fSimpleProject});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{fAnotherProject});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{RefactoringTestSetup.getProject()});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{getRoot()});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{fCuA});
+		checkEnabled(new Object[]{RefactoringTestSetup.getProject()}, new Object[]{faTxt});
 	}
 	
 	public void testCu() throws Exception{
@@ -208,7 +208,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		checkEnabled(new Object[]{fCuA}, new Object[]{fPackageQ});
 		checkEnabled(new Object[]{fCuA}, new Object[]{fSimpleProject});
 		checkEnabled(new Object[]{fCuA}, new Object[]{fAnotherProject});
-		checkEnabled(new Object[]{fCuA}, new Object[]{MySetup.getProject()});
+		checkEnabled(new Object[]{fCuA}, new Object[]{RefactoringTestSetup.getProject()});
 		checkEnabled(new Object[]{fCuA}, new Object[]{getRoot()});
 		checkEnabled(new Object[]{fCuA}, new Object[]{fCuA});		
 		checkEnabled(new Object[]{fCuA}, new Object[]{faTxt});
@@ -219,7 +219,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		checkEnabled(new Object[]{faTxt}, new Object[]{fPackageQ});
 		checkEnabled(new Object[]{faTxt}, new Object[]{fSimpleProject});
 		checkEnabled(new Object[]{faTxt}, new Object[]{fAnotherProject});
-		checkEnabled(new Object[]{faTxt}, new Object[]{MySetup.getProject()});
+		checkEnabled(new Object[]{faTxt}, new Object[]{RefactoringTestSetup.getProject()});
 		checkEnabled(new Object[]{faTxt}, new Object[]{getRoot()});
 		checkEnabled(new Object[]{faTxt}, new Object[]{fCuA});
 		checkEnabled(new Object[]{faTxt}, new Object[]{faTxt});
@@ -232,14 +232,14 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{fPackageQ});
 		
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{fAnotherProject});
-		checkEnabled(new Object[]{getPackageP()}, new Object[]{MySetup.getProject()});		
+		checkEnabled(new Object[]{getPackageP()}, new Object[]{RefactoringTestSetup.getProject()});		
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{fCuA});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{faTxt});
 	}
 	
 	public void testRoot() throws Exception {		
 		checkEnabled(new Object[]{getRoot()}, new Object[]{fAnotherProject});
-		checkEnabled(new Object[]{getRoot()}, new Object[]{MySetup.getProject()});		
+		checkEnabled(new Object[]{getRoot()}, new Object[]{RefactoringTestSetup.getProject()});		
 		
 		checkEnabled(new Object[]{getRoot()}, new Object[]{getRoot()});
 		checkEnabled(new Object[]{getRoot()}, new Object[]{fSimpleProject});

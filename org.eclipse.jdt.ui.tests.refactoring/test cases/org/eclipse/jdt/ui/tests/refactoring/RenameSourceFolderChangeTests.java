@@ -32,7 +32,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public void test0() throws Exception {
@@ -40,8 +40,8 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		String newName= "newName";
 		
 		try{
-			IJavaProject testProject= MySetup.getProject();
-			IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName);
+			IJavaProject testProject= RefactoringTestSetup.getProject();
+			IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), oldName);
 			
 			assertTrue("old folder should exist here", oldRoot.exists());
 			
@@ -56,7 +56,7 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 				assertTrue("should exist " + i, newRoots[i].exists());
 			}
 		} finally{
-			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), newName);
+			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), newName);
 		}	
 	}
 	
@@ -67,9 +67,9 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 		
 		try{
 			
-			IJavaProject testProject= MySetup.getProject();
-			IPackageFragmentRoot oldRoot1= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName1);
-			IPackageFragmentRoot oldRoot2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), oldName2);
+			IJavaProject testProject= RefactoringTestSetup.getProject();
+			IPackageFragmentRoot oldRoot1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), oldName1);
+			IPackageFragmentRoot oldRoot2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), oldName2);
 			
 			assertTrue("old folder should exist here", oldRoot1.exists());
 			assertTrue("old folder 2 should exist here", oldRoot2.exists());
@@ -88,8 +88,8 @@ public class RenameSourceFolderChangeTests extends RefactoringTest {
 					assertEquals("3rd position should be:" + newName1, newName1, newRoots[i].getElementName());
 			} 
 		}finally{		
-			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), newName1);
-			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), oldName2);
+			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), newName1);
+			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), oldName2);
 		}	
 	}
 	

@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring.infra;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 public class TextRangeUtil {
 
@@ -28,10 +31,10 @@ public class TextRangeUtil {
 	}
 
 	public static int getOffset(ICompilationUnit cu, int line, int column) throws Exception{
-		TextBuffer tb= TextBuffer.create(cu.getSource());
-		int r= tb.getLineInformation(line - 1).getOffset();
-		
-		int lineTabCount= calculateTabCountInLine(tb.getLineContent(line - 1), column);		
+		IDocument document= new Document(cu.getSource());
+		int r= document.getLineInformation(line - 1).getOffset();
+		IRegion region= document.getLineInformation(line - 1);
+		int lineTabCount= calculateTabCountInLine(document.get(region.getOffset(), region.getLength()), column);		
 		r += (column - 1) - (lineTabCount * getTabWidth()) + lineTabCount;
 		return r ;
 	}

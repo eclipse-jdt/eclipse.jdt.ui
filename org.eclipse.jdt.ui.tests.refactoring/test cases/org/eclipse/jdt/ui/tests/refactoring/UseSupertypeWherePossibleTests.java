@@ -34,7 +34,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	protected String getRefactoringPath() {

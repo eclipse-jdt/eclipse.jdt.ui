@@ -35,13 +35,13 @@ public class CopyPackageChangeTest extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public void test0() throws Exception{
 		createCU(getPackageP(), "A.java", getFileContents(getRefactoringPath() + "A.java"));
 		
-		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "newName");
+		IPackageFragmentRoot newRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "newName");
 		
 		String packName= getPackageP().getElementName();
 		CopyPackageChange change= new CopyPackageChange(getPackageP(), newRoot, null);

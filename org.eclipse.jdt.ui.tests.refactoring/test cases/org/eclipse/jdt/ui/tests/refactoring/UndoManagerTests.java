@@ -27,7 +27,7 @@ public class UndoManagerTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	private void checkState(boolean undo, boolean redo, int undoCount, int redoCount){

@@ -47,11 +47,11 @@ public class PullUpTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new Java15Setup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new Java15Setup(someTest);
 	}	
 
 	protected String getRefactoringPath() {
@@ -213,7 +213,7 @@ public class PullUpTests extends RefactoringTest {
 		IMember[] membersToPullUp= merge(methodsToPullUp, fieldsToPullUp, typesToPullUp);
 		
 		IMethod[] methodsToDeclareAbstract= findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
-		ref.setMembersToPullUp(membersToPullUp);
+		ref.setMembersToMove(membersToPullUp);
 		ref.setMethodsToDeclareAbstract(methodsToDeclareAbstract);
 		if (deleteAllPulledUpMethods && methodsToPullUp.length != 0)
 			ref.setMethodsToDelete(methodsToPullUp);
@@ -1398,5 +1398,155 @@ public class PullUpTests extends RefactoringTest {
 		IMember[] members= {typeB};
 		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
 	}
-}
 
+	public void testEnablement4() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement5() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement6() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement7() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement8() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement9() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement10() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement11() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement12() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("Outer").getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement13() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IType typeD= cu.getType("D");
+		IMember[] members= {typeB, typeD};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement14() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IType typeD= cu.getType("D");
+		IMember[] members= {typeB, typeD};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement15() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IType typeD= cu.getType("D");
+		IMember[] members= {typeB, typeD};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement16() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IType typeD= cu.getType("D");
+		IMember[] members= {typeB, typeD};
+		assertTrue("should be disabled", ! PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement17() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement18() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement19() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement20() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement21() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement22() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement23() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+
+	public void testEnablement24() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType typeB= cu.getType("B");
+		IMember[] members= {typeB};
+		assertTrue("should be enabled", PullUpRefactoring.isAvailable(members));
+	}
+}

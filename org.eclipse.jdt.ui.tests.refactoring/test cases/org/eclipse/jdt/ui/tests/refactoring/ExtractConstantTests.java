@@ -47,7 +47,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	private String getSimpleTestFileName(boolean canInline, boolean input){

@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
@@ -77,13 +77,13 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	protected void setUp() throws Exception {
 		super.setUp();
 		fClipboard= new MockClipboard(Display.getDefault());
-		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
+		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", 
 			"package p;" +
@@ -95,7 +95,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 			"class Inner{}" +
 			"}");
 		
-		fPackageQ= MySetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackageQ, CU_B_NAME + ".java", 
 				"package q;" +
 				"import java.util.Set;" +
@@ -105,10 +105,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 				"class InnerB{}" +
 				"}");
 		
-		fPackageQ_R= MySetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
-		fOlder= createFolder(MySetup.getProject().getProject(), "fOlder");
+		fOlder= createFolder(RefactoringTestSetup.getProject().getProject(), "fOlder");
 		
 		fLabelProvider= new JavaElementLabelProvider(	JavaElementLabelProvider.SHOW_VARIABLE + 
 														JavaElementLabelProvider.SHOW_PARAMETERS + 
@@ -366,7 +366,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}	
 
 	public void testDisabled3() throws Exception {
-		Object[] elements= {MySetup.getProject(), getPackageP()};
+		Object[] elements= {RefactoringTestSetup.getProject(), getPackageP()};
 		checkDisabled(elements);
 	}	
 
@@ -391,7 +391,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testDisabled9() throws Exception{
-		checkDisabled(new Object[]{MySetup.getProject().getPackageFragmentRoots()});
+		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
 	}
 
 	public void testDisabled10() throws Exception{
@@ -453,7 +453,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	public void testDisabled21() throws Exception {
 		Object fieldF= fCuA.getType("A").getField("f");
-		Object[] elements= {fieldF, MySetup.getProject()};
+		Object[] elements= {fieldF, RefactoringTestSetup.getProject()};
 		checkDisabled(elements);
 	}	
 
@@ -469,7 +469,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testEnabled0() throws Exception {
-		Object[] elements= {MySetup.getProject()};
+		Object[] elements= {RefactoringTestSetup.getProject()};
 		checkEnabled(elements);
 	}	
 
@@ -484,7 +484,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	}	
 
 	public void testEnabled3() throws Exception {
-		Object[] elements= {MySetup.getDefaultSourceFolder()};
+		Object[] elements= {RefactoringTestSetup.getDefaultSourceFolder()};
 		checkEnabled(elements);
 	}
 	

@@ -21,7 +21,7 @@ public class AllChangeTests {
 		suite.addTest(new TestSuite(RenameResourceChangeTests.class));
 		suite.addTest(new TestSuite(RenameSourceFolderChangeTests.class));
 		suite.addTest(new TestSuite(CopyPackageChangeTest.class));
-		return new MySetup(suite);
+		return new RefactoringTestSetup(suite);
 	}
 }
 

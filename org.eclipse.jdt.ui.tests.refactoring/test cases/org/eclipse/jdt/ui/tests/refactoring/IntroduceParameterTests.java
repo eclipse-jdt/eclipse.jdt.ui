@@ -34,18 +34,18 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	}
 	
 	public static Test setUpTest(Test test) {
-		return new MySetup(test);
+		return new RefactoringTestSetup(test);
 	}
 
 	public static Test suite() {
 		//TODO: re-runnable tests: setUp() should create project iff neccessary (circumvent TestDecorator "MySetup")
 		if (true) {
-			return new MySetup(new TestSuite(IntroduceParameterTests.class));
+			return new RefactoringTestSetup(new TestSuite(IntroduceParameterTests.class));
 		} else {
 			System.err.println("*** Running only parts of IntroduceParameterTests!");
 			TestSuite suite= new TestSuite();
 			suite.addTest(new IntroduceParameterTests("testSimple_StaticGetter1"));
-			return new MySetup(suite);
+			return new RefactoringTestSetup(suite);
 		}
 	}
 	
@@ -83,7 +83,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 
 	private void perform(int expectedActivationStatus, int expectedInputStatus) throws Exception {
 		String packageName= adaptPackage(getName());
-		IPackageFragment packageFragment= MySetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
+		IPackageFragment packageFragment= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment(packageName, true , null);
 		ICompilationUnit cu= createCU(packageFragment, getName());
 
 		ISourceRange selection= getSelection(cu);

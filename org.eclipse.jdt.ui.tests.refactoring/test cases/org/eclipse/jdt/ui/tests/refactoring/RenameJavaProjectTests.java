@@ -31,7 +31,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	public void test0() throws Exception {

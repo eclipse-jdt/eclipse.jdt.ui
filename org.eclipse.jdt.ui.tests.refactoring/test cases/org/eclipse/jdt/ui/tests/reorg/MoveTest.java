@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
@@ -63,11 +63,11 @@ public class MoveTest extends RefactoringTest {
 	private static final String REFACTORING_PATH= "Move/";
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new RefactoringTestSetup(someTest);
 	}
 
 	protected String getRefactoringPath() {
@@ -154,7 +154,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDisabled_javaProject() throws Exception {
-		IJavaElement[] javaElements= {MySetup.getProject()};
+		IJavaElement[] javaElements= {RefactoringTestSetup.getProject()};
 		IResource[] resources= {};
 		verifyDisabled(resources, javaElements);
 	}
@@ -169,7 +169,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDisabled_project() throws Exception {
 		IJavaElement[] javaElements= {};
-		IResource[] resources= {MySetup.getProject().getProject()};
+		IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
 		verifyDisabled(resources, javaElements);
 	}
 
@@ -431,7 +431,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_fileToParentFolder() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		IFile file= folder.getFile("a.txt");
@@ -488,7 +488,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_folderToParentFolder() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 
 		IFolder parentFolder= superFolder.getFolder("folder");
 		parentFolder.create(true, true, null);
@@ -687,7 +687,7 @@ public class MoveTest extends RefactoringTest {
 	
 	public void testDestination_no_sourceFolderToCu() throws Exception {
 		ICompilationUnit cu= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
@@ -703,7 +703,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_sourceFolderToPackage() throws Exception {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
@@ -722,7 +722,7 @@ public class MoveTest extends RefactoringTest {
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
@@ -742,7 +742,7 @@ public class MoveTest extends RefactoringTest {
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
@@ -758,7 +758,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_sourceFolderToSourceFolder() throws Exception {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
 			IResource[] resources= {};
@@ -773,7 +773,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_sourceFolderToSimpleProject() throws Exception {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		IProject simpleProject= ResourcesPlugin.getWorkspace().getRoot().getProject("mySImpleProject");
 		simpleProject.create(null);
 		simpleProject.open(null);
@@ -795,7 +795,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_no_sourceFolderToJavaProjecteWithNoSourceFolder() throws Exception {
 		IJavaProject otherProject= JavaProjectHelper.createJavaProject("otherProject", null);
 		JavaProjectHelper.addSourceContainer(otherProject, null);
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 		
 		try{
 			IJavaElement[] javaElements= {sourceFolder};
@@ -911,7 +911,7 @@ public class MoveTest extends RefactoringTest {
 			IResource[] resources= {};
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 	
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyInvalidDestination(ref, destination);
 		} finally{
 			performDummySearch();
@@ -995,7 +995,7 @@ public class MoveTest extends RefactoringTest {
 		String newA= "package otherPackage;public class A{}";
 		ICompilationUnit cuA= getPackageP().createCompilationUnit("A.java", oldA, false, new NullProgressMonitor());
 		
-		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "testSrc");
+		IPackageFragmentRoot testSrc= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "testSrc");
 		IPackageFragment testP= testSrc.createPackageFragment("p", true, new NullProgressMonitor());
 		String oldRef= "package p;\npublic class Ref { A t = new A(); }";
 		String newRef= "package p;\n\nimport otherPackage.A;\n\npublic class Ref { A t = new A(); }";
@@ -1027,7 +1027,7 @@ public class MoveTest extends RefactoringTest {
 		}finally{
 			performDummySearch();
 			safeDelete(otherPackage);
-			JavaProjectHelper.removeSourceContainer(MySetup.getProject(), testSrc.getElementName());
+			JavaProjectHelper.removeSourceContainer(RefactoringTestSetup.getProject(), testSrc.getElementName());
 		}
 	}
 	
@@ -1178,7 +1178,7 @@ public class MoveTest extends RefactoringTest {
 			String[] handles= ParticipantTesting.createHandles(new Object[] {cu1, cu1.getTypes()[0], cu1.getResource()});
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
-			IJavaProject project= MySetup.getProject();
+			IJavaProject project= RefactoringTestSetup.getProject();
 			Object destination= project;
 			verifyValidDestination(ref, destination);			
 
@@ -1286,7 +1286,7 @@ public class MoveTest extends RefactoringTest {
 	public void testDestination_yes_cuToFolder() throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		
@@ -1328,7 +1328,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_fileToSiblingFolder() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -1368,7 +1368,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_fileToCu() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -1406,7 +1406,7 @@ public class MoveTest extends RefactoringTest {
 	
 	public void testDestination_yes_fileToPackage() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -1480,7 +1480,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_fileToRoot() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 
@@ -1514,7 +1514,7 @@ public class MoveTest extends RefactoringTest {
 	}		
 
 	public void testDestination_no_fileToParentProject() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -1523,7 +1523,7 @@ public class MoveTest extends RefactoringTest {
 			IResource[] resources= {file};
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyInvalidDestination(ref, destination);			
 		}finally{
 			performDummySearch();
@@ -1533,7 +1533,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_folderToSiblingFolder() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1568,7 +1568,7 @@ public class MoveTest extends RefactoringTest {
 	}
 
 	public void testDestination_no_folderToParentProject() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1577,7 +1577,7 @@ public class MoveTest extends RefactoringTest {
 			IResource[] resources= {folder};
 			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyInvalidDestination(ref, destination);						
 		} finally{
 			performDummySearch();
@@ -1587,7 +1587,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_folderToSiblingRoot() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		
@@ -1619,7 +1619,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_folderToPackage() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1651,7 +1651,7 @@ public class MoveTest extends RefactoringTest {
 	
 	public void testDestination_yes_folderToFileInAnotherFolder() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1689,7 +1689,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_folderToCu() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1724,7 +1724,7 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_folderToSimpleProject() throws Exception{
 		ParticipantTesting.reset();
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1763,7 +1763,7 @@ public class MoveTest extends RefactoringTest {
 		ParticipantTesting.reset();
 		IJavaProject otherJavaProject= JavaProjectHelper.createJavaProject("other", "bin");
 		
-		IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "newSrc");
+		IPackageFragmentRoot oldRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "newSrc");
 		IPackageFragmentRoot newRoot= null;
 		try {
 			IJavaElement[] javaElements= { oldRoot };

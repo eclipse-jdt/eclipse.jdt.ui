@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVar
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 public class TypeConstraintTests extends RefactoringTest {
@@ -45,11 +45,11 @@ public class TypeConstraintTests extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new RefactoringTestSetup(someTest);
 	}
 	
 	private String getSimpleTestFileName(){

@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -57,11 +57,11 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new MySetup(test);
+		return new RefactoringTestSetup(test);
 	}
 
 	protected String getRefactoringPath() {
@@ -231,7 +231,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDisabled_javaProject() throws Exception {
-		IJavaElement[] javaElements= {MySetup.getProject()};
+		IJavaElement[] javaElements= {RefactoringTestSetup.getProject()};
 		IResource[] resources= {};
 		verifyDisabled(resources, javaElements);
 	}
@@ -246,7 +246,7 @@ public class CopyTest extends RefactoringTest {
 
 	public void testDisabled_project() throws Exception {
 		IJavaElement[] javaElements= {};
-		IResource[] resources= {MySetup.getProject().getProject()};
+		IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
 		verifyDisabled(resources, javaElements);
 	}
 
@@ -450,7 +450,7 @@ public class CopyTest extends RefactoringTest {
 		IJavaElement[] javaElements= { getPackageP()};
 		IResource[] resources= {};
 		CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
-		verifyInvalidDestination(ref, MySetup.getProject());
+		verifyInvalidDestination(ref, RefactoringTestSetup.getProject());
 	}
 
 	public void testDestination_package_no_2() throws Exception{		
@@ -488,7 +488,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_package_no_4() throws Exception{		
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -525,7 +525,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_no_0() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		try{
@@ -542,7 +542,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_no_1() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -563,7 +563,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testDestination_folder_no_2() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -584,7 +584,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testDestination_folder_no_3() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -649,7 +649,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testDestination_root_no_3() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 
@@ -667,7 +667,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_root_no_4() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		try {
@@ -760,7 +760,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);			
 		}finally{
 			performDummySearch();
@@ -789,7 +789,7 @@ public class CopyTest extends RefactoringTest {
 
 	public void testDestination_cu_yes_6() throws Exception{
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		try{
@@ -808,7 +808,7 @@ public class CopyTest extends RefactoringTest {
 
 	public void testDestination_cu_yes_7() throws Exception{
 		ICompilationUnit cu1= getPackageP().createCompilationUnit("A.java", "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 		try{
@@ -845,7 +845,7 @@ public class CopyTest extends RefactoringTest {
 	
 
 	public void testDestination_file_yes_0() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		try{
@@ -862,7 +862,7 @@ public class CopyTest extends RefactoringTest {
 	}		
 
 	public void testDestination_file_yes_1() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -884,7 +884,7 @@ public class CopyTest extends RefactoringTest {
 	}		
 
 	public void testDestination_file_yes_3() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -906,7 +906,7 @@ public class CopyTest extends RefactoringTest {
 	}		
 
 	public void testDestination_file_yes_4() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -926,7 +926,7 @@ public class CopyTest extends RefactoringTest {
 	}		
 	
 	public void testDestination_file_yes_5() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -944,7 +944,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_file_yes_6() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -962,7 +962,7 @@ public class CopyTest extends RefactoringTest {
 	}		
 
 	public void testDestination_file_yes_7() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= superFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 		
@@ -971,7 +971,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {file};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);			
 		}finally{
 			performDummySearch();
@@ -1019,7 +1019,7 @@ public class CopyTest extends RefactoringTest {
 	}
 			
 	public void testDestination_folder_yes_0() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1041,7 +1041,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_yes_1() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1050,7 +1050,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {folder};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);						
 		} finally{
 			performDummySearch();
@@ -1059,7 +1059,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_yes_2() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1077,7 +1077,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_yes_3() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1095,7 +1095,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testDestination_folder_yes_4() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1119,7 +1119,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_yes_5() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1139,7 +1139,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testDestination_folder_yes_6() throws Exception{
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder folder= superFolder.getFolder("folder");
 		folder.create(true, true, null);
 
@@ -1277,7 +1277,7 @@ public class CopyTest extends RefactoringTest {
 
 	public void testDestination_method_no_folder() throws Exception{
 		ICompilationUnit cu= null;
-		IProject parentFolder= MySetup.getProject().getProject();
+		IProject parentFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= parentFolder.getFolder(folderName);
 		folder.create(true, true, null);	
@@ -1324,7 +1324,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, null, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyInvalidDestination(ref, destination);
 		} finally {
 			performDummySearch();
@@ -1704,7 +1704,7 @@ public class CopyTest extends RefactoringTest {
 		IFile file= parentFolder.getFile(fileName);
 		file.create(getStream("123"), true, null);
 		
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder destinationFolder= superFolder.getFolder("folder");
 		destinationFolder.create(true, true, null);
 		
@@ -1813,7 +1813,7 @@ public class CopyTest extends RefactoringTest {
 		IFile file= parentFolder.getFile(fileName);
 		file.create(getStream("123"), true, null);
 
-		IFile otherFile= MySetup.getProject().getProject().getFile("b.txt");
+		IFile otherFile= RefactoringTestSetup.getProject().getProject().getFile("b.txt");
 		otherFile.create(getStream("123"), true, null);
 				
 		IFile newFile= null;
@@ -1834,7 +1834,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist after copying", file.exists());
 			
-			newFile= MySetup.getProject().getProject().getFile(fileName);
+			newFile= RefactoringTestSetup.getProject().getProject().getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
 		} finally {
 			performDummySearch();
@@ -1966,7 +1966,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= { file };
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source file does not exist before copying", file.exists());
@@ -1976,7 +1976,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist after copying", file.exists());
 			
-			newFile= MySetup.getProject().getProject().getFile(fileName);
+			newFile= RefactoringTestSetup.getProject().getProject().getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
 		} finally {
 			performDummySearch();
@@ -2064,7 +2064,7 @@ public class CopyTest extends RefactoringTest {
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		IFolder destinationFolder= superFolder.getFolder("folder");
 		destinationFolder.create(true, true, null);
 		
@@ -2304,7 +2304,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, queries, createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);
 			
 			assertTrue("source file does not exist before copying", cu.exists());
@@ -2314,7 +2314,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist after copying", cu.exists());
 			
-			newFile= MySetup.getProject().getProject().getFile(fileName);
+			newFile= RefactoringTestSetup.getProject().getProject().getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
 		} finally {
 			performDummySearch();
@@ -2370,7 +2370,7 @@ public class CopyTest extends RefactoringTest {
 		String fileName= "A.java";
 		ICompilationUnit cu= getPackageP().createCompilationUnit(fileName, "package p;class A{void foo(){}class Inner{}}", false, new NullProgressMonitor());
 
-		IProject parentFolder= MySetup.getProject().getProject();
+		IProject parentFolder= RefactoringTestSetup.getProject().getProject();
 		IFile file= parentFolder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
 
@@ -2392,7 +2392,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source file does not exist after copying", cu.exists());
 			
-			newFile= MySetup.getProject().getProject().getFile(fileName);
+			newFile= RefactoringTestSetup.getProject().getProject().getFile(fileName);
 			assertTrue("new file does not exist after copying", newFile.exists());
 		} finally {
 			performDummySearch();
@@ -2494,7 +2494,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_Package_to_Another_Root() throws Exception {
-		IPackageFragmentRoot otherRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "otherRoot");
+		IPackageFragmentRoot otherRoot= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "otherRoot");
 		IPackageFragment newPackage= null;
 		String packageName= getPackageP().getElementName();
 		try {
@@ -2559,7 +2559,7 @@ public class CopyTest extends RefactoringTest {
 	}
 	
 	public void testCopy_folder_to_other_folder() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2591,7 +2591,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_folder_Java_project() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2601,7 +2601,7 @@ public class CopyTest extends RefactoringTest {
 			IResource[] resources= {folder};
 			CopyRefactoring ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 
-			Object destination= MySetup.getProject();
+			Object destination= RefactoringTestSetup.getProject();
 			verifyValidDestination(ref, destination);						
 
 			assertTrue("source does not exist before copying", folder.exists());
@@ -2610,7 +2610,7 @@ public class CopyTest extends RefactoringTest {
 			
 			assertTrue("source does not exist after copying", folder.exists());
 			
-			assertTrue("copied folder does not exist after copying", MySetup.getProject().getProject().getFolder(folderName).exists());
+			assertTrue("copied folder does not exist after copying", RefactoringTestSetup.getProject().getProject().getFolder(folderName).exists());
 		} finally{
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
@@ -2618,7 +2618,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_folder_to_source_folder() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2645,7 +2645,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_folder_to_package() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2670,7 +2670,7 @@ public class CopyTest extends RefactoringTest {
 
 	}
 	public void testCopy_folder_to_file_in_another_folder() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2701,7 +2701,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_folder_to_cu() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2728,7 +2728,7 @@ public class CopyTest extends RefactoringTest {
 	}
 
 	public void testCopy_folder_to_simple_project() throws Exception {
-		IProject superFolder= MySetup.getProject().getProject();
+		IProject superFolder= RefactoringTestSetup.getProject().getProject();
 		String folderName= "folder";
 		IFolder folder= superFolder.getFolder(folderName);
 		folder.create(true, true, null);
@@ -2771,7 +2771,7 @@ public class CopyTest extends RefactoringTest {
 
 			assertTrue("source does not exist after copying", getRoot().exists());
 			String newName= MockNewNameQueries.NEW_PACKAGE_FRAGMENT_ROOT_NAME;
-			newRoot= getSourceFolder(MySetup.getProject(), newName);
+			newRoot= getSourceFolder(RefactoringTestSetup.getProject(), newName);
 			assertNotNull("copied folder does not exist after copying", newRoot);
 			assertTrue("copied folder does not exist after copying", newRoot.exists());
 		} finally {

@@ -40,7 +40,7 @@ public class RenameParametersTests extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	private String getSimpleTestFileName(boolean canRename, boolean input){

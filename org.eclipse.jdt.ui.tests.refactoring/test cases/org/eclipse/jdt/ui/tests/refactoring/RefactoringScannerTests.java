@@ -29,7 +29,7 @@ public class RefactoringScannerTests extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	protected void setUp() throws Exception {

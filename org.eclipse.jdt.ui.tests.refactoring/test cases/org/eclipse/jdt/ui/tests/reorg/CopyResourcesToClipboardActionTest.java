@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
@@ -55,7 +55,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
 	private IFile createFile(IFolder folder, String fileName) throws Exception {
@@ -67,14 +67,14 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	protected void setUp() throws Exception {
 		super.setUp();
 		fClipboard= new MockClipboard(Display.getDefault());
-		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
+		fDefaultPackage= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", "package p; class A{}");
 		
-		fPackageQ= MySetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
+		fPackageQ= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q", true, null);
 		fCuB= createCU(fPackageQ, CU_B_NAME + ".java", "package q; class B{}");
 		
-		fPackageQ_R= MySetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
+		fPackageQ_R= RefactoringTestSetup.getDefaultSourceFolder().createPackageFragment("q.r", true, null);
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 		
@@ -187,7 +187,7 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	public void testDisabled9() throws Exception{
-		checkDisabled(new Object[]{MySetup.getProject().getPackageFragmentRoots()});
+		checkDisabled(new Object[]{RefactoringTestSetup.getProject().getPackageFragmentRoots()});
 	}
 
 	public void testDisabled10() throws Exception{

@@ -38,7 +38,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
@@ -60,7 +60,7 @@ public class PasteActionTest extends RefactoringTest{
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	protected String getRefactoringPath() {
@@ -97,14 +97,14 @@ public class PasteActionTest extends RefactoringTest{
 	}
 
 	public void testEnabled_javaProject() throws Exception {
-		IJavaElement[] javaElements= {MySetup.getProject()};
+		IJavaElement[] javaElements= {RefactoringTestSetup.getProject()};
 		IResource[] resources= {};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
 
 	public void testEnabled_project() throws Exception {
 		IJavaElement[] javaElements= {};
-		IResource[] resources= {MySetup.getProject().getProject()};
+		IResource[] resources= {RefactoringTestSetup.getProject().getProject()};
 		verifyEnabled(resources, javaElements, new IResource[0], new IJavaElement[0]);
 	}
 

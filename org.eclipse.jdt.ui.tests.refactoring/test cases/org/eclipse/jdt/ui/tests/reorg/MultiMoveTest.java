@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
@@ -53,12 +53,12 @@ public class MultiMoveTest extends RefactoringTest {
 	}
 
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316
 	public static Test setUpTest(Test someTest) {
-		return new MySetup(someTest);
+		return new RefactoringTestSetup(someTest);
 	}
 
 	protected String getRefactoringPath() {
@@ -343,8 +343,8 @@ public class MultiMoveTest extends RefactoringTest {
 		IPackageFragmentRoot r1= null;
 		IPackageFragmentRoot r2= null;
 		try {
-			r1= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src1");
-			r2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+			r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
+			r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
 			ICompilationUnit c2= p1.createCompilationUnit("B.java", "public class B {}", true, null);
@@ -390,8 +390,8 @@ public class MultiMoveTest extends RefactoringTest {
 		IPackageFragmentRoot r1= null;
 		IPackageFragmentRoot r2= null;
 		try {
-			r1= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src1");
-			r2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+			r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
+			r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 			r1.createPackageFragment("p1.p2", true, null);
 			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
@@ -437,8 +437,8 @@ public class MultiMoveTest extends RefactoringTest {
 		IPackageFragmentRoot r1= null;
 		IPackageFragmentRoot r2= null;
 		try {
-			r1= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src1");
-			r2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
+			r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
+			r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
 			r2.createPackageFragment("p1", true, null);
 			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);

@@ -42,11 +42,11 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	}
 	
 	public static Test suite() {
-		return new MySetup(new TestSuite(clazz));
+		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new MySetup(test);
+		return new RefactoringTestSetup(test);
 	}
 	
 	private String getSimpleTestFileName(boolean input) {
