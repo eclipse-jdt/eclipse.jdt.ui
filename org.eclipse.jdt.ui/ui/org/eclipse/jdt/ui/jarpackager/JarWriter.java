@@ -236,8 +236,8 @@ public class JarWriter {
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
 			IPath projectLocation= project.getLocation();
-			boolean isInWorkspace= projectLocation != null && projectLocation.isPrefixOf(jarPath);
-			if (isInWorkspace)
+			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
+			if (isInProject) {
 				try {
 					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
 					jarPath= jarPath.removeLastSegments(1);
@@ -247,9 +247,8 @@ public class JarWriter {
 				} catch (CoreException ex) {
 					// don't refresh the folder but log the problem
 					JavaPlugin.log(ex);
-				} finally {
-					return;
 				}
+			}
 		}
 	}
 }
