@@ -754,10 +754,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		if (node == null)
 			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-				RefactoringCoreMessages.getString("IntroduceFactory.noASTNodeForConstructorSearchHit") + //$NON-NLS-1$
-				start + ", " + end + "]: " + unitHandle.getSource().substring(start, end) + //$NON-NLS-1$ //$NON-NLS-2$
-				RefactoringCoreMessages.getString("IntroduceFactory.noASTNodeForConstructorSearchHitPart2") + //$NON-NLS-1$
-				unitHandle.getElementName()));
+				RefactoringCoreMessages.getFormattedString("IntroduceFactory.noASTNodeForConstructorSearchHit", //$NON-NLS-1$
+					new Object[] {	Integer.toString(start), Integer.toString(end),
+									unitHandle.getSource().substring(start, end),
+									unitHandle.getElementName() })));
 
 		if (node instanceof ClassInstanceCreation) {
 			return (ClassInstanceCreation) node;
@@ -768,14 +768,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				return (ClassInstanceCreation) init;
 			} else if (init != null)
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-					RefactoringCoreMessages.getString("IntroduceFactory.unexpectedInitializerNodeType") + //$NON-NLS-1$
-					init.toString() +
-					RefactoringCoreMessages.getString("IntroduceFactory.unexpectedInitializerNodeTypePart2") + //$NON-NLS-1$
-					unitHandle.getElementName()));
+					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedInitializerNodeType", //$NON-NLS-1$
+										new Object[] { init.toString(), unitHandle.getElementName() })));
 			else
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-					RefactoringCoreMessages.getString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl") + //$NON-NLS-1$
-					node.toString()));
+					RefactoringCoreMessages.getFormattedString("IntroduceFactory.noConstructorCallNodeInsideFoundVarbleDecl", //$NON-NLS-1$
+										new Object[] { node.toString() })));
 		} else if (node instanceof ConstructorInvocation) {
 			// This is a call we can bypass; it's from one constructor flavor
 			// to another flavor on the same class.
@@ -787,15 +785,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				return (ClassInstanceCreation) expr;
 			else
 				throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-					RefactoringCoreMessages.getString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit") + //$NON-NLS-1$
-					expr.toString() +
-					RefactoringCoreMessages.getString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHitPart2") + //$NON-NLS-1$
-					unitHandle.getElementName()));
+					RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+						new Object[] { expr.toString(), unitHandle.getElementName() })));
 		} else
 			throw new JavaModelException(new JavaModelStatus(IStatus.ERROR,
-				RefactoringCoreMessages.getString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit") + //$NON-NLS-1$
-				node.getClass().getName() + "('" + node.toString() + "')" + //$NON-NLS-1$ //$NON-NLS-2$ 
-				RefactoringCoreMessages.getString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHitPart2") + unitHandle.getElementName())); //$NON-NLS-1$
+				RefactoringCoreMessages.getFormattedString("IntroduceFactory.unexpectedASTNodeTypeForConstructorSearchHit", //$NON-NLS-1$
+					new Object[] {	node.getClass().getName() + "('" + node.toString() + "')",
+									unitHandle.getElementName() }))); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	/**
