@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 
-import sun.security.action.GetPropertyAction;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
