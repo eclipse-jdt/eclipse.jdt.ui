@@ -81,6 +81,10 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		// ignore matches in import declarations:
 		if (javaElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
 			return;
+		if (javaElement.getElementType() == IJavaElement.CLASS_FILE)
+			return; //matches in import statements of class files
+		if (javaElement.getElementType() == IJavaElement.TYPE)
+			return; //classes extending the accessor class and workaround for bug 61286
 		
 		// heuristic: ignore matches in resource bundle name field:
 		if (javaElement.getElementType() == IJavaElement.FIELD) {
@@ -151,7 +155,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			int sourceRangeOffset= ((ISourceReference) enclosingElement).getSourceRange().getOffset();
 			String source= ((ISourceReference) enclosingElement).getSource();
 			if (source == null)
-				return null;
+				return null; //e.g. a class file without source
 			source= source.substring(typeNameStart - sourceRangeOffset);
 			
 			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
