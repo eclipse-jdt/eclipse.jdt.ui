@@ -422,13 +422,13 @@ public class ASTFlattener extends GenericVisitor {
 			e.accept(this);
 		}
 		fResult.append("; ");//$NON-NLS-1$
+		if (node.getExpression() != null) {
+			node.getExpression().accept(this);
+		}
+		fResult.append("; ");//$NON-NLS-1$
 		for (Iterator it = node.updaters().iterator(); it.hasNext(); ) {
 			Expression e = (Expression) it.next();
 			e.accept(this);
-		}
-		fResult.append("; ");//$NON-NLS-1$
-		if (node.getExpression() != null) {
-			node.getExpression().accept(this);
 		}
 		fResult.append(") ");//$NON-NLS-1$
 		node.getBody().accept(this);
