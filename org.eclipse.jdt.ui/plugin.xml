@@ -564,20 +564,20 @@
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
-         <filter
+          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
-         </filter>
+          </filter>
       </page>
       <page
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
-         <filter
+          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
-         </filter>
+          </filter>
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
@@ -1111,6 +1111,7 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.preferences.CompliancePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.compiler"/>
       </page>
       <page
             name="%problemSeveritiesPrefName"
@@ -1135,6 +1136,7 @@
             category="org.eclipse.jdt.ui.preferences.CompliancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
             id="org.eclipse.jdt.ui.preferences.TodoTaskPreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.todo"/>
       </page>
       <page
             name="%templatePageName"
@@ -1166,6 +1168,7 @@
             category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeTemplatePreferencePage">
+            <keywordReference id="org.eclipse.jdt.ui.codetemplates"/>
       </page>
       <page
             name="%memberSortPrefName"
@@ -1174,6 +1177,19 @@
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
       </page>
    </extension>
+   
+      <extension
+   		point="org.eclipse.ui.keywords">
+      <keyword
+            label="%preferenceKeywords.compiler"
+            id="org.eclipse.jdt.ui.compiler"/>
+      <keyword
+            label="%preferenceKeywords.codeTemplates"
+            id="org.eclipse.jdt.ui.codetemplates"/>
+      <keyword
+            label="%preferenceKeywords.todo"
+            id="org.eclipse.jdt.ui.todo"/>
+   </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
 <!-- =========================================================================== -->
