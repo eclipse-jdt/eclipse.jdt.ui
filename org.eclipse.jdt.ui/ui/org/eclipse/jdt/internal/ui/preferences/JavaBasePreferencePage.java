@@ -64,6 +64,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	private static final String OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE="org.eclipse.jdt.ui.typeHierarchy.reusePerspective"; //$NON-NLS-1$
 	private static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
+	private static final String RECONCILE_JAVA_VIEWS= "JavaUI.reconcile"; //$NON-NLS-1$
 
 	public static boolean useSrcAndBinFolders() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
@@ -114,6 +115,10 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return store.getBoolean(DOUBLE_CLICK_GOES_INTO);
 	}
 
+	public static boolean reconcileJavaViews() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(RECONCILE_JAVA_VIEWS);
+	}
+
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
 	private ArrayList fTextControls;
@@ -157,11 +162,13 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
+
 		store.setDefault(SRCBIN_FOLDERS_IN_NEWPROJ, false);
 		store.setDefault(SRCBIN_SRCNAME, "src"); //$NON-NLS-1$
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
-				
+
 		store.setDefault(DOUBLE_CLICK_GOES_INTO, false);		
+		store.setDefault(RECONCILE_JAVA_VIEWS, false);
 	}
 	
 	/*
@@ -237,6 +244,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN); //$NON-NLS-1$
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.reconcileJavaViews"), RECONCILE_JAVA_VIEWS); //$NON-NLS-1$
 		
 		fFolderButton= addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.folders"), SRCBIN_FOLDERS_IN_NEWPROJ); //$NON-NLS-1$
 		fFolderButton.addSelectionListener(fSelectionListener);

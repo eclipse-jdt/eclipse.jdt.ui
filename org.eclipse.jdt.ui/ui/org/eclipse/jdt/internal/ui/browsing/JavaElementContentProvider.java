@@ -41,7 +41,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
 
 
@@ -51,17 +51,15 @@ class JavaElementContentProvider extends BaseJavaElementContentProvider implemen
 	private Object fInput;
 	private JavaBrowsingPart fBrowsingPart;
 	
-
 	public JavaElementContentProvider(boolean provideMembers, JavaBrowsingPart browsingPart) {
-
-		super(provideMembers, reconcile());
+		super(provideMembers, reconcileJavaViews());
 		fBrowsingPart= browsingPart;
 		fViewer= fBrowsingPart.getViewer();
 		JavaCore.addElementChangedListener(this);
 	}
 
-	private static boolean reconcile() {
-		return WorkInProgressPreferencePage.reconcile();
+	private static boolean reconcileJavaViews() {
+		return JavaBasePreferencePage.reconcileJavaViews();
 	}
 
 	public Object[] getChildren(Object element) {

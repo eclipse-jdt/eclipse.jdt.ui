@@ -103,7 +103,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -242,7 +241,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer= new ProblemTreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		
 		boolean showCUChildren= JavaBasePreferencePage.showCompilationUnitChildren();
-		boolean reconcile= WorkInProgressPreferencePage.reconcile();
+		boolean reconcile= JavaBasePreferencePage.reconcileJavaViews();
 		fViewer.setContentProvider(new JavaElementContentProvider(showCUChildren, reconcile));
 		
 		JavaPlugin.getDefault().getProblemMarkerManager().addListener(fViewer);		
