@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
@@ -27,4 +28,11 @@ class JavaEditorMessages {
 	public static ResourceBundle getResourceBundle() {
 		return fgResourceBundle;
 	}
+
+	/**
+	 * Gets a string from the resource bundle and formats it with arguments
+	 */	
+	public static String getFormattedString(String key, Object[] args) {
+		return MessageFormat.format(getString(key), args);
+	}	
 }

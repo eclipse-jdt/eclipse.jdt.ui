@@ -155,6 +155,12 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 	}
 	
 	public void acceptUnknownReference(char[] p1, int p2){
+	}
+	
+	public void enterInitializer(int declarationStart, int modifiers) {
+	}
+
+	public void exitInitializer(int declarationEnd) {
 	}	
 	
 	//----
@@ -226,5 +232,6 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		buffer.append(')');
 		return buffer.toString();
 	}
+
 }
 

@@ -118,8 +118,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					try {
 						dialog.run(false, true, op);
 					} catch (InvocationTargetException e) {
-						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 						JavaPlugin.log(e);
+						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getTargetException().getMessage()); //$NON-NLS-1$
 					} catch (InterruptedException e) {
 						// Do nothing. Operation has been canceled.
 					}
