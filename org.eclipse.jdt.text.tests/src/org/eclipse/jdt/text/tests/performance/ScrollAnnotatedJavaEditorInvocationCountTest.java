@@ -31,14 +31,26 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScrollAnnotatedJavaEditorTest {
 	
 	private static final Class THIS= ScrollAnnotatedJavaEditorInvocationCountTest.class;
-
+	private AbstractTextEditor fEditor;
+	private boolean fWasQuickDiffEnabled;
+	
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 	
 	protected void setUp(AbstractTextEditor editor) throws Exception {
+		fWasQuickDiffEnabled= editor.isChangeInformationShowing();
 		editor.showChangeInformation(false); // don't need to test quick diff...
+		fEditor= editor;
 		super.setUp(editor);
+	}
+	
+	protected void tearDown() throws Exception {
+		if (fEditor != null) {
+			fEditor.showChangeInformation(fWasQuickDiffEnabled);
+			fEditor= null;
+		}
+		super.tearDown();
 	}
 
 	/**
