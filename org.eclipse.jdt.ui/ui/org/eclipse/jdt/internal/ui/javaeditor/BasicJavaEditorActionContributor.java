@@ -176,7 +176,7 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next");
+		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next"); 
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
@@ -250,25 +250,28 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			
 			editMenu.appendToGroup(IWorkbenchActionConstants.FIND_EXT, fShowReferencesAction);
 
-			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$
+			MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label"), "expandSelection"); //$NON-NLS-1$ //$NON-NLS-2$ 
 			structureSelection.add(fStructureSelectEnclosingAction);
 			structureSelection.add(fStructureSelectNextAction);
 			structureSelection.add(fStructureSelectPreviousAction);
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
-			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoPreviousMemberAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoNextMemberAction);			
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fGotoMatchingBracket);
 
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fShowOutline);
 		}
 
-//		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
-//		if (navigateMenu != null) {
-//			navigateMenu.appendToGroup("open.ext", fOpenStructure); //$NON-NLS-1$
-//		}
+		IMenuManager navigateMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_NAVIGATE);
+		if (navigateMenu != null) {
+			navigateMenu.appendToGroup(IWorkbenchActionConstants.SHOW_EXT, fShowOutline);
+		}
+		
+		IMenuManager gotoMenu= menu.findMenuUsingPath("navigate/goTo"); //$NON-NLS-1$
+		if (gotoMenu != null) {
+			gotoMenu.add(new Separator("additions2"));  //$NON-NLS-1$
+			gotoMenu.appendToGroup("additions2", fGotoPreviousMemberAction); //$NON-NLS-1$
+			gotoMenu.appendToGroup("additions2", fGotoNextMemberAction); //$NON-NLS-1$
+			gotoMenu.appendToGroup("additions2", fGotoMatchingBracket); //$NON-NLS-1$
+		}
 	}
 	
 	/*
