@@ -152,9 +152,12 @@ public class JavaIndenter {
 						break;
 					case Symbols.TokenRBRACE: // closing braces get unindented
 						matchBrace= true;
+						break;
+					case Symbols.TokenWHILE:
+						break;
 				}
 			} else {
-				danglingElse= true;
+				danglingElse= true; // assume an else could come - align with 'if' 
 			}
 			
 			// find the base position
@@ -310,6 +313,8 @@ public class JavaIndenter {
 		boolean found= false; // whether we have found anything at all. If we have, we'll trace back to it once we have a hoist point
 		boolean hasBrace= false;
 		
+		int commaPosition= JavaHeuristicScanner.NOT_FOUND;
+		
 		if (matchBrace) {
 			if (!skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
 				fPosition= position;
@@ -357,13 +362,15 @@ public class JavaIndenter {
 					break;
 				
 				case Symbols.TokenDO: // do blockless special
-					if (indentBlockLess)
+					if (indentBlockLess) {
 						fIndent++;
-					else
-						// after a do, there has to come a while, on the same indentation as the do
-						fIndent= 0;
-					
-					return fPosition; 
+						return fPosition;
+					} else if (hasBrace) {
+						return fPosition;
+					} else {
+						fIndent= 0; // after a do, there is a mandatory while on the same level
+						return fPosition;
+					}
 					
 				case Symbols.TokenELSE: // else blockless special
 	
@@ -416,7 +423,7 @@ public class JavaIndenter {
 					
 					if (found)
 						return fScanner.findNonWhitespaceForward(searchPos, position);
-						
+                    
 					// search start of code forward or continue
 					takeNextExit= true;
 					indentBlockLess= false;
@@ -445,7 +452,7 @@ public class JavaIndenter {
 				// RBRACE is either the end of a statement as SEMICOLON, 
 				// or - if no statement start can be found - must be skipped as RPAREN and RBRACKET
 				case Symbols.TokenRBRACE:
-					if (found)
+					if (found && fScanner.nextToken(fPreviousPos, position) != Symbols.TokenSEMICOLON) // don't take it for array initializers
 						return fScanner.findNonWhitespaceForward(fPreviousPos, position);
 
 					skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
@@ -478,6 +485,12 @@ public class JavaIndenter {
 					
 					fIndent+= prefArrayDimensionIndent();
 						
+					nextToken();
+					break;
+				
+				case Symbols.TokenCOMMA:
+					if (found)
+						commaPosition= fScanner.findNonWhitespaceForward(fPreviousPos, position);
 					nextToken();
 					break;
 

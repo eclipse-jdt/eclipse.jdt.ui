@@ -64,9 +64,10 @@ public class JavaHeuristicScanner implements Symbols {
 		 * 
 		 * @param ch the char at the current position
 		 * @param position the current position
+		 * @param forward the iteration direction 
 		 * @return <code>true</code> if the stop condition is met.
 		 */
-		boolean stop(char ch, int position);
+		boolean stop(char ch, int position, boolean forward);
 	}
 	
 	/**
@@ -76,7 +77,7 @@ public class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
-		public boolean stop(char ch, int position) {
+		public boolean stop(char ch, int position, boolean forward) {
 			return !Character.isWhitespace(ch);
 		}
 	}
@@ -90,8 +91,8 @@ public class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
-		public boolean stop(char ch, int position) {
-			return super.stop(ch, position) && isDefaultPartition(position);
+		public boolean stop(char ch, int position, boolean forward) {
+			return super.stop(ch, position, true) && isDefaultPartition(position);
 		}
 	}
 	
@@ -102,7 +103,7 @@ public class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
-		public boolean stop(char ch, int position) {
+		public boolean stop(char ch, int position, boolean forward) {
 			return !Character.isJavaIdentifierPart(ch);
 		}
 	}
@@ -116,8 +117,8 @@ public class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
-		public boolean stop(char ch, int position) {
-			return super.stop(ch, position) || !isDefaultPartition(position);
+		public boolean stop(char ch, int position, boolean forward) {
+			return super.stop(ch, position, true) || !isDefaultPartition(position);
 		}
 	}
 	
@@ -149,9 +150,92 @@ public class JavaHeuristicScanner implements Symbols {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char, int)
 		 */
-		public boolean stop(char ch, int position) {
+		public boolean stop(char ch, int position, boolean forward) {
 			return Arrays.binarySearch(fChars, ch) >= 0 && isDefaultPartition(position);
 		}
+	}
+	
+	/**
+	 * Acts like character match, but skips all scopes introduced by parenthesis, brackets, and 
+	 * braces. 
+	 */
+	private class SkippingScopeMatch extends CharacterMatch {
+		private char fOpening, fClosing;
+		private int fDepth= 0;
+		
+		/**
+		 * Creates a new instance.
+		 * @param ch the single character to match
+		 */
+		public SkippingScopeMatch(char ch) {
+			super(ch);
+		}
+		
+		/**
+		 * Creates a new instance.
+		 * @param chars the chars to match.
+		 */
+		public SkippingScopeMatch(char[] chars) {
+			super(chars);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char, int)
+		 */
+		public boolean stop(char ch, int position, boolean forward) {
+			
+			if (fDepth == 0 && super.stop(ch, position, true))
+				return true;
+			else if (ch == fOpening)
+				fDepth++;
+			else if (ch == fClosing) {
+				fDepth--;
+				if (fDepth == 0) {
+					fOpening= 0;
+					fClosing= 0;
+				}
+			} else if (fDepth == 0) {
+				fDepth= 1;
+				if (forward) {
+					
+					switch (ch) {
+						case LBRACE:
+							fOpening= LBRACE;
+							fClosing= RBRACE;
+							break;
+						case LPAREN:
+							fOpening= LPAREN;
+							fClosing= RPAREN;
+							break;
+						case LBRACKET:
+							fOpening= LBRACKET;
+							fClosing= RBRACKET;
+							break;
+					}
+					
+				} else {
+					switch (ch) {
+						case RBRACE:
+							fOpening= RBRACE;
+							fClosing= LBRACE;
+							break;
+						case RPAREN:
+							fOpening= RPAREN;
+							fClosing= LPAREN;
+							break;
+						case RBRACKET:
+							fOpening= RBRACKET;
+							fClosing= LBRACKET;
+							break;
+					}
+					
+				}
+			}
+			
+			return false;
+			
+		}
+
 	}
 	
 	/** The document being scanned. */
@@ -558,7 +642,7 @@ public class JavaHeuristicScanner implements Symbols {
 			while (fPos < bound) {
 
 				fChar= fDocument.getChar(fPos);
-				if (condition.stop(fChar, fPos))
+				if (condition.stop(fChar, fPos, true))
 					return fPos;
 
 				fPos++;
@@ -618,7 +702,7 @@ public class JavaHeuristicScanner implements Symbols {
 			while (fPos > bound) {
 				
 				fChar= fDocument.getChar(fPos);
-				if (condition.stop(fChar, fPos))
+				if (condition.stop(fChar, fPos, false))
 					return fPos;
 
 				fPos--;
