@@ -366,6 +366,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		
 		store.setDefault(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB, false);
 		store.setDefault(PREF_SEARCH_MENU, true);
+		store.setDefault(PREF_BGSEARCH, true);
 		store.setDefault(PREF_SEARCH_IGNORE_IMPORTS, false);
 	}
 }
