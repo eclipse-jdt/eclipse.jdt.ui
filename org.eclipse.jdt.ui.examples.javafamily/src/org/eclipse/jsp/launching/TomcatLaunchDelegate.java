@@ -12,6 +12,7 @@ package org.eclipse.jsp.launching;
 
 import java.io.File;
 import java.text.MessageFormat;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
@@ -41,12 +42,6 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 	 */
 	public static final String ATTR_CATALINA_HOME = "org.eclipse.jsp.CATALINA_HOME"; //$NON-NLS-1$
 	
-	/**
-	 * Launch configuration attribute - value is a workspace relative path to the root
-	 * folder of a web application.
-	 */
-	public static final String ATTR_WEB_APP_ROOT= "org.eclipse.jsp.WEB_APP_ROOT"; //$NON-NLS-1$	
-
 	/**
 	 * Constructs a new launch delegate
 	 */
