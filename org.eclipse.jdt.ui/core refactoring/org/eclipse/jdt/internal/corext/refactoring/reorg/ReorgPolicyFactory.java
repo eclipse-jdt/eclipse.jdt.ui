@@ -1347,8 +1347,9 @@ class ReorgPolicyFactory {
 					IResource res= pack.getResource();
 					INewNameQuery nameQuery= copyQueries.createNewResourceNameQuery(res, newName);
 					return new CopyResourceChange(res, dest, nameQuery);
-				}else
+				} else {
 					return new NullChange();
+				}
 			}	
 		}
 	}
