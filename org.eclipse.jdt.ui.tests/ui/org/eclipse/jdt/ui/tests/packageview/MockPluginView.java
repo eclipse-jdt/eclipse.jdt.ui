@@ -56,12 +56,9 @@ public class MockPluginView extends PackageExplorerPart {
 		fRefreshedObjects= new ArrayList();
 	}
 	
-	public void resetRefreshedObjects(){
-		fRefreshedObjects= new ArrayList();
-	}
-
-
 	/**
+	 * Creates only the viewer and the content provider.
+	 * 
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
@@ -75,20 +72,13 @@ public class MockPluginView extends PackageExplorerPart {
 		contentProvider= createContentProvider();
 		contentProvider.inputChanged(fViewer, null, null);
 		
-		//JavaCore.removeElementChangedListener(contentProvider);
-		
 		//set content provider
 		fViewer.setContentProvider(contentProvider);
 		
 		
 	}
 	
-	/**
-	 * Method createViewer.
-	 * @param parent
-	 * @return TreeViewer
-	 */
-	public TreeViewer createViewer(Composite parent) {
+	private TreeViewer createViewer(Composite parent) {
 		return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
 
@@ -113,19 +103,11 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 	
 	/**
-	 * Returns the fRefreshHappened.
+	 * Returns true if a refresh happened
 	 * @return boolean
 	 */
-	public boolean isFRefreshHappened() {
+	public boolean hasRefreshHappened() {
 		return fRefreshHappened;
-	}
-
-	/**
-	 * Sets the fRefreshHappened.
-	 * @param fRefreshHappened The fRefreshHappened to set
-	 */
-	public void setFRefreshHappened(boolean fRefreshHappened) {
-		fRefreshHappened= fRefreshHappened;
 	}
 
 	/**
@@ -177,108 +159,58 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 
 	/**
-	 * Returns the fRefreshedObject.
+	 * Returns the refreshed object.
 	 * @return Object
 	 */
-	public boolean getFRefreshedObject(Object c) {
+	public boolean getRefreshedObject(Object c) {
 		return fRefreshedObjects.contains(c);
 	}
 
 	/**
-	 * Sets the fRefreshedObject.
-	 * @param fRefreshedObject The fRefreshedObject to set
-	 */
-	public void setFRefreshedObject(Object fRefreshedObject) {
-		fRefreshedObjects.add(fRefreshedObject);
-	}
-
-	/**
-	 * Returns the fAddedParentObject.
+	 * Returns the object added to the tree viewer
 	 * @return Object
 	 */
-	public Object getFAddedParentObject() {
+	public Object getParentOfAddedObject() {
 		return fAddedParentObject;
 	}
 
 	/**
-	 * Returns the fAddHappened.
+	 * Returns true if something was added to the viewer
 	 * @return boolean
 	 */
-	public boolean isFAddHappened() {
+	public boolean addHappened() {
 		return fAddHappened;
 	}
 
 	/**
-	 * Returns the fRemovedObject.
+	 * Returns the object removed from the viewer
 	 * @return Object
 	 */
-	public Object getFRemovedObject() {
+	public Object getRemovedObject() {
 		return fRemovedObject;
 	}
 
 	/**
-	 * Returns the fRemoveHappened.
+	 * Returns true if an object was removed from the viewer
 	 * @return boolean
 	 */
-	public boolean isFRemoveHappened() {
+	public boolean removeHappened() {
 		return fRemoveHappened;
 	}
 
 	/**
-	 * Sets the fAddedParentObject.
-	 * @param fAddedParentObject The fAddedParentObject to set
-	 */
-	public void setFAddedParentObject(Object fAddedParentObject) {
-		fAddedParentObject= fAddedParentObject;
-	}
-
-	/**
-	 * Sets the fAddHappened.
-	 * @param fAddHappened The fAddHappened to set
-	 */
-	public void setFAddHappened(boolean fAddHappened) {
-		fAddHappened= fAddHappened;
-	}
-
-	/**
-	 * Sets the fRemovedObject.
-	 * @param fRemovedObject The fRemovedObject to set
-	 */
-	public void setFRemovedObject(Object fRemovedObject) {
-		fRemovedObject= fRemovedObject;
-	}
-
-	/**
-	 * Sets the fRemoveHappened.
-	 * @param fRemoveHappened The fRemoveHappened to set
-	 */
-	public void setFRemoveHappened(boolean fRemoveHappened) {
-		fRemoveHappened= fRemoveHappened;
-	}
-
-	/**
-	 * Returns the fAddedObject.
+	 * Returns the object added to the viewer
 	 * @return Object
 	 */
-	public Object getFAddedObject() {
+	public Object getAddedObject() {
 		return fAddedObject;
-	}
-
-	/**
-	 * Sets the fAddedObject.
-	 * @param fAddedObject The fAddedObject to set
-	 */
-	public void setFAddedObject(Object fAddedObject) {
-		fAddedObject= fAddedObject;
 	}
 	
 	/**
-	 * Method setFolding.
-	 * @param b
+	 * Sets the folding preference.
+	 * @param fold
 	 */
-	public void setFolding(boolean b) {
-		JavaPlugin.getDefault().getPreferenceStore().setValue(AppearancePreferencePage.PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, b);
+	public void setFolding(boolean fold) {
+		JavaPlugin.getDefault().getPreferenceStore().setValue(AppearancePreferencePage.PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
 	}
-
-
 }
