@@ -108,57 +108,10 @@ public class MoveMembersTests extends RefactoringTest {
 		//tearDown() deletes resources and does performDummySearch();
 	}
 	
-	/** Move members from p.A to r.B*/
+	/* Move members from p.A to r.B */
 	private void fieldMethodTypeABHelper_passing(String[] fieldNames, String[] methodNames, String[][] signatures, String[] typeNames) throws Exception {
 		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
 		fieldMethodTypePackageHelper_passing(fieldNames, methodNames, signatures, typeNames, getPackageP(), packageForB);
-		//tearDown() deletes resources and does performDummySearch();
-	}
-
-	/** Move members from p.A to r.B under presence of other.C */
-	private void fieldMethodType3CUsHelper_passing(String[] fieldNames, String[] methodNames, String[][] signatures, String[] typeNames) throws Exception {
-		ParticipantTesting.reset();
-		IPackageFragment packageForB= getRoot().createPackageFragment("r", false, null);
-		IPackageFragment packageForC= getRoot().createPackageFragment("other", false, null);
-
-		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-		ICompilationUnit cuB= createCUfromTestFile(packageForB, "B");
-		ICompilationUnit cuC= createCUfromTestFile(packageForC, "C");
-		
-		IType typeA= getType(cuA, "A");
-		IType typeB= getType(cuB, "B");
-
-		IField[] fields= getFields(typeA, fieldNames);
-		IMethod[] methods= getMethods(typeA, methodNames, signatures);
-		IType[] types= getMemberTypes(typeA, typeNames);
-	
-		IType destinationType= typeB;
-		IMember[] members= merge(methods, fields, types);
-		String[] handles= ParticipantTesting.createHandles(members);
-		MoveArguments[] args= new MoveArguments[handles.length];
-		for (int i = 0; i < args.length; i++) {
-			args[i]= new MoveArguments(destinationType, true);
-		}
-		MoveRefactoring ref= createRefactoring(members, destinationType);
-	
-		RefactoringStatus result= performRefactoringWithStatus(ref);
-		assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);
-		ParticipantTesting.testMove(handles, args);
-	
-		String expected;
-		String actual;
-	
-		expected= getFileContents(getOutputTestFileName("A"));
-		actual= cuA.getSource();
-		assertEqualLines("incorrect modification of  A", expected, actual);
-	
-		expected= getFileContents(getOutputTestFileName("B"));
-		actual= cuB.getSource();
-		assertEqualLines("incorrect modification of  B", expected, actual);
-	
-		expected= getFileContents(getOutputTestFileName("C"));
-		actual= cuC.getSource();
-		assertEqualLines("incorrect modification of  C", expected, actual);
 		//tearDown() deletes resources and does performDummySearch();
 	}
 

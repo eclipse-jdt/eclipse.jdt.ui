@@ -228,9 +228,7 @@ public abstract class RefactoringTest extends TestCase {
 		return undoManager;
 	}
 
-	/****************  helpers  ******************/
-	/**** mostly not general, just shortcuts *****/
-
+	/* ===================  helpers  ================= */
 	protected IType getType(ICompilationUnit cu, String name) throws JavaModelException {
 		IType[] types= cu.getAllTypes();
 		for (int i= 0; i < types.length; i++)
@@ -240,25 +238,20 @@ public abstract class RefactoringTest extends TestCase {
 		return null;
 	}
 	
-	/**
+	/*
 	 * subclasses override to inform about the location of their test cases
 	 */
 	protected String getRefactoringPath() {
 		return "";
 	}
 
-	/**
+	/*
 	 *  example "RenameType/"
 	 */
 	protected String getTestPath() {
 		return TEST_PATH_PREFIX + getRefactoringPath();
 	}
 
-	/**
-	 * @param cuName
-	 * @param infix
-	 * example "RenameTest/test0 + infix + cuName.java"
-	 */
 	protected String createTestFileName(String cuName, String infix) {
 		return getTestPath() + getName() + infix + cuName + ".java";
 	}
@@ -267,7 +260,7 @@ public abstract class RefactoringTest extends TestCase {
 		return createTestFileName(cuName, TEST_INPUT_INFIX);
 	}
 	
-	/**
+	/*
 	 * @param subDirName example "p/" or "org/eclipse/jdt/"
 	 */
 	protected String getInputTestFileName(String cuName, String subDirName) {
@@ -278,7 +271,7 @@ public abstract class RefactoringTest extends TestCase {
 		return createTestFileName(cuName, TEST_OUTPUT_INFIX);
 	}
 	
-	/**
+	/*
 	 * @param subDirName example "p/" or "org/eclipse/jdt/"
 	 */
 	protected String getOutputTestFileName(String cuName, String subDirName) {
@@ -480,6 +473,8 @@ public abstract class RefactoringTest extends TestCase {
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String)
 	 * without considering line delimiters.
+	 * @param expected the expected value
+	 * @param actual the actual value
 	 */
 	public static void assertEqualLines(String expected, String actual) {
 		assertEqualLines("", expected, actual);
@@ -488,6 +483,9 @@ public abstract class RefactoringTest extends TestCase {
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String, String)
 	 * without considering line delimiters.
+	 * @param message the message
+	 * @param expected the expected value
+	 * @param actual the actual value
 	 */
 	public static void assertEqualLines(String message, String expected, String actual) {
 		String[] expectedLines= Strings.convertIntoLines(expected);
@@ -495,29 +493,7 @@ public abstract class RefactoringTest extends TestCase {
 
 		String expected2= (expectedLines == null ? null : Strings.concatenate(expectedLines, "\n"));
 		String actual2= (actualLines == null ? null : Strings.concatenate(actualLines, "\n"));
-		assertEquals(message, expected2, actual2);
-		
-//		StringBuffer diffs= new StringBuffer();
-//		for (int i= 0; i < Math.max(actualLines.length, expectedLines.length); i++) {
-//			String exp= i >= expectedLines.length ? "<no line>" : expectedLines[i];
-//			String act= i >= actualLines.length ? "<no line>" : actualLines[i];
-//			if (! exp.equals(act)) {
-//				diffs.append("\n* " + (i+1) + "* expected: <" + exp + ">"
-//				           + "\n_ " + (i+1) + "_ but was:  <" + act + ">");
-//			}
-//		}
-//		
-//		boolean hasDiffs= diffs.length() != 0;
-//		boolean hasDiffLineCount= expectedLines.length != actualLines.length;
-//		if (hasDiffs || hasDiffLineCount) {
-//			message= (message == null || message.length() == 0 ? "" : message + ": ");
-//			if (hasDiffLineCount) {
-//				fail(message + "different number of lines (" + actualLines.length +
-//					" not " + expectedLines.length + ")" + diffs);
-//			} else {
-//				fail(message + "differences in lines: " + diffs);
-//			}
-//		}
+		assertEquals(message, expected2, actual2);		
 	}
 	
 	private static class Requestor implements ITypeNameRequestor{

@@ -192,19 +192,7 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 		assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 	}
 	
-	private void checkDisabled(Object[] copySelection, Object[] pasteSelection) {
-		doCopy(copySelection);		
-		SelectionDispatchAction pasteAction= new PasteAction(new MockWorkbenchSite(pasteSelection), fClipboard);
-		pasteAction.update(pasteAction.getSelection());
-		assertTrue("paste incorrectly enabled", ! pasteAction.isEnabled());
-	}
-
-	//--- tests --------
-
 	public void testProject() throws Exception{
-//		System.out.println("PasteResourcesFromClipboardActionTest#testProject - disabled due to failure under Motif");
-//		if (true)
-//			return;
 		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{getPackageP()});
 		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fPackageQ});
 		checkEnabled(new Object[]{MySetup.getProject()}, new Object[]{fSimpleProject});
@@ -238,9 +226,6 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	}
 	
 	public void testPackage() throws Exception{
-//		System.out.println("PasteResourcesFromClipboardActionTest#testPackage - disabled due to failure under Motif");
-//		if (true)
-//			return;
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{fSimpleProject});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{getRoot()});
 		checkEnabled(new Object[]{getPackageP()}, new Object[]{getPackageP()});
@@ -253,9 +238,6 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	}
 	
 	public void testRoot() throws Exception {		
-//		System.out.println("PasteResourcesFromClipboardActionTest#testRoot - disabled due to failure under Motif");
-//		if (true)
-//			return;
 		checkEnabled(new Object[]{getRoot()}, new Object[]{fAnotherProject});
 		checkEnabled(new Object[]{getRoot()}, new Object[]{MySetup.getProject()});		
 		

@@ -119,7 +119,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper2_0("m", "k", new String[0], false);
 	}
 	
-/******************************************************************/	
 	public void testFail0() throws Exception{
 		helper1();
 	}

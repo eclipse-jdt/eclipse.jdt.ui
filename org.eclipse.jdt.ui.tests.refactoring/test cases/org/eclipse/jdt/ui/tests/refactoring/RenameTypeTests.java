@@ -16,11 +16,12 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.boot.BootLoader;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -54,8 +55,6 @@ public class RenameTypeTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 		
-	/******* shortcuts **********/
-	
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
 		return getType(createCUfromTestFile(pack, className), className);
 	}
@@ -114,8 +113,6 @@ public class RenameTypeTests extends RefactoringTest {
 		return helper2_0(oldName, newName, newName, true);
 	}
 				
-	/****** tests ***********/
-	
 	public void testIllegalInnerClass() throws Exception {
 		helper1();
 	}
@@ -153,7 +150,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testIllegalTypeName9() throws Exception {
-		if (BootLoader.getOS().equals(BootLoader.OS_WIN32))
+		if (Platform.getOS().equals(Platform.OS_WIN32))
 			helper1_0("A", "aux");
 	}
 
@@ -660,8 +657,6 @@ public class RenameTypeTests extends RefactoringTest {
 		RefactoringStatus result= performRefactoring(createRefactoring(myClass, "B"));
 		assertNotNull("precondition was supposed to fail", result);
 	}
-	
-	/******************/
 	
 	public void test0() throws Exception { 
 		ParticipantTesting.reset();

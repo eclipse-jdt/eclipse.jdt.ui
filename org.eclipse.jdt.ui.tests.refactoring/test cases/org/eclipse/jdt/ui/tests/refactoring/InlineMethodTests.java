@@ -74,7 +74,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out, true);
 	}
 
-	/************************ Invalid Tests ********************************/
+	/* *********************** Invalid Tests ******************************* */
 		
 	protected void performInvalidTest() throws Exception {
 		performTest(fgTestSetup.getInvalidPackage(), getName(), INVALID_SELECTION, null);
@@ -124,7 +124,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
-	/************************ Simple Tests ********************************/
+	/* *********************** Simple Tests ******************************* */
 		
 	private void performSimpleTest() throws Exception {
 		performTest(fgTestSetup.getSimplePackage(), getName(), COMPARE_WITH_OUTPUT, "simple_out");
@@ -174,7 +174,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTest();
 	}	
 
-	/************************ Argument Tests ********************************/
+	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {
 		performTest(fgTestSetup.getArgumentPackage(), getName(), COMPARE_WITH_OUTPUT, "argument_out");
@@ -260,7 +260,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}
 	
-	/************************ Name Conflict Tests ********************************/
+	/* *********************** Name Conflict Tests ******************************* */
 		
 	private void performNameConflictTest() throws Exception {
 		performTest(fgTestSetup.getNameConflictPackage(), getName(), COMPARE_WITH_OUTPUT, "nameconflict_out");
@@ -298,7 +298,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performNameConflictTest();
 	}
 
-	/************************ Call Tests ********************************/
+	/* *********************** Call Tests ******************************* */
 		
 	private void performCallTest() throws Exception {
 		performTest(fgTestSetup.getCallPackage(), getName(), COMPARE_WITH_OUTPUT, "call_out");
@@ -324,7 +324,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performCallTest();
 	}
 	
-	/************************ Expression Tests ********************************/
+	/* *********************** Expression Tests ******************************* */
 		
 	private void performExpressionTest() throws Exception {
 		performTest(fgTestSetup.getExpressionPackage(), getName(), COMPARE_WITH_OUTPUT, "expression_out");
@@ -354,7 +354,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performExpressionTest();
 	}
 	
-	/************************ Control Statements Tests ********************************/
+	/* *********************** Control Statements Tests ******************************* */
 		
 	private void performControlStatementTest() throws Exception {
 		performTest(fgTestSetup.getControlStatementPackage(), getName(), COMPARE_WITH_OUTPUT, "controlStatement_out");
@@ -388,7 +388,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performControlStatementTest();
 	}
 
-	/************************ Receiver Tests ********************************/
+	/* *********************** Receiver Tests ******************************* */
 		
 	private void performReceiverTest() throws Exception {
 		performTest(fgTestSetup.getReceiverPackage(), getName(), COMPARE_WITH_OUTPUT, "receiver_out");
@@ -434,7 +434,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performReceiverTest();
 	}
 	
-	/************************ Import Tests ********************************/
+	/* *********************** Import Tests ******************************* */
 		
 	private void performImportTest() throws Exception {
 		performTest(fgTestSetup.getImportPackage(), getName(), COMPARE_WITH_OUTPUT, "import_out");
@@ -472,7 +472,7 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performImportTest();
 	}	
 
-	/************************ Cast Tests ********************************/
+	/* *********************** Cast Tests ******************************* */
 
 	private void performCastTest() throws Exception {
 		performTest(fgTestSetup.getCastPackage(), getName(), COMPARE_WITH_OUTPUT, "cast_out");

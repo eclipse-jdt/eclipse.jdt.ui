@@ -122,9 +122,9 @@ public class ASTNodes {
     }
     
 	/**
-	 * Returns a list of the direct chidrens of a node. The siblings are ordered by start offset.
-	 * @param node
-	 * @return
+	 * Returns a list of the direct children of a node. The siblings are ordered by start offset.
+	 * @param node the node to get the children for
+	 * @return the children
 	 */    
 	public static List getChildren(ASTNode node) {
 		ChildrenCollector visitor= new ChildrenCollector();
@@ -181,6 +181,8 @@ public class ASTNodes {
 	
 	/**
 	 * Returns the type node for the given declaration. 
+	 * @param declaration the declaration
+	 * @return the type node
 	 */
 	public static Type getType(VariableDeclaration declaration) {
 		if (declaration instanceof SingleVariableDeclaration) {
@@ -198,6 +200,8 @@ public class ASTNodes {
 	
 	/**
 	 * Returns the extra dimensions for the given declaration. 
+	 * @param declaration the declaration
+	 * @return the extra dimensions
 	 */
 	public static int getExtraDimensions(VariableDeclaration declaration) {
 		if (declaration instanceof SingleVariableDeclaration) {

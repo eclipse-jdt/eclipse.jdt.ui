@@ -85,10 +85,6 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		return -1;
 	}
 	
-	private void helper1(String cuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
-		helper1(new String[] {cuQName}, cuQName, startLine, startColumn, endLine, endColumn, newReceiverType, newReceiverName, inlineDelegator, removeDelegator);
-	}
-	
 	private void helper1(String[] cuQNames, String selectionCuQName, int startLine, int startColumn, int endLine, int endColumn, int newReceiverType, String newReceiverName, boolean inlineDelegator, boolean removeDelegator) throws Exception {
 		int selectionCuIndex= firstIndexOf(selectionCuQName, cuQNames);
 		Assert.isTrue(selectionCuIndex != -1, "parameter selectionCuQName must match some String in cuQNames.");

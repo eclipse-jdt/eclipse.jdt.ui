@@ -85,7 +85,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * Test files are assumed to be located in the resources directory.
 	 * @param positive true iff the requested file is for a positive unit test
 	 * @param input true iff the requested file is an input file
-	 * @see getSimpleTestFileName(boolean input)
+	 * @return the test file name
 	 */
 	private String getTestFileName(boolean positive, boolean input) {
 		String path= TEST_PATH_PREFIX + getRefactoringPath();
@@ -102,7 +102,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param positive
 	 * @param input
 	 * @return the ICompilationUnit created from the specified test file
-	 * @see getTestFileName()
+	 * @throws Exception
 	 */
 	private ICompilationUnit createCUForSimpleTest(IPackageFragment pack,
 												  boolean positive, boolean input)
@@ -119,11 +119,12 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * like getSimpleTestFileName(), but also prepends the appropriate version
 	 * of the resource path (depending on the value of <code>positive</code>).
 	 * Test files are assumed to be located in the resources directory.
-	 * @param project TODO
+	 * @param project the project
+	 * @param pack the package fragment
+	 * @param fileName the file name
 	 * @param input true iff the requested file is an input file
-	 * @see getSimpleTestFileName(boolean input)
-	 * @param positive true iff the requested file is for a positive unit test
-	 */
+	 * @return the test file name
+	 */ 
 	private String getBugTestFileName(IJavaProject project, IPackageFragment pack, String fileName, boolean input) {
 		String testName= getName();
 		String testNumber= testName.substring("test".length());//$NON-NLS-1$
@@ -144,7 +145,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param baseName
 	 * @param input
 	 * @return the ICompilationUnit created from the specified test file
-	 * @see getTestFileName()
+	 * @throws Exception
 	 */
 	private ICompilationUnit createCUForBugTestCase(IJavaProject project,
 													IPackageFragment pack, String baseName, boolean input)
@@ -164,7 +165,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * i.e. the first occurrences of <code>SELECTION_START_HERALD</code> and
 	 * <code>SELECTION_END_HERALD</code>. Fails an assertion if either of these
 	 * markers is not present in the source string.
+	 * @param source
 	 * @return an ISourceRange representing the marked selection
+	 * @throws Exception
 	 */
 	private ISourceRange findSelectionInSource(String source) throws Exception {
 		int		begin= source.indexOf(SELECTION_START_HERALD) + SELECTION_START_HERALD.length();
@@ -216,9 +219,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * options indicator such as "_FFF"), and compares the transformed code
 	 * to a source file whose name is the test name (minus the "test" prefix).
 	 * Test files are assumed to be located in the resources directory.
-	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
 	 * @param protectConstructor true iff IntroduceFactoryRefactoring should make the constructor private
-	 * @see getTestFileName()
+	 * @throws Exception
 	 */
 	void singleUnitHelper(boolean protectConstructor)
 		throws Exception
@@ -234,9 +236,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * options indicator such as "_FFF"), and compares the transformed code
 	 * to a source file whose name is the test name (minus the "test" prefix).
 	 * Test files are assumed to be located in the resources directory.
-	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
+	 * @param baseFileName the base file name
 	 * @param protectConstructor true iff IntroduceFactoryRefactoring should make the constructor private
-	 * @see getTestFileName()
+	 * @throws Exception
 	 */
 	protected void singleUnitBugHelper(String baseFileName, boolean protectConstructor)
 		throws Exception
@@ -249,9 +251,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	/**
 	 * Like singleUnitHelper(), but allows for the specification of the names of
 	 * the generated factory method, class, and interface, as appropriate.
-	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
 	 * @param factoryMethodName the name to use for the generated factory method
-	 * @see singleUnitHelper()
+	 * @throws Exception
 	 */
 	void namesHelper(String factoryMethodName)
 		throws Exception
@@ -286,6 +287,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param fileName the base name of the source file (minus the "_in" suffix)
 	 * @param pack an IPackageFragment for the containing package
 	 * @return the ICompilationUnit for the newly-created unit
+	 * @throws Exception
 	 */
 	private ICompilationUnit createCUFromFileName(String fileName, IPackageFragment pack) throws Exception {
 		String fullName = TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + "_in.java";
@@ -332,7 +334,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * Test files are assumed to be located in the resources directory.
 	 * @param staticFactoryMethod true iff IntroduceFactoryRefactoring should make the factory method static
 	 * @param inputFileBaseNames an array of input source file base names
-	 * @see createCUFromFileName()
+	 * @throws Exception
 	 */
 	void multiUnitHelper(boolean staticFactoryMethod, String[] inputFileBaseNames)
 		throws Exception
@@ -358,7 +360,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * @param inputFileBaseNames an array of input source file base names
 	 * @param factoryClassName the fully-qualified name of the class to receive the factory method, or null
 	 * if the factory method is to be placed on the class defining the given constructor
-	 * @see createCUFromFileName()
+	 * @throws Exception
 	 */
 	void multiUnitBugHelper(boolean staticFactoryMethod, String[] inputFileBaseNames, String factoryClassName)
 		throws Exception
@@ -383,7 +385,6 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	void multiProjectBugHelper(String[] inputFileBaseNames, String[] dependencies) throws Exception {
 		Map/*<String,Set<String>>*/ projName2PkgNames= collectProjectPackages(inputFileBaseNames);
 		Map/*<String,IJavaProject>*/ projName2Project= new HashMap();
-		Map/*<IJavaProject,Set<IPackageFragment>>*/ proj2Pkgs= new HashMap();
 		Map/*<IJavaProject,IPackageFragmentRoot>*/ proj2PkgRoot= new HashMap();
 
 		createProjectPackageStructure(projName2PkgNames, projName2Project, proj2PkgRoot);
@@ -406,7 +407,6 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			String filePath= inputFileBaseNames[i];
 
 			int projEnd= filePath.indexOf('/');
-			int pkgBegin= projEnd+1;
 			int pkgEnd= filePath.lastIndexOf('/');
 			int fileBegin= pkgEnd+1;
 

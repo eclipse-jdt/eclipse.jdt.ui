@@ -105,7 +105,6 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		helper2(true);
 	}
 
-	/******* tests ******************/
 	public void testFail0() throws Exception{
 		helper1();
 	}
@@ -117,11 +116,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	public void testFail2() throws Exception{
 		helper1();
 	}
-	
-	//testFail3 deleted
-	
-	//testFail4 deleted
-	
+		
 	public void testFail5() throws Exception{
 		helper1();
 	}

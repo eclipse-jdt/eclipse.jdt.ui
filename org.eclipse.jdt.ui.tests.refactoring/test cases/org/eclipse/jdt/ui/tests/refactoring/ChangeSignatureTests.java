@@ -125,7 +125,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEqualLines("invalid renaming", expectedFileContents, newcu.getSource());
 	}
 	
-	/**
+	/*
 	 * Rename method 'A.m(signature)' to 'A.newMethodName(signature)'
 	 */
 	private void helperRenameMethod(String[] signature, String newMethodName) throws Exception {
@@ -512,9 +512,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	
 	public void testFailDoAll8()throws Exception{
 		String[] signature= {"I"};
-		String[] newNames= {};
-		String[] newTypes= {};
-		String[] newDefaultValues= {};
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= {0};
 		
@@ -1307,9 +1304,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testAll61()throws Exception{ //bug 51634
 		String[] signature= {};
-		String[] newNames= null;
-		String[] newTypes= null;
-		String[] newDefaultValues= null;
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= null;
 		

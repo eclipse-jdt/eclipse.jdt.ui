@@ -37,7 +37,6 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		return new MySetup(test);
 	}
 
-	/** for the JUnit Launcher */
 	public static Test suite() {
 		//TODO: re-runnable tests: setUp() should create project iff neccessary (circumvent TestDecorator "MySetup")
 		if (true) {
@@ -57,7 +56,9 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	/**
 	 * get names from comment in source "//name: guessedName -> nameToUse"
 	 * <br>relies on tabwidth == 4
+	 * @param cu
 	 * @return {"guessedName", "nameToUse"} or null iff no name comment found
+	 * @throws Exception
 	 */
 	private String[] getNames(ICompilationUnit cu) throws Exception {
 		String source= cu.getSource();

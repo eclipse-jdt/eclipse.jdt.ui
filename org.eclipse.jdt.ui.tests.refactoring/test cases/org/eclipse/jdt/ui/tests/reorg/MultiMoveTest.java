@@ -41,7 +41,7 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-;
+
 
 public class MultiMoveTest extends RefactoringTest {
 

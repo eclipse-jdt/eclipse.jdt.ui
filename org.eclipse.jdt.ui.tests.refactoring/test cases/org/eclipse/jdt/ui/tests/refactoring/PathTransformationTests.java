@@ -30,7 +30,6 @@ public class PathTransformationTests extends TestCase {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
-/************/	
 	private IPath createIPath(String p){
 		return Path.EMPTY.append(p);
 	}

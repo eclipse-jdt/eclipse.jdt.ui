@@ -80,8 +80,6 @@ public class ExtractInterfaceTests extends RefactoringTest {
     	JavaCore.setOptions(fOldOptions);	
     }
 	
-	/******* shortcuts **********/
-	
 	private static String getTopLevelTypeName(String typeQualifiedTyperName){
 		int dotIndex= typeQualifiedTyperName.indexOf('.');
 		if (dotIndex == -1)

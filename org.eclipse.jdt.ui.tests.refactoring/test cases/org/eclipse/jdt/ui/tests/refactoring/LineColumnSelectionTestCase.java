@@ -71,7 +71,7 @@ public class LineColumnSelectionTestCase extends AbstractCUTestCase {
 				+ name.substring(5, separator);
 	}
 
-	/**
+	/*
 	 * get selection from comment in source "//selection: line, col, line, col"
 	 * <br>relies on tabwidth == 4
 	 */
@@ -90,7 +90,7 @@ public class LineColumnSelectionTestCase extends AbstractCUTestCase {
 		return TextRangeUtil.getSelection(cu, line1, col1, line2, col2);
 	}
 
-	/** @require refactoring.checkActivation().isOK() */
+	/* @require refactoring.checkActivation().isOK() */
 	protected void performTest(final ICompilationUnit unit, final Refactoring refactoring, final String out) throws Exception {
 		JavaCore.run(new IWorkspaceRunnable() {
 			public void run(IProgressMonitor monitor) throws CoreException {

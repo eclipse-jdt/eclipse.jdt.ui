@@ -59,7 +59,6 @@ public class RenamePackageTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
-	/** See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316">Bug 47316</a>. */
 	public static Test setUpTest(Test someTest) {
 		return new MySetup(someTest);
 	}
@@ -249,6 +248,7 @@ public class RenamePackageTests extends RefactoringTest {
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
+	 * @throws Exception
 	 */
 	private void helperMultiProjects(IPackageFragmentRoot[] roots, String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		ICompilationUnit[][][] cus=new ICompilationUnit[roots.length][][]; 
@@ -305,6 +305,7 @@ public class RenamePackageTests extends RefactoringTest {
 	 * @param packageNames package names per root
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 * @param cuNames cu names per package
+	 * @throws Exception
 	 */
 	private void helperProjectsPrgTest(String[][] packageNames, String newPackageName, String[][][] cuNames) throws Exception{
 		IJavaProject projectPrg= null;
@@ -327,7 +328,7 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 	}
 	
-	/**
+	/*
 	 * Multiple source folders in the same project.
 	 * @param newPackageName the new package name for packageNames[0][0]
 	 */

@@ -106,7 +106,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2(true);
 	}
 	
-	/********tests************/
 	public void testFail0() throws Exception{
 		helper1();
 	}

@@ -81,8 +81,6 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	}
 	
 
-	/******* shortcuts **********/
-	
 	private IType getClassFromTestFile(IPackageFragment pack, String className) throws Exception{
 		return getType(createCUfromTestFile(pack, className), className);
 	}
