@@ -35,6 +35,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private static final Class clazz= RenamePrivateFieldTests.class;
 	private static final String REFACTORING_PATH= "RenamePrivateField/";
 
+	private static final boolean BUG_75642_GENERIC_METHOD_SEARCH= true;
+	
 	private Object fPrefixPref;
 	public RenamePrivateFieldTests(String name) {
 		super(name);
@@ -249,4 +251,16 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		helper2("fBig", "fSmall", true, false, true, true, true, true);
 	}		
 	
+	public void test10() throws Exception{
+		//regression test for 81084
+		helper2("fList", "fElements", true, false, false, false, false, false);
+	}		
+	
+	public void test11() throws Exception{
+		if (BUG_75642_GENERIC_METHOD_SEARCH) {
+			printTestDisabledMessage("BUG_75642_GENERIC_METHOD_SEARCH");
+			return;
+		}
+		helper2("fList", "fElements", true, false, true, true, true, true);
+	}		
 }
