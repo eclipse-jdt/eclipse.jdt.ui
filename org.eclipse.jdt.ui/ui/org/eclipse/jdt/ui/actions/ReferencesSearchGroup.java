@@ -69,9 +69,16 @@ public class ReferencesSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindReferencesAction= new FindReferencesAction(site);
+		fFindReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
+
 		fFindReferencesInProjectAction= new FindReferencesInProjectAction(site);
+		fFindReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_PROJECT);
+		
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(site);
+		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
+		
 		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(site);
+		fFindReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKING_SET);
 
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();

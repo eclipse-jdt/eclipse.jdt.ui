@@ -18,8 +18,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.Page;
@@ -104,13 +104,22 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 
 	private void createSiteActions(IWorkbenchSite site) {
-		fSite= site;
 		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
+		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
+
 		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);
+		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
+
 		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site);
-        fOpenCallHierarchy= new OpenCallHierarchyAction(site);
-		fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
-		initialize(site);
+		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
+
+		fOpenCallHierarchy= new OpenCallHierarchyAction(site);
+        fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+
+        fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
+        fOpenPropertiesDialog.setActionDefinitionId("org.eclipse.ui.file.properties");
+		
+        initialize(site);
 	}
 	
 	private void initialize(IWorkbenchSite site) {
@@ -176,7 +185,7 @@ public class OpenViewActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
         actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.PROPERTIES, fOpenPropertiesDialog);		
+		actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);		
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {

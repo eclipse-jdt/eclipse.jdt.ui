@@ -24,8 +24,6 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
-import org.eclipse.ui.editors.text.ITextEditorHelpContextIds;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -34,7 +32,10 @@ import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -128,8 +129,7 @@ public class GenerateActionGroup extends ActionGroup {
 
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
-		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$		
-
+		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
 		
 		fSurroundWithTryCatch= new SurroundWithTryCatchAction(editor);
 		fSurroundWithTryCatch.setActionDefinitionId(IJavaEditorActionDefinitionIds.SURROUND_WITH_TRY_CATCH);
@@ -142,18 +142,18 @@ public class GenerateActionGroup extends ActionGroup {
 		editor.setAction("ExternalizeStrings", fExternalizeStrings); //$NON-NLS-1$		
 		
 		fConvertToWindows= new ConvertLineDelimitersAction(editor, "\r\n"); //$NON-NLS-1$
-		fConvertToWindows.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
-		fConvertToWindows.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
+		fConvertToWindows.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
+		fConvertToWindows.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_WINDOWS);
 		editor.setAction("ConvertLineDelimitersToWindows", fConvertToWindows); //$NON-NLS-1$		
 		
 		fConvertToUNIX= new ConvertLineDelimitersAction(editor, "\n"); //$NON-NLS-1$
-		fConvertToUNIX.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
-		fConvertToUNIX.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
+		fConvertToUNIX.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
+		fConvertToUNIX.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_UNIX);
 		editor.setAction("ConvertLineDelimitersToUNIX", fConvertToUNIX); //$NON-NLS-1$		
 	
 		fConvertToMac= new ConvertLineDelimitersAction(editor, "\r"); //$NON-NLS-1$
-		fConvertToMac.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
-		fConvertToMac.setHelpContextId(ITextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
+		fConvertToMac.setActionDefinitionId(ITextEditorActionDefinitionIds.CONVERT_LINE_DELIMITERS_TO_MAC);
+		fConvertToMac.setHelpContextId(IAbstractTextEditorHelpContextIds.CONVERT_LINE_DELIMITERS_TO_MAC);
 		editor.setAction("ConvertLineDelimitersToMac", fConvertToMac); //$NON-NLS-1$
 	}
 	
@@ -185,19 +185,44 @@ public class GenerateActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fOverrideMethods= new OverrideMethodsAction(site);
+		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
+		
 		fAddGetterSetter= new AddGetterSetterAction(site);
+		fAddGetterSetter.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_GETTER_SETTER);
+		
 		fAddDelegateMethods= new AddDelegateMethodsAction(site);
+		fAddDelegateMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.CREATE_DELEGATE_METHODS);
+		
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
+		fAddUnimplementedConstructors.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_UNIMPLEMENTED_CONTRUCTORS);
+		
 		fGenerateConstructorUsingFields= new GenerateNewConstructorUsingFieldsAction(site);
+		fGenerateConstructorUsingFields.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_CONSTRUCTOR_USING_FIELDS);
+		
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
+		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
+		
 		fAddBookmark= new AddBookmarkAction(site.getShell());
+		fAddBookmark.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_BOOKMARK);
+		
 		fAddToClasspathAction= new AddToClasspathAction(site);
 		fRemoveFromClasspathAction= new RemoveFromClasspathAction(site);
+		// context-menu only -> no action definition ids
+		
 		fAddTaskAction= new AddTaskAction(site);
+		fAddTaskAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.ADD_TASK);
+		
 		fExternalizeStrings= new ExternalizeStringsAction(site);
+		fExternalizeStrings.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTERNALIZE_STRINGS);
+		
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
+		fFindStringsToExternalize.setActionDefinitionId(IJavaEditorActionDefinitionIds.FIND_STRINGS_TO_EXTERNALIZE);
+		
 		fOrganizeImports= new OrganizeImportsAction(site);
+		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
+		
 		fSortMembers= new SortMembersAction(site);
+		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		
 		fOverrideMethods.update(selection);
 		fAddGetterSetter.update(selection);

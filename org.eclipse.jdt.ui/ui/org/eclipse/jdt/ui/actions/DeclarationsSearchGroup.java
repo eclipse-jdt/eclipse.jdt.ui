@@ -69,9 +69,16 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 		
 		fFindDeclarationsAction= new FindDeclarationsAction(site);
+		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
+
 		fFindDeclarationsInProjectAction= new FindDeclarationsInProjectAction(site);
-		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(site);
+		fFindDeclarationsInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
+
 		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(site);
+		fFindDeclarationsInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_HIERARCHY);
+
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(site);
+		fFindDeclarationsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKING_SET);
 
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();
@@ -96,7 +103,7 @@ public class DeclarationsSearchGroup extends ActionGroup  {
 		fEditor.setAction("SearchDeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$
 
 		fFindDeclarationsInProjectAction= new FindDeclarationsInProjectAction(fEditor);
-		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
+		fFindDeclarationsInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_PROJECTS);
 		fEditor.setAction("SearchDeclarationsInProjects", fFindDeclarationsInProjectAction); //$NON-NLS-1$
 
 		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(fEditor);

@@ -22,6 +22,7 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CutAction;
@@ -77,14 +78,20 @@ public class CCPActionGroup extends ActionGroup {
 	private CCPActionGroup(IWorkbenchSite site) {
 		fSite= site;
 		fClipboard= new Clipboard(site.getShell().getDisplay());
+		
 		fPasteAction= new PasteAction(fSite, fClipboard);
+		fPasteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
+		
 		fCopyAction= new CopyToClipboardAction(fSite, fClipboard, fPasteAction);
-		fActions= new SelectionDispatchAction[] {	
-			fCutAction= new CutAction(fSite, fClipboard, fPasteAction),
-			fCopyAction,
-			fPasteAction,
-			fDeleteAction= new DeleteAction(fSite),
-		};
+		fCopyAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
+		
+		fCutAction= new CutAction(fSite, fClipboard, fPasteAction);
+		fCutAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
+		
+		fDeleteAction= new DeleteAction(fSite);
+		fDeleteAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.DELETE);
+		
+		fActions= new SelectionDispatchAction[] { fCutAction, fCopyAction, fPasteAction, fDeleteAction };
 		registerActionsAsSelectionChangeListeners();
 	}
 

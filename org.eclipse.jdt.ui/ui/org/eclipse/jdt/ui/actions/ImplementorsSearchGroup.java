@@ -68,8 +68,13 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindImplementorsAction= new FindImplementorsAction(site);
+		fFindImplementorsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKSPACE);
+
 		fFindImplementorsInProjectAction= new FindImplementorsInProjectAction(site);
+		fFindImplementorsInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_PROJECT);
+
 		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(site);
+		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
 
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();

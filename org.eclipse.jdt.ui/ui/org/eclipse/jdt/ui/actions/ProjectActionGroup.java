@@ -22,10 +22,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;
+import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -58,8 +58,10 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
-		fOpenAction= new OpenProjectAction(fSite);
 		fCloseAction= new CloseResourceAction(shell);
+		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject");
+		fOpenAction= new OpenProjectAction(fSite);
+		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject");
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection s= (IStructuredSelection)selection;
 			fOpenAction.selectionChanged(s);
@@ -77,8 +79,8 @@ public class ProjectActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.CLOSE_PROJECT, fCloseAction);
-		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.OPEN_PROJECT, fOpenAction);
+		actionBars.setGlobalActionHandler(IDEActionFactory.CLOSE_PROJECT.getId(), fCloseAction);
+		actionBars.setGlobalActionHandler(IDEActionFactory.OPEN_PROJECT.getId(), fOpenAction);
 	}
 	
 	/* (non-Javadoc)

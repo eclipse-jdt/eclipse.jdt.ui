@@ -23,10 +23,11 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.BuildAction;
+import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.core.IJavaProject;
 
@@ -66,11 +67,14 @@ public class BuildActionGroup extends ActionGroup {
 		
 		fBuildAction= new BuildAction(shell, IncrementalProjectBuilder.INCREMENTAL_BUILD);
 		fBuildAction.setText(ActionMessages.getString("BuildAction.label")); //$NON-NLS-1$
+		fBuildAction.setActionDefinitionId("org.eclipse.ui.project.buildProject");
 		
 		fFullBuildAction= new BuildAction(shell, IncrementalProjectBuilder.FULL_BUILD);
 		fFullBuildAction.setText(ActionMessages.getString("RebuildAction.label")); //$NON-NLS-1$
+		fFullBuildAction.setActionDefinitionId("org.eclipse.ui.project.rebuildProject");
 		
 		fRefreshAction= new RefreshAction(fSite);
+		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh");
 		
 		provider.addSelectionChangedListener(fBuildAction);
 		provider.addSelectionChangedListener(fFullBuildAction);
@@ -119,9 +123,9 @@ public class BuildActionGroup extends ActionGroup {
 	}	
 	
 	private void setGlobalActionHandlers(IActionBars actionBar) {
-		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.BUILD_PROJECT, fBuildAction);
-		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.REBUILD_PROJECT, fFullBuildAction);
-		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.REFRESH, fRefreshAction);
+		actionBar.setGlobalActionHandler(IDEActionFactory.BUILD_PROJECT.getId(), fBuildAction);
+		actionBar.setGlobalActionHandler(IDEActionFactory.REBUILD_PROJECT.getId(), fFullBuildAction);
+		actionBar.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {

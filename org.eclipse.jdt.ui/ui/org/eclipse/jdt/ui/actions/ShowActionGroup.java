@@ -78,6 +78,8 @@ public class ShowActionGroup extends ActionGroup {
 
 	private ShowActionGroup(IWorkbenchSite site) {
 		fShowInPackagesViewAction= new ShowInPackageViewAction(site);
+		fShowInPackagesViewAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_IN_PACKAGE_VIEW);
+		
 		initialize(site , false);		
 	}
 

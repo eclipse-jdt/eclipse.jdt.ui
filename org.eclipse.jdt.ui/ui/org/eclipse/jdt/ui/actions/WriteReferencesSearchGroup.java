@@ -69,9 +69,16 @@ public class WriteReferencesSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindWriteReferencesAction= new FindWriteReferencesAction(site);
+		fFindWriteReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKSPACE);
+
 		fFindWriteReferencesInProjectAction= new FindWriteReferencesInProjectAction(site);
+		fFindWriteReferencesInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_PROJECT);
+
 		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(site);
+		fFindWriteReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_HIERARCHY);
+
 		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(site);
+		fFindWriteReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKING_SET);
 
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();

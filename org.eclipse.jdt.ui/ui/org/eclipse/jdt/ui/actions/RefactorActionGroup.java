@@ -275,45 +275,59 @@ public class RefactorActionGroup extends ActionGroup {
 		ISelection selection= provider.getSelection();
 		
 		fMoveAction= new MoveAction(site);
+		fMoveAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_ELEMENT);
 		initAction(fMoveAction, provider, selection);
 		
 		fRenameAction= new RenameAction(site);
+		fRenameAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.RENAME_ELEMENT);
 		initAction(fRenameAction, provider, selection);
 		
 		fModifyParametersAction= new ModifyParametersAction(fSite);
+		fModifyParametersAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MODIFY_METHOD_PARAMETERS);
 		initAction(fModifyParametersAction, provider, selection);
 		
 		fPullUpAction= new PullUpAction(fSite);
+		fPullUpAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PULL_UP);
 		initAction(fPullUpAction, provider, selection);
 
 		fPushDownAction= new PushDownAction(fSite);
+		fPushDownAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PUSH_DOWN);
 		initAction(fPushDownAction, provider, selection);
 		
 		fSelfEncapsulateField= new SelfEncapsulateFieldAction(fSite);
+		fSelfEncapsulateField.setActionDefinitionId(IJavaEditorActionDefinitionIds.SELF_ENCAPSULATE_FIELD);
 		initAction(fSelfEncapsulateField, provider, selection);
 
 		fExtractInterfaceAction= new ExtractInterfaceAction(fSite);
+		fExtractInterfaceAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_INTERFACE);
 		initAction(fExtractInterfaceAction, provider, selection);
 
 		fChangeTypeAction= new ChangeTypeAction(fSite);
+		fChangeTypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CHANGE_TYPE);
 		initAction(fChangeTypeAction, provider, selection);
 
 		fConvertNestedToTopAction= new ConvertNestedToTopAction(fSite);
+		fConvertNestedToTopAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.MOVE_INNER_TO_TOP);
 		initAction(fConvertNestedToTopAction, provider, selection);
 
 		fUseSupertypeAction= new UseSupertypeAction(fSite);
+		fUseSupertypeAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.USE_SUPERTYPE);
 		initAction(fUseSupertypeAction, provider, selection);
 		
 		fInlineAction= new InlineAction(fSite);
+		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
 		initAction(fInlineAction, provider, selection);
 		
 		fRenameRefactoringAction= new RenameRefactoringAction(fSite);
+		// no action definition id
 		initAction(fRenameRefactoringAction, provider, selection);
 		
 		fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
+		fIntroduceFactoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
 		initAction(fIntroduceFactoryAction, provider, selection);
 		
 		fConvertAnonymousToNestedAction= new ConvertAnonymousToNestedAction(fSite);
+		fConvertAnonymousToNestedAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.CONVERT_ANONYMOUS_TO_NESTED);
 		initAction(fConvertAnonymousToNestedAction, provider, selection);
 	}
 
