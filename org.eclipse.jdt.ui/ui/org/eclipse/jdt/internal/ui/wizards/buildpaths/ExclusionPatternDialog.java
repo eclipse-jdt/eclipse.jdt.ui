@@ -90,6 +90,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 			elements.add(pattern[i].toString());
 		}
 		fExclusionPatternList.setElements(elements);
+		fExclusionPatternList.selectFirstElement();
 	}
 	
 	

@@ -696,13 +696,22 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Refreshes the table.
+	* Refreshes the tree.
 	*/
 	public void refresh() {
 		if (fTree != null) {
 			fTree.refresh();
 		}
 	}
+	
+	/**
+	* Refreshes the tree.
+	*/
+	public void refresh(Object element) {
+		if (fTree != null) {
+			fTree.refresh(element);
+		}
+	}	
 
 	// ------- list maintenance
 

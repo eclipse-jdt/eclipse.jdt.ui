@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.util.Collection;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.util.Assert;
@@ -24,6 +26,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 
 	private Class[] fAcceptedTypes;
 	private boolean fAllowMultipleSelection;
+	private Collection fRejectedElements;
 	
 	/**
 	 * @param acceptedTypes The types accepted by the validator
@@ -31,10 +34,21 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 	 * allows multiple selection.
 	 */
 	public TypedElementSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection) {
+		this(acceptedTypes, allowMultipleSelection, null);
+	}
+	
+	/**
+	 * @param acceptedTypes The types accepted by the validator
+	 * @param allowMultipleSelection If set to <code>true</code>, the validator
+	 * allows multiple selection.
+	 * @param rejectedElements A list of elements that are not accepted
+	 */
+	public TypedElementSelectionValidator(Class[] acceptedTypes, boolean allowMultipleSelection, Collection rejectedElements) {
 		Assert.isNotNull(acceptedTypes);
 		fAcceptedTypes= acceptedTypes;
 		fAllowMultipleSelection= allowMultipleSelection;
-	}
+		fRejectedElements= rejectedElements;
+	}	
 	
 	/*
 	 * @see org.eclipse.ui.dialogs.ISelectionValidator#isValid(java.lang.Object)
@@ -55,6 +69,10 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		return false;
 	}
 	
+	private boolean isRejectedElement(Object elem) {
+		return (fRejectedElements != null) && fRejectedElements.contains(elem);
+	}
+	
 	private boolean isValid(Object[] selection) {
 		if (selection.length == 0) {
 			return false;
@@ -66,7 +84,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		
 		for (int i= 0; i < selection.length; i++) {
 			Object o= selection[i];	
-			if (!isOfAcceptedType(o)) {
+			if (!isOfAcceptedType(o) || isRejectedElement(o)) {
 				return false;
 			}
 		}

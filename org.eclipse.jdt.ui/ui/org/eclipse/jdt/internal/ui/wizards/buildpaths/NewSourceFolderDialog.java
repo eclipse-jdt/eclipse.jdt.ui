@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.util.List;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -38,10 +40,10 @@ public class NewSourceFolderDialog extends StatusDialog {
 	private StatusInfo fContainerFieldStatus;
 	
 	private IContainer fFolder;
-	private IContainer[] fExistingFolders;
+	private List fExistingFolders;
 	private IProject fCurrProject;
 		
-	public NewSourceFolderDialog(Shell parent, String title, IProject project, IContainer[] existingFolders, CPListElement entryToEdit) {
+	public NewSourceFolderDialog(Shell parent, String title, IProject project, List existingFolders, CPListElement entryToEdit) {
 		super(parent);
 		setTitle(title);
 		
@@ -50,15 +52,16 @@ public class NewSourceFolderDialog extends StatusDialog {
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 		
 		fUseProjectButton= new SelectionButtonDialogField(SWT.RADIO);
-		fUseProjectButton.setLabelText("Project as source folder");
+		fUseProjectButton.setLabelText("&Project as source folder");
 		fUseProjectButton.setDialogFieldListener(adapter);
 
 		fUseFolderButton= new SelectionButtonDialogField(SWT.RADIO);
-		fUseFolderButton.setLabelText("Folder as source folder");
+		fUseFolderButton.setLabelText("&Folder as source folder");
 		fUseFolderButton.setDialogFieldListener(adapter);		
 		
 		fContainerDialogField= new StringDialogField();
 		fContainerDialogField.setDialogFieldListener(adapter);
+		fContainerDialogField.setLabelText("&Source folder name:");
 		
 		fUseFolderButton.attachDialogField(fContainerDialogField);
 		
@@ -84,10 +87,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 	
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
-		
-		int widthHint= convertWidthInCharsToPixels(50);
-		int horizontalIndent= convertWidthInCharsToPixels(3);
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -95,14 +95,24 @@ public class NewSourceFolderDialog extends StatusDialog {
 		layout.numColumns= 1;
 		inner.setLayout(layout);
 		
-		fUseProjectButton.doFillIntoGrid(inner, 1);
-		fUseFolderButton.doFillIntoGrid(inner, 1);
-		Control control= fContainerDialogField.getTextControl(inner);
+		int widthHint= convertWidthInCharsToPixels(50);
+		
 		
 		GridData data= new GridData(GridData.FILL_HORIZONTAL);
 		data.widthHint= widthHint;
-		data.horizontalIndent= horizontalIndent;
-		control.setLayoutData(data);
+		
+		if (fExistingFolders.contains(fCurrProject)) {
+			fContainerDialogField.doFillIntoGrid(inner, 2);
+		} else {
+			fUseProjectButton.doFillIntoGrid(inner, 1);
+			fUseFolderButton.doFillIntoGrid(inner, 1);
+			fContainerDialogField.getTextControl(inner);
+
+			int horizontalIndent= convertWidthInCharsToPixels(3);
+			data.horizontalIndent= horizontalIndent;
+		}
+		Control control= fContainerDialogField.getTextControl(null);
+		control.setLayoutData(data);	
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;
@@ -155,12 +165,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 	}
 	
 	private boolean isExisting(IContainer folder) {
-		for (int i= 0; i < fExistingFolders.length; i++) {
-			if (folder.equals(fExistingFolders[i])) {
-				return true;
-			}
-		}
-		return false;
+		return fExistingFolders.contains(folder);
 	}
 		
 	

@@ -5,7 +5,10 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
@@ -36,6 +39,7 @@ import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -96,8 +100,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFoldersList.setRemoveButtonIndex(removeIndex);
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
+		fFoldersList.enableButton(IDX_EDIT, false);
 		
 		fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
+		fUseFolderOutputs.setSelection(false);
 		fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check"));
 		fUseFolderOutputs.setDialogFieldListener(adapter);
 	}
@@ -127,7 +133,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
-		
 		fUseFolderOutputs.setSelection(useFolderOutputs);
 	}			
 	
@@ -217,10 +222,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
+			if (index == IDX_ADD) {
 			List elementsToAdd= new ArrayList(10);
-			switch (index) {
-			case IDX_ADD: /* add */
-				
 				if (fCurrJProject.exists()) {
 					CPListElement[] srcentries= openSourceContainerDialog(null);
 					if (srcentries != null) {
@@ -234,19 +237,30 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 						elementsToAdd.add(entry);
 					}
 				}
-			
-				break;
-			case IDX_EDIT: /* add existing */
+				if (!elementsToAdd.isEmpty()) {
+					if (fFoldersList.getSize() == 1) {
+						CPListElement existing= (CPListElement) fFoldersList.getElement(0);
+						if (existing.getResource() instanceof IProject) {
+							askForChangingBuildPathDialog(existing);
+						}
+					}
+					HashSet modifiedElements= new HashSet();
+					askForAddingExclusionPatternsDialog(elementsToAdd, modifiedElements);
+					
+					fFoldersList.addElements(elementsToAdd);
+					fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+					
+					if (!modifiedElements.isEmpty()) {
+						for (Iterator iter= modifiedElements.iterator(); iter.hasNext();) {
+							Object elem= iter.next();
+							fFoldersList.refresh(elem);
+							fFoldersList.expandElement(elem, 3);
+						}
+					}
+
+				}				
+			} else if (index == IDX_EDIT) {
 				editEntry();
-				return;
-			}
-			if (!elementsToAdd.isEmpty()) {
-				fFoldersList.addElements(elementsToAdd);
-				fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
-				// if no source folders up to now
-				if (fFoldersList.getSize() == elementsToAdd.size()) {
-					askForChangingBuildPathDialog();
-				}
 			}
 		}
 	}
@@ -331,7 +345,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		
 		if (field == fUseFolderOutputs) {
-			if (fUseFolderOutputs.isSelected()) {
+			if (!fUseFolderOutputs.isSelected()) {
 				int nFolders= fFoldersList.getSize();
 				for (int i= 0; i < nFolders; i++) {
 					CPListElement cpe= (CPListElement) fFoldersList.getElement(i);
@@ -395,25 +409,67 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	/**
 	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
 	 */ 
-	private void askForChangingBuildPathDialog() {
+	private void askForChangingBuildPathDialog(CPListElement existing) {
 		IPath outputFolder= new Path(fOutputLocationField.getText());
+		
+		IPath newOutputFolder= null;
+		String message;
 		if (outputFolder.segmentCount() == 1) {
 			String outputFolderName= PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME);
-			IPath newPath= outputFolder.append(outputFolderName);
-			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
-			String message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.message", newPath); //$NON-NLS-1$
-			if (MessageDialog.openQuestion(getShell(), title, message)) {
-				fOutputLocationField.setText(newPath.toString());
+			newOutputFolder= outputFolder.append(outputFolderName);
+			message= NewWizardMessages.getFormattedString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.project_and_output.message", newOutputFolder); //$NON-NLS-1$
+		} else {
+			message= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.project.message"); //$NON-NLS-1$
+		}
+		String title= NewWizardMessages.getString("SourceContainerWorkbookPage.ChangeOutputLocationDialog.title"); //$NON-NLS-1$
+		if (MessageDialog.openQuestion(getShell(), title, message)) {
+			fFoldersList.removeElement(existing);
+			if (newOutputFolder != null) {
+				fOutputLocationField.setText(newOutputFolder.toString());
+			}
+		}			
+	}
+	
+	private void askForAddingExclusionPatternsDialog(List newEntries, Set modifiedEntries) {
+		for (int i= 0; i < newEntries.size(); i++) {
+			CPListElement curr= (CPListElement) newEntries.get(i);
+			addExclusionPatterns(curr, modifiedEntries);
+		}
+		if (!modifiedEntries.isEmpty()) {
+			String title= NewWizardMessages.getString("SourceContainerWorkbookPage.exclusion_added.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("SourceContainerWorkbookPage.exclusion_added.message"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), title, message);
+		}
+	}
+	
+	
+	private void addExclusionPatterns(CPListElement newEntry, Set modifiedEntries) {
+		IPath entryPath= newEntry.getPath();
+		List existing= fFoldersList.getElements();
+		for (int i= 0; i < existing.size(); i++) {
+			CPListElement curr= (CPListElement) existing.get(i);
+			IPath currPath= curr.getPath();
+			if (currPath.isPrefixOf(entryPath)) {
+				IPath[] exclusionFilters= (IPath[]) curr.getAttribute(CPListElement.EXCLUSION);
+				if (!JavaModelUtil.isExcludedPath(entryPath, exclusionFilters)) {
+					IPath pathToExclude= entryPath.removeFirstSegments(currPath.segmentCount()).addTrailingSeparator();
+					IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
+					System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
+					newExclusionFilters[exclusionFilters.length]= pathToExclude;
+					curr.setAttribute(CPListElement.EXCLUSION, newExclusionFilters);
+					modifiedEntries.add(curr);
+				}
 			}
 		}
 	}
+	
 	
 			
 			
 	private CPListElement[] openSourceContainerDialog(CPListElement existing) {
 		
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null, getExistingContainers(null));
 		
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
 		ArrayList rejectedElements= new ArrayList(allProjects.length);
@@ -455,7 +511,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		return null;
 	}
 	
-	private IContainer[] getExistingContainers(CPListElement existing) {
+	private List getExistingContainers(CPListElement existing) {
 		List res= new ArrayList();
 		List cplist= fFoldersList.getElements();
 		for (int i= 0; i < cplist.size(); i++) {
@@ -467,7 +523,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				}
 			}
 		}
-		return (IContainer[]) res.toArray(new IContainer[res.size()]);
+		return res;
 	}
 	
 	private CPListElement newCPSourceElement(IResource res) {

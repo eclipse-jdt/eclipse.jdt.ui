@@ -342,10 +342,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			/*CPListElementAttribute attrib= (CPListElementAttribute) elem;
 			if (attrib.getKey().equals(CPListElement.JAVADOC)) {
 				return true;
-			}
+			}*/
 			return ((CPListElementAttribute) elem).getParent().getParentContainer() == null;
 		}
 		return false;
