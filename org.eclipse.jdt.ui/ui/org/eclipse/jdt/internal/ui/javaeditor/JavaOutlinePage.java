@@ -251,6 +251,14 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			
 			class JavaOutlineViewer extends TreeViewer {
 				
+				/**
+				 * Indicates an item which has been reused. At the point of
+				 * its reuse it has been expanded. This field is used to
+				 * communicate between <code>internalExpandToLevel</code> and
+				 * <code>reuseTreeItem</code>.
+				 */
+				private Item fReusedExpandedItem;
+				
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
 					setAutoExpandLevel(ALL_LEVELS);
@@ -279,22 +287,26 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						Item i= (Item) node;
 						if (i.getData() instanceof IJavaElement) {
 							IJavaElement je= (IJavaElement) i.getData();
-							
-							if (je.getElementType() == IJavaElement.IMPORT_CONTAINER)
-								return;
-							
-							if (isInnerType(je))
-								return;								
+							if (je.getElementType() == IJavaElement.IMPORT_CONTAINER || isInnerType(je)) {
+								if (i != fReusedExpandedItem) {
+									setExpanded(i, false);
+									return;
+								}
+							}
 						}
 					}
 					super.internalExpandToLevel(node, level);
 				}
-				
+								
 				protected void reuseTreeItem(Item item, Object element) {
 					
 					// remove children
 					Item[] c= getChildren(item);
 					if (c != null && c.length > 0) {
+						
+						if (getExpanded(item))
+							fReusedExpandedItem= item;
+						
 						for (int k= 0; k < c.length; k++) {
 							if (c[k].getData() != null)
 								disassociate(c[k]);
@@ -303,9 +315,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					}
 					
 					updateItem(item, element);
-					
+					updatePlus(item, element);					
 					internalExpandToLevel(item, ALL_LEVELS);
 					
+					fReusedExpandedItem= null;
 				}
 				
 				/**
