@@ -39,6 +39,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 	private IPackageFragment fBranchPackage;
 	private IPackageFragment fErrorPackage;
 	private IPackageFragment fWikiPackage;
+	private IPackageFragment fParameterNamePackage;
 	
 	public ExtractMethodTestSetup(Test test) {
 		super(test);
@@ -74,6 +75,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 		fBranchPackage= getRoot().createPackageFragment("branch_in", true, null);
 		fErrorPackage= getRoot().createPackageFragment("error_in", true, null);
 		fWikiPackage= getRoot().createPackageFragment("wiki_in", true, null);
+		fParameterNamePackage= getRoot().createPackageFragment("parameterName_in", true, null);
 		
 		ICompilationUnit cu= fExpressionPackage.createCompilationUnit(
 			"A.java", 
@@ -144,5 +146,8 @@ public class ExtractMethodTestSetup extends TestSetup {
 	public IPackageFragment getWikiPackage() {
 		return fWikiPackage;
 	}	
-}
+
+	public IPackageFragment getParameterNamePackage() {
+		return fParameterNamePackage;
+	}	}
 

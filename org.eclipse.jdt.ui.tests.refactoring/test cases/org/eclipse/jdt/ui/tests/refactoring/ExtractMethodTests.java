@@ -4,8 +4,13 @@
  */
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -13,12 +18,18 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
-
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
 public class ExtractMethodTests extends AbstractSelectionTestCase {
+
+	private String[] fNewNames;
+	private int[] fNewOrder;
 
 	private static ExtractMethodTestSetup fgTestSetup;
 	
@@ -74,6 +85,28 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(unit, refactoring, mode, out);
 	}	
 	
+	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+		RefactoringStatus result= refactoring.checkActivation(pm);
+		if (result.hasFatalError())
+			return result;
+		ExtractMethodRefactoring extract= (ExtractMethodRefactoring)refactoring;
+		List parameters= extract.getParameterInfos();
+		if (fNewNames != null && fNewNames.length > 0) {
+			for (int i= 0; i < fNewNames.length; i++) {
+				if (fNewNames[i] != null)
+					((ParameterInfo)parameters.get(i)).setNewName(fNewNames[i]);
+			}
+		}
+		if (fNewOrder != null && fNewOrder.length > 0) {
+			assertTrue(fNewOrder.length == parameters.size());
+			List current= new ArrayList(parameters);
+			for (int i= 0; i < fNewOrder.length; i++) {
+				parameters.set(fNewOrder[i], current.get(i));
+			}
+		}
+		result.merge(refactoring.checkInput(pm));
+		return result;
+	}
 	protected void invalidSelectionTest() throws Exception {
 		performTest(fgTestSetup.getInvalidSelectionPackage(), "A", INVALID_SELECTION, null);
 	}
@@ -1418,6 +1451,40 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test802() throws Exception {
 		errorTest();
+	}
+	
+	//---- Test parameter name changes
+	
+	private void invalidParameterNameTest(String[] newNames) throws Exception {
+		fNewNames= newNames;
+		fNewOrder= null;
+		performTest(fgTestSetup.getParameterNamePackage(), "A", INVALID_SELECTION, null);
+	}
+	
+	private void parameterNameTest(String[] newNames, int[] newOrder) throws Exception {
+		fNewNames= newNames;
+		fNewOrder= newOrder;
+		performTest(fgTestSetup.getParameterNamePackage(), "A", COMPARE_WITH_OUTPUT, "parameterName_out");
+	}
+	
+	public void test900() throws Exception {
+		invalidParameterNameTest(new String[] {"y"});
+	}
+	
+	public void test901() throws Exception {
+		invalidParameterNameTest(new String[] {null, "i"});
+	}
+	
+	public void test902() throws Exception {
+		invalidParameterNameTest(new String[] {"System"});
+	}
+	
+	public void test903() throws Exception {
+		parameterNameTest(new String[] {"xxx", "yyyy"}, null);
+	}
+	
+	public void test904() throws Exception {
+		parameterNameTest(new String[] {"xx", "zz"}, new int[] {1, 0});
 	}
 	
 	//---- Test copied from http://c2.com/cgi/wiki?RefactoringBenchmarksForExtractMethod

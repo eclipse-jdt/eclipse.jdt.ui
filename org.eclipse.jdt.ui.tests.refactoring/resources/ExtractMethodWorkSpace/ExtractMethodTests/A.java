@@ -1,13 +1,12 @@
 public class A{
-	public A() {
-		this(5 + 6);
-	}
-	public A(int i) {
-	}
-	
-	static class B extends A {
-		public B() {
-			super(5 + 7);
-		}
+	public void foo() {
+		int i= 0;
+		int y= 0;
+		
+		int system= 0;
+		
+		System.out.println(i + y);
+
+		System.out.println("Dirk");
 	}
 }

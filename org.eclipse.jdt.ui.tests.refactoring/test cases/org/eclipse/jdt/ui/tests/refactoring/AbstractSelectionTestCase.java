@@ -7,22 +7,23 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
@@ -89,7 +90,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	
 	protected void performTest(ICompilationUnit unit, Refactoring refactoring, int mode, String out) throws Exception {
 		IProgressMonitor pm= new NullProgressMonitor();
-		RefactoringStatus status= refactoring.checkPreconditions(pm);
+		RefactoringStatus status= checkPreconditions(refactoring, pm);
 		switch (mode) {
 			case VALID_SELECTION:
 				// System.out.println(status);
@@ -118,5 +119,9 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				compareSource(unit.getSource(), original);
 				break;		
 		}
-	}	
+	}
+	
+	protected RefactoringStatus checkPreconditions(Refactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+		return refactoring.checkPreconditions(pm);
+	}
 }
