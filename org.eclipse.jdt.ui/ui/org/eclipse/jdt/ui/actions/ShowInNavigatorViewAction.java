@@ -83,7 +83,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
 		try {
-			setEnabled(getResource(getElement(selection)) != null); 
+			setEnabled(getResource(selection) != null); 
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 			setEnabled(false);
@@ -96,22 +96,34 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	protected void run(ITextSelection selection) {
 		IJavaElement element= SelectionConverter.codeResolveOrInputHandled(fEditor, 
 			getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.dialog.message")); //$NON-NLS-1$
-		if (element != null)
-			run(element);
+		if (element == null)
+			return;
+		try {
+			run(getResource(element));
+		} catch(JavaModelException e) {
+			// This shouldn't happen. If we can't convert the selection the
+			// action is disabled.
+			JavaPlugin.log(e);
+		}
 	}
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(IStructuredSelection selection) {
-		run(getElement(selection));
+		try {
+			run(getResource(selection));
+		} catch (JavaModelException e) {
+			// This shouldn't happen. If we can't convert the selection the
+			// action is disabled.
+			JavaPlugin.log(e);
+		}
 	}
 	
-	private void run(IJavaElement element) {
+	private void run(IResource resource) {
+		if (resource == null)
+			return;
 		try {
-			IResource resource= getResource(element);
-			if (resource == null)
-				return;
 			IWorkbenchPage page= getSite().getWorkbenchWindow().getActivePage();	
 			IViewPart view= page.showView(IPageLayout.ID_RES_NAV);
 			if (view instanceof ISetSelectionTarget) {
@@ -120,21 +132,23 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 			}
 		} catch(PartInitException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.error.activation_failed")); //$NON-NLS-1$
-		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ShowInNavigatorView.error.conversion_failed")); //$NON-NLS-1$
 		}
 	}
 	
-	private IJavaElement getElement(IStructuredSelection selection) {
+	private IResource getResource(IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() != 1)
 			return null;
 		Object element= selection.getFirstElement();
-		if (!(element instanceof IJavaElement))
-			return null;
-		return (IJavaElement)element;
+		if (element instanceof IResource)
+			return (IResource)element;
+		if (element instanceof IJavaElement)
+			return getResource((IJavaElement)element);
+		return null;
 	}
 	
 	private IResource getResource(IJavaElement element) throws JavaModelException {
+		if (element == null)
+			return null;
 		element= OpenActionUtil.getElementToOpen(element);
 		if (element == null)
 			return null;
