@@ -3,6 +3,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -47,6 +48,25 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
+	private void validatePassingTest(String className, String newInterfaceName, String[] extractedNames, String[][] extractedSignatures, boolean replaceOccurrences) throws Exception {
+		IType clas= getClassFromTestFile(getPackageP(), className);
+		ICompilationUnit cu= clas.getCompilationUnit();
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+				
+		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		assertEquals("interface name should be accepted", RefactoringStatus.OK, ref.checkNewInterfaceName(newInterfaceName).getSeverity());
+		
+		ref.setNewInterfaceName(newInterfaceName);
+		ref.setReplaceOccurrences(replaceOccurrences);	
+		IMethod[] extractedMethods= TestUtil.getMethods(clas, extractedNames, extractedSignatures);
+		ref.setExtractedMembers(extractedMethods);
+		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
+
+		ICompilationUnit interfaceCu= pack.getCompilationUnit(newInterfaceName + ".java");
+		assertEquals("incorrect interface created", getFileContents(getOutputTestFileName(newInterfaceName)), interfaceCu.getSource());
+	}
+	
 	private void validatePassingTest(String className, String newInterfaceName, boolean extractAll, boolean replaceOccurrences) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 		ICompilationUnit cu= clas.getCompilationUnit();
@@ -58,6 +78,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		ref.setNewInterfaceName(newInterfaceName);
 		if (extractAll)
 			ref.setExtractedMembers(ref.getExtractableMembers());
+		ref.setReplaceOccurrences(replaceOccurrences);	
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("incorrect changes in " + className, getFileContents(getOutputTestFileName(className)), cu.getSource());
 
@@ -132,6 +153,48 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	public void test13() throws Exception{
 		validatePassingTest("A", "I", true, true);
+	}
+
+	public void test14() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test15() throws Exception{
+		String[] names= new String[]{"m", "m1"};
+		String[][] signatures= new String[][]{new String[0], new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test16() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test17() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test18() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test19() throws Exception{
+		String[] names= new String[]{"m"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
+	}
+
+	public void test20() throws Exception{
+		String[] names= new String[]{"m", "m1"};
+		String[][] signatures= new String[][]{new String[0], new String[0]};
+		validatePassingTest("A", "I", names, signatures, true);
 	}
 
 	public void testFail0() throws Exception{
