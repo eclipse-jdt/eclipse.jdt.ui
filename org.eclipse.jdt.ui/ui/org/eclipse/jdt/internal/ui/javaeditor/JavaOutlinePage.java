@@ -766,13 +766,16 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		// register global actions
 		IActionBars bars= site.getActionBars();
 		
+		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
+		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
 		
 		fActionGroups.fillActionBars(bars);
 

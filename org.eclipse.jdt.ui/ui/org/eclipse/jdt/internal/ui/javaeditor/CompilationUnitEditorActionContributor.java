@@ -149,13 +149,15 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "PreviousError.", ITextEditorActionConstants.PREVIOUS, false); //$NON-NLS-1$
-		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
+		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
+		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "NextError.", ITextEditorActionConstants.NEXT, false); //$NON-NLS-1$
-		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
+		a= new RetargetToolbarAction(b, "PreviousError.", IJavaEditorActionConstants.PREVIOUS_ERROR, false); //$NON-NLS-1$
+		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
@@ -177,10 +179,13 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	public void init(IActionBars bars) {
 		super.init(bars);
 		// register actions that have a dynamic editor. 
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_TEXT_HOVER, fToggleTextHover);
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
+		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
 	}
 
 	/*
