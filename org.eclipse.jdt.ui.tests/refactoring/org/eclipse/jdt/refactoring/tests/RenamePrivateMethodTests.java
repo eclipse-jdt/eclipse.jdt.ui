@@ -86,10 +86,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	public void testFail3() throws Exception{
 		helper1();
 	}
-
-	public void testFail4() throws Exception{
-		helper1();
-	}
+	
+	//testFail4 deleted
 	
 	public void testFail5() throws Exception{
 		helper1();

@@ -50,7 +50,7 @@ public class JavaTestProject {
 		}
 		
 		IPath outputLocation;
-		if (binFolderName != null) {
+		if (binFolderName != null && ! "".equals(binFolderName)) {
 			IFolder binFolder= project.getFolder(binFolderName);
 			if (!binFolder.exists()) {
 				binFolder.create(false, true, null);
