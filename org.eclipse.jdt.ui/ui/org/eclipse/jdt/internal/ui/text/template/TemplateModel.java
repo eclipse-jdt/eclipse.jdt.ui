@@ -230,8 +230,6 @@ public class TemplateModel {
 			size += element.size;
 		}
 		
-		System.out.println("total size= " + size);
-		
 		return size;		
 	}
 }
