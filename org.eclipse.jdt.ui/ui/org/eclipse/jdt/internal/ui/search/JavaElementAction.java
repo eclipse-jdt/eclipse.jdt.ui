@@ -141,7 +141,7 @@ public abstract class JavaElementAction extends Action {
 				if (elements.length == 1 || !shouldUserBePrompted())
 					return elements[0];
 				else if (elements.length > 1)
-					return chooseFromList(Arrays.asList(elements));
+					return chooseFromList(elements);
 			}
 		}
 		return null;
@@ -160,7 +160,7 @@ public abstract class JavaElementAction extends Action {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(input);
 	}
-	private IJavaElement chooseFromList(List openChoices) {
+	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
@@ -168,6 +168,7 @@ public abstract class JavaElementAction extends Action {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
+		dialog.setElements(openChoices);
 		if (dialog.open() == dialog.OK)
 			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
 		return null;

@@ -386,7 +386,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 						if (elements.length == 1)
 							fJavaElement= elements[0];
 						else
-							fJavaElement= chooseFromList(Arrays.asList(elements));
+							fJavaElement= chooseFromList(elements);
 						if (fJavaElement != null)
 							return determineInitValuesFrom(fJavaElement);
 					}
@@ -562,14 +562,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		return new SearchPatternData(TYPE, REFERENCES, "", null); //$NON-NLS-1$
 	}	
 
-	private IJavaElement chooseFromList(java.util.List openChoices) {
+	private IJavaElement chooseFromList(IJavaElement[] openChoices) {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
-		dialog.setElements(openChoices.toArray()); // XXX inefficient
+		dialog.setElements(openChoices); // XXX inefficient
 		if (dialog.open() == dialog.OK)
 			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
 		return null;
