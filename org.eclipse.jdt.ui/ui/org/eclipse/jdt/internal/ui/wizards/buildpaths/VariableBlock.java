@@ -81,8 +81,7 @@ public class VariableBlock {
 		String[] buttonLabels= new String[] { 
 			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$
 			/* 1 */ NewWizardMessages.getString("VariableBlock.vars.edit.button"), //$NON-NLS-1$
-			/* 2 */ null,
-			/* 3 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
+			/* 2 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
@@ -92,7 +91,7 @@ public class VariableBlock {
 		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.getString("VariableBlock.vars.label")); //$NON-NLS-1$
-		fVariablesList.setRemoveButtonIndex(3);
+		fVariablesList.setRemoveButtonIndex(2);
 		
 		fVariablesList.enableButton(1, false);
 		
@@ -235,7 +234,7 @@ public class VariableBlock {
 		// edit
 		fVariablesList.enableButton(1, canEdit(selected, containsReserved));
 		// remove button
-		fVariablesList.enableButton(3, !containsReserved);
+		fVariablesList.enableButton(2, !containsReserved);
 		
 		fSelectedElements= selected;
 	}
@@ -363,7 +362,7 @@ public class VariableBlock {
 		/*
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
-		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		public void run(IProgressMonitor monitor) throws InvocationTargetException {
 			monitor.beginTask(NewWizardMessages.getString("VariableBlock.operation_desc"), fDoBuild ? 2 : 1); //$NON-NLS-1$
 			try {
 				int nVariables= fToChange.size() + fToRemove.size();

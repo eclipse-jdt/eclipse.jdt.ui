@@ -213,8 +213,14 @@ public class ListDialogField extends DialogField {
 			remove();
 		} else if (index == fUpButtonIndex) {
 			up();
+			if (!fButtonControls[index].isEnabled() && fDownButtonIndex != -1) {
+				fButtonControls[fDownButtonIndex].setFocus();
+			}
 		} else if (index == fDownButtonIndex) {
 			down();
+			if (!fButtonControls[index].isEnabled() && fUpButtonIndex != -1) {
+				fButtonControls[fUpButtonIndex].setFocus();
+			}
 		} else {
 			return false;
 		}
@@ -593,16 +599,25 @@ public class ListDialogField extends DialogField {
 	/**
 	 * Adds an element at the end of the list.
 	 */		
-	public void addElement(Object element) {		
+	public void addElement(Object element) {
+		addElement(element, fElements.size());
+	}
+	
+	/**
+	 * Adds an element at a position.
+	 */		
+	public void addElement(Object element, int index) {
 		if (fElements.contains(element)) {
 			return;
 		}
-		fElements.add(element);
+		fElements.add(index, element);
 		if (fTable != null) {
 			fTable.add(element);
+			fTable.setSelection(new StructuredSelection(element));
 		}
+		
 		dialogFieldChanged();
-	}
+	}	
 
 	/**
 	 * Adds elements at the end of the list.
@@ -623,25 +638,12 @@ public class ListDialogField extends DialogField {
 			fElements.addAll(elementsToAdd);
 			if (fTable != null) {
 				fTable.add(elementsToAdd.toArray());
+				fTable.setSelection(new StructuredSelection(elementsToAdd));
 			}
 			dialogFieldChanged();
 		}
 	}	
 
-	/**
-	 * Adds an element at a position.
-	 */		
-	public void insertElementAt(Object element, int index) {
-		if (fElements.contains(element)) {
-			return;
-		}
-		fElements.add(index, element);
-		if (fTable != null) {
-			fTable.add(element);
-		}
-		
-		dialogFieldChanged();
-	}	
 
 
 	/**

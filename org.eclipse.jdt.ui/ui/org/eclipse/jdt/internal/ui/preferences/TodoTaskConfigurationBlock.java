@@ -96,6 +96,10 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 
 	}
 	
+	private static final int IDX_ADD= 0;
+	private static final int IDX_EDIT= 1;
+	private static final int IDX_REMOVE= 2;
+	
 	private IStatus fTaskTagsStatus;
 	private ListDialogField fTodoTasksList;
 
@@ -105,14 +109,14 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		TaskTagAdapter adapter=  new TaskTagAdapter();
 		String[] buttons= new String[] {
 			/* 0 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.add.button"), //$NON-NLS-1$
-			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"), //$NON-NLS-1$
-			null,
-			/* 3 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"), //$NON-NLS-1$
+			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"), //$NON-NLS-1$
+			/* 2 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"), //$NON-NLS-1$
+			
 		};
 		fTodoTasksList= new ListDialogField(adapter, buttons, new TodoTaskLabelProvider());
 		fTodoTasksList.setDialogFieldListener(adapter);
 		fTodoTasksList.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.label")); //$NON-NLS-1$
-		fTodoTasksList.setRemoveButtonIndex(1);
+		fTodoTasksList.setRemoveButtonIndex(IDX_REMOVE);
 		
 		String[] columnsHeaders= new String[] {
 			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.name.column"), //$NON-NLS-1$
@@ -124,7 +128,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		if (fTodoTasksList.getSize() > 0) {
 			fTodoTasksList.selectFirstElement();
 		} else {
-			fTodoTasksList.enableButton(3, false);
+			fTodoTasksList.enableButton(IDX_EDIT, false);
 		}
 		
 		fTaskTagsStatus= new StatusInfo();		
@@ -147,12 +151,12 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		}
 
 		public void selectionChanged(ListDialogField field) {
-			field.enableButton(3, canEdit(field));
+			field.enableButton(IDX_EDIT, canEdit(field));
 		}
 			
 		public void doubleClicked(ListDialogField field) {
 			if (canEdit(field)) {
-				doTodoButtonPressed(3);
+				doTodoButtonPressed(IDX_EDIT);
 			}
 		}
 
@@ -273,7 +277,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		
 	private void doTodoButtonPressed(int index) {
 		TodoTask edited= null;
-		if (index != 0) {
+		if (index != IDX_ADD) {
 			edited= (TodoTask) fTodoTasksList.getSelectedElements().get(0);
 		}
 		

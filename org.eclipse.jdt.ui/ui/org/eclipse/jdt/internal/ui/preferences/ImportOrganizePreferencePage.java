@@ -141,7 +141,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
         }
 
         public void selectionChanged(ListDialogField field) {
-			fOrderListField.enableButton(1, canEdit(field));
+			fOrderListField.enableButton(IDX_EDIT, canEdit(field));
         }
 
         public void dialogFieldChanged(DialogField field) {
@@ -152,10 +152,18 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
         
         public void doubleClicked(ListDialogField field) {
         	if (canEdit(field)) {
-				doButtonPressed(1);
+				doButtonPressed(IDX_EDIT);
         	}
         }
 	}
+	
+	private static final int IDX_ADD= 0;
+	private static final int IDX_EDIT= 1;
+	private static final int IDX_REMOVE= 2;
+	private static final int IDX_UP= 4;
+	private static final int IDX_DOWN= 5;
+	private static final int IDX_LOAD= 7;
+	private static final int IDX_SAVE= 8;
 
 	private ListDialogField fOrderListField;
 	private StringDialogField fThresholdField;
@@ -169,14 +177,13 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		String[] buttonLabels= new String[] { 
 			/* 0 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.add.button"), //$NON-NLS-1$
 			/* 1 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.edit.button"), //$NON-NLS-1$
-			/* 2 */  null,
-			/* 3 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.up.button"), //$NON-NLS-1$
-			/* 4 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.down.button"), //$NON-NLS-1$
-			/* 5 */  null,
-			/* 6 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.remove.button"), //$NON-NLS-1$
-			/* 7 */  null,
-			/* 8 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.load.button"), //$NON-NLS-1$					
-			/* 9 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.save.button") //$NON-NLS-1$			
+			/* 2 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.remove.button"), //$NON-NLS-1$
+			/* 3 */  null,
+			/* 4 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.up.button"), //$NON-NLS-1$
+			/* 5 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.down.button"), //$NON-NLS-1$
+			/* 6 */  null,
+			/* 7 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.load.button"), //$NON-NLS-1$					
+			/* 8 */  PreferencesMessages.getString("ImportOrganizePreferencePage.order.save.button") //$NON-NLS-1$			
 		};
 				
 		ImportOrganizeAdapter adapter= new ImportOrganizeAdapter();
@@ -184,11 +191,11 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 		fOrderListField= new ListDialogField(adapter, buttonLabels, new ImportOrganizeLabelProvider());
 		fOrderListField.setDialogFieldListener(adapter);
 		fOrderListField.setLabelText(PreferencesMessages.getString("ImportOrganizePreferencePage.order.label")); //$NON-NLS-1$
-		fOrderListField.setUpButtonIndex(3);
-		fOrderListField.setDownButtonIndex(4);
-		fOrderListField.setRemoveButtonIndex(6);
+		fOrderListField.setUpButtonIndex(IDX_UP);
+		fOrderListField.setDownButtonIndex(IDX_DOWN);
+		fOrderListField.setRemoveButtonIndex(IDX_REMOVE);
 		
-		fOrderListField.enableButton(1, false);
+		fOrderListField.enableButton(IDX_EDIT, false);
 		
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
@@ -258,13 +265,13 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	}
 	
 	private void doButtonPressed(int index) {
-		if (index == 0) { // add new
+		if (index == IDX_ADD) { // add new
 			List existing= fOrderListField.getElements();
 			ImportOrganizeInputDialog dialog= new ImportOrganizeInputDialog(getShell(), existing);
 			if (dialog.open() == Window.OK) {
 				fOrderListField.addElement(dialog.getResult());
 			}
-		} else if (index == 1) { // edit
+		} else if (index == IDX_EDIT) { // edit
 			List selected= fOrderListField.getSelectedElements();
 			if (selected.isEmpty()) {
 				return;
@@ -279,12 +286,12 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 			if (dialog.open() == Window.OK) {
 				fOrderListField.replaceElement(editedEntry, dialog.getResult());
 			}
-		} else if (index == 8) { // load
+		} else if (index == IDX_LOAD) { // load
 			List order= loadImportOrder();
 			if (order != null) {
 				fOrderListField.setElements(order);
 			}
-		} else if (index == 9) { // save
+		} else if (index == IDX_SAVE) { // save
 			saveImportOrder(fOrderListField.getElements());
 		}		
 	}
