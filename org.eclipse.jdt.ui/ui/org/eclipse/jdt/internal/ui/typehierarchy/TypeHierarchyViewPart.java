@@ -610,6 +610,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			viewMenu.add(fToggleOrientationActions[i]);
 		}
 		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		
 	
 		// fill the method viewer toolbar
 		ToolBarManager lowertbmanager= new ToolBarManager(methodViewerToolBar);
@@ -631,6 +632,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
+		
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE,  ReorgGroup.createDeleteAction(fSelectionProviderMediator));
 				
 		IJavaElement input= determineInputElement();
 		if (fMemento != null) {
