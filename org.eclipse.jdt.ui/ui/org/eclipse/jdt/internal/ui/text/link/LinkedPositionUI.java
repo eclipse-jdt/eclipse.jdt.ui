@@ -415,7 +415,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			{
 				// if tab was treated as a document change, would it exceed variable range?
 				if (!LinkedPositionManager.includes(fFramePosition, offset, length)) {
-					leave(UNINSTALL | COMMIT | UPDATE_CARET);
+					leave(UNINSTALL | COMMIT);
 					return;
 				}
 			}

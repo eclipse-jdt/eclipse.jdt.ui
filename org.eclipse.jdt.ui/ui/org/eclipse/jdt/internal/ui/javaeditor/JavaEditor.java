@@ -193,7 +193,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Link mode.  
 	 */
 	class MouseClickListener implements KeyListener, MouseListener, MouseMoveListener,
-		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {		
+		FocusListener, PaintListener, IPropertyChangeListener, IDocumentListener, ITextInputListener {
 
 		/** The session is active. */
 		private boolean fActive;
@@ -203,9 +203,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		/** The hand cursor. */
 		private Cursor fCursor;
-		
-		/** The default cursor. */
-		private Cursor fDefaultCursor;
 		
 		/** The link color. */
 		private Color fColor;
@@ -251,7 +248,17 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		}
 		
 		public void uninstall() {
-
+			
+			if (fColor != null) {
+				fColor.dispose();
+				fColor= null;
+			}
+			
+			if (fCursor != null) {
+				fCursor.dispose();
+				fCursor= null;
+			}
+			
 			ISourceViewer sourceViewer= getSourceViewer();
 			if (sourceViewer == null)
 				return;
@@ -274,17 +281,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			text.removeMouseListener(this);
 			text.removeMouseMoveListener(this);
 			text.removeFocusListener(this);
-			text.removePaintListener(this);
-			
-			if (fColor != null) {
-				fColor.dispose();
-				fColor= null;
-			}
-				
-			if (fCursor != null) {
-				fCursor.dispose();
-				fCursor= null;
-			}				
+			text.removePaintListener(this);			
 		}
 
 		/*
@@ -517,12 +514,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		private void resetCursor(ISourceViewer viewer) {
 			StyledText text= viewer.getTextWidget();
-			if (text == null || text.isDisposed())
-				return;
-			Display display= text.getDisplay();			
-			if (fDefaultCursor == null)
-				fDefaultCursor= new Cursor(display, SWT.CURSOR_IBEAM);			
-			text.setCursor(fDefaultCursor);
+			if (text != null && !text.isDisposed())
+				text.setCursor(null);
 			
 			if (fCursor != null) {
 				fCursor.dispose();
@@ -546,16 +539,17 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			
 			fActive= true;
-
-			ISourceViewer viewer= getSourceViewer();
-			if (viewer == null)
-				return;
 			
-			IRegion region= getCurrentTextRegion(viewer);
-			if (region == null)
-				return;
-			
-//			removed for #25871			
+//			removed for #25871
+//
+//			ISourceViewer viewer= getSourceViewer();
+//			if (viewer == null)
+//				return;
+//			
+//			IRegion region= getCurrentTextRegion(viewer);
+//			if (region == null)
+//				return;
+//			
 //			highlightRegion(viewer, region);
 //			activateCursor(viewer);												
 		}

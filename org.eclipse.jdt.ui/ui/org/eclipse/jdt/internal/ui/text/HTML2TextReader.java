@@ -118,9 +118,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return  processHTMLTag();
 		else if (c == '&')
 			return processEntity();
-		else if (fIsPreformattedText) {
+		else if (fIsPreformattedText)
 			return processPreformattedText(c);
-		}
 		
 		return null;
 	}
@@ -245,7 +244,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private String processPreformattedText(int c) {
 		if  (c == '\r' || c == '\n')
 			fCounter++;
-		return new String(new char[] { (char)c });
+		return null;
 	}
 
 	

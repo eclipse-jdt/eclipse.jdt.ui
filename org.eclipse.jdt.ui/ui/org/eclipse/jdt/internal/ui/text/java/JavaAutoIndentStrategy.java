@@ -1,9 +1,16 @@
+/**********************************************************************
+Copyright (c) 2000, 2002 IBM Corp. and others.
+All rights reserved. This program and the accompanying materials
+are made available under the terms of the Common Public License v1.0
+which accompanies this distribution, and is available at
+http://www.eclipse.org/legal/cpl-v10.html
+
+Contributors:
+    IBM Corporation - Initial implementation
+**********************************************************************/
+
 package org.eclipse.jdt.internal.ui.text.java;
 
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -32,6 +39,8 @@ import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private final static String COMMENT= "//"; //$NON-NLS-1$
+	private int fTabWidth= -1;
+	private Boolean fUseSpaces= null;
 
 	public JavaAutoIndentStrategy() {
 	}
@@ -204,7 +213,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				int whiteend= findEndOfWhiteSpace(d, start, c.offset);
 				buf.append(d.get(start, whiteend - start));
 				if (getBracketCount(d, start, c.offset, true) > 0) {
-					buf.append(createIndent(1));
+					buf.append(createIndent(1, useSpaces()));
 				}
 			}
 			c.text= buf.toString();
@@ -258,8 +267,8 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 			// choose smaller indent of block and preceeding non-empty line 
 			String blockIndent= getBlockIndent(document, command);
-			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
-			int insideBlockIndentSize= calculateDisplayedWidth(insideBlockIndent);
+			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1, useSpaces()); //$NON-NLS-1$ // add one indent level
+			int insideBlockIndentSize= calculateDisplayedWidth(insideBlockIndent, getTabWidth());
 			int previousIndentSize= getIndentSize(document, command);
 			int newIndentSize= insideBlockIndentSize < previousIndentSize
 				? insideBlockIndentSize
@@ -267,7 +276,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			// indent is different if block starts with '}'				
 			if (startsWithClosingBrace(pastedText)) {
-				int outsideBlockIndentSize= blockIndent == null ? 0 : calculateDisplayedWidth(blockIndent);
+				int outsideBlockIndentSize= blockIndent == null ? 0 : calculateDisplayedWidth(blockIndent, getTabWidth());
 				newIndentSize = outsideBlockIndentSize;				
 			}
 
@@ -308,7 +317,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * A line is considered empty if it only consists of whitespaces or if it
 	 * begins with a single line comment followed by whitespaces only.
 	 */
-	private static int getIndentSizeOfFirstLine(String paragraph, boolean includeFirstLine) {
+	private static int getIndentSizeOfFirstLine(String paragraph, boolean includeFirstLine, int tabWidth) {
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
 			final String line= (String) iterator.next();
 			
@@ -335,7 +344,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				indent= getIndentOfLine(line);
 			}
 			
-			return calculateDisplayedWidth(indent);
+			return calculateDisplayedWidth(indent, tabWidth);
 		}
 
 		return 0;		
@@ -344,7 +353,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	/**
 	 * Returns the minimal indent size of all non empty lines;
 	 */
-	private static int getMinimalIndentSize(String paragraph, boolean includeFirstLine) {
+	private static int getMinimalIndentSize(String paragraph, boolean includeFirstLine, int tabWidth) {
 		int minIndentSize= Integer.MAX_VALUE;
 		
 		for (final Iterator iterator= new LineIterator(paragraph); iterator.hasNext();) {
@@ -372,7 +381,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				indent=getIndentOfLine(line);
 			}
 
-			final int indentSize= calculateDisplayedWidth(indent);
+			final int indentSize= calculateDisplayedWidth(indent, tabWidth);
 			if (indentSize < minIndentSize)
 				minIndentSize= indentSize;
 		}
@@ -384,9 +393,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * Returns the displayed width of a string, taking in account the displayed tab width.
 	 * The result can be compared against the print margin.
 	 */
-	private static int calculateDisplayedWidth(String string) {
-
-		final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+	private static int calculateDisplayedWidth(String string, int tabWidth) {
 
 		int column= 0;
 		for (int i= 0; i < string.length(); i++)
@@ -442,14 +449,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			int whiteend= findEndOfWhiteSpace(document, start, command.offset);
 			buffer.append(document.get(start, whiteend - start));
 			if (getBracketCount(document, start, command.offset, true) > 0) {
-				buffer.append(createIndent(1));
+				buffer.append(createIndent(1, useSpaces()));
 			}
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
 		
-		return calculateDisplayedWidth(buffer.toString());
+		return calculateDisplayedWidth(buffer.toString(), getTabWidth());
 	}
 	
 	private String getBlockIndent(IDocument d, DocumentCommand c) {
@@ -514,15 +521,11 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	}
 
-	private static IPreferenceStore getPreferenceStore() {
-		return JavaPlugin.getDefault().getPreferenceStore();
-	}
-
-	private static String createIndent(int level) {
+	private static String createIndent(int level, boolean useSpaces) {
 
 		StringBuffer buffer= new StringBuffer();
 
-		if (useSpaces()) {
+		if (useSpaces) {
 			int tabWidth= getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
 			int width= level * tabWidth;
 			for (int i= 0; i != width; ++i)
@@ -540,24 +543,23 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * Extends the string to match displayed width.
 	 * String is either the empty string or "//" and should not contain whites.
 	 */
-	private static String changePrefix(String string, int displayedWidth) {
+	private static String changePrefix(String string, int displayedWidth, boolean useSpaces, int tabWidth) {
 
 		// assumption: string contains no whitspaces
 		final StringBuffer buffer= new StringBuffer(string);
-		int column= calculateDisplayedWidth(buffer.toString());
+		int column= calculateDisplayedWidth(buffer.toString(), tabWidth);
 
 		if (column > displayedWidth)
 			return string;
 		
-		if (useSpaces()) {
+		if (useSpaces) {
 			while (column != displayedWidth) {
 				buffer.append(' ');
 				++column;
 			}
 			
 		} else {
-			final int tabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
-
+			
 			while (column != displayedWidth) {
 				if (column + tabWidth - (column % tabWidth) <= displayedWidth) {
 					buffer.append('\t');
@@ -578,8 +580,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 */
 	private String format(String paragraph, int newIndentSize, String lineDelimiter, boolean indentFirstLine) {
 
-		final int firstLineIndentSize= getIndentSizeOfFirstLine(paragraph, indentFirstLine);
-		final int minIndentSize= getMinimalIndentSize(paragraph, indentFirstLine);		
+		final int tabWidth= getTabWidth();
+		final int firstLineIndentSize= getIndentSizeOfFirstLine(paragraph, indentFirstLine, tabWidth);
+		final int minIndentSize= getMinimalIndentSize(paragraph, indentFirstLine, tabWidth);		
 
 		if (newIndentSize < firstLineIndentSize - minIndentSize)
 			newIndentSize= firstLineIndentSize - minIndentSize;
@@ -603,9 +606,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 					buffer.append(line);
 
 				} else {
-					int indentSize= calculateDisplayedWidth(lineIndent);
+					int indentSize= calculateDisplayedWidth(lineIndent, tabWidth);
 					int deltaSize= newIndentSize - firstLineIndentSize;
-					lineIndent= changePrefix(lineIndent.trim(), indentSize + deltaSize);
+					lineIndent= changePrefix(lineIndent.trim(), indentSize + deltaSize, useSpaces(), tabWidth);
 					buffer.append(lineIndent);
 					buffer.append(lineContent);			
 				}
@@ -664,10 +667,28 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			smartIndentAfterBlockDelimiter(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_PASTE))
 			smartPaste(d, c);
+			
+		clearCachedValues();
 	}
-
-	private static boolean useSpaces() {
-		return JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR));
+	
+	private static IPreferenceStore getPreferenceStore() {
+		return JavaPlugin.getDefault().getPreferenceStore();
 	}
-
+	
+	private boolean useSpaces() {
+		if (fUseSpaces == null)
+			fUseSpaces= new Boolean(JavaCore.SPACE.equals(JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_CHAR)));
+		return fUseSpaces.booleanValue();
+	}
+	
+	private int getTabWidth() {
+		if (fTabWidth == -1)
+			fTabWidth= JavaPlugin.getDefault().getPreferenceStore().getInt(PreferenceConstants.EDITOR_TAB_WIDTH);
+		return fTabWidth;
+	}
+	
+	private void clearCachedValues() {
+		fTabWidth= -1;
+		fUseSpaces= null;
+	}
 }
