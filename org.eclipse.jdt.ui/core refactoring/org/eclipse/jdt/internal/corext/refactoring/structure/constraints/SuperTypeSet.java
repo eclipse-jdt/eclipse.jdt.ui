@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure.constraints;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
 
@@ -84,18 +85,33 @@ public abstract class SuperTypeSet implements ITypeSet {
 		 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet#restrictedTo(org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet)
 		 */
 		public final ITypeSet restrictedTo(final ITypeSet set) {
+			final TType leftErasure= fType.getErasure();
 			if (set instanceof SuperTypeUniverse) {
 				return this;
 			} else if (set instanceof SuperTypeSingletonSet) {
 				if (this == set)
 					return this;
+				if (fType.isNullType())
+					return this;
 				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
-				if (fType.canAssignTo(singleton.fType))
+				final TType rightErasure= singleton.fType.getErasure();
+				if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
+						return this;
+				}
+				if (leftErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.getEmpty();
 			} else if (set instanceof SuperTypeTuple) {
+				if (fType.isNullType())
+					return this;
 				final SuperTypeTuple tuple= (SuperTypeTuple) set;
-				if (fType.canAssignTo(tuple.fSuperType))
+				final TType rightErasure= tuple.fSuperType.getErasure();
+				if (leftErasure.isGenericType() || rightErasure.isGenericType()) {
+					if (rightErasure.equals(leftErasure) || ((HierarchyType) leftErasure).isSubType((HierarchyType) rightErasure))
+						return this;
+				}
+				if (leftErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.createTypeSet(tuple.fSubType);
 			} else if (set instanceof SuperTypeEmptySet) {
@@ -155,7 +171,14 @@ public abstract class SuperTypeSet implements ITypeSet {
 				return this;
 			} else if (set instanceof SuperTypeSingletonSet) {
 				final SuperTypeSingletonSet singleton= (SuperTypeSingletonSet) set;
-				if (fSubType.canAssignTo(singleton.fType) && fSuperType.canAssignTo(singleton.fType))
+				final TType rightErasure= singleton.fType.getErasure();
+				final TType subErasure= fSubType.getErasure();
+				final TType superErasure= fSuperType.getErasure();
+				if (subErasure.isGenericType() || superErasure.isGenericType() || rightErasure.isGenericType()) {
+					if ((rightErasure.equals(subErasure) || ((HierarchyType) subErasure).isSubType((HierarchyType) rightErasure)) && (rightErasure.equals(superErasure) || ((HierarchyType) superErasure).isSubType((HierarchyType) rightErasure)))
+						return this;
+				}
+				if (subErasure.canAssignTo(rightErasure) && superErasure.canAssignTo(rightErasure))
 					return this;
 				return SuperTypeSet.createTypeSet(fSubType);
 			} else if (set instanceof SuperTypeTuple) {
