@@ -9,6 +9,8 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -344,6 +346,15 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 			}
 		};		
 		text.addListener(SWT.Modify, listener);
+
+		text.addKeyListener(new KeyListener() {
+			public void keyPressed(KeyEvent e) {
+				if (e.keyCode == SWT.ARROW_DOWN)
+					fFilteredList.setFocus();
+			}
+			
+			public void keyReleased(KeyEvent e) {}
+		});
 
 		fFilterText= text;
 				
