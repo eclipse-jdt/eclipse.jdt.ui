@@ -34,23 +34,30 @@ public class JavaSearchGroup extends ContextMenuGroup  {
 	}
 
 	public void fill(IMenuManager manager, GroupContext context) {
+		ResourceBundle bundle= JavaPlugin.getResourceBundle();
+		MenuManager javaSearchMM= new MenuManager(bundle.getString(GROUP_NAME), GROUP_NAME);
+		
 		for (int i= 0; i < fActions.length; i++) {
 			ElementSearchAction action= fActions[i];
 			if (action.canOperateOn(context.getSelection()))
-				manager.appendToGroup(GROUP_NAME, action);
+				javaSearchMM.add(action);
 		}
+		
+		manager.appendToGroup(GROUP_NAME, javaSearchMM);
 	}
 
 	public String getGroupName() {
 		return GROUP_NAME;
 	}
 	
-	public MenuManager getMenuManagerForGroup() {
+	public MenuManager getMenuManagerForGroup(boolean isTextSelectionEmpty) {
 		ResourceBundle bundle= JavaPlugin.getResourceBundle();
 		MenuManager javaSearchMM= new MenuManager(bundle.getString(GROUP_NAME), GROUP_NAME);
-		javaSearchMM.add(new GroupMarker(GROUP_NAME));
-		for (int i= 0; i < fActions.length; i++)
-			javaSearchMM.appendToGroup(GROUP_NAME, fActions[i]);
+		if (!isTextSelectionEmpty) {
+			javaSearchMM.add(new GroupMarker(GROUP_NAME));
+			for (int i= 0; i < fActions.length; i++)
+				javaSearchMM.appendToGroup(GROUP_NAME, fActions[i]);
+		}
 		return javaSearchMM;
 	}
 }
