@@ -357,9 +357,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
-			for (int i= 0; i < fNewWorkingCopies.length; i++) {
-				fNewWorkingCopies[i].destroy();		
-			}
+			if (fNewWorkingCopies != null){
+				for (int i= 0; i < fNewWorkingCopies.length; i++) {
+					fNewWorkingCopies[i].destroy();		
+				}
+			}	
 		}
 	}
 

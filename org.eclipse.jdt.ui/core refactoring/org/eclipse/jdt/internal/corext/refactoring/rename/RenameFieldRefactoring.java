@@ -355,9 +355,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			throw new JavaModelException(e);
 		} finally{
 			pm.done();
-			for (int i= 0; i < fNewWorkingCopies.length; i++) {
-				fNewWorkingCopies[i].destroy();
-			}
+			if (fNewWorkingCopies != null){
+				for (int i= 0; i < fNewWorkingCopies.length; i++) {
+					fNewWorkingCopies[i].destroy();
+				}
+			}	
 		}
 	}
 
