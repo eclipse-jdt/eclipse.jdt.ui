@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -57,6 +59,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 
 	private final Clipboard fClipboard;
 	private SelectionDispatchAction fPasteAction;//may be null
+	private boolean fAutoRepeatOnFailure= false;
 
 	public CopyToClipboardAction(IWorkbenchSite site, Clipboard clipboard, SelectionDispatchAction pasteAction) {
 		super(site);
@@ -74,6 +77,10 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
 
+	public void setAutoRepeatOnFailure(boolean autorepeatOnFailure){
+		fAutoRepeatOnFailure= autorepeatOnFailure;
+	}
+	
 	private static ISharedImages getWorkbenchSharedImages() {
 		return JavaPlugin.getDefault().getWorkbench().getSharedImages();
 	}
@@ -112,7 +119,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	}
 
 	private void doRun(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		new ClipboardCopier(resources, javaElements, fClipboard, getShell()).copyToClipboard();
+		new ClipboardCopier(resources, javaElements, fClipboard, getShell(), fAutoRepeatOnFailure).copyToClipboard();
 
 		// update the enablement of the paste action
 		// workaround since the clipboard does not support callbacks				
@@ -127,13 +134,14 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 	//----------------------------------------------------------------------------------------//
 	
 	private static class ClipboardCopier{
+		private final boolean fAutoRepreatOnFailure;
 		private final IResource[] fResources;
 		private final IJavaElement[] fJavaElements;
 		private final Clipboard fClipboard;
 		private final Shell fShell;
 		private final ILabelProvider fLabelProvider;
 		
-		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Clipboard clipboard, Shell shell){
+		private ClipboardCopier(IResource[] resources, IJavaElement[] javaElements, Clipboard clipboard, Shell shell, boolean autoRepeatOnFailure){
 			Assert.isNotNull(resources);
 			Assert.isNotNull(javaElements);
 			Assert.isNotNull(clipboard);
@@ -143,31 +151,41 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			fClipboard= clipboard;
 			fShell= shell;
 			fLabelProvider= createLabelProvider();
+			fAutoRepreatOnFailure= autoRepeatOnFailure;
 		}
 
 		public void copyToClipboard() throws JavaModelException{
-			//List<String> fileNameList
-			List fileNameList= new ArrayList(fResources.length + fJavaElements.length);
+			//Set<String> fileNames
+			Set fileNames= new HashSet(fResources.length + fJavaElements.length);
 			StringBuffer namesBuf = new StringBuffer();
-			processResources(fileNameList, namesBuf);
-			processJavaElements(fileNameList, namesBuf);
+			processResources(fileNames, namesBuf);
+			processJavaElements(fileNames, namesBuf);
 
 			IType[] mainTypes= ReorgUtils2.getMainTypes(fJavaElements);
-			processMainTypes(fileNameList, mainTypes);
-			
 			ICompilationUnit[] cusOfMainTypes= ReorgUtils2.getCompilationUnits(mainTypes);
-			IResource[] resourcesForClipboard= ReorgUtils2.union(fResources, ReorgUtils2.getResources(cusOfMainTypes));
+			IResource[] resourcesOfMainTypes= ReorgUtils2.getResources(cusOfMainTypes);
+			addFileNames(fileNames, resourcesOfMainTypes);
+			
+			IResource[] cuResources= ReorgUtils2.getResources(getCompilationUnits(fJavaElements));
+			addFileNames(fileNames, cuResources);
+
+			IResource[] resourcesForClipboard= ReorgUtils2.union(fResources, ReorgUtils2.union(cuResources, resourcesOfMainTypes));
 			IJavaElement[] javaElementsForClipboard= ReorgUtils2.union(fJavaElements, cusOfMainTypes);
 			
 			TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsForClipboard);
-			String[] fileNames= (String[]) fileNameList.toArray(new String[fileNameList.size()]);
-			copyToClipboard(resourcesForClipboard, fileNames, namesBuf.toString(), javaElementsForClipboard, typedSources);
+			String[] fileNameArray= (String[]) fileNames.toArray(new String[fileNames.size()]);
+			copyToClipboard(resourcesForClipboard, fileNameArray, namesBuf.toString(), javaElementsForClipboard, typedSources);
 		}
 
-		private void processResources(List fileNameList, StringBuffer namesBuf) {
+		private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
+			List cus= ReorgUtils2.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+			return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
+		}
+
+		private void processResources(Set fileNames, StringBuffer namesBuf) {
 			for (int i= 0; i < fResources.length; i++) {
 				IResource resource= fResources[i];
-				addFileNameToList(fileNameList, resource);
+				addFileName(fileNames, resource);
 
 				if (i > 0)
 					namesBuf.append('\n');
@@ -175,11 +193,11 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 		}
 
-		private void processJavaElements(List fileNameList, StringBuffer namesBuf) {
+		private void processJavaElements(Set fileNames, StringBuffer namesBuf) {
 			for (int i= 0; i < fJavaElements.length; i++) {
 				IJavaElement element= fJavaElements[i];
 				if (! ReorgUtils2.isInsideCompilationUnit(element))
-					addFileNameToList(fileNameList, ReorgUtils2.getResource(element));
+					addFileName(fileNames, ReorgUtils2.getResource(element));
 
 				if (fResources.length > 0 || i > 0)
 					namesBuf.append('\n');
@@ -187,21 +205,19 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 		}
 
-		private void processMainTypes(List fileNameList, IType[] mainTypes) {
-			for (int i= 0; i < mainTypes.length; i++) {
-				IType mainType= mainTypes[i];
-				IResource resource= ReorgUtils2.getResource(mainType.getCompilationUnit());
-				addFileNameToList(fileNameList, resource);
+		private static void addFileNames(Set fileName, IResource[] resources) {
+			for (int i= 0; i < resources.length; i++) {
+				addFileName(fileName, resources[i]);
 			}
 		}
 
-		private static void addFileNameToList(List fileNameList, IResource resource){
+		private static void addFileName(Set fileName, IResource resource){
 			if (resource == null)
 				return;
 			IPath location = resource.getLocation();
 			// location may be null. See bug 29491.
 			if (location != null)
-				fileNameList.add(location.toOSString());			
+				fileName.add(location.toOSString());			
 		}
 		
 		private void copyToClipboard(IResource[] resources, String[] fileNames, String names, IJavaElement[] javaElements, TypedSource[] typedSources){
@@ -211,7 +227,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			} catch (SWTError e) {
 				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD)
 					throw e;
-				if (MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
+				if (fAutoRepreatOnFailure || MessageDialog.openQuestion(fShell, "Problem Copying to Clipboard", "There was a problem when accessing the system clipboard. Retry?"))
 					copyToClipboard(resources, fileNames, names, javaElements, typedSources);
 			}
 		}

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -166,6 +165,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	private void checkEnabled(Object[] elements) throws JavaModelException{
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
+		copyAction.setAutoRepeatOnFailure(true);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be enabled", copyAction.isEnabled());
 		copyAction.run();
@@ -177,7 +177,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
 		IType[] mainTypesCopied= ReorgUtils2.getMainTypes(javaElementsCopied);
 		
-		IResource[] resourcesExpected= computeResourcesExpectedInClipboard(resourcesCopied, mainTypesCopied);
+		IResource[] resourcesExpected= computeResourcesExpectedInClipboard(resourcesCopied, mainTypesCopied, javaElementsCopied);
 		IJavaElement[] javaElementsExpected= computeJavaElementsExpectedInClipboard(javaElementsCopied, mainTypesCopied);
 		
 		String[] clipboardFiles= getClipboardFiles();
@@ -203,8 +203,9 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		}
 	}
 
-	private IResource[] computeResourcesExpectedInClipboard(IResource[] resourcesCopied, IType[] mainTypesCopied) throws JavaModelException {
-		return ReorgUtils2.union(resourcesCopied, ReorgUtils2.getResources(ReorgUtils2.getCompilationUnits(mainTypesCopied)));
+	private IResource[] computeResourcesExpectedInClipboard(IResource[] resourcesCopied, IType[] mainTypesCopied, IJavaElement[] javaElementsCopied) throws JavaModelException {
+		IResource[] cuResources= ReorgUtils2.getResources(getCompilationUnits(javaElementsCopied));
+		return ReorgUtils2.union(cuResources, ReorgUtils2.union(resourcesCopied, ReorgUtils2.getResources(ReorgUtils2.getCompilationUnits(mainTypesCopied))));
 	}
 
 	private static IJavaElement[] computeJavaElementsExpectedInClipboard(IJavaElement[] javaElementsExpected, IType[] mainTypesCopied) throws JavaModelException {
@@ -290,24 +291,17 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		return count;
 	}
 
+	private static IJavaElement[] getCompilationUnits(IJavaElement[] javaElements) {
+		List cus= ReorgUtils2.getElementsOfType(javaElements, IJavaElement.COMPILATION_UNIT);
+		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
+	}
+
 	private static IResource[] getResources(Object[] elements) {
-		List resources= new ArrayList(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
-			if (element instanceof IResource)
-				resources.add(element);			
-		}
-		return (IResource[]) resources.toArray(new IResource[resources.size()]);
+		return ReorgUtils2.getResources(Arrays.asList(elements));
 	}
 
 	private static IJavaElement[] getJavaElements(Object[] elements) {
-		List resources= new ArrayList(elements.length);
-		for (int i= 0; i < elements.length; i++) {
-			Object element= elements[i];
-			if (element instanceof IJavaElement)
-				resources.add(element);			
-		}
-		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
+		return ReorgUtils2.getJavaElements(Arrays.asList(elements));
 	}
 
 	private IJavaElement[] getClipboardJavaElements() {
