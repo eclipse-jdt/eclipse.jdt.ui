@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.filters;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -39,6 +40,10 @@ public class NonJavaElementFilter  extends ViewerFilter {
 			IProject project= ((IResource)element).getProject(); 
 			return project == null || !project.isOpen();
 		}
+
+		// Exclude all IStorage elements which are neither Java elements nor resources
+		if (element instanceof IStorage)
+			return false;
 			
 		return true;
 	}
