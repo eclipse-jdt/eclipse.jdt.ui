@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
 import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
 
@@ -336,6 +337,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		PackageExplorerPart.initDefaults(store);
 		JavaEditorPreferencePage.initDefaults(store);
+		
+		JavaDebugPreferencePage.initDefaults(store);
 		
 	}
 }
