@@ -18,12 +18,24 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 /**
- * Evaluates all fields, methods and types avaiable at a given offset in a compilation unit.
+ * Evaluates all fields, methods and types available (declared) at a given offset
+ * in a compilation unit.
  */
 public class ScopeAnalyzer {
 	
+	/**
+	 * Flag to specify that method should be reported.
+	 */
 	public static final int METHODS= 1;
+	
+	/**
+	 * Flag to specify that variables should be reported.
+	 */	
 	public static final int VARIABLES= 2;
+	
+	/**
+	 * Flag to specify that types should be reported.
+	 */		
 	public static final int TYPES= 4;
 	
 	private HashSet fRequestor;
