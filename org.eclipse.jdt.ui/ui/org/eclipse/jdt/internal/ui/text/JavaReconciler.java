@@ -28,6 +28,10 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.JavaCore;
+
 
  
 /**
@@ -38,36 +42,38 @@ public class JavaReconciler extends MonoReconciler {
 	/**
 	 * Internal part listener for activating the reconciler.
 	 */
-	class PartListener implements IPartListener {
+	private class PartListener implements IPartListener {
 		
-		/*
-		 * @see IPartListener#partActivated(IWorkbenchPart)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void partActivated(IWorkbenchPart part) {
-			if (part == fTextEditor)
+			if (part == fTextEditor && hasJavaModelChanged())
 				JavaReconciler.this.forceReconciling();
 		}
 
-		/*
-		 * @see IPartListener#partBroughtToTop(IWorkbenchPart)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void partBroughtToTop(IWorkbenchPart part) {
 		}
 
-		/*
-		 * @see IPartListener#partClosed(IWorkbenchPart)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void partClosed(IWorkbenchPart part) {
 		}
 
-		/*
-		 * @see IPartListener#partDeactivated(IWorkbenchPart)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void partDeactivated(IWorkbenchPart part) {
+			if (part == fTextEditor)
+				setJavaModelChanged(false);
 		}
 
-		/*
-		 * @see IPartListener#partOpened(IWorkbenchPart)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void partOpened(IWorkbenchPart part) {
 		}
@@ -76,22 +82,45 @@ public class JavaReconciler extends MonoReconciler {
 	/**
 	 * Internal Shell activation listener for activating the reconciler.
 	 */
-	class ActivationListener extends ShellAdapter {
+	private class ActivationListener extends ShellAdapter {
 		
 		private Control fControl;
 		
 		public ActivationListener(Control control) {
 			fControl= control;
 		}
-		
-		/*
-		 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
+
+		/**
+		 * {@inheritDoc}
 		 */
 		public void shellActivated(ShellEvent e) {
-			if (!fControl.isDisposed() && fControl.isVisible())
+			if (!fControl.isDisposed() && fControl.isVisible() && hasJavaModelChanged())
 				JavaReconciler.this.forceReconciling();
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void shellDeactivated(ShellEvent e) {
+			setJavaModelChanged(false);
+		}
 	}
+	
+	/**
+	 * Internal Java element changed listener
+	 * 
+	 * @since 3.0
+	 */
+	private class ElementChangedListener implements IElementChangedListener {
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void elementChanged(ElementChangedEvent event) {
+			setJavaModelChanged(true);
+		}
+	}
+	
 	
 	/** The reconciler's editor */
 	private ITextEditor fTextEditor;
@@ -99,6 +128,16 @@ public class JavaReconciler extends MonoReconciler {
 	private IPartListener fPartListener;
 	/** The shell listener */
 	private ShellListener fActivationListener;
+	/**
+	 * The Java element changed listener.
+	 * @since 3.0
+	 */
+	private IElementChangedListener fJavaElementChangedListener;
+	/**
+	 * Tells whether the Java model sent out a changed event.
+	 * @since 3.0
+	 */
+	private volatile boolean fHasJavaModelChanged= true;
 	
 	
 	/**
@@ -109,8 +148,8 @@ public class JavaReconciler extends MonoReconciler {
 		fTextEditor= editor;
 	}
 	
-	/*
-	 * @see IReconciler#install(ITextViewer)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void install(ITextViewer textViewer) {
 		super.install(textViewer);
@@ -123,10 +162,13 @@ public class JavaReconciler extends MonoReconciler {
 		fActivationListener= new ActivationListener(textViewer.getTextWidget());
 		Shell shell= window.getShell();
 		shell.addShellListener(fActivationListener);
+		
+		fJavaElementChangedListener= new ElementChangedListener();
+		JavaCore.addElementChangedListener(fJavaElementChangedListener);
 	}
 
-	/*
-	 * @see IReconciler#uninstall()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void uninstall() {
 		
@@ -140,11 +182,14 @@ public class JavaReconciler extends MonoReconciler {
 			shell.removeShellListener(fActivationListener);
 		fActivationListener= null;
 		
+		JavaCore.removeElementChangedListener(fJavaElementChangedListener);
+		fJavaElementChangedListener= null;
+		
 		super.uninstall();
 	}
 	
-    /*
-	 * @see AbstractReconciler#forceReconciling()
+	/**
+	 * {@inheritDoc}
 	 */
 	protected void forceReconciling() {
 		super.forceReconciling();
@@ -152,12 +197,32 @@ public class JavaReconciler extends MonoReconciler {
 		strategy.notifyParticipants(false);
 	}
     
-	/*
-	 * @see AbstractReconciler#reconcilerReset()
+	/**
+	 * {@inheritDoc}
 	 */
 	protected void reconcilerReset() {
 		super.reconcilerReset();
         JavaCompositeReconcilingStrategy strategy= (JavaCompositeReconcilingStrategy) getReconcilingStrategy(IDocument.DEFAULT_CONTENT_TYPE);
 		strategy.notifyParticipants(true);
+	}
+	
+	/**
+	 * Tells whether the Java Model has changed or not.
+	 * 
+	 * @return <code>true</code> iff the Java Model has changed
+	 * @since 3.0
+	 */
+	private synchronized boolean hasJavaModelChanged() {
+		return fHasJavaModelChanged;
+	}
+	
+	/**
+	 * Sets whether the Java Model has changed or not.
+	 * 
+	 * @param state <code>true</code> iff the java model has changed
+	 * @since 3.0
+	 */
+	private synchronized void setJavaModelChanged(boolean state) {
+		fHasJavaModelChanged= state;
 	}
 }
