@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -316,6 +317,23 @@ public class ImportsStructure implements IImportsStructure {
 		String mainTypeName= JavaModelUtil.concatenateName(packageName, Signature.getQualifier(cu.getElementName()));
 		return qualifier.equals(mainTypeName);
 	}
+
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param binding The type binding of the type to be added
+	 * @return Returns the name to use in the code: Simple name if the import
+	 * was added, fully qualified type name if the import could not be added due
+	 * to a conflict. 
+	 */
+	public String addImport(ITypeBinding binding) {
+		String qualifiedName= binding.getQualifiedName();
+		if (qualifiedName.length() > 0) {
+			return addImport(qualifiedName);
+		}
+		return binding.getName();
+	}
 	
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
@@ -333,8 +351,16 @@ public class ImportsStructure implements IImportsStructure {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 */			
-	public String addImport(String fullTypeName) {
+	 */
+	public String addImport(String qualifiedTypeName) {
+		int bracketOffset= qualifiedTypeName.indexOf('[');
+		if (bracketOffset != -1) {
+			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
+		}
+		return internalAddImport(qualifiedTypeName);
+	}
+		
+	private String internalAddImport(String fullTypeName) {
 		String typeContainerName= Signature.getQualifier(fullTypeName);
 		String typeName= Signature.getSimpleName(fullTypeName);
 		
@@ -385,7 +411,7 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-
+	
 		fHasChanges= true;
 		return typeName;
 	}

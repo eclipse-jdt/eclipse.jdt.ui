@@ -302,7 +302,7 @@ public class LocalCorrectionsSubProcessor {
         } else if (selectedNode instanceof MethodInvocation) {
         	qualifier= ((MethodInvocation) selectedNode).getExpression();
         }
-		if (qualifier != null) {
+		if (qualifier == null) {
 			ITypeBinding typeBinding= ASTResolving.normalizeTypeBinding(qualifier.resolveTypeBinding());
 			if (typeBinding != null) {
 				ASTRewrite rewrite= new ASTRewrite(selectedNode.getParent());
@@ -316,6 +316,9 @@ public class LocalCorrectionsSubProcessor {
 
 				proposals.add(proposal);
 			}
+			
+			
+			
 		}
 	}
 

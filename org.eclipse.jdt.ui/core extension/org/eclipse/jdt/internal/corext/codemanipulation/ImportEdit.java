@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -55,15 +56,25 @@ public final class ImportEdit extends SimpleTextEdit {
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 * @return Retuns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
+	 * The type name can contain dimensions.
 	 */
 	public String addImport(String qualifiedTypeName) {
-		//XXX workaround for 11622, 11537 and related problems with array types
-		int bracketOffset= qualifiedTypeName.indexOf('[');
-		if (bracketOffset != -1) {
-			return fImportsStructure.addImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
-		}			
 		return fImportsStructure.addImport(qualifiedTypeName);
 	}
+	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param binding The type binding of the type to be added
+	 * @return Retuns the simple type name that can be used in the code or the
+	 * fully qualified type name if an import conflict prevented the import.
+	 * The type binding can be an array binding. No import is added for unnamed
+	 * types (local or anonymous types)
+	 */
+	public String addImport(ITypeBinding binding) {
+		return fImportsStructure.addImport(binding);
+	}	
 	
 	public void removeImport(String qualifiedTypeName) {
 		fImportsStructure.removeImport(qualifiedTypeName);

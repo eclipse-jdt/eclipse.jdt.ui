@@ -385,8 +385,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							typeBinding= typeBinding.getElementType();
 						}
 						if (needsImport(typeBinding, ref)) {
-							String name= Bindings.getFullyQualifiedName(typeBinding);
-							fImpStructure.addImport(name);
+							fImpStructure.addImport(typeBinding);
 						}
 					}	
 					return null;

@@ -11,7 +11,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -59,19 +58,20 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		return change;
 	}
 	
-	public String addImport(String qualifiedTypeName) throws CoreException {
+	private ImportEdit getImportEdit() throws CoreException {
 		if (fImportEdit == null) {
 			fImportEdit= new ImportEdit(getCompilationUnit(), JavaPreferencesSettings.getCodeGenerationSettings());
 		}
-		return fImportEdit.addImport(qualifiedTypeName);
+		return fImportEdit;
+	}
+	
+	
+	public String addImport(String qualifiedTypeName) throws CoreException {
+		return getImportEdit().addImport(qualifiedTypeName);
 	}
 	
 	public String addImport(ITypeBinding binding) throws CoreException {
-		ITypeBinding baseType= binding.isArray() ? binding.getElementType() : binding;
-		if (baseType.isMember() || baseType.isTopLevel()) {
-			return addImport(Bindings.getFullyQualifiedName(baseType));
-		}
-		return null;
+		return getImportEdit().addImport(binding);
 	}	
 	
 	protected ASTRewrite getRewrite() throws CoreException {
