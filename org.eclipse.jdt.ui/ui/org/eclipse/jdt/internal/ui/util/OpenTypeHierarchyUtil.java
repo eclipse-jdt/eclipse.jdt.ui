@@ -99,7 +99,6 @@ public class OpenTypeHierarchyUtil {
 			
 			if (input instanceof IMember) {
 				result.selectMember((IMember) input);
-				openEditor(input, false);
 			}	
 			return result;
 		} catch (CoreException e) {
@@ -133,7 +132,10 @@ public class OpenTypeHierarchyUtil {
 		part.setInputElement(perspectiveInput);
 		if (input instanceof IMember) {
 			part.selectMember((IMember) input);
-			openEditor(input, false);
+			
+			if (page.getEditorReferences().length == 0) {
+				openEditor(input, false); // only open when the perspecive has been created
+			}
 		}
 		return part;
 	}

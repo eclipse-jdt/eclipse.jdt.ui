@@ -98,7 +98,6 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
@@ -168,6 +167,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 
 	private int fCurrentOrientation;
 	private boolean fLinkingEnabled;
+	private boolean fSelectInEditor;
 	
 	private boolean fIsVisible;
 	private boolean fNeedRefresh;	
@@ -212,6 +212,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fInputElement= null;
 		fIsVisible= false;
 		fIsRefreshRunnablePosted= false;
+		fSelectInEditor= true;
 		
 		boolean isReconciled= PreferenceConstants.UPDATE_WHILE_EDITING.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.UPDATE_JAVA_VIEWS));
 
@@ -318,13 +319,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
 			updateHierarchyViewer(true);
-		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-			
 		}
-		
-		
 	}
-	
 		
 	/**
 	 * Adds the entry if new. Inserted at the beginning of the history entries list.
@@ -381,11 +377,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * Selects an member in the methods list or in the current hierarchy.
 	 */	
 	public void selectMember(IMember member) {
+		fSelectInEditor= false;
 		if (member.getElementType() != IJavaElement.TYPE) {
-			// methods are working copies
-			if (fHierarchyLifeCycle.isReconciled()) {
-				member= JavaModelUtil.toWorkingCopy(member);
-			}
 			Control methodControl= fMethodsViewer.getControl();
 			if (methodControl != null && !methodControl.isDisposed()) {
 				methodControl.setFocus();
@@ -397,13 +390,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (viewerControl != null && !viewerControl.isDisposed()) {
 				viewerControl.setFocus();
 			}
-			// types are originals
-			member= JavaModelUtil.toOriginal(member);
 			
 			if (!member.equals(fSelectedType)) {
 				getCurrentViewer().setSelection(new StructuredSelection(member), true);
 			}
-		}	
+		}
+		fSelectInEditor= true;
 	}
 
 	/**
@@ -442,7 +434,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (element.getElementType() != IJavaElement.TYPE) {
 					element= ((IMember) element).getDeclaringType();
 				}
-				element= JavaModelUtil.toOriginal((IMember) element);
 				if (!element.exists()) {
 					MessageDialog.openError(getSite().getShell(), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.title"), TypeHierarchyMessages.getString("TypeHierarchyViewPart.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 					return;
@@ -492,7 +483,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				setView(VIEW_ID_TYPE);
 			}
 			// turn off member filtering
+			fSelectInEditor= false;
 			setMemberFilter(null);
+			internalSelectType(null, false); // clear selection
 			fIsEnableMemberFilter= false;
 			if (!inputElement.equals(prevInput)) {
 				updateHierarchyViewer(true);
@@ -504,6 +497,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			updateTitle();
 			enableMemberFilter(false);
 			fPagebook.showPage(fTypeMethodsSplitter);
+			fSelectInEditor= true;
 		}
 	}
 	
@@ -1060,7 +1054,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				updateTitle();
 				internalSelectType(fSelectedType, true);	
 			}
-			if (nSelected == 1) {
+			if (nSelected == 1 && fSelectInEditor) {
 				revealElementInEditor(selected.get(0), fMethodsViewer);
 			}
 		}
@@ -1084,7 +1078,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				} else if (types.size() == 0) {
 					// method selected, no change
 				}
-				if (nSelected == 1) {
+				if (nSelected == 1 && fSelectInEditor) {
 					revealElementInEditor(selected.get(0), getCurrentViewer());
 				}
 			} else {
@@ -1095,7 +1089,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void revealElementInEditor(Object elem, Viewer originViewer) {
-		// only allow revealing when the type hierarchy is the active pagae
+		// only allow revealing when the type hierarchy is the active page
 		// no revealing after selection events due to model changes
 		
 		if (getSite().getPage().getActivePart() != this) {
