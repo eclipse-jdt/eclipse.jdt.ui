@@ -82,7 +82,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		fSettings= dialogSettings.getSection(SETTINGS_SECTION);		
 		if (fSettings == null)  {
 			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-			fSettings.put(SETTINGS_INSERTPOSITION, 0); //$NON-NLS-1$
+			fSettings.put(SETTINGS_INSERTPOSITION, 1); //$NON-NLS-1$
 		}
 
 		fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION);
