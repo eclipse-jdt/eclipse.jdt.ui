@@ -93,7 +93,10 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			}
 			buffer.append("public class "); //$NON-NLS-1$
 			buffer.append(dummyName);
-			buffer.append(" extends "); //$NON-NLS-1$
+			if (fDeclaringType.isInterface())
+				buffer.append(" implements "); //$NON-NLS-1$
+			else
+				buffer.append(" extends "); //$NON-NLS-1$
 			buffer.append(fDeclaringType.getFullyQualifiedName('.'));
 			int start= buffer.length();
 			buffer.append("{\n\n}"); //$NON-NLS-1$
@@ -136,7 +139,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 						List list= new ArrayList();
 						for (int index= 0; index < bindings.length; index++) {
 							if (Modifier.isAbstract(bindings[index].getModifiers()))
-								list.add(bindings[index]);
+								list.add(bindings[index].getKey());
 						}
 						keys= (String[]) list.toArray(new String[list.size()]);
 					}
@@ -217,7 +220,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		if (!createStubs(buf, impStructure)) {
 			return false;
 		}
-		buf.append(';');
+		if (document.getChar(offset) != ')')
+			buf.append(';');
 
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
@@ -227,10 +231,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 
 		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, null, lineDelim, fDeclaringType.getJavaProject());
 		replacement= Strings.changeIndent(replacement, 0, tabWidth, CodeFormatterUtil.createIndentString(indent, fCompilationUnit.getJavaProject()), lineDelim);
-		int start= replacement.indexOf('(') + 1;
-		int end= replacement.lastIndexOf(';') + 1;
-
-		setReplacementString(replacement.substring(start, end));
+		setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
 
 		int pos= offset;
 		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {
