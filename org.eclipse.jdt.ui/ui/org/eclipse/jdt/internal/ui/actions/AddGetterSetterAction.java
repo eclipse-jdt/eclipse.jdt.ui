@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -25,13 +24,13 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.AddGetterSetterOperation;
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
@@ -95,7 +94,7 @@ public class AddGetterSetterAction extends Action {
 			if (op.getOperationInfo() != null) {
 				String title= JavaUIMessages.getString("AddGetterSetterAction.info.title"); //$NON-NLS-1$
 				String message= JavaUIMessages.getString("AddGetterSetterAction.info.message"); //$NON-NLS-1$
-				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, op.getOperationInfo());
+				ProblemDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, op.getOperationInfo());
 			}
 		
 			IMethod[] createdMethods= op.getCreatedAccessors();
