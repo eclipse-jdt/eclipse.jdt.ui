@@ -203,6 +203,7 @@
 		category="org.eclipse.jdt.ui.java"
 		project="true"
 		finalPerspective="org.eclipse.jdt.ui.JavaPerspective"
+		preferredPerspectives="org.eclipse.jdt.ui.JavaPerspective,org.eclipse.jdt.ui.JavaBrowsingPerspective,org.eclipse.jdt.ui.JavaHierarchyPerspective"
 		icon="icons/full/ctool16/newjprj_wiz.gif">
 		<description>%NewJavaProject.description</description>
     </wizard>	
