@@ -147,7 +147,7 @@ public class TypeConstraintTests extends RefactoringTest {
 	}	
 
 	public void testConstraints5() throws Exception{
-		String[] strings= {"[as0] =^= A[]", "Decl(A:f()) =^= p.A", "[a0] <= A", "[a0] =^= A", "[null] <= [a0]", "[new A[]={a0}] <= [as0]"};
+		String[] strings= {"[as0] =^= A[]", "Decl(A:f()) =^= p.A", "[a0] <= A", "[a0] =^= A", "[null] <= [a0]", "[new A[]{a0}] <= [as0]"};
 		testConstraints(strings);
 	}	
 
