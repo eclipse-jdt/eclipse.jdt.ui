@@ -69,7 +69,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		return null;
 	}
 	
-	private void reconcile() {
+	private void reconcile(boolean initialReconcile) {
 		CompilationUnit ast= null;
 		try {
 			ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());		
@@ -84,7 +84,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					}
 					
 					try {
-						boolean isASTNeeded= JavaPlugin.getDefault().getASTProvider().isActive(unit);
+						boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
 						// reconcile
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener && isASTNeeded) {
@@ -130,14 +130,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */
 	public void reconcile(IRegion partition) {
-		reconcile();
+		reconcile(false);
 	}
 	
 	/*
 	 * @see IReconcilingStrategy#reconcile(DirtyRegion, IRegion)
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
-		reconcile();
+		reconcile(false);
 	}
 	
 	/*
@@ -157,7 +157,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	 * @see IReconcilingStrategyExtension#initialReconcile()
 	 */
 	public void initialReconcile() {
-		reconcile();
+		reconcile(true);
 	}
 	
 	/**
