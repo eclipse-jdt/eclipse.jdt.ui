@@ -405,7 +405,6 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 	private final ICompilationUnit fCu;
 	private NLSSubstitution[] fSubstitutions;
-	private String fDefaultPrefix;
 	private Button fExternalizeButton;
 	private Button fIgnoreButton;
 	private Button fInternalizeButton;
@@ -421,12 +420,9 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		super(PAGE_NAME);
 		fCu= nlsRefactoring.getCu();
 		fSubstitutions= nlsRefactoring.getSubstitutions();
-		fDefaultPrefix= nlsRefactoring.getPrefixHint();
 		fNLSRefactoring= nlsRefactoring;
 
-		NLSSubstitution.setPrefix(fDefaultPrefix);
-
-		createDefaultExternalization(fSubstitutions, fDefaultPrefix);
+		createDefaultExternalization(fSubstitutions, nlsRefactoring.getPrefix());
 	}
 
 	/*
@@ -619,7 +615,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 					return;
 				NLSSubstitution substitution= (NLSSubstitution) selected.iterator().next();
 				if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
-					openEditButton(event.getSelection());
+					//openEditButton(event.getSelection());
 				}
 			}
 		});
@@ -702,12 +698,12 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 
 		fPrefixField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fPrefixField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fPrefixField.setText(fDefaultPrefix);
+		fPrefixField.setText(fNLSRefactoring.getPrefix());
 		fPrefixField.selectAll();
 
 		fPrefixField.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				NLSSubstitution.setPrefix(fPrefixField.getText());
+				fNLSRefactoring.setPrefix(fPrefixField.getText());
 				fTableViewer.refresh(true);
 			}
 		});

@@ -153,7 +153,7 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 	private NLSRefactoring prepareRefac(ICompilationUnit cu) {
 		NLSRefactoring refac= NLSRefactoring.create(cu);
 		NLSSubstitution[] subs= refac.getSubstitutions();
-		NLSSubstitution.setPrefix("");
+		refac.setPrefix("");
 		for (int i= 0; i < subs.length; i++) {
 			subs[i].setState(NLSSubstitution.EXTERNALIZED);
 			subs[i].generateKey(subs);
