@@ -107,8 +107,12 @@ public class OpenAction extends SelectionDispatchAction {
 			return false;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object)iter.next();
-			if (element instanceof IImportDeclaration && !((IImportDeclaration)element).isOnDemand())
+			if (element instanceof IImportDeclaration) {
+				if (((IImportDeclaration)element).isOnDemand()) {
+					return false;
+				}
 				continue;
+			}
 			if (element instanceof ISourceReference)
 				continue;
 			if (element instanceof IResource)
