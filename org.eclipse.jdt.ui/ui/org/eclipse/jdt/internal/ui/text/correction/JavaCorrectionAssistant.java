@@ -177,8 +177,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 			IProblemAnnotation annot= (IProblemAnnotation)iter.next();
 			Position pos= model.getPosition((Annotation)annot);
 			if (isIncluded(pos, startOffset, endOffset)) {
-				if (annot.isProblem() && JavaCorrectionProcessor.hasCorrections(annot.getId())) {
-					invocationOffset= computeBestOffset(invocationOffset, pos, offset);
+				int probelmId= annot.getId();
+				if (probelmId != -1) {
+					if (JavaCorrectionProcessor.hasCorrections(probelmId)) {
+						invocationOffset= computeBestOffset(invocationOffset, pos, offset);
+					}
 				} else if (annot instanceof MarkerAnnotation) {
 					IMarker marker= ((MarkerAnnotation)annot).getMarker();
 					if (markerRegistry.hasResolutions(marker))

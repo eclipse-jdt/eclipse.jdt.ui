@@ -130,8 +130,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			IProblemAnnotation annot= (IProblemAnnotation) iter.next();
 			Position pos= model.getPosition((Annotation) annot);
 			if (isAtPosition(offset, pos)) {
-				if (annot.isProblem()) {
-					if (idsProcessed.add(new Integer(annot.getId()))) { // collect only once per problem id
+				int problemId= annot.getId();
+				if (problemId != -1) {
+					if (idsProcessed.add(new Integer(problemId))) { // collect only once per problem id
 						context.initialize(pos.getOffset(), pos.getLength(), annot.getId(), annot.getArguments());
 						collectCorrections(context, proposals);
 						if (proposals.isEmpty()) {
