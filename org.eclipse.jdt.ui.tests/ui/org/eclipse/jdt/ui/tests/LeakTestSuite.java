@@ -36,6 +36,9 @@ public class LeakTestSuite extends TestSuite {
 	 */
 	public LeakTestSuite() {
 		addTest(JavaLeakTest.suite());
+		
+		// Not yet ready due to leaks in the new operation support
+//		addTest(UndoManagerLeakTest.suite());
 	}
 	
 }
