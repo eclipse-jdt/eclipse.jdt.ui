@@ -121,6 +121,24 @@ public class TokenScanner {
 	}
 	
 	/**
+	 * Reads the next token.
+	 * @param ignoreComments If set, comments will be overread
+	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
+	 * or a lexical error was detected while scanning (code LEXICAL_ERROR)
+	 */
+	private int readNextWithEOF(boolean ignoreComments) throws CoreException {
+		int curr= 0;
+		do {
+			try {
+				curr= fScanner.getNextToken();
+			} catch (InvalidInputException e) {
+				throw new CoreException(JavaUIStatus.createError(LEXICAL_ERROR, e.getMessage(), e)); //$NON-NLS-1$
+			}
+		} while (ignoreComments && isComment(curr));
+		return curr;
+	}	
+	
+	/**
 	 * Reads the next token from the given offset.
 	 * @param ignoreComments If set, comments will be overread
 	 * @exception CoreException Thrown when the end of the file has been reached (code END_OF_FILE)
@@ -294,15 +312,16 @@ public class TokenScanner {
 		
 		setOffset(nodeEnd);
 		
-		int curr= readNext(false);
+		
+		int curr= readNextWithEOF(false);
 		while (curr == ITerminalSymbols.TokenNameCOMMENT_LINE || curr == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
 			int currStartLine= getLineOfOffset(getCurrentStartOffset());
 			int linesDifference= currStartLine - prevEndLine;
-			
+
 			if (linesDifference > 1) {
 				return prevEndPos; // separated comments
 			}
-			
+
 			if (curr == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 				prevEndPos= getLineEnd(currStartLine);
 				prevEndLine= currStartLine;
@@ -315,17 +334,17 @@ public class TokenScanner {
 					res= prevEndPos;
 				} else {
 					sameLineComment= false;
-				}	
+				}
 			}
-			curr= readNext(false);
+			curr= readNextWithEOF(false);
+		}
+		if (curr == ITerminalSymbols.TokenNameEOF) {
+			return prevEndPos;
 		}
 		int currStartLine= getLineOfOffset(getCurrentStartOffset());
 		int linesDifference= currStartLine - prevEndLine;
 		if (linesDifference > 1) {
 			return prevEndPos; // separated comments
-		}
-		if (currStartLine == 0 && nextTokenStart == getCurrentStartOffset()) {
-			return nodeEnd;
 		}
 		return res;
 	}

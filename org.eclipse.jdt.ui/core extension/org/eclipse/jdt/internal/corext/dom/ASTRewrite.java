@@ -150,8 +150,7 @@ public final class ASTRewrite extends NewASTRewrite {
 	 */
 	public final void rewriteNode(TextBuffer textBuffer, TextEdit rootEdit) {
 		convertOldToNewEvents();
-			
-		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, fRootNode, this);
+		ASTRewriteAnalyzer visitor= new ASTRewriteAnalyzer(textBuffer, rootEdit, fRootNode.getRoot(), this);
 		fRootNode.accept(visitor); 
 	}
 	
