@@ -103,7 +103,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		
 		// use the code formatter
 		String lineDelim= StubUtility.getLineDelimiterFor(document);
-		int tabWidth= CodeFormatterUtil.getTabWidth();
+		int tabWidth= CodeFormatterUtil.getTabWidth(fDeclaringType.getJavaProject());
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 		

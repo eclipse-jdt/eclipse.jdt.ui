@@ -217,10 +217,11 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 * 
 	 * @param comment the computed comment 
 	 * @param indentation the base indentation
+	 * @param tabWidth the tab width to use
 	 * @param lineDelimiter the line delimiter
 	 * @return a trimmed version of <code>comment</code>
 	 */
-	private String prepareTemplateComment(String comment, String indentation, String lineDelimiter) {
+	private String prepareTemplateComment(String comment, String indentation, int tabWidth, String lineDelimiter) {
 		//	trim comment start and end if any
 		if (comment.endsWith("*/")) //$NON-NLS-1$
 			comment= comment.substring(0, comment.length() - 2);
@@ -232,7 +233,7 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 				comment= comment.substring(2); // remove '/*'
 			}
 		}
-		return Strings.changeIndent(comment, 0, CodeFormatterUtil.getTabWidth(), indentation, lineDelimiter);
+		return Strings.changeIndent(comment, 0, tabWidth, indentation, lineDelimiter);
 	}
 	
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
@@ -248,7 +249,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		String[] typeParamNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
 		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParamNames, lineDelimiter);
 		if (comment != null) {
-			return prepareTemplateComment(comment.trim(), indentation, lineDelimiter);
+			int tabWidth= CodeFormatterUtil.getTabWidth(type.getJavaProject());
+			return prepareTemplateComment(comment.trim(), indentation, tabWidth, lineDelimiter);
 		}
 		return null;
 	}
@@ -273,7 +275,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
 			boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
 			if (javadocComment == isJavaDoc) {
-				return prepareTemplateComment(comment, indentation, lineDelimiter);
+				int tabWidth= CodeFormatterUtil.getTabWidth(method.getJavaProject());
+				return prepareTemplateComment(comment, indentation, tabWidth, lineDelimiter);
 			}
 		}
 		return null;
