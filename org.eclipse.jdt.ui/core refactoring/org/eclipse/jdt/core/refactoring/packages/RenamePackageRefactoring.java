@@ -75,7 +75,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "RenamePackageRefactoring:" + fPackage.getElementName() + " to " + fNewName;
+		return "Rename package: " + fPackage.getElementName() + " to: " + fNewName;
 	}
 
 	public RenamePackageRefactoring(IJavaSearchScope scope, IPackageFragment pack, String newName){

@@ -87,7 +87,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	}
 		
 	public String getName() {
-		return "Move Compilation Unit \"" + fCompilationUnit.getElementName() + "\" to: " + fNewPackage.getElementName();
+		return "Move \"" + fCompilationUnit.getElementName() + "\" to: " + fNewPackage.getElementName();
 	}
 	
 	public ICompilationUnit getCompilationUnit(){

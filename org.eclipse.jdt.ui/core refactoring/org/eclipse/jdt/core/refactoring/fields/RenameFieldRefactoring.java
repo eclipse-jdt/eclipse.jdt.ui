@@ -89,7 +89,7 @@ abstract class RenameFieldRefactoring extends FieldRefactoring implements IRenam
 	 * @see IRefactoring#getName
 	 */
 	 public String getName(){
-	 	return "Rename Field " + getField().getElementName() + "(declared in " + getField().getDeclaringType().getFullyQualifiedName()+ ")" +" to " + getNewName();
+	 	return "Rename field " + getField().getElementName() + " to: " + getNewName();
 	 }
 	
 	// -------------- Preconditions -----------------------

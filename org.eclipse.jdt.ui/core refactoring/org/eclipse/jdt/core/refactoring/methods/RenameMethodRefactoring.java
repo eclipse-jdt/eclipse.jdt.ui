@@ -98,7 +98,7 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 	 * @see IRefactoring#getName
 	 */
 	public String getName(){
-		return "RenameMethodRefactoring method:" + getMethod().getElementName() + " newName: " + getNewName();
+		return "Rename method " + getMethod().getElementName() + " to: " + getNewName();
 	}
 	
 	//----------- Conditions ------------------
