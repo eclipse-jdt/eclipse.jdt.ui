@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -390,5 +391,10 @@ public class ReorgUtils2 {
 		
 	private static boolean isFlagSet(int flags, int flag){
 		return (flags & flag) != 0;
+	}
+
+	public static boolean isSourceFolder(IJavaElement javaElement) throws JavaModelException {
+		return (javaElement instanceof IPackageFragmentRoot) &&
+				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_SOURCE;
 	}
 }
