@@ -29,6 +29,11 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
 /**
+ * Standard wizard page for creating new Java projects. This page can be used in 
+ * project creation wizards for projects and in capability install wizards. The page
+ * shows UI to configure the project with a Java build path and output location. On
+ * finish the page will also configure the Java nature. 
+ * This is a replace for <code>NewJavaProjectWizardPage</code> with a cleaner API.
   */
 public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 
@@ -38,8 +43,9 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	private BuildPathsBlock fBuildPathsBlock;
 	
 	/**
-	 * Creates a wizard page that can be used in a Java project creation wizard.
-	 * It contains controls to configure a the classpath and the output folder.
+	 * Creates a wizard page that can be used in a Java project creation wizard or
+	 * in a capability install wizard.
+	 * It contains UI to configure a the classpath and the output folder.
 	 * 
 	 * <p>
 	 * After constructing, a call to <code>init</code> is required
@@ -67,23 +73,23 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * The default classpath entries must correspond the the given project.
 	 * </p>
 	 * <p>
-	 * The caller of this method is responsible for creating the underlying project and any new
-	 * folders that might be mentioned on the default classpath. The wizard will create the output folder if required.
+	 * The caller of this method is responsible for creating the underlying project. The page will create the output folder
+	 * and source and library folders if required.
 	 * </p>
 	 * <p>
 	 * The project does not have to exist at the time of initialization, but must exist when executing the runnable
 	 * obtained by <code>getRunnable()</code>.
 	 * </p>
-	 * @param project The java project.
-	 * @param entries The default classpath entries or <code>null</code> to take the default
-	 * @param path The folder to be taken as the default output path or <code>null</code> to take the default
-	 * @return overrideExistingClasspath If set to true, an existing '.classpath' file is ignored. If set to <code>false</code>
-	 * the default classpath is only used if no '.classpath' exists.
+	 * @param project The Java project.
+	 * @param entries The default classpath entries or <code>null</code> to let the page choose the default
+	 * @param path The folder to be taken as the default output path or <code>null</code> to let the page choose the default
+	 * @return overrideExistingClasspath If set to <code>true</code>, an existing '.classpath' file is ignored. If set to <code>false</code>
+	 * the given default classpath and output location is only used if no '.classpath' exists.
 	 */
 	public void init(IJavaProject jproject, IPath defaultOutputLocation, IClasspathEntry[] defaultEntries, boolean defaultsOverrideExistingClasspath) {
 		if (!defaultsOverrideExistingClasspath && jproject.exists() && jproject.getProject().getFile(".classpath").exists()) { //$NON-NLS-1$
 			defaultOutputLocation= null;
-			defaultOutputLocation= null;
+			defaultEntries= null;
 		}
 		fBuildPathsBlock.init(jproject, defaultOutputLocation, defaultEntries);
 		fJavaProject= jproject;
@@ -101,14 +107,14 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 		
 	/**
-	 * Returns the currently configured output location. Note that the returned path must not be valid.
+	 * Returns the currently configured output location. Note that the returned path might not be a valid path.
 	 */
 	public IPath getOutputLocation() {
 		return fBuildPathsBlock.getOutputLocation();
 	}
 
 	/**
-	 * Returns the currently configured class path. Note that the class path must not be valid.
+	 * Returns the currently configured class path. Note that the class path might not be valid.
 	 */	
 	public IClasspathEntry[] getRawClassPath() {
 		return fBuildPathsBlock.getRawClassPath();
