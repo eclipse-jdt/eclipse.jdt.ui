@@ -253,10 +253,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
-		if (Flags.isPrivate(fField.getFlags()))
-			return SearchEngine.createJavaSearchScope(new IResource[]{getResource(fField)});
-		else
-			return SearchEngine.createWorkspaceScope();	
+		return RefactoringScope.create(fField);
 	}
 	
 	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{

@@ -285,7 +285,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
-		return SearchEngine.createWorkspaceScope();
+		return RefactoringScope.create(fType);
 	}
 	
 	private ISearchPattern createSearchPattern() throws JavaModelException{

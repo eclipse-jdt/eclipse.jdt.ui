@@ -217,10 +217,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
-		if (Flags.isPrivate(fMethod.getFlags()))
-			return SearchEngine.createJavaSearchScope(new IResource[]{getResource(fMethod)});
-		else
-			return SearchEngine.createWorkspaceScope();	
+		return RefactoringScope.create(fMethod);
 	}
 	
 	ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
