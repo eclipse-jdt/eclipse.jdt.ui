@@ -148,11 +148,22 @@ public abstract class StructuredSelectionProvider {
 			return StructuredSelection.EMPTY;
 		}
 	}
-	
+
+	/**
+	 * Returns the current selection. Does not return <code>null</code>, but the empty selection
+	 * in case no selected element could be found.
+	 * For text selections the element referenced at the current position is taken.
+	 */
 	public IStructuredSelection getSelection() {
 		return getSelection(FLAGS_DO_CODERESOLVE);
 	}
 	
+	/**
+	 * Returns the current selection. Does not return <code>null</code>, but the empty selection
+	 * in case no selected element could be found.
+	 * @param flags Defines how text selections should be processed. FLAGS_DO_CODERESOLVE or
+	 * FLAGS_DO_ELEMENT_AT_OFFSET are valid options.
+	 */
 	public abstract IStructuredSelection getSelection(int flags);
 
 	private StructuredSelectionProvider() {
