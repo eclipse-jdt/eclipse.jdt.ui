@@ -24,14 +24,14 @@ public class InlineTempAction extends TextSelectionBasedRefactoringAction {
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createRefactoring(ICompilationUnit, ITextSelection)
 	 */
-	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new InlineTempRefactoring(cunit, selection.getOffset(), selection.getLength());
 	}
 
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
 	 */
-	RefactoringWizard createWizard(Refactoring refactoring) {
+	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		//XXX wrong help
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= "Inline Local Variable";

@@ -29,14 +29,14 @@ public class RenameTempAction extends TextSelectionBasedRefactoringAction{
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createRefactoring
 	 */	
-	Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
 		return new RenameTempRefactoring(cunit, selection.getOffset(), selection.getLength());
 	}
 	
 	/*
 	 * @see TextSelectionBasedRefactoringAction#createWizard(Refactoring)
 	 */
-	RefactoringWizard createWizard(Refactoring refactoring) {
+	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		String message= "Choose a new name for the local variable.";
 		String wizardPageHelp= IJavaHelpContextIds.RENAME_TEMP_WIZARD_PAGE; 
 		String errorPageHelp= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;

@@ -33,7 +33,7 @@ public abstract class TextSelectionBasedRefactoringAction extends TextSelectionA
 		}	
 	}
 	
-	abstract Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection);
-	abstract RefactoringWizard createWizard(Refactoring refactoring);
+	protected abstract Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection);
+	protected abstract RefactoringWizard createWizard(Refactoring refactoring);
 }
 
