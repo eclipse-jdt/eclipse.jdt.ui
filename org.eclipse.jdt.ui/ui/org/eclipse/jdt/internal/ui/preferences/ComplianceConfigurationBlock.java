@@ -417,7 +417,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 
 			if (VERSION_1_4.equals(complianceLevel)) {
 				assertAsId= WARNING;
-				enumAsId= IGNORE;
+				enumAsId= WARNING;
 				source= VERSION_1_3;
 				target= VERSION_1_2;
 			} else if (VERSION_1_5.equals(complianceLevel)) {
@@ -464,7 +464,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				&& VERSION_1_1.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_4.equals(complianceLevel)
 				&& WARNING.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& IGNORE.equals(map.get(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& WARNING.equals(map.get(PREF_PB_ENUM_AS_IDENTIFIER))
 				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
 				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_5.equals(complianceLevel)
