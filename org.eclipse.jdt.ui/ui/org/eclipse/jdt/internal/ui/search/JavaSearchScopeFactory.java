@@ -121,7 +121,7 @@ public class JavaSearchScopeFactory {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null) {
 			IEditorPart editor= page.getActiveEditor();
-			if (editor != null) {
+			if (editor != null && editor.equals(page.getActivePart())) {
 				return editor.getEditorInput();
 			}
 		}
@@ -131,7 +131,7 @@ public class JavaSearchScopeFactory {
 	private IJavaSearchScope internalCreateProjectScope(IEditorInput editorInput, boolean includeJRE) {
 		IAdaptable inputElement = getEditorInputElement(editorInput);
 		StructuredSelection selection;
-		if (editorInput != null) {
+		if (inputElement != null) {
 			selection= new StructuredSelection(inputElement);
 		} else {
 			selection= StructuredSelection.EMPTY;
