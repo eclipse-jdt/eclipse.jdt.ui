@@ -147,7 +147,7 @@ abstract public class TextSelectionAction extends Action implements IUpdate, IWo
 	}	
 	
 	//---- private helpers --------------------------------------------------------------------------
-	
+		
 	private boolean canOperateOn() {
 		if (getEditor() == null)
 			return false;
