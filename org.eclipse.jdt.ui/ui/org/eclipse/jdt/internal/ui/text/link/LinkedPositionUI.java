@@ -6,8 +6,6 @@ package org.eclipse.jdt.internal.ui.text.link;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -26,15 +24,15 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextListener;
 import org.eclipse.jface.text.ITextViewer;
@@ -44,6 +42,10 @@ import org.eclipse.jface.text.ITextViewerExtension3;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextEvent;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -105,6 +107,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private boolean fNeedRedraw;
 	
 	private String fContentType;
+	private Position fPreviousPosition;
 
 	/**
 	 * Creates a user interface for <code>LinkedPositionManager</code>.
@@ -250,7 +253,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		Shell shell= text.getShell();
 		shell.addShellListener(this);
-
+		
 		fFramePosition= (fInitialOffset == -1) ? fManager.getFirstPosition() : fManager.getPosition(fInitialOffset);
 		if (fFramePosition == null) {
 			leave(UNINSTALL | COMMIT | UPDATE_CARET);
@@ -315,6 +318,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		ITextViewerExtension extension= (ITextViewerExtension) fViewer;
 		extension.removeVerifyKeyListener(this);
+		
+		IRewriteTarget target= extension.getRewriteTarget();
+		target.endCompoundChange();
 
 		if (fViewer instanceof ITextViewerExtension2 && fContentType != null)
 			((ITextViewerExtension2) fViewer).removeAutoEditStrategy(fManager, fContentType);
@@ -439,17 +445,61 @@ public class LinkedPositionUI implements LinkedPositionListener,
 			leave(UNINSTALL | COMMIT);
 			event.doit= false;
 			break;
+			
+		default:
+			if (event.character != 0) {
+				if (!controlUndoBehavior(offset, length)) {
+					leave(UNINSTALL | COMMIT);
+					event.doit= false;
+					break;					
+				}
+			}
 		}
 	}
-
+	
+	private boolean controlUndoBehavior(int offset1, int length1) {
+		
+		int offset;
+		int length;
+		
+		if (fViewer instanceof ITextViewerExtension3) {
+			ITextViewerExtension3 extension= (ITextViewerExtension3) fViewer;
+			IRegion modelRange= extension.widgetRange2ModelRange(new Region(offset1, length1));
+			if (modelRange == null)
+				return false;
+				
+			offset= modelRange.getOffset();
+			length= modelRange.getLength();
+				
+		} else {
+			IRegion visibleRegion= fViewer.getVisibleRegion();
+			offset= offset1+ visibleRegion.getOffset();
+			length= length1;
+		}
+		
+		Position position= fManager.getEmbracingPosition(offset, length);
+		if (position != null) {
+			
+			ITextViewerExtension extension= (ITextViewerExtension) fViewer;
+			IRewriteTarget target= extension.getRewriteTarget();
+			
+			if (fPreviousPosition != null && !fPreviousPosition.equals(position))
+				target.endCompoundChange();
+			target.beginCompoundChange();
+		}
+		
+		fPreviousPosition= position;
+		return fPreviousPosition != null;
+	}
+	
 	/*
 	 * @see VerifyListener#verifyText(VerifyEvent)
 	 */
 	public void verifyText(VerifyEvent event) {
 		if (!event.doit)
 			return;
-
-
+	
+	
 		int offset= 0;
 		int length= 0;
 		

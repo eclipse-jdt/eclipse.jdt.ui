@@ -286,8 +286,9 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		Position lastPosition= null;
 		Position position= getFirstPosition();
 
-		while ((position != null) && (position.getOffset() < offset) && !((TypedPosition) position).getType().equals(currentType)) {
-			lastPosition= position;
+		while (position != null && position.getOffset() < offset) {
+			if (!((TypedPosition) position).getType().equals(currentType))
+				lastPosition= position;
 			position= findNextPosition(positions, position.getOffset());
 		}
 		
@@ -474,6 +475,22 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			return false;
 		
 		return includes(position, offset, length);
+	}
+	
+	/**
+	 * Returns the position that includes the given range.
+	 * @param offset
+	 * @param length
+	 * @return position that includes the given range
+	 */
+	public Position getEmbracingPosition(int offset, int length) {
+		Position[] positions= getPositions(fDocument);
+
+		Position position= findCurrentPosition(positions, offset);
+		if (position != null && includes(position, offset, length))
+			return position;
+			
+		return null;
 	}
 	
 	/*
