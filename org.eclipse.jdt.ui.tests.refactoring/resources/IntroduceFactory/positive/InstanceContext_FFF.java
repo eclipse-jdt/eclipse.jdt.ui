@@ -2,6 +2,9 @@ package p;
 
 public class InstanceContext_in {
 	private int fN;
+	public static InstanceContext_in createInstanceContext_in(int N) {
+		return new InstanceContext_in(N);
+	}
 	public InstanceContext_in(int N) {
 		fN= N;
 	}
@@ -12,8 +15,5 @@ public class InstanceContext_in {
 		InstanceContext_in	ic= createInstanceContext_in(16);
 
 		System.out.println("Value = " + ic.get());
-	}
-	public static InstanceContext_in createInstanceContext_in(int N) {
-		return new InstanceContext_in(N);
 	}
 }

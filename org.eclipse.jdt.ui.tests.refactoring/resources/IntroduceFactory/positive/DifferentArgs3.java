@@ -2,6 +2,9 @@ package p;
 
 public class DifferentArgs3_in {
 	private int fN;
+	public static DifferentArgs3_in createDifferentArgs3_in(int N) {
+		return new DifferentArgs3_in(N);
+	}
 	public DifferentArgs3_in(int N) {
 		fN= N;
 	}
@@ -18,8 +21,5 @@ public class DifferentArgs3_in {
 		DifferentArgs3_in	da= createDifferentArgs3_in(24);
 
 		System.out.println("Value = " + da.get());
-	}
-	public static DifferentArgs3_in createDifferentArgs3_in(int N) {
-		return new DifferentArgs3_in(N);
 	}
 }

@@ -182,9 +182,9 @@ public class JavaElementUtil {
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
 				try{
-					return ((IMember)o2).getNameRange().getOffset() - ((IMember)o1).getNameRange().getOffset();
+					return ((IMember) o1).getNameRange().getOffset() - ((IMember) o2).getNameRange().getOffset();
 				} catch (JavaModelException e){
-					return o2.hashCode() - o1.hashCode();
+					return 0;
 				}	
 			}
 		};

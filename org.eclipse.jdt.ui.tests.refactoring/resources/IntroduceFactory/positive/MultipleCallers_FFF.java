@@ -2,6 +2,9 @@ package p;
 
 public class MultipleCallers_in {
 	private int fN;
+	public static MultipleCallers_in createMultipleCallers_in(int N) {
+		return new MultipleCallers_in(N);
+	}
 	public MultipleCallers_in(int N) {
 		fN= N;
 	}
@@ -17,8 +20,5 @@ public class MultipleCallers_in {
 		MultipleCallers_in	mc= createMultipleCallers_in(16);
 
 		System.out.println("Value = " + mc.get());
-	}
-	public static MultipleCallers_in createMultipleCallers_in(int N) {
-		return new MultipleCallers_in(N);
 	}
 }

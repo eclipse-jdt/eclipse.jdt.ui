@@ -2,6 +2,9 @@ package p;
 
 public class Names_in {
 	private int fN;
+	public static Names_in createThing(int N) {
+		return new Names_in(N);
+	}
 	private Names_in(int N) {
 		fN= N;
 	}
@@ -12,8 +15,5 @@ public class Names_in {
 		Names_in	n= createThing(16);
 
 		System.out.println("Value = " + n.get());
-	}
-	public static Names_in createThing(int N) {
-		return new Names_in(N);
 	}
 }

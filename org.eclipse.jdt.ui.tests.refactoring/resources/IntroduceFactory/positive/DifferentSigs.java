@@ -2,6 +2,9 @@ package p;
 
 public class DifferentSigs_in {
 	private int fN;
+	public static DifferentSigs_in createDifferentSigs_in(int N) {
+		return new DifferentSigs_in(N);
+	}
 	public DifferentSigs_in() {
 		this(10);
 	}
@@ -20,8 +23,5 @@ public class DifferentSigs_in {
 		DifferentSigs_in	ds= new DifferentSigs_in();
 
 		System.out.println("Value = " + ds.get());
-	}
-	public static DifferentSigs_in createDifferentSigs_in(int N) {
-		return new DifferentSigs_in(N);
 	}
 }

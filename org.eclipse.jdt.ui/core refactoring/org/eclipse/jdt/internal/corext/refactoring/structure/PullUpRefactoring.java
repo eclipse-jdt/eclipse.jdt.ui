@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
@@ -1602,9 +1603,9 @@ public class PullUpRefactoring extends Refactoring {
 
 	private void copyMembersToTargetClass(CompilationUnit declaringCuNode, CompilationUnit targetCuNode, OldASTRewrite rewrite, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		TypeDeclaration targetClass= ASTNodeSearchUtil.getTypeDeclarationNode(getTargetClass(), targetCuNode);
-		fMembersToPullUp= JavaElementUtil.sortByOffset(fMembersToPullUp);
+		fMembersToPullUp= JavaElementUtil.sortByOffset(fMembersToPullUp); // preserve member order
 		pm.beginTask("", fMembersToPullUp.length); //$NON-NLS-1$
-		for (int i = fMembersToPullUp.length - 1; i >= 0; i--) { //backwards - to preserve method order
+		for (int i= 0; i < fMembersToPullUp.length; i++) {
 			IMember member= fMembersToPullUp[i];
 			if (member instanceof IField)
 				copyFieldToTargetClass((IField)member, declaringCuNode, targetClass, rewrite, new SubProgressMonitor(pm, 1), status);
@@ -1622,7 +1623,8 @@ public class PullUpRefactoring extends Refactoring {
 	private void copyTypeToTargetClass(IType type, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite rewrite) throws JavaModelException {
 		BodyDeclaration newType= createNewTypeDeclarationNode(type, declaringCuNode, rewrite);
 		rewrite.markAsInserted(newType);
-		targetClass.bodyDeclarations().add(newType);
+		int insertionIndex= ASTNodes.getInsertionIndex(newType, targetClass.bodyDeclarations());
+		targetClass.bodyDeclarations().add(insertionIndex, newType);
 	}
 
 	private BodyDeclaration createNewTypeDeclarationNode(IType type, CompilationUnit declaringCuNode, OldASTRewrite rewrite) throws JavaModelException {
@@ -1633,7 +1635,8 @@ public class PullUpRefactoring extends Refactoring {
 	private void copyMethodToTargetClass(IMethod method, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite targetRewrite, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(method, declaringCuNode, targetRewrite, pm, status);
 		targetRewrite.markAsInserted(newMethod);
-		targetClass.bodyDeclarations().add(newMethod);
+		int insertionIndex= ASTNodes.getInsertionIndex(newMethod, targetClass.bodyDeclarations());
+		targetClass.bodyDeclarations().add(insertionIndex, newMethod);
 	}
 
 	private MethodDeclaration createNewMethodDeclarationNode(IMethod sourceMethod, CompilationUnit declaringCuNode, OldASTRewrite targetRewrite, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
@@ -1732,7 +1735,8 @@ public class PullUpRefactoring extends Refactoring {
 	private void copyFieldToTargetClass(IField field, CompilationUnit declaringCuNode, TypeDeclaration targetClass, OldASTRewrite rewrite, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		FieldDeclaration newField= createNewFieldDeclarationNode(field, declaringCuNode, rewrite, pm, status);
 		rewrite.markAsInserted(newField);
-		targetClass.bodyDeclarations().add(newField);
+		int insertionIndex= ASTNodes.getInsertionIndex(newField, targetClass.bodyDeclarations());
+		targetClass.bodyDeclarations().add(insertionIndex, newField);
 	}
 
 	private FieldDeclaration createNewFieldDeclarationNode(IField field, CompilationUnit declaringCuNode, OldASTRewrite rewrite, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {

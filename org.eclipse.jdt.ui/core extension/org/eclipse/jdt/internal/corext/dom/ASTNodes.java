@@ -631,8 +631,24 @@ public class ASTNodes {
 	 * @return the insertion index to be used
 	 */
 	private static int getInsertionIndex(List container, int memberType, boolean isStatic) {
-		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER)
-			return 0;
+		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER) {
+			int last= -1;
+			int i= 0;
+			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+				switch (nodeType) {
+					case ASTNode.TYPE_DECLARATION:
+					case ASTNode.INITIALIZER:
+						if (nodeType == memberType)
+							last= i;
+						break;
+					default:
+						return last + 1;
+				}
+			}
+			return last + 1;
+		}
+		
 		int defaultIndex= container.size();
 		if (memberType == ASTNode.FIELD_DECLARATION) {
 			int first= -1;
@@ -677,7 +693,7 @@ public class ASTNodes {
 			if (isStatic) {
 				if (lastStaticMethod != -1)
 					return ++lastStaticMethod;
-				else if (firstMethod != 1)
+				else if (firstMethod != -1)
 					return firstMethod;
 			} else {
 				if (lastMethod != -1)

@@ -275,7 +275,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		String newSource = cu.getSource();
 
-		assertEqualLines(getName() + ": ", newSource, getFileContents(getTestFileName(true, false)));
+		assertEqualLines(getName() + ": ", getFileContents(getTestFileName(true, false)), newSource);
 	}
 
 	/**
