@@ -388,6 +388,7 @@ public class JavaTextTools {
 	 * Returns this text tool's preference store.
 	 * 
 	 * @return the preference store
+	 * @since 3.0
 	 */
 	public IPreferenceStore getPreferenceStore() {
 		return fPreferenceStore;
