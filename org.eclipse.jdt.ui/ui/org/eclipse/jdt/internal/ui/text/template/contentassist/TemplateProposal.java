@@ -392,8 +392,11 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		try {
 			int replaceOffset= getReplaceOffset();
-			String content= document.get(replaceOffset, getReplaceEndOffset() - replaceOffset);
-			return fTemplate.getName().startsWith(content);
+			int replaceEndOffset= getReplaceEndOffset();
+			if (replaceEndOffset >= offset) {
+				String content= document.get(replaceOffset, replaceEndOffset - replaceOffset);
+				return fTemplate.getName().startsWith(content);
+			}
 		} catch (BadLocationException e) {
 			// concurrent modification - ignore
 		}
