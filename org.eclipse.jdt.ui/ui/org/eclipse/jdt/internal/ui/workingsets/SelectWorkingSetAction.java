@@ -65,11 +65,11 @@ public class SelectWorkingSetAction extends Action {
 		if (dialog.open() == Window.OK) {
 			IWorkingSet[] result= dialog.getSelection();
 			if (result != null && result.length > 0) {
-				fActionGroup.setWorkingSet(result[0]);
+				fActionGroup.setWorkingSet(result[0], true);
 				manager.addRecentWorkingSet(result[0]);
 			}
 			else
-				fActionGroup.setWorkingSet(null);
+				fActionGroup.setWorkingSet(null, true);
 		}
 	}
 }

@@ -62,7 +62,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		mi.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
-				fActionGroup.setWorkingSet(fWorkingSet);
+				fActionGroup.setWorkingSet(fWorkingSet, true);
 				manager.addRecentWorkingSet(fWorkingSet);
 			}
 		});
