@@ -188,9 +188,15 @@ class NLSSearchResultCollector2 implements IJavaSearchResultCollector {
 		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
 		InputStream stream= null;
 		LineReader lineReader= null;
+		String encoding;
+		try {
+			encoding= fPropertiesFile.getCharset();
+		} catch (CoreException e1) {
+			encoding= "ISO-8859-1";  //$NON-NLS-1$
+		}
 		try {
 			stream= fPropertiesFile.getContents();
-			lineReader= new LineReader(stream);
+			lineReader= new LineReader(stream, encoding);
 		} catch (CoreException cex) {
 			// failed to get input stream
 			JavaPlugin.log(cex);

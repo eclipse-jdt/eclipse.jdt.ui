@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,20 +16,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 
 class LineReader extends Object {
-	protected static final int fgLF= '\n';
-	protected static final int fgCR= '\r';
+	protected static final int LF= '\n';
+	protected static final int CR= '\r';
 
 	private BufferedReader fReader;
 
 	protected int fPushbackChar;
 	protected boolean fPushback;
 
-	// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
-	public LineReader(InputStream in) throws IOException {
-		this(new InputStreamReader(in, ResourcesPlugin.getEncoding()));
+	public LineReader(InputStream in, String encoding) throws IOException {
+		this(new InputStreamReader(in, encoding));
 	}
 
 	public LineReader(Reader reader) {
@@ -46,11 +44,11 @@ class LineReader extends Object {
 		} else
 			ch= fReader.read();
 		while (ch >= 0) {
-			if (ch == fgLF)
+			if (ch == LF)
 				return 1;
-			if (ch == fgCR) {
+			if (ch == CR) {
 				ch= fReader.read();
-				if (ch == fgLF)
+				if (ch == LF)
 					return 2;
 				else {
 					fPushbackChar= ch;

@@ -258,12 +258,17 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	 * @return	the start position of the property name in the file, -1 if not found
 	 */
 	protected int findPropertyNameStartPosition(String propertyName) {
-		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19319
 		InputStream stream= null;
 		LineReader lineReader= null;
+		String encoding;
 		try {
+            encoding= fPropertyFile.getCharset();
+        } catch (CoreException e1) {
+			encoding= "ISO-8859-1";  //$NON-NLS-1$
+        }
+ 		try {
 			stream= fPropertyFile.getContents();
-			lineReader= new LineReader(stream);
+			lineReader= new LineReader(stream, encoding);
 		} catch (CoreException cex) {
 			// failed to get input stream
 			JavaPlugin.log(cex);
