@@ -352,11 +352,11 @@ public class NewTestCaseCreationWizardPage2 extends WizardPage {
 			if (checked[i] instanceof IMethod)
 				checkedMethodCount++;
 		}
-		String label= "";
+		String label= ""; //$NON-NLS-1$
 		if (checkedMethodCount == 1)
-			label= WizardMessages.getFormattedString("NewTestClassWizPage2.selected_methods.label_one", new Integer(checkedMethodCount));
+			label= WizardMessages.getFormattedString("NewTestClassWizPage2.selected_methods.label_one", new Integer(checkedMethodCount)); //$NON-NLS-1$
 		else
-			label= WizardMessages.getFormattedString("NewTestClassWizPage2.selected_methods.label_many", new Integer(checkedMethodCount));
+			label= WizardMessages.getFormattedString("NewTestClassWizPage2.selected_methods.label_many", new Integer(checkedMethodCount)); //$NON-NLS-1$
 		fSelectedMethodsLabel.setText(label);
 	}
 	

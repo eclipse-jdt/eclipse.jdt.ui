@@ -11,9 +11,9 @@ import org.eclipse.swt.graphics.Image;
 public class ProgressImages {
 	static final int PROGRESS_STEPS= 9;
 	
-	static final String BASE= "prgss/";
-	static final String FAILURE= "ff";
-	static final String OK= "ss";
+	static final String BASE= JavaBrowsingMessages.getString("prgss/_1"); //$NON-NLS-1$
+	static final String FAILURE= "ff"; //$NON-NLS-1$
+	static final String OK= "ss"; //$NON-NLS-1$
 	
 	Image[] fOKImages= new Image[PROGRESS_STEPS];
 	Image[] fFailureImages= new Image[PROGRESS_STEPS];

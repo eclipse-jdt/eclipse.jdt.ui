@@ -50,8 +50,19 @@
                 visible="false" 
                 relationship="stack"/> 
         </perspectiveExtension> 
+        <perspectiveExtension 
+			targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
+		</perspectiveExtension>
+		<perspectiveExtension 
+			targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
+		</perspectiveExtension>
+		<perspectiveExtension 
+			targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+			<actionSet id="org.eclipse.jdt.junit.JUnitLaunchActionSet"/>
+		</perspectiveExtension>
     </extension> 
-
 
 	<extension
 		point="org.eclipse.ui.preferencePages">
@@ -147,4 +158,36 @@
 		<super type="org.eclipse.core.resources.taskmarker"/>
 		<persistent value="true"/>
 	</extension>
+	
+	<extension point="org.eclipse.ui.actionSets">
+    <actionSet
+            label="JUnit Action Set"
+            visible="false"
+            id="org.eclipse.jdt.junit.JUnitLaunchActionSet">
+         <menu
+               label="%RunMenu.label"
+               id="org.eclipse.ui.run"
+               path="additions">
+            <separator name="jdtRunLaunchGroup"/>
+            <groupMarker name="jdtDebugLaunchGroup"/>
+         </menu>
+         <action
+               id="org.eclipse.jdt.junit.actions.debugJUnit"
+               class="org.eclipse.jdt.internal.junit.launcher.LaunchTestAction"
+               label="%DebugJUnitTestAction.label"
+               menubarPath="org.eclipse.ui.run/jdtDebugLaunchGroup"
+               tooltip="%DebugJUnitTestAction.tooltip"
+               mode= "debug">
+         </action>
+         <action
+               id="org.eclipse.jdt.junit.actions.runJUnit"
+               class="org.eclipse.jdt.internal.junit.launcher.LaunchTestAction"
+               label="%RunJUnitTestAction.label"
+               menubarPath="org.eclipse.ui.run/jdtDebugLaunchGroup"
+               tooltip="%RunJUnitTestAction.tooltip"
+               mode= "run">
+         </action>
+      </actionSet>
+	</extension>
+
 </plugin>

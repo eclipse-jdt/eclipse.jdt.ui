@@ -133,7 +133,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	
 	protected void initializeDefaultPageImageDescriptor() {
 		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif"));
+			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif")); //$NON-NLS-1$
 			setDefaultPageImageDescriptor(id);
 	} catch (MalformedURLException e) {
 			// Should not happen.  Ignore.

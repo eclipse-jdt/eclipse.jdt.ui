@@ -40,7 +40,7 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
-	private final Image fFailureTabIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$
+	private final Image fFailureTabIcon= TestRunnerViewPart.createImage("obj16/failures.gif"); //$NON-NLS-1$
 	
 	public FailureRunView(CTabFolder tabFolder, TestRunnerViewPart runner) {
 		fRunnerViewPart= runner;

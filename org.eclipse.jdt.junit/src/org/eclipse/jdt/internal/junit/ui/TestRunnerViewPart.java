@@ -69,7 +69,7 @@ import org.eclipse.jdt.internal.junit.runner.ITestRunListener;
 public class TestRunnerViewPart extends ViewPart
 	implements ITestRunListener, IPropertyChangeListener {
 
-	public static final String NAME= "org.eclipse.jdt.junit.ResultView";
+	public static final String NAME= "org.eclipse.jdt.junit.ResultView"; //$NON-NLS-1$
  	/**
  	 * Number of executed tests during a test run
  	 */
@@ -133,11 +133,11 @@ public class TestRunnerViewPart extends ViewPart
 	 */
 	private RemoteTestRunnerClient fTestRunnerClient;
 
-	final Image fStackViewIcon= TestRunnerViewPart.createImage("obj16/stackframe.gif");//$NON-NLS-1$
-	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsuc.gif");
-	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif");
-	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsucq.gif");
-	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif");
+	final Image fStackViewIcon= TestRunnerViewPart.createImage("cview16/stackframe.gif");//$NON-NLS-1$
+	final Image fTestRunOKIcon= TestRunnerViewPart.createImage("cview16/junitsuc.gif"); //$NON-NLS-1$
+	final Image fTestRunFailIcon= TestRunnerViewPart.createImage("cview16/juniterr.gif"); //$NON-NLS-1$
+	final Image fTestRunOKDirtyIcon= TestRunnerViewPart.createImage("cview16/junitsucq.gif"); //$NON-NLS-1$
+	final Image fTestRunFailDirtyIcon= TestRunnerViewPart.createImage("cview16/juniterrq.gif"); //$NON-NLS-1$
 	
 	Image fOriginalViewImage= null;
 	IElementChangedListener fDirtyListener= null;
@@ -146,9 +146,9 @@ public class TestRunnerViewPart extends ViewPart
 		public StopAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.stopaction.tooltip"));//$NON-NLS-1$
-			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif"));
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/stop.gif"));
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif"));
+			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif")); //$NON-NLS-1$
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/stop.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
 		}
 
 		public void run() {
@@ -160,9 +160,9 @@ public class TestRunnerViewPart extends ViewPart
 		public RerunAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.label")); //$NON-NLS-1$
 			setToolTipText(JUnitMessages.getString("TestRunnerViewPart.rerunaction.tooltip")); //$NON-NLS-1$
-			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif"));
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/relaunch.gif"));
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif"));
+			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
+			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/relaunch.gif")); //$NON-NLS-1$
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
 		}
 		
 		public void run(){

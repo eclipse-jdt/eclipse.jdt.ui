@@ -21,9 +21,9 @@ public class EnableStackFilterAction extends Action {
 		setDescription(JUnitMessages.getString("EnableStackFilterAction.action.description"));  //$NON-NLS-1$
 		setToolTipText(JUnitMessages.getString("EnableStackFilterAction.action.tooltip")); //$NON-NLS-1$
 		
-		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif"));
-		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/cfilter.gif"));
-		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif"));
+		setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/cfilter.gif")); //$NON-NLS-1$
+		setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("clcl16/cfilter.gif")); //$NON-NLS-1$
+		setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/cfilter.gif")); //$NON-NLS-1$
 
 		fView= view;
 		setChecked(JUnitPreferencePage.getFilterStack());

@@ -34,7 +34,7 @@ class FailureTraceView implements IMenuListener {
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	
-	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stackframe.gif"); //$NON-NLS-1$
+	private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
 	private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
 
 	public FailureTraceView(Composite parent, TestRunnerViewPart testRunner) {

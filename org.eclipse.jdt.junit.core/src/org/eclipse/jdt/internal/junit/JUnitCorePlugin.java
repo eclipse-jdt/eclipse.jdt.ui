@@ -234,5 +234,5 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		}
 		return display;
 	}		
-
+	
 }

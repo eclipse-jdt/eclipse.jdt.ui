@@ -28,7 +28,7 @@ import org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage;
  * Launch configuration delegate for a plain JUnit test.
  */
 public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
-
+	public static final String ID_JUNIT_APPLICATION= "org.eclipse.jdt.junit.launchconfig"; //$NON-NLS-1$
 	/**
 	 * Add a VMRunner with a class path that includes org.eclipse.jdt.junit plugin.
 	 * In addition it adds the port for the RemoteTestRunner as an argument
