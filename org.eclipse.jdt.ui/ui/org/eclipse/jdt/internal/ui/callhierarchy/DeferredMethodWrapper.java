@@ -16,7 +16,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jface.progress.IElementCollector;
+import org.eclipse.ui.progress.IElementCollector;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 
