@@ -16,8 +16,6 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.text.Assert;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -27,6 +25,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -39,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor
  */
 class JavaEditorHoverConfigurationBlock {
 
+	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.delimiter"); //$NON-NLS-1$
 
 	// Data structure to hold the values which are edited by the user
 	private static class HoverConfig {
@@ -100,7 +101,7 @@ class JavaEditorHoverConfigurationBlock {
 		hoverComposite.setLayoutData(gd);
 
 		Label label= new Label(hoverComposite, SWT.NONE);
-		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.hoverPreferences")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.hoverPreferences")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -133,7 +134,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Enabled checkbox		
 		fEnableField= new Button(stylesComposite, SWT.CHECK);
-		fEnableField.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.enabled")); //$NON-NLS-1$
+		fEnableField.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.enabled")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -152,7 +153,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Text field for modifier string
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.keyModifier")); //$NON-NLS-1$
+		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.keyModifier")); //$NON-NLS-1$
 		fModifierEditor= new Text(stylesComposite, SWT.BORDER);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		fModifierEditor.setLayoutData(gd);
@@ -166,12 +167,31 @@ class JavaEditorHoverConfigurationBlock {
 			public void keyReleased(KeyEvent e) {
 				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
 					String text= fModifierEditor.getText();
-					if (text.length() > 0)
-						text= PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.appendModifier", new String[] {text, Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					Point selection= fModifierEditor.getSelection();
+					int i= selection.x - 1;
+					while (i > -1 && Character.isWhitespace(text.charAt(i))) {
+						i--;
+					}
+					boolean needsPrefixDelimiter= i > -1 && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+
+					i= selection.y;
+					while (i < text.length() && Character.isWhitespace(text.charAt(i))) {
+						i++;
+					}
+					boolean needsPostfixDelimiter= i < text.length() && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+
+					String insertString;
+
+					if (needsPrefixDelimiter && needsPostfixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.insertDelimiterAndModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					else if (needsPrefixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.insertDelimiterAndModifier", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					else if (needsPostfixDelimiter)
+						insertString= PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.insertModifierAndDelimiter", new String[] {Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
 					else
-						text= Action.findModifierString(e.stateMask);
-					fModifierEditor.setText(text);
-					fModifierEditor.setSelection(text.length(), text.length());
+						insertString= Action.findModifierString(e.stateMask);
+
+					fModifierEditor.insert(insertString);
 				}
 			}
 		});
@@ -184,7 +204,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Description
 		Label descriptionLabel= new Label(stylesComposite, SWT.LEFT);
-		descriptionLabel.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.description")); //$NON-NLS-1$
+		descriptionLabel.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.description")); //$NON-NLS-1$
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		descriptionLabel.setLayoutData(gd);
@@ -283,7 +303,7 @@ class JavaEditorHoverConfigurationBlock {
 		fHoverConfigs[i].fModifierString= modifiers;
 		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
 		if (fHoverConfigs[i].fIsEnabled && fHoverConfigs[i].fStateMask == -1)
-			fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
+			fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
 		else
 			fStatus= new StatusInfo();
 		updateStatus();
@@ -325,9 +345,9 @@ class JavaEditorHoverConfigurationBlock {
 				String label= getContributedHovers()[i].getLabel();
 				Integer stateMask= new Integer(fHoverConfigs[i].fStateMask);
 				if (fHoverConfigs[i].fStateMask == -1)
-					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.modifierIsNotValidForHover", new String[] {fHoverConfigs[i].fModifierString, label})); //$NON-NLS-1$
+					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.modifierIsNotValidForHover", new String[] {fHoverConfigs[i].fModifierString, label})); //$NON-NLS-1$
 				else if (stateMasks.containsKey(stateMask))
-					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.duplicateModifier", new String[] {label, (String)stateMasks.get(stateMask)})); //$NON-NLS-1$
+					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.duplicateModifier", new String[] {label, (String)stateMasks.get(stateMask)})); //$NON-NLS-1$
 				else
 					stateMasks.put(stateMask, label);
 			}
