@@ -408,13 +408,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		String label= "Insert &single proposals automatically";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOINSERT, 0);
 		
-		label= "Show only proposals visible in the invocation context";
+		label= "Show only proposals visible in the invocation &context";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, 0);
 		
-//		label= "Show only proposals with matching cases";
+//		label= "Show only proposals with &matching cases";
 //		addCheckBox(contentAssistComposite, label, ContentAssistPreference.CASE_SENSITIVITY, 0);
 		
-		label= "Present proposals in alphabetical order";
+		label= "Present proposals in &alphabetical order";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ORDER_PROPOSALS, 0);
 		
 		label= "&Enable auto activation";
