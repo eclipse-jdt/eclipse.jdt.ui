@@ -109,16 +109,20 @@ class ReorgPolicyFactory {
 	public static ICopyPolicy createCopyPolicy(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		return (ICopyPolicy)createReorgPolicy(true, resources, javaElements, settings);
 	}
+	
 	public static IMovePolicy createMovePolicy(IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
 		return (IMovePolicy)createReorgPolicy(false, resources, javaElements, settings);
 	}
-		
-	private static IReorgPolicy createReorgPolicy(boolean copy, IResource[] resources, IJavaElement[] javaElements, CodeGenerationSettings settings) throws JavaModelException{
+	
+	private static IReorgPolicy createReorgPolicy(boolean copy, IResource[] selectedResources, IJavaElement[] selectedJavaElements, CodeGenerationSettings settings) throws JavaModelException{
 		final IReorgPolicy NO;
 		if (copy)
 			NO= new NoCopyPolicy();
 		else
 			NO= new NoMovePolicy();
+
+		IResource[] resources= ReorgUtils2.getResourcesWithoutCorrespondingJavaElementsSelected(selectedResources, selectedJavaElements);
+		IJavaElement[] javaElements= selectedJavaElements;
 	
 		if (isNothingToReorg(resources, javaElements) || 
 			containsNull(resources) ||
