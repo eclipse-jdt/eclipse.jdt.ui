@@ -43,6 +43,12 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
+	private void helper1_not_available(String methodName, String[] signatures) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType interfaceI= getType(cu, "I");
+		
+		assertTrue(! RenameMethodRefactoring.isAvailable(interfaceI.getMethod(methodName, signatures)));
+	}
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
@@ -160,7 +166,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper1_0("m", "k", new String[]{"QObject;"});
 	}
 	public void testFail23() throws Exception{
-		helper1_0("toString", "k", new String[0]);
+		helper1_not_available("toString", new String[0]);
 	}
 	public void testFail24() throws Exception{
 		helper1();
@@ -182,11 +188,11 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public void testFail30() throws Exception{
-		helper1_0("toString", "k", new String[0]);
+		helper1_not_available("toString", new String[0]);
 	}
 	
 	public void testFail31() throws Exception{
-		helper1_0("toString", "k", new String[0]);
+		helper1_not_available("toString", new String[0]);
 	}
 	
 	public void testFail32() throws Exception{
