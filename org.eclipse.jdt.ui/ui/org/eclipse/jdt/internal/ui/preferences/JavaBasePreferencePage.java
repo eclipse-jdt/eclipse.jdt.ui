@@ -264,12 +264,12 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		fBinFolderNameText.addModifyListener(fModifyListener);
 		
 		new Label(composite, SWT.NONE); // spacer
-		new Label(composite, SWT.NONE).setText("Java Browsing Settings");
+		new Label(composite, SWT.NONE).setText("Link settings");
 		addCheckBox(composite, "&Link Java Browsing views selection to active editor", LINK_BROWSING_VIEW_TO_EDITOR);
-		
-		new Label(composite, SWT.NONE).setText("Package view settings");
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
+		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 
+		new Label(composite, SWT.NONE); // spacer
 		Label doubleClickLabel= new Label(composite, SWT.NONE);
 		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
 
@@ -279,9 +279,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		doubleClickRadioGroup.setLayout(layout);		
 		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
 		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
-		
-		new Label(composite, SWT.NONE).setText(JavaUIMessages.getString("JavaBasePreferencePage.typeHierarchySettings"));  //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkTypeHierarchy"), LINK_TYPEHIERARCHY_TO_EDITOR); //$NON-NLS-1$
 		
 		Label label= new Label(composite, SWT.NONE);
 		label.setText(JavaUIMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
