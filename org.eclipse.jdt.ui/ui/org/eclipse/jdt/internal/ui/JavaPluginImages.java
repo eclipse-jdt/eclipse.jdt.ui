@@ -209,8 +209,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_TERMSNIPPET= create(T_CTOOL, "term_sbook.gif");
 	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_CTOOL, "show_empty_pkg.gif");
 	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_CTOOL, "segment_edit.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "goto_next_error.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "goto_prev_error.gif");
+	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "next_error_nav.gif");
+	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "prev_error_nav.gif");
 
 	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_CTOOL, "opentype.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_CTOOL, "newjprj_wiz.gif");
