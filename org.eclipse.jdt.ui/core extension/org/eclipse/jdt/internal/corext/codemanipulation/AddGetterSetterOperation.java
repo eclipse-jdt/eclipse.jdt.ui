@@ -188,7 +188,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		int indent= StubUtility.getIndentUsed(field);
 
 
-		String setterName= fNameProposer.proposeSetterName(field.getElementName());
+		String setterName= fNameProposer.proposeSetterName(field);
 		String[] args= new String[] { field.getTypeSignature() };		
 		IMethod existingSetter= JavaModelUtil.findMethod(setterName, args, false, parentType);			
 		boolean doCreateSetter= ((!isFinal || !querySkipFinalSetters(field)) && (existingSetter == null || querySkipExistingMethods(existingSetter)));

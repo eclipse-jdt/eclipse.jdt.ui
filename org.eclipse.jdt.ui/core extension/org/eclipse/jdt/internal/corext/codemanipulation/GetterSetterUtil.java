@@ -19,7 +19,7 @@ public class GetterSetterUtil {
 	
 	public static IMethod getSetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
 		String[] args= new String[] { field.getTypeSignature() };	
-		String setterName= new NameProposer(namePrefixes, nameSuffixes).proposeSetterName(field.getElementName());
+		String setterName= new NameProposer(namePrefixes, nameSuffixes).proposeSetterName(field);
 		return JavaModelUtil.findMethod(setterName, args, false, field.getDeclaringType());
 	}
 }

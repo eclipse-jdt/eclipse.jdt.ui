@@ -129,7 +129,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 		return getRenameFieldRefactoring().getNewGetterName();
 	}
 	
-	private String createNewSetterName(){
+	private String createNewSetterName() throws JavaModelException {
 		return getRenameFieldRefactoring().getNewSetterName();
 	}
 	

@@ -226,8 +226,9 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return new NameProposer(fPrefixes, fSuffixes).proposeGetterName(fNewName, isBoolean);
 	}
 	
-	public String getNewSetterName(){
-		return new NameProposer(fPrefixes, fSuffixes).proposeSetterName(fNewName);
+	public String getNewSetterName() throws JavaModelException {
+		boolean isBoolean=	Signature.SIG_BOOLEAN.equals(fField.getTypeSignature());
+		return new NameProposer(fPrefixes, fSuffixes).proposeSetterName(fNewName, isBoolean);
 	}
 	
 	//----------

@@ -55,13 +55,22 @@ public class NameProposer {
 	}	
 	
 	public String proposeSetterName(IField field) throws JavaModelException {
-		return proposeSetterName(field.getElementName());
+		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
+		return proposeSetterName(field.getElementName(), isBoolean);
 	}
 	
 	/**
 	 * @seprecated use proposeSetterName(IField)
 	 */
-	public String proposeSetterName(String fieldName) {
+	public String proposeSetterName(String fieldName, boolean isBoolean) {
+		if (isBoolean) {
+			String name= removePrefixAndSuffix(fieldName);
+			int prefixLen=  GETTER_BOOL_NAME.length();
+			if (name.startsWith(GETTER_BOOL_NAME)
+				&& name.length() > prefixLen && Character.isUpperCase(name.charAt(prefixLen))) {
+				return SETTER_NAME + name.substring(prefixLen);
+			}
+		}
 		return SETTER_NAME + proposeAccessorName(fieldName);
 	}
 	
@@ -132,11 +141,11 @@ public class NameProposer {
 	
 	public String proposeFieldName(String fieldType) {
 		String name= Signature.getSimpleName(fieldType);
-		String arraySuffix= "";
+		String arraySuffix= ""; //$NON-NLS-1$
 		int arrIndex= name.indexOf('[');
 		if (arrIndex != -1) {
 			name= name.substring(0, arrIndex);
-			arraySuffix= "s";
+			arraySuffix= "s"; //$NON-NLS-1$
 		}
 		
 		for (int i= 0; i < fNamePrefixes.length; i++) {
