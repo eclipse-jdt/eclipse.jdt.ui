@@ -102,9 +102,13 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 			ITypedElement[] editions= buildEditions(target, file);
 
 			ITypedElement ti= null;
-			if (fPrevious)
+			if (fPrevious) {
 				ti= d.selectPreviousEdition(target, editions, input);
-			else
+				if (ti == null) {
+					MessageDialog.openInformation(shell, errorTitle, CompareMessages.getString("ReplaceFromHistory.parsingErrorMessage"));	//$NON-NLS-1$
+					return;
+				}
+			} else
 				ti= d.selectEdition(target, editions, input);
 						
 			if (ti instanceof IStreamContentAccessor) {
