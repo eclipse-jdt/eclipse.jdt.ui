@@ -61,7 +61,6 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 	public GoToNextPreviousMemberAction(boolean isSelectNext) {
 		super(""); //$NON-NLS-1$
 		fIsGotoNext= isSelectNext;
-		update();
 	}
 	
 	public void update() {
@@ -96,7 +95,7 @@ public class GoToNextPreviousMemberAction extends Action implements IUpdate {
 		if (input instanceof IClassFileEditorInput) {
 			return new IType[] { ((IClassFileEditorInput)input).getClassFile().getType() };
 		} else {
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input).getTypes();
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input).getAllTypes();
 		}
 	}
 	

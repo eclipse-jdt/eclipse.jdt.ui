@@ -46,7 +46,7 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 											int expectedStartLine, int expectedStartColumn, boolean isSelectNext) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile();
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ISourceRange actualNewRange= new GoToNextPreviousMemberAction(isSelectNext).getNewSelectionRange(selection, cu.getTypes());
+		ISourceRange actualNewRange= new GoToNextPreviousMemberAction(isSelectNext).getNewSelectionRange(selection, cu.getAllTypes());
 		ISourceRange expectedNewRange= TextRangeUtil.getSelection(cu, expectedStartLine, expectedStartColumn, expectedStartLine, expectedStartColumn);
 		assertEquals("incorrect selection offset", expectedNewRange.getOffset(), actualNewRange.getOffset());
 		assertEquals("incorrect selection length", expectedNewRange.getLength(), actualNewRange.getLength());
