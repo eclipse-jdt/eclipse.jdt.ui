@@ -125,7 +125,8 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	public void testConstraints4() throws Exception{
 		String[] strings= {"[as0] =^= A[]", "[a0] <= A", "[{a0,}] <= [as0]", "Decl(A:f()) =^= p.A", "[null] <= [a0]", "[a0] =^= A"};
-		testConstraints(strings);
+//		testConstraints(strings);
+		printTestDisabledMessage("see bug 50658");
 	}	
 
 	public void testConstraints5() throws Exception{
@@ -145,7 +146,8 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	public void testConstraints8() throws Exception{
 		String[] strings= {"Decl(A:x) =^= p.A", "Decl(A:f()) =^= p.A", "[aField.x] =^= java.lang.Object", "Decl(A:aField) =^= p.A", "[this] <= [aField.x]", "[aField] =^= A", "[x] =^= Object", "[this] =^= p.A", "[aField] <= Decl(A:x)"};
-		testConstraints(strings);
+//		testConstraints(strings);
+		printTestDisabledMessage("see bug 50658");
 	}	
 
 	public void testConstraints9() throws Exception{
@@ -209,7 +211,8 @@ public class TypeConstraintTests extends RefactoringTest {
 
 	public void testConstraints19() throws Exception{
 		String[] strings= {"[super.aField] =^= p.A", "[a] =^= A", "Decl(B:f()) =^= p.B", "[a] <= [super.aField]", "[null] <= [a]", "Decl(A:aField) =^= p.A", "[aField] =^= A"};
-		testConstraints(strings);
+		//testConstraints(strings);
+		printTestDisabledMessage("see bug 50658");
 	}	
 
 	public void testConstraints20() throws Exception{
