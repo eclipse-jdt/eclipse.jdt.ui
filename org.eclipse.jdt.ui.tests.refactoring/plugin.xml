@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <plugin
-   name="Refactoring Tests Pluging"
+   name="%Plugin.name"
    id="org.eclipse.jdt.ui.tests.refactoring"
    version="2.1.0"
-   provider-name = "Eclipse.org"
+   provider-name = "%Plugin.providerName"
    class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin">
    
    <requires>
