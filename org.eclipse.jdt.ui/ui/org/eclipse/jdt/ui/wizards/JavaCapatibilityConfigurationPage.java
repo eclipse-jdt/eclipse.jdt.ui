@@ -141,7 +141,7 @@ public class JavaCapatibilityConfigurationPage extends NewElementWizardPage {
 						nSteps--;
 					}
 													
-					// confige the build paths
+					// configure the build paths
 					IRunnableWithProgress jrunnable= fBuildPathsBlock.getRunnable();
 					jrunnable.run(new SubProgressMonitor(monitor, nSteps));
 				} catch (CoreException e) {
