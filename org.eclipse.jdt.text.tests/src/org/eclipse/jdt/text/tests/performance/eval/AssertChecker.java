@@ -12,7 +12,6 @@ package org.eclipse.jdt.text.tests.performance.eval;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.text.tests.performance.data.Assert;

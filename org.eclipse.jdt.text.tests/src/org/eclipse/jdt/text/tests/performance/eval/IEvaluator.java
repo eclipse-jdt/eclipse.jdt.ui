@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.performance.eval;
 
-import org.eclipse.jdt.text.tests.performance.data.Dimension;
 import org.eclipse.jdt.text.tests.performance.data.MeteringSession;
 
 
