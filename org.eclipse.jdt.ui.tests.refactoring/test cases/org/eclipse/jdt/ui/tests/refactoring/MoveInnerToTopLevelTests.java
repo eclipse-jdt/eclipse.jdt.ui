@@ -65,7 +65,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 
-	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName) throws Exception {
+	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal) throws Exception {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
 		IType clas= parentClas.getType(className);
 				
@@ -74,7 +74,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 			assertTrue("name should be ok ", ref.checkEnclosingInstanceName(enclosingInstanceName).isOK());
 		}	
-		
+		ref.setMarkInstanceFieldAsFinal(makeFinal);
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
@@ -88,6 +88,9 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		ICompilationUnit newCu= clas.getPackageFragment().getCompilationUnit(className + ".java");
 		assertEquals("incorrect new cu created", getFileContents(getOutputTestFileName(className)), newCu.getSource());
 	}
+	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName) throws Exception {
+		validatePassingTest(parentClassName, className, cuNames, packageNames, enclosingInstanceName, false);
+	}
 
 	private void validateFailingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, int expectedSeverity) throws Exception {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
@@ -97,7 +100,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 		}	
-		
+		ref.setMarkInstanceFieldAsFinal(false);		
 		ICompilationUnit[] cus= new ICompilationUnit[cuNames.length];
 		for (int i= 0; i < cuNames.length; i++) {
 			cus[i]= createCUfromTestFile(getPackage(packageNames[i]), cuNames[i]);			
@@ -308,6 +311,10 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test_nonstatic_29() throws Exception{
 		printTestDisabledMessage("test for bug 23724");
 //		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a");
+	}
+	public void test_nonstatic_30() throws Exception{
+//		printTestDisabledMessage("test for bug 23715");
+		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true);
 	}
 
 	public void testFail_nonstatic_0() throws Exception{

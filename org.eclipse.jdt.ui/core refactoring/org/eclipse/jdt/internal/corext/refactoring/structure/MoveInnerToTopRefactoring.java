@@ -100,6 +100,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private String fEnclosingInstanceFieldName;
 	private ASTNodeMappingManager fASTManager;
 	private DeleteSourceReferenceEdit fCutTypeEdit; 
+	private boolean fMarkInstanceFieldAsFinal;
 	
 	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(type.exists());
@@ -109,8 +110,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fImportEditManager= new ImportEditManager(codeGenerationSettings);
 		fASTManager= new ASTNodeMappingManager();
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
+		fMarkInstanceFieldAsFinal= true; //defualt
 	}
 
+	public boolean isInstanceFieldMarkedFinal(){
+		return fMarkInstanceFieldAsFinal;
+	}
+	
+	public void setMarkInstanceFieldAsFinal(boolean mark){
+		fMarkInstanceFieldAsFinal= mark;
+	}
+	
 	private String getInitialNameForEnclosingInstanceField() {
 		if (getEnclosingType() == null)
 			return ""; //$NON-NLS-1$
@@ -426,9 +436,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 
 	private void addEnclosingInstanceDeclaration(TextChangeManager manager) throws CoreException {
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		String[] fieldSource= new String[]{"private " + createDeclarationForEnclosingInstance() + ';'};
+		
+		String[] fieldSource= new String[]{createEnclosingInstanceAccessModifierStrings() + createDeclarationForEnclosingInstance() + ';'};
 		MemberEdit memberEdit= new MemberEdit(fType, MemberEdit.ADD_AT_BEGINNING, fieldSource, tabWidth);
 		manager.get(getInputTypeCu()).addTextEdit("Add enclosing instance declaration", memberEdit);
+	}
+	
+	private String createEnclosingInstanceAccessModifierStrings(){
+		if (fMarkInstanceFieldAsFinal)
+			return "private final ";
+		else 
+			return "private ";
 	}
 
 	private void removeUnusedTypeModifiers(TextChangeManager manager) throws CoreException {
