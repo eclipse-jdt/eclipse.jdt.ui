@@ -85,7 +85,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	/**
 	 * Sets the descriptors adornments. Valid values are: <code>ABSTRACT</code>, <code>FINAL</code>,
 	 * <code>SYNCHRONIZED</code>, </code>STATIC<code>, </code>RUNNABLE<code>, </code>WARNING<code>, 
-	 * </code>ERROR<code>, </code>OVERRIDDEN<code>, or any combination of those.
+	 * </code>ERROR<code>, </code>OVERRIDDES<code>, <code>IMPLEMENTS</code>, <code>CONSTRUCTOR</code>,
+	 * or any combination of those.
 	 * 
 	 * @param adornments the image descritpors adornments
 	 */
@@ -191,16 +192,6 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 		Point size= getSize();
 		int x= size.x;
 		ImageData data= null;
-		if ((fFlags & SYNCHRONIZED) != 0) {
-			data= JavaPluginImages.DESC_OVR_SYNCH.getImageData();
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
-		}
-		if ((fFlags & RUNNABLE) != 0) {
-			data= JavaPluginImages.DESC_OVR_RUN.getImageData();
-			x-= data.width;
-			drawImage(data, x, size.y - data.height);
-		}
 		if ((fFlags & OVERRIDES) != 0) {
 			data= JavaPluginImages.DESC_OVR_OVERRIDES.getImageData();
 			x-= data.width;
@@ -211,6 +202,16 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}			
+		if ((fFlags & SYNCHRONIZED) != 0) {
+			data= JavaPluginImages.DESC_OVR_SYNCH.getImageData();
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}
+		if ((fFlags & RUNNABLE) != 0) {
+			data= JavaPluginImages.DESC_OVR_RUN.getImageData();
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}
 	}		
 	
 	private void drawBottomLeft() {
