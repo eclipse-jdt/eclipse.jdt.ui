@@ -464,19 +464,4 @@ public class ASTNodes {
 				return 1;
 		}
 	}
-	
-	//recursive
-	/**
-	 * @deprecated Use ASTNodes.asString(name)
-	 */
-	public static String getNameIdentifier(Name name) {
-		if (name.isSimpleName())
-			return ((SimpleName) name).getIdentifier();
-		if (name.isQualifiedName()) {
-			QualifiedName qn= (QualifiedName) name;
-			return getNameIdentifier(qn.getQualifier()) + "." + qn.getName().getIdentifier(); //$NON-NLS-1$
-		}
-		Assert.isTrue(false);
-		return ""; //$NON-NLS-1$
-	}
 }
