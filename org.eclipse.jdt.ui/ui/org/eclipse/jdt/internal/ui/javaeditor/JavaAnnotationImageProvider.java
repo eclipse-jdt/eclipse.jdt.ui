@@ -127,7 +127,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 		switch (imageType) {
 			case OVERLAY_IMAGE:
 				IJavaAnnotation overlay= annotation.getOverlay();
-				image= overlay.getImage(display);
+				image= getManagedImage((Annotation) overlay);
 				break;
 			case QUICKFIX_IMAGE:
 				image= getQuickFixImage();

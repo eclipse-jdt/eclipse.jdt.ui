@@ -12,10 +12,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+
 
 /**
  * Interface of annotations representing markers
@@ -65,7 +63,7 @@ public interface IJavaAnnotation {
 	 * Returns an iterator for iterating over the
  	 * annotation which are overlaid by this annotation.
 	 * 
-	 * @return an iterator over the overlaid annotaions
+	 * @return an iterator over the overlaid annotations
 	 */
 	Iterator getOverlaidIterator();
 	
@@ -73,7 +71,7 @@ public interface IJavaAnnotation {
 	 * Adds the given annotation to the list of
 	 * annotations which are overlaid by this annotations.
 	 *  
-	 * @param annotation	the problem annoation
+	 * @param annotation the problem annotation
 	 */
 	void addOverlaid(IJavaAnnotation annotation);
 	
@@ -81,7 +79,7 @@ public interface IJavaAnnotation {
 	 * Removes the given annotation from the list of
 	 * annotations which are overlaid by this annotation.
 	 *  
-	 * @param annotation	the problem annoation
+	 * @param annotation the problem annotation
 	 */
 	void removeOverlaid(IJavaAnnotation annotation);
 	
@@ -101,7 +99,5 @@ public interface IJavaAnnotation {
 	
 	String[] getArguments();
 	
-	int getId();
-	
-	Image getImage(Display display);
+	int getId();	
 }

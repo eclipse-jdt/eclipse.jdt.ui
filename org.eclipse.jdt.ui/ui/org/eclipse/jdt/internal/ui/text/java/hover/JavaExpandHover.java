@@ -46,7 +46,6 @@ import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl.AnnotationH
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
 /**
@@ -66,12 +65,19 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		}
 		
 		/*
-		 * @see org.eclipse.jface.text.source.Annotation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
+		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#paint(org.eclipse.swt.graphics.GC, org.eclipse.swt.widgets.Canvas, org.eclipse.swt.graphics.Rectangle)
 		 */
 		public void paint(GC gc, Canvas canvas, Rectangle bounds) {
 			// draw affordance so the user know she can click here to get a breakpoint
 			Image fImage= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			ImageUtilities.drawImage(fImage, gc, canvas, bounds, SWT.CENTER);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.text.source.IAnnotationPresentation#getLayer()
+		 */
+		public int getLayer() {
+			return IAnnotationPresentation.DEFAULT_LAYER;
 		}
 	}
 	
@@ -114,9 +120,11 @@ public class JavaExpandHover extends AnnotationExpandHover {
 				if (!((IAnnotationAccessExtension)fAnnotationAccess).isPaintable(annotation))
 					continue;
 				
-			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
-				if (((IJavaAnnotation) annotation).getImage(display) == null)
-					continue;
+// TODO need a new check the this one is not OK
+//
+//			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
+//				if (((IJavaAnnotation) annotation).getImage(display) == null)
+//					continue;
 				
 			AnnotationPreference pref= fLookup.getAnnotationPreference(annotation);
 			if (pref != null) {

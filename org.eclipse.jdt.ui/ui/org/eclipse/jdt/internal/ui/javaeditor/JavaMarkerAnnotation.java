@@ -16,9 +16,6 @@ import java.util.Iterator;
 
 import org.eclipse.core.resources.IMarker;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 
 import org.eclipse.jdt.core.CorrectionEngine;
@@ -43,14 +40,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	public JavaMarkerAnnotation(IMarker marker) {
 		super(marker);
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getImage(org.eclipse.swt.widgets.Display)
-	 */
-	public Image getImage(Display display) {
-		return super.getImage(display);
-	}
-	
+		
 	/*
 	 * @see IJavaAnnotation#getArguments()
 	 */
