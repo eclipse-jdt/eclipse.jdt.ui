@@ -67,7 +67,7 @@ public class GotoMarkerAction extends Action {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		IJavaElement javaElement= SearchUtil.getJavaElement(marker);
 
-		if (javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
+		if (javaElement != null && javaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 			gotoPackagesView(javaElement, wbPage);
 		else {
 			if (SearchUI.reuseEditor())
