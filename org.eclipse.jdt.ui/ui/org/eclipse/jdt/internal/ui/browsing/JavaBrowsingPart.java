@@ -134,6 +134,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	
 	// Actions
 	private WorkingSetFilterActionGroup fWorkingSetFilterActionGroup;
+	private boolean fHasWorkingSetFilter= true;
 	private OpenEditorActionGroup fOpenEditorGroup;
 	private CCPActionGroup fCCPActionGroup;
 	private BuildActionGroup fBuildActionGroup;
@@ -181,11 +182,13 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				memento.putMemento(fMemento);
 			return;
 		}
-		fWorkingSetFilterActionGroup.saveState(memento);
+		if (fHasWorkingSetFilter)
+			fWorkingSetFilterActionGroup.saveState(memento);
 	}	
 
 	protected void restoreState(IMemento memento) {
-		fWorkingSetFilterActionGroup.restoreState(memento);
+		if (fHasWorkingSetFilter)
+			fWorkingSetFilterActionGroup.restoreState(memento);
 	}	
 
 	/**
@@ -290,7 +293,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
 		fillToolBar(toolBar);
-		fWorkingSetFilterActionGroup.fillActionBars(getViewSite().getActionBars());		
+		if (fHasWorkingSetFilter)
+			fWorkingSetFilterActionGroup.fillActionBars(getViewSite().getActionBars());		
 
 		actionBars.updateActionBars();
 	
@@ -431,7 +435,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					updateTitle();
 			}
 		};
-		fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(fViewer, viewId, getShell(), titleUpdater);
+		if (fHasWorkingSetFilter)
+			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(fViewer, viewId, getShell(), titleUpdater);
 	}
 	
 	/**
@@ -564,6 +569,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 
+	void setHasWorkingSetFilter(boolean state) {
+		fHasWorkingSetFilter= state;
+	}
+	
 	protected void setInput(Object input) {
 		setViewerInput(input);
 		updateTitle();
