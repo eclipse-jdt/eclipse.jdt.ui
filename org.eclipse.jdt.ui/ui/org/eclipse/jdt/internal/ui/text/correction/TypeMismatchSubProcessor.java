@@ -280,5 +280,40 @@ public class TypeMismatchSubProcessor {
 		return proposal;
 	}
 
+	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveredNode(astRoot);
+		if (selectedNode instanceof SimpleName) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration decl= (MethodDeclaration) selectedNode;
+		IMethodBinding binding= decl.resolveBinding();
+		if (binding == null) {
+			return;
+		}
+		
+		IMethodBinding overridden= Bindings.findMethodDefininition(binding);
+		if (overridden == null || overridden.getReturnType() == binding.getReturnType()) {
+			return;
+		}
+		ITypeBinding declaringType= overridden.getDeclaringClass();
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		proposals.add(new TypeChangeCompletionProposal(cu, binding, astRoot, overridden.getReturnType(), false, 8));
+		
+		ICompilationUnit targetCu= cu;
+		if (declaringType != null && declaringType.isFromSource()) {
+			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
+		}
+		if (targetCu != null) {
+			proposals.add(new TypeChangeCompletionProposal(targetCu, overridden, astRoot, binding.getReturnType(), false, 7));
+		}
+
+	
+	}
+
 
 }

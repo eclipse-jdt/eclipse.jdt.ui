@@ -153,7 +153,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IllegalModifierForMethod:
 			case IProblem.IllegalModifierForVariable:
 			case IProblem.IllegalVisibilityModifierForInterfaceMemberType:
-
+			case IProblem.IncompatibleReturnType:
 				return true;
 			default:
 				return false;
@@ -261,6 +261,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;	
 			case IProblem.TypeMismatch:
 				TypeMismatchSubProcessor.addTypeMismatchProposals(context, problem, proposals);
+				break;
+			case IProblem.IncompatibleReturnType:
+				TypeMismatchSubProcessor.addIncompatibleReturnTypeProposals(context, problem, proposals);
 				break;
 			case IProblem.UnhandledException:
 				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
