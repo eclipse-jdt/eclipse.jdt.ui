@@ -827,7 +827,13 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			if (kind != IPackageFragmentRoot.K_BINARY && containsJavaElements)
 				packages.add(fragment);
 		}
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), new JavaElementContentProvider(), true, false);
+		JavaElementContentProvider cp= new JavaElementContentProvider() {
+			public boolean hasChildren(Object element) {
+				// prevent the + from being shown in front of packages
+				return !(element instanceof IPackageFragment) && super.hasChildren(element);
+			}
+		};
+		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getContainer().getShell(), new JavaElementLabelProvider(flags), cp, true, false);
 		dialog.setInput(JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()));
 		dialog.addFilter(new EmptyInnerPackageFilter());		
 		dialog.addFilter(new LibraryFilter());

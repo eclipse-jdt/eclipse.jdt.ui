@@ -32,6 +32,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.SaveAsDialog;
@@ -447,10 +448,17 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 		int labelFlags= JavaElementLabelProvider.SHOW_BASICS
 						| JavaElementLabelProvider.SHOW_OVERLAY_ICONS
 						| JavaElementLabelProvider.SHOW_SMALL_ICONS;
+		ITreeContentProvider treeContentProvider=
+			new JavaElementContentProvider() {
+				public boolean hasChildren(Object element) {
+					// prevent the + from being shown in front of packages
+					return !(element instanceof IPackageFragment) && super.hasChildren(element);
+				}
+			};
 		fInputGroup= new CheckboxTreeAndListGroup(
 					parent,
 					JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot()),
-					new JavaElementContentProvider(),
+					treeContentProvider,
 					new JavaElementLabelProvider(labelFlags),
 					new JavaElementModalListContentProvider(),
 					new JavaElementLabelProvider(labelFlags),

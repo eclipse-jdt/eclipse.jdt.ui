@@ -31,6 +31,7 @@ import org.eclipse.ui.actions.WorkspaceModifyOperation;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -202,7 +203,12 @@ public class CopyAction extends ReorgAction {
 	}
 	
 	protected Object selectDestination(IJavaElement root, List elements, Shell parent) {
-		JavaElementContentProvider cp= new JavaElementContentProvider();
+		JavaElementContentProvider cp= new JavaElementContentProvider() {
+			public boolean hasChildren(Object element) {
+				// prevent the + from being shown in front of packages
+				return !(element instanceof IPackageFragment) && super.hasChildren(element);
+			}
+		};
 		ContainerFilter filter= new ContainerFilter(elements);
 		ISelectionValidator v= getDestinationValidator(elements);
 		ILabelProvider labelProvider= new DestinationRenderer(
