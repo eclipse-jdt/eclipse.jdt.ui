@@ -1086,4 +1086,15 @@ JavaStructureDiffViewerCreator
 	</editorContribution>
 </extension>
 
+<!-- =========================================================================== -->
+<!-- Java Working Set Page 														 -->
+<!-- =========================================================================== -->
+<extension point="org.eclipse.ui.workingSets">
+	<workingSet
+		id="org.eclipse.jdt.ui.JavaWorkingSetPage"
+		name="%JavaWorkingSetPage.name"
+		pageClass="org.eclipse.jdt.internal.ui.workingsets.JavaWorkingSetPage">
+	</workingSet>
+</extension>
+
 </plugin>

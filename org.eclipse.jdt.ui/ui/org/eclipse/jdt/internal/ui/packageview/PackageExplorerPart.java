@@ -14,6 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
@@ -52,12 +58,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -72,7 +72,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ResourceWorkingSetFilter;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.part.ResourceTransfer;
@@ -88,14 +87,21 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IPackagesViewPart;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -107,11 +113,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-import org.eclipse.jdt.ui.IPackagesViewPart;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilter;
 
 
 /**
@@ -140,7 +142,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 
-	private ResourceWorkingSetFilter fWorkingSetFilter;	
+	private WorkingSetFilter fWorkingSetFilter;	
 	
 	private PackageExplorerActionGroup fActionSet;
 	private ProblemTreeViewer fViewer; 
@@ -267,11 +269,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		addWorkingSetChangeSupport();
 		IWorkingSet workingSet= getSite().getPage().getWorkingSet();
-		if (workingSet != null) {
-			fWorkingSetFilter= new ResourceWorkingSetFilter();
+		if (workingSet != null)
 			fWorkingSetFilter.setWorkingSet(workingSet);		
-			fViewer.addFilter(fWorkingSetFilter);
-		}		
 		
 		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
@@ -898,6 +897,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		getLibraryFilter().setShowLibraries(show);
 	}
 
+
+	
 	boolean isExpandable(Object element) {
 		if (fViewer == null)
 			return false;
@@ -921,6 +922,15 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			setTitle(title);
 			setTitleToolTip(getToolTipText(input));
 		} 
+	}
+	
+	/**
+	 * Sets the decorator for the package explorer.
+	 *
+	 * @param decorator a label decorator or <code>null</code> for no decorations.
+	 * @deprecated To be removed
+	 */
+	public void setLabelDecorator(ILabelDecorator decorator) {
 	}
 	
 	/*
@@ -951,7 +961,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
 		final IWorkbenchPage page= getSite().getPage();
 
-		fWorkingSetFilter= new ResourceWorkingSetFilter();
+		fWorkingSetFilter= new WorkingSetFilter();
 		fViewer.addFilter(fWorkingSetFilter);
 
 		// Register listener on working set
@@ -961,11 +971,14 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		// Register listener on page
 		page.addPropertyChangeListener(propertyChangeListener);
 		
-		// Register dispose listener which removes the page listener
+		// Register dispose listener which removes the listeners
 		fViewer.getControl().addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				if (page!= null)
 					page.removePropertyChangeListener(propertyChangeListener);
+				if (fWorkingSetFilter.getWorkingSet() != null)
+					fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(propertyChangeListener);
+					
 			}
 		});
 		
@@ -999,14 +1012,4 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			}
 		};
 	}
-	
-	/**
-	 * Sets the decorator for the package explorer.
-	 *
-	 * @param decorator a label decorator or <code>null</code> for no decorations.
-	 * @deprecated To be removed
-	 */
-	public void setLabelDecorator(ILabelDecorator decorator) {
-	}
-
 }

@@ -18,7 +18,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DragSource;
 import org.eclipse.swt.dnd.DragSourceEvent;
-import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -32,7 +31,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -71,7 +69,6 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.ResourceWorkingSetFilter;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -130,6 +127,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
+import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilter;
 
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener {
@@ -155,7 +153,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	private Object fPreviousSelectedElement;
 	private Image fOriginalTitleImage;
 	
-	private ResourceWorkingSetFilter fWorkingSetFilter;
+	private WorkingSetFilter fWorkingSetFilter;
 	private CCPActionGroup fCCPActionGroup;
 			
 	/*
@@ -741,11 +739,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// default is to have no filters
 		addWorkingSetChangeSupport();
 		IWorkingSet workingSet= getSite().getPage().getWorkingSet();
-		if (workingSet != null) {
-			fWorkingSetFilter= new ResourceWorkingSetFilter();
+		if (workingSet != null)
 			fWorkingSetFilter.setWorkingSet(workingSet);		
-			fViewer.addFilter(fWorkingSetFilter);
-		}		
 	}
 
 	/**
@@ -1157,7 +1152,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		final IPropertyChangeListener propertyChangeListener= createWorkingSetChangeListener();
 		final IWorkbenchPage page= getSite().getPage();
 
-		fWorkingSetFilter= new ResourceWorkingSetFilter();
+		fWorkingSetFilter= new WorkingSetFilter();
 		fViewer.addFilter(fWorkingSetFilter);
 
 		// Register listener on working set
@@ -1167,14 +1162,17 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		// Register listener on page
 		page.addPropertyChangeListener(propertyChangeListener);
 		
-		// Register dispose listener which removes the page listener
+		// Register dispose listener which removes the listeners
 		fViewer.getControl().addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				if (page!= null)
 					page.removePropertyChangeListener(propertyChangeListener);
+				if (fWorkingSetFilter.getWorkingSet() != null)
+					fWorkingSetFilter.getWorkingSet().removePropertyChangeListener(propertyChangeListener);
+					
 			}
 		});
-		
+
 		return propertyChangeListener;		
 	}
 
