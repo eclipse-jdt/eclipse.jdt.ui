@@ -254,8 +254,13 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	
 	private void textModified(String text) {
 		fRefactoring.setMethodName(text);
-		updatePreview(text);
-		setPageComplete(validatePage(true));
+		RefactoringStatus status= validatePage(true);
+		if (!status.hasFatalError()) {
+			updatePreview(text);
+		} else {
+			fPreview.setText(""); //$NON-NLS-1$
+		}
+		setPageComplete(status);
 	}
 	
 	private void parameterModified() {
