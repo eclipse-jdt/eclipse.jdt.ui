@@ -38,8 +38,9 @@ public class HTMLPrinter {
 	}
 	
 	public static String convertToHTMLContent(String content) {
-		content= replace(content, '<', "&lt;");
-		return replace(content, '>', "&gt;");
+		return content;
+//		content= replace(content, '<', "&lt;");
+//		return replace(content, '>', "&gt;");
 	}
 	
 	public static String read(Reader rd) {

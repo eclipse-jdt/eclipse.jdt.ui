@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -19,6 +20,8 @@ import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.compare.structuremergeviewer.IStructureComparator;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -871,11 +874,15 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	public void select(ISourceReference reference) {
 		if (fOutlineViewer != null) {
 			
-			ISelection s= StructuredSelection.EMPTY;
-			if (reference != null)
-				s= new StructuredSelection(reference);
-				
-			fOutlineViewer.setSelection(s, true);
+			ISelection s= fOutlineViewer.getSelection();
+			if (s instanceof IStructuredSelection) {
+				IStructuredSelection ss= (IStructuredSelection) s;
+				List elements= ss.toList();
+				if (!elements.contains(reference)) {
+					s= (reference == null ? StructuredSelection.EMPTY : new StructuredSelection(reference));
+					fOutlineViewer.setSelection(s, true);
+				}
+			}
 		}
 	}
 	
