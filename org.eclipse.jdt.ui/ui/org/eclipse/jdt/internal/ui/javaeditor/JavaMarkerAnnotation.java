@@ -23,6 +23,8 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
@@ -94,7 +96,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 					}
 				} else if (marker.isSubtypeOf(IMarker.TASK))
 					fType= AnnotationType.TASK;
-				else if (marker.isSubtypeOf("org.eclipse.search.searchmarker")) 
+				else if (marker.isSubtypeOf(SearchUI.SEARCH_MARKER)) 
 					fType= AnnotationType.SEARCH_RESULT;
 				else if (marker.isSubtypeOf(IMarker.BOOKMARK))
 					fType= AnnotationType.BOOKMARK;
