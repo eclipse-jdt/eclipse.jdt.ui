@@ -51,9 +51,12 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileDisassembler;
@@ -167,15 +170,23 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				data.heightHint= 2;
 				separator.setLayoutData(data);
 		
-				final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
-		
-				if (root != null) {
-					
-					if (!root.isArchive()) {
-						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
-		
-					} else {
-						try {
+				try {
+
+					final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
+					if (root != null) {
+						
+						IClasspathEntry entry= root.getRawClasspathEntry();	
+						
+						if (!root.isArchive()) {
+							createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
+			
+						} else if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {	
+							IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
+							String containerName= container == null ? entry.getPath().toString() : container.getDescription();
+							createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.containerEntry", containerName));  //$NON-NLS-1$
+	
+						} else {
+							
 							Button button;
 		
 							IPath path= root.getSourceAttachmentPath();			
@@ -211,12 +222,13 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 								public void widgetDefaultSelected(SelectionEvent e) {}
 							});
 		
-						} catch (JavaModelException e) {
-							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-							String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
 						}
 					}
+
+				} catch (JavaModelException e) {
+					String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+					String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
 				}
 				
 				separator= createCompositeSeparator(composite);
@@ -350,7 +362,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			
 			private void updateCodeView(StyledText styledText, IClassFile classFile) {
 				String content= null;
-				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS;
+				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS | IClassFileReader.SUPER_INTERFACES;
 				IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);					
 				if (classFileReader != null) {
 					IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
