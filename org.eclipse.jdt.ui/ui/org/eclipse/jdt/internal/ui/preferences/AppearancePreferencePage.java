@@ -170,7 +170,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fCompressPackageNames.doFillIntoGrid(composite, nColumns);
 		fPackageNamePattern.doFillIntoGrid(composite, 2);
 		LayoutUtil.setHorizontalGrabbing(fPackageNamePattern.getTextControl(null));
-		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(80));
+		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(65));
 		
 		
 		new Separator().doFillIntoGrid(composite, nColumns);
