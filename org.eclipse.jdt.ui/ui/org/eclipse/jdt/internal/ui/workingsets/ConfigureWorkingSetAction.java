@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.workingsets;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -17,6 +21,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
+import org.eclipse.ui.internal.WorkbenchPlugin;
 
 
 public class ConfigureWorkingSetAction extends Action {
@@ -34,8 +39,18 @@ public class ConfigureWorkingSetAction extends Action {
 	 * {@inheritDoc}
 	 */
 	public void run() {
+		List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getWorkingSets()));
+    	IWorkingSet[] others= WorkbenchPlugin.getDefault().getWorkingSetManager().getWorkingSets();
+    	for (int i= 0; i < others.length; i++) {
+			IWorkingSet workingSet= others[i];
+			if ("org.eclipse.jdt.ui.JavaWorkingSetPage".equals(workingSet.getId()) && !workingSets.contains(workingSet)) { //$NON-NLS-1$
+				workingSets.add(workingSet);
+			}
+		}
 		IWorkingSetSelectionDialog dialog= new WorkingSetSelectionDialog(
-			fParent, fWorkingSetModel.getWorkingSets(), true, false); //$NON-NLS-1$
+			fParent, 
+			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]), 
+			true, false); //$NON-NLS-1$
 		dialog.setSelection(fWorkingSetModel.getWorkingSets());
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IWorkingSet[] selection= dialog.getSelection();
