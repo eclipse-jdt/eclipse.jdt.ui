@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
@@ -21,8 +22,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 public class DeleteFromClasspathChange extends Change {
 
-	private String fProjectHandle;
-	private IPath fPathToDelete;
+	private final String fProjectHandle;
+	private final IPath fPathToDelete;
 	
 	private IPath fPath;
 	private IPath fSourceAttachmentPath;
@@ -34,7 +35,8 @@ public class DeleteFromClasspathChange extends Change {
 		this(root.getPath(), root.getJavaProject());
 	}
 	
-	public DeleteFromClasspathChange(IPath pathToDelete, IJavaProject project){
+	DeleteFromClasspathChange(IPath pathToDelete, IJavaProject project){
+		Assert.isNotNull(pathToDelete);
 		fPathToDelete= pathToDelete;
 		fProjectHandle= project.getHandleIdentifier();
 	}
@@ -54,7 +56,7 @@ public class DeleteFromClasspathChange extends Change {
 			int j= 0;
 			while (j < newCp.length) {
 				IClasspathEntry current= JavaCore.getResolvedClasspathEntry(cp[i]);
-				if (toBeDeleted(current)) {
+				if (current != null && toBeDeleted(current)) {
 					i++;
 					setDeletedEntryProperties(current);
 				} 
@@ -75,6 +77,8 @@ public class DeleteFromClasspathChange extends Change {
 	}
 	
 	private boolean toBeDeleted(IClasspathEntry entry){
+		if (entry == null) //safety net
+			return false; 
 		return fPathToDelete.equals(entry.getPath());
 	}
 	
