@@ -64,7 +64,11 @@ public class StructureSelectionAction extends TextSelectionAction {
 	
 	public final ISourceRange getNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu){
 		try{
+			if (! cu.isStructureKnown())
+				return oldSourceRange;
 			AST ast= new AST(cu);
+			if (ast.getProblems().length != 0)
+				return oldSourceRange;
 			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(cu.getBuffer(), oldSourceRange.getOffset(), oldSourceRange.getLength());
 			ast.accept(selAnalyzer);
 			return internalGetNewSelectionRange(oldSourceRange, cu, selAnalyzer);
@@ -80,7 +84,6 @@ public class StructureSelectionAction extends TextSelectionAction {
 	 */
 	ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ICompilationUnit cu, StructureSelectionAnalyzer selAnalyzer) throws JavaModelException{
 		AstNode[] parents= selAnalyzer.getParents();
-
 		if (parents == null || parents.length == 0){
 			if (selAnalyzer.getLastCoveringNode() != null)
 				return getSelectedNodeSourceRange(cu, selAnalyzer.getLastCoveringNode());
