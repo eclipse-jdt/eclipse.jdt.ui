@@ -62,24 +62,23 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.getter_name")); //$NON-NLS-1$
-		Text text= new Text(result, SWT.BORDER);
-		text.setText(fRefactoring.getGetterName());
-		layouter.perform(label, text, 1);
-		text.addModifyListener(new ModifyListener() {
+		Text getter= new Text(result, SWT.BORDER);
+		getter.setText(fRefactoring.getGetterName());
+		layouter.perform(label, getter, 1);
+		getter.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				fRefactoring.setGetterName(((Text)e.widget).getText());
 				processValidation();
 			}
 		});
-		text.setFocus();
 		
 		if (needsSetter()) {
 			label= new Label(result, SWT.LEFT);
 			label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.setter_name")); //$NON-NLS-1$
-			text= new Text(result, SWT.BORDER);
-			text.setText(fRefactoring.getSetterName());
-			layouter.perform(label, text, 1);
-			text.addModifyListener(new ModifyListener() {
+			Text setter= new Text(result, SWT.BORDER);
+			setter.setText(fRefactoring.getSetterName());
+			layouter.perform(label, setter, 1);
+			setter.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					fRefactoring.setSetterName(((Text)e.widget).getText());
 					processValidation();
@@ -102,9 +101,11 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		
 		createAccessModifier(result, layouter);
 		
-		createFieldAccessBlock(result);
+		createFieldAccessBlock(result, layouter);
 			
 		processValidation();
+		
+		getter.setFocus();
 		
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
@@ -121,7 +122,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		Composite group= new Composite(result, SWT.NONE);
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layout= new GridLayout();
-		layout.numColumns= 4; layout.marginWidth= 0;
+		layout.numColumns= 4; layout.marginWidth= 0; layout.marginHeight= 0;
 		group.setLayout(layout);
 		
 		Object[] info= createData(visibility);
@@ -143,14 +144,15 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layouter.perform(label, group, 1);	
 	}
 	
-	public void createFieldAccessBlock(Composite result) {
+	private void createFieldAccessBlock(Composite result, RowLayouter layouter) {
 		int indent= convertWidthInCharsToPixels(2);
+		Label label= new Label(result, SWT.LEFT);
+		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
+		
 		Composite block= new Composite(result, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginWidth= 0; layout.marginHeight= 0;
+		layout.marginWidth= 0; layout.marginHeight= 0; layout.numColumns= 2;
 		block.setLayout(layout);
-		Label label= new Label(block, SWT.LEFT);
-		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
 		Button radio= new Button(block, SWT.RADIO);
 		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.use_setter_getter")); //$NON-NLS-1$
 		radio.setSelection(true);
@@ -159,9 +161,9 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				fRefactoring.setEncapsulateDeclaringClass(true);
 			}
 		});
-		GridData data= new GridData();
-		data.horizontalIndent= indent;
-		radio.setLayoutData(data);
+		// GridData data= new GridData();
+		// data.horizontalIndent= indent;
+		// radio.setLayoutData(data);
 		
 		radio= new Button(block, SWT.RADIO);
 		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.keep_references")); //$NON-NLS-1$
@@ -170,9 +172,10 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				fRefactoring.setEncapsulateDeclaringClass(false);
 			}
 		});
-		data= new GridData();
-		data.horizontalIndent= indent;
-		radio.setLayoutData(data);
+		// data= new GridData();
+		// data.horizontalIndent= indent;
+		// radio.setLayoutData(data);
+		layouter.perform(label, block, 1);
 	}
 
 	private Object[] createData(int visibility) {

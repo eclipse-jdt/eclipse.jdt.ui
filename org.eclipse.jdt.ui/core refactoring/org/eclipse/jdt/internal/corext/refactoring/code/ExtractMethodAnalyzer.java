@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
@@ -425,6 +427,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			if (status.hasFatalError())
 				break superCall;
 			if (!hasSelectedNodes()) {
+				ASTNode coveringNode= getLastCoveringNode();
+				if (coveringNode instanceof Block && coveringNode.getParent() instanceof MethodDeclaration) {
+					MethodDeclaration methodDecl= (MethodDeclaration)coveringNode.getParent();
+					Message[] messages= ASTNodes.getMessages(methodDecl, ASTNodes.NODE_ONLY);
+					if (messages.length > 0) {
+						status.addFatalError(RefactoringCoreMessages.getFormattedString(
+							"ExtractMethodAnalyzer.compile_errors", //$NON-NLS-1$
+							methodDecl.getName().getIdentifier()));
+						break superCall;
+					}
+				}
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
 			}

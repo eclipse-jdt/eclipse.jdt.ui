@@ -39,8 +39,9 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
 public class ASTNodes {
 
-	public static final int INCLUDE_FIRST_PARENT= 	0;
-	public static final int INCLUDE_ALL_PARENTS= 	1;
+	public static final int NODE_ONLY=						0;
+	public static final int INCLUDE_FIRST_PARENT= 	1;
+	public static final int INCLUDE_ALL_PARENTS= 	2;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	
@@ -308,6 +309,8 @@ public class ASTNodes {
 	
 	private static int computeIterations(int flags) {
 		switch (flags) {
+			case NODE_ONLY:
+				return 1;
 			case INCLUDE_ALL_PARENTS:
 				return Integer.MAX_VALUE;
 			case INCLUDE_FIRST_PARENT:
