@@ -161,6 +161,6 @@ public class TestExpression extends Expression {
 			if (i < fArgs.length - 1)
 				args.append(", "); //$NON-NLS-1$
 		}
-		return "<test property=\"" + fProperty + "\" args=\"" + args + "\""; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		return "<test property=\"" + fProperty + "\" args=\"" + args + "\"/>"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}
 }

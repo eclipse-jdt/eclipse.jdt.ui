@@ -26,7 +26,9 @@ public class StandardElementHandler implements IElementHandler {
 
 	public Expression create(IConfigurationElement element, ExpressionParser creator) throws CoreException {
 		String name= element.getName();
-		if (TestExpression.NAME.equals(name)) {
+		if (InstanceofExpression.NAME.equals(name)) {
+			return new InstanceofExpression(element);
+		} else if (TestExpression.NAME.equals(name)) {
 			return new TestExpression(element);
 		} else if (OrExpression.NAME.equals(name)) {
 			OrExpression result= new OrExpression();
