@@ -19,6 +19,7 @@ import org.eclipse.ui.PlatformUI;
 
 /**
  * Closes the workbench at the end of the test run, if run from the <code>EclipseTestRunner</code>.
+ * NOTE: Only decorate top-level (i.e., run from test.xml) tests.
  */
 public class CloseWorkbenchDecorator extends TestDecorator {
 
