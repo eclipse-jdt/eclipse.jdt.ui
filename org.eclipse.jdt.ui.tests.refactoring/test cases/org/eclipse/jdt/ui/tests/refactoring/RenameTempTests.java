@@ -285,6 +285,26 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 		helper1("j", true, 7, 16, 7, 18);
 	}
 	
+	public void test40() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#10660");
+		helper1("j", true, 3, 12, 3, 17);
+	}
+	
+	public void test41() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#10660");
+		helper1("j", true, 3, 13, 3, 18);
+	}
+
+	public void test42() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#10660");
+		helper1("j", true, 3, 25, 3, 26);
+	}
+
+	public void test43() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#10660");
+		helper1("j", true, 4, 19, 4, 24);
+	}
+	
 	
 // -----
 	public void testFail0() throws Exception{
@@ -333,9 +353,10 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 		helper2("uu");
 	}
 
-	public void testFail11() throws Exception{
-		helper2("uu");
-	}
+// disabled - it's allowed now
+//	public void testFail11() throws Exception{
+//		helper2("uu");
+//	}
 	
 	public void testFail12() throws Exception{
 		printTestDisabledMessage("http://dev.eclipse.org/bugs/show_bug.cgi?id=11638");
@@ -373,18 +394,20 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	public void testFail20() throws Exception{
 		helper2("j");
 	}	
-	
-	public void testFail21() throws Exception{
-		helper2("j");
-	}
+
+// disabled - it's allowed now	
+//	public void testFail21() throws Exception{
+//		helper2("j");
+//	}
 
 	public void testFail22() throws Exception{
 		helper2("j");
 	}
 
-	public void testFail23() throws Exception{
-		helper2("j");
-	}
+// disabled - it's allowed now
+//	public void testFail23() throws Exception{
+//		helper2("j");
+//	}
 	
 	public void testFail24() throws Exception{
 		printTestDisabledMessage("compile errors are ok now");
@@ -398,4 +421,13 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 	public void testFail26() throws Exception{
 		helper2("j");
 	}
+	
+	public void testFail27() throws Exception{
+		helper2("j");
+	}
+
+	public void testFail28() throws Exception{
+		helper2("j");
+	}
+	
 }
