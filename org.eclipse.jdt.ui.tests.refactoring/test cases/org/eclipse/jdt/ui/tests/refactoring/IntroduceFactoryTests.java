@@ -11,22 +11,27 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
@@ -110,14 +115,16 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * like getSimpleTestFileName(), but also prepends the appropriate version
 	 * of the resource path (depending on the value of <code>positive</code>).
 	 * Test files are assumed to be located in the resources directory.
-	 * @param positive true iff the requested file is for a positive unit test
+	 * @param project TODO
 	 * @param input true iff the requested file is an input file
 	 * @see getSimpleTestFileName(boolean input)
+	 * @param positive true iff the requested file is for a positive unit test
 	 */
-	private String getBugTestFileName(IPackageFragment pack, String fileName, boolean input) {
+	private String getBugTestFileName(IJavaProject project, IPackageFragment pack, String fileName, boolean input) {
 		String testName= getName();
 		String testNumber= testName.substring("test".length());//$NON-NLS-1$
 		String path= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/" +
+									(project == null ? "" : project.getElementName() + "/") +
 									(pack == getPackageP() ? "" : pack.getElementName() + "/");
 
 		return path + fileName + (input ? "" : "_out") + ".java";//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
@@ -128,17 +135,18 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	 * is based on the testcase name, but whose basename is supplied by
 	 * the caller.
 	 * Test files are assumed to be located in the resources directory.
+	 * @param project can be null if only 1 project exists in the test workspace
 	 * @param pack
 	 * @param baseName
 	 * @param input
 	 * @return the ICompilationUnit created from the specified test file
 	 * @see getTestFileName()
 	 */
-	private ICompilationUnit createCUForBugTestCase(IPackageFragment pack,
-													String baseName, boolean input)
+	private ICompilationUnit createCUForBugTestCase(IJavaProject project,
+													IPackageFragment pack, String baseName, boolean input)
 		throws Exception
 	{
-		String	fileName= getBugTestFileName(pack, baseName, input);
+		String	fileName= getBugTestFileName(project, pack, baseName, input);
 		String	cuName= baseName + (input ? "" : "_out") + ".java";
 
 		return createCU(pack, cuName, getFileContents(fileName));
@@ -229,9 +237,9 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	protected void singleUnitBugHelper(String baseFileName, boolean protectConstructor)
 		throws Exception
 	{
-		ICompilationUnit	cu= createCUForBugTestCase(getPackageP(), baseFileName, true);
+		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
 
-		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(getPackageP(), baseFileName, false));
+		doSingleUnitTest(protectConstructor, cu, getBugTestFileName(null, getPackageP(), baseFileName, false));
 	}
 
 	/**
@@ -302,12 +310,13 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		String	testName= getName();
 
 		for (int i = 0; i < CUs.length; i++) {
-			int		optIdx= testName.indexOf("_");
-			String	testOptions= (optIdx >= 0) ? testName.substring(optIdx) : "";
-			String	outFileName= testPath + outputFileBaseNames[i] + testOptions + "_out.java";
-			String	newSource= CUs[i].getSource();
+			int optIdx= testName.indexOf("_");
+			String testOptions= (optIdx >= 0) ? testName.substring(optIdx) : "";
+			String outFileName= testPath + outputFileBaseNames[i] + testOptions + "_out.java";
+			String xformedSrc= CUs[i].getSource();
+			String expectedSrc= getFileContents(outFileName);
 
-			assertEqualLines(getName() + ": ", newSource, getFileContents(outFileName));
+			assertEqualLines(getName() + ": ", expectedSrc, xformedSrc);
 		}
 	}
 
@@ -357,7 +366,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			boolean explicitPkg= (pkgEnd > 0);
 			IPackageFragment pkg= explicitPkg ? getRoot().createPackageFragment(inputFileBaseNames[i].substring(0, pkgEnd-1), true, new NullProgressMonitor()) : getPackageP();
 
-			CUs[i]= createCUForBugTestCase(pkg, inputFileBaseNames[i].substring(pkgEnd), true);
+			CUs[i]= createCUForBugTestCase(null, pkg, inputFileBaseNames[i].substring(pkgEnd), true);
 		}
 
 		String	testName= getName();
@@ -365,6 +374,103 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		String	testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
 
 		doMultiUnitTest(CUs, testPath, inputFileBaseNames, factoryClassName);
+	}
+
+	void multiProjectBugHelper(String[] inputFileBaseNames, String[] dependencies) throws Exception {
+		Map/*<String,Set<String>>*/ projName2PkgNames= collectProjectPackages(inputFileBaseNames);
+		Map/*<String,IJavaProject>*/ projName2Project= new HashMap();
+		Map/*<IJavaProject,Set<IPackageFragment>>*/ proj2Pkgs= new HashMap();
+		Map/*<IJavaProject,IPackageFragmentRoot>*/ proj2PkgRoot= new HashMap();
+
+		createProjectPackageStructure(projName2PkgNames, projName2Project, proj2PkgRoot);
+
+		ICompilationUnit[] CUs = createCUs(inputFileBaseNames, projName2Project, proj2PkgRoot);
+
+		addProjectDependencies(dependencies, projName2Project);
+
+		String	testName= getName();
+		String	testNumber= testName.substring("test".length());
+		String	testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
+
+		doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
+	}
+
+	private ICompilationUnit[] createCUs(String[] inputFileBaseNames, Map projName2Project, Map proj2PkgRoot) throws Exception {
+		ICompilationUnit CUs[]= new ICompilationUnit[inputFileBaseNames.length];
+
+		for(int i= 0; i < inputFileBaseNames.length; i++) {
+			String filePath= inputFileBaseNames[i];
+
+			int projEnd= filePath.indexOf('/');
+			int pkgBegin= projEnd+1;
+			int pkgEnd= filePath.lastIndexOf('/');
+			int fileBegin= pkgEnd+1;
+
+			String projName= filePath.substring(0, projEnd);
+			String pkgName= filePath.substring(projEnd+1, pkgEnd).replace('/', '.');
+
+			IJavaProject project= (IJavaProject) projName2Project.get(projName);
+			IPackageFragmentRoot root= (IPackageFragmentRoot) proj2PkgRoot.get(project);
+			IPackageFragment pkg= root.getPackageFragment(pkgName);
+
+			CUs[i]= createCUForBugTestCase(project, pkg, filePath.substring(fileBegin), true);
+		}
+		return CUs;
+	}
+
+	private void addProjectDependencies(String[] dependencies, Map projName2Project) throws JavaModelException {
+		for(int i= 0; i < dependencies.length; i++) {
+			// dependent:provider
+			String dependency= dependencies[i];
+			int colonIdx= dependency.indexOf(':');
+			String depName= dependency.substring(0, colonIdx);
+			String provName= dependency.substring(colonIdx+1);
+
+			IJavaProject depProj= (IJavaProject) projName2Project.get(depName);
+			IJavaProject provProj= (IJavaProject) projName2Project.get(provName);
+
+			JavaProjectHelper.addRequiredProject(depProj, provProj);
+		}
+	}
+
+	private void createProjectPackageStructure(Map projName2PkgNames, Map projName2Project, Map proj2PkgRoot) throws CoreException, JavaModelException {
+		for(Iterator iter= projName2PkgNames.keySet().iterator(); iter.hasNext(); ) {
+			String projName= (String) iter.next();
+			Set/*<String>*/ projPkgNames= (Set) projName2PkgNames.get(projName);
+
+			IJavaProject project= JavaProjectHelper.createJavaProject(projName, "bin");
+			IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(project, CONTAINER);
+
+			JavaProjectHelper.addRTJar(project);
+
+			Set/*<IPackageFragment>*/ pkgs= new HashSet();
+
+			projName2Project.put(projName, project);
+			proj2PkgRoot.put(project, root);
+			for(Iterator pkgIter= projPkgNames.iterator(); pkgIter.hasNext(); ) {
+				String pkgName= (String) pkgIter.next();
+
+				pkgs.add(root.createPackageFragment(pkgName, true, null));
+			}
+		}
+	}
+
+	private Map/*<String,Set<String>>*/ collectProjectPackages(String[] inputFileBaseNames) {
+		Map/*<String,Set<String>>*/ proj2Pkgs= new HashMap();
+
+		for(int i= 0; i < inputFileBaseNames.length; i++) {
+			String filePath= inputFileBaseNames[i];
+			int projEnd= filePath.indexOf('/');
+			String projName= filePath.substring(0, projEnd);
+			String pkgName= filePath.substring(projEnd+1, filePath.lastIndexOf('/'));
+
+			Set/*<String>*/ projPkgs= (Set) proj2Pkgs.get(projName);
+
+			if (projPkgs == null)
+				proj2Pkgs.put(projName, projPkgs= new HashSet());
+			projPkgs.add(pkgName);
+		}
+		return proj2Pkgs;
 	}
 
 	private void failHelper(boolean staticFactory, int expectedStatus) throws Exception {
@@ -379,7 +485,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	}	
 
 	private void failBugHelper(String baseFileName, boolean staticFactory, int expectedStatus) throws Exception {
-		ICompilationUnit	cu= createCUForBugTestCase(getPackageP(), baseFileName, true);
+		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
 		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 				JavaPreferencesSettings.getCodeGenerationSettings());
@@ -532,5 +638,10 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	public void test58293() throws Exception {
 		singleUnitBugHelper("ImplicitSuperCtorCall", true);
+	}
+
+	public void test59283() throws Exception {
+		multiProjectBugHelper(new String[] { "proj1/pA/A", "proj2/pB/B" },
+				new String[] { "proj2:proj1" });
 	}
 }

@@ -56,7 +56,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -75,12 +74,12 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -135,7 +134,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * The method binding for the selected constructor.
 	 */
 	private IMethodBinding fCtorBinding;
-
+	
 	/**
 	 * <code>TypeDeclaration</code> for class containing the constructor to be
 	 * encapsulated.
@@ -199,9 +198,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private CompilationUnit fFactoryCU;
 
-	/**
-	 * 
-	 */
 	private int fConstructorVisibility= Modifier.PRIVATE;
 
 	public static boolean isAvailable(IMethod method) throws JavaModelException {
@@ -286,10 +282,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	
 			// getTargetNode() must return either a ClassInstanceCreation or a
 			// constructor MethodDeclaration; nothing else.
-			if (fSelectedNode instanceof ClassInstanceCreation)
-				fCtorBinding= ((ClassInstanceCreation) fSelectedNode).resolveConstructorBinding();
-			else if (fSelectedNode instanceof MethodDeclaration)
-				fCtorBinding= ((MethodDeclaration) fSelectedNode).resolveBinding();
+			if (fSelectedNode instanceof ClassInstanceCreation) {
+				ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation)fSelectedNode;
+				fCtorBinding= classInstanceCreation.resolveConstructorBinding();
+			} else if (fSelectedNode instanceof MethodDeclaration) {
+				MethodDeclaration methodDeclaration= (MethodDeclaration)fSelectedNode;
+				fCtorBinding= methodDeclaration.resolveBinding();
+			}
 	
 			if (fCtorBinding == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unableToResolveConstructorBinding")); //$NON-NLS-1$
@@ -371,18 +370,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * Returns a <code>SearchPattern</code> that finds all calls to the constructor
 	 * identified by the argument <code>methodBinding</code>.
 	 */
-	private SearchPattern createSearchPattern(IMethodBinding methodBinding) throws JavaModelException {
+	private SearchPattern createSearchPattern(IMethod ctor, IMethodBinding methodBinding) {
 		Assert.isNotNull(methodBinding,
 				RefactoringCoreMessages.getString("IntroduceFactory.noBindingForSelectedConstructor")); //$NON-NLS-1$
-
-		// Find the IMethod corresponding to the given method binding and use that
-		// as the basis for the search pattern.
-		ICompilationUnit unit= ASTCreator.getCu(fSelectedNode);
-		IJavaProject javaProject= (IJavaProject) unit.getAncestor(IJavaElement.JAVA_PROJECT);
-		IMethod method= Bindings.findMethod(methodBinding, javaProject);
-
-		if (method != null)
-			return SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES);
+		
+		if (ctor != null)
+			return SearchPattern.createPattern(ctor, IJavaSearchConstants.REFERENCES);
 		else { // perhaps a synthetic method? (but apparently not always... hmmm...)
 			// Can't find an IMethod for this method, so build a string pattern instead
 			StringBuffer	buf= new StringBuffer();
@@ -397,6 +390,15 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			buf.append(")"); //$NON-NLS-1$
 			return SearchPattern.createPattern(buf.toString(), IJavaSearchConstants.CONSTRUCTOR,
 					IJavaSearchConstants.REFERENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
+		}
+	}
+	
+	private IJavaSearchScope createSearchScope(IMethod ctor, IMethodBinding binding, IJavaProject resolvingScope) throws JavaModelException {
+		if (ctor != null) {
+			return RefactoringScopeFactory.create(ctor);
+		} else {
+			ITypeBinding type= Bindings.getTopLevelType(binding.getDeclaringClass());
+			return RefactoringScopeFactory.create(Bindings.findType(type, resolvingScope));
 		}
 	}
 
@@ -429,11 +431,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 */
 	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm) throws JavaModelException {
-		SearchPattern		pattern=  createSearchPattern(methodBinding);
-		IJavaProject		javaProj= (IJavaProject) fCUHandle.getAncestor(IJavaElement.JAVA_PROJECT);
-		IJavaSearchScope	scope=	  SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProj }, false);
-		SearchResultGroup[]	groups=	  RefactoringSearchEngine.search(pattern, scope, pm);
-
+		ICompilationUnit unit= ASTCreator.getCu(fSelectedNode);
+		IJavaProject javaProject= (IJavaProject) unit.getAncestor(IJavaElement.JAVA_PROJECT);
+		IMethod method= Bindings.findMethod(methodBinding, javaProject);
+		
+		SearchPattern pattern= createSearchPattern(method, methodBinding);
+		IJavaSearchScope scope= createSearchScope(method, methodBinding, javaProject);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
+		
 		return groups;
 	}
 
