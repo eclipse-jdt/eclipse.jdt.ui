@@ -108,8 +108,20 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
 	 * action group
 	 * @param set The new value. If true, the elements of the given types are filtered.
+	 * @deprecated use setMemberFilter(int, boolean, boolean)
 	 */	
 	public void setMemberFilter(int filterProperty, boolean set) {
+		setMemberFilter(filterProperty, set, true);
+	}
+
+	/**
+	 * Set the current filter.
+	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
+	 * action group
+	 * @param set The new value. If true, the elements of the given types are filtered.
+	 * @param refreshViewer Indicates if the viewer should be refreshed.
+	 */	
+	public void setMemberFilter(int filterProperty, boolean set, boolean refreshViewer) {
 		if (set) {
 			fFilter.addFilter(filterProperty);
 		} else {
@@ -124,7 +136,8 @@ public class MemberFilterActionGroup extends ActionGroup {
 			}
 			store.setValue(getPreferenceKey(currProperty), hasMemberFilter(currProperty));
 		}
-		fViewer.refresh();
+		if (refreshViewer)
+			fViewer.refresh();
 	}
 
 	/**
@@ -147,16 +160,25 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Restores the state of the filter actions from a memento.
+	 * @param memento
+	 * @param refreshViewer Indicates if the viewer should be refreshed.
+	 */	
+	public void restoreState(IMemento memento, boolean refreshViewer) {
+		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
+		setMemberFilter(FILTER_FIELDS, set, refreshViewer);
+		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
+		setMemberFilter(FILTER_STATIC, set, refreshViewer);
+		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
+		setMemberFilter(FILTER_NONPUBLIC, set, refreshViewer);		
+	}
+	
+	/**
+	 * Restores the state of the filter actions from a memento.
+	 * @deprecated use restoreState(IMemento, boolean)
 	 */	
 	public void restoreState(IMemento memento) {
-		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(FILTER_FIELDS, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(FILTER_STATIC, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		setMemberFilter(FILTER_NONPUBLIC, set);		
+		restoreState(memento, true);
 	}
-
 
 	/* (non-Javadoc)
 	 * @see ActionGroup#fillActionBars(IActionBars)

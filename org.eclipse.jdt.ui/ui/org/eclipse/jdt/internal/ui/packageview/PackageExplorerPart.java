@@ -634,7 +634,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		restoreSelectionState(memento);
 		// commented out because of http://bugs.eclipse.org/bugs/show_bug.cgi?id=4676
 		//restoreScrollState(memento, fViewer.getTree());
-		fActionSet.restoreState(memento);		
+		fActionSet.restoreState(memento, false);
 	}
 
 	protected void restoreScrollState(IMemento memento, Tree tree) {

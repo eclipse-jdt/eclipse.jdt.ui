@@ -175,10 +175,10 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 
 	//---- Persistent state -----------------------------------------------------------------------
 
-	/* package */ void restoreState(IMemento memento) {
-		fMemberFilterActionGroup.restoreState(memento);
-		fWorkingSetFilterActionGroup.restoreState(memento);
-		fCustomFiltersActionGroup.restoreState(memento);
+	/* package */ void restoreState(IMemento memento, boolean refreshViewer) {
+		fMemberFilterActionGroup.restoreState(memento, refreshViewer);
+		fWorkingSetFilterActionGroup.restoreState(memento, refreshViewer);
+		fCustomFiltersActionGroup.restoreState(memento, refreshViewer);
 	}
 	
 	/* package */ void saveState(IMemento memento) {
