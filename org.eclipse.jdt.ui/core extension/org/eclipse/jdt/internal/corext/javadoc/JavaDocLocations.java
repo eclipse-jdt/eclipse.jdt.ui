@@ -534,7 +534,9 @@ public class JavaDocLocations {
 		buf.append('(');
 		String[] params= meth.getParameterTypes();
 		IType declaringType= meth.getDeclaringType();
-		for (int i= 0; i < params.length; i++) {
+		boolean isVararg= Flags.isVarargs(meth.getFlags());
+		int lastParam= params.length - 1;
+		for (int i= 0; i <= lastParam; i++) {
 			if (i != 0) {
 				buf.append(", "); //$NON-NLS-1$
 			}
@@ -543,9 +545,15 @@ public class JavaDocLocations {
 			if (fullName != null) {
 				buf.append(fullName);
 				int dim= Signature.getArrayCount(curr);
+				if (i == lastParam && isVararg) {
+					dim--;
+				}
 				while (dim > 0) {
 					buf.append("[]"); //$NON-NLS-1$
 					dim--;
+				}
+				if (i == lastParam && isVararg) {
+					buf.append("..."); //$NON-NLS-1$
 				}
 			}
 		}
