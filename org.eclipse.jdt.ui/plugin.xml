@@ -4085,7 +4085,7 @@
             class="org.eclipse.jdt.internal.ui.refactoring.TextChangePreviewViewer"
             id="org.eclipse.jdt.ui.textChangePreviewViewer">
          <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.changes.TextChange"/>
+            <instanceof value="org.eclipse.ltk.core.refactoring.TextChange"/>
          </enablement>
       </changePreviewViewer>
       <changePreviewViewer
