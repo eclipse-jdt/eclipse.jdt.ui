@@ -4,7 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -21,14 +24,21 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ISearchPattern;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -36,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
@@ -63,9 +74,10 @@ public class MoveRefactoring extends ReorgRefactoring {
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1); //$NON-NLS-1$
+		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkPackageVisibileClassReferences(new SubProgressMonitor(pm, 1)));
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
@@ -74,6 +86,84 @@ public class MoveRefactoring extends ReorgRefactoring {
 		} finally{
 			pm.done();
 		}	
+	}
+
+	private RefactoringStatus checkPackageVisibileClassReferences(IProgressMonitor pm) throws JavaModelException {
+		if (! (getDestination() instanceof IPackageFragment))
+			return null;
+		
+		ICompilationUnit[] movedCus= collectCus();
+		List movedCuList= Arrays.asList(movedCus);
+		IType[] movedPackageVisibleTypes= getMovedPackageVisibleTypes(movedCus);
+		if (movedPackageVisibleTypes.length == 0)
+			return null;
+				
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		ISearchPattern pattern= createSearchPattern(movedPackageVisibleTypes);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
+		
+		RefactoringStatus status= new RefactoringStatus();
+		for (int i= 0; i < groups.length; i++) {
+			SearchResultGroup group= groups[i];
+			ICompilationUnit cu= group.getCompilationUnit();
+			if (cu == null)
+				continue;
+			if (cu.getParent().equals(getDestination()))
+				continue;
+			if (movedCuList.contains(cu))	
+				continue;
+			String key= "''{0}'' contains references to a type that will not be visible after moving.";
+			String message= MessageFormat.format(key, new String[]{cu.getElementName()});
+			status.addWarning(message);
+		}
+		pm.done();
+		return status;
+	}
+
+	private static ISearchPattern createSearchPattern(IType[] movedPackageVisibleTypes) {
+		ISearchPattern pattern= SearchEngine.createSearchPattern(movedPackageVisibleTypes[0], IJavaSearchConstants.REFERENCES);
+		for (int i= 1; i < movedPackageVisibleTypes.length; i++) { //not-idiomatic loop
+			ISearchPattern newPattern= SearchEngine.createSearchPattern(movedPackageVisibleTypes[i], IJavaSearchConstants.REFERENCES);
+			pattern= SearchEngine.createOrSearchPattern(pattern, newPattern);
+		}
+		return pattern;
+	}
+	
+	private static IType[] getMovedPackageVisibleTypes(ICompilationUnit[] movedCus) throws JavaModelException{
+		List result= new ArrayList(movedCus.length);
+		for (int i= 0; i < movedCus.length; i++) {
+			ICompilationUnit cu= movedCus[i];
+			result.addAll(getPackageVisibleTypes(cu));
+		}
+		return (IType[]) result.toArray(new IType[result.size()]);
+	}
+
+	//returns list of ITypes	
+	private static Collection getPackageVisibleTypes(ICompilationUnit cu) throws JavaModelException {
+		IType[] types= cu.getTypes();
+		List result= new ArrayList(types.length);
+		for (int i= 0; i < types.length; i++) {
+				IType type= types[i];
+				if (JdtFlags.isPackageVisible(type))
+					result.add(type);
+				result.addAll(getPackageVisibleTypes(type));
+		}
+		return result;
+	}
+
+	//returns list of ITypes
+	private static Collection getPackageVisibleTypes(IType type) throws JavaModelException {
+		IType[] types= type.getTypes();
+		List result= new ArrayList();
+		for (int i= 0; i < types.length; i++) {
+			IType innerType= types[i];
+			if (JdtFlags.isPrivate(innerType))
+				continue;
+			if (! JdtFlags.isPublic(innerType))	
+				result.add(innerType);
+			result.addAll(getPackageVisibleTypes(innerType));	
+		}
+		return result;
 	}
 	
 	private IFile[] getAllFilesToModify() throws CoreException{
