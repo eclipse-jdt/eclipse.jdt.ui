@@ -6,6 +6,9 @@ import java.util.Collection;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -14,9 +17,6 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -57,15 +57,17 @@ public class SuperReferenceFinder {
 		}
 		
 		private ISourceRange getSuperRange(String scanSource){
-			Scanner scanner= new Scanner(false, false);
+			IScanner scanner= ToolFactory.createScanner(false, false, false);
 			scanner.setSourceBuffer(scanSource.toCharArray());
 			try {
 				int token = scanner.getNextToken();
-				while (token != TerminalSymbols.TokenNameEOF) {
+				while (token != ITerminalSymbols.TokenNameEOF) {
 					switch (token) {
-						case TerminalSymbols.TokenNamesuper :
-							int start= scanner.currentPosition - scanner.getCurrentTokenSource().length;
-							int end= scanner.currentPosition;
+						case ITerminalSymbols.TokenNamesuper :
+							//int start= scanner.currentPosition - scanner.getCurrentTokenSource().length;
+							int start= scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenSource().length;
+							int end= scanner.getCurrentTokenEndPosition() + 1;
+							//scanner.currentPosition;
 							return new SourceRange(start, end - start);
 					}
 					token = scanner.getNextToken();

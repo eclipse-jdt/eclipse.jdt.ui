@@ -26,10 +26,10 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -772,14 +772,14 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private static String substitutePrivateWithProtected(String methodSource) throws JavaModelException {
-		Scanner scanner= new Scanner();
+		IScanner scanner= ToolFactory.createScanner(false, false, false);
 		scanner.setSourceBuffer(methodSource.toCharArray());
 		int offset= 0;
 		int token= 0;
 		try {
-			while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-				if (token == TerminalSymbols.TokenNameprivate) {
-					offset= scanner.startPosition;
+			while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+				if (token == ITerminalSymbols.TokenNameprivate) {
+					offset= scanner.getCurrentTokenStartPosition();
 					break;
 				}
 			}
