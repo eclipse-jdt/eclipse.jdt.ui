@@ -129,7 +129,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		Composite composite= (Composite) super.createDialogArea(parent);
 		initializeDialogUnits(parent);
 		
-		GridLayout layout= (GridLayout) composite.getLayoutData();
+		GridLayout layout= (GridLayout) composite.getLayout();
 		layout.numColumns= 2;
 		
 		fNameDialogField.doFillIntoGrid(composite, 3);
