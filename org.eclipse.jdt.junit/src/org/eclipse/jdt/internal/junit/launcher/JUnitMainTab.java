@@ -187,6 +187,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		});
 		
 		fSearchButton = new Button(comp, SWT.PUSH);
+		fSearchButton.setEnabled(fProjText.getText().length() > 0);		
 		fSearchButton.setText(JUnitMessages.getString("JUnitMainTab.label.search")); //$NON-NLS-1$
 		fSearchButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent evt) {
@@ -210,9 +211,10 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		fProjText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
 				updateLaunchConfigurationDialog();
+				boolean isSingleTestMode= fTestRadioButton.getSelection();				
+				fSearchButton.setEnabled(isSingleTestMode && fProjText.getText().length() > 0);
 			}
-		});
-		
+		});		
 		fProjButton = new Button(comp, SWT.PUSH);
 		fProjButton.setText(JUnitMessages.getString("JUnitMainTab.label.browse")); //$NON-NLS-1$
 		fProjButton.addSelectionListener(new SelectionAdapter() {
@@ -460,7 +462,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	}
 
 	private void setEnableSingleTestGroup(boolean enabled) {
-		fSearchButton.setEnabled(enabled);
+		fSearchButton.setEnabled(enabled && fProjText.getText().length() > 0);
 		fTestText.setEnabled(enabled);
 	}
 
@@ -484,7 +486,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	}
 
 	private void initializeTestAttributes(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
-		if (javaElement.getElementType() < IJavaElement.COMPILATION_UNIT) 
+		if (javaElement != null && javaElement.getElementType() < IJavaElement.COMPILATION_UNIT) 
 			initializeTestContainer(javaElement, config);
 		else
 			initializeTestType(javaElement, config);

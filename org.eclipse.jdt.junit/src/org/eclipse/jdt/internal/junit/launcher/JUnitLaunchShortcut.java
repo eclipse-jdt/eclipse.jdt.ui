@@ -236,7 +236,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 		
 	}
 
-	private ILaunchConfiguration createConfiguration(IJavaProject project, String name, String mainType, String container) {
+	protected ILaunchConfiguration createConfiguration(IJavaProject project, String name, String mainType, String container) {
 		ILaunchConfiguration config= null;
 		try {
 			ILaunchConfigurationType configType= getJUnitLaunchConfigType();

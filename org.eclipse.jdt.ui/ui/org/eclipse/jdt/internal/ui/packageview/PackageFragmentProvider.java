@@ -304,7 +304,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 	}
 
 
-	private Object findNextLevelChildrenByElementName(IJavaElement child, IPackageFragmentRoot parent) {
+	private Object findNextLevelChildrenByElementName(IJavaElement child, IJavaElement parent) {
 		String name= child.getElementName();
 		
 		if(name.indexOf(".")==-1) //$NON-NLS-1$
@@ -312,8 +312,15 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 		
 		try {
 			String realParentName= child.getElementName().substring(0,name.lastIndexOf(".")); //$NON-NLS-1$
+			IJavaElement[] children= new IJavaElement[0];			
 			
-			IJavaElement[] children= parent.getChildren();
+			if(parent instanceof IPackageFragmentRoot){
+				IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
+				children= root.getChildren();
+			} else if (parent instanceof IJavaProject) {
+				IJavaProject project = (IJavaProject) parent;
+				children= project.getPackageFragments();
+			}
 			
 			for (int i= 0; i < children.length; i++) {
 				IJavaElement element= children[i];
@@ -323,7 +330,7 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
-	
+		
 		return parent;
 	}
 
@@ -437,26 +444,38 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 
 	}
 
+
 	// XXX: needs to be revisited - might be a performance issue
 	private void refreshGrandParent(final IJavaElement element) {
-		Object gp= getGrandParent(element);
-		if (gp instanceof IJavaElement) {
-			IJavaElement el = (IJavaElement) gp;
-			if(el.exists())
-				fViewer.refresh(gp);
+		if (element instanceof IPackageFragment) {
+			Object gp= getGrandParent((IPackageFragment)element);
+			if (gp instanceof IJavaElement) {
+				IJavaElement el = (IJavaElement) gp;
+				if(el.exists())
+					fViewer.refresh(gp);
+			}
 		}
-		
-		return;
 	}
 
-	private Object getGrandParent(IJavaElement element) {
-		Object object= getParent(element);
-		if((object!=null) && (object instanceof IPackageFragment)) {
-			IPackageFragment frag= (IPackageFragment)object;
-			if(frag.exists())	
-				return getParent(object);
+	private Object getGrandParent(IPackageFragment element) {
+
+		Object parent= findNextLevelChildrenByElementName(element, element.getParent());
+		if (parent instanceof IPackageFragmentRoot) {
+			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
+			if(isRootProject(root))
+				return root.getJavaProject();
+			else return root;
 		}
-		return object;
+
+		Object grandParent= getParent(parent);
+		if(grandParent==null){
+			return parent;
+		}
+		return grandParent;
+	}
+
+	private boolean isRootProject(IPackageFragmentRoot root) {
+		return IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH.equals(root.getElementName());
 	}
 
 	protected void processAffectedChildren(IJavaElementDelta[] affectedChildren) {
