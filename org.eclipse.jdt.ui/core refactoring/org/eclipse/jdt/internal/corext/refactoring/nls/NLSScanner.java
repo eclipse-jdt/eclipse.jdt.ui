@@ -9,11 +9,10 @@ import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
 
 public class NLSScanner {
 
@@ -37,8 +36,7 @@ public class NLSScanner {
 	
 	private static NLSLine[] scan(char[] content) throws JavaModelException, InvalidInputException {
 		List lines= new ArrayList();
-		Scanner scanner= new Scanner(true, true);
-		scanner.recordLineSeparator= true;
+		IScanner scanner= ToolFactory.createScanner(true, true, false, true);
 		scanner.setSource(content);
 		int token= scanner.getNextToken();
 		int currentLineNr= -1;
@@ -48,18 +46,17 @@ public class NLSScanner {
 		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
 				case ITerminalSymbols.TokenNameStringLiteral:
-					currentLineNr= scanner.linePtr;
+					currentLineNr= scanner.getLineNumber(scanner.getCurrentTokenStartPosition());
 					if (currentLineNr != previousLineNr) {
 						currentLine= new NLSLine(currentLineNr);
 						lines.add(currentLine);
 						previousLineNr= currentLineNr;
 					}
 					String value= new String(scanner.getCurrentTokenSource());
-					currentLine.add(new NLSElement(value, scanner.startPosition, scanner.currentPosition-scanner.startPosition));
+					currentLine.add(new NLSElement(value, scanner.getCurrentTokenStartPosition(), scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition()));
 					break;
 				case ITerminalSymbols.TokenNameCOMMENT_LINE:
-					// When we get the line comment this pointer is already moved to the next line
-					if (currentLineNr != scanner.linePtr - 1)
+					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))
 						break;
 						
 					parseTags(currentLine, scanner);
