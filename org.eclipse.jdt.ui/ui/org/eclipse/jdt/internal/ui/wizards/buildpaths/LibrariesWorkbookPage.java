@@ -112,8 +112,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fLibrariesList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
 		fLibrariesList.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.label")); //$NON-NLS-1$
-		fLibrariesList.setRemoveButtonIndex(IDX_REMOVE); //$NON-NLS-1$
-	
+
+		fLibrariesList.enableButton(IDX_REMOVE, false);
 		fLibrariesList.enableButton(IDX_EDIT, false);
 		
 		fLibrariesList.setViewerSorter(new CPListElementSorter());
@@ -233,6 +233,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		case IDX_EDIT: /* edit */
 			editEntry();
 			return;
+		case IDX_REMOVE: /* remove */
+			removeEntry();
+			return;			
 		}
 		if (libentries != null) {
 			int nElementsChosen= libentries.length;					
@@ -258,6 +261,44 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			editEntry();
 		}
 	}
+
+
+	private void removeEntry() {
+		List selElements= fLibrariesList.getSelectedElements();
+		for (int i= selElements.size() - 1; i >= 0 ; i--) {
+			Object elem= selElements.get(i);
+			if (elem instanceof CPListElementAttribute) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				attrib.setValue(null);
+				selElements.remove(i);
+			}
+		}
+		if (selElements.isEmpty()) {
+			fLibrariesList.refresh();
+		} else {
+			fLibrariesList.removeElements(selElements);
+		}
+	}
+	
+	private boolean canRemove(List selElements) {
+		if (selElements.size() == 0) {
+			return false;
+		}
+		for (int i= 0; i < selElements.size(); i++) {
+			Object elem= (Object) selElements.get(i);
+			if (elem instanceof CPListElementAttribute) {
+				if (((CPListElementAttribute)elem).getValue() == null) {
+					return false;
+				}
+			} else if (elem instanceof CPListElement) {
+				CPListElement curr= (CPListElement) elem;
+				if (curr.getParentContainer() != null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}	
 
 	/**
 	 * Method editEntry.
@@ -334,11 +375,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 	}
 
-
-	
 	private void libaryPageSelectionChanged(DialogField field) {
 		List selElements= fLibrariesList.getSelectedElements();
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
+		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
 	}
 	
 	private boolean canEdit(List selElements) {
@@ -350,15 +390,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.getKey().equals(CPListElement.SOURCEATTACHMENT)) {
-				return true;
-			}
-			return ((CPListElementAttribute) elem).getParent().getParentContainer() == null;
+			return true;
 		}
 		return false;
 	}
-	
 	
 	private void libaryPageDialogFieldChanged(DialogField field) {
 		if (fCurrJProject != null) {

@@ -85,19 +85,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 					
 		String[] buttonLabels;
-		int removeIndex;
+
 		buttonLabels= new String[] { 
 			/* 0 = IDX_ADDEXIST */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.add.button"), //$NON-NLS-1$
 			/* 1 */ null,
 			/* 2 = IDX_EDIT */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.edit.button"), //$NON-NLS-1$
 			/* 3 = IDX_REMOVE */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
 		};
-		removeIndex= IDX_REMOVE;
 		
 		fFoldersList= new TreeListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
-		fFoldersList.setRemoveButtonIndex(removeIndex);
 		
 		fFoldersList.setViewerSorter(new CPListElementSorter());
 		fFoldersList.enableButton(IDX_EDIT, false);
@@ -230,7 +228,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
 			if (index == IDX_ADD) {
-			List elementsToAdd= new ArrayList(10);
+				List elementsToAdd= new ArrayList(10);
 				if (fCurrJProject.exists()) {
 					CPListElement[] srcentries= openSourceContainerDialog(null);
 					if (srcentries != null) {
@@ -268,6 +266,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				}				
 			} else if (index == IDX_EDIT) {
 				editEntry();
+			} else if (index == IDX_REMOVE) {
+				removeEntry();
 			}
 		}
 	}
@@ -329,7 +329,54 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	protected void sourcePageSelectionChanged(DialogField field) {
 		List selected= fFoldersList.getSelectedElements();
 		fFoldersList.enableButton(IDX_EDIT, canEdit(selected));
+		fFoldersList.enableButton(IDX_REMOVE, canRemove(selected));
 	}
+	
+	private void removeEntry() {
+		List selElements= fFoldersList.getSelectedElements();
+		for (int i= selElements.size() - 1; i >= 0 ; i--) {
+			Object elem= selElements.get(i);
+			if (elem instanceof CPListElementAttribute) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.getKey().equals(CPListElement.EXCLUSION)) {
+					attrib.setValue(new Path[0]);
+				} else {
+					attrib.setValue(null);
+				}
+				selElements.remove(i);
+			}
+		}
+		if (selElements.isEmpty()) {
+			fFoldersList.refresh();
+		} else {
+			fFoldersList.removeElements(selElements);
+		}
+	}
+	
+	private boolean canRemove(List selElements) {
+		if (selElements.size() == 0) {
+			return false;
+		}
+		for (int i= 0; i < selElements.size(); i++) {
+			Object elem= (Object) selElements.get(i);
+			if (elem instanceof CPListElementAttribute) {
+				CPListElementAttribute attrib= (CPListElementAttribute) elem;
+				if (attrib.getKey().equals(CPListElement.EXCLUSION)) {
+					if (((IPath[]) attrib.getValue()).length == 0) {
+						return false;
+					}
+				} else if (attrib.getValue() == null) {
+					return false;
+				}
+			} else if (elem instanceof CPListElement) {
+				CPListElement curr= (CPListElement) elem;
+				if (curr.getParentContainer() != null) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}		
 	
 	private boolean canEdit(List selElements) {
 		if (selElements.size() != 1) {

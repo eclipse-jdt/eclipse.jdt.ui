@@ -646,6 +646,15 @@ public class BuildPathsBlock {
 			classpath[i]= entry.getClasspathEntry();
 						
 			// set javadoc location
+			configureJavaDoc(entry);
+		}	
+		monitor.worked(1);
+				
+		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
+	}
+	
+	private void configureJavaDoc(CPListElement entry) {
+		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 			URL javadocLocation= (URL) entry.getAttribute(CPListElement.JAVADOC);
 			IPath path= entry.getPath();
 			if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
@@ -653,12 +662,16 @@ public class BuildPathsBlock {
 			}
 			if (path != null) {
 				JavaUI.setLibraryJavadocLocation(path, javadocLocation);
+			}			
+		} else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+			Object[] children= entry.getChildren(false);
+			for (int i= 0; i < children.length; i++) {
+				CPListElement curr= (CPListElement) children[i];
+				configureJavaDoc(curr);
 			}
-		}	
-		monitor.worked(1);
-				
-		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));		
+		}
 	}
+	
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {
 		if (resource.isDerived()) { //$NON-NLS-1$

@@ -5,7 +5,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URL;
-import java.util.HashMap;
+import java.util.ArrayList;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -39,14 +39,14 @@ public class CPListElement {
 	private CPListElement fParentContainer;
 		
 	private IClasspathEntry fCachedEntry;
-	private HashMap fAttributes;
+	private ArrayList fChildren;
 	
 	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
 		fProject= project;
 
 		fEntryKind= entryKind;
 		fPath= path;
-		fAttributes= new HashMap();
+		fChildren= new ArrayList();
 		fResource= res;
 		fIsExported= false;
 		
@@ -65,7 +65,18 @@ public class CPListElement {
 				createAttributeElement(JAVADOC, null);
 				break;
 			case IClasspathEntry.CPE_PROJECT:
+				break;
 			case IClasspathEntry.CPE_CONTAINER:
+				try {
+					IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
+					IClasspathEntry[] entries= container.getClasspathEntries();
+					for (int i= 0; i < entries.length; i++) {
+						CPListElement curr= createFromExisting(entries[i], fProject);
+						curr.setParentContainer(this);
+						fChildren.add(curr);
+					}
+				} catch (JavaModelException e) {
+				}			
 				break;
 			default:
 		}
@@ -125,7 +136,7 @@ public class CPListElement {
 	}
 	
 	public CPListElementAttribute setAttribute(String key, Object value) {
-		CPListElementAttribute attribute= (CPListElementAttribute) fAttributes.get(key);
+		CPListElementAttribute attribute= findAttributeElement(key);
 		if (attribute == null) {
 			return null;
 		}
@@ -134,43 +145,37 @@ public class CPListElement {
 		return attribute;
 	}
 	
+	private CPListElementAttribute findAttributeElement(String key) {
+		for (int i= 0; i < fChildren.size(); i++) {
+			Object curr= fChildren.get(i);
+			if (curr instanceof CPListElementAttribute) {
+				CPListElementAttribute elem= (CPListElementAttribute) curr;
+				if (key.equals(elem.getKey())) {
+					return elem;
+				}
+			}
+		}		
+		return null;		
+	}
+	
 	public Object getAttribute(String key) {
-		CPListElementAttribute attrib= (CPListElementAttribute) fAttributes.get(key);
+		CPListElementAttribute attrib= findAttributeElement(key);
 		if (attrib != null) {
 			return attrib.getValue();
 		}
 		return null;
 	}
 	
-	private CPListElementAttribute createAttributeElement(String key, Object value) {
-		CPListElementAttribute attribute= (CPListElementAttribute) fAttributes.get(key);
-		if (attribute == null) {
-			attribute= new CPListElementAttribute(this, key, value);
-			fAttributes.put(key, attribute);
-		}
-		return attribute;
+	private void createAttributeElement(String key, Object value) {
+		fChildren.add(new CPListElementAttribute(this, key, value));
 	}	
 	
 	
 	public Object[] getChildren(boolean hideOutputFolder) {
-		if (fEntryKind == IClasspathEntry.CPE_CONTAINER) {
-			try {
-				IClasspathContainer container= JavaCore.getClasspathContainer(fPath, fProject);
-				IClasspathEntry[] entries= container.getClasspathEntries();
-				CPListElement[] elements= new CPListElement[entries.length];
-				for (int i= 0; i < elements.length; i++) {
-					elements[i]= createFromExisting(entries[i], fProject);
-					elements[i].setParentContainer(this);
-				}
-				return elements;
-			} catch (JavaModelException e) {
-				return new Object[0];
-			}
-		}
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
-			return new Object[] { fAttributes.get(EXCLUSION) };
+			return new Object[] { findAttributeElement(EXCLUSION) };
 		}
-		return fAttributes.values().toArray();
+		return fChildren.toArray();
 	}
 	
 	private void setParentContainer(CPListElement element) {
