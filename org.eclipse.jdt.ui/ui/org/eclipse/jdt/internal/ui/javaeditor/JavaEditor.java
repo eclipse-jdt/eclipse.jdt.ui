@@ -172,7 +172,8 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			}
 		}
 		
-		resetHighlightRange();
+		if (moveCursor)
+			resetHighlightRange();
 	}
 		
 	public void setSelection(ISourceReference reference) {

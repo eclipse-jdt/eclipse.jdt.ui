@@ -5,17 +5,17 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
  * All Rights Reserved.
  */
 
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextViewer;
 
-import org.eclipse.ui.IEditorPart;
+import org.eclipse.jface.util.IPropertyChangeListener;import org.eclipse.jface.util.PropertyChangeEvent;import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
@@ -44,6 +44,10 @@ public class JavaTextHover implements ITextHover {
 			if (part == fEditor) {
 				fEditor.getSite().getWorkbenchWindow().getPartService().removePartListener(fPartListener);
 				fPartListener= null;
+				
+				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+				store.removePropertyChangeListener(fPropertyChangeListener);
+				fPropertyChangeListener= null;
 			}
 		}
 		
@@ -59,12 +63,30 @@ public class JavaTextHover implements ITextHover {
 		}	
 	};
 	
+	class PropertyChangeListener implements IPropertyChangeListener {
+		/**
+		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (ENABLED.equals(event.getProperty())) {
+				Object newValue= event.getNewValue();
+				if (newValue instanceof Boolean)
+					fEnabled= ((Boolean) newValue).booleanValue();
+			}
+		}
+	};
+	
+	
+	public final static String ENABLED= "JavaTextHover.isEnabled";
+	
 	
 	protected IEditorPart fEditor;
 	protected IPartListener fPartListener;
+	protected IPropertyChangeListener fPropertyChangeListener;
 	
 	protected String fCurrentPerspective;
 	protected ITextHover[] fImplementations;
+	protected boolean fEnabled;
 	
 	
 	
@@ -78,8 +100,15 @@ public class JavaTextHover implements ITextHover {
 			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
 			window.getPartService().addPartListener(fPartListener);
 			
+			fPropertyChangeListener= new PropertyChangeListener();
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			store.addPropertyChangeListener(fPropertyChangeListener);
+			fEnabled= store.getBoolean(ENABLED);
+			
 			update();
 		}
+		
+		
 	}
 	
 	
@@ -110,8 +139,13 @@ public class JavaTextHover implements ITextHover {
 	 * @see ITextHover#getHoverRegion(ITextViewer, int)
 	 */
 	public IRegion getHoverRegion(ITextViewer textViewer, int offset) {
+		
+		if (!fEnabled)
+			return null;
+		
 		if (textViewer != null)
 			return JavaWordFinder.findWord(textViewer.getDocument(), offset);
+		
 		return null;
 	}
 		
@@ -119,7 +153,7 @@ public class JavaTextHover implements ITextHover {
 	 * @see ITextHover#getHoverInfo(ITextViewer, IRegion)
 	 */
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
-		if (fImplementations != null) {
+		if (fImplementations != null && fEnabled) {
 			for (int i= 0; i < fImplementations.length; i++) {
 				String s= fImplementations[i].getHoverInfo(textViewer, hoverRegion);
 				if (s != null && s.trim().length() > 0)

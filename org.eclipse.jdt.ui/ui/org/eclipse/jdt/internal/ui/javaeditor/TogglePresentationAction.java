@@ -24,7 +24,7 @@ public class TogglePresentationAction extends TextEditorAction {
 	 */
 	public TogglePresentationAction(ResourceBundle bundle, String prefix) {
 		super(bundle, prefix, null);
-		setImageDescriptor(JavaPluginImages.DESC_TOOL_SHOW_SEGMENTS);
+		JavaPluginImages.setImageDescriptors(this, "tool16", "segment_edit.gif");
 		update();
 	}
 	

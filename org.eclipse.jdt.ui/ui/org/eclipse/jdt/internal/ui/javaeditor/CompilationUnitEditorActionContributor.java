@@ -28,6 +28,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected RetargetTextEditorAction fAddImportOnSelection;
 	protected RetargetTextEditorAction fOrganizeImports;
 	protected TogglePresentationAction fTogglePresentation;
+	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
@@ -42,6 +43,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction.");
 		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction.");
 		fTogglePresentation= new TogglePresentationAction(bundle, "Editor.TogglePresentation.");
+		fToggleTextHover= new ToggleTextHoverAction(bundle, "Editor.ToggleTextHover.");
 		fPreviousError= new GotoErrorAction(bundle, "Editor.PreviousError.", false);
 		fNextError= new GotoErrorAction(bundle, "Editor.NextError.", true);
 	}
@@ -71,6 +73,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	public void contributeToToolBar(IToolBarManager tbm) {
 		tbm.add(new Separator());
 		tbm.add(fTogglePresentation);
+		tbm.add(fToggleTextHover);
 		tbm.add(fNextError);
 		tbm.add(fPreviousError);
 	}
@@ -93,6 +96,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports"));
 		
 		fTogglePresentation.setEditor(textEditor);
+		fToggleTextHover.setEditor(textEditor);
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
 	}

@@ -25,6 +25,7 @@ public abstract class EvaluateAction extends ResourceAction implements IUpdate, 
 		super(bundle, prefix);
 		
 		fPrefix= prefix;
+		fResourceBundle= bundle;
 		fWorkbenchPart= workbenchPart;
 	}
 	
