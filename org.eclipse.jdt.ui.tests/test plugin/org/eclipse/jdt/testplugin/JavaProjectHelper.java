@@ -48,6 +48,8 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.ClasspathEntry;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 
 /**
@@ -60,6 +62,7 @@ public class JavaProjectHelper {
 	
 	public static final IPath MYLIB= new Path("testresources/mylib.jar");
 	
+	private static final int MAX_RETRY= 5;
 
 	/**
 	 * Creates a IJavaProject.
@@ -106,7 +109,21 @@ public class JavaProjectHelper {
 	public static void delete(IJavaProject jproject) throws CoreException {
 		performDummySearch();
 		jproject.setRawClasspath(new ClasspathEntry[0], jproject.getProject().getFullPath(), null);
-		jproject.getProject().delete(true, true, null);
+		for (int i= 0; i < MAX_RETRY; i++) {
+			try {
+				jproject.getProject().delete(true, true, null);
+				i= MAX_RETRY;
+			} catch (CoreException e) {
+				if (i == MAX_RETRY - 1) {
+					JavaPlugin.log(e);
+					throw e;
+				}
+				try {
+					Thread.sleep(1000); // sleep a second
+				} catch (InterruptedException e1) {
+				} 
+			}
+		}
 	}
 
 	public static void performDummySearch() throws JavaModelException {

@@ -3,7 +3,7 @@
 <plugin
    name="Java Test Plugin"
    id="org.eclipse.jdt.ui.tests"
-   version="2.1.0"
+   version="2.1.1"
    provider-name = "Eclipse.org"
    class="org.eclipse.jdt.testplugin.JavaTestPlugin">
    

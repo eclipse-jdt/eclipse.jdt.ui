@@ -998,8 +998,13 @@ public class RenameTypeTests extends RefactoringTest {
 		InputStreamReader reader= new InputStreamReader(file.getContents(true));
 		StringBuffer newContent= new StringBuffer();
 		int ch;
-		while((ch= reader.read()) != -1)
-			newContent.append((char)ch);
+		try {
+			while((ch= reader.read()) != -1)
+				newContent.append((char)ch);
+		} finally {
+			if (reader != null)
+				reader.close();
+		}
 		String definedContent= getFileContents(getTestPath() + "testQualifiedName1/out/build.xml");
 		assertEquals("invalid updating build.xml", newContent.toString(), definedContent);
 		
