@@ -22,6 +22,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -283,14 +284,20 @@ public final class RefactoringSearchEngine2 {
 	public final void searchPattern(final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(fPattern);
 		try {
-			SearchEngine engine= null;
-			if (fOwner != null)
-				engine= new SearchEngine(fOwner);
-			else
-				engine= new SearchEngine();
-			engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, fCollector, monitor);
-		} catch (CoreException exception) {
-			throw new JavaModelException(exception);
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.occurrences")); //$NON-NLS-1$
+			try {
+				SearchEngine engine= null;
+				if (fOwner != null)
+					engine= new SearchEngine(fOwner);
+				else
+					engine= new SearchEngine();
+				engine.search(fPattern, SearchUtils.getDefaultSearchParticipants(), fScope, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -304,14 +311,20 @@ public final class RefactoringSearchEngine2 {
 	public final void searchReferencedFields(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		try {
-			SearchEngine engine= null;
-			if (fOwner != null)
-				engine= new SearchEngine(fOwner);
-			else
-				engine= new SearchEngine();
-			engine.searchDeclarationsOfAccessedFields(element, fCollector, monitor);
-		} catch (CoreException exception) {
-			throw new JavaModelException(exception);
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.fields")); //$NON-NLS-1$
+			try {
+				SearchEngine engine= null;
+				if (fOwner != null)
+					engine= new SearchEngine(fOwner);
+				else
+					engine= new SearchEngine();
+				engine.searchDeclarationsOfAccessedFields(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -325,14 +338,20 @@ public final class RefactoringSearchEngine2 {
 	public final void searchReferencedMethods(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		try {
-			SearchEngine engine= null;
-			if (fOwner != null)
-				engine= new SearchEngine(fOwner);
-			else
-				engine= new SearchEngine();
-			engine.searchDeclarationsOfSentMessages(element, fCollector, monitor);
-		} catch (CoreException exception) {
-			throw new JavaModelException(exception);
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.methods")); //$NON-NLS-1$
+			try {
+				SearchEngine engine= null;
+				if (fOwner != null)
+					engine= new SearchEngine(fOwner);
+				else
+					engine= new SearchEngine();
+				engine.searchDeclarationsOfSentMessages(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+		} finally {
+			monitor.done();
 		}
 	}
 
@@ -346,14 +365,20 @@ public final class RefactoringSearchEngine2 {
 	public final void searchReferencedTypes(final IJavaElement element, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isNotNull(element);
 		try {
-			SearchEngine engine= null;
-			if (fOwner != null)
-				engine= new SearchEngine(fOwner);
-			else
-				engine= new SearchEngine();
-			engine.searchDeclarationsOfReferencedTypes(element, fCollector, monitor);
-		} catch (CoreException exception) {
-			throw new JavaModelException(exception);
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(RefactoringCoreMessages.getString("RefactoringSearchEngine.searching.referenced.types")); //$NON-NLS-1$
+			try {
+				SearchEngine engine= null;
+				if (fOwner != null)
+					engine= new SearchEngine(fOwner);
+				else
+					engine= new SearchEngine();
+				engine.searchDeclarationsOfReferencedTypes(element, fCollector, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+		} finally {
+			monitor.done();
 		}
 	}
 
