@@ -56,42 +56,33 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  * this early stage to solicit feedback from pioneering adopters on the understanding that any 
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
-public class MoveCompilationUnitRefactoring extends Refactoring{
+public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	/*
 	* NOTE: This class will be split.
 	*/
 	 
 	private IPackageFragment fNewPackage;
-	private ICompilationUnit fCompilationUnit;
 	
 	private List fOccurrences;
-	private ITextBufferChangeCreator fTextBufferChangeCreator;
+	
 	private boolean fNeedsImportToCurrentPackage;
 	 
 	public MoveCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, IPackageFragment newPackage, ICompilationUnit compilationUnit){
-		super();
+		super(changeCreator, compilationUnit);
 		Assert.isNotNull(newPackage, "newPackage");
-		Assert.isNotNull(compilationUnit, "compilation unit");
-		Assert.isNotNull(changeCreator, "change creator");
-		fNewPackage= newPackage;
-		fCompilationUnit= compilationUnit;
-		fTextBufferChangeCreator= changeCreator;		
+		fNewPackage= newPackage;		
 	}
 	
 	public MoveCompilationUnitRefactoring(ITextBufferChangeCreator changeCreator, ICompilationUnit compilationUnit){
-		super();
-		Assert.isNotNull(compilationUnit, "compilation unit");
-		Assert.isNotNull(changeCreator, "change creator");
-		fCompilationUnit= compilationUnit;
-		fTextBufferChangeCreator= changeCreator;
+		super(changeCreator, compilationUnit);
 	}
 		
 	public String getName() {
-		return "Move \"" + fCompilationUnit.getElementName() + "\" to: " + fNewPackage.getElementName();
+		return "Move \"" + getCu().getElementName() + "\" to: " + fNewPackage.getElementName();
 	}
 	
 	public ICompilationUnit getCompilationUnit(){
-		return fCompilationUnit;
+		return getCu();
 	}
 	
 	public void setNewPackage(IPackageFragment pack){
@@ -114,23 +105,23 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		result.merge(checkAvailability(fNewPackage));
 		pm.worked(1);
 		
-		if (fNewPackage.getCompilationUnit(fCompilationUnit.getElementName()).exists())
-			result.addFatalError("Compilation unit \"" + fCompilationUnit.getElementName() + "\" already exists in " + fNewPackage.getElementName());
+		if (fNewPackage.getCompilationUnit(getCu().getElementName()).exists())
+			result.addFatalError("Compilation unit \"" + getCu().getElementName() + "\" already exists in " + fNewPackage.getElementName());
 		pm.worked(1);
 		
 		result.merge(checkNewPackage());
 		pm.worked(1);
 		
-		result.merge(Checks.checkForNativeMethods(fCompilationUnit));
+		result.merge(Checks.checkForNativeMethods(getCu()));
 		pm.worked(1);
-		result.merge(Checks.checkForMainMethods(fCompilationUnit));
+		result.merge(Checks.checkForMainMethods(getCu()));
 		pm.worked(1);
 		if (result.hasFatalError())
 			return result;
 		
-		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL), fCompilationUnit);
+		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL), getCu());
 		if (fNeedsImportToCurrentPackage)
-			result.merge(checkTopLevelTypeNameConflict(fNewPackage, fCompilationUnit));
+			result.merge(checkTopLevelTypeNameConflict(fNewPackage, getCu()));
 							
 		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL))));
 		pm.worked(5);
@@ -240,9 +231,9 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	
 	private RefactoringStatus checkReferencesInOurCompilationUnit(String flagLabel, MemberValidator validator, IProgressMonitor pm) throws JavaModelException{
 		List members= new ArrayList();
-		IResource ourResource= getResource(fCompilationUnit);
+		IResource ourResource= getResource(getCu());
 		
-		ICompilationUnit[] cus= getPackage(fCompilationUnit).getCompilationUnits();
+		ICompilationUnit[] cus= getPackage(getCu()).getCompilationUnits();
 		//must be at least one - ours
 		for (int i= 0; i < cus.length; i++){
 			if (! ourResource.equals(getResource(cus[i])))
@@ -253,7 +244,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 			return null;
 		ISearchPattern pattern= createSearchPattern(members);
 		RefactoringStatus result= new RefactoringStatus();
-		List grouped= RefactoringSearchEngine.search(pm, createCompilationUnitScope(fCompilationUnit), pattern);
+		List grouped= RefactoringSearchEngine.search(pm, createCompilationUnitScope(getCu()), pattern);
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
@@ -280,13 +271,13 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	}
 	
 	private RefactoringStatus checkReferencesInOtherCompilationUnits(String flagLabel, MemberValidator validator, IProgressMonitor pm) throws JavaModelException{
-		List members= getMembers(validator, fCompilationUnit);
+		List members= getMembers(validator, getCu());
 		if (members == null)
 			return null;
 		ISearchPattern pattern= createSearchPattern(members);
 		RefactoringStatus result= new RefactoringStatus();
-		List grouped= RefactoringSearchEngine.search(pm, createPackageScope(getPackage(fCompilationUnit)), pattern);
-		IResource ourResource= getResource(fCompilationUnit);
+		List grouped= RefactoringSearchEngine.search(pm, createPackageScope(getPackage(getCu())), pattern);
+		IResource ourResource= getResource(getCu());
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){
 			List searchResults= (List)iter.next();
 			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
@@ -294,7 +285,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 				/*
 				 * can't get more info: don't know which one it really was
 				 */
-				result.addError("A "+ flagLabel + " java element declared in \"" + fCompilationUnit.getElementName() +"\" is referenced in \"" + resource.getProjectRelativePath() + "\" (refactoring may result in compile errors)");
+				result.addError("A "+ flagLabel + " java element declared in \"" + getCu().getElementName() +"\" is referenced in \"" + resource.getProjectRelativePath() + "\" (refactoring may result in compile errors)");
 		}
 		return result;
 		
@@ -383,7 +374,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		if (cus == null || cus.length == 0) 
 			return null;
 			
-		IType[] types= fCompilationUnit.getAllTypes();
+		IType[] types= getCu().getAllTypes();
 		if (types == null || types.length == 0)
 			return null;
 		
@@ -396,10 +387,10 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(fCompilationUnit));
+		result.merge(checkAvailability(getCu()));
 		if (result.hasFatalError())
 			return result;
-		if (getPackage(fCompilationUnit).isDefaultPackage())
+		if (getPackage(getCu()).isDefaultPackage())
 			result.addFatalError("Moving out of the the default package is not supported");	
 		pm.done();
 		return result;
@@ -408,7 +399,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	public RefactoringStatus checkPackage() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fNewPackage));
-		if (((IPackageFragment)fCompilationUnit.getParent()).equals(fNewPackage))
+		if (((IPackageFragment)getCu().getParent()).equals(fNewPackage))
 			result.addFatalError("Please choose another package");
 		if (fNewPackage.isDefaultPackage())
 			result.addFatalError("Moving to the default package is not supported");
@@ -422,14 +413,14 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		addLocalImportUpdate(builder);
 		pm.worked(1);
 		modifyTypeReferences(pm, builder);
-		builder.addChange(new MoveCompilationUnitChange(fCompilationUnit, fNewPackage));
+		builder.addChange(new MoveCompilationUnitChange(getCu(), fNewPackage));
 		pm.done();
 		fOccurrences= null;
 		return builder;
 	}
 	
 	private IType getPublicType() throws JavaModelException{
-		IType[] types= fCompilationUnit.getTypes();
+		IType[] types= getCu().getTypes();
 		if (types == null)
 			return null;
 		for (int i= 0; i < types.length; i++){
@@ -467,7 +458,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		for (Iterator iter= getOccurrences(null).iterator(); iter.hasNext();){
 			List l= (List)iter.next();
 			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)l.get(0)).getResource());
-			ITextBufferChange change= fTextBufferChangeCreator.create("update type reference", cu);
+			ITextBufferChange change= getTextBufferChangeCreator().create("update type reference", cu);
 			boolean importNeeded= false;
 			for (Iterator subIter= l.iterator(); subIter.hasNext();){
 				SearchResult searchResult= (SearchResult)subIter.next();
@@ -476,7 +467,7 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 				if (isQualified)
 					change.addSimpleTextChange(createTextChange(searchResult));
 			}
-			if (importNeeded && (!cu.equals(fCompilationUnit)))
+			if (importNeeded && (!cu.equals(getCu())))
 				addImport(change, fNewPackage, cu);
 			if (!change.isEmpty())	
 				builder.addChange(change);
@@ -494,8 +485,8 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 		SimpleReplaceTextChange change= new SimpleReplaceTextChange("Type Reference Update", searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewPackage.getElementName()) {
 			protected SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String oldText= buffer.getContent(getOffset(), getLength());
-				String packageName= getPackage(fCompilationUnit).getElementName();
-				if (getPackage(fCompilationUnit).isDefaultPackage()){
+				String packageName= getPackage(getCu()).getElementName();
+				if (getPackage(getCu()).isDefaultPackage()){
 					setLength(0);
 				} else if (! oldText.startsWith(packageName)){
 					//no action - simple reference
@@ -604,11 +595,11 @@ public class MoveCompilationUnitRefactoring extends Refactoring{
 	}
 	
 	private void addLocalImportUpdate(CompositeChange builder) throws JavaModelException {
-		ITextBufferChange change= fTextBufferChangeCreator.create("Update Import", fCompilationUnit);
+		ITextBufferChange change= getTextBufferChangeCreator().create("Update Import", getCu());
 		/*
 		 * could remove useless import declarations
 		 */
-		if (fNeedsImportToCurrentPackage && addImport(change, getPackage(fCompilationUnit), fCompilationUnit))
+		if (fNeedsImportToCurrentPackage && addImport(change, getPackage(getCu()), getCu()))
 			builder.addChange(change);	
 	}
 }
