@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -95,10 +98,11 @@ class OverwriteHelper {
 	
 	private void confirmOverwritting(IReorgQueries reorgQueries) {
 		IConfirmQuery overwriteQuery= reorgQueries.createYesYesToAllNoNoToAllQuery(RefactoringCoreMessages.getString("OverwriteHelper.0"), true, IReorgQueries.CONFIRM_OVERWRITTING); //$NON-NLS-1$
+		IConfirmQuery skipQuery= reorgQueries.createSkipQuery(RefactoringCoreMessages.getString("OverwriteHelper.2"), IReorgQueries.CONFIRM_SKIPPING); //$NON-NLS-1$
 		confirmFileOverwritting(overwriteQuery);
-		confirmFolderOverwritting(overwriteQuery);
+		confirmFolderOverwritting(skipQuery);
 		confirmCuOverwritting(overwriteQuery);	
-		confirmPackageFragmentRootOverwritting(overwriteQuery);	
+		confirmPackageFragmentRootOverwritting(skipQuery);	
 		confirmPackageOverwritting(overwriteQuery);	
 	}
 
@@ -106,7 +110,7 @@ class OverwriteHelper {
 		List toNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fRoots.length; i++) {
 			IPackageFragmentRoot root= fRoots[i];
-			if (canOverwrite(root) && ! overwrite(root, overwriteQuery))
+			if (canOverwrite(root) && ! skip(root.getElementName(), overwriteQuery))
 				toNotOverwrite.add(root);
 		}
 		IPackageFragmentRoot[] roots= (IPackageFragmentRoot[]) toNotOverwrite.toArray(new IPackageFragmentRoot[toNotOverwrite.size()]);
@@ -128,7 +132,7 @@ class OverwriteHelper {
 		List foldersToNotOverwrite= new ArrayList(1);
 		for (int i= 0; i < fFolders.length; i++) {
 			IFolder folder= fFolders[i];
-			if (canOverwrite(folder) && ! overwrite(folder, overwriteQuery))
+			if (canOverwrite(folder) && ! skip(folder.getName(), overwriteQuery))
 				foldersToNotOverwrite.add(folder);				
 		}
 		IFolder[] folders= (IFolder[]) foldersToNotOverwrite.toArray(new IFolder[foldersToNotOverwrite.size()]);
@@ -169,19 +173,33 @@ class OverwriteHelper {
 		IResource destinationResource= ResourceUtil.getResource(fDestination);
 		if (destinationResource.equals(resource.getParent()))
 			return false;
-		if (destinationResource instanceof IFolder){
-			IFolder folder= (IFolder)destinationResource;
-			IResource member=  folder.findMember(resource.getName());
-			if (member != null && member.exists())
-				return true;
+		if (destinationResource instanceof IContainer) {
+			IContainer container= (IContainer)destinationResource;
+			IResource member=  container.findMember(resource.getName());
+			if (member == null || !member.exists())
+				return false;
+			if (member instanceof IContainer) {
+				try {
+					if (((IContainer)member).members().length == 0)
+						return false;
+				} catch (CoreException e) {
+					return true;
+				}
+			}
+			return true;
 		}
 		return false;
 	}
 	
-	private  boolean canOverwrite(IPackageFragmentRoot root) {
+	private boolean canOverwrite(IPackageFragmentRoot root) {
 		Assert.isTrue(fDestination instanceof IJavaProject);
 		IJavaProject destination= (IJavaProject)fDestination;
-		return ! destination.equals(root.getParent()) && destination.getProject().getFolder(root.getElementName()).exists();
+		IFolder conflict= destination.getProject().getFolder(root.getElementName());
+		try {
+			return !destination.equals(root.getParent()) && conflict.exists() &&  conflict.members().length > 0;
+		} catch (CoreException e) {
+			return true;
+		}
 	}
 
 	private boolean canOverwrite(ICompilationUnit cu) {
@@ -205,4 +223,8 @@ class OverwriteHelper {
 		String question= RefactoringCoreMessages.getFormattedString("OverwriteHelper.1", name); //$NON-NLS-1$
 		return overwriteQuery.confirm(question);
 	}
+	private static boolean skip(String name, IConfirmQuery overwriteQuery){
+		String question= RefactoringCoreMessages.getFormattedString("OverwriteHelper.3", name); //$NON-NLS-1$
+		return overwriteQuery.confirm(question);
+	}	
 }

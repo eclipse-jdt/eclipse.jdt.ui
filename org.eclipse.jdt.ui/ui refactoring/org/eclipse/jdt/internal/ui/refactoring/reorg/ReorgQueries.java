@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
-public class ReorgQueries implements IReorgQueries{
+public class ReorgQueries implements IReorgQueries {
 	
 	private final Wizard fWizard;
 	private final Shell fShell;	
@@ -67,6 +67,10 @@ public class ReorgQueries implements IReorgQueries{
 	 */
 	public IConfirmQuery createYesNoQuery(String dialogTitle, boolean allowCancel, int queryID) {
 		return new YesNoQuery(getShell(), allowCancel, dialogTitle);
+	}
+	
+	public IConfirmQuery createSkipQuery(String dialogTitle, int queryID) {
+		return new SkipQuery(getShell(), dialogTitle);
 	}
 
 	private static class YesYesToAllNoNoToAllQuery implements IConfirmQuery{
@@ -315,6 +319,84 @@ public class ReorgQueries implements IReorgQueries{
 			}
 		}
 	}
+	
+	private static class SkipQuery implements IConfirmQuery{
+
+		private final Shell fShell;
+		private final String fDialogTitle;
+		private boolean fSkipAll;
+
+		SkipQuery(Shell parent, String dialogTitle){
+			fShell= parent;
+			fDialogTitle= dialogTitle;
+			fSkipAll= false;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IConfirmQuery#confirm(java.lang.String)
+		 */
+		public boolean confirm(String question) throws OperationCanceledException {
+			if (fSkipAll)
+				return false;
+			final int[] result= new int[1];
+			fShell.getDisplay().syncExec(createQueryRunnable(question, result));
+			return getResult(result);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.IReorgQueries.IConfirmQuery#confirm(java.lang.String, java.lang.Object[])
+		 */
+		public boolean confirm(String question, Object[] elements) throws OperationCanceledException {
+			throw new UnsupportedOperationException("Not supported for skip queries"); //$NON-NLS-1$
+		}
+
+		private Runnable createQueryRunnable(final String question, final int[] result){
+			return new Runnable() {
+				public void run() {
+					MessageDialog dialog= new MessageDialog(
+						fShell, 
+						fDialogTitle, 
+						null,
+						question,
+						MessageDialog.QUESTION,
+						getButtonLabels(),
+						0);
+					dialog.open();
+					
+					switch (dialog.getReturnCode()) {
+						case -1 : //MessageDialog closed without choice => cancel | no
+							//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
+							result[0]= IDialogConstants.CANCEL_ID;
+							break;
+						default:
+							result[0]= dialog.getReturnCode();
+					}
+				}
+
+				private String[] getButtonLabels() {
+					return new String[] {IDialogConstants.SKIP_LABEL, ReorgMessages.getString("ReorgQueries.skip_all"), IDialogConstants.CANCEL_LABEL}; //$NON-NLS-1$
+				}
+			};
+		}
+
+		private boolean getResult(int[] result) throws OperationCanceledException {
+			switch(result[0]){
+				// skip button
+				case 0:
+					return false;
+				// skip all button
+				case 1:
+					fSkipAll= true;
+					return false;
+				// Cancel button
+				case 2:
+					throw new OperationCanceledException();
+				default:
+					return false;
+			}
+		}
+	}
+	
 	private static final class YesNoListDialog extends ListDialog {
 		private final boolean fYesToAllNoToAll;
 		private YesNoListDialog(Shell parent, boolean includeYesToAllNoToAll) {

@@ -1446,7 +1446,6 @@ class ReorgPolicyFactory {
 		private QualifiedNameSearchResult fQualifiedNameSearchResult;
 		private String fFilePatterns;
 		private TextChangeManager fChangeManager;
-		private final CodeGenerationSettings fSettings;
 
 		MoveFilesFoldersAndCusPolicy(IFile[] files, IFolder[] folders, ICompilationUnit[] cus, CodeGenerationSettings settings){
 			super(files, folders, cus);
@@ -1454,7 +1453,6 @@ class ReorgPolicyFactory {
 			fUpdateReferences= true;
 			fUpdateQualifiedNames= false;
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
-			fSettings= settings;
 		}
 		
 		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {

@@ -18,6 +18,7 @@ public interface IReorgQueries {
 	public static final int CONFIRM_DELETE_FOLDERS_CONTAINING_SOURCE_FOLDERS= 	4;
 	public static final int CONFIRM_READ_ONLY_ELEMENTS= 						5;
 	public static final int CONFIRM_OVERWRITTING=								6;
+	public static final int CONFIRM_SKIPPING=									7;
 	
 	/*
 	 * The ID is used to uniquely identify a query. It's also useful for testing.
@@ -28,4 +29,9 @@ public interface IReorgQueries {
 	 * The ID is used to uniquely identify a query. It's also useful for testing.
 	 */
 	IConfirmQuery createYesNoQuery(String queryTitle, boolean allowCancel, int queryID);
+	
+	/*
+	 * The ID is used to uniquely identify a query. It's also useful for testing.
+	 */
+	IConfirmQuery createSkipQuery(String queryTitle, int queryID);
 }
