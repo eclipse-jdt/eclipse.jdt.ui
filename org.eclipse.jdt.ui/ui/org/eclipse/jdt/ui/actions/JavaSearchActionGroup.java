@@ -155,23 +155,60 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fEditor= editor;
 		
 		fFindReferencesAction= new FindReferencesAction(editor);
+		fFindReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKSPACE);
+		editor.setAction("SearchReferencesInWorkspace", fFindReferencesAction); //$NON-NLS-1$
+
 		fFindReferencesInHierarchyAction= new FindReferencesInHierarchyAction(editor);
+		fFindReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_HIERARCHY);
+		editor.setAction("SearchReferencesInHierarchy", fFindReferencesInHierarchyAction); //$NON-NLS-1$
+		
 		fFindReferencesInWorkingSetAction= new FindReferencesInWorkingSetAction(editor);
+		fFindReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_REFERENCES_IN_WORKING_SET);
+		editor.setAction("SearchReferencesInWorkingSet", fFindReferencesInWorkingSetAction); //$NON-NLS-1$
 		
 		fFindReadReferencesAction= new FindReadReferencesAction(editor);
+		fFindReadReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_WORKSPACE);
+		editor.setAction("SearchReadAccessInWorkspace", fFindReadReferencesAction); //$NON-NLS-1$		
+		
 		fFindReadReferencesInHierarchyAction= new FindReadReferencesInHierarchyAction(editor);
+		fFindReadReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_HIERARCHY);
+		editor.setAction("SearchReadAccessInHierarchy", fFindReadReferencesInHierarchyAction); //$NON-NLS-1$		
+
 		fFindReadReferencesInWorkingSetAction= new FindReadReferencesInWorkingSetAction(editor);
+		fFindReadReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_READ_ACCESS_IN_WORKING_SET);
+		editor.setAction("SearchReadAccessInWorkingSet", fFindReadReferencesInWorkingSetAction); //$NON-NLS-1$		
 
 		fFindWriteReferencesAction= new FindWriteReferencesAction(editor);
+		fFindWriteReferencesAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKSPACE);
+		editor.setAction("SearchWriteAccessInWorkspace", fFindWriteReferencesAction); //$NON-NLS-1$		
+
 		fFindWriteReferencesInHierarchyAction= new FindWriteReferencesInHierarchyAction(editor);
+		fFindWriteReferencesInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_HIERARCHY);
+		editor.setAction("SearchWriteAccessInHierarchy", fFindWriteReferencesInHierarchyAction); //$NON-NLS-1$		
+
 		fFindWriteReferencesInWorkingSetAction= new FindWriteReferencesInWorkingSetAction(editor);
+		fFindWriteReferencesInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_WRITE_ACCESS_IN_WORKING_SET);
+		editor.setAction("SearchWriteAccessInWorkingSet", fFindWriteReferencesInWorkingSetAction); //$NON-NLS-1$		
 
 		fFindDeclarationsAction= new FindDeclarationsAction(editor);
-		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(editor);
+		fFindDeclarationsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKSPACE);
+		editor.setAction("SearchDeclarationsInWorkspace", fFindDeclarationsAction); //$NON-NLS-1$		
+
 		fFindDeclarationsInHierarchyAction= new FindDeclarationsInHierarchyAction(editor);
+		fFindDeclarationsInHierarchyAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_HIERARCHY);
+		editor.setAction("SearchDeclarationsInHierarchy", fFindDeclarationsInHierarchyAction); //$NON-NLS-1$		
+
+		fFindDeclarationsInWorkingSetAction= new FindDeclarationsInWorkingSetAction(editor);
+		fFindDeclarationsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_DECLARATIONS_IN_WORKING_SET);
+		editor.setAction("SearchDeclarationsInWorkingSet", fFindDeclarationsInWorkingSetAction); //$NON-NLS-1$		
 
 		fFindImplementorsAction= new FindImplementorsAction(editor);
+		fFindImplementorsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKSPACE);
+		editor.setAction("SearchImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$		
+
 		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(editor);
+		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
+		editor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$		
 
 		fOldGroup= new JavaSearchGroup(editor);
 		initialize(editor.getEditorSite(), true);
