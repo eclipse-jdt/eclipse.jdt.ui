@@ -1383,10 +1383,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				lineDelimiter= StubUtility.getLineDelimiterUsed(enclosingType);
 				StringBuffer content= new StringBuffer();
-				String comment= getTypeComment(parentCU);
-				if (comment != null) {
-					content.append(comment);
-					content.append(lineDelimiter);
+				
+				if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
+					String comment= getTypeComment(parentCU, lineDelimiter);
+					if (comment != null) {
+						content.append(comment);
+						content.append(lineDelimiter);
+					}
 				}
 				content.append(constructTypeStub(new ImportsManager(imports), lineDelimiter));
 				IJavaElement[] elems= enclosingType.getChildren();
@@ -1449,12 +1452,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 2.1
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
-		StringBuffer typeQualifiedName= new StringBuffer();
-		if (isEnclosingTypeSelected()) {
-			typeQualifiedName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
-		}
-		typeQualifiedName.append(getTypeName());
-		String typeComment= CodeGeneration.getTypeComment(cu, typeQualifiedName.toString(), lineDelimiter);
+		String typeComment= getTypeComment(cu, lineDelimiter);
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String content= CodeGeneration.getCompilationUnitContent(cu, typeComment, typeContent, lineDelimiter);
 		if (content != null) {
@@ -1604,30 +1602,37 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Hook method that gets called from <code>createType</code> to retrieve 
 	 * a type comment. This default implementation returns the content of the 
-	 * 'typecomment' template.
+	 * 'type comment' template.
 	 * 
 	 * @return the type comment or <code>null</code> if a type comment 
 	 * is not desired
 	 */		
-	protected String getTypeComment(ICompilationUnit parentCU) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
-			try {
-				StringBuffer typeName= new StringBuffer();
-				if (isEnclosingTypeSelected()) {
-					typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
-				}
-				typeName.append(getTypeName());
-				String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), String.valueOf('\n'));
-				if (comment != null && isValidComment(comment)) {
-					return comment;
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
+	protected String getTypeComment(ICompilationUnit parentCU, String lineDelimiter) {
+		try {
+			StringBuffer typeName= new StringBuffer();
+			if (isEnclosingTypeSelected()) {
+				typeName.append(JavaModelUtil.getTypeQualifiedName(getEnclosingType())).append('.');
 			}
+			typeName.append(getTypeName());
+			String comment= CodeGeneration.getTypeComment(parentCU, typeName.toString(), lineDelimiter);
+			if (comment != null && isValidComment(comment)) {
+				return comment;
+			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 		return null;
 	}
-
+	
+	/**
+	 * @deprecated Use getTypeComment(ICompilationUnit, String)
+	 */
+	protected String getTypeComment(ICompilationUnit parentCU) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
+			return getTypeComment(parentCU, String.valueOf('\n'));
+		}
+		return null;
+	}
 
 	/**
 	 * @deprecated Use getTemplate(String,ICompilationUnit,int)
