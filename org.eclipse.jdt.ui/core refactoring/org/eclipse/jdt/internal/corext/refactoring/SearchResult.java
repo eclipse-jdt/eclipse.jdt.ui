@@ -62,12 +62,11 @@ public class SearchResult {
 	 * for debugging only
 	 */
 	public String toString(){
-		return "\n<Search Result"  //$NON-NLS-1$
-			 + "\n\tstart:" + fStart //$NON-NLS-1$
-			 + "\n\tend:" + fEnd //$NON-NLS-1$
-			 + "\n\tresource:" + fResource.getFullPath() //$NON-NLS-1$
-			 + "\n\tjavaElement:" + fEnclosingElement + "(instanceof " + fEnclosingElement.getClass() + ")" //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
-			 + getElementSourceRange()
+		return "<Search Result"  //$NON-NLS-1$
+			 + "\n\tstart: " + fStart + "; end: " + fEnd //$NON-NLS-1$ //$NON-NLS-2$
+			 + "\n\tresource: " + fResource.getFullPath() //$NON-NLS-1$
+			 + "\n\tjavaElement: " + "(instanceof " + fEnclosingElement.getClass() + ")" //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
+			 + "\n" + fEnclosingElement + getElementSourceRange() //$NON-NLS-1$
 			 + "\n\tAccuracy:" + fAccuracy //$NON-NLS-1$
 			 + "/>"; //$NON-NLS-1$
 	}
