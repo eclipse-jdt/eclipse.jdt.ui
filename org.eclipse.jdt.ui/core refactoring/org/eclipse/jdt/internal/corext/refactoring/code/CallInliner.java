@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -64,6 +65,7 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -106,8 +108,10 @@ public class CallInliner {
 	
 	private ASTNode fInvocation;
 	private ASTRewrite fRewrite;
-	private Block fBlock;
+	
 	private int fInsertionIndex;
+	private ListRewrite fListRewrite;
+	
 	private boolean fNeedsStatement;
 	private ASTNode fTargetNode;
 	private FlowContext fFlowContext;
@@ -547,10 +551,9 @@ public class CallInliner {
 	private void addNewLocals() {
 		if (fLocals.isEmpty())
 			return;
-		ListRewrite statements= fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY);
 		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
-			statements.insertAt(element, fInsertionIndex++, null);
+			fListRewrite.insertAt(element, fInsertionIndex++, null);
 		}
 	}
 
@@ -566,7 +569,7 @@ public class CallInliner {
 			ASTNode node= null;
 			for (int i= 0; i < blocks.length - 1; i++) {
 				node= fRewrite.createStringPlaceholder(blocks[i], ASTNode.RETURN_STATEMENT);
-				fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(node, fInsertionIndex++, null);
+				fListRewrite.insertAt(node, fInsertionIndex++, null);
 			}
 			String block= blocks[blocks.length - 1];
 			// We can inline a call where the declaration is a function and the call itself
@@ -612,7 +615,7 @@ public class CallInliner {
 			// Now replace the target node with the source node
 			if (node != null) {
 				if (fTargetNode == null) {
-					fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertAt(node, fInsertionIndex++, null);
+					fListRewrite.insertAt(node, fInsertionIndex++, null);
 				} else {
 					fRewrite.replace(fTargetNode, node, null);
 				}
@@ -696,25 +699,31 @@ public class CallInliner {
 	}
 	
 	private void initializeInsertionPoint(int nos) {
-		fBlock= null;
 		fInsertionIndex= -1;
 		fNeedsStatement= false;
 		ASTNode parentStatement= ASTNodes.getParent(fInvocation, Statement.class);
 		ASTNode container= parentStatement.getParent();
 		int type= container.getNodeType();
-		if (type == ASTNode.BLOCK) {
-			fBlock= (Block) container;
-			fInsertionIndex= fBlock.statements().indexOf(parentStatement);
+		if (type == ASTNode.BLOCK) { 
+			Block block= (Block)container;
+			fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
+			fInsertionIndex= block.statements().indexOf(parentStatement);
+		} else if (type == ASTNode.SWITCH_STATEMENT) {
+			SwitchStatement switchStatement= (SwitchStatement)container;
+			fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
+			fInsertionIndex= switchStatement.statements().indexOf(parentStatement);
 		} else if (isControlStatement(container)) {
 			fNeedsStatement= true;
 			if (nos > 1) {
 				Block block= fInvocation.getAST().newBlock();
-				fBlock= block;
 				fInsertionIndex= 0;
 				Statement currentStatement= null;
 				switch(type) {
 					case ASTNode.FOR_STATEMENT:
 						currentStatement= ((ForStatement)container).getBody();
+						break;
+					case ASTNode.ENHANCED_FOR_STATEMENT:
+						currentStatement= ((EnhancedForStatement)container).getBody();
 						break;
 					case ASTNode.WHILE_STATEMENT:
 						currentStatement= ((WhileStatement)container).getBody();
@@ -733,15 +742,16 @@ public class CallInliner {
 						break;
 				}
 				Assert.isNotNull(currentStatement);
+				fRewrite.replace(currentStatement, block, null);
+				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 				// The method to be inlined is not the body of the control statement.
 				if (currentStatement != fTargetNode) {
-					fRewrite.getListRewrite(fBlock, Block.STATEMENTS_PROPERTY).insertLast(fRewrite.createCopyTarget(currentStatement), null);
+					fListRewrite.insertLast(fRewrite.createCopyTarget(currentStatement), null);
 				} else {
 					// We can't replace a copy with something else. So we
 					// have to insert all statements to be inlined.
 					fTargetNode= null;
 				}
-				fRewrite.replace(currentStatement, block, null);
 			}
 		}
 		// We only insert one new statement or we delete the existing call. 
@@ -754,7 +764,7 @@ public class CallInliner {
 
 	private boolean isControlStatement(ASTNode node) {
 		int type= node.getNodeType();
-		return type == ASTNode.IF_STATEMENT || type == ASTNode.FOR_STATEMENT ||
+		return type == ASTNode.IF_STATEMENT || type == ASTNode.FOR_STATEMENT || type == ASTNode.ENHANCED_FOR_STATEMENT ||
 		        type == ASTNode.WHILE_STATEMENT || type == ASTNode.DO_STATEMENT;
 	}
 }

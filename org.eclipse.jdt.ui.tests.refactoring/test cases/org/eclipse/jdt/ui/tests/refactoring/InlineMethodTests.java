@@ -176,6 +176,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performSimpleTest();
 	}	
 
+	public void testCatchClause() throws Exception {
+		performSimpleTest();
+	}	
+
 	/* *********************** Argument Tests ******************************* */
 		
 	private void performArgumentTest() throws Exception {
@@ -379,6 +383,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	public void testForTwo() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testEnhancedForOne() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testEnhancedForTwo() throws Exception {
 		performControlStatementTest();
 	}
 	
