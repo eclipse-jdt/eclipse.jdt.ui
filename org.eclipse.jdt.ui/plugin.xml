@@ -243,6 +243,14 @@
       contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
     </editor>
 
+   <editor id ="org.eclipse.jdt.ui.DefaultTextEditor"
+      icon="icons/full/obj16/jar_desc_obj.gif"
+      name="JAR Description Editor"
+      extensions="jardesc"
+      class="org.eclipse.ui.editors.text.TextEditor"
+      contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor">     
+    </editor>
+
 </extension>
 
 <extension
@@ -750,6 +758,15 @@
 	</filter>
 </extension>
 
+<extension id="snippetSupportLineBreakpoint" point="org.eclipse.core.resources.markers">
+	<super type="org.eclipse.jdt.debug.javaLineBreakpoint"/>
+	<persistent value="false"/>
+</extension>	
+
+<!-- =========================================================================== -->
+<!-- JAR Packager                                                                -->
+<!-- =========================================================================== -->
+
 <extension point="org.eclipse.ui.exportWizards">
 	<wizard
 	   id="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
@@ -765,5 +782,34 @@
 	<super type="org.eclipse.jdt.debug.javaLineBreakpoint"/>
 	<persistent value="false"/>
 </extension>	
+
+<extension point="org.eclipse.ui.popupMenus">
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.jarpackager.RunJarPackager"
+		objectClass="org.eclipse.core.resources.IResource"
+		nameFilter="*.jardesc">
+		<action
+			id="CreateJar"
+			label="Create JAR"
+			tooltip="Create the JAR based on the selected JAR description file"
+			menubarPath="additions"
+			enablesFor="+"
+			class="org.eclipse.jdt.internal.ui.jarpackager.CreateJarActionDelegate">
+		</action>
+	</objectContribution>			
+	<objectContribution
+		id="org.eclipse.jdt.internal.ui.jarpackager.RunJarPackager"
+		objectClass="org.eclipse.core.resources.IResource"
+		nameFilter="*.jardesc">
+		<action
+			id="OpenJarPackageWizard"
+			label="Open JAR Packager"
+			tooltip="Opens the JAR Package Wizard based on the selected JAR description file"
+			menubarPath="additions"
+			enablesFor="1"
+			class="org.eclipse.jdt.internal.ui.jarpackager.OpenJarPackageWizardActionDelegate">
+		</action>
+	</objectContribution>			
+</extension>
 
 </plugin>
