@@ -131,17 +131,26 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			
 			if (element instanceof IJavaProject) {
 				if (fFilterPackages)
-					return ((IJavaProject)element).getNonJavaResources();
+					/*
+					 * Ported fix for 1GHSDS1 and 1GFM3J3 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+					 */
+					return getNonJavaResources((IJavaProject)element);
 				else
 					return getNonProjectPackageFragmentRoots((IJavaProject)element);
 			}
-			if (element instanceof IPackageFragmentRoot && !fFilterPackages) 
-				return getPackageFragments((IPackageFragmentRoot)element);
-			
+			if (element instanceof IPackageFragmentRoot) {
+				if (fFilterPackages)
+					/*
+					 * Ported fix for 1GHSDS1 and 1GFM3J3 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+					 */
+					return ((IPackageFragmentRoot)element).getNonJavaResources();
+				else
+					return getPackageFragments((IPackageFragmentRoot)element);
+			}
 			if (element instanceof IPackageFragment && fShowPackageContent)
 				return getPackageContents((IPackageFragment)element);
 				
-			if (element instanceof IFolder && fShowPackageContent)
+			if (element instanceof IFolder)
 				return getResources((IFolder)element);
 			
 		} catch (JavaModelException e) {
@@ -424,9 +433,15 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 //				System.out.println("Root doesn't have children");
 			}
 		}
-		if (projectIsRoot || !fShowPackageContent)
+		/*
+		 * Ported fix for 1GGY618 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+		 */
+		if (projectIsRoot)		
 			return list.toArray();
-		return ArrayUtility.merge(list.toArray(), project.getNonJavaResources());
+		/*
+		 * Ported fix for 1GGY618 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+		 */
+		return ArrayUtility.merge(list.toArray(), getNonJavaResources(project));
 	}
 
 	private Object[] getJavaProjects(IJavaModel jm) throws JavaModelException {
@@ -447,9 +462,13 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 			List nonJavaResources= new ArrayList();
 			for (int i= 0; i < members.length; i++) {
 				Object o= members[i];
-				if (!(o instanceof IFolder && JavaCore.create((IFolder)o) != null)) {
+				/*
+				 * Ported fix for 1GHSDS1 and 1GFM3J3 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+				 */
+				boolean o_isFolder= o instanceof IFolder;
+				boolean o_isNonJavaFile= o instanceof IFile;
+				if (fShowPackageContent && o_isNonJavaFile || !fShowPackageContent && o_isFolder && !(JavaCore.create((IFolder)o) != null))
 					nonJavaResources.add(o);
-				}	
 			}
 			return nonJavaResources.toArray();
 		} catch(CoreException e) {
@@ -527,5 +546,28 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		if (element instanceof IJavaElement)
 			return ((IJavaElement)element).getParent();
 		return null;
+	}
+
+	/*
+	 * Ported fix for 1GHSDS1 and 1GFM3J3 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder
+	 */
+	private Object[] getNonJavaResources(IJavaProject jProj) {
+		try {
+			Object[] members= jProj.getNonJavaResources();
+			List nonJavaResources= new ArrayList();
+			for (int i= 0; i < members.length; i++) {
+				Object o= members[i];
+				boolean isProjectFragmentRoot= jProj.getPackageFragmentRoot(jProj.getProject()).exists();
+				boolean o_isFolder= o instanceof IFolder;
+				boolean o_isNonJavaFile= o instanceof IFile
+					&& (!isProjectFragmentRoot || (!"java".equals(((IFile)o).getFileExtension()) && !"class".equals(((IFile)o).getFileExtension()))); //$NON-NLS-1$ //$NON-NLS-2$
+
+				if (fShowPackageContent && o_isNonJavaFile || !fShowPackageContent && o_isFolder)
+					nonJavaResources.add(o);
+			}
+			return nonJavaResources.toArray();
+		} catch(JavaModelException e) {
+			return ArrayUtility.getEmptyArray();
+		}
 	}
 }

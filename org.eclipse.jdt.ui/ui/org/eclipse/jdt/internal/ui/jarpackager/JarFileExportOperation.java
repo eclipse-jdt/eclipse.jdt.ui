@@ -41,23 +41,19 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 					jProject= JavaCore.create(resource.getProject());
 					try {
 						IPackageFragment pkgFragment= jProject.findPackageFragment(resource.getFullPath().removeLastSegments(1));
-						if (pkgFragment != null) {
-							pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);
-							if (pkgRoot != null)
-								leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
-						}
+						if (pkgFragment != null)
+							pkgRoot= JavaModelUtility.getPackageFragmentRoot(pkgFragment);						/*						 * Ported fix for 1GHSDS1 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder						 */						else							pkgRoot= jProject.findPackageFragmentRoot(resource.getFullPath().removeLastSegments(1));
 					} catch (JavaModelException ex) {
 						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.javaPackageNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$						return;					}
-				}			}
+				}			}			/*			 * Ported fix for 1GHSDS1 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder			 */			if (pkgRoot != null)				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 			
-			try {				// Binary Export				if (fJarPackage.areClassFilesExported() && isJavaElement && pkgRoot != null) {
-					// find corresponding file(s) on classpath and export
+			try {				// Binary Export				/*				 * Ported fix for 1GHSDS1 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder				 */				if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {					// find corresponding file(s) on classpath and export
 					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
 					IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 					while (iter.hasNext()) {
-						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources				if (fJarPackage.areJavaFilesExported() && (!isJavaElement || isJavaFile(resource) || pkgRoot == null || !fJarPackage.areClassFilesExported()))					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
+						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				}				// Java Files and resources								/*				 * Begin ported fix for 1GHSDS1 from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder				 */				boolean isInOutputFolder= false;							if (isJavaElement) {								try {									isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());								} catch (JavaModelException ex) {									isInOutputFolder= false;								}							}				boolean isNonJavaResource= !isJavaElement || (pkgRoot == null && !isInOutputFolder);				if ((fJarPackage.areClassFilesExported() && (isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource))))					|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource)))))				/*				 * End ported fix from 2.0 to 1.0 due to bug 7121: Not possible to export files directly in source folder				 */					fJarWriter.write((IFile) resource, destinationPath);								} catch (IOException ex) {
 				String message= ex.getMessage();
 				if (message == null)
 					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
