@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -42,6 +43,7 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -168,6 +170,10 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			null
 		);
 	}
+	
+	public boolean visit(AnonymousClassDeclaration node) {
+		return false;
+	}
 
 	public boolean visit(CastExpression node) {
 		if ("java.lang.ClassCastException".equals(fException.getQualifiedName())) //$NON-NLS-1$
@@ -223,6 +229,11 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 			
 		}
 		return super.visit(node);
+	}
+	
+	public boolean visit(TypeDeclarationStatement node) {
+		// don't dive into local type declarations.
+		return false;
 	}
 	
 	private boolean matches(IMethodBinding binding) {
