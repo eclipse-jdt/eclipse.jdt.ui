@@ -5,7 +5,7 @@ package org.eclipse.jdt.internal.ui;/*
  */
 
 
-import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdapterManager;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.Status;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.editors.text.FileDocumentProvider;import org.eclipse.ui.plugin.AbstractUIPlugin;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;import org.eclipse.jdt.internal.ui.launcher.J9PreferencePage;import org.eclipse.jdt.internal.ui.launcher.JDK12PreferencePage;import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
+import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import java.util.MissingResourceException;import java.util.ResourceBundle;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspace;import org.eclipse.core.resources.ResourcesPlugin;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IAdapterManager;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IPluginDescriptor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Platform;import org.eclipse.core.runtime.Status;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.resource.ImageRegistry;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.editors.text.FileDocumentProvider;import org.eclipse.ui.plugin.AbstractUIPlugin;import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.IWorkingCopyManager;import org.eclipse.jdt.ui.text.JavaTextTools;import org.eclipse.jdt.internal.compiler.ConfigurableOption;import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;import org.eclipse.jdt.internal.ui.launcher.J9PreferencePage;import org.eclipse.jdt.internal.ui.launcher.JDK12PreferencePage;import org.eclipse.jdt.internal.ui.packageview.ErrorTickManager;import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -257,27 +257,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		menu.add(new Separator(IContextMenuConstants.GROUP_VIEWER_SETUP));
 		menu.add(new Separator(IContextMenuConstants.GROUP_PROPERTIES));
 	}
-	
-	protected void initializeEditorSettings(IPreferenceStore store) {
-		String[] keys= new String[] {
-			IPreferencesConstants.HIGHLIGHT_KEYWORDS,
-			IPreferencesConstants.HIGHLIGHT_TYPES,
-			IPreferencesConstants.HIGHLIGHT_STRINGS,
-			IPreferencesConstants.HIGHLIGHT_COMMENTS
-		};
-		
-		for (int i= 0; i < keys.length; i++) {
-			if (!store.contains(keys[i]))
-				store.setDefault(keys[i], IPreferencesConstants.HIGHLIGHT_DEFAULT);
-		}
-		
-		if (!store.contains(IPreferencesConstants.AUTOINDENT))
-			store.setDefault(IPreferencesConstants.AUTOINDENT, IPreferencesConstants.AUTOINDENT_DEFAULT);
-		
-		if (!store.contains(IPreferencesConstants.MODEL_RECONCILER_DELAY))
-			store.setDefault(IPreferencesConstants.MODEL_RECONCILER_DELAY, IPreferencesConstants.MODEL_RECONCILER_DELAY_DEFAULT);		
-	}
-
 
 	//---- Runtime settings -------------------------------------------------------
 	
@@ -312,7 +291,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		JDK12PreferencePage.initDefaults(store);
 		J9PreferencePage.initDefaults(store);
 		PackageExplorerPart.initDefaults(store);
-		initializeEditorSettings(store);
+		JavaEditorPreferencePage.initDefaults(store);
+		
 		initializeJavaSettings(store);
 		
 	}

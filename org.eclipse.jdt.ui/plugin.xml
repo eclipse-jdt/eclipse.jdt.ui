@@ -232,6 +232,11 @@
 		class="org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage"
 		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
 	</page>	
+	<page name= "Java Editor"
+		id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
+		category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>
 </extension>
 
 <extension

@@ -45,6 +45,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 		setSourceViewerConfiguration(new JavaSourceViewerConfiguration(textTools, this));
 		setRangeIndicator(new DefaultRangeIndicator());
+		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 	
 	/** 
