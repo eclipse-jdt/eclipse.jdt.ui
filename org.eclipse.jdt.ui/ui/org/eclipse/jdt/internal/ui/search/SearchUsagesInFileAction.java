@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -204,13 +205,17 @@ public class SearchUsagesInFileAction extends Action {
 	public final  void run() {
 		ITextSelection ts= getTextSelection();
 		final CompilationUnit root= createAST();
-		if (root == null)
+		if (root == null) {
+			MessageDialog.openError(fEditor.getSite().getShell(), SearchMessages.getString("SearchUsagesInFileAction.operationUnavailable.title"), SearchMessages.getString("SearchUsagesInFileAction.cannotParse.text")); 
 			return;
+		}
 		ASTNode node= NodeFinder.perform(root, ts.getOffset(), ts.getLength());
 		
-		if (!(node instanceof Name))
+		if (!(node instanceof Name)) {
+			MessageDialog.openError(fEditor.getSite().getShell(), SearchMessages.getString("SearchUsagesInFileAction.operationUnavailable.title"), SearchMessages.getString("SearchUsagesInFileAction.noJavaElement.text")); 
 			return;
- 
+		}
+		
 		final Name name= (Name)node;
 		final IBinding target= name.resolveBinding();
 		
