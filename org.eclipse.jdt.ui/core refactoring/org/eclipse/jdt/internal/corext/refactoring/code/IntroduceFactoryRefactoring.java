@@ -292,7 +292,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	
 			if (fCtorBinding == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceFactory.unableToResolveConstructorBinding")); //$NON-NLS-1$
-	
+
+			// If this constructor is of a generic type, get the generic version,
+			// not some instantiation thereof.
+			fCtorBinding= fCtorBinding.getMethodDeclaration();
+
 			if (fNewMethodName == null)
 				fNewMethodName= "create" + fCtorBinding.getName();//$NON-NLS-1$
 	

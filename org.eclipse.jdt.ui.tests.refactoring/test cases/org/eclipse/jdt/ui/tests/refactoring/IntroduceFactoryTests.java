@@ -720,4 +720,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		multiProjectBugHelper(new String[] { "proj1/pA/A", "proj2/pB/B" },
 				new String[] { "proj2:proj1" });
 	}
+
+	public void test84807() throws Exception {
+		singleUnitBugHelper("CtorOfParamType", true);
+	}
 }
