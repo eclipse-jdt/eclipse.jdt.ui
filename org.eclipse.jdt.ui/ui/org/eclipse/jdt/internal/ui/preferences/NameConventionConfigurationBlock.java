@@ -270,7 +270,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			validateSettings(null, null);
+			validateSettings(field);
 		}	
 	}
 		
@@ -317,6 +317,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 		
 		fExceptionName= new StringDialogField();
+		fExceptionName.setDialogFieldListener(adapter);
 		fExceptionName.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.exceptionname.label")); //$NON-NLS-1$
 		fExceptionName.setText(preferenceStore.getString(PREF_EXCEPTION_NAME));
 		
@@ -367,6 +368,18 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		DialogField.createEmptySpace(composite);
 		
 		return composite;
+	}
+	
+	protected void validateSettings(DialogField field) {
+		if (field == fExceptionName) {
+			String name= fExceptionName.getText();
+			IStatus status = JavaConventions.validateIdentifier(name);
+			if (!status.isOK()) {
+				fContext.statusChanged(status);
+			} else {
+				fContext.statusChanged(new StatusInfo());
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
