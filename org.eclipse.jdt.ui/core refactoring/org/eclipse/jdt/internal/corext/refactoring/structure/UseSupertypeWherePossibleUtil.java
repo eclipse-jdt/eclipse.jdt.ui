@@ -102,15 +102,15 @@ class UseSupertypeWherePossibleUtil {
 
 	private UseSupertypeWherePossibleUtil(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IType supertypeToUse, boolean updateInstanceOf) throws JavaModelException {
 		fManager= manager;
-		fExtractedMemberSet= new HashSet(Arrays.asList(extractedMembers));
+		fExtractedMemberSet= toWorkingCopyMembersSet(new HashSet(Arrays.asList(extractedMembers)));
 		fSuperTypeName= superTypeName;
-		fInputClass= (IType)JavaModelUtil.toWorkingCopy(inputClass);
+		fInputClass= (IType)WorkingCopyUtil.getWorkingCopyIfExists(inputClass);
 		fCodeGenerationSettings= codeGenerationSettings;
 		fASTMappingManager= astManager;
 		fBadVarSet= new HashSet(0);
 		fReferenceNodeCache= new HashMap();
 		fRippleMethodCache= new HashMap();
-		fSuperTypeToUse= (IType)JavaModelUtil.toWorkingCopy(supertypeToUse);
+		fSuperTypeToUse= (IType)WorkingCopyUtil.getWorkingCopyIfExists(supertypeToUse);
 		fSuperTypeSet= createSuperTypeSet(fSuperTypeToUse, fInputClass.getJavaProject());
 		fUpdateInstanceOf= updateInstanceOf;
 	}
@@ -137,16 +137,16 @@ class UseSupertypeWherePossibleUtil {
 	private static Set createSuperTypeSet(IType type, IJavaProject project) throws JavaModelException {
 		if (type == null){
 			Set result= new HashSet(1);
-			result.add(project.findType("java.lang.Object"));
+			result.add(project.findType("java.lang.Object")); //$NON-NLS-1$
 			return result;
 		}	
 		return toWorkingCopyMembersSet(new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor()))));
 	}
 	
-	private static Set toWorkingCopyMembersSet(Set members){
+	private static Set toWorkingCopyMembersSet(Set members) throws JavaModelException{
 		Set result= new HashSet(members.size());
 		for (Iterator iter= members.iterator(); iter.hasNext();) {
-            result.add(JavaModelUtil.toWorkingCopy((IMember) iter.next()));
+            result.add(WorkingCopyUtil.getWorkingCopyIfExists((IMember) iter.next()));
         }
         return result;
 	}
@@ -177,7 +177,7 @@ class UseSupertypeWherePossibleUtil {
 
 	private boolean needsImport(ICompilationUnit cu) {
 		IPackageFragment superTypePackage= getSuperTypePackage();
-		if (superTypePackage.getElementName().equals("java.lang"))
+		if (superTypePackage.getElementName().equals("java.lang")) //$NON-NLS-1$
 			return false;
 		return ! superTypePackage.equals(cu.getParent());
 	}
@@ -329,6 +329,7 @@ class UseSupertypeWherePossibleUtil {
 			IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
 			if (method == null)
 				return null; //XXX this can be null because of bug 22883
+			method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);	
 			return getAllRippleMethods(pm, getTopMethod(method, new SubProgressMonitor(pm, 1)));
 		} finally{
 			pm.done();
@@ -338,8 +339,16 @@ class UseSupertypeWherePossibleUtil {
 		if (fRippleMethodCache.containsKey(topMethod))
 			return (IMethod[])fRippleMethodCache.get(topMethod);
 		IMethod[] methods= RippleMethodFinder.getRelatedMethods(topMethod, new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);	
-		fRippleMethodCache.put(topMethod, methods);
+		fRippleMethodCache.put(topMethod, getWorkingCopyMethods(methods));
 		return methods;
+	}
+
+	private static IMethod[] getWorkingCopyMethods(IMethod[] methods) throws JavaModelException{
+		IMethod[] result= new IMethod[methods.length];
+		for (int i = 0; i < methods.length; i++) {
+			result[i]= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(methods[i]);
+		}
+		return result;
 	}
 	
 	private boolean isAnyParameterDeclarationExcluded(IMethod[] methods, int parameterIndex, Collection nodesToRemove) throws JavaModelException{
@@ -387,7 +396,7 @@ class UseSupertypeWherePossibleUtil {
 			top= MethodChecks.overridesAnotherMethod(top, new SubProgressMonitor(pm, 1)); 
 		} while(top != null);
 		pm.done();
-		return oldTop;
+		return (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(oldTop);
 	}
 	
 	private boolean hasIndirectProblems(VariableDeclaration varDeclaration, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException{
@@ -415,6 +424,7 @@ class UseSupertypeWherePossibleUtil {
 		IField field= Binding2JavaModel.find(varDeclaration.resolveBinding(), getCompilationUnit(varDeclaration).getJavaProject());
 		if (field == null)
 			return new ASTNode[0];
+		field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);	
 		return getReferenceNodes(field, pm);	
 	}
 	
@@ -500,6 +510,7 @@ class UseSupertypeWherePossibleUtil {
 		IMethod method= Binding2JavaModel.find(bin, fInputClass.getJavaProject());
 		if (method == null)
 			return false;
+		method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);	
 		
 		if (method.getCompilationUnit() == null) {
 			if (fSuperTypeToUse == null)
@@ -507,6 +518,7 @@ class UseSupertypeWherePossibleUtil {
 			IType type= JavaModelUtil.findType(fInputClass.getJavaProject(), Signature.toString(method.getParameterTypes()[argumentIndex]));
 			if (type == null)
 				return false;
+			type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
 			if (fSuperTypeToUse.equals(type) || fSuperTypeSet.contains(type))
 				return true;
 			return false;
@@ -607,8 +619,11 @@ class UseSupertypeWherePossibleUtil {
 					if (binding == null)
 						return true; //XXX
 					IMethod method= Binding2JavaModel.find(binding, cu.getJavaProject());
-					if (method != null && anyReferenceHasDirectProblems(method, new SubProgressMonitor(pm, 1)))
-						return true;	
+					if (method != null){
+						method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method); 
+						if (anyReferenceHasDirectProblems(method, new SubProgressMonitor(pm, 1)))
+							return true;	
+					}	
 				}
 			}	
 						
@@ -830,6 +845,7 @@ class UseSupertypeWherePossibleUtil {
 				if (method == null)
 					return true;
 				IType paramType= getMethodParameterType(method, argumentIndex);
+				paramType= (IType)WorkingCopyUtil.getWorkingCopyIfExists(paramType);
 				if ( fSuperTypeToUse != null && 
 				     ! fSuperTypeSet.contains(paramType) && 
 					 ! fSuperTypeToUse.equals(paramType) && 
@@ -843,7 +859,7 @@ class UseSupertypeWherePossibleUtil {
 				IType type= findType(assign.getLeftHandSide().resolveTypeBinding());
 				if (type == null)
 					return true;
-					
+				type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
 				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
 					return true;
 			}	
@@ -854,6 +870,7 @@ class UseSupertypeWherePossibleUtil {
 				IType type= findType(vd.getName().resolveTypeBinding());
 				if (type == null)
 					return true;
+				type= (IType)WorkingCopyUtil.getWorkingCopyIfExists(type);	
 				if (!type.equals(fInputClass) && ! fSuperTypeSet.contains(type))	
 					return true;
 			}
@@ -876,9 +893,10 @@ class UseSupertypeWherePossibleUtil {
 		if (! vb.isField())
 			return false;
 		IField field= Binding2JavaModel.find(vb, fInputClass.getJavaProject());
-		if (field != null && fExtractedMemberSet.contains(field))
-			return true;	
-		return false;
+		if (field == null)
+			return false;
+		field= (IField)WorkingCopyUtil.getWorkingCopyIfExists(field);	
+		return fExtractedMemberSet.contains(field);
 	}
 	
 	private boolean isMethodInvocationOk(MethodInvocation mi, IProgressMonitor pm) throws JavaModelException{
@@ -890,7 +908,10 @@ class UseSupertypeWherePossibleUtil {
 			method= Binding2JavaModel.findIncludingSupertypes((IMethodBinding)miBinding, fSuperTypeToUse, pm);
 		else
 			method= Binding2JavaModel.find((IMethodBinding)miBinding, fInputClass);
-		if (method == null || ! fExtractedMemberSet.contains(method))
+		if (method == null)
+			return false;
+		method= (IMethod)WorkingCopyUtil.getWorkingCopyIfExists(method);				
+		if (! fExtractedMemberSet.contains(method))
 			return false;	
 		if (VisibilityChecker.isVisibleFrom(method, mi, fASTMappingManager.getCompilationUnit(mi)))
 			return true;
@@ -920,6 +941,9 @@ class UseSupertypeWherePossibleUtil {
 	private IType findType(ITypeBinding tb) throws JavaModelException{
 		if (tb == null)
 			return null;
-		return Binding2JavaModel.find(tb, fInputClass.getJavaProject());
+		IType result= Binding2JavaModel.find(tb, fInputClass.getJavaProject());
+		if (result == null)
+			return result;
+		return (IType)WorkingCopyUtil.getWorkingCopyIfExists(result);	
 	}
 }
