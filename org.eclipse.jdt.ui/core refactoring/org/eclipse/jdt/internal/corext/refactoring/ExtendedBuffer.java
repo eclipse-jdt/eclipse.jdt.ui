@@ -5,8 +5,8 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 

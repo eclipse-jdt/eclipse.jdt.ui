@@ -4,16 +4,14 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-
-import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
 
 public class OldCommentAnalyzer {
