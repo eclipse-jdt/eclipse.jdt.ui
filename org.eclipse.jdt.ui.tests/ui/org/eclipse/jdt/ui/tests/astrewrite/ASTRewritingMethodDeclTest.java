@@ -1068,13 +1068,10 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			SingleVariableDeclaration first= (SingleVariableDeclaration) params.get(0);
 			SingleVariableDeclaration second= (SingleVariableDeclaration) params.get(1);
 				
-			ASTNode copy1= rewrite.createCopy(first);
 			ASTNode copy2= rewrite.createCopy(second);
-			
+
 			rewrite.markAsReplaced(first, copy2);
-			rewrite.markAsReplaced(second, copy1);
-			
-			rewrite.markAsRemoved(first);
+			rewrite.markAsRemoved(second);
 		}
 	
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
