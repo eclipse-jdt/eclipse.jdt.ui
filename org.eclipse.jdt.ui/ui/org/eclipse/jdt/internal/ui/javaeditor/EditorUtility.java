@@ -151,6 +151,24 @@ public class EditorUtility {
 		return null;
 	}
 	
+	/**
+	 * If the current active editor edits a java element return it, else
+	 * return null
+	 */
+	public static IJavaElement getActiveEditorJavaInput() {
+		IWorkbenchPage page= JavaPlugin.getActivePage();
+		if (page != null) {
+			IEditorPart part= page.getActiveEditor();
+			if (part != null) {
+				IEditorInput editorInput= part.getEditorInput();
+				if (editorInput != null) {
+					return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+				}
+			}
+		}
+		return null;	
+	}
+	
 	/** 
 	 * Gets the working copy of an compilation unit opened in an editor
 	 * @param part the editor part

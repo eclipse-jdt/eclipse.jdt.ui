@@ -131,6 +131,10 @@ public abstract class ContainerPage extends NewElementWizardPage {
 		fContainerDialogField.doFillIntoGrid(parent, nColumns);
 	}
 	
+	protected void setFocusOnContainer() {
+		fContainerDialogField.setFocus();
+	}
+
 	// -------- ContainerFieldAdapter --------
 
 	private class ContainerFieldAdapter implements IStringButtonAdapter, IDialogFieldListener {

@@ -204,13 +204,6 @@ public abstract class TypePage extends ContainerPage {
 			try {
 				IType type= null;
 				switch (elem.getElementType()) {
-				case IJavaElement.COMPILATION_UNIT:
-					String typename= Signature.getQualifier(elem.getElementName());
-					type= ((ICompilationUnit)elem).getType(typename);
-					break;
-				case IJavaElement.CLASS_FILE:
-					type= ((IClassFile)elem).getType();
-					break;
 				case IJavaElement.TYPE:
 					type= (IType)elem;
 					break;
@@ -323,12 +316,26 @@ public abstract class TypePage extends ContainerPage {
 		gd.grabExcessVerticalSpace= false;
 	}
 
+	
 	/**
-	 * Sets the focus on the type name control
+	 * Sets the focus on the container if empty, elso on type name
 	 */		
 	protected void setFocus() {
-		fTypeNameDialogField.setFocus();
+		if (getContainerText().length() == 0) {
+			setFocusOnContainer();
+		} else {
+			fTypeNameDialogField.setFocus();
+		}
 	}
+	
+	private boolean setFocus(StringDialogField field) {
+		if (field.isCreated() && field.getText().length() == 0) {
+			field.setFocus();
+			return true;
+		}
+		return false;
+	}
+
 				
 	// -------- TypeFieldsAdapter --------
 
