@@ -53,8 +53,6 @@ import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension;
-import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -533,6 +531,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
+		private boolean fCloseAngularBrackets= true;
 		private final String CATEGORY= toString();
 		private IPositionUpdater fUpdater= new ExclusivePositionUpdater(CATEGORY);
 		private Stack fBracketLevelStack= new Stack();
@@ -543,6 +542,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		public void setCloseStringsEnabled(boolean enabled) {
 			fCloseStrings= enabled;
+		}
+
+		public void setCloseAngularBracketsEnabled(boolean enabled) {
+			fCloseAngularBrackets= enabled;
 		}
 
 		private boolean hasIdentifierToTheRight(IDocument document, int offset) {
@@ -561,7 +564,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 
-		private boolean hasIdentifierToTheLeft(IDocument document, int offset) {
+		private boolean hasIdentifierToTheLeft(IDocument document, int offset, boolean onlyUpperCase) {
 			try {
 				int start= offset;
 				IRegion startLine= document.getLineInformationOfOffset(start);
@@ -569,7 +572,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				while (start != minStart && Character.isWhitespace(document.getChar(start - 1)))
 					--start;
 				
-				return start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1));
+				while (start != minStart && Character.isJavaIdentifierPart(document.getChar(start - 1)))
+					--start;
+				
+				return start != minStart 
+						&& Character.isJavaIdentifierPart(document.getChar(start))
+						&& (!onlyUpperCase || Character.isUpperCase(document.getChar(start)));
 
 			} catch (BadLocationException e) {
 				return true;
@@ -612,96 +620,104 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			case '(':
 				if (hasCharacterToTheRight(document, offset + length, '('))
 					return;
+				if (hasIdentifierToTheRight(document, offset + length))
+					return;
+				break;
 
-				// fall through
+			case '<':
+				if (!fCloseAngularBrackets)
+					return;
+				if (hasCharacterToTheRight(document, offset + length, '<'))
+					return;
+				if (hasIdentifierToTheRight(document, offset + length))
+					return;
+				if (!hasIdentifierToTheLeft(document, offset, true))
+					return;
+				break;
 
 			case '[':
-					if (!fCloseBrackets)
-						return;
-					if (hasIdentifierToTheRight(document, offset + length))
-						return;
-			
-				// fall through
+				if (!fCloseBrackets)
+					return;
+				if (hasIdentifierToTheRight(document, offset + length))
+					return;
+				break;
 			
 			case '\'':
-				if (event.character == '\'') {
-					if (!fCloseStrings)
-						return;
-					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
-						return;
-				}
-				
-				// fall through
+				if (!fCloseStrings)
+					return;
+				if (hasIdentifierToTheLeft(document, offset, false) || hasIdentifierToTheRight(document, offset + length))
+					return;
+				break;
 
 			case '"':
-				if (event.character == '"') {
-					if (!fCloseStrings)
-						return;
-					if (hasIdentifierToTheLeft(document, offset) || hasIdentifierToTheRight(document, offset + length))
-						return;
-				}
-				
-				try {		
-					ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
-//					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()) && partition.getOffset() != offset)
-					if (! IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
-						return;
-						
-					if (!validateEditorInputState())
-						return;
-
-					final char character= event.character;
-					final char closingCharacter= getPeerCharacter(character);
-					final StringBuffer buffer= new StringBuffer();
-					buffer.append(character);
-					buffer.append(closingCharacter);
-
-					document.replace(offset, length, buffer.toString());
-					
-					
-					BracketLevel level= new BracketLevel();
-					fBracketLevelStack.push(level);
-					
-					LinkedPositionGroup group= new LinkedPositionGroup(); 
-					group.addPosition(new LinkedPosition(document, offset + 1, 0, LinkedPositionGroup.NO_STOP));
-
-					LinkedModeModel model= new LinkedModeModel();
-					model.addLinkingListener(this);
-					model.addGroup(group);
-					model.forceInstall();
-					
-					level.fOffset= offset;
-					level.fLength= 2;
+				if (!fCloseStrings)
+					return;
+				if (hasIdentifierToTheLeft(document, offset, false) || hasIdentifierToTheRight(document, offset + length))
+					return;
+				break;
 			
-					// set up position tracking for our magic peers
-					if (fBracketLevelStack.size() == 1) {
-						document.addPositionCategory(CATEGORY);
-						document.addPositionUpdater(fUpdater);
-					}
-					level.fFirstPosition= new Position(offset, 1);
-					level.fSecondPosition= new Position(offset + 1, 1);
-					document.addPosition(CATEGORY, level.fFirstPosition);
-					document.addPosition(CATEGORY, level.fSecondPosition);
-					
-					level.fUI= new EditorLinkedModeUI(model, sourceViewer);
-					level.fUI.setSimpleMode(true);
-					level.fUI.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
-					level.fUI.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
-					level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
-					level.fUI.enter();
-					
-					
-					IRegion newSelection= level.fUI.getSelectedRegion();
-					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
-	
-					event.doit= false;
-
-				} catch (BadLocationException e) {
-					JavaPlugin.log(e);
-				} catch (BadPositionCategoryException e) {
-					JavaPlugin.log(e);
+			default:
+				return;
+			}
+			
+			try {		
+				ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
+				if (!IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType()))
+					return;
+				
+				if (!validateEditorInputState())
+					return;
+				
+				final char character= event.character;
+				final char closingCharacter= getPeerCharacter(character);
+				final StringBuffer buffer= new StringBuffer();
+				buffer.append(character);
+				buffer.append(closingCharacter);
+				
+				document.replace(offset, length, buffer.toString());
+				
+				
+				BracketLevel level= new BracketLevel();
+				fBracketLevelStack.push(level);
+				
+				LinkedPositionGroup group= new LinkedPositionGroup(); 
+				group.addPosition(new LinkedPosition(document, offset + 1, 0, LinkedPositionGroup.NO_STOP));
+				
+				LinkedModeModel model= new LinkedModeModel();
+				model.addLinkingListener(this);
+				model.addGroup(group);
+				model.forceInstall();
+				
+				level.fOffset= offset;
+				level.fLength= 2;
+				
+				// set up position tracking for our magic peers
+				if (fBracketLevelStack.size() == 1) {
+					document.addPositionCategory(CATEGORY);
+					document.addPositionUpdater(fUpdater);
 				}
-				break;	
+				level.fFirstPosition= new Position(offset, 1);
+				level.fSecondPosition= new Position(offset + 1, 1);
+				document.addPosition(CATEGORY, level.fFirstPosition);
+				document.addPosition(CATEGORY, level.fSecondPosition);
+				
+				level.fUI= new EditorLinkedModeUI(model, sourceViewer);
+				level.fUI.setSimpleMode(true);
+				level.fUI.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
+				level.fUI.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
+				level.fUI.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
+				level.fUI.enter();
+				
+				
+				IRegion newSelection= level.fUI.getSelectedRegion();
+				sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
+				
+				event.doit= false;
+				
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			} catch (BadPositionCategoryException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		
@@ -718,28 +734,22 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			// remove brackets
 			final ISourceViewer sourceViewer= getSourceViewer();
 			final IDocument document= sourceViewer.getDocument();
-			if (document instanceof IDocumentExtension) {
-				IDocumentExtension extension= (IDocumentExtension) document;
-				extension.registerPostNotificationReplace(null, new IDocumentExtension.IReplace() {
-				
-					public void perform(IDocument d, IDocumentListener owner) {
-						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) && !level.fSecondPosition.isDeleted && level.fSecondPosition.offset == level.fFirstPosition.offset) {
-							try {
-								document.replace(level.fSecondPosition.offset, level.fSecondPosition.length, null);
-							} catch (BadLocationException e) {
-							}
-						}
-						
-						if (fBracketLevelStack.size() == 0) {
-							document.removePositionUpdater(fUpdater);
-							try {
-								document.removePositionCategory(CATEGORY);
-							} catch (BadPositionCategoryException e) {
-							}
-						}
-					}
-	
-				});
+			if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) 
+					&& !level.fSecondPosition.isDeleted 
+					&& level.fSecondPosition.offset == level.fFirstPosition.offset)
+			{
+				try {
+					document.replace(level.fSecondPosition.offset, level.fSecondPosition.length, null);
+				} catch (BadLocationException e) {
+				}
+			}
+			
+			if (fBracketLevelStack.size() == 0) {
+				document.removePositionUpdater(fUpdater);
+				try {
+					document.removePositionCategory(CATEGORY);
+				} catch (BadPositionCategoryException e) {
+				}
 			}
 
 		}
@@ -1609,9 +1619,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		IPreferenceStore preferenceStore= getPreferenceStore();
 		boolean closeBrackets= preferenceStore.getBoolean(CLOSE_BRACKETS);
 		boolean closeStrings= preferenceStore.getBoolean(CLOSE_STRINGS);
+		boolean closeAngularBrackets= JavaCore.VERSION_1_5.equals(preferenceStore.getString(JavaCore.COMPILER_SOURCE));
 		
 		fBracketInserter.setCloseBracketsEnabled(closeBrackets);
 		fBracketInserter.setCloseStringsEnabled(closeStrings);
+		fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 		
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer instanceof ITextViewerExtension)
@@ -1636,6 +1648,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				
 			case ')':
 				return '(';
+				
+			case '<':
+				return '>';
+				
+			case '>':
+				return '<';
 				
 			case '[':
 				return ']';
@@ -1674,6 +1692,11 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				if (CLOSE_STRINGS.equals(p)) {
 					fBracketInserter.setCloseStringsEnabled(getPreferenceStore().getBoolean(p));
 					return;
+				}
+				
+				if (JavaCore.COMPILER_SOURCE.equals(p)) {
+					boolean closeAngularBrackets= JavaCore.VERSION_1_5.equals(getPreferenceStore().getString(p));
+					fBracketInserter.setCloseAngularBracketsEnabled(closeAngularBrackets);
 				}
 								
 				if (SPACES_FOR_TABS.equals(p)) {
