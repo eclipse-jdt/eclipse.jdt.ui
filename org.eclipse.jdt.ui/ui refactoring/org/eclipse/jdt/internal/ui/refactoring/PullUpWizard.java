@@ -104,6 +104,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -419,7 +420,7 @@ public class PullUpWizard extends RefactoringWizard {
 			label.setLayoutData(new GridData());
 		
 			fSuperclassCombo= new Combo(parent, SWT.READ_ONLY);
-			fSuperclasses= getPullUpRefactoring().getPossibleTargetClasses(pm);
+			fSuperclasses= getPullUpRefactoring().getPossibleTargetClasses(new RefactoringStatus(), pm);
 			Assert.isTrue(fSuperclasses.length > 0);
 			for (int i= 0; i < fSuperclasses.length; i++) {
 				String comboLabel= JavaModelUtil.getFullyQualifiedName(fSuperclasses[i]);

@@ -12,8 +12,11 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -44,9 +47,6 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -71,7 +71,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -620,94 +619,111 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		}
 	}
 
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
-		try{
-			pm.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.preview"), 8); //$NON-NLS-1$
-
-			addImportsToSubclasses(new SubProgressMonitor(pm, 1));
-
-			TextChangeManager manager= new TextChangeManager();
-
-			MemberActionInfo[] abstractMembersToCopyToSubclasses= getInfosForAbstractMembersToBeCreatedInSubclassesOfDeclaringClass();
-			MemberActionInfo[] nonAbstractMembersToCopyToSubclasses= getInfosForNonAbstractMembersToBeCreatedInSubclassesOfDeclaringClass();
-			IType[] destinationsForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
-			IType[] destinationsForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
-			
-			ICompilationUnit declaringCu= getDeclaringCU();
-			CompilationUnit declaringCuNode= new RefactoringASTParser(AST.JLS3).parse(declaringCu, true);
-			ICompilationUnit[] cus= getCusToProcess(new SubProgressMonitor(pm, 1));
-			IProgressMonitor subPm= new SubProgressMonitor(pm, 4);
-			subPm.beginTask("", cus.length); //$NON-NLS-1$
-			for (int i= 0; i < cus.length; i++) {
-				ICompilationUnit cu= cus[i];
-				CompilationUnit cuNode= cu.equals(declaringCu) ? declaringCuNode: new RefactoringASTParser(AST.JLS3).parse(cu, true);
-				ASTRewrite rewrite= ASTRewrite.create(cuNode.getAST());
-
-				if (cu.equals(declaringCu)){
-					TypeDeclaration declaringClass= ASTNodeSearchUtil.getTypeDeclarationNode(getDeclaringType(), cuNode);
+	private TextChangeManager createChangeManager(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.getString("PushDownRefactoring.preview"), 8); //$NON-NLS-1$
+			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(getDeclaringType().getCompilationUnit());
+			final Map importMap= new HashMap();
+			addImportsToSubclasses(importMap, new SubProgressMonitor(monitor, 1));
+			final TextChangeManager manager= new TextChangeManager();
+			final MemberActionInfo[] copyAbstract= getInfosForAbstractMembersToBeCreatedInSubclassesOfDeclaringClass();
+			final MemberActionInfo[] copyEffected= getInfosForNonAbstractMembersToBeCreatedInSubclassesOfDeclaringClass();
+			final IType[] effectedDestinations= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(monitor, 1));
+			final IType[] abstractDestinations= getDestinationClassesForAbstractMembers(new SubProgressMonitor(monitor, 1));
+			final ICompilationUnit[] involvedUnits= getInvolvedCompilationUnits(new SubProgressMonitor(monitor, 1));
+			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 4);
+			subMonitor.beginTask("", involvedUnits.length); //$NON-NLS-1$
+			ICompilationUnit currentUnit= null;
+			CompilationUnitRewrite unitRewriter= null;
+			for (int index= 0; index < involvedUnits.length; index++) {
+				currentUnit= involvedUnits[index];
+				if (currentUnit.equals(sourceRewriter.getCu()))
+					unitRewriter= sourceRewriter;
+				else
+					unitRewriter= new CompilationUnitRewrite(currentUnit);
+				if (currentUnit.equals(sourceRewriter.getCu())) {
+					final TypeDeclaration declaration= ASTNodeSearchUtil.getTypeDeclarationNode(getDeclaringType(), unitRewriter.getRoot());
 					if (shouldMakeDeclaringClassAbstract())
-						makeDeclaringClassAbstract(declaringClass, rewrite);
-					deleteDeclarationNodes(cuNode, rewrite, Arrays.asList(getMembersToDeleteFromDeclaringClass()));
-					makeMethodsAbstractInDeclaringClass(declaringCuNode, rewrite);
+						ModifierRewrite.create(unitRewriter.getASTRewrite(), declaration).setModifiers(createNewModifiersForMakingDeclaringClassAbstract(declaration), null);
+					deleteDeclarationNodes(sourceRewriter, unitRewriter, unitRewriter, Arrays.asList(getMembersToDeleteFromDeclaringClass()));
+					makeMethodsAbstractInDeclaringClass(sourceRewriter, unitRewriter);
 				}
-				copyMembers(abstractMembersToCopyToSubclasses, destinationsForAbstract, declaringCuNode, cu, cuNode, rewrite);
-				copyMembers(nonAbstractMembersToCopyToSubclasses, destinationsForNonAbstract, declaringCuNode, cu, cuNode, rewrite);
-				addTextEditFromRewrite(manager, cu, rewrite);
-				subPm.worked(1);
-				if (pm.isCanceled())
+				final Set imports= (Set) importMap.get(currentUnit);
+				if (imports != null) {
+					IType type= null;
+					for (final Iterator iterator= imports.iterator(); iterator.hasNext();) {
+						type= (IType) iterator.next();
+						final String fullyQualifiedName= type.getFullyQualifiedName('.');
+						unitRewriter.getImportRewrite().addImport(fullyQualifiedName);
+						unitRewriter.getImportRemover().registerAddedImport(fullyQualifiedName);
+					}
+				}
+				copyMembers(copyAbstract, abstractDestinations, sourceRewriter, unitRewriter);
+				copyMembers(copyEffected, effectedDestinations, sourceRewriter, unitRewriter);
+				manager.manage(currentUnit, unitRewriter.createChange());
+				subMonitor.worked(1);
+				if (monitor.isCanceled())
 					throw new OperationCanceledException();
 			}
 			return manager;
-		} finally{
-			pm.done();
+		} finally {
+			monitor.done();
 		}
 	}
 
-	private void copyMembers(MemberActionInfo[] infos, IType[] destinationTypes, CompilationUnit declaringCuNode, ICompilationUnit declaringCu, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void copyMembers(MemberActionInfo[] infos, IType[] destinations, CompilationUnitRewrite sourceRewriter, CompilationUnitRewrite unitRewriter) throws JavaModelException {
+		IType type= null;
 		TypeVariableMaplet[] mapping= null;
-		for (int i= 0; i < destinationTypes.length; i++) {
-			IType dest= destinationTypes[i];
-			mapping= TypeVariableUtil.superTypeToInheritedType(getDeclaringType(), dest);
-			if (declaringCu.equals(dest.getCompilationUnit()))
-				createAll(infos, ASTNodeSearchUtil.getTypeDeclarationNode(dest, cuNode), declaringCuNode, mapping, rewrite);
+		for (int index= 0; index < destinations.length; index++) {
+			type= destinations[index];
+			mapping= TypeVariableUtil.superTypeToInheritedType(getDeclaringType(), type);
+			if (unitRewriter.getCu().equals(type.getCompilationUnit()))
+				createAll(infos, ASTNodeSearchUtil.getTypeDeclarationNode(type, unitRewriter.getRoot()), sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite());
 		}
 	}
 
-	private ICompilationUnit[] getCusToProcess(IProgressMonitor pm) throws JavaModelException {
+	private ICompilationUnit[] getInvolvedCompilationUnits(IProgressMonitor pm) throws JavaModelException {
 		IType[] subTypes= getAllDirectSubclassesOfDeclaringClass(pm);
 		Set result= new HashSet(subTypes.length + 1);
 		for (int i= 0; i < subTypes.length; i++) {
 			result.add(subTypes[i].getCompilationUnit());
 		}
-		result.add(getDeclaringCU());
+		result.add(getDeclaringType().getCompilationUnit());
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
 
-	private void addImportsToSubclasses(IProgressMonitor pm) throws CoreException {
+	private void addImportsToSubclasses(Map imports, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		IMember[] allMembers= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
 		IMember[] nonAbstractMembers= getNonAbstractMembers(allMembers);
 		IType[] destForNonAbstract= getDestinationClassesForNonAbstractMembers(new SubProgressMonitor(pm, 1));
-		addImportsToTypesReferencedInMembers(nonAbstractMembers, destForNonAbstract, new SubProgressMonitor(pm, 1));
+		addImportsToTypesReferencedInMembers(imports, nonAbstractMembers, destForNonAbstract, new SubProgressMonitor(pm, 1));
 
 		IMember[] abstractMembers= getAbstractMembers(allMembers);
 		IType[] destForAbstract= getDestinationClassesForAbstractMembers(new SubProgressMonitor(pm, 1));
-		addImportsToTypesReferencedInMembers(abstractMembers, destForAbstract, new SubProgressMonitor(pm, 1));
+		addImportsToTypesReferencedInMembers(imports, abstractMembers, destForAbstract, new SubProgressMonitor(pm, 1));
 		pm.done();
 	}
-	
-	private void addImportsToTypesReferencedInMembers(IMember[] members, IType[] destinationClasses, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", 1); //$NON-NLS-1$
-		IType[] typesReferenced= getTypesReferencedIn(members, pm);
-		for (int i= 0; i < destinationClasses.length; i++) {
-			ICompilationUnit cu= destinationClasses[i].getCompilationUnit();
-			for (int j= 0; j < typesReferenced.length; j++) {
-				fImportManager.addImportTo(typesReferenced[j], cu);
+
+	private void addImportsToTypesReferencedInMembers(Map importMap, IMember[] members, IType[] destinations, IProgressMonitor monitor) throws CoreException {
+		monitor.beginTask("", 1); //$NON-NLS-1$
+		final IType[] types= getTypesReferencedIn(members, monitor);
+		for (int index= 0; index < destinations.length; index++) {
+			final ICompilationUnit unit= destinations[index].getCompilationUnit();
+			for (int j= 0; j < types.length; j++) {
+				Set imports= null;
+				if (importMap.containsKey(unit))
+					imports= (Set) importMap.get(unit);
+				else {
+					imports= new HashSet();
+					importMap.put(unit, imports);
+				}
+				imports.add(types[j]);
 			}
 		}
-		pm.done();
+		monitor.done();
 	}
-	
+
 	private IType[] getTypesReferencedIn(IMember[] members, IProgressMonitor pm) throws JavaModelException {
 		return ReferenceFinderUtil.getTypesReferencedIn(members, pm);
 	}
@@ -735,13 +751,11 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 			createMethod(info, declaration, declaringCuNode, mapping, rewrite);
 	}
 
-	// TODO factor out
 	private void createMethod(MemberActionInfo info, TypeDeclaration declaration, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
 		MethodDeclaration newMethod= createNewMethodDeclarationNode(info, declaringCuNode, mapping, rewrite);
 		rewrite.getListRewrite(declaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), null);
 	}
 
-	// TODO factor out
 	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
 		Assert.isTrue(! info.isFieldInfo());
 		IMethod method= (IMethod)info.getMember();
@@ -771,7 +785,7 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 			final IDocument document= new Document(method.getCompilationUnit().getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(body.getAST());
 			final ITrackedNodePosition position= rewriter.track(body);
-			body.accept(new TypeMapper(rewriter, mapping));
+			body.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			String content= document.get(position.getStartPosition(), position.getLength());
 			String[] lines= Strings.convertIntoLines(content);
@@ -789,51 +803,11 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		return info.getNewModifiersForCopyInSubclass(oldMethod.getModifiers());
 	}
 
-	private void copyThrownExceptions(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
-		AST ast= newMethod.getAST();
-		for (int i= 0, n= oldMethod.thrownExceptions().size(); i < n; i++) {
-			Name oldException= (Name)oldMethod.thrownExceptions().get(i);
-			if (oldException.isSimpleName()){
-				Name newException= ast.newSimpleName(((SimpleName)oldException).getIdentifier());
-				newMethod.thrownExceptions().add(i, newException);
-			}	else {
-				Name newException= (Name)ASTNode.copySubtree(ast, oldException);
-				newMethod.thrownExceptions().add(i, newException);
-			}
-		}
-	}
-	
-	// TODO factor out
-	private void copyParameters(ASTRewrite targetRewrite, ICompilationUnit cu, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
-		for (int i= 0, n= oldMethod.parameters().size(); i < n; i++) {
-			SingleVariableDeclaration newParam= null;
-			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) oldMethod.parameters().get(i);
-			if (mapping.length > 0)
-				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, cu, mapping, targetRewrite);
-			else
-				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, cu, targetRewrite);
-			newMethod.parameters().add(i, newParam);
-		}
-	}
-	
-	// TODO factor out
-	private void copyReturnType(ASTRewrite rewrite, ICompilationUnit sourceCu, MethodDeclaration oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
-		Type newReturnType= null;
-		Type oldReturnType= oldMethod.getReturnType2();
-		if (mapping.length > 0)
-			newReturnType= createPlaceholderForType(oldReturnType, sourceCu, mapping, rewrite);
-		else
-			newReturnType= createPlaceholderForType(oldReturnType, sourceCu, rewrite);
-		newMethod.setReturnType2(newReturnType);
-	}
-
-	// TODO factor out
 	private void createField(MemberActionInfo info, TypeDeclaration declaration, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
 		FieldDeclaration newField= createNewFieldDeclarationNode(info, declaringCuNode, mapping, rewrite);
 		rewrite.getListRewrite(declaration, TypeDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), null);
 	}
 
-	// TODO factor out
 	private FieldDeclaration createNewFieldDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite) throws JavaModelException {
 		Assert.isTrue(info.isFieldInfo());
 		IField field= (IField)info.getMember();
@@ -961,11 +935,6 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
 	}
 
-	private void makeDeclaringClassAbstract(TypeDeclaration declaration, ASTRewrite rewrite) {
-		int newModifiers= createNewModifiersForMakingDeclaringClassAbstract(declaration);
-		ModifierRewrite.create(rewrite, declaration).setModifiers(newModifiers, null);
-	}
-
 	private int createNewModifiersForMakingDeclaringClassAbstract(TypeDeclaration declaration) {
 		return Modifier.ABSTRACT | declaration.getModifiers();
 	}
@@ -975,10 +944,10 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 				getInfosForNewMethodsToBeDeclaredAbstract().length != 0;
 	}
 
-	private void makeMethodsAbstractInDeclaringClass(CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void makeMethodsAbstractInDeclaringClass(CompilationUnitRewrite sourceRewriter, CompilationUnitRewrite unitRewriter) throws JavaModelException {
 		MemberActionInfo[] methods= getInfosForNewMethodsToBeDeclaredAbstract();
 		for (int i= 0; i < methods.length; i++) {
-			declareMethodAbstract(methods[i], cuNode, rewrite);
+			declareMethodAbstract(methods[i], sourceRewriter, unitRewriter.getASTRewrite());
 		}
 	}
 
@@ -992,13 +961,14 @@ public class PushDownRefactoring extends HierarchyRefactoring {
 		return (MemberActionInfo[]) result.toArray(new MemberActionInfo[result.size()]);
 	}
 
-	private void declareMethodAbstract(MemberActionInfo info, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException {
+	private void declareMethodAbstract(MemberActionInfo info, CompilationUnitRewrite sourceRewrite, ASTRewrite rewrite) throws JavaModelException {
 		Assert.isTrue(! info.isFieldInfo());
 		IMethod method= (IMethod)info.getMember();
 		if (JdtFlags.isAbstract(method))
 			return;
-		MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, cuNode);
+		final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(method, sourceRewrite.getRoot());
 		rewrite.remove(declaration.getBody(), null);
+		sourceRewrite.getImportRemover().registerRemovedNode(declaration.getBody());
 		
 		int newModifiers= createModifiersForMethodMadeAbstract(info, declaration.getModifiers());
 		ModifierRewrite.create(rewrite, declaration).setModifiers(newModifiers, null);

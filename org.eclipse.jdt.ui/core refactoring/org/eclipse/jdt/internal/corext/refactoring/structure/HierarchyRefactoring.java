@@ -15,7 +15,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -26,6 +25,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -50,8 +50,10 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -68,13 +70,13 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -91,7 +93,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
  * Partial implementation of a refactoring executed on type hierarchies.
@@ -101,7 +102,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	/**
 	 * AST node visitor which performs the actual mapping.
 	 */
-	public static final class MethodMapper extends TypeMapper {
+	public static class MethodBodyMapper extends TypeVariableMapper {
 
 		/** Are we in an anonymous class declaration? */
 		protected boolean fAnonymousClassDeclaration= false;
@@ -109,22 +110,35 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		/** The qualified type name where the super references are referring to */
 		protected final String fQualifiedName;
 
+		/** The source compilation unit rewrite to use */
+		protected final CompilationUnitRewrite fSourceRewriter;
+
+		/** The target compilation unit rewrite to use */
+		protected final CompilationUnitRewrite fTargetRewriter;
+
 		/** Are we in a type declaration statement? */
 		protected boolean fTypeDeclarationStatement= false;
 
 		/**
-		 * Creates a new method mapper.
+		 * Creates a new method body mapper.
 		 * 
+		 * @param sourceRewriter
+		 *        the source compilation unit rewrite to use
+		 * @param targetRewriter
+		 *        the target compilation unit rewrite to use
 		 * @param rewrite
-		 *        The AST rewrite to use
+		 *        the AST rewrite to use
 		 * @param type
 		 *        the super reference type
 		 * @param mapping
 		 *        the type variable mapping
 		 */
-		public MethodMapper(final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping) {
+		public MethodBodyMapper(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping) {
 			super(rewrite, mapping);
+			Assert.isNotNull(rewrite);
 			Assert.isNotNull(type);
+			fSourceRewriter= sourceRewriter;
+			fTargetRewriter= targetRewriter;
 			fQualifiedName= JavaModelUtil.getFullyQualifiedName(type);
 		}
 
@@ -150,6 +164,8 @@ public abstract class HierarchyRefactoring extends Refactoring {
 				access.setExpression(ast.newThisExpression());
 				access.setName(ast.newSimpleName(node.getName().getIdentifier()));
 				fRewrite.replace(node, access, null);
+				if (!fSourceRewriter.getCu().equals(fTargetRewriter.getCu()))
+					fSourceRewriter.getImportRemover().registerRemovedNode(node);
 				return true;
 			}
 			return false;
@@ -171,10 +187,12 @@ public abstract class HierarchyRefactoring extends Refactoring {
 				invocation.setExpression(expression);
 				final List arguments= (List) node.getStructuralProperty(SuperMethodInvocation.ARGUMENTS_PROPERTY);
 				if (arguments != null && arguments.size() > 0) {
-					final ListRewrite rewrite= fRewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
-					rewrite.insertLast(rewrite.createCopyTarget((ASTNode) arguments.get(0), (ASTNode) arguments.get(arguments.size() - 1)), null);
+					final ListRewrite rewriter= fRewrite.getListRewrite(invocation, MethodInvocation.ARGUMENTS_PROPERTY);
+					rewriter.insertLast(rewriter.createCopyTarget((ASTNode) arguments.get(0), (ASTNode) arguments.get(arguments.size() - 1)), null);
 				}
 				fRewrite.replace(node, invocation, null);
+				if (!fSourceRewriter.getCu().equals(fTargetRewriter.getCu()))
+					fSourceRewriter.getImportRemover().registerRemovedNode(node);
 				return true;
 			}
 			return false;
@@ -189,7 +207,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	/**
 	 * AST node visitor which performs the actual mapping.
 	 */
-	public static class TypeMapper extends ASTVisitor {
+	public static class TypeVariableMapper extends ASTVisitor {
 
 		/** The type variable mapping to use */
 		protected final TypeVariableMaplet[] fMapping;
@@ -198,14 +216,14 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		protected final ASTRewrite fRewrite;
 
 		/**
-		 * Creates a new type mapper.
+		 * Creates a new type variable mapper.
 		 * 
 		 * @param rewrite
 		 *        The AST rewrite to use
 		 * @param mapping
 		 *        The type variable mapping to use
 		 */
-		public TypeMapper(final ASTRewrite rewrite, final TypeVariableMaplet[] mapping) {
+		public TypeVariableMapper(final ASTRewrite rewrite, final TypeVariableMaplet[] mapping) {
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(mapping);
 			fRewrite= rewrite;
@@ -260,9 +278,24 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected static void copyJavadocNode(final ASTRewrite rewrite, final IMember member, final BodyDeclaration oldDeclaration, final BodyDeclaration newDeclaration) throws JavaModelException {
-		final Javadoc doc= oldDeclaration.getJavadoc();
-		if (doc != null)
-			newDeclaration.setJavadoc((Javadoc) ASTNode.copySubtree(rewrite.getAST(), doc));
+		final Javadoc predecessor= oldDeclaration.getJavadoc();
+		if (predecessor != null) {
+			final IDocument buffer= new Document(member.getCompilationUnit().getBuffer().getContents());
+			try {
+				final String[] lines= Strings.convertIntoLines(buffer.get(predecessor.getStartPosition(), predecessor.getLength()));
+				Strings.trimIndentation(lines, CodeFormatterUtil.getTabWidth(), false);
+				final Javadoc successor= (Javadoc) rewrite.createStringPlaceholder(Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(buffer)), ASTNode.JAVADOC);
+				newDeclaration.setJavadoc(successor);
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+	}
+
+	protected static void copyThrownExceptions(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
+		final AST ast= newMethod.getAST();
+		for (int index= 0, n= oldMethod.thrownExceptions().size(); index < n; index++)
+			newMethod.thrownExceptions().add(index, ASTNode.copySubtree(ast, (Name) oldMethod.thrownExceptions().get(index)));
 	}
 
 	protected static String createFieldLabel(final IField field) {
@@ -296,7 +329,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(expression.getAST());
 			final ITrackedNodePosition position= rewriter.track(expression);
-			expression.accept(new TypeMapper(rewriter, mapping));
+			expression.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			result= (Expression) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.METHOD_INVOCATION);
 		} catch (MalformedTreeException exception) {
@@ -328,7 +361,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
-			bodyDeclaration.accept(new TypeMapper(rewriter, mapping) {
+			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping) {
 
 				public final boolean visit(final TypeDeclaration node) {
 					ModifierRewrite.create(fRewrite, bodyDeclaration).setVisibility(Modifier.PROTECTED, null);
@@ -355,7 +388,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(declaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(declaration);
-			declaration.accept(new TypeMapper(rewriter, mapping));
+			declaration.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			result= (SingleVariableDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SINGLE_VARIABLE_DECLARATION);
 		} catch (MalformedTreeException exception) {
@@ -376,7 +409,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(type.getAST());
 			final ITrackedNodePosition position= rewriter.track(type);
-			type.accept(new TypeMapper(rewriter, mapping));
+			type.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			result= (Type) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.SIMPLE_TYPE);
 		} catch (MalformedTreeException exception) {
@@ -397,7 +430,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 			final IDocument document= new Document(declaringCu.getBuffer().getContents());
 			final ASTRewrite rewriter= ASTRewrite.create(bodyDeclaration.getAST());
 			final ITrackedNodePosition position= rewriter.track(bodyDeclaration);
-			bodyDeclaration.accept(new TypeMapper(rewriter, mapping));
+			bodyDeclaration.accept(new TypeVariableMapper(rewriter, mapping));
 			rewriter.rewriteAST(document, null).apply(document, TextEdit.NONE);
 			result= (BodyDeclaration) rewrite.createStringPlaceholder(document.get(position.getStartPosition(), position.getLength()), ASTNode.TYPE_DECLARATION);
 		} catch (MalformedTreeException exception) {
@@ -412,20 +445,30 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		return JavaModelUtil.getFullyQualifiedName(type);
 	}
 
-	protected static void deleteDeclarationNodes(final CompilationUnit cuNode, final ASTRewrite rewrite, final List members) throws JavaModelException {
-		final List declarationNodes= getDeclarationNodes(cuNode, members);
+	protected static void deleteDeclarationNodes(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final CompilationUnitRewrite unitRewriter, final List members) throws JavaModelException {
+		final List declarationNodes= getDeclarationNodes(unitRewriter.getRoot(), members);
+		final boolean sameCu= sourceRewriter.getCu().equals(targetRewriter.getCu());
 		for (final Iterator iterator= declarationNodes.iterator(); iterator.hasNext();) {
 			final ASTNode node= (ASTNode) iterator.next();
+			final ASTRewrite rewriter= unitRewriter.getASTRewrite();
+			final ImportRemover remover= unitRewriter.getImportRemover();
 			if (node instanceof VariableDeclarationFragment) {
 				if (node.getParent() instanceof FieldDeclaration) {
 					final FieldDeclaration declaration= (FieldDeclaration) node.getParent();
-					if (areAllFragmentsDeleted(declaration, declarationNodes))
-						rewrite.remove(declaration, null);
-					else
-						rewrite.remove(node, null);
+					if (areAllFragmentsDeleted(declaration, declarationNodes)) {
+						rewriter.remove(declaration, null);
+						if (!sameCu)
+							remover.registerRemovedNode(declaration);
+					} else {
+						rewriter.remove(node, null);
+						if (!sameCu)
+							remover.registerRemovedNode(node);
+					}
 				}
 			} else {
-				rewrite.remove(node, null);
+				rewriter.remove(node, null);
+				if (!sameCu)
+					remover.registerRemovedNode(node);
 			}
 		}
 	}
@@ -500,8 +543,6 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected final CodeGenerationSettings fCodeGenerationSettings;
 
-	protected final ImportRewriteManager fImportManager;
-
 	protected IMember[] fMembersToMove;
 
 	protected HierarchyRefactoring(final IMember[] members, final CodeGenerationSettings settings) {
@@ -510,16 +551,6 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 		fCodeGenerationSettings= settings;
-		fImportManager= new ImportRewriteManager();
-	}
-
-	protected void addTextEditFromRewrite(final TextChangeManager manager, final ICompilationUnit cu, final ASTRewrite rewrite) throws CoreException {
-		final IDocument document= new Document(cu.getBuffer().getContents());
-		final TextEdit result= rewrite.rewriteAST(document, null);
-		final TextChange change= manager.get(cu);
-		if (fImportManager.hasImportEditFor(cu))
-			result.addChild(fImportManager.getImportRewrite(cu).createEdit(document));
-		TextChangeCompatibility.addTextEdit(change, getName(), result);
 	}
 
 	protected boolean canBeAccessedFrom(final IMember member, final IType targetType, final ITypeHierarchy targetTypeHierarchy) throws JavaModelException {
@@ -599,15 +630,62 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected void clearCaches() {
 		fCachedReferencedTypes= null;
-		fImportManager.clear();
+	}
+
+	protected void copyParameters(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
+		SingleVariableDeclaration newParam= null;
+		for (int index= 0, size= oldMethod.parameters().size(); index < size; index++) {
+			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) oldMethod.parameters().get(index);
+			if (mapping.length > 0)
+				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, unit, mapping, rewrite);
+			else
+				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, unit, rewrite);
+			newMethod.parameters().add(index, newParam);
+		}
+	}
+
+	protected void copyReturnType(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
+		Type newReturnType= null;
+		Type oldReturnType= oldMethod.getReturnType2();
+		if (mapping.length > 0)
+			newReturnType= createPlaceholderForType(oldReturnType, unit, mapping, rewrite);
+		else
+			newReturnType= createPlaceholderForType(oldReturnType, unit, rewrite);
+		newMethod.setReturnType2(newReturnType);
+	}
+
+	protected FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit declaringCuNode, final IField field, final TypeVariableMaplet[] mapping, final IProgressMonitor pm, final RefactoringStatus status, int modifiers) throws JavaModelException {
+		VariableDeclarationFragment oldFieldFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, declaringCuNode);
+		VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
+		newFragment.setExtraDimensions(oldFieldFragment.getExtraDimensions());
+		Expression initializer= oldFieldFragment.getInitializer();
+		if (initializer != null) {
+			Expression newInitializer= null;
+			if (mapping.length > 0)
+				newInitializer= createPlaceholderForExpression(initializer, field.getCompilationUnit(), mapping, rewrite);
+			else
+				newInitializer= createPlaceholderForExpression(initializer, field.getCompilationUnit(), rewrite);
+			newFragment.setInitializer(newInitializer);
+		}
+		newFragment.setName(((SimpleName) ASTNode.copySubtree(rewrite.getAST(), oldFieldFragment.getName())));
+		FieldDeclaration newField= rewrite.getAST().newFieldDeclaration(newFragment);
+		FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, declaringCuNode);
+		copyJavadocNode(rewrite, field, oldField, newField);
+		newField.modifiers().addAll(ASTNodeFactory.newModifiers(rewrite.getAST(), modifiers));
+
+		Type oldType= oldField.getType();
+		ICompilationUnit cu= field.getCompilationUnit();
+		Type newType= null;
+		if (mapping.length > 0) {
+			newType= createPlaceholderForType(oldType, cu, mapping, rewrite);
+		} else
+			newType= createPlaceholderForType(oldType, cu, rewrite);
+		newField.setType(newType);
+		return newField;
 	}
 
 	protected IFile[] getAllFilesToModify() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-	}
-
-	protected ICompilationUnit getDeclaringCU() {
-		return getDeclaringType().getCompilationUnit();
 	}
 
 	public IType getDeclaringType() {
