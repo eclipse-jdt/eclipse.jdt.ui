@@ -168,7 +168,7 @@ public class JavadocTagsSubProcessor {
 		proposals.add(proposal);
 		
 		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.addjavadoc.allmissing.description"); //$NON-NLS-1$
-		JavadocRewriteProposal addAllMissing= new JavadocRewriteProposal(label, context.getCompilationUnit(), javadoc, 1, image); //$NON-NLS-1$
+		JavadocRewriteProposal addAllMissing= new JavadocRewriteProposal(label, context.getCompilationUnit(), javadoc, 5, image); //$NON-NLS-1$
 		List list= methodDecl.parameters();
 		for (int i= 0; i < list.size(); i++) {
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) list.get(i);
