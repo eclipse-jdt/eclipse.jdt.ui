@@ -398,7 +398,7 @@ public class FilteredList extends Composite {
 		if (((fFilter == null) || (fFilter.length() == 0)) && !fMatchEmtpyString)
 			return 0;
 		
-		fFilterMatcher.setFilter(fFilter, fIgnoreCase, false);
+		fFilterMatcher.setFilter(fFilter.trim(), fIgnoreCase, false);
 
 		int k= 0;
 		for (int i= 0; i != fElements.length; i++) {
