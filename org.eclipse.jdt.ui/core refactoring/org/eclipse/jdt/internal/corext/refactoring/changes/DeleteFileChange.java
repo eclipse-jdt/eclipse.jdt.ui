@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFileChange extends AbstractDeleteChange {
 

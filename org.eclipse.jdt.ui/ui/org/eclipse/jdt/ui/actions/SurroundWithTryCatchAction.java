@@ -29,10 +29,7 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 
@@ -42,12 +39,17 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.UIPerformChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Action to surround a set of statements with a try/catch block.
@@ -125,7 +127,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 				return;
 			Change change= refactoring.createChange(new NullProgressMonitor());
 			change.initializeValidationData(new NullProgressMonitor());
-			PerformChangeOperation op= new PerformChangeOperation(change);
+			PerformChangeOperation op= new UIPerformChangeOperation(change);
 			new BusyIndicatorRunnableContext().run(false, false, new WorkbenchRunnableAdapter(op, cu.getResource()));
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, getDialogTitle(), RefactoringMessages.getString("SurroundWithTryCatchAction.exception")); //$NON-NLS-1$

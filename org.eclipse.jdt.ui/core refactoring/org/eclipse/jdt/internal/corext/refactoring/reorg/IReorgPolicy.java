@@ -16,9 +16,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRefactoring {
 	public RefactoringStatus checkInput(IProgressMonitor pm, IReorgQueries reorgQueries) throws JavaModelException;

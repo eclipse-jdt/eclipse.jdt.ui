@@ -27,13 +27,13 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
 import org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class TypeRenameParticipant extends RenameParticipant {
 

@@ -14,10 +14,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
+
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
 class ChangeTypeContentProvider implements ITreeContentProvider {
 	

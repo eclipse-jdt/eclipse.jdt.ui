@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{

@@ -21,8 +21,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public class DeleteFromClasspathChange extends JDTChange {
 

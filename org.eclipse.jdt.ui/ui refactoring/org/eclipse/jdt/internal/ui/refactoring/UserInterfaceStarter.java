@@ -14,9 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 /**
  * Opens the user interface for a given refactoring.

@@ -39,7 +39,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -47,6 +46,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.ltk.core.refactoring.Change;
 
 /**
  * Presents the changes made by the refactoring.
@@ -161,7 +162,7 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * Method defined in RefactoringWizardPage
 	 */
 	protected boolean performFinish() {
-		return getRefactoringWizard().performFinish(new PerformChangeOperation(fChange));
+		return getRefactoringWizard().performFinish(new UIPerformChangeOperation(fChange));
 	} 
 	
 	/* (non-JavaDoc)

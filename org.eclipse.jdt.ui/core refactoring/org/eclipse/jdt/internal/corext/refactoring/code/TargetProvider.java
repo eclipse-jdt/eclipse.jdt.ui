@@ -44,8 +44,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 abstract class TargetProvider {
 

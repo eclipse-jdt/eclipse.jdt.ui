@@ -21,11 +21,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -33,6 +30,10 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * A helper class to activate the UI of a refactoring

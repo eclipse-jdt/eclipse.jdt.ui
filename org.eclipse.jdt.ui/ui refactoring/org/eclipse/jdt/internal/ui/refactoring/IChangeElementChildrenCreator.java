@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public interface IChangeElementChildrenCreator {
 

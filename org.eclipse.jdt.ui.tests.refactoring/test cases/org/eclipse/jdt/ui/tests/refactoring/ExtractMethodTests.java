@@ -26,14 +26,14 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodTests extends AbstractSelectionTestCase {
 
@@ -120,7 +120,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	}
 	
 	protected int getCheckingStyle() {
-		return PerformRefactoringOperation.CHECK_INPUT;
+		return CheckConditionsOperation.INPUT;
 	}
 	
 	protected void invalidSelectionTest() throws Exception {

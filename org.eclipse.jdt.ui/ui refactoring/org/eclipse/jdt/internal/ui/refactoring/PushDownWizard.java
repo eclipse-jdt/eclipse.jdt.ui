@@ -20,6 +20,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -58,9 +60,9 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -68,9 +70,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class PushDownWizard extends RefactoringWizard {
 

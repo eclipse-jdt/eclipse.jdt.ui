@@ -33,7 +33,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -45,6 +44,8 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.Change;
 
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {

@@ -24,12 +24,13 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveInnerToTopWizard extends RefactoringWizard {
 

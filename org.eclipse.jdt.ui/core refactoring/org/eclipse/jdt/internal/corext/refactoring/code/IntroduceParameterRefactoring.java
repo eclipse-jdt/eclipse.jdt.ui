@@ -61,14 +61,14 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring.ASTData;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class IntroduceParameterRefactoring extends Refactoring {
 	

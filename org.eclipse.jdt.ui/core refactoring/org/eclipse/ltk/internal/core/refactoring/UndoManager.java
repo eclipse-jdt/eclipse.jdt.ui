@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
-package org.eclipse.jdt.internal.corext.refactoring;
+package org.eclipse.ltk.internal.core.refactoring;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -21,16 +20,16 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManagerListener;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.IUndoManagerListener;
 import org.eclipse.ltk.core.refactoring.IValidationStateListener;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.ValidationStateChangedEvent;
 
 /**
@@ -190,7 +189,6 @@ public class UndoManager implements IUndoManager {
 	 * (Non-Javadoc) Method declared in IUndoManager.
 	 */
 	public RefactoringStatus performRedo(IProgressMonitor pm) throws CoreException {
-		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (fRedoChanges.empty())
@@ -216,36 +214,42 @@ public class UndoManager implements IUndoManager {
 		return result;
 	}
 
-	private Change executeChange(RefactoringStatus status, final Change change, IProgressMonitor pm) throws CoreException {
-		// TODO @@@ should use change perform operation.
-		Exception exception= null;
+	private Change executeChange(final RefactoringStatus status, final Change change, IProgressMonitor pm) throws CoreException {
 		final Change[] undo= new Change[1];
-		try {
-			pm.beginTask("", 11); //$NON-NLS-1$
-			status.merge(change.isValid(new SubProgressMonitor(pm, 2)));
-			if (status.hasFatalError())
-				return null;
+		IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
+				Exception exception= null;
+				try {
+					monitor.beginTask("", 11); //$NON-NLS-1$
+					status.merge(change.isValid(new SubProgressMonitor(monitor, 2)));
+					if (status.hasFatalError()) {
+						return;
+					}
 
-			aboutToPerformChange(change);
-			JavaCore.run(new IWorkspaceRunnable() {
-				public void run(IProgressMonitor innerPM) throws CoreException {
-					undo[0]= change.perform(innerPM);
+					ResourcesPlugin.getWorkspace().checkpoint(false);
+					aboutToPerformChange(change);
+					undo[0]= change.perform(new SubProgressMonitor(monitor, 8));
+					try {
+						change.dispose();
+					} finally {
+						if (undo[0] != null) {
+							undo[0].initializeValidationData(new SubProgressMonitor(monitor, 1));
+						}
+					}
+				} catch (RuntimeException e) {
+					exception= e;
+					throw e;
+				} catch (CoreException e) {
+					exception= e;
+					throw e;
+				} finally {
+					ResourcesPlugin.getWorkspace().checkpoint(false);
+					changePerformed(change, undo[0], exception);
+					monitor.done();
 				}
-			}, new SubProgressMonitor(pm, 8));
-		} catch (RuntimeException e) {
-			exception= e;
-			throw e;
-		} catch (CoreException e) {
-			exception= e;
-			throw e;
-		} finally {
-			change.dispose();
-			changePerformed(change, undo[0], exception);
-			pm.done();
-		}
-		if (undo[0] != null) {
-			undo[0].initializeValidationData(new SubProgressMonitor(pm, 1));
-		}
+			}
+		};
+		JavaCore.run(runnable, pm);
 		return undo[0];
 	}
 

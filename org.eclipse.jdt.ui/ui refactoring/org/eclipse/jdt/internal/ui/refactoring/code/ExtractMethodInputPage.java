@@ -33,7 +33,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -43,6 +42,8 @@ import org.eclipse.jdt.internal.ui.refactoring.IParameterListChangeListener;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractMethodInputPage extends UserInputWizardPage {
 

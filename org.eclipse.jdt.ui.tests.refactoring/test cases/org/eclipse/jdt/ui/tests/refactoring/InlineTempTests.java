@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineTempTests extends RefactoringTest {
 

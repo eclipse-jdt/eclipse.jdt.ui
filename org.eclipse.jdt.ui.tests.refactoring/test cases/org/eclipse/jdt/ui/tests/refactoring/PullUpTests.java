@@ -29,11 +29,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class PullUpTests extends RefactoringTest {
 
@@ -82,7 +83,7 @@ public class PullUpTests extends RefactoringTest {
 								
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref);
+			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -154,7 +155,7 @@ public class PullUpTests extends RefactoringTest {
 		
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref);
+			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -253,7 +254,7 @@ public class PullUpTests extends RefactoringTest {
 
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref);
+			performChange(ref, false);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -270,7 +271,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cu, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 
 			setTargetClass(ref, targetClassIndex);
@@ -281,7 +281,7 @@ public class PullUpTests extends RefactoringTest {
 		
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", checkInputResult.isOK());	
-			performChange(ref);
+			performChange(ref, false);
 			
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cu.getSource();
@@ -298,7 +298,6 @@ public class PullUpTests extends RefactoringTest {
 			IType type= getType(cu, "B");
 			IMethod[] methods= getMethods(type, methodNames, signatures);
 			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 			setTargetClass(ref, targetClassIndex);
 			if (deleteAllInSourceType)

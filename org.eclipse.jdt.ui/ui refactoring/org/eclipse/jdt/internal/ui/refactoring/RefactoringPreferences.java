@@ -13,10 +13,11 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RefactoringPreferences {
 

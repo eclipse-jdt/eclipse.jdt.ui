@@ -22,10 +22,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * @author rfuhrer, tip
@@ -87,7 +88,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 	
-		performChange(ref);	
+		performChange(ref, false);	
 		
 		String newSource= cu.getSource();
 	

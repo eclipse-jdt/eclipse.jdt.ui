@@ -20,9 +20,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IProcessorBasedRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
@@ -32,6 +29,9 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModific
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.core.refactoring.DelegatingValidationStateChange;
 
 

@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public interface IPreviewWizardPage extends IWizardPage {
 

@@ -23,11 +23,12 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineMethodInputPage extends UserInputWizardPage {
 

@@ -15,9 +15,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.ltk.core.refactoring.Change;
 
 class DefaultChangeElement extends ChangeElement {
 	

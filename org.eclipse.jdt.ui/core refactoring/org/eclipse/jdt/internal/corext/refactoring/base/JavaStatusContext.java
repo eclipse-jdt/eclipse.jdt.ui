@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**
  * A Java element context that can be used to annotate a </code>RefactoringStatusEntry<code> 

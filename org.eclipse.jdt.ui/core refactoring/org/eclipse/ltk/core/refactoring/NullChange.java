@@ -14,15 +14,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages;
 
 public class NullChange extends Change {
 
 	private String fName;
 	
 	public NullChange() {
-		this("No change");
+		this(RefactoringCoreMessages.getString("NullChange.name")); //$NON-NLS-1$
 	}
 
 	public NullChange(String name) {

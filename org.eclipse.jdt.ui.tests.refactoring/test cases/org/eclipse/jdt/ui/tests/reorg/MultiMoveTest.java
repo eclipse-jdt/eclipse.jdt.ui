@@ -18,11 +18,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 ;
 
 public class MultiMoveTest extends RefactoringTest {

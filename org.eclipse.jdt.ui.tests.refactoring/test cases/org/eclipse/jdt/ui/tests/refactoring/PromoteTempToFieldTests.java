@@ -26,9 +26,10 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class PromoteTempToFieldTests extends RefactoringTest{
 	
@@ -128,7 +129,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 		assertTrue("precondition was supposed to pass", checkInputResult.isOK());
 
-		performChange(ref);
+		performChange(ref, false);
         		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

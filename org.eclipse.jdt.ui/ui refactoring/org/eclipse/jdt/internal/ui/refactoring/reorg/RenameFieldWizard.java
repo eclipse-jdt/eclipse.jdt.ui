@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
@@ -34,6 +33,8 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameFieldWizard extends RenameRefactoringWizard {
 

@@ -29,11 +29,12 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class PushDownTests extends RefactoringTest {
 
@@ -111,7 +112,7 @@ public class PushDownTests extends RefactoringTest {
 
 			RefactoringStatus checkInputResult= ref.checkInput(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass but got " + checkInputResult.toString(), checkInputResult.isOK());	
-			performChange(ref);
+			performChange(ref, false);
 
 			String expected= getFileContents(getOutputTestFileName("A"));
 			String actual= cuA.getSource();

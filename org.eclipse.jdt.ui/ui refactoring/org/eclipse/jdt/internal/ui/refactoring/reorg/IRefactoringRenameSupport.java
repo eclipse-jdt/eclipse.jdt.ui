@@ -13,8 +13,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Abstraction layer for renaming using refactoring.

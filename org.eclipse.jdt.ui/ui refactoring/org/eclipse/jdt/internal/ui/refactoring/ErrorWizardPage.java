@@ -21,8 +21,10 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Presents the list of failed preconditions to the user
@@ -105,7 +107,7 @@ class ErrorWizardPage extends RefactoringWizardPage {
 		RefactoringWizard wizard= getRefactoringWizard();
 		Change change= wizard.getChange();
 		if (change == null) {
-			change= wizard.createChange(CreateChangeOperation.CHECK_NONE, RefactoringStatus.ERROR, false);
+			change= wizard.createChange(new CreateChangeOperation(getRefactoring()), false);
 			wizard.setChange(change);
 		}
 		if (change == null)
@@ -122,12 +124,10 @@ class ErrorWizardPage extends RefactoringWizardPage {
 		Change change= wizard.getChange();
 		PerformChangeOperation op= null;
 		if (change != null) {
-			op= new PerformChangeOperation(change);
+			op= new UIPerformChangeOperation(change);
 		} else {
-			CreateChangeOperation ccop= new CreateChangeOperation(getRefactoring(), CreateChangeOperation.CHECK_NONE);
-			ccop.setCheckPassedSeverity(RefactoringStatus.ERROR);
-			
-			op= new PerformChangeOperation(ccop);
+			CreateChangeOperation ccop= new CreateChangeOperation(getRefactoring());
+			op= new UIPerformChangeOperation(ccop);
 		}
 		return wizard.performFinish(op);
 	} 

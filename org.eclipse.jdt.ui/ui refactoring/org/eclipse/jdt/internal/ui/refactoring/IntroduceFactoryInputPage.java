@@ -16,13 +16,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
-import org.eclipse.jface.window.Window;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -34,7 +28,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.window.Window;
+
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * @author rfuhrer

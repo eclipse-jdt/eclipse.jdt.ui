@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public class CopyCompilationUnitChange extends CompilationUnitReorgChange {
 	

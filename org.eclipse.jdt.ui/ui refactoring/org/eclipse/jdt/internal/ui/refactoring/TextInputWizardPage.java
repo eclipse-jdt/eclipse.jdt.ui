@@ -19,7 +19,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class TextInputWizardPage extends UserInputWizardPage{
 

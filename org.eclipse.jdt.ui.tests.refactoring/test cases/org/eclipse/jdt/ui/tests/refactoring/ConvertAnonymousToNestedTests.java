@@ -29,8 +29,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
@@ -111,7 +111,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 			preconditionResult= null;
 		assertEquals("precondition was supposed to pass", null, preconditionResult);
 		
-		performChange(ref);
+		performChange(ref, false);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 		String newCuName= getSimpleTestFileName(true, true);

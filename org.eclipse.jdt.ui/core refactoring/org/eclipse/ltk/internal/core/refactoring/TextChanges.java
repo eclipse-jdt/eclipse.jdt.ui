@@ -22,7 +22,7 @@ import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Helper class for text file changes.
@@ -93,7 +93,7 @@ public class TextChanges {
 	public static RefactoringStatus isValid(IDocument document, int length) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (length != document.getLength()) {
-			result.addFatalError("Content of the document has changed");
+			result.addFatalError(RefactoringCoreMessages.getString("TextChanges.error.document_content_changed")); //$NON-NLS-1$
 		}
 		return result;
 	}

@@ -44,18 +44,21 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
-import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -82,7 +85,7 @@ public abstract class RefactoringTest extends TestCase {
 			System.out.println("\n---------------------------------------------");
 			System.out.println("\nTest:" + getClass() + "." + getName());
 		}	
-		Refactoring.getUndoManager().flush();
+		RefactoringCore.getUndoManager().flush();
 	}
 
 	protected void performDummySearch() throws Exception {
@@ -165,12 +168,13 @@ public abstract class RefactoringTest extends TestCase {
 	protected final RefactoringStatus performRefactoring(Refactoring ref, boolean providesUndo) throws Exception {
 		performDummySearch();
 		IUndoManager undoManager= getUndoManager();
-		CreateChangeOperation create= new CreateChangeOperation(ref, 
-			CreateChangeOperation.CHECK_PRECONDITION, RefactoringStatus.ERROR);
+		CreateChangeOperation create= new CreateChangeOperation(
+			new CheckConditionsOperation(ref, CheckConditionsOperation.PRECONDITIONS),
+			RefactoringStatus.ERROR);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
-		perform.setUndoManager(Refactoring.getUndoManager(), ref.getName());
+		perform.setUndoManager(undoManager, ref.getName());
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
-		RefactoringStatus status= create.getStatus();
+		RefactoringStatus status= create.getConditionCheckingStatus();
 		if (!status.isOK())
 			return status;
 		assertTrue("Change wasn't executed", perform.changeExecuted());
@@ -186,21 +190,25 @@ public abstract class RefactoringTest extends TestCase {
 	
 	protected final RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception {
 		performDummySearch();
-		CreateChangeOperation create= new CreateChangeOperation(ref, 
-			CreateChangeOperation.CHECK_PRECONDITION, RefactoringStatus.ERROR);
+		CreateChangeOperation create= new CreateChangeOperation(
+			new CheckConditionsOperation(ref, CheckConditionsOperation.PRECONDITIONS),
+			RefactoringStatus.ERROR);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
-		perform.setUndoManager(Refactoring.getUndoManager(), ref.getName());
+		perform.setUndoManager(RefactoringCore.getUndoManager(), ref.getName());
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
-		RefactoringStatus status= create.getStatus();
+		RefactoringStatus status= create.getConditionCheckingStatus();
 		if (status.hasFatalError())
 			return status;
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return status;
 	}
 	
-	protected final Change performChange(final Refactoring refactoring) throws Exception {
-		CreateChangeOperation create= new CreateChangeOperation(refactoring, CreateChangeOperation.CHECK_NONE);
+	protected final Change performChange(final Refactoring refactoring, boolean storeUndo) throws Exception {
+		CreateChangeOperation create= new CreateChangeOperation(refactoring);
 		PerformChangeOperation perform= new PerformChangeOperation(create);
+		if (storeUndo) {
+			perform.setUndoManager(getUndoManager(), refactoring.getName());
+		}
 		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
 		assertTrue("Change wasn't executed", perform.changeExecuted());
 		return perform.getUndoChange();
@@ -214,7 +222,7 @@ public abstract class RefactoringTest extends TestCase {
 	}
 	
 	protected IUndoManager getUndoManager() {
-		IUndoManager undoManager= Refactoring.getUndoManager();
+		IUndoManager undoManager= RefactoringCore.getUndoManager();
 		undoManager.flush();
 		return undoManager;
 	}

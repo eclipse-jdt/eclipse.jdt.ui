@@ -11,12 +11,15 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jface.wizard.IWizardPage;
-
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jface.wizard.IWizardPage;
+
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * An abstract wizard page that can be used to implement user input pages for 
@@ -110,9 +113,9 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		if (activationStatus != null && activationStatus.getSeverity() > threshold) {
 			inputStatus= wizard.checkInput();
 		} else {
-			CreateChangeOperation create= new CreateChangeOperation(refactoring, CreateChangeOperation.CHECK_INPUT); 
-			create.setCheckPassedSeverity(threshold);
-			
+			CreateChangeOperation create= new CreateChangeOperation(
+				new CheckConditionsOperation(refactoring, CheckConditionsOperation.INPUT),
+				threshold);
 			PerformChangeOperation perform= new PerformChangeOperation(create);
 			
 			result= wizard.performFinish(perform);
@@ -120,7 +123,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 			if (!result)
 				return false;
 			inputStatus= new RefactoringStatus();
-			inputStatus.merge(create.getStatus());
+			inputStatus.merge(create.getConditionCheckingStatus());
 			inputStatus.merge(perform.getValidationStatus());
 		}
 		

@@ -29,8 +29,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
@@ -51,6 +49,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Central access point to execute rename refactorings.

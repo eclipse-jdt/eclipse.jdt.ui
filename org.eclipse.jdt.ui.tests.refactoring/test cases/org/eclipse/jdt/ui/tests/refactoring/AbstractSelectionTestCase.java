@@ -17,24 +17,22 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformRefactoringOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 
@@ -109,13 +107,13 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				assertTrue(!checkPreconditions(refactoring, pm).isOK());
 				break;
 			case COMPARE_WITH_OUTPUT:
-				IUndoManager undoManager= Refactoring.getUndoManager();
+				IUndoManager undoManager= RefactoringCore.getUndoManager();
 				undoManager.flush();
 				String original= unit.getSource();
 				
 				PerformRefactoringOperation op= new PerformRefactoringOperation(
 					refactoring, getCheckingStyle());
-				ResourcesPlugin.getWorkspace().run(op, new NullProgressMonitor());
+				JavaCore.run(op, new NullProgressMonitor());
 				assertTrue("Precondition check failed", !op.getConditionStatus().hasFatalError());
 				assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
 				assertNotNull("No Undo", op.getUndoChange());
@@ -141,6 +139,6 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	}
 	
 	protected int getCheckingStyle() {
-		return PerformRefactoringOperation.CHECK_PRECONDITION;
+		return CheckConditionsOperation.PRECONDITIONS;
 	}
 }

@@ -31,13 +31,13 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.ListenerList;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
 import org.eclipse.ltk.core.refactoring.IValidationStateListener;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.ValidationStateChangedEvent;
 
 public class ValidationStateChange extends CompositeChange implements IDynamicValidationStateChange {
@@ -209,9 +209,14 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	public void changePerformed(Change change, Change undo, Exception e) {
 		fInRefactoringCount--;
 		if (fInRefactoringCount == 0) {
+			// if the undo object == null then this change object is invalid
+			// because the work space state will not be restored properly.
+			// Additionally if an exception occurred this change is invalid as
+			// well.
 			if ((undo == null || e != null) && fValidationState != null) {
 				fireValidationStateChanged();
 			}
+			fValidationState= null;
 		}
 	}
 	
@@ -249,7 +254,7 @@ public class ValidationStateChange extends CompositeChange implements IDynamicVa
 	}
 
 	private void workspaceChanged() {
-		fValidationState= RefactoringStatus.createFatalErrorStatus("Workspace has changed");
+		fValidationState= RefactoringStatus.createFatalErrorStatus("Workspace has changed since change has been created");
 		if (fInRefactoringCount > 0)
 			return;
 		fireValidationStateChanged();

@@ -35,16 +35,14 @@ import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.UndoManagerAdapter;
 
 abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 
@@ -58,7 +56,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 	public UndoManagerAction() {
 	}
 	
-	protected abstract IRunnableWithProgress createOperation(ChangeContext context);
+	protected abstract IRunnableWithProgress createOperation();
 	
 	protected abstract UndoManagerAdapter createUndoManagerListener();
 	
@@ -81,7 +79,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 			return;
 		fAction= action;
 		fUndoManagerListener= createUndoManagerListener();
-		Refactoring.getUndoManager().addListener(fUndoManagerListener);
+		RefactoringCore.getUndoManager().addListener(fUndoManagerListener);
 	}
 	
 	protected String shortenText(String text, int patternLength) {
@@ -102,7 +100,7 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 	 */
 	public void dispose() {
 		if (fUndoManagerListener != null)
-			Refactoring.getUndoManager().removeListener(fUndoManagerListener);
+			RefactoringCore.getUndoManager().removeListener(fUndoManagerListener);
 		fWorkbenchWindow= null;
 		fAction= null;
 		fUndoManagerListener= null;
@@ -120,18 +118,15 @@ abstract class UndoManagerAction implements IWorkbenchWindowActionDelegate {
 	 */
 	public void run(IAction action) {
 		Shell parent= fWorkbenchWindow.getShell();
-		ChangeContext context= new ChangeContext(new AbortChangeExceptionHandler(), getUnsavedFiles());
-		IRunnableWithProgress op= createOperation(context);
+		IRunnableWithProgress op= createOperation();
 		try {
 			// Don't execute in separate thread since it updates the UI.
 			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, op);
 		} catch (InvocationTargetException e) {
-			Refactoring.getUndoManager().flush();
+			RefactoringCore.getUndoManager().flush();
 			ExceptionHandler.handle(e, RefactoringMessages.getString("UndoManagerAction.internal_error.title"), RefactoringMessages.getString("UndoManagerAction.internal_error.message")); //$NON-NLS-2$ //$NON-NLS-1$
 		} catch (InterruptedException e) {
 			// Opertation isn't cancelable.
-		} finally {
-			context.clearPerformedChanges();
 		}
 		
 		if (fPreflightStatus != null && fPreflightStatus.hasError()) {

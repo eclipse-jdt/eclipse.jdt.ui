@@ -8,13 +8,14 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
-import org.eclipse.core.runtime.CoreException;
 
-public interface IReorgExceptionHandler extends IChangeExceptionHandler{
-	
-	public boolean forceDeletingResourceOutOfSynch(String name, CoreException e);
-	
-	public void foo();
+/**
+ * @deprecated. Will not become API in 3.0. Is only here to make some 
+ * old methods in Change final. Will go away for 3.0.
+ */
+/* package */ class ChangeContext {
+	private ChangeContext() {
+	}
 }

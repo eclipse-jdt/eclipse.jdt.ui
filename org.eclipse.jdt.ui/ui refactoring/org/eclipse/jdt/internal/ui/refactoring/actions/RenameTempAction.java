@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -33,6 +32,8 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 public class RenameTempAction extends SelectionDispatchAction {
 

@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
@@ -44,6 +43,8 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public class CopyTest extends RefactoringTest {

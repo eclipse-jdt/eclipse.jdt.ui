@@ -16,10 +16,10 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameJavaProjectTests extends RefactoringTest {
 

@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.core.runtime.CoreException;
 
 /**
  * Presents a preview of a <code>ChangeElement</code>

@@ -24,7 +24,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 class RefactoringStatusDialog extends Dialog {
 	

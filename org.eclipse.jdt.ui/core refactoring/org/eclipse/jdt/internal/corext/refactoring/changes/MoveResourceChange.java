@@ -18,7 +18,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public class MoveResourceChange extends ResourceReorgChange {
 	

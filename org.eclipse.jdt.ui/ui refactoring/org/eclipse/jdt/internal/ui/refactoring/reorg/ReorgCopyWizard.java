@@ -17,8 +17,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public class ReorgCopyWizard extends RefactoringWizard {

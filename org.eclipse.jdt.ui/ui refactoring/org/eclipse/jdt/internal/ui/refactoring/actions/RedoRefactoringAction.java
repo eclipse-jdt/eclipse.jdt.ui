@@ -20,13 +20,11 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
-import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.IUndoManager;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.UndoManagerAdapter;
-
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.UndoManagerAdapter;
 
 public class RedoRefactoringAction extends UndoManagerAction {
 
@@ -46,19 +44,16 @@ public class RedoRefactoringAction extends UndoManagerAction {
 	/* (non-Javadoc)
 	 * Method declared in UndoManagerAction
 	 */
-	protected IRunnableWithProgress createOperation(final ChangeContext context) {
+	protected IRunnableWithProgress createOperation() {
 		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		return new IRunnableWithProgress(){
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					setPreflightStatus(Refactoring.getUndoManager().performRedo(pm));
+					setPreflightStatus(RefactoringCore.getUndoManager().performRedo(pm));
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);			
-				} catch (ChangeAbortException e) {
-					throw new InvocationTargetException(e);
 				}
 			}
-
 		};
 	}
 	
@@ -92,7 +87,7 @@ public class RedoRefactoringAction extends UndoManagerAction {
 		if (!isHooked()) {
 			hookListener(action);
 			fPatternLength= RefactoringMessages.getString("RedoRefactoringAction.extendedLabel").length(); //$NON-NLS-1$
-			IUndoManager undoManager = Refactoring.getUndoManager();
+			IUndoManager undoManager = RefactoringCore.getUndoManager();
 			if (undoManager.anythingToRedo()) {
 				if (undoManager.peekRedoName() != null)
 					action.setText(getActionText());
@@ -106,6 +101,6 @@ public class RedoRefactoringAction extends UndoManagerAction {
 	private String getActionText() {
 		return shortenText(RefactoringMessages.getFormattedString(
 			"RedoRefactoringAction.extendedLabel", //$NON-NLS-1$
-			Refactoring.getUndoManager().peekRedoName()), fPatternLength);
+			RefactoringCore.getUndoManager().peekRedoName()), fPatternLength);
 	}
 }

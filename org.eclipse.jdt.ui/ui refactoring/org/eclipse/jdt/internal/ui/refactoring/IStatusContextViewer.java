@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**
  * A special viewer to present the context of a <code>RefactoringStatusEntry</code>.

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
 import java.util.ArrayList;
 import java.util.Iterator;

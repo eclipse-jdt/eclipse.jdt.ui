@@ -13,6 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 /**
  * Helper method to code Java refactorings

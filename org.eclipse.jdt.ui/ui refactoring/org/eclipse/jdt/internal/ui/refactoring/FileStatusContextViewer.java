@@ -23,9 +23,10 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 
 public class FileStatusContextViewer extends TextContextViewer {

@@ -14,9 +14,11 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class RefactoringStatusEntryLabelProvider extends LabelProvider{
 		public String getText(Object element){

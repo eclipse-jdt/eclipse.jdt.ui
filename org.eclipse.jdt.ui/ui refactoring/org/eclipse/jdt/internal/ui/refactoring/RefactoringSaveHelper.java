@@ -12,11 +12,12 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;

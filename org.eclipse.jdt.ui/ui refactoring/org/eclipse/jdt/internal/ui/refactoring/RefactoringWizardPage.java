@@ -16,7 +16,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.WizardPage;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 /**
  * An abstract superclass for all wizard pages added to a refactoring wizard. The

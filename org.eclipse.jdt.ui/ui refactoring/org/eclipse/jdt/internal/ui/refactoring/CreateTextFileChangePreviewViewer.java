@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -19,8 +21,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 

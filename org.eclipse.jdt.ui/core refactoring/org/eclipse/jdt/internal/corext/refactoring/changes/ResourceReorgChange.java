@@ -22,10 +22,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.ltk.core.refactoring.Change;
 
 abstract class ResourceReorgChange extends JDTChange {
 	

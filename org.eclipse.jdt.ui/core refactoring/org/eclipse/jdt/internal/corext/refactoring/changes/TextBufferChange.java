@@ -17,9 +17,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * A text change that operates directly on a text buffer. Note that the ownership
@@ -55,6 +55,13 @@ public class TextBufferChange extends TextChange {
 	 */
 	public void initializeValidationData(IProgressMonitor pm) throws CoreException {
 		fChange.initializeValidationData(pm);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {
+		fChange.dispose();
 	}
 	
 	/**

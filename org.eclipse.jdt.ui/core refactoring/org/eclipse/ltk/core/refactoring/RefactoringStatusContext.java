@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
 /**
  * A <code>RefactoringStatusContext<code> can be used to annotate a 

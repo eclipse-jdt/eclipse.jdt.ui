@@ -23,7 +23,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class SefTestSetup extends TestSetup {
 	
@@ -49,7 +49,7 @@ public class SefTestSetup extends TestSetup {
 		JavaProjectHelper.addRTJar(fJavaProject);
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
 		
-		Refactoring.getUndoManager().flush();
+		RefactoringCore.getUndoManager().flush();
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription description= workspace.getDescription();
 		description.setAutoBuilding(false);

@@ -24,8 +24,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class SefTests extends AbstractSelectionTestCase {
 

@@ -21,10 +21,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
 
@@ -108,16 +108,16 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
-		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
 		
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performUndo(new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performRedo(new NullProgressMonitor());
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 

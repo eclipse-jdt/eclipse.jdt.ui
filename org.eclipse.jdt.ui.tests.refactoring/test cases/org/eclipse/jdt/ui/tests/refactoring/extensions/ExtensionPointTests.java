@@ -25,13 +25,13 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 
 import org.eclipse.jdt.internal.ui.refactoring.StatusContextViewerDescriptor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 
 public class ExtensionPointTests extends TestCase {

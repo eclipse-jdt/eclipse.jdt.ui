@@ -17,8 +17,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 	

@@ -25,11 +25,13 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -60,8 +62,8 @@ public class RefactoringExecutionHelper {
 				}
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				fPerformChangeOperation= new PerformChangeOperation(fChange);
-				fPerformChangeOperation.setUndoManager(Refactoring.getUndoManager(), fRefactoring.getName());
+				fPerformChangeOperation= new UIPerformChangeOperation(fChange);
+				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
 				pm.done();
@@ -91,7 +93,7 @@ public class RefactoringExecutionHelper {
 		} catch (InvocationTargetException e) {
 			Throwable inner= e.getTargetException();
 			PerformChangeOperation pco= op.fPerformChangeOperation;
-			if (pco.getChangeExecutionFailed()) {
+			if (pco.changeExecutionFailed()) {
 				org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler handler=
 					new org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler(fParent, fRefactoring);
 				if (inner instanceof RuntimeException) {

@@ -25,7 +25,6 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -34,6 +33,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating2;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 abstract class RenameInputWizardPage extends TextInputWizardPage {
 

@@ -16,7 +16,7 @@ import java.util.ResourceBundle;
 
 public class RefactoringCoreMessages {
 
-	private static final String BUNDLE_NAME= "org.eclipse.ltk.internal.refactoring.core.RefactoringCoreMessages";//$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.ltk.internal.core.refactoring.RefactoringCoreMessages";//$NON-NLS-1$
 
 	private static final ResourceBundle RESOURCE_BUNDLE= ResourceBundle.getBundle(BUNDLE_NAME);
 

@@ -19,13 +19,14 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
 
@@ -106,7 +107,7 @@ public class InlineConstantTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass",preconditionResult.isOK());
 
-		performChange(ref);
+		performChange(ref, false);
 
 		for(int i= 0; i < cus.length; i++){
 			String outputTestFileName= getOutputTestFileName(getSimpleName(cuQNames[i]));

@@ -30,7 +30,6 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
@@ -38,6 +37,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 
 public class JavaStatusContextViewer extends TextContextViewer {

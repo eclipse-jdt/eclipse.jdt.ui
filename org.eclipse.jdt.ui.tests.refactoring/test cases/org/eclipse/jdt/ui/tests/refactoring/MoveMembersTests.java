@@ -23,10 +23,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class MoveMembersTests extends RefactoringTest {
 

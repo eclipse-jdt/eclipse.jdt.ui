@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -25,15 +27,14 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractConstantWizard extends RefactoringWizard {
 

@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**
  * A Java string context can be used to annotate a </code>RefactoringStatusEntry<code> 

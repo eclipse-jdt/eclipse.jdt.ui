@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.ltk.core.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 /**
  * This is a tagging interface to indicate that the validation
  * state of a change changes dynamically. This gives clients
  * that rely on the change's validation state (the value returned
- * form {@link org.eclipse.jdt.internal.corext.refactoring.base.Change#isValid(IProgressMonitor)
+ * form {@link org.eclipse.ltk.core.refactoring.Change#isValid(IProgressMonitor)
  * IChange#isValid}) the opportunity to dynamically update their state 
  * as well. For example, the undo/redo stack listens to validation 
  * state changs and removes undo/redo changes from the undo/redo stack

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,23 +8,23 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring;
+package org.eclipse.ltk.core.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.internal.core.refactoring.Assert;
 
 /**
- * Operation that, when run, check proceconditions of an <code>Refactoring</code> passed 
- * on creation.
+ * Operation that, when run, check preconditions of the {@link Refactoring}
+ * passed on creation.
+ * 
+ * @since 3.0
  */
 public class CheckConditionsOperation implements IWorkspaceRunnable {
+	
 	private Refactoring fRefactoring;
 	private int fStyle;
 	private RefactoringStatus fStatus;
@@ -33,13 +33,15 @@ public class CheckConditionsOperation implements IWorkspaceRunnable {
 	public final static int ACTIVATION=    	1 << 1;
 	public final static int INPUT=	   		1 << 2;
 	public final static int PRECONDITIONS= 	ACTIVATION | INPUT;
-	final static int LAST=                 	1 << 3;
+	private final static int LAST=          1 << 3;
 	
 	/**
 	 * Creates a new <code>CheckConditionsOperation</code>.
 	 * 
-	 * @param refactoring the refactoring. Parameter must not be <code>null</code>.
-	 * @param style style to define which conditions to check.
+	 * @param refactoring the refactoring for which the preconditions are to
+	 *  be checked.
+	 * @param style style to define which conditions to check. Must be one of
+	 *  <code>ACTIVATION</code>, <code>INPUT</code> or <code>PRECONDITIONS</code>
 	 */
 	public CheckConditionsOperation(Refactoring refactoring, int style) {
 		Assert.isNotNull(refactoring);
@@ -48,9 +50,8 @@ public class CheckConditionsOperation implements IWorkspaceRunnable {
 		Assert.isTrue(checkStyle(fStyle));
 	}
 
-	/*
-	 * (Non-Javadoc)
-	 * Method defined int IRunnableWithProgress
+	/**
+	 * {@inheritDoc}
 	 */
 	public void run(IProgressMonitor pm) throws CoreException {
 		try {
@@ -68,17 +69,34 @@ public class CheckConditionsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Returns the outcome of the operation or <code>null</code> if an exception 
-	 * has occured when performing the operation.
+	 * has occurred when performing the operation.
 	 * 
-	 * @return the <code>RefactoringStatus</code> returned from 
-	 *  <code>IRefactoring.checkPreconditions</code>.
+	 * @return the {@link RefactoringStatus} of the condition checking
 	 */
 	public RefactoringStatus getStatus() {
 		return fStatus;
 	}
 	
+	/**
+	 * Returns the operation's refactoring
+	 * 
+	 * @return the operation's refactoring
+	 */
+	public Refactoring getRefactoring() {
+		return fRefactoring;
+	}
+	
+	/**
+	 * Returns the condition checking style.
+	 * 
+	 * @return the condition checking style
+	 */
+	public int getStyle() {
+		return fStyle;
+	}
+	
 	private boolean checkStyle(int style) {
-		return style < LAST;
+		return style > NONE && style < LAST;
 	}
 
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,23 +8,23 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.jdt.internal.ui.util;
+
+import org.eclipse.jface.viewers.ISelection;
 
 /**
- * An adapter implementation for <code>IUndoManagerListener</code>.
+ * A selection converter converts a given selection into
+ * another selection.
+ * 
+ * @since 3.0
  */
-public class UndoManagerAdapter implements IUndoManagerListener {
-
-	/* (non-Javadoc)
-	 * Method declared in IUndoManagerListener
+public interface ISelectionConverter {
+	/**
+	 * Converts the given selection into another selection.
+	 * 
+	 * @param selection the original selection
+	 * 
+	 * @return the converted selection
 	 */
-	public void undoStackChanged(IUndoManager manager) {
-	}
-	
-	/* (non-Javadoc)
-	 * Method declared in IUndoManagerListener
-	 */
-	public void redoStackChanged(IUndoManager manager) {
-	}
+	public ISelection convert(ISelection selection);
 }
-

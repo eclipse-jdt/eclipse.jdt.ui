@@ -19,11 +19,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
@@ -79,18 +79,18 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		String actuaRenaming= cu.getSource();
 		assertEqualLines("incorrect renaming", expectedRenaming, actuaRenaming);
 		
-		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to undo", 1, Refactoring.getUndoManager().getRefactoringLog().size());
 		
-		Refactoring.getUndoManager().performUndo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performUndo(new NullProgressMonitor());
 		assertEqualLines("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
 
-		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
-		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
 		//assertEquals("1 to redo", 1, Refactoring.getUndoManager().getRedoStack().size());
 		
-		Refactoring.getUndoManager().performRedo(new NullProgressMonitor());
+		RefactoringCore.getUndoManager().performRedo(new NullProgressMonitor());
 		assertEqualLines("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	

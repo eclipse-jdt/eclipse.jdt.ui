@@ -23,10 +23,11 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * @author rfuhrer@watson.ibm.com
@@ -179,7 +180,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		RefactoringStatus	checkInputResult= ref.checkInput(new NullProgressMonitor());
 
 		if (!checkInputResult.isOK()) {
-			performChange(ref);
+			performChange(ref, false);
 
 			String newSource = cu.getSource();
 
@@ -190,7 +191,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 			assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), false);
 		}
 
-		performChange(ref);
+		performChange(ref, false);
 
 		String newSource = cu.getSource();
 
@@ -258,7 +259,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
-		performChange(ref);
+		performChange(ref, false);
 
 		String newSource = cu.getSource();
 
@@ -293,7 +294,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 		assertTrue("precondition was supposed to pass but was " + checkInputResult.toString(), checkInputResult.isOK());
 
-		performChange(ref);
+		performChange(ref, false);
 
 		String	testName= getName();
 

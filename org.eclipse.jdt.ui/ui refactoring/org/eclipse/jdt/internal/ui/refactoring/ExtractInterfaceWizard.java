@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -31,9 +35,7 @@ import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -42,8 +44,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	

@@ -24,8 +24,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
@@ -33,6 +31,8 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public class RenameJavaProjectProcessor extends RenameProcessor implements IReferenceUpdating {

@@ -26,9 +26,9 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 

@@ -14,22 +14,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
-import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -44,7 +29,29 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.Document;
+
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class ChangeSignatureWizard extends RefactoringWizard {
 

@@ -23,8 +23,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class SurroundWithTestSetup extends TestSetup {
 	
@@ -48,7 +48,7 @@ public class SurroundWithTestSetup extends TestSetup {
 		JavaProjectHelper.addRTJar(fJavaProject);
 		fRoot= JavaProjectHelper.addSourceContainer(fJavaProject, CONTAINER);
 		
-		Refactoring.getUndoManager().flush();
+		RefactoringCore.getUndoManager().flush();
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		IWorkspaceDescription description= workspace.getDescription();
 		description.setAutoBuilding(false);

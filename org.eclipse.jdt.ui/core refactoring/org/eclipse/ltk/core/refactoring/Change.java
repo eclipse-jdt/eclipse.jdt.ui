@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,8 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
-
+package org.eclipse.ltk.core.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -17,7 +16,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.internal.core.refactoring.Assert;
 
 /**
  * Represents a generic change to the workbench. An <code>Change</code> object 
@@ -29,7 +28,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  *   <li>after a single change or a tree of changes has been created, the
  *       method <code>initializeValidationState</code> has to be called.</li>
  *   <li>the method <code>isValid</code> can be used to determine if a change
- *       can still be applied to the workspace. If the method returns a {@link 
+ *       can still be applied to the work space. If the method returns a {@link 
  *       RefactoringStatus} with a severity of FATAL then the change has to be 
  *       treated as invalid. Performing an invalid change isn't allowed and 
  *       results in an unspecified result. This method can be called multiple
@@ -38,9 +37,9 @@ import org.eclipse.jdt.internal.corext.Assert;
  *       be executed.</li>
  *   <li>the method dispose has to be called either after the perform method
  *       has been called or if a change is no longer needed. The second case
- *       for example occurrs when the undo stack gets flushed and all change
+ *       for example occurs when the undo stack gets flushed and all change
  *       objects managed by the undo stack are no longer needed. The method
- *       dispose is typically use to unregister listeners register during the
+ *       dispose is typically implemented to unregister listeners register during the
  *       method <code>initializeValidationState</code>. There is no guarantee 
  *       that <code>initializeValidationState</code>, <code>isValid</code>
  *       or <code>perform</code> has been called, before <code>dispose</code>
@@ -77,12 +76,6 @@ import org.eclipse.jdt.internal.corext.Assert;
  * implementors should be aware that not providing an undo object for a change 
  * object that is part of a larger change tree will result in the fact that for
  * the whole change tree no undo object will be present.    
- * </p>
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.
  * </p>
  * 
  * @since 3.0
@@ -167,7 +160,7 @@ public abstract class Change implements IAdaptable {
 	 * <p>
 	 * For example, a change object that manipulates the content of an <code>IFile</code>
 	 * could either listen to resource changes and detect that the file got changed or
-	 * it could remember the timestamp and compare it with the actual timestamp when
+	 * it could remember the time stamp and compare it with the actual time stamp when
 	 * <code>isValid</code> is called.
 	 * </p>
 	 * 
@@ -196,7 +189,7 @@ public abstract class Change implements IAdaptable {
 	 * 
 	 * @return a refactoring status describing the outcome of the validation check
 	 * 
-	 * @throws CoreException if an error occured during validation check. The change
+	 * @throws CoreException if an error occurred during validation check. The change
 	 *  is to be treated as invalid if an exception occurs
 	 */
 	public abstract RefactoringStatus isValid(IProgressMonitor pm) throws CoreException;
@@ -214,6 +207,14 @@ public abstract class Change implements IAdaptable {
 	 */
 	public abstract Change perform(IProgressMonitor pm) throws CoreException;
 	
+	/**
+	 * Disposes this change. Subclasses that override this method typically 
+	 * unregister listeners which got registered during the call to <code>
+	 * initializeValidationState</code>. 
+	 * <p>
+	 * Subclasses may override this method.
+	 * </p>
+	 */
 	public void dispose() {
 		// empty default implementation
 	}

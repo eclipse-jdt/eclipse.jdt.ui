@@ -25,12 +25,13 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 /**
  * Test Naming Convention:<p>

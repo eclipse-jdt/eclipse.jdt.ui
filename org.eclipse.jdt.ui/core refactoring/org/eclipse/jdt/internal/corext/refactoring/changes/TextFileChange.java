@@ -26,12 +26,14 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.core.refactoring.BufferValidationState;
 
 /**
- * A special {@link TextChange} that operates on <code>IFile</code>s. 
+ * A special {@link TextChange} that operates on <code>IFile</code>s.
+ * 
+ * @since 3.0 
  */
 public class TextFileChange extends TextChange {
 	

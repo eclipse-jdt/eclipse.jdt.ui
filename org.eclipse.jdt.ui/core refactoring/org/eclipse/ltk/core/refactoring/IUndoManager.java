@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,22 +8,22 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 /**
- * An undo manager keeps track of changes performed by refactorings. Use <code>performUndo</code> 
- * and <code>performRedo</code> to undo and redo changes.
+ * An undo manager keeps track of performed changes. Use the method <code>addUndo</code>
+ * to add change objects to the undo stack and <code>performUndo</code> and <code>
+ * performRedo</code> to undo or redo changes.
  * <p>
- * NOTE: This interface is not intended to be implemented or extended. Use Refactoring.getUndoManager()
- * to access the undo manager. </p>
- * <p>
- * <bf>NOTE:<bf> This class/interface is part of an interim API that is still under development 
- * and expected to change significantly before reaching stability. It is being made available at 
- * this early stage to solicit feedback from pioneering adopters on the understanding that any 
- * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
+ * This interface is not intended to be implemented or extended. Use the method <code>
+ * IUndoManager#createUndoManager</code> to create a new undo manager or the method
+ * <code>RefactoringCore#getUndoManager()</code> to access the refactoring undo manager.
+ * </p>
+ * 
+ * @since 3.0
  */
 public interface IUndoManager {
 
@@ -42,7 +42,7 @@ public interface IUndoManager {
 	public void removeListener(IUndoManagerListener listener);
 	
 	/**
-	 * The infrastructure is goind to perform the given change.
+	 * The infrastructure is going to perform the given change.
 	 * 
 	 * @param change the change to be performed.
 	 */
@@ -53,7 +53,7 @@ public interface IUndoManager {
 	 * 
 	 * @param change the change that was performed
 	 * @param undo the corresponding undo change or <code>null</code>
-	 *  if no undo exists
+	 *  if no undo has been created
 	 * @param e <code>null</code> if the change got executed
 	 *  successfully; otherwise the catched exception
 	 */
@@ -62,9 +62,9 @@ public interface IUndoManager {
 	/**
 	 * Adds a new undo change to this undo manager.
 	 * 
-	 * @param name the name of the refactoring the change was created
-	 *  for. The name must not be <code>null</code>
-	 * @param change the undo change. The change must not be <code>null</code>
+	 * @param name the name presented on the undo stack for the provided
+	 *  undo change. The name must be human readable
+	 * @param change the undo change
 	 */
 	public void addUndo(String name, Change change);
 
@@ -90,7 +90,7 @@ public interface IUndoManager {
 	 * 
 	 * @param pm a progress monitor to report progress during performing
 	 *  the undo change. The progress monitor must not be <code>null</code>
-	 * @return a status indicating if the undo preflight produced any error
+	 * @return the validation status of the undone change.
 	 */	
 	public RefactoringStatus performUndo(IProgressMonitor pm) throws CoreException;
 
@@ -116,7 +116,7 @@ public interface IUndoManager {
 	 * 
 	 * @param pm a progress monitor to report progress during performing
 	 *  the redo change. The progress monitor must not be <code>null</code>
-	 * @return a status indicating if the undo preflight produced any error
+	 * @return the validation status of the redone change.
 	 */	
 	public RefactoringStatus performRedo(IProgressMonitor pm) throws CoreException;
 	

@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -34,6 +33,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 /**
  * Inlines the value of a local variable at all places where a read reference

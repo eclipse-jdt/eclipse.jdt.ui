@@ -79,14 +79,14 @@ import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class CallInliner {
 

@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public class ReorgMoveWizard extends RefactoringWizard{

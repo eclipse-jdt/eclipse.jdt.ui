@@ -27,12 +27,12 @@ import org.eclipse.core.indexsearch.ISearchResultCollector;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public class RenameTypeParticipant extends RenameParticipant {

@@ -39,13 +39,13 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 class RefactoringStatusViewer extends SashForm {
 

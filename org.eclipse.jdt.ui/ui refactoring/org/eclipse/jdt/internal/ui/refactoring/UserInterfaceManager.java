@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 public class UserInterfaceManager {
 	

@@ -26,20 +26,43 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jface.text.Document;
-
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.*;
-
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -52,18 +75,39 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.*;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompositeOrTypeConstraint;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintCollector;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintOperator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ConstraintVariableFactory;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.DeclaringTypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ExpressionVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.FullConstraintCreator;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ITypeConstraint;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ParameterTypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.RawBindingVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeBindings;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 class ExtractInterfaceUtil {
 

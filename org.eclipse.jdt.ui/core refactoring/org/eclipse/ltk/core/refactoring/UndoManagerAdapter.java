@@ -8,23 +8,26 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
-
+package org.eclipse.ltk.core.refactoring;
 
 /**
- * Listener to monitor changes made to an <code>UndoManager</code>
+ * This adapter class provides default implementations for the
+ * methods described by the {@link IUndoManagerListener} interface.
+ * 
+ * @since 3.0
  */
-public interface IUndoManagerListener {
-	
-	/**
-	 * This method is called by the undo manager if an undo change has been 
-	 * added to it.
+public class UndoManagerAdapter implements IUndoManagerListener {
+
+	/* (non-Javadoc)
+	 * Method declared in IUndoManagerListener
 	 */
-	public void undoStackChanged(IUndoManager manager);
+	public void undoStackChanged(IUndoManager manager) {
+	}
 	
-	/**
-	 * This method is called by the undo manager if a redo change has been 
-	 * added to it.
+	/* (non-Javadoc)
+	 * Method declared in IUndoManagerListener
 	 */
-	public void redoStackChanged(IUndoManager manager);	
+	public void redoStackChanged(IUndoManager manager) {
+	}
 }
+

@@ -28,11 +28,12 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,31 +8,20 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.internal.corext.refactoring.UndoManager;
-
 /**
  * Abstract super class for all refactorings.
- * <ul>
- *   <li>
- * </u> 
+ * 
+ * @since 3.0
  */
 public abstract class Refactoring implements IAdaptable {
 
-	private static IUndoManager fgUndoManager= null;
-	
-	public static IUndoManager getUndoManager() {
-		if (fgUndoManager == null)
-			fgUndoManager= new UndoManager();
-		return fgUndoManager;
-	}
-	
 	/**
 	 * Returns the refactoring's name.
 	 * 

@@ -16,10 +16,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -28,6 +24,15 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.jdt.core.IBufferFactory;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -38,10 +43,9 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -55,18 +59,8 @@ import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
-import org.eclipse.jdt.core.IBufferFactory;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
@@ -83,6 +77,13 @@ import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 /**
  * Represents the java plugin. It provides a series of convenience methods such as
@@ -370,7 +371,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		uninstallPreferenceStoreBackwardsCompatibility();
 		
-		Refactoring.getUndoManager().shutdown();
+		RefactoringCore.getUndoManager().shutdown();
 	}
 		
 	private IWorkbenchPage internalGetActivePage() {

@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.ltk.core.refactoring.Change;
 
 public class CompilationUnitChange extends TextFileChange {
 

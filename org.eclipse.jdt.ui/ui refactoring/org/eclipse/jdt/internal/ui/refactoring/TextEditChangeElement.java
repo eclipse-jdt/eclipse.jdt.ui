@@ -15,9 +15,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextEditChangeGroup;
+import org.eclipse.ltk.core.refactoring.Change;
 
 /* package */ class TextEditChangeElement extends ChangeElement {
 	

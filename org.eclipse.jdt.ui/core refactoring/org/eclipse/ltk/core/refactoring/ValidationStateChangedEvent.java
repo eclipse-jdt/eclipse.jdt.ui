@@ -12,7 +12,6 @@ package org.eclipse.ltk.core.refactoring;
 
 import java.util.EventObject;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 
 
 /**

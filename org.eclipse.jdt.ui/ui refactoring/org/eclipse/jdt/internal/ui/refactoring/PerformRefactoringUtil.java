@@ -18,10 +18,12 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 public class PerformRefactoringUtil {
 
@@ -30,12 +32,12 @@ public class PerformRefactoringUtil {
 	}
 
 	public static boolean performRefactoring(PerformChangeOperation op, Refactoring refactoring, IRunnableContext execContext, Shell parent) {
-		op.setUndoManager(Refactoring.getUndoManager(), refactoring.getName());
+		op.setUndoManager(RefactoringCore.getUndoManager(), refactoring.getName());
 		try{
 			execContext.run(false, false, new WorkbenchRunnableAdapter(op));
 		} catch (InvocationTargetException e) {
 			Throwable inner= e.getTargetException();
-			if (op.getChangeExecutionFailed()) {
+			if (op.changeExecutionFailed()) {
 				org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler handler=
 					new org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler(parent, refactoring);
 				if (inner instanceof RuntimeException) {

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.base;
+package org.eclipse.ltk.core.refactoring;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -18,10 +18,10 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 
 /**
- * This exception is thrown if an unexpected errors occurs during execution
- * of a change object.
+ * @deprecated. Will not become API in 3.0. Is only here to make some 
+ * old methods in Change final. Will go away for 3.0.
  */
-public class ChangeAbortException extends RuntimeException {
+/* package*/ class ChangeAbortException extends RuntimeException {
 
 	private Throwable fThrowable;
 

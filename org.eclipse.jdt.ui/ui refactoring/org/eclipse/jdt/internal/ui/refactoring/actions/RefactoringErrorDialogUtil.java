@@ -14,13 +14,14 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 public class RefactoringErrorDialogUtil {
 	

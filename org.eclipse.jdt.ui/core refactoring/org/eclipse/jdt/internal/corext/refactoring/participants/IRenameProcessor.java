@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 
 public interface IRenameProcessor extends IRefactoringProcessor {

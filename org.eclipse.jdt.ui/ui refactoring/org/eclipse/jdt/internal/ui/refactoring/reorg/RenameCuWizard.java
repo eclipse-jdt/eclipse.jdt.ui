@@ -10,11 +10,12 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameCuWizard extends RenameRefactoringWizard {
 	public RenameCuWizard() {

@@ -34,7 +34,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.ltk.core.refactoring.Change;
 
 /**
  * A text change is a special change object that applies a {@link TextEdit
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Change;
  * the document as well as creating a preview of the change. The edit
  * tree gets copied when creating any king of preview. Therefore no region
  * updating on the original edit tree takes place when requesting a preview
- * (for more information on region unpdating see class {@link TextEdit TextEdit}. 
+ * (for more information on region updating see class {@link TextEdit TextEdit}. 
  * If region tracking is required for a preview it can be enabled via a call 
  * to the method {@link #setKeepPreviewEdits(boolean) setKeepPreviewEdits}.
  * If enabled the text change keeps the copied edit tree executed for the

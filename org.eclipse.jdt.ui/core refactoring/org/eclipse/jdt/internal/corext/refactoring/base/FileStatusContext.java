@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 /**
  * A file context can be used to annotate a </code>RefactoringStatusEntry<code> with

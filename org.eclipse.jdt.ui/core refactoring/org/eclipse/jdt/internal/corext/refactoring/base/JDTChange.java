@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * JDT specific change object.
