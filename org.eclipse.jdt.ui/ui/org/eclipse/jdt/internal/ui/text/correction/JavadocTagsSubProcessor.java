@@ -38,9 +38,10 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -147,7 +148,7 @@ public class JavadocTagsSubProcessor {
 		MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 		
 		AST ast= javadoc.getAST();
-		OldASTRewrite rewrite= new OldASTRewrite(javadoc);
+		ASTRewrite rewrite= new ASTRewrite(ast);
 		ListRewrite tagsRewriter= rewrite.getListRewrite(javadoc, Javadoc.TAGS_PROPERTY);
 		
 		

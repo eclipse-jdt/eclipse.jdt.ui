@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -174,7 +175,7 @@ public class ReorgCorrectionsSubProcessor {
 			ArrayList res= new ArrayList();
 			ITypeNameRequestor requestor= new TypeInfoRequestor(res);
 			new SearchEngine().searchAllTypeNames(cu.getResource().getWorkspace(), packageName, typeName,
-					IJavaSearchConstants.EXACT_MATCH, true, IJavaSearchConstants.TYPE, scope, requestor,
+					SearchPattern.R_EXACT_MATCH, true, IJavaSearchConstants.TYPE, scope, requestor,
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 			
 			if (res.isEmpty()) {
