@@ -384,6 +384,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		fColorManager= null;
 		fConfiguration= null;
 		fPresentationReconciler= null;
+		fHardcodedRanges= null;
 	}
 
 	/**
