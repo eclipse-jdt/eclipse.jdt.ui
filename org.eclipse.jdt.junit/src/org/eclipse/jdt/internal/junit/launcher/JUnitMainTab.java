@@ -361,18 +361,15 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fContainerElement.getJavaProject().getElementName());
 			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, fContainerElement.getHandleIdentifier());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, ""); //$NON-NLS-1$
+			 //workaround for bug 65399
+			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, "");
 		} else {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, fProjText.getText());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, fTestText.getText());
-			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$			
+			config.setAttribute(JUnitBaseLaunchConfiguration.LAUNCH_CONTAINER_ATTR, ""); //$NON-NLS-1$
+			config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
 		}
 		config.setAttribute(JUnitBaseLaunchConfiguration.ATTR_KEEPRUNNING, fKeepRunning.getSelection());
-		config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, fOriginalTestMethodName);
-		String testMethod= config.contentsEqual(config.getOriginal()) //workaround for bug 65399
-			? fOriginalTestMethodName
-			: ""; //$NON-NLS-1$
-		config.setAttribute(JUnitBaseLaunchConfiguration.TESTNAME_ATTR, testMethod);
-		setTestMethodLabel(testMethod);
 	}
 
 	/**
