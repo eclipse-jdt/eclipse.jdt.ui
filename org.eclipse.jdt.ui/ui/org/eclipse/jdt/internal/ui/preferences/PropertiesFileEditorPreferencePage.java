@@ -61,6 +61,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.model.WorkbenchViewerSorter;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 
@@ -72,10 +73,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.preferences.CHyperLinkText.ILinkListener;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.JavaColorManager;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * The page for setting the properties file editor preferences.
@@ -314,7 +317,6 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 	 * Creates a new preference page.
 	 */
 	public PropertiesFileEditorPreferencePage() {
-		setDescription(PreferencesMessages.getString("PropertiesFileEditorPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		
 		fOverlayStore= new OverlayPreferenceStore(getPreferenceStore(), createOverlayStoreKeys());
@@ -525,14 +527,51 @@ public class PropertiesFileEditorPreferencePage extends PreferencePage implement
 		fOverlayStore.load();
 		fOverlayStore.start();
 
-		Control control= createSyntaxPage(parent);
+		Composite contents= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		contents.setLayout(layout);
+		
+		createHeader(contents);
+		
+		createSyntaxPage(contents);
 
 		initialize();
 		
-		Dialog.applyDialogFont(control);
-		return control;
+		Dialog.applyDialogFont(contents);
+		return contents;
 	}
-	
+
+	private void createHeader(Composite contents) {
+		String text= PreferencesMessages.getFormattedString("PropertiesFileEditorPreferencePage.link", "org.eclipse.ui.preferencePages.GeneralTextEditor"); //$NON-NLS-1$ //$NON-NLS-2$
+		// TODO move to platform hyperlink widget when it becomes available
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=79419
+		CHyperLinkText link= new CHyperLinkText(contents, SWT.NONE);
+		link.setText(text);
+		link.addLinkListener(new ILinkListener() {
+			public void linkSelected(String url) {
+				PreferencesUtil.createPreferenceDialogOn(getShell(), url, null, null);
+			}
+		});
+		
+		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gridData.widthHint= 150; // only expand further if anyone else requires it
+		link.setLayoutData(gridData);
+		
+		addFiller(contents);
+	}
+
+	private void addFiller(Composite composite) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
+	}
+
 	private void initialize() {
 		
 		initializeFields();
