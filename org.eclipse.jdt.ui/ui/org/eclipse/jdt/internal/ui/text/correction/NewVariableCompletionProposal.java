@@ -167,22 +167,25 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	private int  fVariableKind;
 	private String fVariableName;
 	private IMember fParentMember;
+	
+	private ProblemPosition fProblemPosition;
 
 	public NewVariableCompletionProposal(IMember parentMember, ProblemPosition problemPos, String label, int variableKind, String variableName, int relevance) throws CoreException {
-		super(label, problemPos, relevance);
+		super(label, problemPos.getCompilationUnit(), relevance);
 		
 		fVariableKind= variableKind;
 		fVariableName= variableName;
 		fParentMember= parentMember;
+		fProblemPosition= problemPos;
 	}
 
 	/*
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= getProblemPosition();
+		ProblemPosition problemPos= fProblemPosition;
 		
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= changeElement.getCompilationUnit();
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());

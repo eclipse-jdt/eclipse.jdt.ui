@@ -26,15 +26,18 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 
+	private ProblemPosition fProblemPosition;
+
 	public CorrectPackageDeclarationProposal(ProblemPosition problemPos, int relevance) throws CoreException {
-		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos, relevance); //$NON-NLS-1$
+		super(CorrectionMessages.getString("CorrectPackageDeclarationProposal.name"), problemPos.getCompilationUnit(), relevance); //$NON-NLS-1$
+		fProblemPosition= problemPos;
 	}
 
 	/*
 	 * @see CUCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange change) throws CoreException {
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= change.getCompilationUnit();
 		
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		IPackageDeclaration[] decls= cu.getPackageDeclarations();
@@ -53,7 +56,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 			return;
 		}
 		
-		ProblemPosition pos= getProblemPosition();
+		ProblemPosition pos= fProblemPosition;
 		change.addTextEdit(CorrectionMessages.getString("CorrectPackageDeclarationProposal.changenameedit.label"), SimpleTextEdit.createReplace(pos.getOffset(), pos.getLength(), parentPack.getElementName())); //$NON-NLS-1$
 	}
 	
@@ -61,7 +64,7 @@ public class CorrectPackageDeclarationProposal extends CUCorrectionProposal {
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public String getDisplayString() {
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit cu= fProblemPosition.getCompilationUnit();
 		IPackageFragment parentPack= (IPackageFragment) cu.getParent();
 		try {
 			IPackageDeclaration[] decls= cu.getPackageDeclarations();		

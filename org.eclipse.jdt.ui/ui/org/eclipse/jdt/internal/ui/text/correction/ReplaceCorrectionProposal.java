@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -24,19 +26,19 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 public class ReplaceCorrectionProposal extends CUCorrectionProposal {
 	
 	private String fReplacementString;
+	private Position fPosition;
 
 	public ReplaceCorrectionProposal(ProblemPosition problemPos, String label, String replacementString, int relevance) throws CoreException {
-		super(label, problemPos, relevance);
+		super(label, problemPos.getCompilationUnit(), relevance);
 		fReplacementString= replacementString;
+		fPosition= problemPos;
 	}
 
 	/*
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= getProblemPosition();
-		
-		TextEdit edit= SimpleTextEdit.createReplace(problemPos.getOffset(), problemPos.getLength(), fReplacementString);
+		TextEdit edit= SimpleTextEdit.createReplace(fPosition.getOffset(), fPosition.getLength(), fReplacementString);
 		changeElement.addTextEdit(changeElement.getName(), edit);
 	}
 	

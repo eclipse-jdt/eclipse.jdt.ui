@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -39,34 +40,41 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 
 	private String fMethodName;
 	private String[] fParamTypes;
+	
+	private ProblemPosition fProblemPosition;
 
 	public NewMethodCompletionProposal(IType type, ProblemPosition problemPos, String label, String methodName, String[] paramTypes, int relevance) throws CoreException {
-		super(label, problemPos, relevance);
+		super(label, type.getCompilationUnit(), !type.getCompilationUnit().isWorkingCopy(), relevance);
 		
 		fParentType= type;
 		fMethodName= methodName;
 		fParamTypes= paramTypes;
+		
+		fProblemPosition= problemPos;
 	}
-
+	
 	/*
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= getProblemPosition();
+		ProblemPosition problemPos= fProblemPosition;
 		
-		ICompilationUnit cu= getCompilationUnit();
+		ICompilationUnit changedCU= changeElement.getCompilationUnit();
+		ICompilationUnit problemCU= problemPos.getCompilationUnit();
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		ImportEdit importEdit= new ImportEdit(cu, settings);
+		ImportEdit importEdit= new ImportEdit(changedCU, settings);
 
 		String content= generateStub(importEdit);
 		
 		int insertPos= MemberEdit.ADD_AT_END;
 		IJavaElement anchor= fParentType;
-		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
-		if (elem.getElementType() == IJavaElement.METHOD) {
-			anchor= elem;
-			insertPos= MemberEdit.INSERT_AFTER;
+		if (changedCU.equals(problemCU)) {
+			IJavaElement elem= problemCU.getElementAt(problemPos.getOffset());
+			if (elem.getElementType() == IJavaElement.METHOD) {
+				anchor= elem;
+				insertPos= MemberEdit.INSERT_AFTER;
+			}
 		}
 		
 		MemberEdit memberEdit= new MemberEdit(anchor, insertPos, new String[] { content }, settings.tabWidth);
@@ -79,17 +87,24 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 	
 	
-	private String generateStub(ImportEdit importEdit) {
+	private String generateStub(ImportEdit importEdit) throws CoreException {
 		StringBuffer buf= new StringBuffer();
+		
+		boolean isInterface= fParentType.isInterface();
+		boolean isSameType= fParentType.getCompilationUnit().equals(fProblemPosition.getCompilationUnit());
 		
 		ITypeBinding returnType= evaluateMethodType(importEdit);
 		String returnTypeName= returnType.getName();
-	
-		buf.append("private "); //$NON-NLS-1$
+
+		if (isSameType) {
+			buf.append("private "); //$NON-NLS-1$
+		} else if (!isInterface) {
+			buf.append("public "); //$NON-NLS-1$
+		}
 		buf.append(returnTypeName);
 		buf.append(' ');
 		buf.append(fMethodName);
-		buf.append("("); //$NON-NLS-1$
+		buf.append('(');
 		if (fParamTypes.length > 0) {
 			String[] paramNames= new NameProposer().proposeParameterNames(fParamTypes);
 			for (int i= 0; i < fParamTypes.length; i++) {
@@ -102,28 +117,32 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 					curr= Signature.getSimpleName(curr);
 				}
 				buf.append(curr);
-				buf.append(" "); //$NON-NLS-1$
+				buf.append(' ');
 				buf.append(paramNames[i]);
 			}
 		}
-		buf.append(") {\n"); //$NON-NLS-1$
-
-		if (!returnType.isPrimitive()) {
-			buf.append("return null;\n"); //$NON-NLS-1$
-		} else if (returnTypeName.equals("boolean")) { //$NON-NLS-1$
-			buf.append("return false;\n"); //$NON-NLS-1$
-		} else if (!returnTypeName.equals("void")) { //$NON-NLS-1$
-			buf.append("return 0;\n"); //$NON-NLS-1$
+		buf.append(')');
+		if (isInterface) {
+			buf.append(";\n");  //$NON-NLS-1$
+		} else {
+			buf.append("{\n"); //$NON-NLS-1$
+	
+			if (!returnType.isPrimitive()) {
+				buf.append("return null;\n"); //$NON-NLS-1$
+			} else if (returnTypeName.equals("boolean")) { //$NON-NLS-1$
+				buf.append("return false;\n"); //$NON-NLS-1$
+			} else if (!returnTypeName.equals("void")) { //$NON-NLS-1$
+				buf.append("return 0;\n"); //$NON-NLS-1$
+			}
+			buf.append("}\n"); //$NON-NLS-1$
 		}
-		buf.append("}\n"); //$NON-NLS-1$
 		return buf.toString();
 	}
 	
 	private ITypeBinding evaluateMethodType(ImportEdit importEdit) {
-		ProblemPosition pos= getProblemPosition(); 
-		CompilationUnit cu= AST.parseCompilationUnit(getCompilationUnit(), true);
+		CompilationUnit cu= AST.parseCompilationUnit(fProblemPosition.getCompilationUnit(), true);
 
-		ASTNode node= ASTResolving.findSelectedNode(cu, pos.getOffset(), pos.getLength());
+		ASTNode node= ASTResolving.findSelectedNode(cu, fProblemPosition.getOffset(), fProblemPosition.getLength());
 		if (node != null) {
 			ITypeBinding binding= ASTResolving.getTypeBinding(node.getParent());
 			if (binding != null) {

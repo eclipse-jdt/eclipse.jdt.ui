@@ -168,7 +168,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					ReorgCorrectionsSubProcessor.addCastProposal(problemPos, proposals);
 					break;
 				default:
-					//proposals.add(new NoCorrectionProposal(problemPos));
+					proposals.add(new NoCorrectionProposal(problemPos));
 				
 			}
 		} catch (CoreException e) {

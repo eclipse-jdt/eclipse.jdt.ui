@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Position;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -27,9 +29,8 @@ public class InsertCorrectionProposal extends CUCorrectionProposal {
 	private String fInsertionString;
 	private int  fOffset;
 
-
 	public InsertCorrectionProposal(ProblemPosition problemPos, String label, int offset, String insertString, int relevance) throws CoreException {
-		super(label, problemPos, relevance);
+		super(label, problemPos.getCompilationUnit(), relevance);
 		fInsertionString= insertString;
 		fOffset= offset;
 	}
@@ -38,8 +39,6 @@ public class InsertCorrectionProposal extends CUCorrectionProposal {
 	 * @see JavaCorrectionProposal#addEdits(CompilationUnitChange)
 	 */
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
-		ProblemPosition problemPos= getProblemPosition();
-		
 		TextEdit edit= SimpleTextEdit.createInsert(fOffset, fInsertionString);
 		changeElement.addTextEdit(getDisplayString(), edit);
 	}

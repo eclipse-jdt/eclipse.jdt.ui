@@ -28,16 +28,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.changes.AbortChangeExceptionHandler;
 
-public abstract class ChangeCorrectionProposal implements ICompletionProposal {
+public class ChangeCorrectionProposal implements ICompletionProposal {
 
-	private ProblemPosition fProblemPosition;
+	private Change fChange;
 	private String fName;
-	
 	private int fRelevance;
 
-	public ChangeCorrectionProposal(String name, ProblemPosition problemPos, int relevance) {
-		fProblemPosition= problemPos;
+	public ChangeCorrectionProposal(String name, Change change, int relevance) {
 		fName= name;
+		fChange= change;
 		fRelevance= relevance;
 	}
 	
@@ -105,22 +104,18 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		return new Point(fProblemPosition.getOffset(), fProblemPosition.getLength());
+		return null;
 	}
 
-	/**
-	 * Gets the problem position.
-	 * @return Returns a problem position
-	 */
-	public ProblemPosition getProblemPosition() {
-		return fProblemPosition;
-	}
+
 
 	/**
 	 * Gets the change element.
 	 * @return Returns a Change
 	 */
-	protected abstract Change getChange() throws CoreException;
+	protected Change getChange() throws CoreException {
+		return fChange;
+	}
 
 	/**
 	 * Sets the display name.

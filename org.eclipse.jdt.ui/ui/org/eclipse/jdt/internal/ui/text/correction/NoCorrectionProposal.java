@@ -116,7 +116,7 @@ public class NoCorrectionProposal implements ICompletionProposal {
 	 * @see ICompletionProposal#getSelection(IDocument)
 	 */
 	public Point getSelection(IDocument document) {
-		return new Point(fProblemPosition.getOffset(), fProblemPosition.getLength());
+		return null;
 	}
 
 }

@@ -29,28 +29,33 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 public class CUCorrectionProposal extends ChangeCorrectionProposal {
 
-	private ProblemPosition fProblemPosition;
-	private CompilationUnitChange fCompilationUnitChange;
-	private ICompilationUnit fCompilationUnit;
+	private boolean fIsInitialized;
 
-	public CUCorrectionProposal(String name, ProblemPosition problemPos, int relevance) throws CoreException {
-		super(name, problemPos, relevance);
-		fCompilationUnit= problemPos.getCompilationUnit();
-		fCompilationUnitChange= null;
+	public CUCorrectionProposal(String name, ICompilationUnit cu, boolean doSave, int relevance) throws CoreException {
+		super(name, createCompilationUnitChange(name, cu, doSave), relevance);
+		fIsInitialized= false;
+	}
+
+	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance) throws CoreException {
+		this(name, cu, false, relevance);
 	}
 	
+	private static Change createCompilationUnitChange(String name, ICompilationUnit cu, boolean doSave) throws CoreException {
+		CompilationUnitChange change= new CompilationUnitChange(name, cu);
+		change.setTrackPositionChanges(true);
+		change.setSave(doSave);
+		return change;
+	}
+
 	/*
 	 * @see ChangeCorrectionProposal#getChange()
 	 */
 	protected Change getChange() throws CoreException {
-		if (fCompilationUnitChange == null) {
-			fCompilationUnitChange= new CompilationUnitChange(getDisplayString(), fCompilationUnit);
-			fCompilationUnitChange.setTrackPositionChanges(true);
-			fCompilationUnitChange.setSave(false);
-			
-			addEdits(fCompilationUnitChange);
+		if (!fIsInitialized) {
+			fIsInitialized= true;
+			addEdits(getCompilationUnitChange());
 		}
-		return fCompilationUnitChange;
+		return super.getChange();
 	}
 	
 	protected void addEdits(CompilationUnitChange change) throws CoreException {
@@ -115,14 +120,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	 */
 	public Image getImage() {
 		return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPCONT);
-	}
-
-	/**
-	 * Gets the compilation unit.
-	 * @return Returns a ICompilationUnit
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
 	}
 
 	/**

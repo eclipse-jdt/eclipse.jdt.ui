@@ -16,13 +16,11 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -30,7 +28,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
@@ -56,11 +53,7 @@ public class ReorgCorrectionsSubProcessor {
 
 			label= CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renamecu.description", newCUName); //$NON-NLS-1$
 			// rename cu
-			proposals.add(new ChangeCorrectionProposal(label, problemPos, 2) {
-				protected Change getChange() throws CoreException {
-					return change;
-				}
-			});
+			proposals.add(new ChangeCorrectionProposal(label, change, 2));
 		}
 	}
 	
@@ -94,11 +87,7 @@ public class ReorgCorrectionsSubProcessor {
 			composite.add(new CreatePackageChange(newPack));
 			composite.add(new MoveCompilationUnitChange(cu, newPack));
 
-			proposals.add(new ChangeCorrectionProposal(label, problemPos, 2) {
-				protected Change getChange() throws CoreException {
-					return composite;
-				}
-			});
+			proposals.add(new ChangeCorrectionProposal(label, composite, 2));
 		}
 	}
 	
@@ -122,7 +111,7 @@ public class ReorgCorrectionsSubProcessor {
 			InsertCorrectionProposal proposal= new InsertCorrectionProposal(problemPos, label, pos, cast, 1);
 			proposals.add(proposal);
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportEdit edit= new ImportEdit(proposal.getCompilationUnit(), settings);
+			ImportEdit edit= new ImportEdit(problemPos.getCompilationUnit(), settings);
 			edit.addImport(args[1]);
 			proposal.getCompilationUnitChange().addTextEdit("Import", edit); //$NON-NLS-1$
 		}	

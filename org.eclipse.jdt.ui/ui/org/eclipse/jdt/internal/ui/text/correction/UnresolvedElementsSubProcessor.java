@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -24,6 +23,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class UnresolvedElementsSubProcessor {
@@ -67,9 +67,7 @@ public class UnresolvedElementsSubProcessor {
 		}			
 		
 		try {
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-			scanner.setSource(buf.getCharacters());
-			scanner.resetTo(problemPos.getOffset() + problemPos.getLength(), buf.getLength());
+			IScanner scanner= ASTResolving.createScanner(cu, problemPos.getOffset() + problemPos.getLength());
 			if (scanner.getNextToken() == ITerminalSymbols.TokenNameDOT) {
 				getTypeProposals(problemPos, SimilarElementsRequestor.TYPES, proposals);
 			}
@@ -106,7 +104,7 @@ public class UnresolvedElementsSubProcessor {
 			String simpleName= Signature.getSimpleName(curr);
 			boolean importOnly= simpleName.equals(typeName);
 			
-			CUCorrectionProposal proposal= new CUCorrectionProposal("", problemPos, 0); //$NON-NLS-1$
+			CUCorrectionProposal proposal= new CUCorrectionProposal("", cu, 0); //$NON-NLS-1$
 			proposals.add(proposal);
 			
 			CompilationUnitChange change= proposal.getCompilationUnitChange();
@@ -153,14 +151,27 @@ public class UnresolvedElementsSubProcessor {
 		
 		// new method
 		String typeName= args[0];
-		
-		IJavaElement elem= cu.getElementAt(problemPos.getOffset());
-		if (elem instanceof IMember) {
-			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
-			if (parentType != null && typeName.equals(JavaModelUtil.getFullyQualifiedName(parentType))) {
-				String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
-				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments, 1));
+		IType type= JavaModelUtil.findType(cu.getJavaProject(), typeName);
+		if (type != null && type.getCompilationUnit() != null) {
+			ICompilationUnit changedCU= type.getCompilationUnit();
+			if (!changedCU.isWorkingCopy()) {
+				changedCU= EditorUtility.getWorkingCopy(changedCU);
+				if (changedCU == null) {
+					// not yet supported, waiting for new working copy support
+					return;
+				}					
+				type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
+				if (type == null) {
+					return; // type does not exist in working copy
+				}
 			}
+			String label;
+			if (cu.equals(changedCU)) {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.description", methodName); //$NON-NLS-1$
+			} else {
+				label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createmethod.other.description", new Object[] { methodName, typeName } ); //$NON-NLS-1$
+			}
+			proposals.add(new NewMethodCompletionProposal(type, problemPos, label, methodName, arguments, 1));
 		}
 	}
 	
