@@ -1,5 +1,6 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,6 +10,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
@@ -25,6 +28,8 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.eclipse.jface.dialogs.IInputValidator;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnLayoutData;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -43,6 +48,7 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -56,11 +62,9 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 public class ModifyParametersInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "ModifyParametersInputPage"; //$NON-NLS-1$
-	
-	private static final String[] PROPERTIES= {"type", "old", "new"}; //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+	private static final String[] PROPERTIES= {"type", "new"}; //$NON-NLS-2$ //$NON-NLS-1$
 	private static final int TYPE_PROP= 0; 
-	private static final int OLDNAME_PROP= 1; 
-	private static final int NEWNAME_PROP= 2;
+	private static final int NEWNAME_PROP= 1;
 	
 	private static final int ROW_COUNT= 10; 
 	
@@ -68,6 +72,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private Button fDownButton;
 	private Label fSignaturePreview;
 	private TableViewer fTableViewer;
+    private Button fEditButton;
 	
 	public ModifyParametersInputPage() {
 		super(PAGE_NAME, true);
@@ -166,7 +171,6 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
 		
 		editors[TYPE_PROP]= new TextCellEditor(table);
-		editors[OLDNAME_PROP]= new TextCellEditor(table);
 		
 		class AutoApplyTextCellEditor extends TextCellEditor {
 			public AutoApplyTextCellEditor(Composite parent) {
@@ -209,15 +213,65 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 
 		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_op"), true); //$NON-NLS-1$
 		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ModifyParametersInputPage.move_down"), false); //$NON-NLS-1$
-		
+		fEditButton= createEditButton(buttonComposite);
 		updateButtonsEnabledState();
 	}
 
 	private void updateButtonsEnabledState() {
 		fDownButton.setEnabled(canMoveDown());
 		fUpButton.setEnabled(canMoveUp());
+		fEditButton.setEnabled(fTableViewer.getTable().getSelectionIndices().length == 1);
 	}
 	
+	private Button createEditButton(Composite buttonComposite) {
+		Button button= new Button(buttonComposite, SWT.PUSH);
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
+		button.setText("&Edit...");
+		button.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					ISelection selection= fTableViewer.getSelection();
+					try{
+    					ParameterInfo[] selected= getSelectedItems();
+    					Assert.isTrue(selected.length == 1);
+    					ParameterInfo parameterInfo= selected[0];
+    					String key= "Enter a new name for parameter ''{0}'':";
+    					String message= MessageFormat.format(key, new String[]{parameterInfo.oldName});
+    					IInputValidator validator= createParameterNameValidator(parameterInfo.oldName);
+    					InputDialog dialog= new InputDialog(getShell(), "Modify Parameter Name", message, parameterInfo.newName, validator);
+    					if (dialog.open() == InputDialog.CANCEL) {
+    						fTableViewer.setSelection(selection);
+    						return;
+    					}	
+    					parameterInfo.newName= dialog.getValue();
+    					tableModified(getNewParameterNames());
+    					fTableViewer.update(parameterInfo, new String[] { PROPERTIES[NEWNAME_PROP]});
+					} finally {
+						fTableViewer.refresh();
+    					fTableViewer.getControl().setFocus();
+    					fTableViewer.setSelection(selection);
+					}
+				}
+			}	
+		);	
+		return button;	
+	}
+	
+	private static IInputValidator createParameterNameValidator(final String oldName){
+		return new IInputValidator(){
+            public String isValid(String newText) {
+            	if (newText.equals(""))
+            		return "";
+            	if (newText.equals(oldName))
+            		return "";
+            	IStatus status= JavaConventions.validateFieldName(newText);
+            	if (status.getSeverity() == IStatus.ERROR)
+            		return status.getMessage();
+                return null;
+            }
+		};
+	}
+
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -248,22 +302,16 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	private TableLayout createTableLayout(Table table) {
 		TableLayout layout= new TableLayout();
 		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[3];
-		columnLayoutData[TYPE_PROP]= new ColumnWeightData(34, true);
-		columnLayoutData[OLDNAME_PROP]= new ColumnWeightData(33, true);
-		columnLayoutData[NEWNAME_PROP]= new ColumnWeightData(33, true);
+		columnLayoutData[TYPE_PROP]= new ColumnWeightData(50, true);
+		columnLayoutData[NEWNAME_PROP]= new ColumnWeightData(50, true);
 		
 		layout.addColumnData(columnLayoutData[TYPE_PROP]);
-		layout.addColumnData(columnLayoutData[OLDNAME_PROP]);
 		layout.addColumnData(columnLayoutData[NEWNAME_PROP]);
 		
 		TableColumn tc;
 		tc= new TableColumn(table, SWT.NONE, TYPE_PROP);
 		tc.setResizable(columnLayoutData[TYPE_PROP].resizable);
 		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.type")); //$NON-NLS-1$
-		
-		tc= new TableColumn(table, SWT.NONE, OLDNAME_PROP);
-		tc.setResizable(columnLayoutData[OLDNAME_PROP].resizable);
-		tc.setText(RefactoringMessages.getString("ModifyParametersInputPage.old_Name"));  //$NON-NLS-1$
 		
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(columnLayoutData[NEWNAME_PROP].resizable);
@@ -447,8 +495,6 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			ParameterInfo tuple= (ParameterInfo)element;
 			if (columnIndex == TYPE_PROP)
 				return Signature.toString(tuple.typeName);
-			if (columnIndex == OLDNAME_PROP)
-				return tuple.oldName;
 			if (columnIndex == NEWNAME_PROP)
 				return tuple.newName;
 			Assert.isTrue(false);
@@ -495,8 +541,6 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 				return null;
 			if (property.equals(PROPERTIES[TYPE_PROP]))
 				return ((ParameterInfo) element).typeName;	
-			if (property.equals(PROPERTIES[OLDNAME_PROP]))
-				return ((ParameterInfo) element).oldName;
 			if (property.equals(PROPERTIES[NEWNAME_PROP]))
 				return ((ParameterInfo) element).newName;
 			Assert.isTrue(false);	
@@ -509,11 +553,11 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 			Object data= ((TableItem) element).getData();
 			if (! (data instanceof ParameterInfo)) 
 				return;
-			ParameterInfo paremeterInfo= (ParameterInfo) data;
+			ParameterInfo parameterInfo= (ParameterInfo) data;
 			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
-				paremeterInfo.newName= (String) value;
+				parameterInfo.newName= (String) value;
 				tableModified(getNewParameterNames());
-				fTableViewer.update(paremeterInfo, new String[] { property });
+				fTableViewer.update(parameterInfo, new String[] { property });
 			}
 		}
 	};
