@@ -64,7 +64,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			monitor.beginTask(CodeGenerationMessages.getString("AddImportsOperation.description"), 2); //$NON-NLS-1$
 		
 			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, fSettings.importOrder, fSettings.importThreshold, true);
-			
+			impStructure.setFindAmbiguousImports(true);
 			for (int i= 0; i < nImports; i++) {
 				IJavaElement imp= fImports[i];
 				if (imp instanceof IType) {
