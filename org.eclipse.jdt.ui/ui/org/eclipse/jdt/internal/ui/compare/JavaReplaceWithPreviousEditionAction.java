@@ -13,10 +13,13 @@ package org.eclipse.jdt.internal.ui.compare;
 /**
  * Provides "Replace from local history" for Java elements.
  */
-public class JavaReplaceWithPreviousEditionAction extends JavaReplaceWithEditionAction {
+public class JavaReplaceWithPreviousEditionAction extends JavaHistoryAction {
 					
 	public JavaReplaceWithPreviousEditionAction() {
-		fPrevious= true;
 	}	
+	
+	protected JavaHistoryActionImpl createDelegate() {
+		return new JavaReplaceWithEditionActionImpl(true);
+	}
 }
 
