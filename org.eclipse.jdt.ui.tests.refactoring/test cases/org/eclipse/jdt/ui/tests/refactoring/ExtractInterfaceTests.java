@@ -281,6 +281,14 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		standardPassingTest();
 	}
 
+	public void test43() throws Exception{
+		standardPassingTest();
+	}
+
+	public void test44() throws Exception{
+		standardPassingTest();
+	}
+
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
