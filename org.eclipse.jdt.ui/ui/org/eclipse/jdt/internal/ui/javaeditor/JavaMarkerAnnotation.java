@@ -173,7 +173,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 		if (isProblem())
 			return marker.getAttribute(IJavaModelMarker.ID, -1);
 			
-		if (fType == TASK_ANNOTATION_TYPE) {
+		if (TASK_ANNOTATION_TYPE.equals(fType)) {
 			try {
 				if (marker.isSubtypeOf(IJavaModelMarker.TASK_MARKER)) {
 					return IProblem.Task;
@@ -189,7 +189,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 	 * @see IJavaAnnotation#isProblem()
 	 */
 	public boolean isProblem() {
-		return fType == WARNING_ANNOTATION_TYPE || fType == ERROR_ANNOTATION_TYPE;
+		return WARNING_ANNOTATION_TYPE.equals(fType) || ERROR_ANNOTATION_TYPE.equals(fType);
 	}
 	
 	/*
@@ -244,7 +244,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			newImageType= OVERLAY_IMAGE;
 		else if (isRelevant()) {
 			if (isProblem() && mustShowQuickFixIcon()) { // no light bulb for tasks
-				if (fType == ERROR_ANNOTATION_TYPE)
+				if (ERROR_ANNOTATION_TYPE.equals(fType))
 					newImageType= QUICKFIX_ERROR_IMAGE;
 				else
 					newImageType= QUICKFIX_IMAGE; 

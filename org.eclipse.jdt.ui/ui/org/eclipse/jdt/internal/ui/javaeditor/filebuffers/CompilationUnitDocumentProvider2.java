@@ -129,7 +129,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 							fgQuickFixImagesInitialized= true;
 						}
-						if (fType == ERROR_ANNOTATION_TYPE)
+						if (ERROR_ANNOTATION_TYPE.equals(fType))
 							fImage= fgQuickFixErrorImage;
 						else
 							fImage= fgQuickFixImage;
@@ -191,7 +191,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 * @see IJavaAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return  fType == WARNING_ANNOTATION_TYPE || fType == ERROR_ANNOTATION_TYPE;
+				return  WARNING_ANNOTATION_TYPE.equals(fType) || ERROR_ANNOTATION_TYPE.equals(fType);
 			}
 			
 			/*
