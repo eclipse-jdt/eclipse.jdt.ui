@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	public static final int MULTIPLE=				5;
 
 	private MethodDeclaration fEnclosingMethod;
+	private IMethodBinding fEnclosingMethodBinding;
 	private int fMaxVariableId;
 
 	private int fReturnKind;
@@ -80,7 +81,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	private IVariableBinding[] fCallerLocals;
 	private IVariableBinding fReturnLocal;
 	
-	private ITypeBinding[] fExceptions;	
+	private ITypeBinding[] fExceptions;
+	private ITypeBinding fExpressionBinding;	
 	
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
 		super(unit, selection, false);
@@ -129,6 +131,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	
 	public IVariableBinding getReturnLocal() {
 		return fReturnLocal;
+	}
+	
+	public ITypeBinding getExpressionBinding() {
+		return fExpressionBinding;
 	}
 	
 	//---- Activation checking ---------------------------------------------------------------------------
@@ -183,9 +189,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 				break;
 			case EXPRESSION:
 				Expression expression= (Expression)getFirstSelectedNode();
-				ITypeBinding type= expression.resolveTypeBinding();
-				if (type != null) {
-					fReturnType= Bindings.createType(type, ast);
+				fExpressionBinding= expression.resolveTypeBinding();
+				if (fExpressionBinding != null) {
+					fReturnType= Bindings.createType(fExpressionBinding, ast);
 					break;
 				}
 				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
@@ -205,7 +211,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		
 	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope) {
 		ITypeBinding[] arguments= getArgumentTypes();
-		ITypeBinding type= fEnclosingMethod.resolveBinding().getDeclaringClass();
+		ITypeBinding type= fEnclosingMethodBinding.getDeclaringClass();
 		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
 		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, arguments, scope));
 	}
@@ -406,6 +412,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 			if (fEnclosingMethod == null) {
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.only_method_body")); //$NON-NLS-1$
 				break superCall;
+			} else {
+				fEnclosingMethodBinding= fEnclosingMethod.resolveBinding();
 			}
 			status.merge(LocalTypeAnalyzer.perform(fEnclosingMethod, getSelection()));
 		}

@@ -424,8 +424,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
 		if (extractsExpression) {
 			result.append(indent);
-			Expression expression= (Expression)fAnalyzer.getFirstSelectedNode();
-			ITypeBinding binding= expression.resolveTypeBinding();
+			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) //$NON-NLS-1$
 				result.append(RETURN_BLANK);
 		}
