@@ -25,6 +25,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
@@ -1461,7 +1462,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			success= true;
 			
 		} catch (CoreException x) {
-			ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), x.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
+			IStatus status= x.getStatus();
+			if (status == null || status.getSeverity() != IStatus.CANCEL)
+				ErrorDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title2"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message2"), x.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
 			provider.changed(newInput);
 			if (success)
