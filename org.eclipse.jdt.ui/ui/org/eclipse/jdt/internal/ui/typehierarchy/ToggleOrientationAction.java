@@ -4,45 +4,53 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.core.internal.runtime.Assert;
+
 import org.eclipse.jface.action.Action;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * Toggles horizontaol / vertical layout of the type hierarchy
+ * Toggles the orientationof the layout of the type hierarchy
  */
 public class ToggleOrientationAction extends Action {
 
 	private TypeHierarchyViewPart fView;	
+	private int fOrientation;
 	
-	public ToggleOrientationAction(TypeHierarchyViewPart v, boolean initHorizontal) {
-		super(TypeHierarchyMessages.getString("ToggleOrientationAction.label")); //$NON-NLS-1$
-		setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.description")); //$NON-NLS-1$
-		setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip")); //$NON-NLS-1$
-		
-		JavaPluginImages.setLocalImageDescriptors(this, "impl_co.gif"); //$NON-NLS-1$
-
+	public ToggleOrientationAction(TypeHierarchyViewPart v, int orientation) {
+		super();
+		if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_HORIZONTAL) {
+			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.horizontal.label")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.horizontal.description")); //$NON-NLS-1$
+			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.horizontal.tooltip")); //$NON-NLS-1$
+			JavaPluginImages.setLocalImageDescriptors(this, "th_horizontal.gif"); //$NON-NLS-1$
+		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_VERTICAL) {
+			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.vertical.label")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.vertical.description")); //$NON-NLS-1$
+			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.vertical.tooltip")); //$NON-NLS-1$	
+			JavaPluginImages.setLocalImageDescriptors(this, "th_vertical.gif"); //$NON-NLS-1$
+		} else if (orientation == TypeHierarchyViewPart.VIEW_ORIENTATION_SINGLE) {
+			setText(TypeHierarchyMessages.getString("ToggleOrientationAction.single.label")); //$NON-NLS-1$
+			setDescription(TypeHierarchyMessages.getString("ToggleOrientationAction.single.description")); //$NON-NLS-1$
+			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.single.tooltip")); //$NON-NLS-1$	
+			JavaPluginImages.setLocalImageDescriptors(this, "th_single.gif"); //$NON-NLS-1$
+		} else {
+			Assert.isTrue(false);
+		}
 		fView= v;
-		setChecked(initHorizontal);
+		fOrientation= orientation;
 	}
-
+	
+	public int getOrientation() {
+		return fOrientation;
+	}	
+	
 	/*
 	 * @see Action#actionPerformed
 	 */		
 	public void run() {
-		fView.setOrientation(isChecked()); // will toggle the checked state
+		fView.setOrientation(fOrientation); // will toggle the checked state
 	}
-
-	/*
-	 * @see Action#setChecked
-	 */		
-	public void setChecked(boolean checked) {
-		if (checked) {
-			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip.checked")); //$NON-NLS-1$
-		} else {
-			setToolTipText(TypeHierarchyMessages.getString("ToggleOrientationAction.tooltip.unchecked")); //$NON-NLS-1$
-		}
-		super.setChecked(checked);
-	}	
 	
 }

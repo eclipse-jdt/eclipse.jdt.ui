@@ -103,6 +103,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public static final int VIEW_ID_SUPER= 0;
 	public static final int VIEW_ID_SUB= 1;
 	
+	public static final int VIEW_ORIENTATION_VERTICAL= 0;
+	public static final int VIEW_ORIENTATION_HORIZONTAL= 1;
+	public static final int VIEW_ORIENTATION_SINGLE= 2;
+	
 	private static final String DIALOGSTORE_HIERARCHYVIEW= "TypeHierarchyViewPart.hierarchyview";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_VIEWORIENTATION= "TypeHierarchyViewPart.orientation";	 //$NON-NLS-1$
 
@@ -136,10 +140,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private SashForm fTypeMethodsSplitter;
 	private PageBook fViewerbook;
 	private PageBook fPagebook;
+	
 	private Label fNoHierarchyShownLabel;
 	private Label fEmptyTypesViewer;
 	
 	private ViewForm fTypeViewerViewForm;
+	private ViewForm fMethodViewerViewForm;
+	
 	private CLabel fMethodViewerPaneLabel;
 	private JavaElementLabelProvider fPaneLabelProvider;
 	
@@ -149,7 +156,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private HistoryDropDownAction fHistoryDropDownAction;
 	
-	private ToggleOrientationAction fToggleOrientationAction;
+	private ToggleOrientationAction[] fToggleOrientationActions;
+	private int fCurrentOrientation;
 	
 	private EnableMemberFilterAction fEnableMemberFilterAction;
 	private AddMethodStubAction fAddStubAction;
@@ -175,35 +183,23 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fInputHistory= new ArrayList();
 		fCurrHistoryIndex= -1;
 		fAllViewers= null;
-		
-		String title= TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.supertypes.label"); //$NON-NLS-1$
-		String contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
-		ToggleViewAction superViewAction= new ToggleViewAction(this, VIEW_ID_SUPER, title, contextHelpId, true);
-		superViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.supertypes.description")); //$NON-NLS-1$
-		superViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.supertypes.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(superViewAction, "super_co.gif"); //$NON-NLS-1$
-
-		title= TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.label"); //$NON-NLS-1$
-		contextHelpId= IJavaHelpContextIds.SHOW_SUPERTYPES;
-		ToggleViewAction subViewAction= new ToggleViewAction(this, VIEW_ID_SUB, title, contextHelpId, false);
-		subViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.description")); //$NON-NLS-1$
-		subViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.subtypes.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(subViewAction, "sub_co.gif"); //$NON-NLS-1$
-
-		title= TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.label"); //$NON-NLS-1$
-		ToggleViewAction vajViewAction= new ToggleViewAction(this, VIEW_ID_TYPE, title, contextHelpId, false);
-		vajViewAction.setDescription(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.description")); //$NON-NLS-1$
-		vajViewAction.setToolTipText(TypeHierarchyMessages.getString("TypeHierarchyViewPart.toggleaction.vajhierarchy.tooltip")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(vajViewAction, "hierarchy_co.gif"); //$NON-NLS-2$
-		
-		fViewActions= new ToggleViewAction[] { vajViewAction, superViewAction, subViewAction };
+				
+		fViewActions= new ToggleViewAction[] {
+			new ToggleViewAction(this, VIEW_ID_TYPE),
+			new ToggleViewAction(this, VIEW_ID_SUPER),
+			new ToggleViewAction(this, VIEW_ID_SUB)
+		};
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		fHistoryDropDownAction= new HistoryDropDownAction(this);
 		
-		fToggleOrientationAction= new ToggleOrientationAction(this, fDialogSettings.getBoolean(DIALOGSTORE_VIEWORIENTATION));
-		
+		fToggleOrientationActions= new ToggleOrientationAction[] {
+			new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
+			new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
+			new ToggleOrientationAction(this, VIEW_ORIENTATION_SINGLE)
+		};
+			
 		fEnableMemberFilterAction= new EnableMemberFilterAction(this, false);
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
@@ -513,19 +509,19 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		Control typeViewerControl= createTypeViewerControl(fTypeViewerViewForm);
 		fTypeViewerViewForm.setContent(typeViewerControl);
 				
-		ViewForm methodViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
+		fMethodViewerViewForm= new ViewForm(fTypeMethodsSplitter, SWT.NONE);
 		fTypeMethodsSplitter.setWeights(new int[] {35, 65});
 		
-		Control methodViewerPart= createMethodViewerControl(methodViewerViewForm);
-		methodViewerViewForm.setContent(methodViewerPart);
+		Control methodViewerPart= createMethodViewerControl(fMethodViewerViewForm);
+		fMethodViewerViewForm.setContent(methodViewerPart);
 		
-		fMethodViewerPaneLabel= new CLabel(methodViewerViewForm, SWT.NONE);
-		methodViewerViewForm.setTopLeft(fMethodViewerPaneLabel);
+		fMethodViewerPaneLabel= new CLabel(fMethodViewerViewForm, SWT.NONE);
+		fMethodViewerViewForm.setTopLeft(fMethodViewerPaneLabel);
 		
 		initDragAndDrop();		
 		
-		ToolBar methodViewerToolBar= new ToolBar(methodViewerViewForm, SWT.FLAT | SWT.WRAP);
-		methodViewerViewForm.setTopCenter(methodViewerToolBar);
+		ToolBar methodViewerToolBar= new ToolBar(fMethodViewerViewForm, SWT.FLAT | SWT.WRAP);
+		fMethodViewerViewForm.setTopCenter(methodViewerToolBar);
 		
 		// page 2 of pagebook (no hierarchy label)
 		fNoHierarchyShownLabel= new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
@@ -536,14 +532,27 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fNoHierarchyShownLabel.setMenu(menu.createContextMenu(fNoHierarchyShownLabel));
 		
 		fPagebook.showPage(fNoHierarchyShownLabel);
-		
+
+		int orientation;
+		try {
+			orientation= fDialogSettings.getInt(DIALOGSTORE_VIEWORIENTATION);
+			if (orientation < 0 || orientation > 2) {
+				orientation= VIEW_ORIENTATION_VERTICAL;
+			}
+		} catch (NumberFormatException e) {
+			orientation= VIEW_ORIENTATION_VERTICAL;
+		}
+		// force the update
+		fCurrentOrientation= -1;
 		// will fill the main tool bar
-		setOrientation(fToggleOrientationAction.isChecked());
+		setOrientation(orientation);
 		
 		// set the filter menu items
 		IActionBars actionBars= getViewSite().getActionBars();
 		IMenuManager viewMenu= actionBars.getMenuManager();
-		viewMenu.add(fToggleOrientationAction);	
+		for (int i= 0; i < fToggleOrientationActions.length; i++) {
+			viewMenu.add(fToggleOrientationActions[i]);
+		}	
 	
 		// fill the method viewer toolbar
 		ToolBarManager lowertbmanager= new ToolBarManager(methodViewerToolBar);
@@ -583,14 +592,38 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	/**
 	 * called from ToggleOrientationAction
 	 */	
-	public void setOrientation(boolean horizontal) {
-		if (fTypeMethodsSplitter != null && !fTypeMethodsSplitter.isDisposed()) {
-			fTypeMethodsSplitter.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
-			updateMainToolbar(horizontal);
+	public void setOrientation(int orientation) {
+		if (fCurrentOrientation != orientation) {
+			boolean updateMethodViewer= false;
+			
+			if (fMethodViewerViewForm != null && !fMethodViewerViewForm.isDisposed()
+					&& fTypeMethodsSplitter != null && !fTypeMethodsSplitter.isDisposed()) {
+				if (orientation == VIEW_ORIENTATION_SINGLE) {
+					fMethodViewerViewForm.setVisible(false);
+					enableMemberFilter(false);
+					updateMethodViewer(null);
+				} else {
+					if (fCurrentOrientation == VIEW_ORIENTATION_SINGLE) {
+						fMethodViewerViewForm.setVisible(true);
+						updateMethodViewer= true;
+					}
+					boolean horizontal= orientation == VIEW_ORIENTATION_HORIZONTAL;
+					fTypeMethodsSplitter.setOrientation(horizontal ? SWT.HORIZONTAL : SWT.VERTICAL);
+					updateMainToolbar(horizontal);
+				}
+				fTypeMethodsSplitter.layout();
+			}
+			for (int i= 0; i < fToggleOrientationActions.length; i++) {
+				fToggleOrientationActions[i].setChecked(orientation == fToggleOrientationActions[i].getOrientation());
+			}
+			fCurrentOrientation= orientation;
+			if (updateMethodViewer) {
+				updateMethodViewer(getInput());
+			}
+			fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, orientation);
 		}
-		fToggleOrientationAction.setChecked(horizontal);
-		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, horizontal);
 	}
+	
 		
 	private void updateMainToolbar(boolean horizontal) {
 		IActionBars actionBars= getViewSite().getActionBars();
@@ -746,7 +779,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 	private void updateMethodViewer(IType input) {
-		if (input != fMethodsViewer.getInput()) {
+		if (input != fMethodsViewer.getInput() && !fIsEnableMemberFilter && fCurrentOrientation != VIEW_ORIENTATION_SINGLE) {
 			if (input != null) {
 				fMethodViewerPaneLabel.setText(fPaneLabelProvider.getText(input));
 				fMethodViewerPaneLabel.setImage(fPaneLabelProvider.getImage(input));
@@ -790,9 +823,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 				if (types.size() == 1) {
 					IType selectedType= (IType)types.get(0);
-					if (!fIsEnableMemberFilter && !selectedType.equals(fMethodsViewer.getInput())) {
-						updateMethodViewer(selectedType);
-					}
+					updateMethodViewer(selectedType);
 				} else if (types.size() == 0) {
 					// method selected, no change
 				}
@@ -800,9 +831,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					revealElementInEditor(selected.get(0));
 				}
 			} else {
-				if (!fIsEnableMemberFilter && fMethodsViewer.getInput() != null) {
-					updateMethodViewer(null);
-				}
+				updateMethodViewer(null);
 			}
 		}
 	}
@@ -1008,7 +1037,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			memento.putString(TAG_INPUT, fInput.getHandleIdentifier());
 		}
 		memento.putInteger(TAG_VIEW, getViewIndex());
-		memento.putInteger(TAG_ORIENTATION, fToggleOrientationAction.isChecked() ? 1 : 0);	
+		memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);	
 		int weigths[]= fTypeMethodsSplitter.getWeights();
 		int ratio= (weigths[0] * 1000) / (weigths[0] + weigths[1]);
 		memento.putInteger(TAG_RATIO, ratio);
@@ -1045,7 +1074,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 		Integer orientation= memento.getInteger(TAG_ORIENTATION);
 		if (orientation != null) {
-			setOrientation(orientation.intValue() == 1);
+			setOrientation(orientation.intValue());
 		}
 		Integer ratio= memento.getInteger(TAG_RATIO);
 		if (ratio != null) {
