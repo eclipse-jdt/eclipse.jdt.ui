@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -85,6 +87,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
@@ -104,6 +108,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
 	private ASTNodeMappingManager fASTMappingManager;
+	private Map fReferenceNodeCache;//Members[] -> ASTNode[]
+	private Map fRippleMethodCache; //IMethod -> IMethod[]
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -113,6 +119,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fExtractedMembers= new IMember[0];
 		fBadVarSet= new HashSet(0);
 		fASTMappingManager= new ASTNodeMappingManager();
+		fReferenceNodeCache= new HashMap();
+		fRippleMethodCache= new HashMap();
 	}
 	
 	/*
@@ -270,7 +278,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("Creating change", 1);
+			pm.beginTask("", 1);
 			CompositeChange builder= new CompositeChange("Extract Interface");
 			builder.addAll(fChangeManager.getAllChanges());
 			builder.add(createExtractedInterface());
@@ -278,17 +286,27 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		}	finally{
+			clearIntermediateState();
 			pm.done();
 		}
 	}
+
+	private void clearIntermediateState() {
+		fReferenceNodeCache.clear();
+		fASTMappingManager.clear();
+		fBadVarSet.clear();
+		fRippleMethodCache.clear();
+	}
+
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
-			pm.beginTask("", 2); //$NON-NLS-1$
+			pm.beginTask("", 10); //$NON-NLS-1$
+			pm.setTaskName("Analyzing...");
 			TextChangeManager manager= new TextChangeManager();
 			updateTypeDeclaration(manager, new SubProgressMonitor(pm, 1));
 			if (fReplaceOccurrences)
-				updateReferences(manager, new SubProgressMonitor(pm, 1));
+				updateReferences(manager, new SubProgressMonitor(pm, 9));
 			else
 				pm.worked(1);	
 			return manager;
@@ -298,9 +316,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
-		pm.beginTask("", 2);//$NON-NLS-1$
+		pm.beginTask("", 4);//$NON-NLS-1$
 		SearchResultGroup[] referenceGroups= getMemberReferences(fInputClass, new SubProgressMonitor(pm, 1));
-		addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 1), referenceGroups);
+		addReferenceUpdatesAndImports(manager, new SubProgressMonitor(pm, 3), referenceGroups);
 		pm.done();
 	}
 	
@@ -344,96 +362,112 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private Collection computeNodesToRemove(Set nodeSet, IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", nodeSet.size()); //XXX
+		pm.beginTask("", 1); 
+		IProgressMonitor subPm1= new SubProgressMonitor(pm, 1);
+		subPm1.beginTask("", nodeSet.size());
 		Collection nodesToRemove= new HashSet(0);
 		for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 			ASTNode node= (ASTNode) iter.next();
-			if (hasDirectProblems(node, new SubProgressMonitor(pm, 1)))
+			if (hasDirectProblems(node, new SubProgressMonitor(subPm1, 1)))
 				nodesToRemove.add(node);	
 		}
+		subPm1.done();
+
+		IProgressMonitor subPm2= new SubProgressMonitor(pm, 1);
+		subPm2.beginTask("", nodeSet.size() - nodesToRemove.size());
 		boolean reiterate;
 		do {
 			reiterate= false;
 			for (Iterator iter= nodeSet.iterator(); iter.hasNext();) {
 				ASTNode node= (ASTNode) iter.next();
-				if (! nodesToRemove.contains(node) && hasIndirectProblems(node, nodesToRemove, new NullProgressMonitor())){ //XXX
+				if (! nodesToRemove.contains(node) && hasIndirectProblems(node, nodesToRemove, new SubProgressMonitor(subPm2, 1))){
 					reiterate= true;
 					nodesToRemove.add(node);			
 				}
 			}
 		} while (reiterate);	
+		subPm2.done();
 		pm.done();
 		return nodesToRemove;
 	}
 
 	private boolean hasIndirectProblems(ASTNode node, Collection nodesToRemove, IProgressMonitor pm) throws JavaModelException {
-		ASTNode parentNode= node.getParent();
-		if (parentNode instanceof VariableDeclarationStatement){
-			VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
-			if (vds.getType() != node)
-				return false; 
-			VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
-			for (int i= 0; i < vdfs.length; i++) {
-				if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
-					return true;	
-			}
-		} else if (parentNode instanceof FieldDeclaration){
-			FieldDeclaration fd= (FieldDeclaration)parentNode;
-			if (fd.getType() != node)
-				return false; 
-			VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(fd);	
-			for (int i= 0; i < vdfs.length; i++) {
-				if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
-					return true;	
-			}
-				
-		} else if (parentNode instanceof VariableDeclaration){
-			if (isMethodParameter(parentNode)){
-				MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode.getParent();	
-				int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
-				IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
-				if (methods == null){ //XXX this can be null because of bug 22883
-					SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methodDeclaration);
-					nodesToRemove.add(svd.getType());
-					addToBadVarSet(svd);
-					return true;
+		try{
+			ASTNode parentNode= node.getParent();
+			if (parentNode instanceof VariableDeclarationStatement){
+				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
+				if (vds.getType() != node)
+					return false; 
+				VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(vds);	
+				pm.beginTask("", vdfs.length);
+				for (int i= 0; i < vdfs.length; i++) {
+					if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
+						return true;	
 				}
-				if (isAnyParameterDeclarationExcluded(methods, parameterIndex, nodesToRemove)){
-					for (int i= 0; i < methods.length; i++) {
-						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
+			} else if (parentNode instanceof FieldDeclaration){
+				FieldDeclaration fd= (FieldDeclaration)parentNode;
+				if (fd.getType() != node)
+					return false; 
+				VariableDeclarationFragment[] vdfs= getVariableDeclarationFragments(fd);	
+				pm.beginTask("", vdfs.length);
+				for (int i= 0; i < vdfs.length; i++) {
+					if (hasIndirectProblems(vdfs[i], nodesToRemove, new SubProgressMonitor(pm, 1)))
+						return true;	
+				}
+					
+			} else if (parentNode instanceof VariableDeclaration){
+				pm.beginTask("", 1);
+				if (isMethodParameter(parentNode)){
+					MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode.getParent();	
+					int parameterIndex= methodDeclaration.parameters().indexOf(parentNode);
+					IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
+					if (methods == null){ //XXX this can be null because of bug 22883
+						SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methodDeclaration);
 						nodesToRemove.add(svd.getType());
 						addToBadVarSet(svd);
 						return true;
 					}
-				}
-			} 
-			if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
-				return true;
-		} else if (parentNode instanceof CastExpression){
-			if (! isReferenceUpdatable(parentNode, nodesToRemove))
-				return true;	
-		} else if (parentNode instanceof MethodDeclaration){
-			MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode;
-			if (methodDeclaration.getReturnType() == node){
-				IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
-				if (methods == null){ //XXX this can be null because of bug 22883
-					nodesToRemove.add(methodDeclaration.getReturnType());
+					if (isAnyParameterDeclarationExcluded(methods, parameterIndex, nodesToRemove)){
+						for (int i= 0; i < methods.length; i++) {
+							SingleVariableDeclaration svd= getParameterDeclarationNode(parameterIndex, methods[i]);
+							nodesToRemove.add(svd.getType());
+							addToBadVarSet(svd);
+							return true;
+						}
+					}
+				} 
+				if (hasIndirectProblems((VariableDeclaration)parentNode, nodesToRemove, new SubProgressMonitor(pm, 1)))
 					return true;
-				}	
-				if (isAnyMethodReturnTypeNodeExcluded(methods, nodesToRemove)){
-					nodesToRemove.addAll(getAllReturnTypeNodes(methods));
-					return true;
-				}	
-				ASTNode[] referenceNodes= getReferenceNodes(methods, pm);
-				for (int i= 0; i < referenceNodes.length; i++) {
-					if (! isReferenceUpdatable(referenceNodes[i], nodesToRemove)){
+			} else if (parentNode instanceof CastExpression){
+				pm.beginTask("", 1);
+				if (! isReferenceUpdatable(parentNode, nodesToRemove))
+					return true;	
+			} else if (parentNode instanceof MethodDeclaration){
+				pm.beginTask("", 3);
+				MethodDeclaration methodDeclaration= (MethodDeclaration)parentNode;
+				if (methodDeclaration.getReturnType() == node){
+					IMethod[] methods= getAllRippleMethods(methodDeclaration, new SubProgressMonitor(pm, 1));
+					if (methods == null){ //XXX this can be null because of bug 22883
+						nodesToRemove.add(methodDeclaration.getReturnType());
+						return true;
+					}	
+					if (isAnyMethodReturnTypeNodeExcluded(methods, nodesToRemove)){
 						nodesToRemove.addAll(getAllReturnTypeNodes(methods));
 						return true;
+					}	
+					ASTNode[] referenceNodes= getReferenceNodes(methods, new SubProgressMonitor(pm, 1));
+					for (int i= 0; i < referenceNodes.length; i++) {
+						if (! isReferenceUpdatable(referenceNodes[i], nodesToRemove)){
+							nodesToRemove.addAll(getAllReturnTypeNodes(methods));
+							return true;
+						}
 					}
-				}
-			}		
-		}
-		return false;
+				}		
+			}
+			return false;
+		} finally{
+			pm.done();
+		}	
 	}
 
 	private static boolean isMethodParameter(ASTNode node){
@@ -443,13 +477,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private IMethod[] getAllRippleMethods(MethodDeclaration methodDeclaration, IProgressMonitor pm) throws JavaModelException{
-		IMethodBinding methodBinding= methodDeclaration.resolveBinding();
-		if (methodBinding == null)
-			return new IMethod[0];
-		IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
-		if (method == null)
-			return null; //XXX this can be null because of bug 22883
-		return RippleMethodFinder.getRelatedMethods(getTopMethod(method, new SubProgressMonitor(pm, 1)), new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);
+		try{
+			pm.beginTask("", 2);
+			IMethodBinding methodBinding= methodDeclaration.resolveBinding();
+			if (methodBinding == null)
+				return new IMethod[0];
+			IMethod method= Binding2JavaModel.find(methodBinding, getCompilationUnit(methodDeclaration).getJavaProject());
+			if (method == null)
+				return null; //XXX this can be null because of bug 22883
+			return getAllRippleMethods(pm, getTopMethod(method, new SubProgressMonitor(pm, 1)));
+		} finally{
+			pm.done();
+		}	
+	}
+	private IMethod[] getAllRippleMethods(IProgressMonitor pm, IMethod topMethod) throws JavaModelException {
+		if (fRippleMethodCache.containsKey(topMethod))
+			return (IMethod[])fRippleMethodCache.get(topMethod);
+		IMethod[] methods= RippleMethodFinder.getRelatedMethods(topMethod, new SubProgressMonitor(pm, 1), new ICompilationUnit[0]);	
+		fRippleMethodCache.put(topMethod, methods);
+		return methods;
 	}
 	
 	private boolean isAnyParameterDeclarationExcluded(IMethod[] methods, int parameterIndex, Collection nodesToRemove) throws JavaModelException{
@@ -489,12 +535,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	private static IMethod getTopMethod(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		Assert.isNotNull(method);
-		pm.beginTask("", 1);
+		pm.beginTask("", 3);
 		IMethod top= method;
 		IMethod oldTop;
 		do {
 			oldTop = top;
-			top= MethodChecks.overridesAnotherMethod(top, new NullProgressMonitor()); //XXX 	
+			top= MethodChecks.overridesAnotherMethod(top, new SubProgressMonitor(pm, 1)); 
 		} while(top != null);
 		pm.done();
 		return oldTop;
@@ -529,14 +575,33 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
-		return ASTNodeSearchUtil.findReferenceNodes(member, fASTMappingManager, pm);
+		ASTNode[] cached= getReferencesFromCache(member);
+		if (cached != null)
+			return cached;
+		ASTNode[] nodes= ASTNodeSearchUtil.findReferenceNodes(member, fASTMappingManager, pm);
+		putToCache(member, nodes);
+		return nodes;
 	}
 
 	private ASTNode[] getReferenceNodes(IMember[] members, IProgressMonitor pm) throws JavaModelException{
-		if (members == null || members.length ==0)
-			return new ASTNode[0];
-		IJavaSearchScope scope= RefactoringScopeFactory.create(members[0]);
-		return ASTNodeSearchUtil.findReferenceNodes(members, fASTMappingManager, pm, scope);
+		try{
+			if (members == null || members.length ==0)
+				return new ASTNode[0];
+			if (members.length == 1)
+				return getReferenceNodes(members[0], pm);	
+			IJavaSearchScope scope= RefactoringScopeFactory.create(members[0]);
+			return ASTNodeSearchUtil.findReferenceNodes(members, fASTMappingManager, pm, scope);
+		} finally {
+			pm.done();
+		}	
+	}
+	
+	private ASTNode[] getReferencesFromCache(IMember member){
+		return (ASTNode[])fReferenceNodeCache.get(member);
+	}
+	
+	private void putToCache(IMember member, ASTNode[] nodes){
+		fReferenceNodeCache.put(member, nodes);
 	}
 		
 	private boolean isReferenceUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
