@@ -110,26 +110,29 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	 * Method declard in IRunnableWithProgress
 	 */
 	public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
-		fChangeExecuted= false;
-		if (createChange()) {
-			pm.beginTask("", 2); //$NON-NLS-1$
-			fCreateChangeOperation.run(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-			fChange= fCreateChangeOperation.getChange();
-			RefactoringStatus status= fCreateChangeOperation.getStatus();
-			int conditionCheckingStyle= fCreateChangeOperation.getConditionCheckingStyle();
-			if (fChange != null && 
-					(conditionCheckingStyle == CreateChangeOperation.CHECK_NONE ||
-			     	 status != null && status.getSeverity() <= fCheckPassedSeverity)) {
-				executeChange(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				fChangeExecuted= true;
+		try{
+			fChangeExecuted= false;
+			if (createChange()) {
+				pm.beginTask("", 2); //$NON-NLS-1$
+				fCreateChangeOperation.run(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+				fChange= fCreateChangeOperation.getChange();
+				RefactoringStatus status= fCreateChangeOperation.getStatus();
+				int conditionCheckingStyle= fCreateChangeOperation.getConditionCheckingStyle();
+				if (fChange != null && 
+						(conditionCheckingStyle == CreateChangeOperation.CHECK_NONE ||
+				     	 status != null && status.getSeverity() <= fCheckPassedSeverity)) {
+					executeChange(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+					fChangeExecuted= true;
+				} else {
+					pm.worked(1);
+				}
 			} else {
-				pm.worked(1);
+				executeChange(pm);
+				fChangeExecuted= true;
 			}
+		} finally{
 			pm.done();
-		} else {
-			executeChange(pm);
-			fChangeExecuted= true;
-		}
+		}	
 	}
 	
 	private void executeChange(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
