@@ -64,6 +64,7 @@ import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.IUpdate;
+import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -731,7 +732,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private ToggleTextHoverAction fToggleTextHover;
 	private GotoErrorAction fPreviousError;
 	private GotoErrorAction fNextError;
-	private TextOperationAction fShowJavadoc;
+	private TextEditorAction fShowJavadoc;
 	private TextOperationAction fUndo;
 	private TextOperationAction fRedo;
 	
@@ -754,7 +755,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
-		fShowJavadoc= (TextOperationAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
+		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		fUndo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.UNDO);
 		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
 		

@@ -413,14 +413,20 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.0
 	 */
 	public IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer) {
-		return getInformationControlCreator(sourceViewer, true);
-	}
-	
-	private IInformationControlCreator getInformationControlCreator(ISourceViewer sourceViewer, final boolean cutDown) {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				int style= cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
-				return new DefaultInformationControl(parent, style, new HTMLTextPresenter(cutDown));
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true));
+				// return new HoverBrowserControl(parent);
+			}
+		};
+	}
+
+	private IInformationControlCreator getInformationPresenterControlCreator(ISourceViewer sourceViewer) {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;
+				return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
 				// return new HoverBrowserControl(parent);
 			}
 		};
@@ -431,7 +437,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @since 2.0
 	 */
 	public IInformationPresenter getInformationPresenter(ISourceViewer sourceViewer) {
-		InformationPresenter presenter= new InformationPresenter(getInformationControlCreator(sourceViewer, false));
+		InformationPresenter presenter= new InformationPresenter(getInformationPresenterControlCreator(sourceViewer));
 		IInformationProvider provider= new JavaInformationProvider(getEditor());
 		presenter.setInformationProvider(provider, IDocument.DEFAULT_CONTENT_TYPE);
 		presenter.setInformationProvider(provider, JavaPartitionScanner.JAVA_DOC);

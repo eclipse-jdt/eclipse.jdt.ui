@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
@@ -52,17 +53,23 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.text.information.IInformationProvider;
+import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.source.AnnotationRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -95,6 +102,7 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.StatusTextEditor;
+import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
@@ -127,6 +135,7 @@ import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
@@ -740,7 +749,115 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			return maxLocation;
 		}
 
-	}	
+	}
+
+	/**
+	 * This action dispatches into two behaviours: If there is no current text
+	 * hover, the javadoc is displayed using information presenter. If there is
+	 * a current text hover, it is converted into a information presenter in
+	 * order to make it sticky.
+	 */
+	class InformationDispatchAction extends TextEditorAction {
+		
+		/** The wrapped text operation action. */
+		private final TextOperationAction fTextOperationAction;
+		
+		/**
+		 * Creates a dispatch action.
+		 */
+		public InformationDispatchAction(ResourceBundle resourceBundle, String prefix, final TextOperationAction textOperationAction) {
+			super(resourceBundle, prefix, JavaEditor.this);
+			if (textOperationAction == null)
+				throw new IllegalArgumentException();
+			fTextOperationAction= textOperationAction;
+		}
+		
+		/*
+		 * @see org.eclipse.jface.action.IAction#run()
+		 */
+		public void run() {
+
+			ISourceViewer sourceViewer= getSourceViewer();
+			if (sourceViewer == null) {	
+				fTextOperationAction.run();
+				return;
+			}
+				
+			if (! (sourceViewer instanceof ITextViewerExtension2)) {
+				fTextOperationAction.run();
+				return;
+			}
+				
+			ITextViewerExtension2 textViewerExtension2= (ITextViewerExtension2) sourceViewer;
+
+			// does a text hover exist?
+			ITextHover textHover= textViewerExtension2.getCurrentTextHover();
+			if (textHover == null) {
+				fTextOperationAction.run();
+				return;				
+			}
+
+			Point hoverEventLocation= textViewerExtension2.getHoverEventLocation();
+			int offset= computeOffsetAtLocation(sourceViewer, hoverEventLocation.x, hoverEventLocation.y);
+			if (offset == -1) {
+				fTextOperationAction.run();
+				return;				
+			}				
+
+			try {
+				// get the text hover content
+				IDocument document= sourceViewer.getDocument();
+				String contentType= document.getContentType(offset);
+
+				final IRegion hoverRegion= textHover.getHoverRegion(sourceViewer, offset);						
+				if (hoverRegion == null)
+					return;
+				
+				final String hoverInfo= textHover.getHoverInfo(sourceViewer, hoverRegion);
+	
+				// with information provider
+				IInformationProvider informationProvider= new IInformationProvider() {
+					/*
+					 * @see org.eclipse.jface.text.information.IInformationProvider#getSubject(org.eclipse.jface.text.ITextViewer, int)
+					 */
+					public IRegion getSubject(ITextViewer textViewer, int offset) {					
+						return hoverRegion;
+					}
+					/*
+					 * @see org.eclipse.jface.text.information.IInformationProvider#getInformation(org.eclipse.jface.text.ITextViewer, org.eclipse.jface.text.IRegion)
+					 */
+					public String getInformation(ITextViewer textViewer, IRegion subject) {
+						return hoverInfo;
+					}
+				};
+
+				fInformationPresenter.setOffset(offset);	
+				fInformationPresenter.setInformationProvider(informationProvider, contentType);
+				fInformationPresenter.showInformation();
+
+			} catch (BadLocationException e) {				
+			}
+		}
+
+		// modified version from TextViewer
+		private int computeOffsetAtLocation(ITextViewer textViewer, int x, int y) {
+			
+			StyledText styledText= textViewer.getTextWidget();
+			IDocument document= textViewer.getDocument();
+			IRegion visibleRegion= textViewer.getVisibleRegion();
+			
+			if (document == null)
+				return -1;		
+
+			try {
+				return styledText.getOffsetAtLocation(new Point(x, y)) + visibleRegion.getOffset();
+			} catch (IllegalArgumentException e) {
+				return -1;	
+			}
+
+		}
+	}
+
 	
 	/** Preference key for showing the line number ruler */
 	public final static String LINE_NUMBER_RULER= "lineNumberRuler"; //$NON-NLS-1$
@@ -765,6 +882,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private DefaultEncodingSupport fEncodingSupport;
 	/** The mouse listener */
 	private MouseClickListener fMouseListener;
+	/** The information presenter. */
+	private InformationPresenter fInformationPresenter;
 	
 	protected CompositeActionGroup fActionGroups;
 	private CompositeActionGroup fContextMenuGroup;
@@ -1202,7 +1321,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$				
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
+		action= new InformationDispatchAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", (TextOperationAction) action); //$NON-NLS-1$
+ 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
 		fEncodingSupport= new DefaultEncodingSupport();
@@ -1502,5 +1622,28 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		super.doSetSelection(selection);
 		synchronizeOutlinePageSelection();
 	}
+
+	/*
+	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.
+	 * widgets.Composite)
+	 */
+	public void createPartControl(Composite parent) {
+		super.createPartControl(parent);
+
+		ISourceViewer sourceViewer= getSourceViewer();
+		SourceViewerConfiguration sourceViewerConfiguration= getSourceViewerConfiguration();
+
+		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				boolean cutDown= false;
+				int style= cutDown ? SWT.NONE : (SWT.V_SCROLL | SWT.H_SCROLL);
+				return new DefaultInformationControl(parent, SWT.RESIZE, style, new HTMLTextPresenter(cutDown));
+			}
+		};
+
+		fInformationPresenter= new InformationPresenter(informationControlCreator);
+		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
+		fInformationPresenter.install(sourceViewer);
+ 	}
 
 }
