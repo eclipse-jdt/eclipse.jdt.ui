@@ -31,21 +31,17 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class DeleteWizard extends RefactoringWizard {
 
-	public DeleteWizard() {
-		super();
+	public DeleteWizard(Refactoring refactoring) {
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE | YES_NO_BUTTON_STYLE | NO_PREVIEW_PAGE);
 		setDefaultPageTitle(RefactoringMessages.getString("DeleteWizard.1")); //$NON-NLS-1$
-	}
-	
-	public void initialize(Refactoring refactoring) {
-		super.initialize(refactoring);
 		((JavaDeleteProcessor)getDeleteRefactoring().getProcessor()).setQueries(new ReorgQueries(this));
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
 	 */
@@ -56,29 +52,20 @@ public class DeleteWizard extends RefactoringWizard {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#getMessageLineWidthInChars()
 	 */
-	protected int getMessageLineWidthInChars() {
+	public int getMessageLineWidthInChars() {
 		return 0;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
-	 */
-	public boolean hasPreviewPage() {
-		return false;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#yesNoStyle()
-	 */
-	protected boolean yesNoStyle() {
-		return true;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.wizard.Wizard#needsProgressMonitor()
 	 */
 	public boolean needsProgressMonitor() {
-		return (getDeleteRefactoring().getStyle() & RefactoringStyles.NEEDS_PROGRESS) != 0;
+		DeleteRefactoring refactoring= getDeleteRefactoring();
+		RefactoringProcessor processor= refactoring.getProcessor();
+		if (processor instanceof JavaDeleteProcessor) {
+			return ((JavaDeleteProcessor)processor).needsProgressMonitor();
+		}
+		return super.needsProgressMonitor();
 	}
 	
 	private DeleteRefactoring getDeleteRefactoring() {

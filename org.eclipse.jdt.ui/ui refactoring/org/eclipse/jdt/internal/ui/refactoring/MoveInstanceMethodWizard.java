@@ -62,7 +62,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class MoveInstanceMethodWizard extends RefactoringWizard {
 
 	public MoveInstanceMethodWizard(MoveInstanceMethodRefactoring ref) {
-		super(ref, RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE); 
+		setDefaultPageTitle(RefactoringMessages.getString("MoveInstanceMethodWizard.Move_Method")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -143,7 +144,7 @@ public class MoveInstanceMethodWizard extends RefactoringWizard {
 				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES;
 	
 		public MoveInstanceMethodInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 		}
 
 		public void createControl(Composite parent) {

@@ -109,7 +109,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class PullUpWizard extends RefactoringWizard {
 
 	public PullUpWizard(PullUpRefactoring ref) {
-		super(ref, RefactoringMessages.getString("PullUpWizard.defaultPageTitle")); //$NON-NLS-1$
+		super(ref, WIZARD_BASED_USER_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("PullUpWizard.defaultPageTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);
 	}
 	
@@ -121,13 +122,6 @@ public class PullUpWizard extends RefactoringWizard {
 		addPage(new PullUpInputPage2());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasMultiPageUserInput()
-	 */
-	public boolean hasMultiPageUserInput() {
-		return true;
-	}
-	
 	private static class PullUpInputPage1 extends UserInputWizardPage {
 	
 		private class PullUpCellModifier implements ICellModifier {
@@ -347,7 +341,7 @@ public class PullUpWizard extends RefactoringWizard {
 		private Label fStatusLine;
 
 		public PullUpInputPage1() {
-			super(PAGE_NAME, false);
+			super(PAGE_NAME);
 			setMessage(RefactoringMessages.getString("PullUpInputPage1.page_message")); //$NON-NLS-1$
 		}
 
@@ -747,7 +741,7 @@ public class PullUpWizard extends RefactoringWizard {
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			if (canSkipSecondInputPage())
-				return getRefactoringWizard().computeUserInputSuccessorPage(this);
+				return computeSuccessorPage();
 			else 
 				return super.getNextPage();
 		}
@@ -1022,7 +1016,7 @@ public class PullUpWizard extends RefactoringWizard {
 	  public static final String PAGE_NAME= "PullUpMethodsInputPage2"; //$NON-NLS-1$
 	
 	  public PullUpInputPage2() {
-		  super(PAGE_NAME, true);
+		  super(PAGE_NAME);
 		  setMessage(RefactoringMessages.getString("PullUpInputPage.select_methods")); //$NON-NLS-1$
 	  }
 

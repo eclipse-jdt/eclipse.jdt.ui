@@ -59,7 +59,8 @@ public class ChangeTypeWizard extends RefactoringWizard {
 
 
 	public ChangeTypeWizard(ChangeTypeRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ChangeTypeWizard.title")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("ChangeTypeWizard.title")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -138,7 +139,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		private boolean fTreeUpdated= false;
 		
 		public ChangeTypeInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			setMessage(MESSAGE);
 		}
 		

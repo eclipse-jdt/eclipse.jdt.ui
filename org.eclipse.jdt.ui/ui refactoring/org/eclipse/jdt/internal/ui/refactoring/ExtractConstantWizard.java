@@ -42,8 +42,8 @@ public class ExtractConstantWizard extends RefactoringWizard {
 	private static final String MESSAGE = RefactoringMessages.getString("ExtractConstantInputPage.enter_name"); //$NON-NLS-1$
 
 	public ExtractConstantWizard(ExtractConstantRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ExtractConstantWizard.defaultPageTitle")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		setDefaultPageTitle(RefactoringMessages.getString("ExtractConstantWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -63,7 +63,6 @@ public class ExtractConstantWizard extends RefactoringWizard {
 		
 		addPage(new ExtractConstantInputPage(message, messageType, guessName()));
 	}
-
 
 	private String guessName() {
 		try {

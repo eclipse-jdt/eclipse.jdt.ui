@@ -31,8 +31,8 @@ public class InlineConstantWizard extends RefactoringWizard {
 	private static final String MESSAGE = RefactoringMessages.getString("InlineConstantWizard.message"); //$NON-NLS-1$
 
 	public InlineConstantWizard(InlineConstantRefactoring ref) {
-		super(ref, RefactoringMessages.getString("InlineConstantWizard.Inline_Constant")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		setDefaultPageTitle(RefactoringMessages.getString("InlineConstantWizard.Inline_Constant")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -69,7 +69,7 @@ public class InlineConstantWizard extends RefactoringWizard {
 		private final String fOriginalMessage;
 	
 		public InlineConstantInputPage(String description, int messageType) {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			fOriginalMessage= description;
 			fOriginalMessageType= messageType;
 			setDescription(description);

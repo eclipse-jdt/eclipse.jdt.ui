@@ -41,7 +41,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 	private Button fRemove;
 	
 	public InlineMethodInputPage() {
-		super(PAGE_NAME, true);
+		super(PAGE_NAME);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 		setDescription(DESCRIPTION);
 	}

@@ -78,7 +78,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class PushDownWizard extends RefactoringWizard {
 
 	public PushDownWizard(PushDownRefactoring ref) {
-		super(ref, RefactoringMessages.getString("PushDownWizard.defaultPageTitle")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("PushDownWizard.defaultPageTitle")); //$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);//XXX incorrect icon
 	}
 
@@ -206,7 +207,7 @@ public class PushDownWizard extends RefactoringWizard {
 		private Label fStatusLine;
 	
 		public PushDownInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 		}
 
 		/*

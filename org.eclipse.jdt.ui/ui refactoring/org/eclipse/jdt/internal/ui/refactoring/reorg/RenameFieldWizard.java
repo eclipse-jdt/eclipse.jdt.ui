@@ -33,13 +33,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameFieldWizard extends RenameRefactoringWizard {
 
-	public RenameFieldWizard() {
-		super(RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
+	public RenameFieldWizard(Refactoring refactoring) {
+		super(refactoring, RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
 			RefactoringMessages.getString("RenameFieldWizard.inputPage.description"),   //$NON-NLS-1$
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD,
 			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);

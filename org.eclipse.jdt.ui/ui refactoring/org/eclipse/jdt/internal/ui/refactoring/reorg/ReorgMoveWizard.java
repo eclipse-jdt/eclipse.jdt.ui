@@ -37,7 +37,15 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
-		super(ref, ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE | computeHasPreviewPage(ref)); 
+		setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
+	}
+	
+	private static int computeHasPreviewPage(MoveRefactoring refactoring) {
+		JavaMoveProcessor processor= (JavaMoveProcessor)refactoring.getAdapter(JavaMoveProcessor.class);
+		if (processor.canUpdateReferences() || processor.canEnableQualifiedNameUpdating())
+			return NONE;
+		return NO_PREVIEW_PAGE;
 	}
 
 	/* (non-Javadoc)
@@ -47,17 +55,6 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		addPage(new MoveInputPage());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
-	 */
-	protected boolean hasPreviewPage() {
-		return getJavaMoveProcessor().canUpdateReferences() || getJavaMoveProcessor().canEnableQualifiedNameUpdating();
-	}
-
-	private JavaMoveProcessor getJavaMoveProcessor(){
-		return (JavaMoveProcessor)getRefactoring().getAdapter(JavaMoveProcessor.class);
-	}
-
 	private static class MoveInputPage extends ReorgUserInputPage{
 
 		private static final String PAGE_NAME= "MoveInputPage"; //$NON-NLS-1$
@@ -106,7 +103,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		}
 	
 		private void updateUIStatus() {
-			getRefactoringWizard().setPreviewReview(false);
+			getRefactoringWizard().setForcePreviewReview(false);
 			JavaMoveProcessor processor= getJavaMoveProcessor();
 			if (fReferenceCheckbox != null){
 				fReferenceCheckbox.setEnabled(canUpdateReferences());
@@ -118,7 +115,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				if (enabled) {
 					fQualifiedNameComponent.setEnabled(processor.getUpdateQualifiedNames());
 					if (processor.getUpdateQualifiedNames())
-						getRefactoringWizard().setPreviewReview(true);
+						getRefactoringWizard().setForcePreviewReview(true);
 				} else {
 					fQualifiedNameComponent.setEnabled(false);
 				}

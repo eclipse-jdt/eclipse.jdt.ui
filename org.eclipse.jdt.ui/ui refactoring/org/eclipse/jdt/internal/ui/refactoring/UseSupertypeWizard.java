@@ -44,7 +44,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class UseSupertypeWizard extends RefactoringWizard{
 
 	public UseSupertypeWizard(UseSupertypeWherePossibleRefactoring ref) {
-		super(ref, RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("UseSupertypeWizard.Use_Super_Type_Where_Possible")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -63,7 +64,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		private JavaElementLabelProvider fTableLabelProvider;
 
 		public UseSupertypeInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			fFileCount= new HashMap(2);
 			setMessage(MESSAGE);
 		}

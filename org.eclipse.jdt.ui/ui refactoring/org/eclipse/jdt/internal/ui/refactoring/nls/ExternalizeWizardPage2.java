@@ -86,7 +86,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 	//  private Label fSyncVisualizer;
 
 	public ExternalizeWizardPage2(NLSRefactoring refactoring) {
-		super(PAGE_NAME, true);
+		super(PAGE_NAME);
 
 		IDialogFieldListener updateListener= new IDialogFieldListener() {
 

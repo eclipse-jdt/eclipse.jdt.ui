@@ -57,7 +57,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	 * @param isLastUserPage
 	 */
 	public IntroduceFactoryInputPage(String name) {
-		super(name, true);
+		super(name);
 	}
 
 	private Text createTextInputField(Composite result) {

@@ -23,7 +23,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ReorgCopyWizard extends RefactoringWizard {
 
 	public ReorgCopyWizard(CopyRefactoring ref) {
-		super(ref, ReorgMessages.getString("ReorgCopyWizard.1")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE | NO_PREVIEW_PAGE); 
+		setDefaultPageTitle(ReorgMessages.getString("ReorgCopyWizard.1")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -33,13 +34,6 @@ public class ReorgCopyWizard extends RefactoringWizard {
 		addPage(new CopyInputPage());
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#hasPreviewPage()
-	 */
-	protected boolean hasPreviewPage() {
-		return false;
-	}
-
 	private static class CopyInputPage extends ReorgUserInputPage{
 
 		private static final String PAGE_NAME= "CopyInputPage"; //$NON-NLS-1$

@@ -34,7 +34,7 @@ public abstract class MessageWizardPage extends UserInputWizardPage {
 	private final int fStyle;
 
 	public MessageWizardPage(String pageName, boolean isLastUserPage, int style) {
-		super(pageName, isLastUserPage);
+		super(pageName);
 		fStyle= style;
 	}
 

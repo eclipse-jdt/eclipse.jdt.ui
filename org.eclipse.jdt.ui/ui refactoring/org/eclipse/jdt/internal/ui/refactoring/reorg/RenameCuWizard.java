@@ -15,11 +15,13 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenameCuWizard extends RenameRefactoringWizard {
-	public RenameCuWizard() {
-		super(
+	
+	public RenameCuWizard(Refactoring refactoring) {
+		super(refactoring,
 			RefactoringMessages.getString("RenameCuWizard.defaultPageTitle"), //$NON-NLS-1$
 			RefactoringMessages.getString("RenameCuWizard.inputPage.description"), //$NON-NLS-1$
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_CU,

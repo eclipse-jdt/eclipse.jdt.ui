@@ -59,7 +59,6 @@ import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class JavaDeleteProcessor extends DeleteProcessor {
@@ -69,7 +68,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	private Object[] fElements;
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
-	private int fStyle;
 	private IReorgQueries fDeleteQueries;	
 
 	private Change fDeleteChange;
@@ -80,7 +78,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		fElements= elements;
 		fResources= getResources(elements);
 		fJavaElements= getJavaElements(elements);
-		fStyle= getStyle(fResources, fJavaElements);
 		fSuggestGetterSetterDeletion= true;
 		fWasCanceled= false;
 	}
@@ -107,6 +104,20 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return true;
 	}
 	
+	public boolean needsProgressMonitor() {
+		if (fResources != null && fResources.length > 0)
+			return true;
+		if (fJavaElements != null) {
+			for (int i= 0; i < fJavaElements.length; i++) {
+				int type= fJavaElements[i].getElementType();
+				if (type <= IJavaElement.CLASS_FILE)
+					return true;
+			}
+		}
+		return false;
+		
+	}
+
 	private boolean canDelete(IResource resource) {
 		if (!resource.exists() || resource.isPhantom())
 			return false;
@@ -170,10 +181,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	
 	public Object[] getElements() {
 		return fElements;
-	}
-	
-	public int getStyle() {
-		return fStyle;
 	}
 	
 	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
@@ -290,20 +297,6 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		}
 		return (IJavaElement[])result.toArray(new IJavaElement[result.size()]);
 	}
-
-	private static int getStyle(IResource[] resources, IJavaElement[] jElements) {	
-		if (resources != null && resources.length > 0)
-			return RefactoringStyles.NEEDS_PROGRESS;
-		if (jElements != null) {
-			for (int i= 0; i < jElements.length; i++) {
-				int type= jElements[i].getElementType();
-				if (type <= IJavaElement.CLASS_FILE)
-					return RefactoringStyles.NEEDS_PROGRESS;
-			}
-		}
-		return RefactoringStyles.NONE;
-	}
-	
 	
 	/* 
 	 * This has to be customizable because when drag and drop is performed on a field,

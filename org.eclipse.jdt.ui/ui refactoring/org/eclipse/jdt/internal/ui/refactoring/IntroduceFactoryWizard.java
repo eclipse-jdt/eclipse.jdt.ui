@@ -24,8 +24,8 @@ public class IntroduceFactoryWizard extends RefactoringWizard {
 	 * @param errorPageContextHelpId
 	 */
 	public IntroduceFactoryWizard(IntroduceFactoryRefactoring ref, String pageTitle) {
-		super(ref, pageTitle);
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		setDefaultPageTitle(pageTitle);
 	}
 
 	/**

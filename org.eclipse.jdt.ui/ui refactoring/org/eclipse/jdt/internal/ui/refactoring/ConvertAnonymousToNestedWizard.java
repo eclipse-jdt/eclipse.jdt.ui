@@ -36,8 +36,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, PREVIEW_EXPAND_FIRST_NODE | DIALOG_BASED_UESR_INTERFACE); 
+		setDefaultPageTitle(RefactoringMessages.getString("ConvertAnonymousToNestedAction.wizard_title")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -53,7 +53,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 		public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$
     
 		public ConvertAnonymousToNestedInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 		}
 

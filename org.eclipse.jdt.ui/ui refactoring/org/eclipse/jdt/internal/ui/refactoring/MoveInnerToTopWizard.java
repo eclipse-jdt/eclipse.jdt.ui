@@ -36,7 +36,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class MoveInnerToTopWizard extends RefactoringWizard {
 
 	public MoveInnerToTopWizard(Refactoring ref) {
-		super(ref, RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE); 
+		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

@@ -122,7 +122,6 @@ public class InlineTempAction extends SelectionDispatchAction {
 	 */
 	protected RefactoringWizard createWizard(Refactoring refactoring) {
 		RefactoringWizard result= new InlineTempWizard((InlineTempRefactoring)refactoring);
-		result.setExpandFirstNode(true);
 		return result;
 	}
 	

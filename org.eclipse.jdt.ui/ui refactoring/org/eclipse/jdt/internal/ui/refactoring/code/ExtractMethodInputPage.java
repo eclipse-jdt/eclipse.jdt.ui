@@ -61,7 +61,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private static final String GENERATE_JAVADOC= "GenerateJavadoc";  //$NON-NLS-1$
 
 	public ExtractMethodInputPage() {
-		super(PAGE_NAME, true);
+		super(PAGE_NAME);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 		setDescription(DESCRIPTION);
 		fFirstTime= true;

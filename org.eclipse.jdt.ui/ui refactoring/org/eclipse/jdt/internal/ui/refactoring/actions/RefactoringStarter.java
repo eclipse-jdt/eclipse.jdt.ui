@@ -29,9 +29,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardDialog;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardDialog2;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -53,12 +52,8 @@ public class RefactoringStarter {
 		if (activationStatus.hasFatalError()){
 			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus, parent);
 		} else {
-			wizard.setActivationStatus(activationStatus);
-			Dialog dialog;
-			if (wizard.hasMultiPageUserInput())
-				dialog= new RefactoringWizardDialog(parent, wizard);
-			else 
-				dialog= new RefactoringWizardDialog2(parent, wizard);
+			wizard.setInitialConditionCheckingStatus(activationStatus);
+			Dialog dialog= RefactoringUI.createRefactoringWizardDialog(parent, wizard);
 			if (dialog.open() == Window.CANCEL)
 				fSaveHelper.triggerBuild();
 			return null;	

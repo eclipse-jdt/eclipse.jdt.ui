@@ -14,9 +14,12 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 public class RenameSourceFolderWizard extends RenameRefactoringWizard {
-	public RenameSourceFolderWizard() {
-		super(
+	
+	public RenameSourceFolderWizard(Refactoring refactoring) {
+		super(refactoring,
 			RefactoringMessages.getString("RenameSourceFolder.defaultPageTitle"), //$NON-NLS-1$
 			RefactoringMessages.getString("RenameSourceFolder.inputPage.description"), //$NON-NLS-1$
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,

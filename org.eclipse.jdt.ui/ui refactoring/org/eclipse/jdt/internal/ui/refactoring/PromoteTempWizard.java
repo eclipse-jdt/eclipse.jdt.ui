@@ -38,8 +38,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class PromoteTempWizard extends RefactoringWizard {
 
 	public PromoteTempWizard(PromoteTempToFieldRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ConvertLocalToField.title")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		setDefaultPageTitle(RefactoringMessages.getString("ConvertLocalToField.title")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -67,7 +67,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 		private Text fNameField;
 	
 		public PromoteTempInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 		}
 

@@ -58,12 +58,10 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class ChangeSignatureWizard extends RefactoringWizard {
 
 	public ChangeSignatureWizard(ChangeSignatureRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("ChangeSignatureRefactoring.modify_Parameters")); //$NON-NLS-1$
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */ 
 	protected void addUserInputPages(){
 		addPage(new ChangeSignatureInputPage());
 	}
@@ -75,7 +73,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private Document fSignaturePreviewDocument;
 		
 		public ChangeSignatureInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			setMessage(RefactoringMessages.getString("ChangeSignatureInputPage.change")); //$NON-NLS-1$
 			fSignaturePreviewDocument= new Document();
 		}

@@ -21,8 +21,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class RenameRefactoringWizard extends RefactoringWizard {
@@ -31,23 +29,15 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	private final String fPageContextHelpId;
 	private final ImageDescriptor fInputPageImageDescriptor;
 	
-	public RenameRefactoringWizard(String defaultPageTitle, String inputPageDescription, 
+	public RenameRefactoringWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription, 
 			ImageDescriptor inputPageImageDescriptor, String pageContextHelpId) {
-		super();
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
 		setDefaultPageTitle(defaultPageTitle);
 		fInputPageDescription= inputPageDescription;
 		fInputPageImageDescriptor= inputPageImageDescriptor;
 		fPageContextHelpId= pageContextHelpId;
 	}
-	
-	protected boolean hasPreviewPage() {
-		Refactoring refactoring= getRefactoring();
-		if (refactoring instanceof RenameRefactoring) {
-			return (((RenameRefactoring)refactoring).getStyle() & RefactoringStyles.NEEDS_PREVIEW) != 0;
-		}
-		return super.hasPreviewPage();
-	}
-	
+
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 

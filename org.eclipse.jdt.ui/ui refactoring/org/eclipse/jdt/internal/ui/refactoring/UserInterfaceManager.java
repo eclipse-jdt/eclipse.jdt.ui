@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,13 +46,20 @@ public class UserInterfaceManager {
 			return null;
 		try {
 			UserInterfaceStarter starter= (UserInterfaceStarter)tuple.starter.newInstance();
-			RefactoringWizard wizard= (RefactoringWizard)tuple.wizard.newInstance();
-			wizard.initialize(refactoring);
+			Class wizardClass= tuple.wizard;
+			Constructor constructor= wizardClass.getConstructor(new Class[] {Refactoring.class});
+			RefactoringWizard wizard= (RefactoringWizard)constructor.newInstance(new Object[] {refactoring});
 			starter.initialize(wizard);
 			return starter;
-		} catch (InstantiationException e) {
+		} catch (NoSuchMethodException e) {
 			return null;
 		} catch (IllegalAccessException e) {
+			return null;
+		} catch (InstantiationException e) {
+			return null;
+		} catch (IllegalArgumentException e) {
+			return null;
+		} catch (InvocationTargetException e) {
 			return null;
 		}
 	}

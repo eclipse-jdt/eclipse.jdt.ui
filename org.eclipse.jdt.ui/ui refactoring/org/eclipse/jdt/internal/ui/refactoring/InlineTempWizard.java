@@ -16,14 +16,15 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class InlineTempWizard extends RefactoringWizard {
 
 	public InlineTempWizard(InlineTempRefactoring ref) {
-		super(ref, RefactoringMessages.getString("InlineTempWizard.defaultPageTitle")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		setDefaultPageTitle(RefactoringMessages.getString("InlineTempWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	protected void addUserInputPages() {
 		addPage(new InlineTempInputPage());
 	}
 
-	protected int getMessageLineWidthInChars() {
+	public int getMessageLineWidthInChars() {
 		return 0;
 	}
 	

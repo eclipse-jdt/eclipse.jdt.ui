@@ -38,8 +38,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ExtractTempWizard extends RefactoringWizard {
 
 	public ExtractTempWizard(ExtractTempRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE);
+		setDefaultPageTitle(RefactoringMessages.getString("ExtractTempWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

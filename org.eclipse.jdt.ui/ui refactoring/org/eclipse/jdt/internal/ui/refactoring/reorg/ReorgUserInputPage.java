@@ -46,7 +46,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 			| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	private TreeViewer fViewer;
 	public ReorgUserInputPage(String pageName) {
-		super(pageName, true);			
+		super(pageName);			
 	}
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)

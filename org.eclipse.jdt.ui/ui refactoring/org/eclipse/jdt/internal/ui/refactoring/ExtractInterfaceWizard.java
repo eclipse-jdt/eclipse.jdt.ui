@@ -50,7 +50,8 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 public class ExtractInterfaceWizard extends RefactoringWizard {
 	
 	public ExtractInterfaceWizard(ExtractInterfaceRefactoring ref) {
-		super(ref, RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface")); //$NON-NLS-1$
+		super(ref, DIALOG_BASED_UESR_INTERFACE); 
+		setDefaultPageTitle(RefactoringMessages.getString("ExtractInterfaceWizard.Extract_Interface")); //$NON-NLS-1$
 	}
 
 	/* non java-doc

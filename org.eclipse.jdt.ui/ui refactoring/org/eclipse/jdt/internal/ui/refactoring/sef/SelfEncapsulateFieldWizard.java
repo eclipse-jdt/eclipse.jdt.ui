@@ -15,7 +15,6 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class SelfEncapsulateFieldWizard extends RefactoringWizard {
@@ -23,16 +22,12 @@ public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	/* package */ static final String DIALOG_SETTING_SECTION= "SelfEncapsulateFieldWizard"; //$NON-NLS-1$
 	
 	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldRefactoring refactoring) {
-		super(refactoring, RefactoringMessages.getString("SelfEncapsulateField.sef")); //$NON-NLS-1$
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("SelfEncapsulateField.sef")); //$NON-NLS-1$
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
 	protected void addUserInputPages() {
 		addPage(new SelfEncapsulateFieldInputPage());
-	}
-
-	protected void addPreviewPage() {
-		PreviewWizardPage page= new PreviewWizardPage();
-		addPage(page);
 	}
 }

@@ -10,33 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
-import org.eclipse.jface.wizard.IWizard;
-import org.eclipse.jface.wizard.IWizardContainer;
+import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-import org.eclipse.ltk.ui.refactoring.IRefactoringWizardDialog;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * good citizen problems - wizard is only valid after constructor (when the pages toggle
- * some values and force an validate the validate cant get a wizard)
+ * some values and force an validate the validate can't get a wizard)
  */
 public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(NLSRefactoring refactoring) {
-		super(refactoring, NLSUIMessages.getFormattedString("wizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
+		super(refactoring, CHECK_INITIAL_CONDITIONS_ON_OPEN | WIZARD_BASED_USER_INTERFACE); 
+		setDefaultPageTitle(NLSUIMessages.getFormattedString("wizard.page.title", refactoring.getCu().getElementName())); //$NON-NLS-1$
 		setWindowTitle(NLSUIMessages.getString("wizard.name"));//$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
-	}
-
-	/**
-	 * @see RefactoringWizard#hasMultiPageUserInput
-	 */
-	public boolean hasMultiPageUserInput() {
-		return true;
 	}
 
 	/**
@@ -54,22 +46,8 @@ public class ExternalizeWizard extends RefactoringWizard {
 		addPage(page2);
 	}
 
-	/**
-	 * @see RefactoringWizard#checkActivationOnOpen
-	 */
-	protected boolean checkActivationOnOpen() {
-		return true;
+	public boolean canFinish() {
+		IWizardPage page= getContainer().getCurrentPage();
+		return !(page instanceof ExternalizeWizardPage);
 	}
-
-	/**
-	 * @see IWizard#setContainer(IWizardContainer)
-	 */
-	public void setContainer(IWizardContainer wizardContainer) {
-		super.setContainer(wizardContainer);
-		if (wizardContainer instanceof IRefactoringWizardDialog) {
-			IRefactoringWizardDialog dialog= (IRefactoringWizardDialog)wizardContainer;
-			dialog.makeNextButtonDefault();
-		}
-	}
-
 }

@@ -14,9 +14,12 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 public class RenameMethodWizard extends RenameRefactoringWizard {
-	public RenameMethodWizard() {
-		super(
+	
+	public RenameMethodWizard(Refactoring refactoring) {
+		super(refactoring,
 			RefactoringMessages.getString("RenameMethodWizard.defaultPageTitle"), //$NON-NLS-1$
 			RefactoringMessages.getString("RenameMethodWizard.inputPage.description"), //$NON-NLS-1$
 			JavaPluginImages.DESC_WIZBAN_REFACTOR_METHOD,

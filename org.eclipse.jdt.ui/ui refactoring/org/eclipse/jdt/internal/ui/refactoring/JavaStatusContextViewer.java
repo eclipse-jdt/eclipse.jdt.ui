@@ -42,10 +42,10 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.ui.refactoring.TextContextViewer;
+import org.eclipse.ltk.ui.refactoring.TextStatusContextViewer;
 
 
-public class JavaStatusContextViewer extends TextContextViewer {
+public class JavaStatusContextViewer extends TextStatusContextViewer {
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#createControl(org.eclipse.swt.widgets.Composite)

@@ -33,8 +33,8 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 public class IntroduceParameterWizard extends RefactoringWizard {
 
 	public IntroduceParameterWizard(IntroduceParameterRefactoring ref) {
-		super(ref, RefactoringMessages.getString("IntroduceParameterWizard.defaultPageTitle")); //$NON-NLS-1$
-		setExpandFirstNode(true);
+		super(ref, DIALOG_BASED_UESR_INTERFACE | PREVIEW_EXPAND_FIRST_NODE); 
+		setDefaultPageTitle(RefactoringMessages.getString("IntroduceParameterWizard.defaultPageTitle")); //$NON-NLS-1$
 	}
 
 	/* non java-doc
@@ -50,7 +50,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		public static final String PAGE_NAME= "IntroduceParameterInputPage";//$NON-NLS-1$
     
 		public IntroduceParameterInputPage() {
-			super(PAGE_NAME, true);
+			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 		}
 

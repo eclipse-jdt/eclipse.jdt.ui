@@ -2366,6 +2366,32 @@
       </keyBinding>
 <!-- source -->
       <command
+            name="%ActionDefinition.sourceQuickMenu.name"
+            description="%ActionDefinition.sourceQuickMenu.description"
+            category="org.eclipse.jdt.ui.category.source"
+            id="org.eclipse.jdt.ui.edit.text.java.source.quickMenu">
+      </command>
+      <keyBinding
+            string="Alt+Shift+J"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+J"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Shift+J"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.source.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
             name="%ActionDefinition.comment.name"
             description="%ActionDefinition.comment.description"
             category="org.eclipse.jdt.ui.category.source"
@@ -2701,11 +2727,31 @@
       </keyBinding>
 <!-- refactoring -->
       <command
-            name="Refactoring Quick List"
-            description="Refactoring Quick List"
+            name="%ActionDefinition.refactorQuickMenu.name"
+            description="%ActionDefinition.refactorQuickMenu.description"
             category="org.eclipse.jdt.ui.category.refactoring"
-            id="org.eclipse.jdt.ui.edit.text.java.refactor.quickList">
+            id="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu">
       </command>
+      <keyBinding
+            string="Alt+Shift+K"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+K"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+K"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       <command
             name="%ActionDefinition.refactorUndo.name"
             description="%ActionDefinition.refactorUndo.description"

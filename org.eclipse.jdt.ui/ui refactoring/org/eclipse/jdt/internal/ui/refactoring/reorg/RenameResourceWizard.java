@@ -14,9 +14,12 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
 public class RenameResourceWizard extends RenameRefactoringWizard {
-	public RenameResourceWizard() {
-		super(
+	
+	public RenameResourceWizard(Refactoring refactoring) {
+		super(refactoring,
 			RefactoringMessages.getString("RenameResourceWizard.defaultPageTitle"), //$NON-NLS-1$
 			RefactoringMessages.getString("RenameResourceWizard.inputPage.description"), //$NON-NLS-1$
 			JavaPluginImages.DESC_WIZBAN_REFACTOR,

@@ -213,6 +213,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (qu != null) {
 			forcePreview |= qu.getUpdateQualifiedNames();
 		}
-		getRefactoringWizard().setPreviewReview(forcePreview);
+		getRefactoringWizard().setForcePreviewReview(forcePreview);
 	}
 }

@@ -339,7 +339,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
     private String fDefaultPrefix;
 	
 	public ExternalizeWizardPage(NLSRefactoring nlsRefactoring) {
-		super(PAGE_NAME, false);
+		super(PAGE_NAME);
 		fCu = nlsRefactoring.getCu();
 		fSubstitutions = nlsRefactoring.getSubstitutions();
 		fDefaultPrefix = nlsRefactoring.getPrefixHint();
