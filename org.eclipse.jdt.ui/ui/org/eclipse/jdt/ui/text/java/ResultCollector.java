@@ -86,7 +86,7 @@ public class ResultCollector extends CompletionRequestor {
 	private final List fKeywords= new ArrayList();
 	private final Set fSuggestedMethodNames= new HashSet();
 	
-	private final ICompilationUnit fCompilationUnit;
+	private ICompilationUnit fCompilationUnit;
 	private final IJavaProject fJavaProject;
 	private int fUserReplacementLength;
 	
@@ -104,15 +104,8 @@ public class ResultCollector extends CompletionRequestor {
 	 * @param cu the compilation unit that the result collector will operate on
 	 */
 	public ResultCollector(ICompilationUnit cu) {
-		fJavaProject= cu.getJavaProject();
+		this(cu.getJavaProject());
 		fCompilationUnit= cu;
-
-		fUserReplacementLength= -1;
-		fLastProblem= null;
-
-		fJavaProposals.clear();
-		fKeywords.clear();
-		fSuggestedMethodNames.clear();
 	}
 	
 	/**
@@ -351,8 +344,7 @@ public class ResultCollector extends CompletionRequestor {
 	 * Creates the context information for a given method reference proposal.
 	 * The passed proposal must be of kind {@link CompletionProposal#METHOD_REF}.
 	 * 
-	 * @param methodProposal the method proposal to create context information
-	 *        for
+	 * @param methodProposal the method proposal for which to create context information
 	 * @return the context information for <code>methodProposal</code>
 	 */
 	protected final IContextInformation createMethodContextInformation(CompletionProposal methodProposal) {
