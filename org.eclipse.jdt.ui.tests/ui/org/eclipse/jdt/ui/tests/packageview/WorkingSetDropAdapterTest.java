@@ -63,16 +63,6 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		super.tearDown();
 	}
 	
-	public void testInvalidTarget1() throws Exception {
-		List selectedElements= new ArrayList();
-		selectedElements.add(fProject);
-		MultiElementSelection selection= createSelection(selectedElements, null);
-		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
-			"Target", new IAdaptable[0]);
-		target.setId(OthersWorkingSetUpdater.ID);
-		performDnD(DND.DROP_NONE, selection, target);
-	}
-	
 	public void testInvalidTarget2() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
@@ -137,6 +127,27 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(0, elements.length);
 	}
 
+	public void testMoveToOthersProject() throws Exception {
+		List selectedElements= new ArrayList();
+		selectedElements.add(fProject);
+		IWorkingSet source= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
+			"Source", new IAdaptable[] {fProject});
+		List treePathes= new ArrayList();
+		treePathes.add(new TreePath(new Object[] {source, fProject}));
+		MultiElementSelection selection= createSelection(selectedElements, treePathes);
+		
+		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
+			"Target", new IAdaptable[0]);
+		target.setId(OthersWorkingSetUpdater.ID);
+		performDnD(DND.DROP_MOVE, selection, target);
+		IAdaptable[] elements= target.getElements();
+		// assert that the target doesn't have an element yet. The others working set
+		// is updated by the updater through a change of the source working set
+		assertEquals(0, elements.length);
+		elements= source.getElements();
+		assertEquals(0, elements.length);
+	}
+	
 	public void testRearrange1() throws Exception {
 		IWorkingSet ws1= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"ws1", new IAdaptable[0]);
