@@ -54,7 +54,8 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (je == null)
 			return null;
 		
-		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_ACTIVE_ONLY, null);
+		// Never wait for an AST in UI thread.
+		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(je, ASTProvider.WAIT_NO, null);
 
 		ASTNode node= NodeFinder.perform(ast, offset, 1);
 		if (!(node instanceof StringLiteral))
