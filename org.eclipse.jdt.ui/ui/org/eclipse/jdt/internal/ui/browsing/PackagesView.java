@@ -15,7 +15,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
+
+import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -29,7 +30,7 @@ public class PackagesView extends JavaBrowsingPart {
 	 */
 	protected void addFilters() {
 		super.addFilters();
-		getViewer().addFilter(new EmptyInnerPackageFilter());
+		getViewer().addFilter(new EmptyPackageFilter());
 		getViewer().addFilter(new NonJavaElementFilter());
 		getViewer().addFilter(new LibraryFilter());
 
