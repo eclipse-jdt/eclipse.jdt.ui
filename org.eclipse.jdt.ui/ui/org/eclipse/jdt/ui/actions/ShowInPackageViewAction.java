@@ -10,30 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IElementComparer;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 /**
  * This action reveals the currently selected Java element in the 
  * package explorer. 
@@ -127,63 +117,9 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 			element= (IJavaElement)openable;
 
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-		if (view != null) {
-			if (reveal(view, element))
-				return;
-			element= getVisibleParent(element);
-			if (element != null) {
-				if (reveal(view, element))
-					return;
-				IResource resource= element.getResource();
-				if (resource != null) {
-					if (reveal(view, resource))
-						return;
-				}
-			}
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("ShowInPackageViewAction.not_found")); //$NON-NLS-1$
-		}
+		view.tryToReveal(element);
 	}
 
-	private boolean reveal(PackageExplorerPart view, Object element) {
-		if (element == null)
-			return false;
-		view.selectReveal(new StructuredSelection(element));
-		IElementComparer comparer= view.getTreeViewer().getComparer();
-		Object selected= getSelectedElement(view);
-		if (comparer != null ? comparer.equals(element, selected) : element.equals(selected))
-			return true;
-		return false;
-	}
-
-	private Object getSelectedElement(PackageExplorerPart view) {
-		return ((IStructuredSelection)view.getSite().getSelectionProvider().getSelection()).getFirstElement();
-	}
-	
-	private IJavaElement getVisibleParent(IJavaElement element) {
-		// Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (element == null)
-			return null;
-		switch (element.getElementType()) {
-			case IJavaElement.IMPORT_DECLARATION:
-			case IJavaElement.PACKAGE_DECLARATION:
-			case IJavaElement.IMPORT_CONTAINER:
-			case IJavaElement.TYPE:
-			case IJavaElement.METHOD:
-			case IJavaElement.FIELD:
-			case IJavaElement.INITIALIZER:
-				// select parent cu/classfile
-				element= (IJavaElement)element.getOpenable();
-				break;
-			case IJavaElement.JAVA_MODEL:
-				element= null;
-				break;
-		}
-		if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
-			element= JavaModelUtil.toOriginal((ICompilationUnit)element);
-		}
-		return element;
-	}
-	
 	private static String getDialogTitle() {
 		return ActionMessages.getString("ShowInPackageViewAction.dialog.title"); //$NON-NLS-1$
 	}

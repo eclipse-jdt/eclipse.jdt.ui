@@ -39,6 +39,9 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
@@ -48,6 +51,7 @@ import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.filters.CustomFiltersDialog;
@@ -214,7 +218,42 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fillViewMenu(actionBars.getMenuManager());
 	}
 
-	/**
+	public String[] removeFiltersFor(Object parent, Object element, IContentProvider contentProvider) {
+	    String[] enabledFilters= getEnabledFilterIds();
+	    Set newFilters= new HashSet();
+	    for (int i= 0; i < enabledFilters.length; i++) {
+            String filterName= enabledFilters[i];
+            ViewerFilter filter= (ViewerFilter) fInstalledBuiltInFilters.get(filterName);
+            if (filter == null)
+                newFilters.add(filterName);
+           else if (isSelected(parent, element, contentProvider, filter)) 
+                newFilters.add(filterName);
+        }
+	    if (newFilters.size() == enabledFilters.length)
+	        return new String[0];
+	    return (String[])newFilters.toArray(new String[newFilters.size()]);
+	}
+	
+	public void setFilters(String[] newFilters) {
+	    setEnabledFilterIds(newFilters);
+	    updateViewerFilters(true);
+	}
+	
+	private boolean isSelected(Object parent, Object element, IContentProvider contentProvider, ViewerFilter filter) {
+	    if (contentProvider instanceof ITreeContentProvider) {
+	        // the element and all its parents have to be selected
+	        ITreeContentProvider provider = (ITreeContentProvider) contentProvider;
+	        while (element != null && !(element instanceof IJavaModel)) {
+	            if (!filter.select(fViewer, parent, element)) 
+	                return false;
+	            element= provider.getParent( element);
+	        }
+	        return true;
+	    } 
+	    return filter.select(fViewer, parent, element);
+	}
+
+    /**
 	 * Sets the enable state of the given filter.
 	 * 
 	 * @param filterDescriptor
@@ -243,9 +282,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		return (String[])enabledFilterIds.toArray(new String[enabledFilterIds.size()]);
 	}
 
+	
 	private void setEnabledFilterIds(String[] enabledIds) {
-
-		
 		Iterator iter= fEnabledFilterIds.keySet().iterator();
 		while (iter.hasNext()) {
 			String id= (String)iter.next();

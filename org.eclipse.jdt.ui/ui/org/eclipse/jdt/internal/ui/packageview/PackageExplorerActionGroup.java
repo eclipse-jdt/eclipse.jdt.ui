@@ -25,6 +25,7 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -382,5 +383,13 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	}
 	public FrameAction getForwardAction() {
 		return fForwardAction;
+	}
+
+	public WorkingSetFilterActionGroup getWorkingSetActionGroup() {
+	    return fWorkingSetFilterActionGroup;
+	}
+	
+	public CustomFiltersActionGroup getCustomFilterActionGroup() {
+	    return fCustomFiltersActionGroup;
 	}
 }

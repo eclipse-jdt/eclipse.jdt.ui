@@ -86,7 +86,17 @@ public class WorkingSetFilterActionGroup extends ActionGroup {
 		
 	}
 
-
+	/**
+	 * Returns whether the current working set filters the given element
+	 * 
+	 * @return the working set
+	 */
+	public boolean isFiltered(Object parent, Object object) {
+	    if (fWorkingSetFilter == null)
+	        return false;
+	    return !fWorkingSetFilter.select(null, parent, object);
+	}
+	
 
 	/**
 	 * Returns the working set which is used by the filter.
