@@ -86,37 +86,21 @@ public class QuickAssistLightBulbUpdater {
 	private ITextViewer fViewer;
 	
 	private ISelectionChangedListener fListener;
+	private IPropertyChangeListener fPropertyChangeListener;
 	
 	public QuickAssistLightBulbUpdater(IEditorPart part, ITextViewer viewer) {
 		fEditor= part;
 		fViewer= viewer;
 		fAnnotation= new AssistAnnotation();
 		fIsAnnotationShown= false;
-		
-		PreferenceConstants.getPreferenceStore().addPropertyChangeListener(new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				doPropertyChanged(event.getProperty());
-			}
-		});
-	}
-	
-	protected void doPropertyChanged(String property) {
-		if (property.equals(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
-			if (isSetInPreferences()) {
-				install();
-				doSelectionChanged();
-			} else {
-				uninstall();
-			}			
-		}
+		fPropertyChangeListener= null;
 	}
 	
 	public boolean isSetInPreferences() {
 		return PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
 	}
 	
-
-	public void install() {
+	private void installSelectionListener() {
 		ISelectionProvider provider= fViewer.getSelectionProvider();
 		if (provider instanceof IPostSelectionProvider) {
 			fListener= new ISelectionChangedListener() {
@@ -125,10 +109,10 @@ public class QuickAssistLightBulbUpdater {
 				}
 			};
 			((IPostSelectionProvider) provider).addPostSelectionChangedListener(fListener);
-		}
+		}		
 	}
 	
-	public void uninstall() {
+	private void uninstallSelectionListener() {
 		if (fListener != null) {
 			IPostSelectionProvider provider= (IPostSelectionProvider) fViewer.getSelectionProvider();
 			provider.removePostSelectionChangedListener(fListener);
@@ -138,7 +122,40 @@ public class QuickAssistLightBulbUpdater {
 				fIsAnnotationShown= false;
 			}
 		}
+	}	
+	
+	public void install() {
+		if (isSetInPreferences()) {
+			installSelectionListener();
+		}
+		if (fPropertyChangeListener == null) {
+			fPropertyChangeListener= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					doPropertyChanged(event.getProperty());
+				}
+			};
+			PreferenceConstants.getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);		
+		}
 	}
+	
+	public void uninstall() {
+		uninstallSelectionListener();
+		if (fPropertyChangeListener != null) {
+			PreferenceConstants.getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);		
+			fPropertyChangeListener= null;
+		}
+	}
+	
+	protected void doPropertyChanged(String property) {
+		if (property.equals(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
+			if (isSetInPreferences()) {
+				installSelectionListener();
+				doSelectionChanged();
+			} else {
+				uninstallSelectionListener();
+			}			
+		}
+	}	
 	
 	private ICompilationUnit getCompilationUnit(IEditorInput input) {
 		if (input instanceof FileEditorInput) {

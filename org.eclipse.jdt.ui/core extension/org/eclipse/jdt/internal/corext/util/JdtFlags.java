@@ -195,15 +195,13 @@ public class JdtFlags {
 	}
 	
 	public static String getVisibilityString(int visibilityCode){
-		switch(visibilityCode){
-			case Modifier.PUBLIC: return VISIBILITY_STRING_PUBLIC;
-			case Modifier.PROTECTED: return VISIBILITY_STRING_PROTECTED;
-			case Modifier.NONE: return VISIBILITY_STRING_PACKAGE;
-			case Modifier.PRIVATE: return VISIBILITY_STRING_PRIVATE;
-			default:
-				Assert.isTrue(false);
-				return null;
-		}
+		if (Modifier.isPublic(visibilityCode))
+			return VISIBILITY_STRING_PUBLIC;
+		if (Modifier.isProtected(visibilityCode))
+			return VISIBILITY_STRING_PROTECTED;
+		if (Modifier.isPrivate(visibilityCode))
+			return VISIBILITY_STRING_PRIVATE;
+		return VISIBILITY_STRING_PACKAGE;
 	}
 	
 	public static void assertVisibility(int visibility){
@@ -235,7 +233,7 @@ public class JdtFlags {
 				return false;	
 		}
 	}
-
+	
 	public static int clearAccessModifiers(int flags) {
 		return clearFlag(Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE, flags);
 	}
