@@ -358,11 +358,14 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private Control createExpression(Composite parent) {
-		Group result= new Group(parent, SWT.NONE);
-		result.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
+		Composite result= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
+		layout.numColumns= 3;
 		result.setLayout(layout);
+
+		// Pattern text
+		Label label= new Label(result, SWT.NONE);
+		label.setText(SearchMessages.getString("SearchPage.expression.label")); //$NON-NLS-1$
 		
 		// Pattern combo
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
@@ -383,9 +386,15 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		gd.horizontalSpan= 2;
 		fPattern.setLayoutData(gd);
 		
+		
+		// Filler
+		new Label(result, SWT.LEFT);
+		
 		// Pattern info
-		Label label= new Label(result, SWT.LEFT);
+		label= new Label(result, SWT.LEFT);
 		label.setText(SearchMessages.getString("SearchPage.expression.pattern")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		label.setLayoutData(gd);
 
 		// Ignore case checkbox		
 		fCaseSensitive= new Button(result, SWT.CHECK);
