@@ -323,23 +323,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 
-	private void rewriteMethodBody(MethodDeclaration methodDecl, Block body) {
+	private void rewriteMethodBody(MethodDeclaration methodDecl, Block body, int startPos) { 
 		if (isInserted(body)) {
-			try {	
-				IScanner scanner= getScanner(methodDecl.getStartPosition());
-				ASTResolving.readToToken(scanner, ITerminalSymbols.TokenNameSEMICOLON);
-				int startPos= scanner.getCurrentTokenStartPosition();
-				int endPos= methodDecl.getStartPosition() + methodDecl.getLength();
-				String description= getDescription(body);
-				doTextRemove(startPos, endPos - startPos, description);
-				doTextInsert(startPos, " ", description);
-				doTextInsert(startPos, body, getIndent(methodDecl.getStartPosition()), true, description);
-			} catch (InvalidInputException e) {
-				// ignore
-			}
+			int endPos= methodDecl.getStartPosition() + methodDecl.getLength();
+			String description= getDescription(body);
+			doTextRemove(startPos, endPos - startPos, description);
+			doTextInsert(startPos, " ", description);
+			doTextInsert(startPos, body, getIndent(methodDecl.getStartPosition()), true, description);
 		} else if (isRemoved(body)) {
-			doTextRemoveAndVisit(body.getStartPosition(), body.getLength(), body);
-			doTextInsert(body.getStartPosition(), ";", getDescription(body));
+			int endPos= methodDecl.getStartPosition() + methodDecl.getLength();
+			doTextRemoveAndVisit(startPos, endPos - startPos, body);
+			doTextInsert(startPos, ";", getDescription(body));
 		} else if (isReplaced(body)) {
 			doTextRemoveAndVisit(body.getStartPosition(), body.getLength(), body);
 			doTextInsert(body.getStartPosition(), getReplacingNode(body), getIndent(body.getStartPosition()), true,getDescription(body));
@@ -862,25 +856,28 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}				
 			
 			List exceptions= methodDecl.thrownExceptions();
-			if (hasChanges(exceptions)) {
+			boolean hasExceptionChanges= hasChanges(exceptions);
+			Block body= methodDecl.getBody();
+			
+			if (hasExceptionChanges || body != null && isInsertOrRemove(body)) {
 				pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameRPAREN);
 				int dim= methodDecl.getExtraDimensions();
 				while (dim > 0) {
 					pos= ASTResolving.getPositionAfter(getScanner(pos), ITerminalSymbols.TokenNameRBRACKET);
 					dim--;
 				}
-				rewriteList(exceptions, pos, " throws ", ", ");
+			}				
+			if (hasExceptionChanges) {
+				pos= rewriteList(exceptions, pos, " throws ", ", ");
 			} else {
-				visitList(exceptions, pos);
+				pos= visitList(exceptions, pos);
 			}
+			if (body != null) {
+				rewriteMethodBody(methodDecl, body, pos);
+			}				
 		} catch (InvalidInputException e) {
 			// ignore
 		}
-
-		Block body= methodDecl.getBody();
-		if (body != null) {
-			rewriteMethodBody(methodDecl, body);
-		}				
 		return false;
 	}
 	

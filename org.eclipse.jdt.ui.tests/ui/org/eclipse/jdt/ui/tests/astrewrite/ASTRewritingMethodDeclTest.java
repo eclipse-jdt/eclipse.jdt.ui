@@ -45,11 +45,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMethodDeclTest("testMethodDeclarationParamShuffel1"));
+			suite.addTest(new ASTRewritingMethodDeclTest("testMethodBody"));
 			return suite;
 		}
 	}
@@ -709,7 +709,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(int p1, int p2, int p3) {\n");
 		buf.append("    }\n");
-		buf.append("    public abstract void gee(int p1, int p2, int p3) throws IllegalArgumentException ;\n");
+		buf.append("    public abstract void gee(int p1, int p2, int p3) throws IllegalArgumentException;\n");
 		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
 		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
 		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
@@ -731,7 +731,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public Object foo3()[][] { return null; }\n");
 		buf.append("    public Object foo4()[][] throws IllegalArgumentException { return null; }\n");
 		buf.append("    public Object foo5()[][] { return null; }\n");
-		buf.append("    public Object foo6(int i)[][] throws IllegalArgumentException { return null; }\n");		
+		buf.append("    public Object foo6(int i)[][] throws IllegalArgumentException { return null; }\n");
+		buf.append("    public Object foo7(int i)[][] { return null; }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);	
 		
@@ -817,7 +818,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			rewrite.markAsModified(methodDecl, modifiedNode);
 			
 			rewrite.markAsRemoved((ASTNode) methodDecl.thrownExceptions().get(0));			
-		}			
+		}
+		{ // remove block
+			MethodDeclaration methodDecl= findMethodDeclaration(type, "foo7");
+			rewrite.markAsRemoved(methodDecl.getBody());			
+		}					
 		
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -833,6 +838,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("    public Object foo4()[] { return null; }\n");
 		buf.append("    public Object foo5(float m1)[][][][] throws ArrayStoreException { return null; }\n");
 		buf.append("    public Object foo6()[][][][] { return null; }\n");
+		buf.append("    public Object foo7(int i)[][];\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
