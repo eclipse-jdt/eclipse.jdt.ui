@@ -13,6 +13,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -63,8 +64,8 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private CompositeChange fChange;
 	
 	private VariableDeclarationFragment fFieldDeclaration;
-	// private TypeDeclaration fTypeDeclaration;
 
+	private int fVisibility;
 	private String fGetterName;
 	private String fSetterName;
 	private String fArgName;
@@ -120,6 +121,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fInsertionIndex= index;
 	}
 	
+	public int getVisibility() {
+		return fVisibility;
+	}
+	
+	public void setVisibility(int visibility) {
+		fVisibility= visibility;
+	}
+	
 	public void setEncapsulateDeclaringClass(boolean encapsulateDeclaringClass) {
 		fEncapsulateDeclaringClass= encapsulateDeclaringClass;
 	}
@@ -135,6 +144,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try {
+			fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 			RefactoringStatus result=  new RefactoringStatus();
 			ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
 			if (node == null || !(node instanceof VariableDeclarationFragment)) {
@@ -376,9 +386,12 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private String createModifiers() throws JavaModelException {
 		StringBuffer result= new StringBuffer();
-		if (JdtFlags.isPublic(fField))	result.append("public "); //$NON-NLS-1$
-		if (JdtFlags.isProtected(fField)) result.append("protected "); //$NON-NLS-1$
-		if (JdtFlags.isPrivate(fField))	result.append("private "); //$NON-NLS-1$
+		if (Flags.isPublic(fVisibility)) 
+			result.append("public "); //$NON-NLS-1$
+		else if (Flags.isProtected(fVisibility)) 
+			result.append("protected "); //$NON-NLS-1$
+		else if (Flags.isPrivate(fVisibility))
+			result.append("private "); //$NON-NLS-1$
 		if (JdtFlags.isStatic(fField)) result.append("static "); //$NON-NLS-1$
 		return result.toString();
 	}
