@@ -44,12 +44,17 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	}	
 
 	public static String getPkgNamePatternForPackagesView() {
+		if (! isCompressingEnabled())
+			return "";
 		return JavaPlugin.getDefault().getPreferenceStore().getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW);
 	}
 
 	public static boolean isCompressingPkgNameInPackagesView() {
-		boolean enabled= JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_COMPRESS_PACKAGE_NAMES);
-		return enabled && getPkgNamePatternForPackagesView().length() > 0;
+		return isCompressingEnabled() && getPkgNamePatternForPackagesView().length() > 0;
+	}
+
+	private static boolean isCompressingEnabled() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_COMPRESS_PACKAGE_NAMES);
 	}
 	
 	/**
