@@ -466,11 +466,18 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	
 	private final Category fEnumDeclInterfacesCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_SUPERINTERFACES_IN_ENUM_DECLARATION,
-	    "enum Example implements A, B {" + //$NON-NLS-1$
-	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
+	    "enum Example implements A, B, C {" + //$NON-NLS-1$
+	    "}", //$NON-NLS-1$
 	    FormatterMessages.getString("LineWrappingTabPage.enum_superinterfaces") //$NON-NLS-1$
 	);
 	
+	private final Category fEnumConstantsCategory= new Category(
+	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ENUM_CONSTANTS,
+	    "enum Example {" + //$NON-NLS-1$
+	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
+	    FormatterMessages.getString("LineWrappingTabPage.enum_constants") //$NON-NLS-1$
+	);
+
 	
 	/**
 	 * The default preview line width.
@@ -566,6 +573,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		methodDeclarations.children.add(fMethodThrowsClauseCategory);
 
 		final Category enumDeclarations= new Category(FormatterMessages.getString("LineWrappingTabPage.enum_decls")); //$NON-NLS-1$
+		enumDeclarations.children.add(fEnumConstantsCategory);
 		enumDeclarations.children.add(fEnumDeclInterfacesCategory);
 		enumDeclarations.children.add(fEnumConstArgumentsCategory);
 		
