@@ -126,7 +126,7 @@ class UseSupertypeWherePossibleUtil {
 	}
 
 	static void updateReferences(TextChangeManager manager, IMember[] extractedMembers, String superTypeName, IType inputClass, CodeGenerationSettings codeGenerationSettings, ASTNodeMappingManager astManager, IProgressMonitor pm) throws CoreException{
-	    updateReferences(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, pm, null, false);
+	    updateReferences(manager, extractedMembers, superTypeName, inputClass, codeGenerationSettings, astManager, pm, null, true);
 	}
 	
 	private static SearchResultGroup[] getMemberReferences(IMember member, IProgressMonitor pm) throws JavaModelException{
