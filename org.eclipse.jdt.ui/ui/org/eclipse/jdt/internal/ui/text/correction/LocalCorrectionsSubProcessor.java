@@ -1,8 +1,11 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -12,6 +15,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
@@ -28,6 +32,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.*;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
@@ -262,6 +267,51 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 	}
+	
+	/**
+	 * Method addMissingReturnStatementProposals.
+	 * @param problemPos
+	 * @param proposals
+	 */
+	public static void addMissingReturnStatementProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {		
+			MethodDeclaration methodDecl= (MethodDeclaration) decl;
+			if (methodDecl.getName().equals(selectedNode)) {
+				Block block= methodDecl.getBody();
+				if (block == null) {
+					return;
+				}
+				
+				List statements= block.statements();
+				ReturnStatement returnStatement= block.getAST().newReturnStatement();
+				returnStatement.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
+				statements.add(returnStatement);
+				ASTRewriteAnalyzer.markAsInserted(returnStatement);
+				
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, astRoot, 10, image);
+				proposals.add(proposal);
+			} else if (selectedNode instanceof ReturnStatement) {
+				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
+				if (returnStatement.getExpression() == null) {
+					ReturnStatement modified= (ReturnStatement) ASTNode.copySubtree(returnStatement.getAST(), returnStatement);
+					modified.setExpression(ASTResolving.getNullExpression(methodDecl.getReturnType()));
+					ASTRewriteAnalyzer.markAsModified(returnStatement, modified);
+				}
+			}
+		}
+
+	}
+
+	
 
 	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		final ICompilationUnit cu= problemPos.getCompilationUnit();
@@ -281,4 +331,7 @@ public class LocalCorrectionsSubProcessor {
 		};
 		proposals.add(proposal);
 	}
+	
+
+
 }

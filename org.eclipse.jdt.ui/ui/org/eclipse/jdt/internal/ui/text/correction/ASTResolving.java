@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -56,8 +58,10 @@ public class ASTResolving {
 	public static ASTNode findSelectedNode(CompilationUnit cuNode, int offset, int length) {
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(offset, length), true);
 		cuNode.accept(analyzer);
-		
-		return analyzer.getFirstSelectedNode();
+		if (analyzer.hasSelectedNodes()) {
+			return analyzer.getFirstSelectedNode();
+		}
+		return analyzer.getLastCoveringNode();
 	}
 	
 	public static ITypeBinding getTypeBinding(ASTNode node) {
@@ -250,6 +254,17 @@ public class ASTResolving {
 		return scanner;
 	}
 	
-	
+	public static Expression getNullExpression(Type returnType) {
+		AST ast= returnType.getAST();
+		if (returnType.isPrimitiveType()) {
+			ITypeBinding binding= returnType.resolveBinding();
+			if (ast.resolveWellKnownType("boolean").equals(binding)) {
+				return ast.newBooleanLiteral(false);
+			} else {
+				return ast.newNumberLiteral("0");
+			}
+		}
+		return ast.newNullLiteral();
+	}	
 
 }

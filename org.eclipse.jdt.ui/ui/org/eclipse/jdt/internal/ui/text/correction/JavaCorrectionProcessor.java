@@ -200,11 +200,14 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.MissingReturnType:
 					LocalCorrectionsSubProcessor.addMissingReturnTypeProposals(problemPos, proposals);
 					break;
+				case IProblem.ShouldReturnValue:
+					LocalCorrectionsSubProcessor.addMissingReturnStatementProposals(problemPos, proposals);
+					break;					
 				case IProblem.NonExternalizedStringLiteral:
 					LocalCorrectionsSubProcessor.addNLSProposals(problemPos, proposals);
 					break;				
 				default:
-					 //proposals.add(new NoCorrectionProposal(problemPos));
+					 proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);

@@ -58,11 +58,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	 * @see ChangeCorrectionProposal#getChange()
 	 */
 	protected Change getChange() throws CoreException {
+		Change change= super.getChange();
 		if (!fIsInitialized) {
 			fIsInitialized= true;
-			addEdits(getCompilationUnitChange());
+			addEdits((CompilationUnitChange) change);
 		}
-		return super.getChange();
+		return change;
 	}
 	
 	protected void addEdits(CompilationUnitChange change) throws CoreException {
