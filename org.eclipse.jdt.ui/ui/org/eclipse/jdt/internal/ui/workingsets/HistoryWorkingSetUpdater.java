@@ -65,7 +65,7 @@ public class HistoryWorkingSetUpdater implements IWorkingSetUpdater {
 		}
 		private IAdaptable getInput(IEditorPart part) {
 			IEditorInput input= part.getEditorInput();
-			if (part instanceof CompilationUnitEditor) {
+			if (part instanceof CompilationUnitEditor && input instanceof IFileEditorInput) {
 				return JavaCore.create(((IFileEditorInput)input).getFile());
 			}
 			if (input instanceof IFileEditorInput) {
