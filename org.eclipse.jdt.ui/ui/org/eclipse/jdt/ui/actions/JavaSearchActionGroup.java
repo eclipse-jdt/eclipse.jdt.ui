@@ -19,6 +19,21 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
+
+import org.eclipse.jdt.internal.ui.search.FindDeclarationsAction;
+import org.eclipse.jdt.internal.ui.search.FindDeclarationsInHierarchyAction;
+import org.eclipse.jdt.internal.ui.search.FindDeclarationsInWorkingSetAction;
+import org.eclipse.jdt.internal.ui.search.FindImplementorsAction;
+import org.eclipse.jdt.internal.ui.search.FindImplementorsInWorkingSetAction;
+import org.eclipse.jdt.internal.ui.search.FindReadReferencesAction;
+import org.eclipse.jdt.internal.ui.search.FindReadReferencesInHierarchyAction;
+import org.eclipse.jdt.internal.ui.search.FindReadReferencesInWorkingSetAction;
+import org.eclipse.jdt.internal.ui.search.FindReferencesAction;
+import org.eclipse.jdt.internal.ui.search.FindReferencesInHierarchyAction;
+import org.eclipse.jdt.internal.ui.search.FindReferencesInWorkingSetAction;
+import org.eclipse.jdt.internal.ui.search.FindWriteReferencesAction;
+import org.eclipse.jdt.internal.ui.search.FindWriteReferencesInHierarchyAction;
+import org.eclipse.jdt.internal.ui.search.FindWriteReferencesInWorkingSetAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 /**
@@ -69,6 +84,28 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBar) {
 		super.fillActionBars(actionBar);
+		setGlobalActionHandlers(actionBar);
+	}
+	
+	private void setGlobalActionHandlers(IActionBars actionBar) {
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkspace", new FindReferencesAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInHierarchy", new FindReferencesInHierarchyAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReferencesInWorkingSet", new FindReferencesInWorkingSetAction()); //$NON-NLS-1$
+		
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkspace", new FindReadReferencesAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInHierarchy", new FindReadReferencesInHierarchyAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet", new FindReadReferencesInWorkingSetAction()); //$NON-NLS-1$
+
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkspace", new FindWriteReferencesAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInHierarchy", new FindWriteReferencesInHierarchyAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet", new FindWriteReferencesInWorkingSetAction()); //$NON-NLS-1$
+
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkspace", new FindDeclarationsAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet", new FindDeclarationsInWorkingSetAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.DeclarationsInHierarchy", new FindDeclarationsInHierarchyAction()); //$NON-NLS-1$
+
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkspace", new FindImplementorsAction()); //$NON-NLS-1$
+		actionBar.setGlobalActionHandler("org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet", new FindImplementorsInWorkingSetAction()); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
