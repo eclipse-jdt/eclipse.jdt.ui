@@ -35,6 +35,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -1691,39 +1692,27 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		final AST ast= covering.getAST();
-		
 		// we operate only on boolean variable
-		final ITypeBinding variableBinding= vdf.getName().resolveTypeBinding();
-		
-		if (variableBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
+		final IVariableBinding variableBinding= (IVariableBinding) vdf.getName().resolveBinding();
+		final ITypeBinding variableTypeBinding= vdf.getName().resolveTypeBinding();
+		if (variableTypeBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
 			return false;
 		}
+		// find linked nodes
 		final MethodDeclaration method= ASTResolving.findParentMethodDeclaration(covering);
-
+		SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(method, variableBinding);
 		// check that there are no assignments for this variable
-		final boolean hasAssignments[]= { false };
-		method.accept(new GenericVisitor() {
-			protected boolean visitNode(ASTNode node) {
-				return !hasAssignments[0];
+		for (int i= 0; i < linkedNodes.length; i++) {
+			SimpleName name= linkedNodes[i];
+			if (name.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				return false;
 			}
-			public void endVisit(Assignment node) {
-				if (node.getLeftHandSide() instanceof SimpleName) {
-					SimpleName name= (SimpleName) node.getLeftHandSide();
-					if (name.resolveBinding() == variableBinding) {
-						hasAssignments[0]= true;
-					}
-				}
-			}
-		});
-		if (hasAssignments[0]) {
-			return false;
 		}
 		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
 		//
-
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
 		// replace initializer for variable
 		rewrite.replace(vdf.getInitializer(), getInversedBooleanExpression(ast, rewrite, vdf.getInitializer()), null);
@@ -1731,35 +1720,35 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.inverseBooleanVariable"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 		final String KEY_NAME= "name"; //$NON-NLS-1$
-		final LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
-		
+		final LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label,
+			context.getCompilationUnit(),
+			rewrite,
+			1,
+			image);
 		// add positions for variable declaration
 		ITrackedNodePosition nameTrack= rewrite.track(vdf.getName());
 		proposal.addLinkedPosition(nameTrack, true, KEY_NAME);
 		proposal.setEndPosition(nameTrack);
-		// iterate over method and replace variable references with negated reference
-		method.accept(new ASTVisitor() {
-			public void endVisit(SimpleName name) {
-				if (name.resolveBinding() != variableBinding) {
-					return;
-				}
-				if (name.getParent() instanceof VariableDeclarationFragment) {
-					return;
-				}
-				if ((name.getParent() instanceof PrefixExpression)
-					&& (((PrefixExpression) name.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
-					rewrite.replace(name.getParent(), name, null);
-					proposal.addLinkedPosition(rewrite.track(name), false, KEY_NAME);
-				} else {
-					PrefixExpression expression= ast.newPrefixExpression();
-					expression.setOperator(PrefixExpression.Operator.NOT);
-					Expression nameCopy= (Expression) rewrite.createMoveTarget(name);
-					expression.setOperand(nameCopy);
-					rewrite.replace(name, expression, null);
-					proposal.addLinkedPosition(rewrite.track(nameCopy), false, KEY_NAME);
-				}
+		// iterate over linked nodes and replace variable references with negated reference
+		for (int i= 0; i < linkedNodes.length; i++) {
+			SimpleName name= linkedNodes[i];
+			StructuralPropertyDescriptor location= name.getLocationInParent();
+			if (location == VariableDeclarationFragment.NAME_PROPERTY) {
+				continue;
 			}
-		});
+			if ((name.getParent() instanceof PrefixExpression)
+				&& (((PrefixExpression) name.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
+				rewrite.replace(name.getParent(), name, null);
+				proposal.addLinkedPosition(rewrite.track(name), false, KEY_NAME);
+			} else {
+				PrefixExpression expression= ast.newPrefixExpression();
+				expression.setOperator(PrefixExpression.Operator.NOT);
+				Expression nameCopy= (Expression) rewrite.createMoveTarget(name);
+				expression.setOperand(nameCopy);
+				rewrite.replace(name, expression, null);
+				proposal.addLinkedPosition(rewrite.track(nameCopy), false, KEY_NAME);
+			}
+		}
 		// add correction proposal
 		resultingCollections.add(proposal);
 		return true;
