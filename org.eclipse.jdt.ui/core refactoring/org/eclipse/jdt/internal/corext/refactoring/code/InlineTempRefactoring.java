@@ -205,7 +205,7 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void removeTemp(TextChange change) throws JavaModelException {
-		int offset= fTempDeclaration.declarationSourceStart;
+		int offset= fTempDeclaration.type.sourceStart;
 		int end= fTempDeclaration.declarationSourceEnd;
 		int length= end - offset + 1;
 		String changeName= "Remove local variable '" + getTempName() + "'"; 
