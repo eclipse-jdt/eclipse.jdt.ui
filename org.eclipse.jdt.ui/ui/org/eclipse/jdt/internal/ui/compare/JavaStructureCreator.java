@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.core.JavaElement;
@@ -243,7 +243,7 @@ public class JavaStructureCreator implements IStructureCreator {
 			// to avoid the trouble when dealing with Unicode
 			// we use the Java scanner to extract non-whitespace and non-comment tokens
 			Scanner scanner= new Scanner(true, true);	// however we request Whitespace and Comments
-			scanner.setSourceBuffer(b);
+			scanner.setSource(b);
 			try {
 				int token;
 				while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {

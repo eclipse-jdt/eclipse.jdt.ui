@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 
@@ -41,7 +41,7 @@ class JavaTokenComparator implements ITokenComparator {
 		fCount= 0;
 		
 		Scanner scanner= new Scanner(true, true);	// returns comments & whitespace
-		scanner.setSourceBuffer(fText.toCharArray());
+		scanner.setSource(fText.toCharArray());
 		try {
 			while (scanner.getNextToken() != TerminalSymbols.TokenNameEOF) {
 				fStarts[fCount]= scanner.startPosition;
