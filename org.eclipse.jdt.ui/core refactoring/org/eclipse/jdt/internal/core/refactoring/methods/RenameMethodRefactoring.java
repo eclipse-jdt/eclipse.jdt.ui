@@ -167,11 +167,18 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 			new String[]{method.getElementName(), method.getDeclaringType().getFullyQualifiedName()});
 	}
 	
+	private RefactoringStatus checkIfConstructorName(IMethod method){
+		return Checks.checkIfConstructorName(method, fNewName, method.getDeclaringType().getElementName());
+	}
+	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		Iterator methods = getMethodsToRename(getMethod(), pm).iterator();
 		while (methods.hasNext()){
 			IMethod method= (IMethod)methods.next();
+			
+			result.merge(checkIfConstructorName(method));
+			
 			if (! method.exists()){
 				result.addFatalError(computeErrorMessage(method, "RenameMethodRefactoring.not_in_mode")); //$NON-NLS-1$
 				continue;
@@ -193,6 +200,8 @@ abstract class RenameMethodRefactoring extends MethodRefactoring implements IRen
 		
 		result.merge(Checks.checkMethodName(fNewName));
 		
+		result.merge(checkIfConstructorName(getMethod()));
+					
 		if (Checks.isAlreadyNamed(getMethod(), getNewName()))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
 		return result;

@@ -16,7 +16,25 @@ public class Checks {
 	 */
 	private Checks(){
 	}
-	
+
+	/**
+	 * Checks if method will have a constructor name after renaming.
+	 * 
+	 * @return <code>RefactoringStatus</code> with <code>WARNING</code> severity if 
+	 * the give method will have a constructor name after renaming
+	 * <code>null</code> otherwise.
+	 */
+	public static RefactoringStatus checkIfConstructorName(IMethod method, String newMethodName, String newTypeName){
+		if (! newMethodName.equals(newTypeName))
+			return null;
+		else
+			return RefactoringStatus.createWarningStatus("If you proceed, then the method " 
+									+ method.getElementName()
+									+ " in " 
+									+ method.getDeclaringType().getFullyQualifiedName()
+									+ " will have a constructor name.");	
+	}
+		
 	/**
 	 * Checks if the given name is a valid Java field name.
 	 *

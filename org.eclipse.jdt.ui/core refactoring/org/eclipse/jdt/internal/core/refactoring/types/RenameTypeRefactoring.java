@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.JavaModelUtility;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
@@ -112,7 +113,7 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 		Assert.isNotNull(fNewName, "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		try{
-			pm.beginTask("", 73); //$NON-NLS-1$
+			pm.beginTask("", 74); //$NON-NLS-1$
 			pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
 			result.merge(checkNewName());
 			if (result.hasFatalError())
@@ -123,6 +124,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			
 			pm.worked(2);
 			result.merge(checkTypesInCompilationUnit());
+			pm.worked(1);
+			result.merge(checkForMethodsWithConstructorNames());
 			pm.worked(1);
 			result.merge(checkImportedTypes());	
 			pm.worked(1);
@@ -201,6 +204,18 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.choose_another_name"));	 //$NON-NLS-1$
 		return result;
 	}
+	
+	private RefactoringStatus checkForMethodsWithConstructorNames()  throws JavaModelException{
+		IMethod[] methods= getType().getMethods();
+		for (int i= 0; i < methods.length; i++){
+			if (methods[i].isConstructor())
+				continue;
+			RefactoringStatus check= Checks.checkIfConstructorName(methods[i], methods[i].getElementName(), fNewName);	
+			if (check != null)
+				return check;
+		}
+		return null;
+	}	
 	
 	private RefactoringStatus checkImportedTypes() throws JavaModelException{
 		IImportDeclaration[] imports= getType().getCompilationUnit().getImports();
