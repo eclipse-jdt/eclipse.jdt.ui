@@ -25,6 +25,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -88,8 +89,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fDocletLabel;
 	private Label fDocletTypeLabel;
 	private Label fDestinationLabel;
-	private Label fVisibilityLabel;
-	private Label fDescriptionLabel;
+	private CLabel fDescriptionLabel;
 
 	protected String fVisibilitySelection;
 	protected boolean fDocletSelected;
@@ -191,21 +191,20 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		visibilityGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 6, 0));
 		visibilityGroup.setLayout(visibilityLayout);
 
-		fVisibilityLabel= createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.visibilitygroup.label"), createGridData(GridData.FILL_HORIZONTAL, 4, 0)); //$NON-NLS-1$
+		createLabel(visibilityGroup, SWT.NONE, JavadocExportMessages.getString("JavadocTreeWizardPage.visibilitygroup.label"), createGridData(GridData.FILL_HORIZONTAL, 4, 0)); //$NON-NLS-1$
 		fPrivateVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.privatebutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fPackageVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.packagebutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fProtectedVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.protectedbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 		fPublicVisibility= createButton(visibilityGroup, SWT.RADIO, JavadocExportMessages.getString("JavadocTreeWizardPage.publicbutton.label"), createGridData(GridData.FILL_HORIZONTAL, 1, 0)); //$NON-NLS-1$
 
-		fDescriptionLabel= createLabel(visibilityGroup, SWT.NONE, "", createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3))); //$NON-NLS-1$
+		fDescriptionLabel= new CLabel(visibilityGroup, SWT.LEFT);
+		fDescriptionLabel.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, convertWidthInCharsToPixels(3) -  3)); // INDENT of CLabel
 
 		fPrivateVisibility.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PRIVATE;
 					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label")); //$NON-NLS-1$
-					//fFilter.setVisibility(fVisibilitySelection);
-					//fInputGroup.refresh();
 				}
 			}
 		});
@@ -214,8 +213,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PACKAGE;
 					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label")); //$NON-NLS-1$
-					//fFilter.setVisibility(fVisibilitySelection);
-					//fInputGroup.refresh();
 				}
 			}
 		});
@@ -224,8 +221,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PROTECTED;
 					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label")); //$NON-NLS-1$
-					//fFilter.setVisibility(fVisibilitySelection);
-					//fInputGroup.refresh();
 				}
 			}
 		});
@@ -235,8 +230,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				if (((Button) e.widget).getSelection()) {
 					fVisibilitySelection= fStore.PUBLIC;
 					fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label")); //$NON-NLS-1$
-					//fFilter.setVisibility(fVisibilitySelection);
-					//fInputGroup.refresh();
 				}
 			}
 		});

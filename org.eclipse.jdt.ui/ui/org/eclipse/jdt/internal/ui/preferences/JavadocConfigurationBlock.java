@@ -22,11 +22,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -38,19 +34,19 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class JavadocConfigurationBlock {
 	
-	private StringButtonDialogField fJavaDocField;
+	private StringDialogField fJavaDocField;
 	private URL fInitialURL;
-	private Button fValidateButton;
+	private SelectionButtonDialogField fValidateButton;
+	private SelectionButtonDialogField fBrowseFolder;
 	private Shell fShell;
 	private IStatusChangeListener fContext;
 	private URL fJavaDocLocation;
@@ -62,7 +58,9 @@ public class JavadocConfigurationBlock {
 	}
 	
 	public Control createContents(Composite parent) {
-		final Composite topComp= new Composite(parent, SWT.NONE);
+		PixelConverter converter= new PixelConverter(parent);
+		
+		Composite topComp= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
 		topLayout.numColumns= 3;
 		topLayout.marginWidth= 0;
@@ -71,32 +69,25 @@ public class JavadocConfigurationBlock {
 
 		JDocConfigurationAdapter adapter= new JDocConfigurationAdapter();
 
-		fJavaDocField= new StringButtonDialogField(adapter);
+		fJavaDocField= new StringDialogField();
 		fJavaDocField.setDialogFieldListener(adapter);
 		fJavaDocField.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.location.label")); //$NON-NLS-1$
-		fJavaDocField.setButtonLabel(PreferencesMessages.getString("JavadocConfigurationBlock.location.button")); //$NON-NLS-1$
-
-		fJavaDocField.doFillIntoGrid(topComp, 3);
-
-		PixelConverter converter= new PixelConverter(topComp);
+		fJavaDocField.doFillIntoGrid(topComp, 2);
 		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
 		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
 
-		// Fillers;
-		DialogField.createEmptySpace(topComp, 2);
+		fBrowseFolder= new SelectionButtonDialogField(SWT.PUSH);
+		fBrowseFolder.setDialogFieldListener(adapter);		
+		fBrowseFolder.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.browse.button")); //$NON-NLS-1$
+		fBrowseFolder.doFillIntoGrid(topComp, 1);
 		
-		fValidateButton= new Button(topComp, SWT.PUSH);
-		fValidateButton.setText(PreferencesMessages.getString("JavadocConfigurationBlock.ValidateButton.label")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END);
-		fValidateButton.setLayoutData(gd);
-		SWTUtil.setButtonDimensionHint(fValidateButton);
+		DialogField.createEmptySpace(topComp, 2);	
 		
-		fValidateButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent event) {
-				  EntryValidator validator= new EntryValidator();
-				  BusyIndicator.showWhile(topComp.getDisplay(), validator);
-			}
-		});
+		fValidateButton= new SelectionButtonDialogField(SWT.PUSH);
+		fValidateButton.setDialogFieldListener(adapter);		
+		fValidateButton.setLabelText(PreferencesMessages.getString("JavadocConfigurationBlock.validate.button")); //$NON-NLS-1$
+		fValidateButton.doFillIntoGrid(topComp, 1);
+
 		setValues();
 		
 		return topComp;
@@ -126,51 +117,90 @@ public class JavadocConfigurationBlock {
 		private String fInvalidMessage= PreferencesMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
 		private String fValidMessage= PreferencesMessages.getString("JavadocConfigurationBlock.ValidLocation.message"); //$NON-NLS-1$
 		private String fTitle=  PreferencesMessages.getString("JavadocConfigurationBlock.MessageDialog.title"); //$NON-NLS-1$
+		private String fUnable= PreferencesMessages.getString("JavadocConfigurationBlock.UnableToValidateLocation.message"); //$NON-NLS-1$
 		public void run() {
 
-			Path path = new Path(fJavaDocField.getText());
-			IPath index = path.append("index.html"); //$NON-NLS-1$
-			IPath packagelist = path.append("package-list"); //$NON-NLS-1$
-			String message = PreferencesMessages.getString("JavadocConfigurationBlock.UnableToValidateLocation.message"); //$NON-NLS-1$
+			URL location= getJavadocLocation();
+			if (location == null) {
+				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+				return;
+			}
+
 			try {
-
-				URL indexURL = new URL(index.toString());
-				URL packagelistURL = new URL(packagelist.toString());
-				String protocol = indexURL.getProtocol();
-
+				String protocol = location.getProtocol();
 				if (protocol.equals("http")) { //$NON-NLS-1$
-					validateURL(indexURL, packagelistURL);
+					validateURL(location);
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
-					validateFile(indexURL, packagelistURL);
+					validateFile(location);
+				} else if (protocol.equals("jar")) { //$NON-NLS-1$
+					validateArchive(location);				
 				} else {
-					MessageDialog.openInformation(fShell, fTitle, message); //$NON-NLS-1$
+					MessageDialog.openInformation(fShell, fTitle, fUnable); //$NON-NLS-1$
 				}
 			} catch (MalformedURLException e) {
-				MessageDialog.openInformation(fShell, fTitle, message); //$NON-NLS-1$
+				MessageDialog.openInformation(fShell, fTitle, fUnable); //$NON-NLS-1$
 			}
 
 		}
 		
-		public void validateFile(URL indexURL, URL packagelisURL) {
-			
-			File indexFile = new File(indexURL.getFile());
-			if (indexFile.exists()) {
-				File packaglistFile = new File(packagelisURL.getFile());
-				if (packaglistFile.exists()) {
-					if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
-						spawnInBrowser(indexURL);
-					}
-					return;
-				}
-			}	
-			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
-		}
-
 		public void spawnInBrowser(URL url) {
 			OpenBrowserUtil.open(url, fShell, fTitle);
 		}
 
-		private void validateURL(URL indexURL, URL packagelistURL) {
+		private void validateFile(URL location) throws MalformedURLException {
+			File folder = new File(location.getFile());
+			if (folder.isDirectory()) {
+				File indexFile= new File(folder, "index.html"); //$NON-NLS-1$
+				if (indexFile.isFile()) {				
+					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
+					if (packageList.exists()) {
+						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
+							spawnInBrowser(indexFile.toURL());
+						}
+						return;					
+					}
+				}
+			}
+			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+		}
+		
+		private void validateArchive(URL location) throws MalformedURLException {
+//			String file= location.getFile();
+//			int idx= file.indexOf('!');
+//			if (idx != -1) {
+//				URL url= new URL(file.substring(0, idx));
+//				if (url.getProtocol())
+//				
+//				
+//				
+//				
+//			}
+//			
+//			
+//			
+//			
+//			File folder = new File(location.getFile());
+//			if (folder.isDirectory()) {
+//				File indexFile= new File(folder, "index.html"); //$NON-NLS-1$
+//				if (indexFile.isFile()) {				
+//					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
+//					if (packageList.exists()) {
+//						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
+//							spawnInBrowser(indexFile.toURL());
+//						}
+//						return;					
+//					}
+//				}
+//			}
+			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+		}		
+
+		private void validateURL(URL location) throws MalformedURLException {
+			IPath path= new Path(location.toExternalForm());
+			IPath index = path.append("index.html"); //$NON-NLS-1$
+			IPath packagelist = path.append("package-list"); //$NON-NLS-1$
+			URL indexURL = new URL(index.toString());
+			URL packagelistURL = new URL(packagelist.toString());
 
 			InputStream in1= null;
 			InputStream in2= null;
@@ -190,44 +220,39 @@ public class JavadocConfigurationBlock {
 		}
 	}
 	
-	private class JDocConfigurationAdapter implements IStringButtonAdapter, IDialogFieldListener {
-
-		// -------- IStringButtonAdapter --------
-		public void changeControlPressed(DialogField field) {
-			jdocChangeControlPressed(field);
-		}
+	private class JDocConfigurationAdapter implements IDialogFieldListener {
 
 		// ---------- IDialogFieldListener --------
 		public void dialogFieldChanged(DialogField field) {
 			jdocDialogFieldChanged(field);
 		}
 	}
-	
-		private void jdocChangeControlPressed(DialogField field) {
-		if (field == fJavaDocField) {
-			URL jdocURL= chooseJavaDocLocation();
-			if (jdocURL != null) {
-				fJavaDocField.setText(jdocURL.toExternalForm());
-			}
-		}
-	}
+
 
 	private void jdocDialogFieldChanged(DialogField field) {
 		if (field == fJavaDocField) {
 			IStatus status= updateJavaDocLocationStatus();
 			fValidateButton.setEnabled(!status.matches(IStatus.ERROR) && fJavaDocField.getText().length() > 0);
 			fContext.statusChanged(status);
+		} else if (field == fValidateButton) {
+			EntryValidator validator= new EntryValidator();
+			BusyIndicator.showWhile(fShell.getDisplay(), validator);
+		} else if (field == fBrowseFolder) {
+			URL jdocURL= chooseJavaDocFolder();
+			if (jdocURL != null) {
+				fJavaDocField.setText(jdocURL.toExternalForm());
+			}			
 		}
 	}
 
-	private URL chooseJavaDocLocation() {
+	private URL chooseJavaDocFolder() {
 		String initPath= ""; //$NON-NLS-1$
 		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
 			initPath= (new File(fJavaDocLocation.getFile())).getPath();
 		}
 		DirectoryDialog dialog= new DirectoryDialog(fShell);
-		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.label")); //$NON-NLS-1$
-		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.javadocLocationDialog.message")); //$NON-NLS-1$
+		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.label")); //$NON-NLS-1$
+		dialog.setMessage(PreferencesMessages.getString("JavadocConfigurationBlock.javadocFolderDialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
@@ -240,7 +265,34 @@ public class JavadocConfigurationBlock {
 		}
 		return null;
 	}
-
+	
+	/*
+	private URL chooseJavaDocArchive() {
+		IPath initPath= Path.EMPTY; //$NON-NLS-1$
+		if (fJavaDocLocation != null && "file".equals(fJavaDocLocation.getProtocol())) { //$NON-NLS-1$
+			initPath= new Path((new File(fJavaDocLocation.getFile())).getPath());
+		}		
+					
+		if (ArchiveFileFilter.isArchivePath(initPath)) {
+			initPath= initPath.removeLastSegments(1);
+		}
+	
+		FileDialog dialog= new FileDialog(fShell);
+		dialog.setText(PreferencesMessages.getString("JavadocConfigurationBlock.javadocArchiveDialog.label")); //$NON-NLS-1$
+		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
+		dialog.setFilterPath(initPath.toOSString());
+		String res= dialog.open();
+		if (res != null) {
+			try {
+				return (new File(res)).toURL();
+			} catch (MalformedURLException e) {
+				// should not happen
+				JavaPlugin.log(e);
+			}
+		}
+		return null;		
+	}	
+	*/
 	private IStatus updateJavaDocLocationStatus() {
 		StatusInfo status= new StatusInfo();
 		fJavaDocLocation= null;

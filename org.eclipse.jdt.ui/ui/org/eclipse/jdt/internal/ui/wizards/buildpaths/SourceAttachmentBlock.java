@@ -113,12 +113,6 @@ public class SourceAttachmentBlock {
 	private IStatus fNameStatus;
 	
 	/**
-	 * The file to which the archive path points to.
-	 * Only set when the file exists.
-	 */
-	private File fResolvedFile; 
-
-	/**
 	 * The path to which the archive variable points.
 	 * Null if invalid path or not resolvable. Must not exist.
 	 */	
@@ -396,7 +390,6 @@ public class SourceAttachmentBlock {
 	
 	private IStatus updateFileNameStatus() {
 		StatusInfo status= new StatusInfo();
-		fResolvedFile= null;
 		fFileVariablePath= null;
 		
 		String fileName= fFileNameField.getText();
@@ -437,7 +430,6 @@ public class SourceAttachmentBlock {
 					status.setWarning(message);
 					return status;
 				}						
-				fResolvedFile= file;
 				
 			} else {
 				File file= filePath.toFile();
@@ -450,7 +442,6 @@ public class SourceAttachmentBlock {
 					status.setError(message);
 					return status;
 				}
-				fResolvedFile= file;
 			}
 			
 		}

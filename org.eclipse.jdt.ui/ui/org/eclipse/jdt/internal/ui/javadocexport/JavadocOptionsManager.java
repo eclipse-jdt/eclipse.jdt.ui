@@ -319,10 +319,10 @@ public class JavadocOptionsManager {
 							if (antpath == null || antpath.length() == 0) {
 								antpath= getDefaultAntPath(javaProject);
 							}
-							ProjectData data= new ProjectData(javaProject);
+							ProjectData data= new ProjectData();
 							data.setDestination(destdir);
 							data.setAntpath(antpath);
-							data.setlinks(hrefs);
+							data.setLinks(hrefs);
 							if (!fLinks.containsValue(javaProject))
 								fLinks.put(javaProject, data);
 						}
@@ -337,10 +337,10 @@ public class JavadocOptionsManager {
 			IProject iProject= projects[i];
 			IJavaProject javaProject= JavaCore.create(iProject);
 			if (!fLinks.containsKey(javaProject)) {
-				ProjectData data= new ProjectData(javaProject);
+				ProjectData data= new ProjectData();
 				data.setDestination(getDefaultDestination(javaProject));
 				data.setAntpath(getDefaultAntPath(javaProject));
-				data.setlinks(""); //$NON-NLS-1$
+				data.setLinks(""); //$NON-NLS-1$
 				fLinks.put(javaProject, data);
 			}
 		}
@@ -428,13 +428,13 @@ public class JavadocOptionsManager {
 		for (Iterator iter= fProjects.iterator(); iter.hasNext();) {
 			IJavaProject iJavaProject= (IJavaProject) iter.next();
 
-			ProjectData data= new ProjectData(iJavaProject);
+			ProjectData data= new ProjectData();
 			IPath path= fXmlfile.getLocation();
 			if (path != null)
 				data.setAntpath(path.toOSString());
 			else
 				data.setAntpath(""); //$NON-NLS-1$
-			data.setlinks(buf.toString());
+			data.setLinks(buf.toString());
 			data.setDestination(destination);
 			fLinks.put(iJavaProject, data);
 		}
@@ -633,7 +633,7 @@ public class JavadocOptionsManager {
 	public String getLinks(IJavaProject project) {
 		ProjectData data= (ProjectData) fLinks.get(project);
 		if (data != null)
-			return data.getlinks();
+			return data.getLinks();
 		else
 			return ""; //$NON-NLS-1$
 	}
@@ -895,7 +895,7 @@ public class JavadocOptionsManager {
 				proj.put(ANTPATH, ""); //$NON-NLS-1$
 			} else {
 				ProjectData data= (ProjectData) fLinks.get(iJavaProject);
-				proj.put(HREF, data.getlinks());
+				proj.put(HREF, data.getLinks());
 				proj.put(DESTINATION, data.getDestination());
 				proj.put(ANTPATH, data.getAntPath());
 			}
@@ -991,7 +991,7 @@ public class JavadocOptionsManager {
 	public void setLinks(IJavaProject project, String hrefs) {
 		ProjectData data= (ProjectData) fLinks.get(project);
 		if (data != null)
-			data.setlinks(hrefs);
+			data.setLinks(hrefs);
 	}
 
 	public void setOpenInBrowser(boolean openInBrowser) {
@@ -1167,16 +1167,11 @@ public class JavadocOptionsManager {
 
 	private class ProjectData {
 
-		private IJavaProject dataProject;
 		private String dataHrefs;
 		private String dataDestdir;
 		private String dataAntPath;
 
-		ProjectData(IJavaProject project) {
-			dataProject= project;
-		}
-
-		public void setlinks(String hrefs) {
+		public void setLinks(String hrefs) {
 			if (hrefs == null)
 				dataHrefs= ""; //$NON-NLS-1$
 			else
@@ -1197,7 +1192,7 @@ public class JavadocOptionsManager {
 				dataAntPath= antpath;
 		}
 
-		public String getlinks() {
+		public String getLinks() {
 			return dataHrefs;
 		}
 
