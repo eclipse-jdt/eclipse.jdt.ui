@@ -131,20 +131,28 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		private static final String DECLARE_ABSTRACT_LABEL= RefactoringMessages.getString("PullUpInputPage1.declare_abstract"); //$NON-NLS-1$
 		private static final String[] FIELD_LABELS= {NO_LABEL};
 		private static final String[] METHOD_LABELS;//indices correspond to values
+		private static final String[] TYPE_LABELS;//indices correspond to values
 		static{
 			METHOD_LABELS= new String[2];
-			METHOD_LABELS[0]= PULL_UP_LABEL;
-			METHOD_LABELS[1]= DECLARE_ABSTRACT_LABEL;
+			METHOD_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL;
+			METHOD_LABELS[DECLARE_ABSTRACT_ACTION]= DECLARE_ABSTRACT_LABEL;
+
+			TYPE_LABELS= new String[1];
+			TYPE_LABELS[PULL_UP_ACTION]= PULL_UP_LABEL; 
 		}
 				
 		private final IMember fMember;
 		private int fAction;
 		
 		MemberActionInfo(IMember member, int action){
-			Assert.isTrue((member instanceof IMethod) || (member instanceof IField));
+			Assert.isTrue((member instanceof IMethod) || (member instanceof IField) || (member instanceof IType));
 			assertAction(member, action);
 			fMember= member;
 			fAction= action;
+		}
+
+		public boolean isTypeInfo() {
+			return getMember() instanceof IType;
 		}
 		
 		public boolean isMethodInfo() {
@@ -174,7 +182,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 				action == NO_ACTION ||
 				action == DECLARE_ABSTRACT_ACTION ||
 				action == PULL_UP_ACTION);
-			} else{
+			} else {
 				Assert.isTrue(
 				action == NO_ACTION ||
 				action == PULL_UP_ACTION);
@@ -200,16 +208,20 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		String[] getAllowedLabels() {
 			if (isFieldInfo())
 				return FIELD_LABELS;
-			else
+			else if (isMethodInfo())
 				return METHOD_LABELS;
+			else if (isTypeInfo())	
+				return TYPE_LABELS;
+			else {
+				Assert.isTrue(false);
+				return null;
+			}	
 		}
 
 		public boolean isEditable() {
-			if (isFieldInfo())
+			if (fAction == NO_ACTION)
 				return false;
 			if (! isMethodInfo())
-				return false;
-			if (fAction == NO_ACTION)
 				return false;
 			IMethod method= (IMethod)fMember;
 			try {
@@ -220,6 +232,9 @@ class PullUpInputPage1 extends UserInputWizardPage {
 			}
 		}
 
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo#isNoAction()
+		 */
 		public boolean isNoAction() {
 			return getAction() == NO_ACTION;
 		}
