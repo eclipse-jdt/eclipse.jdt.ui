@@ -31,6 +31,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.ui.refactoring.ChangePreviewViewerInput;
 import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
 
 
@@ -61,18 +63,19 @@ public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.refactoring.IChangePreviewViewer#setInput(java.lang.Object)
 	 */
-	public void setInput(Object input) throws CoreException {
-		if (!(input instanceof CreateTextFileChange)) {
+	public void setInput(ChangePreviewViewerInput input) throws CoreException {
+		Change change= input.getChange();
+		if (!(change instanceof CreateTextFileChange)) {
 			fSourceViewer.setInput(null);
 			fPane.setText(""); //$NON-NLS-1$
 			return;
 		}
-		CreateTextFileChange change= (CreateTextFileChange)input;
-		fPane.setText(change.getName());
-		IDocument document= new Document(change.getPreview());
+		CreateTextFileChange textFileChange= (CreateTextFileChange)change;
+		fPane.setText(textFileChange.getName());
+		IDocument document= new Document(textFileChange.getPreview());
 		// This is a temporary work around until we get the
 		// source viewer registry.
-		if ("java".equals(change.getTextType())) { //$NON-NLS-1$
+		if ("java".equals(textFileChange.getTextType())) { //$NON-NLS-1$
 			JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
 			textTools.setupJavaDocumentPartitioner(document);
 			fSourceViewer.configure(new JavaSourceViewerConfiguration(textTools, null));

@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Assert;
@@ -34,7 +35,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
 import org.eclipse.ltk.internal.ui.refactoring.UIPerformChangeOperation;
-import org.eclipse.ltk.ui.refactoring.RefactoringStatusDialog;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -58,7 +59,7 @@ public class RefactoringExecutionHelper {
 				pm.subTask(""); //$NON-NLS-1$
 				RefactoringStatus status= fRefactoring.checkAllConditions(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				if (status.getSeverity() >= fStopSeverity) {
-					RefactoringStatusDialog dialog= new RefactoringStatusDialog(fParent, status, fRefactoring.getName(), false);
+					Dialog dialog= RefactoringUI.createRefactoringStatusDialog(status, fParent, fRefactoring.getName(), false);
 					if(dialog.open() == IDialogConstants.CANCEL_ID) {
 						throw new OperationCanceledException();
 					}

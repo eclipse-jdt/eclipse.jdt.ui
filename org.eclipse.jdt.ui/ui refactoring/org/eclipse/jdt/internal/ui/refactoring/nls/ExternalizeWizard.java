@@ -17,8 +17,8 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
+import org.eclipse.ltk.ui.refactoring.IRefactoringWizardDialog;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizardDialog;
 
 /**
  * good citizen problems - wizard is only valid after constructor (when the pages toggle
@@ -66,9 +66,9 @@ public class ExternalizeWizard extends RefactoringWizard {
 	 */
 	public void setContainer(IWizardContainer wizardContainer) {
 		super.setContainer(wizardContainer);
-		if (wizardContainer instanceof RefactoringWizardDialog) {
-			RefactoringWizardDialog dialog= (RefactoringWizardDialog)wizardContainer;
-			dialog.setMakeNextButtonDefault(true);
+		if (wizardContainer instanceof IRefactoringWizardDialog) {
+			IRefactoringWizardDialog dialog= (IRefactoringWizardDialog)wizardContainer;
+			dialog.makeNextButtonDefault();
 		}
 	}
 
