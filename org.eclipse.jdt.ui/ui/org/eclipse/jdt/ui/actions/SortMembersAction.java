@@ -121,13 +121,16 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		try {
 			ICompilationUnit cu= getSelectedCompilationUnit(selection);
+			if (cu == null) {
+				return;
+			}
 			IType[] types= cu.getTypes();
 			if (!hasMembersToSort(types)) {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("SortMembersAction.no_members")); //$NON-NLS-1$			
 				return;
 			}
 			
-			if (cu == null || !ElementValidator.check(cu, getShell(), getDialogTitle(), false)) {
+			if (!ElementValidator.check(cu, getShell(), getDialogTitle(), false)) {
 				return;
 			}
 			
