@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -172,10 +173,47 @@ public class TextPerformanceTestCase extends TestCase {
 	 */
 	protected final PerformanceMeter createPerformanceMeter(String scenarioId) {
 		PerformanceMeter performanceMeter= Performance.getDefault().createPerformanceMeter(scenarioId);
+		addPerformanceMeter(performanceMeter);
+		return performanceMeter;
+	}
+
+	/**
+	 * Create an invocation counting performance meter that will count the
+	 * number of invocations of the given methods. The performance meter
+	 * will be disposed on {@link #tearDown()}.
+	 * 
+	 * @param methods the methods whose invocations will be counted
+	 * @return the created performance meter
+	 */
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(Method[] methods) {
+		return createInvocationCountPerformanceMeter(getDefaultScenarioId(), methods);
+	}
+
+	/**
+	 * Create an invocation counting performance meter with the given
+	 * scenario id. The performance meter will count the number of
+	 * invocations of the given methods. The performance meter will be
+	 * disposed on {@link #tearDown()}.
+	 * 
+	 * @param scenarioId the scenario id
+	 * @param methods the methods whose invocations will be counted
+	 * @return the created performance meter
+	 */
+	protected final InvocationCountPerformanceMeter createInvocationCountPerformanceMeter(String scenarioId, Method[] methods) {
+		InvocationCountPerformanceMeter performanceMeter= new InvocationCountPerformanceMeter(scenarioId, methods);
+		addPerformanceMeter(performanceMeter);
+		return performanceMeter;
+	}
+
+	/**
+	 * Add the given performance meter to the managed performance meters.
+	 * 
+	 * @param performanceMeter the performance meter
+	 */
+	private void addPerformanceMeter(PerformanceMeter performanceMeter) {
 		if (fPerformanceMeters == null)
 			fPerformanceMeters= new ArrayList();
 		fPerformanceMeters.add(performanceMeter);
-		return performanceMeter;
 	}
 
 	/**
