@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.debug.ui.ILaunchConfigurationDialog;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.IFileEditorInput;
@@ -100,6 +102,20 @@ public class TestSearchEngine {
 		return v;
 	}
 	
+	public static IType[] findTests(IRunnableContext context, final Object[] elements) throws InvocationTargetException, InterruptedException {
+		final Set result= new HashSet();
+		
+			if (elements.length > 0) {
+				IRunnableWithProgress runnable= new IRunnableWithProgress() {
+					public void run(IProgressMonitor pm) throws InterruptedException {
+						doFindTests(elements, result, pm);
+					}
+				};
+				context.run(true, true, runnable);			
+			}
+			return (IType[]) result.toArray(new IType[result.size()]) ;
+	}
+
 	public static IType[] findTests(final Object[] elements) throws InvocationTargetException, InterruptedException{
 		final Set result= new HashSet();
 	
@@ -215,4 +231,5 @@ public class TestSearchEngine {
 	public static boolean isTestOrTestSuite(IType type) throws JavaModelException {
 		return hasSuiteMethod(type) || isTestType(type);
 	}
+
 }
