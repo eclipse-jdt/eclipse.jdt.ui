@@ -183,15 +183,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private IPropertyChangeListener fPropertyChangeListener;
 	
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
-	
-	/**
-	 * Mockup preference store for firing events and registering listeners on project setting changes.
-	 * FIXME: Temporary solution.
-	 * 
-	 * @since 3.0
-	 */
-	private MockupPreferenceStore fMockupPreferenceStore;
-	
+		
 	/**
 	 * The AST provider.
 	 * @since 3.0
@@ -564,19 +556,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		return fWorkingCopyManager;
 	}
-	
-	/** 
-	 * Returns the mock-up preference store for firing events and registering listeners on project setting changes. Temporary solution.
-	 * 
-	 * @return the mock-up preference store
-	 */
-	public MockupPreferenceStore getMockupPreferenceStore() {
-		if (fMockupPreferenceStore == null)
-			fMockupPreferenceStore= new MockupPreferenceStore();
 		
-		return fMockupPreferenceStore;
-	}
-	
 	public synchronized ProblemMarkerManager getProblemMarkerManager() {
 		if (fProblemMarkerManager == null)
 			fProblemMarkerManager= new ProblemMarkerManager();

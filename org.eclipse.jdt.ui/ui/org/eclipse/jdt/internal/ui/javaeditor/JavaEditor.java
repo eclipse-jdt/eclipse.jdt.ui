@@ -29,8 +29,10 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ST;
@@ -212,6 +214,8 @@ import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
 import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 
 
 /**
@@ -290,79 +294,47 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	
 	
 	/**
-	 * Adapts an options {@link java.util.Map} to {@link org.eclipse.jface.preference.IPreferenceStore}.
+	 * Adapts an options {@link IEclipsePreferences} to {@link org.eclipse.jface.preference.IPreferenceStore}.
 	 * <p>
 	 * This preference store is read-only i.e. write access
 	 * throws an {@link java.lang.UnsupportedOperationException}.
 	 * </p>
 	 * 
-	 * @since 3.0
+	 * @since 3.1
 	 */
-	private static class OptionsAdapter implements IPreferenceStore {
-
+	private static class EclipsePreferencesAdapter implements IPreferenceStore {
 
 		/**
-		 * A property change event filter.
-		 */
-		public interface IPropertyChangeEventFilter {
-
-			/**
-			 * Should the given event be filtered?
-			 * @param event The property change event.
-			 * @return <code>true</code> iff the given event should be filtered.
-			 */
-			public boolean isFiltered(PropertyChangeEvent event);
-
-		}
-		/**
-		 * Property change listener. Listens for events in the options Map and
+		 * Preference change listener. Listens for events preferences
 		 * fires a {@link org.eclipse.jface.util.PropertyChangeEvent}
 		 * on this adapter with arguments from the received event.
 		 */
-		private class PropertyChangeListener implements IPropertyChangeListener {
+		private class PreferenceChangeListener implements IEclipsePreferences.IPreferenceChangeListener {
 
 			/**
 			 * {@inheritDoc}
 			 */
-			public void propertyChange(PropertyChangeEvent event) {
-				if (getFilter().isFiltered(event))
-					return;
-				
-				if (event.getNewValue() == null)
-					fOptions.remove(event.getProperty());
-				else
-					fOptions.put(event.getProperty(), event.getNewValue());
-				
-				firePropertyChangeEvent(event.getProperty(), event.getOldValue(), event.getNewValue());
+			public void preferenceChange(IEclipsePreferences.PreferenceChangeEvent event) {
+				firePropertyChangeEvent(event.getKey(), event.getOldValue(), event.getNewValue());
 			}
 		}
 
-		/** Listeners on this adapter */
+		/** Listeners on on this adapter */
 		private ListenerList fListeners= new ListenerList();
 
-		/** Listener on the adapted options Map */
-		private IPropertyChangeListener fListener= new PropertyChangeListener();
+		/** Listener on the node */
+		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();
 
-		/** Adapted options Map */
-		private Map fOptions;
-
-		/** Preference store through which events are received. */
-		private IPreferenceStore fMockupPreferenceStore;
-
-		/** Property event filter. */
-		private IPropertyChangeEventFilter fFilter;
+		/** wrappend node */
+		private IEclipsePreferences fNode;
 		
 		/**
-		 * Initialize with the given options.
+		 * Initialize with the node to wrap
 		 * 
-		 * @param options The options to wrap
-		 * @param mockupPreferenceStore the mock-up preference store
-		 * @param filter the property change filter
+		 * @param node The node to wrap
 		 */
-		public OptionsAdapter(Map options, IPreferenceStore mockupPreferenceStore, IPropertyChangeEventFilter filter) {
-			fMockupPreferenceStore= mockupPreferenceStore;
-			fOptions= options;
-			setFilter(filter);
+		public EclipsePreferencesAdapter(IEclipsePreferences node) {
+			fNode= node;
 		}
 
 		/**
@@ -370,7 +342,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		public void addPropertyChangeListener(IPropertyChangeListener listener) {
 			if (fListeners.size() == 0)
-				fMockupPreferenceStore.addPropertyChangeListener(fListener);
+				fNode.addPreferenceChangeListener(fListener);
 			fListeners.add(listener);
 		}
 
@@ -380,14 +352,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		public void removePropertyChangeListener(IPropertyChangeListener listener) {
 			fListeners.remove(listener);
 			if (fListeners.size() == 0)
-				fMockupPreferenceStore.removePropertyChangeListener(fListener);
+				fNode.removePreferenceChangeListener(fListener);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public boolean contains(String name) {
-			return fOptions.containsKey(name);
+			return fNode.get(name, null) != null;
 		}
 
 		/**
@@ -404,11 +376,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * {@inheritDoc}
 		 */
 		public boolean getBoolean(String name) {
-			boolean value= BOOLEAN_DEFAULT_DEFAULT;
-			String s= (String) fOptions.get(name);
-			if (s != null)
-				value= s.equals(TRUE);
-			return value;
+			return fNode.getBoolean(name, BOOLEAN_DEFAULT_DEFAULT);
 		}
 
 		/**
@@ -457,70 +425,35 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * {@inheritDoc}
 		 */
 		public double getDouble(String name) {
-			double value= DOUBLE_DEFAULT_DEFAULT;
-			String s= (String) fOptions.get(name);
-			if (s != null) {
-				try {
-					value= new Double(s).doubleValue();
-				} catch (NumberFormatException e) {
-				}
-			}
-			return value;
+			return fNode.getDouble(name, DOUBLE_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public float getFloat(String name) {
-			float value= FLOAT_DEFAULT_DEFAULT;
-			String s= (String) fOptions.get(name);
-			if (s != null) {
-				try {
-					value= new Float(s).floatValue();
-				} catch (NumberFormatException e) {
-				}
-			}
-			return value;
+			return fNode.getFloat(name, FLOAT_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public int getInt(String name) {
-			int value= INT_DEFAULT_DEFAULT;
-			String s= (String) fOptions.get(name);
-			if (s != null) {
-				try {
-					value= new Integer(s).intValue();
-				} catch (NumberFormatException e) {
-				}
-			}
-			return value;
+			return fNode.getInt(name, INT_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public long getLong(String name) {
-			long value= LONG_DEFAULT_DEFAULT;
-			String s= (String) fOptions.get(name);
-			if (s != null) {
-				try {
-					value= new Long(s).longValue();
-				} catch (NumberFormatException e) {
-				}
-			}
-			return value;
+			return fNode.getLong(name, LONG_DEFAULT_DEFAULT);
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public String getString(String name) {
-			String value= (String) fOptions.get(name);
-			if (value == null)
-				value= STRING_DEFAULT_DEFAULT;
-			return value;
+			return fNode.get(name, STRING_DEFAULT_DEFAULT);
 		}
 
 		/**
@@ -534,7 +467,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * {@inheritDoc}
 		 */
 		public boolean needsSaving() {
-			return !fOptions.isEmpty();
+			try {
+				return fNode.keys().length > 0;
+			} catch (BackingStoreException e) {
+				// ignore
+			}
+			return true;
 		}
 
 		/**
@@ -635,40 +573,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			throw new UnsupportedOperationException();
 		}
 
-		/**
-		 * Returns the adapted options Map.
-		 * 
-		 * @return Returns the adapted options Map.
-		 */
-		public Map getOptions() {
-			return fOptions;
-		}
-
-		/**
-		 * Returns the mock-up preference store, events are received through this preference store.
-		 * @return Returns the mock-up preference store.
-		 */
-		public IPreferenceStore getMockupPreferenceStore() {
-			return fMockupPreferenceStore;
-		}
-
-		/**
-		 * Set the event filter to the given filter.
-		 * 
-		 * @param filter The new filter.
-		 */
-		public void setFilter(IPropertyChangeEventFilter filter) {
-			fFilter= filter;
-		}
-		
-		/**
-		 * Returns the event filter.
-		 * 
-		 * @return The event filter.
-		 */
-		public IPropertyChangeEventFilter getFilter() {
-			return fFilter;
-		}
 	}
 
 	
@@ -1783,19 +1687,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		List stores= new ArrayList(3);
 
 		IJavaProject project= EditorUtility.getJavaProject(input);
-		if (project != null)
-			stores.add(new OptionsAdapter(project.getOptions(false), JavaPlugin.getDefault().getMockupPreferenceStore(), new OptionsAdapter.IPropertyChangeEventFilter() {
-
-				public boolean isFiltered(PropertyChangeEvent event) {
-					IJavaElement inputJavaElement= getInputJavaElement();
-					IJavaProject javaProject= inputJavaElement != null ? inputJavaElement.getJavaProject() : null;
-					if (javaProject == null)
-						return true;
-					
-					return !javaProject.getProject().equals(event.getSource());
-				}
-				
-			}));
+		if (project != null) {
+			IEclipsePreferences node= new ProjectScope(project.getProject()).getNode(JavaCore.PLUGIN_ID);
+			stores.add(new EclipsePreferencesAdapter(node));
+		}
 		
 		stores.add(JavaPlugin.getDefault().getPreferenceStore());
 		stores.add(new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()));
