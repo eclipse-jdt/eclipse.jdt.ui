@@ -553,22 +553,26 @@ public final class JavaModelUtil {
 
 	/**
 	 * Resolves a type name in the context of the declaring type.
-	 * @param refTypeSig the type name in signature notation (for example 'QVector')
-	 *                   this can also be an array type, but dimensions will be ignored.
+	 * 
+	 * @param refTypeSig the type name in signature notation (for example 'QVector') this can also be an array type, but dimensions will be ignored.
 	 * @param declaringType the context for resolving (type where the reference was made in)
-	 * @return returns the fully qualified type name or build-in-type name. 
-	 *  			if a unresolved type couldn't be resolved null is returned
+	 * @return returns the fully qualified type name or build-in-type name. if a unresolved type couldn't be resolved null is returned
 	 */
 	public static String getResolvedTypeName(String refTypeSig, IType declaringType) throws JavaModelException {
 		int arrayCount= Signature.getArrayCount(refTypeSig);
 		char type= refTypeSig.charAt(arrayCount);
 		if (type == Signature.C_UNRESOLVED) {
-			int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
-			if (semi == -1) {
-				throw new IllegalArgumentException();
+			String name= ""; //$NON-NLS-1$
+			int bracket= refTypeSig.indexOf(Signature.C_GENERIC_START, arrayCount + 1);
+			if (bracket > 0)
+				name= refTypeSig.substring(arrayCount + 1, bracket);
+			else {
+				int semi= refTypeSig.indexOf(Signature.C_SEMICOLON, arrayCount + 1);
+				if (semi == -1) {
+					throw new IllegalArgumentException();
+				}
+				name= refTypeSig.substring(arrayCount + 1, semi);
 			}
-			String name= refTypeSig.substring(arrayCount + 1, semi);				
-			
 			String[][] resolvedNames= declaringType.resolveType(name);
 			if (resolvedNames != null && resolvedNames.length > 0) {
 				return JavaModelUtil.concatenateName(resolvedNames[0][0], resolvedNames[0][1]);
