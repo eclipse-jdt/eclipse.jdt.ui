@@ -1164,13 +1164,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
-		try {
-			return EditorUtility.getWorkingCopy(element, true);
-		} catch (JavaModelException x) {
-			JavaPlugin.log(x.getStatus());
-			// nothing found, be tolerant and go on
-		}
-		return null;
+		// TODO: With new working copy story: original == working copy.
+		// Note that the previous code could result in a reconcile as side effect. Should check if that
+		// is still required.
+		return element;
 	}
 
 	/*

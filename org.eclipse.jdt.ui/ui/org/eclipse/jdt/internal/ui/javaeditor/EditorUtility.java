@@ -37,14 +37,10 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -246,96 +242,12 @@ public class EditorUtility {
 		}
 		return null;	
 	}
-	
-	/** 
-	 * Gets the working copy of an compilation unit opened in an editor
-	 * @param part the editor part
-	 * @param cu the original compilation unit (or another working copy)
-	 * @return the working copy of the compilation unit, or null if not found
-	 */	
-	public static ICompilationUnit getWorkingCopy(ICompilationUnit cu) {
-		if (cu == null)
-			return null;
-		if (cu.isWorkingCopy())
-			return cu;
 			
-		return (ICompilationUnit)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
-	}
-	
-	/** 
-	 * Gets the working copy of an member opened in an editor
-	 *
-	 * @param member the original member or a member in a working copy
-	 * @return the corresponding member in the shared working copy or <code>null</code> if not found
-	 */	
-	public static IMember getWorkingCopy(IMember member) throws JavaModelException {
-		ICompilationUnit cu= member.getCompilationUnit();
-		if (cu != null) {
-			ICompilationUnit workingCopy= getWorkingCopy(cu);
-			if (workingCopy != null) {
-				return JavaModelUtil.findMemberInCompilationUnit(workingCopy, member);
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Returns the compilation unit for the given java element.
-	 * @param element the java element whose compilation unit is searched for
-	 * @return the compilation unit of the given java element
-	 */
-	private static ICompilationUnit getCompilationUnit(IJavaElement element) {
-		
-		if (element == null)
-			return null;
-			
-		if (element instanceof IMember)
-			return ((IMember) element).getCompilationUnit();
-		
-		int type= element.getElementType();
-		if (IJavaElement.COMPILATION_UNIT == type)
-			return (ICompilationUnit) element;
-		if (IJavaElement.CLASS_FILE == type)
-			return null;
-			
-		return getCompilationUnit(element.getParent());
-	}
-	
-	/** 
-	 * Returns the working copy of the given java element.
-	 * @param javaElement the javaElement for which the working copyshould be found
-	 * @param reconcile indicates whether the working copy must be reconcile prior to searching it
-	 * @return the working copy of the given element or <code>null</code> if none
-	 */	
-	public static IJavaElement getWorkingCopy(IJavaElement element, boolean reconcile) throws JavaModelException {
-		ICompilationUnit unit= getCompilationUnit(element);
-		if (unit == null)
-			return null;
-			
-		if (unit.isWorkingCopy())
-			return element;
-			
-		ICompilationUnit workingCopy= getWorkingCopy(unit);
-		if (workingCopy != null) {
-			if (reconcile) {
-				synchronized (workingCopy) {
-					workingCopy.reconcile();
-					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
-				}
-			} else {
-					return JavaModelUtil.findInCompilationUnit(workingCopy, element);
-			}
-		}
-		
-		return null;
-	}
-
 	/**
 	 * Maps the localized modifier name to a code in the same
 	 * manner as #findModifier.
 	 * 
 	 * @return the SWT modifier bit, or <code>0</code> if no match was found
-	 * @see findModifier
 	 * @since 2.1.1
 	 */
 	public static int findLocalizedModifier(String token) {

@@ -1178,14 +1178,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	 * Tries to find the given element in a workingcopy.
 	 */
 	protected static IJavaElement getWorkingCopy(IJavaElement input) {
-		try {
-			if (input instanceof ICompilationUnit)
-				return EditorUtility.getWorkingCopy((ICompilationUnit) input);
-			else
-				return EditorUtility.getWorkingCopy(input, false);
-		} catch (JavaModelException ex) {
-		}
-		return null;
+		// MA: with new working copy story original == working copy
+		return input;
 	}
 
 	/**

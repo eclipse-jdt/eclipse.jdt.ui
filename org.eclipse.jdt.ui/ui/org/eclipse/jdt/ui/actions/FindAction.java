@@ -50,7 +50,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
@@ -378,7 +377,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 			if (cu == null)
 				return type;
 				
-			IType wcType= (IType)getWorkingCopy(type);
+			IType wcType= (IType) getWorkingCopy(type);
 			if (wcType != null)
 				return wcType;
 			else
@@ -391,13 +390,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 	 * Tries to find the given element in a working copy.
 	 */
 	private IJavaElement getWorkingCopy(IJavaElement input) {
-		try {
-			if (input instanceof ICompilationUnit)
-				return EditorUtility.getWorkingCopy((ICompilationUnit)input);
-			else
-				return EditorUtility.getWorkingCopy(input, true);
-		} catch (JavaModelException ex) {
-		}
-		return null;
+		// TODO: With new working copy story: original == working copy.
+		// Note that the previous code could result in a reconcile as side effect. Should check if that
+		// is still required.
+		return input;
 	}
 }
