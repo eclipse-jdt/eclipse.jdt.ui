@@ -327,6 +327,7 @@ public class CompilerConfigurationBlock {
 		
 	private void setOptions(Map map) {
 		if (fProject != null) {
+			fProject.setOptions(null); // workaround for bug 26255
 			fProject.setOptions(map);
 		} else {
 			JavaCore.setOptions((Hashtable) map);

@@ -164,9 +164,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				doValidation(TREESTATUS);
 
 				Object obj= e.getElement();
-				if (obj instanceof IJavaProject) {
-					IJavaProject iJavaProject= (IJavaProject) obj;
-					if (e.getChecked()) {
+				if (obj instanceof IJavaElement) {
+					IJavaElement iJavaElement= (IJavaElement) obj;
+					IJavaProject iJavaProject= iJavaElement.getJavaProject();
+					if (iJavaProject != null  && e.getChecked()) {
 						fWizard.addSelectedProject(iJavaProject);
 					} else
 						fWizard.removeSelectedProject(iJavaProject);

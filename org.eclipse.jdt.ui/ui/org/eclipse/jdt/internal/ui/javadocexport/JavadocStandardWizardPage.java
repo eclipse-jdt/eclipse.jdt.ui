@@ -321,7 +321,7 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 					IProject reqProject= (IProject) fStore.getRoot().findMember(curr.getPath());
 					IJavaProject javaProject= JavaCore.create(reqProject);
 
-					if (reqProject.isOpen()) {
+					if (reqProject != null && reqProject.isOpen()) {
 						if (!referencedClasses.contains(javaProject)) {
 							if (!fWizard.getSelectedProjects().contains(javaProject))
 								referencedClasses.add(javaProject);
