@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -147,9 +148,19 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 					fHierarchy= type.newTypeHierarchy(pm);
 				}
 			} else {
-				IJavaProject jproject= element.getJavaProject();
 				IRegion region= JavaCore.newRegion();
-				region.add(element);
+				if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+					// for projects only add the contained source folders
+					IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
+					for (int i= 0; i < roots.length; i++) {
+						if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+							region.add(roots[i]);
+						}
+					}
+				} else {
+					region.add(element);
+				}
+				IJavaProject jproject= element.getJavaProject();
 				fHierarchy= jproject.newTypeHierarchy(region, pm);				
 			}
 			fHierarchy.addTypeHierarchyChangedListener(this);
