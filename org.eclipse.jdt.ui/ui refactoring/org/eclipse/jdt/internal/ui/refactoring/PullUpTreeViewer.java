@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 
-public class PullUpTreeViewer extends CheckboxTreeViewer {
+class PullUpTreeViewer extends CheckboxTreeViewer {
 	
 	private Set fActiveElements;
 	
@@ -48,26 +48,27 @@ public class PullUpTreeViewer extends CheckboxTreeViewer {
 	private ICheckStateListener createCheckStateListener() {
 		return new ICheckStateListener() {
 			public void checkStateChanged(CheckStateChangedEvent event){
-				IMember element= (IMember)event.getElement();
-				boolean checked= event.getChecked();
-
-				if (checked)
-					fActiveElements.add(element);
-				else
-					fActiveElements.remove(element);
-
-				setSubtreeChecked(element, checked);
-				setSubtreeGrayed(element, false);
-				IJavaElement parent= getParent(element);
-				if (parent == null)	
-					return;
-				while(parent != null) {
-					setChecked(parent, checked);
-					setGrayed(parent, isPartlyActive(parent));
-					parent= getParent(parent);
-				}
+				setCheckState(((IMember)event.getElement()), event.getChecked());
 			}
 		};
+	}
+	
+	public void setCheckState(IMember element, boolean checked){
+		if (checked)
+			fActiveElements.add(element);
+		else
+			fActiveElements.remove(element);
+
+		setSubtreeChecked(element, checked);
+		setSubtreeGrayed(element, false);
+		IJavaElement parent= getParent(element);
+		if (parent == null)
+			return;
+		while (parent != null) {
+			setChecked(parent, checked);
+			setGrayed(parent, isPartlyActive(parent));
+			parent= getParent(parent);
+		}
 	}
 	
 	private ITypeHierarchy getTypeHierarchyInput(){
