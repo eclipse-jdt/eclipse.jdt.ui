@@ -11,7 +11,7 @@ import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 
 /**
  * The <code>JavaEditorErrorTickUpdater</code> will register as a AnnotationModelListener
@@ -22,11 +22,12 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 
 	private JavaEditor fJavaEditor;
 	private IAnnotationModel fAnnotationModel;
-	private JavaElementLabelProvider fLabelProvider;
+	private ErrorTickImageProvider fImageProvider;
 
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		fJavaEditor= editor;
 		Assert.isNotNull(editor);
+		fImageProvider= new ErrorTickImageProvider();
 	}
 
 	/**
@@ -43,18 +44,9 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		if (model != null) {
 			fAnnotationModel=model;
 			fAnnotationModel.addAnnotationModelListener(this);
-			
-			if (fLabelProvider == null) {
-				fLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_SMALL_ICONS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS);
-			}
-			fLabelProvider.setErrorTickManager(new AnnotationErrorTickProvider(fAnnotationModel));
 			modelChanged(fAnnotationModel);
 		} else {
 			fAnnotationModel= null;
-			if (fLabelProvider != null) {
-				fLabelProvider.dispose();
-				fLabelProvider= null;
-			}
 		}	
 	}
 			
@@ -67,10 +59,10 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 			return;
 		}
 		IEditorInput input= fJavaEditor.getEditorInput();
-		if (fLabelProvider != null && input != null) { // might run async, tests needed
+		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
 			if (jelement != null) {
-				Image newImage= fLabelProvider.getImage(jelement);
+				Image newImage= fImageProvider.getImageLabel(jelement, ErrorTickImageProvider.OVERLAY_ICONS | ErrorTickImageProvider.SMALL_ICONS);
 				if (titleImage != newImage) {
 					updatedTitleImage(newImage);
 				}

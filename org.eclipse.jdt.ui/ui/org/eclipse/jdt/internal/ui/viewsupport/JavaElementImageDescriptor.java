@@ -5,8 +5,6 @@
 package org.eclipse.jdt.internal.ui.viewsupport;
 
 
-import java.util.HashMap;
-
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 
@@ -14,9 +12,6 @@ import org.eclipse.jface.resource.CompositeImageDescriptor;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.ui.ISharedImages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -39,6 +34,8 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	public final static int WARNING=		0x020;
 	/** Flag to render the error adornment */
 	public final static int ERROR=			0x040;
+	/** Flag to render the error adornment */
+	public final static int OVERRIDDEN= 0x080;	
 	
 	private ImageDescriptor fBaseImage;
 	private int fFlags;
@@ -133,6 +130,11 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 			x-= data.width;
 			drawImage(data, x, size.y - data.height);
 		}
+		if ((fFlags & OVERRIDDEN) != 0) {
+			data= JavaPluginImages.DESC_OVR_OVERRIDDEN.getImageData();
+			x-= data.width;
+			drawImage(data, x, size.y - data.height);
+		}		
 	}		
 	
 	private void drawBottomLeft() {

@@ -72,13 +72,11 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.ITypeHierarchyViewPart;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.compare.JavaReplaceWithEditionAction;
 import org.eclipse.jdt.internal.ui.dnd.BasicSelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -87,9 +85,10 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 /**
@@ -107,7 +106,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	
 	private static final String DIALOGSTORE_HIERARCHYVIEW= "TypeHierarchyViewPart.hierarchyview";	 //$NON-NLS-1$
 	private static final String DIALOGSTORE_VIEWORIENTATION= "TypeHierarchyViewPart.orientation";	 //$NON-NLS-1$
-
 
 	private static final String TAG_INPUT= "input"; //$NON-NLS-1$
 	private static final String TAG_VIEW= "view"; //$NON-NLS-1$
@@ -152,7 +150,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private ViewForm fMethodViewerViewForm;
 	
 	private CLabel fMethodViewerPaneLabel;
-	private JavaElementLabelProvider fPaneLabelProvider;
+	private JavaUILabelProvider fPaneLabelProvider;
 	
 	private IDialogSettings fDialogSettings;
 	
@@ -210,8 +208,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
-		fPaneLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
-		fPaneLabelProvider.setErrorTickManager(new MarkerErrorTickProvider());
+		fPaneLabelProvider= new JavaUILabelProvider(new ErrorTickImageProvider());
 		
 		fAddStubAction= new AddMethodStubAction();
 		fFocusOnSelectionAction= new FocusOnSelectionAction(this);	
@@ -433,7 +430,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				
 		KeyListener keyListener= createKeyListener();
 		
-		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(this, new MarkerErrorTickProvider());
+		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(this);
 				
 		// Create the viewers
 		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);

@@ -22,18 +22,15 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -45,9 +42,10 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 
 /**
@@ -63,8 +61,12 @@ public class MethodsViewer extends ProblemTableViewer {
 	private static final String TAG_SHOWINHERITED= "showinherited";		 //$NON-NLS-1$
 	private static final String TAG_VERTICAL_SCROLL= "mv_vertical_scroll";		 //$NON-NLS-1$
 	
+	private static final int LABEL_BASEFLAGS= JavaElementLabels.M_PARAMETER_TYPES;
+	
 	private MethodsViewerFilterAction[] fFilterActions;
 	private MethodsViewerFilter fFilter;
+	
+	private JavaUILabelProvider fLabelProvider;
 		
 	private OpenJavaElementAction fOpen;
 
@@ -75,13 +77,11 @@ public class MethodsViewer extends ProblemTableViewer {
 	public MethodsViewer(Composite parent, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-	
-		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
+		fLabelProvider= new JavaUILabelProvider(new ErrorTickImageProvider());
 		
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 
-		setLabelProvider(lprovider);
+		setLabelProvider(fLabelProvider);
 		setContentProvider(contentProvider);
 				
 		fOpen= new OpenJavaElementAction(this);
@@ -145,12 +145,10 @@ public class MethodsViewer extends ProblemTableViewer {
 			getTable().setRedraw(false);
 			cprovider.showInheritedMethods(on);
 			fShowInheritedMembersAction.setChecked(on);
-			
-			JavaElementLabelProvider lprovider= (JavaElementLabelProvider) getLabelProvider();
 			if (on) {
-				lprovider.turnOn(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
+				fLabelProvider.setTextFlags(LABEL_BASEFLAGS | JavaElementLabels.ALL_POST_QUALIFIED);
 			} else {
-				lprovider.turnOff(JavaElementLabelProvider.SHOW_POST_QUALIFIED);
+				fLabelProvider.setTextFlags(LABEL_BASEFLAGS);
 			}
 			refresh();
 		} catch (JavaModelException e) {

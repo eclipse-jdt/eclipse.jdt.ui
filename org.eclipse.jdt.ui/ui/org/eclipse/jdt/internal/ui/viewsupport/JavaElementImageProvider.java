@@ -54,8 +54,7 @@ public class JavaElementImageProvider {
 	 * Use the 'light' style for rendering types.
 	 */	
 	public final static int LIGHT_TYPE_ICONS= 0x4;
-	
-	
+		
 	
 	private static final Point SMALL_SIZE= new Point(16, 16);
 	private static final Point BIG_SIZE= new Point(22, 16);
@@ -71,16 +70,11 @@ public class JavaElementImageProvider {
 	}
 	
 	private ImageDescriptorRegistry fRegistry;
-	private IErrorTickProvider fErrorTickProvider;
 		
 	public JavaElementImageProvider() {
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	}
-	
-	public void setErrorTickProvider(IErrorTickProvider provider) {
-		fErrorTickProvider= provider;
-	}
-		
+			
 	/**
 	 * Returns the icon for a given element. The icon depends on the element type
 	 * and element properties. If configured, overlay icons are constructed for
@@ -134,7 +128,7 @@ public class JavaElementImageProvider {
 		if (descriptor == null) {
 			return null;
 		}
-		int adornmentFlags= computeErrorTickAdornmentFlags(adaptable);
+		int adornmentFlags= computeExtraAdornmentFlags(adaptable);
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 		return new JavaElementImageDescriptor(descriptor, adornmentFlags, size);
 	}
@@ -271,7 +265,7 @@ public class JavaElementImageProvider {
 	
 	private int computeAdornmentFlags(IJavaElement element) {
 		
-		int flags= computeErrorTickAdornmentFlags(element);
+		int flags= computeExtraAdornmentFlags(element);
 					
 		if (element instanceof ISourceReference) { 
 			ISourceReference sourceReference= (ISourceReference)element;
@@ -298,19 +292,9 @@ public class JavaElementImageProvider {
 		return flags;
 	}
 	
-	private int computeErrorTickAdornmentFlags(Object element) {
-		int flags= 0;
-		if (fErrorTickProvider != null) {
-			int info= fErrorTickProvider.getErrorInfo(element);
-			if ((info & IErrorTickProvider.ERRORTICK_ERROR) != 0) {
-				flags |= JavaElementImageDescriptor.ERROR;
-			} else if ((info & IErrorTickProvider.ERRORTICK_WARNING) != 0) {
-				flags |= JavaElementImageDescriptor.WARNING;
-			}
-		}
-		return flags;
-	}
-	
+	protected int computeExtraAdornmentFlags(Object element) {
+		return 0;
+	}	
 	
 	private boolean confirmAbstract(IMember member) {
 		 // Although all methods of a Java interface are abstract, the abstract 

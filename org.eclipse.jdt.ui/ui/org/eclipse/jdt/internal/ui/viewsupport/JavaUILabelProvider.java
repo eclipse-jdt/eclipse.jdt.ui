@@ -2,8 +2,7 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.packageview;
-
+package org.eclipse.jdt.internal.ui.viewsupport;
 
 import org.eclipse.core.resources.IStorage;
 
@@ -15,54 +14,53 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
-
-/**
- * Standard label provider for Java elements used by the PackageExplorerPart
- * Use this class when you want to present the Java elements in a viewer.
- * <p>
- * The implementation also handles non-Java elements by forwarding the requests to an 
- * internal <code>WorkbenchLabelProvider</code>.
- * </p>
- * <p>
- * This class may be instantiated; it is not intended to be subclassed.
- * </p>
- *
- * @see org.eclipse.ui.model.WorkbenchLabelProvider
- */
-class PackageExplorerLabelProvider extends LabelProvider {
-
+public class JavaUILabelProvider extends LabelProvider {
+	
 	private JavaElementImageProvider fImageLabelProvider;
 	private WorkbenchLabelProvider fWorkbenchLabelProvider;	
 	private StorageLabelProvider fStorageLabelProvider;
 
 	private int fImageFlags;
 	private int fTextFlags;
-
+	
 	/**
-	 * Create new JavaElementLabelProvider for the PackageExplorerPart
+	 * Creates a new label provider with default flags.
 	 */
-	public PackageExplorerLabelProvider() {
+	public JavaUILabelProvider() {
+		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS);
+	}
+
+	public JavaUILabelProvider(int textFlags, int imageFlags, JavaElementImageProvider imageLabelProvider) {
+		fImageLabelProvider= imageLabelProvider;
 		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
 		fStorageLabelProvider= new StorageLabelProvider();
-		fImageLabelProvider= new ErrorTickImageProvider();
-		fImageFlags= JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS;
-		fTextFlags= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES;
-		if (WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView())
-			fTextFlags |= JavaElementLabels.P_COMPRESSED;
+		fImageFlags= imageFlags;
+		fTextFlags= textFlags;
 	}
-
-	void setCompressingPkgNameInPackagesView(boolean state) {
-		if (state)
-			fTextFlags |= JavaElementLabels.P_COMPRESSED;
-		else
-			fTextFlags &= ~JavaElementLabels.P_COMPRESSED;
+	
+	public JavaUILabelProvider(int textFlags, int imageFlags) {
+		this(textFlags, imageFlags, new JavaElementImageProvider());
 	}
+	
+	public JavaUILabelProvider(JavaElementImageProvider imageLabelProvider) {
+		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS, imageLabelProvider);
 
+	}		
+	
+	/**
+	 * Sets the text flags to use
+	 */
+	public void setTextFlags(int flags) {
+		fTextFlags= flags;
+	}
+	
+	/**
+	 * Sets the text flags to use
+	 */
+	public void setImageFlags(int flags) {
+		fImageFlags= flags;
+	}	
+	
 	/* (non-Javadoc)
 	 * @see ILabelProvider#getImage
 	 */
@@ -82,7 +80,7 @@ class PackageExplorerLabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		
+
 		if (element instanceof IJavaElement) {
 			return JavaElementLabels.getElementLabel((IJavaElement) element, fTextFlags);
 		}

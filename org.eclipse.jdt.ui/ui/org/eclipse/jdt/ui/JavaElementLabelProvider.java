@@ -4,10 +4,6 @@
  */
 package org.eclipse.jdt.ui;
 
-
-import java.util.HashMap;
-import java.util.Map;
-
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.graphics.Image;
@@ -18,7 +14,6 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
@@ -135,10 +130,6 @@ public class JavaElementLabelProvider extends LabelProvider {
 	private int fImageFlags;
 	private int fTextFlags;
 	
-	// map images for JarEntryFiles, key = extension - value = image
-	// the cached images will be disposed wen the label provider is disposed.
-	private Map fJarImageMap= new HashMap(10);
-
 	/**
 	 * Creates a new label provider with <code>SHOW_DEFAULT</code> flag.
 	 *
@@ -277,8 +268,4 @@ public class JavaElementLabelProvider extends LabelProvider {
 		fWorkbenchLabelProvider.dispose();
 		fStorageLabelProvider.dispose();
 	}
-	
-	public void setErrorTickManager(IErrorTickProvider provider) {
-		fImageLabelProvider.setErrorTickProvider(provider);
-	}	
 }

@@ -8,12 +8,11 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * The <code>JavaOutlineErrorTickUpdater</code> will register as a AnnotationModelListener on the annotation model
@@ -22,7 +21,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 
 	private TreeViewer fViewer;
-	private JavaElementLabelProvider fLabelProvider;
+	private ILabelProvider fLabelProvider;
 	private IAnnotationModel fAnnotationModel;
 
 	/**
@@ -33,8 +32,8 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 	public JavaOutlineErrorTickUpdater(TreeViewer viewer) {
 		fViewer= viewer;
 		IBaseLabelProvider lprovider= viewer.getLabelProvider();
-		if (lprovider instanceof JavaElementLabelProvider) {
-			fLabelProvider= (JavaElementLabelProvider) lprovider;
+		if (lprovider instanceof ILabelProvider) {
+			fLabelProvider= (ILabelProvider) lprovider;
 		}
 	}
 
@@ -56,11 +55,9 @@ public class JavaOutlineErrorTickUpdater implements IAnnotationModelListener {
 		if (model != null) {
 			fAnnotationModel= model;
 			fAnnotationModel.addAnnotationModelListener(this);
-			fLabelProvider.setErrorTickManager(new AnnotationErrorTickProvider(fAnnotationModel));
 			modelChanged(model);
 		} else {
 			fAnnotationModel= null;
-			fLabelProvider.setErrorTickManager(null);
 		}	
 	}	
 	
