@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -69,7 +68,7 @@ public class CounterPanel extends Composite {
 		label= new Label(this, SWT.NONE);
 		label.setText(name);
 		label.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING));
-		label.setFont(JFaceResources.getBannerFont());
+		//label.setFont(JFaceResources.getBannerFont());
 		
 		Text value= new Text(this, SWT.READ_ONLY);
 		value.setText(init);

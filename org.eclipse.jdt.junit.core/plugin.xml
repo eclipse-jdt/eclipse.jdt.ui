@@ -38,7 +38,7 @@
 
    <extension-point id="testRunListeners" name="%testRunListeners.name" schema="schema/testRunListeners.exsd"/>
    <extension-point id="junitLaunchConfigs" name="%junitLaunchConfigs.name" schema="schema/junitLaunchConfigs.exsd"/>
-   <extension-point id="internal-testRunTabs" name="%testRunTabs.name" schema="schema/internal-testRunTabs.exsd"/>
+   <extension-point id="internal_testRunTabs" name="%testRunTabs.name" schema="schema/internal_testRunTabs.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
@@ -389,7 +389,7 @@
       </launchConfigType>
    </extension>
    <extension
-         point="org.eclipse.jdt.junit.internal-testRunTabs">
+         point="org.eclipse.jdt.junit.internal_testRunTabs">
       <testRunTab class="org.eclipse.jdt.internal.junit.ui.FailureTab"/>
       <testRunTab class="org.eclipse.jdt.internal.junit.ui.TestHierarchyTab"/>
    </extension>
