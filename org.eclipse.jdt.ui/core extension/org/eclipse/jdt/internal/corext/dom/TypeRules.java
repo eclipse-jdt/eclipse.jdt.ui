@@ -93,13 +93,18 @@ public class TypeRules {
 	}
 	
 	/**
-	 * Tests if a two types are assign compatible
+	 * Tests if a two types are assign compatible. Void types are vener compatible.
 	 * @param typeToAssign The binding of the type to assign
 	 * @param definedType The type of the object that is assigned
 	 * @return boolean Returns true if definedType = typeToAssign is true
 	 */
 	public static boolean canAssign(ITypeBinding typeToAssign, ITypeBinding definedType) {
 		// definedType = typeToAssign;
+		
+		String voidName= PrimitiveType.VOID.toString();
+		if (voidName.equals(typeToAssign.getName()) || voidName.equals(definedType.getName())) {
+			return false;
+		}
 
 		if (typeToAssign.isNullType()) {
 			return !definedType.isPrimitive();
@@ -191,12 +196,18 @@ public class TypeRules {
 	 * @return boolean Returns true if (castType) bindingToCast is a valid cast expression (can be unnecessary, but not invalid).
 	 */
 	public static boolean canCast(ITypeBinding castType, ITypeBinding bindingToCast) {
-		if (castType.isAnonymous() || castType.isNullType()) {
+		String voidName= PrimitiveType.VOID.toString();
+		
+		if (castType.isAnonymous() || castType.isNullType() || voidName.equals(castType.getName())) {
 			throw new IllegalArgumentException();
 		}
 		
 		if (castType == bindingToCast) {
 			return true;
+		}
+		
+		if (voidName.equals(bindingToCast.getName())) {
+			return false;
 		}
 		
 		if (bindingToCast.isArray()) {
@@ -223,8 +234,8 @@ public class TypeRules {
 			if (!bindingToCast.isPrimitive()) {
 				return false;
 			}
-			String bool= "boolean"; //$NON-NLS-1$
-			return (!bool.equals(castType.getName()) && !bool.equals(bindingToCast.getName()));
+			String boolName= PrimitiveType.BOOLEAN.toString();
+			return (!boolName.equals(castType.getName()) && !boolName.equals(bindingToCast.getName()));
 		} else {
 			if (bindingToCast.isPrimitive()) {
 				return false;
