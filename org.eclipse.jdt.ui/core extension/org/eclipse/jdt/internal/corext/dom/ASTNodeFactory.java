@@ -56,6 +56,7 @@ public class ASTNodeFactory {
 	}
 	
 	public static Name newName(AST ast, String name) {
+		//TODO (after I20050315: replace by: return ast.newName(name);
 		StringTokenizer tok= new StringTokenizer(name, "."); //$NON-NLS-1$
 		Name res= null;
 		while (tok.hasMoreTokens()) {

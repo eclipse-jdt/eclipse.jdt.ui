@@ -737,9 +737,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 			return ast.newArrayType(elementType, argType.getDimensions());
 		} else {
-			String typeName= fImportRewriter.addImport(argType);
-
-			return ast.newSimpleType(ASTNodeFactory.newName(ast, typeName));
+			return fImportRewriter.addImport(argType, ast);
 		}
 	}
 
@@ -775,8 +773,6 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		List	actualFactoryArgs= factoryMethodCall.arguments();
 		List	actualCtorArgs= ctorCall.arguments();
-		String	rawMethodName= fNewMethodName;
-		String	methodName;
 
 		// Need to use a qualified name for the factory method if we're not
 		// in the context of the class holding the factory.
@@ -785,13 +781,11 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		if (callOwnerBinding == null ||
 			!Bindings.equals(callOwner.resolveBinding(), fFactoryOwningClass.resolveBinding())) {
-			String	qualifier= fImportRewriter.addImport(fFactoryOwningClass.resolveBinding());
-
-			methodName= qualifier + "." + rawMethodName; //$NON-NLS-1$
-		} else
-			methodName= rawMethodName;
-
-		factoryMethodCall.setName(ast.newSimpleName(methodName));
+			String qualifier= fImportRewriter.addImport(fFactoryOwningClass.resolveBinding());
+			factoryMethodCall.setExpression(ASTNodeFactory.newName(ast, qualifier));
+		}
+		
+		factoryMethodCall.setName(ast.newSimpleName(fNewMethodName));
 
 		for(int i=0; i < actualCtorArgs.size(); i++) {
 			Expression	actualCtorArg= (Expression) actualCtorArgs.get(i);

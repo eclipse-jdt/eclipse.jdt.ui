@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -583,7 +584,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		
 		Type newType= null;
 		if (!fSelectedType.isParameterizedType()){
-			newType= ast.newSimpleType(ast.newSimpleName(typeName));
+			newType= ast.newSimpleType(ASTNodeFactory.newName(ast, typeName));
 		} else {
 			newType= createParameterizedType(ast, fSelectedType);
 		} 
@@ -598,7 +599,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	 */
 	private Type createParameterizedType(AST ast, ITypeBinding typeBinding){
 		if (typeBinding.isParameterizedType() && !typeBinding.isRawType()){
-			Type baseType= ast.newSimpleType(ast.newSimpleName(typeBinding.getErasure().getName()));
+			Type baseType= ast.newSimpleType(ASTNodeFactory.newName(ast, typeBinding.getErasure().getName()));
 			ParameterizedType newType= ast.newParameterizedType(baseType);
 			for (int i=0; i < typeBinding.getTypeArguments().length; i++){
 				ITypeBinding typeArg= typeBinding.getTypeArguments()[i];
@@ -608,7 +609,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return newType;
 		} else {
 			if (!typeBinding.isTypeVariable()){
-				return ast.newSimpleType(ast.newSimpleName(typeBinding.getErasure().getName()));
+				return ast.newSimpleType(ASTNodeFactory.newName(ast, typeBinding.getErasure().getName()));
 			} else {
 				return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
 			}

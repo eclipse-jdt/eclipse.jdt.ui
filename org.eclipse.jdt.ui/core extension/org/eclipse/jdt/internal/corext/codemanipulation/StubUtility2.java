@@ -567,7 +567,7 @@ public final class StubUtility2 {
 		if (normalized == null)
 			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
 		else if (normalized.isTypeVariable())
-			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
+			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
 		else if (normalized.isWildcardType()) {
 			WildcardType type= ast.newWildcardType();
 			ITypeBinding bound= normalized.getBound();
@@ -580,15 +580,15 @@ public final class StubUtility2 {
 		if (qualified.length() > 0) {
 			ITypeBinding[] typeArguments= normalized.getTypeArguments();
 			if (typeArguments.length > 0) {
-				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(qualified)));
+				ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ASTNodeFactory.newName(ast, qualified)));
 				List arguments= type.typeArguments();
 				for (int index= 0; index < typeArguments.length; index++)
 					arguments.add(createTypeNode(typeArguments[index], ast));
 				return type;
 			}
-			return ast.newSimpleType(ast.newSimpleName(qualified));
+			return ast.newSimpleType(ASTNodeFactory.newName(ast, qualified));
 		}
-		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalized)));
+		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalized)));
 	}
 
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) {

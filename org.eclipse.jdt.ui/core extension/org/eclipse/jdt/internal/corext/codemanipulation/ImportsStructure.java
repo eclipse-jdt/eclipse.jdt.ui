@@ -69,6 +69,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -467,7 +468,7 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		if (normalizedBinding.isTypeVariable()) {
 			// no import
-			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
+			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
 		}
 		if (normalizedBinding.isWildcardType()) {
 			WildcardType wcType= ast.newWildcardType();
@@ -490,7 +491,7 @@ public final class ImportsStructure implements IImportsStructure {
 			
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			if (typeArguments.length > 0) {
-				Type erasureType= ast.newSimpleType(ast.newSimpleName(res));
+				Type erasureType= ast.newSimpleType(ASTNodeFactory.newName(ast,res));
 				ParameterizedType paramType= ast.newParameterizedType(erasureType);
 				List arguments= paramType.typeArguments();
 				for (int i= 0; i < typeArguments.length; i++) {
@@ -498,9 +499,9 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 				return paramType;
 			}
-			return ast.newSimpleType(ast.newSimpleName(res));
+			return ast.newSimpleType(ASTNodeFactory.newName(ast, res));
 		}
-		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalizedBinding)));
+		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalizedBinding)));
 	}
 	
 

@@ -24,12 +24,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -717,16 +717,18 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void setSuperType(TypeDeclaration declaration) throws JavaModelException {
-        ITypeBinding binding= ((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).resolveTypeBinding();
+        ClassInstanceCreation classInstanceCreation= (ClassInstanceCreation) fAnonymousInnerClassNode.getParent();
+		ITypeBinding binding= classInstanceCreation.resolveTypeBinding();
         if (binding == null)
             return;
-        if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
+		Type newType= (Type) ASTNode.copySubtree(fAnonymousInnerClassNode.getAST(), classInstanceCreation.getType());
+		if (binding.getSuperclass().getQualifiedName().equals("java.lang.Object")) { //$NON-NLS-1$
             Assert.isTrue(binding.getInterfaces().length <= 1);
             if (binding.getInterfaces().length == 0)
                 return;
-            declaration.superInterfaceTypes().add(0, fAnonymousInnerClassNode.getAST().newSimpleType(fAnonymousInnerClassNode.getAST().newName(Strings.splitByToken(getNodeSourceCode(((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).getType()), ".")))); //$NON-NLS-1$
+            declaration.superInterfaceTypes().add(0, newType); //$NON-NLS-1$
         } else {
-            declaration.setSuperclassType(fAnonymousInnerClassNode.getAST().newSimpleType(fAnonymousInnerClassNode.getAST().newName(Strings.splitByToken(getNodeSourceCode(((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).getType()), ".")))); //$NON-NLS-1$
+            declaration.setSuperclassType(newType); //$NON-NLS-1$
         }
     }
 
