@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
-import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
@@ -56,16 +55,14 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layout.numColumns= 2;
 		layout.verticalSpacing= 8;
 		result.setLayout(layout);
-		RowLayouter layouter= new RowLayouter(layout.numColumns);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.widthHint= convertWidthInCharsToPixels(25);
-		layouter.setDefaultGridData(gd, 1);
 		
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.getter_name")); //$NON-NLS-1$
 		Text getter= new Text(result, SWT.BORDER);
 		getter.setText(fRefactoring.getGetterName());
-		layouter.perform(label, getter, 1);
+		getter.setLayoutData(gd);
 		getter.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				fRefactoring.setGetterName(((Text)e.widget).getText());
@@ -78,7 +75,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			label.setText(RefactoringMessages.getString("SelfEncapsulateFieldInputPage.setter_name")); //$NON-NLS-1$
 			Text setter= new Text(result, SWT.BORDER);
 			setter.setText(fRefactoring.getSetterName());
-			layouter.perform(label, setter, 1);
+			setter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			setter.addModifyListener(new ModifyListener() {
 				public void modifyText(ModifyEvent e) {
 					fRefactoring.setSetterName(((Text)e.widget).getText());
@@ -98,11 +95,11 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				fRefactoring.setInsertionIndex(combo.getSelectionIndex() - 1);
 			}
 		});
-		layouter.perform(label, combo, 1);
+		combo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		createAccessModifier(result, layouter);
+		createAccessModifier(result);
 		
-		createFieldAccessBlock(result, layouter);
+		createFieldAccessBlock(result);
 			
 		processValidation();
 		
@@ -111,7 +108,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SEF_WIZARD_PAGE);		
 	}
 
-	private void createAccessModifier(Composite result, RowLayouter layouter) {
+	private void createAccessModifier(Composite result) {
 		int visibility= fRefactoring.getVisibility();
 		if (Flags.isPublic(visibility))
 			return;
@@ -125,6 +122,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 		layout= new GridLayout();
 		layout.numColumns= 4; layout.marginWidth= 0; layout.marginHeight= 0;
 		group.setLayout(layout);
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Object[] info= createData(visibility);
 		String[] labels= (String[])info[0];
@@ -142,18 +140,18 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				}
 			});
 		}
-		layouter.perform(label, group, 1);	
 	}
 	
-	private void createFieldAccessBlock(Composite result, RowLayouter layouter) {
+	private void createFieldAccessBlock(Composite result) {
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(RefactoringMessages.getString("SelfEncapsulateField.field_access")); //$NON-NLS-1$
 		
-		Composite block= new Composite(result, SWT.NONE);
+		Composite group= new Composite(result, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0; layout.marginHeight= 0; layout.numColumns= 2;
-		block.setLayout(layout);
-		Button radio= new Button(block, SWT.RADIO);
+		group.setLayout(layout);
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		Button radio= new Button(group, SWT.RADIO);
 		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.use_setter_getter")); //$NON-NLS-1$
 		radio.setSelection(true);
 		radio.addSelectionListener(new SelectionAdapter() {
@@ -161,21 +159,16 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				fRefactoring.setEncapsulateDeclaringClass(true);
 			}
 		});
-		// GridData data= new GridData();
-		// data.horizontalIndent= indent;
-		// radio.setLayoutData(data);
+		radio.setLayoutData(new GridData());
 		
-		radio= new Button(block, SWT.RADIO);
+		radio= new Button(group, SWT.RADIO);
 		radio.setText(RefactoringMessages.getString("SelfEncapsulateField.keep_references")); //$NON-NLS-1$
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setEncapsulateDeclaringClass(false);
 			}
 		});
-		// data= new GridData();
-		// data.horizontalIndent= indent;
-		// radio.setLayoutData(data);
-		layouter.perform(label, block, 1);
+		radio.setLayoutData(new GridData());
 	}
 
 	private Object[] createData(int visibility) {
@@ -197,13 +190,6 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 			data= new Integer[] {new Integer(Flags.AccPublic), new Integer(0)};
 		}
 		return new Object[] {labels, data};
-	}
-	
-	private void createSeparator(Composite result, RowLayouter layouter) {
-		Label label;
-		label= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		layouter.perform(label);
 	}
 	
 	private void fillWithPossibleInsertPositions(Combo combo, IField field) {
