@@ -46,8 +46,7 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		super();
 		setPreferenceStore(JUnitUIPlugin.getDefault().getPreferenceStore());
 		fgDirectoryDialog= new DirectoryDialog(JUnitUIPlugin.getActiveShell());
-		fgDirectoryDialog.setText("Please select the directories where Eclipse plugins can be found. " 
-			+ "Required plugins are collect top - down in the list.");
+		fgDirectoryDialog.setText("Select Eclipse plugins directory");
 	}
 	/**
 	 * @see PreferencePage#createControl(Composite)
@@ -88,8 +87,13 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		GridData gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gridData.horizontalSpan= 2;
 		label.setLayoutData(gridData);
-		label.setText("Locations where Eclipse plugins can be found");
-
+		label.setText("Locations where Eclipse plugins can be found.");
+		label= new Label(composite, SWT.WRAP);
+		gridData= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		gridData.horizontalSpan= 2;
+		label.setLayoutData(gridData);
+		label.setText("Required plugins and startup.jar are collected top - down in this list.");
+
 		fgTable= new Table(composite, SWT.BORDER | SWT.SINGLE | SWT.CHECK);
 		gridData= new GridData(GridData.GRAB_HORIZONTAL | GridData.GRAB_VERTICAL | GridData.FILL_BOTH);
 		fgTable.setLayoutData(gridData);
@@ -105,12 +109,12 @@ public class PreferencePage extends org.eclipse.jface.preference.PreferencePage
 		buttonPanel.setLayoutData(gridData);
 		
 		fgAddButton= new Button(buttonPanel, SWT.PUSH);
-		fgAddButton.setText("Add");
+		fgAddButton.setText("&Add...");
 		fgAddButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fgAddButton.addSelectionListener(this);
 		
 		fgRemoveButton= new Button(buttonPanel, SWT.PUSH);
-		fgRemoveButton.setText("Remove");
+		fgRemoveButton.setText("&Remove");
 		fgRemoveButton.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));	
 		fgRemoveButton.addSelectionListener(this);
 	}
