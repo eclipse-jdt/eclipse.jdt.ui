@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 
   
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -71,6 +73,8 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 	private ArrayList[] fResults = new ArrayList[] {
 		fPackages, fLabels, fModifiers, fKeywords, fTypes, fMethods, fFields, fVariables
 	};
+	
+	private Set fSuggestedMethodNames= new HashSet();
 	
 	private int fUserReplacementLength;
 
@@ -315,8 +319,10 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		JavaCompletionProposal proposal= new OverrideCompletionProposal(fJavaProject, fCompilationUnit, typeName.toString(), new String(name), paramTypes, start, getLength(start, end), displayString.toString(), new String(completionName));
 		proposal.setImage(getImage(getMemberDescriptor(modifiers)));
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
-		proposal.setRelevance(relevance);
+		proposal.setRelevance(relevance + 100);
 		fMethods.add(proposal);
+		
+		fSuggestedMethodNames.add(new String(name));
 		
 	}
 	
@@ -334,8 +340,8 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 			if (element != null) {
 				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
 				if (type != null) {
-					GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, 100, fMethods);
-					MethodCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, 100, fMethods);
+					GetterSetterCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 100, fSuggestedMethodNames, fMethods);
+					MethodCompletionProposal.evaluateProposals(type, prefix, completionStart, completionEnd - completionStart, relevance + 99, fSuggestedMethodNames, fMethods);
 				}
 			}
 		} catch (CoreException e) {
@@ -543,6 +549,8 @@ public class ResultCollector extends CompletionRequestorAdapter implements IExte
 		
 		for (int i= 0; i < fResults.length; i++)
 			fResults[i].clear();
+		
+		fSuggestedMethodNames.clear();
 	}
 
 	/**

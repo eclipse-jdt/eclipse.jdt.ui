@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -41,14 +42,14 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public class MethodCompletionProposal extends JavaTypeCompletionProposal {
 	
 	
-	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Collection result) throws CoreException {
+	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
 		IMethod[] methods= type.getMethods();
 		String constructorName= type.getElementName();
-		if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName)) {
+		if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod(methods, constructorName) && suggestedMethods.add(constructorName)) {
 			result.add(new MethodCompletionProposal(type, constructorName, null, offset, length, relevance));
 		}
 		
-		if (prefix.length() > 0 && !constructorName.equals(prefix) && !hasMethod(methods, prefix)) {
+		if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
 			result.add(new MethodCompletionProposal(type, prefix, Signature.SIG_VOID, offset, length, relevance));
 		}
 	}

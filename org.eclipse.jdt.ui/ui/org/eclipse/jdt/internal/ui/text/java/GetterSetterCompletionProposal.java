@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -39,7 +40,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 	
 	
-	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Collection result) throws CoreException {
+	public static void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, Set suggestedMethods, Collection result) throws CoreException {
 		if (prefix.length() == 0) {
 			relevance--;
 		}
@@ -49,12 +50,12 @@ public class GetterSetterCompletionProposal extends JavaTypeCompletionProposal {
 		for (int i= 0; i < fields.length; i++) {
 			IField curr= fields[i];
 			String getterName= GetterSetterUtil.getGetterName(curr, null);
-			if (getterName.startsWith(prefix) && !hasMethod(methods, getterName)) {
+			if (getterName.startsWith(prefix) && !hasMethod(methods, getterName) && suggestedMethods.add(getterName)) {
 				result.add(new GetterSetterCompletionProposal(curr, offset, length, true, relevance));
 			}
 				
 			String setterName= GetterSetterUtil.getSetterName(curr, null);
-			if (setterName.startsWith(prefix) && !hasMethod(methods, setterName)) {
+			if (setterName.startsWith(prefix) && !hasMethod(methods, setterName) && suggestedMethods.add(setterName)) {
 				result.add(new GetterSetterCompletionProposal(curr, offset, length, false, relevance));
 			}
 		}
