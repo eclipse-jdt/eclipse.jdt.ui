@@ -501,6 +501,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			String text;
 			try {
 				text= reader.readLine();
+				if (text == null)
+					text= "";
 			} catch (IOException ex) {
 				text= "";
 			}
