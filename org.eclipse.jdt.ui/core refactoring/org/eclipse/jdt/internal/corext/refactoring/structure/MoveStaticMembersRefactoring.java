@@ -74,7 +74,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private IType fDestinationType;
 	private String fDestinationTypeName;
 	
-	private CodeGenerationSettings fPrefernces;
+	private CodeGenerationSettings fPreferences;
 	private CompositeChange fChange;
 	private ASTData fSource;
 	private ITypeBinding fSourceBinding; 
@@ -150,7 +150,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembers= elements;
-		fPrefernces= preferenceSettings;
+		fPreferences= preferenceSettings;
 	}
 	
 	public static MoveStaticMembersRefactoring create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
@@ -256,7 +256,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;			
 			
-			fSource= new ASTData(fMembers[0].getCompilationUnit(), true, fPrefernces);
+			fSource= new ASTData(fMembers[0].getCompilationUnit(), true, fPreferences);
 			fSourceBinding= getSourceBinding();
 			fMemberBindings= getMemberBindings();
 			if (fSourceBinding == null || hasUnresolvedMemberBinding()) {
@@ -567,7 +567,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private void createChange(RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		fChange= new CompositeChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
-		fTarget= new ASTData(fDestinationType.getCompilationUnit(), true, fPrefernces);
+		fTarget= new ASTData(fDestinationType.getCompilationUnit(), true, fPreferences);
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString(
@@ -618,7 +618,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			return fSource;
 		if (fTarget.unit.equals(unit))
 			return fTarget;
-		return new ASTData(unit, true, fPrefernces);
+		return new ASTData(unit, true, fPreferences);
 	}
 	
 	private boolean isSourceOrTarget(ICompilationUnit unit) {
@@ -678,7 +678,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			wc.reconcile();
 			for (int i= 0; i < fMembers.length; i++) {
 				IMember member= JavaModelUtil.findMemberInCompilationUnit(wc, fMembers[i]);
-				result[i]= Strings.trimIndentation(member.getSource(), fPrefernces.tabWidth, false);
+				result[i]= Strings.trimIndentation(member.getSource(), fPreferences.tabWidth, false);
 			}
 			
 		} finally {
@@ -711,8 +711,8 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		BodyDeclaration[] result= new BodyDeclaration[fMembers.length];
 		for (int i= 0; i < fMembers.length; i++) {
 			IMember member= fMembers[i];
-			ASTNode node= NodeFinder.perform(fSource.root, member.getSourceRange());
-			result[i]= (BodyDeclaration)node;
+			ASTNode node= NodeFinder.perform(fSource.root, member.getNameRange());
+			result[i]= (BodyDeclaration)ASTNodes.getParent(node, BodyDeclaration.class);
 		}
 		return result;
 	}
