@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -356,9 +357,10 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
-		private VariableDeclarationFragment fDeclarationToRemove;
+		private final VariableDeclarationFragment fDeclarationToRemove;
 		private final CompilationUnitRewrite fCuRewrite;
 		private final HashSet fStaticImportsInInitializer;
+		private final boolean fIs15;
 		
 		private InlineTargetCompilationUnit(CompilationUnitRewrite cuRewrite, Name[] references, InlineConstantRefactoring refactoring, HashSet staticImportsInInitializer) throws JavaModelException {
 			fInitializer= refactoring.getInitializer();
@@ -367,12 +369,15 @@ public class InlineConstantRefactoring extends Refactoring {
 			fCuRewrite= cuRewrite;
 			if (refactoring.getRemoveDeclaration() && cuRewrite.getCu().equals(fInitializerUnit))
 				fDeclarationToRemove= refactoring.getDeclaration();
+			else
+				fDeclarationToRemove= null;
 			
 			fReferences= new Expression[references.length];
 			for (int i= 0; i < references.length; i++)
 				fReferences[i]= getQualifiedReference(references[i]);
 			
-			fStaticImportsInInitializer= staticImportsInInitializer;
+			fIs15= JavaModelUtil.is50OrHigher(cuRewrite.getCu().getJavaProject());
+			fStaticImportsInInitializer= fIs15 ? staticImportsInInitializer : new HashSet(0);
 		}
 
 		private static Expression getQualifiedReference(Name fieldName) {
@@ -434,7 +439,8 @@ public class InlineConstantRefactoring extends Refactoring {
 
 		private String prepareInitializerForLocation(Expression location) throws CoreException {
 			HashSet staticImportsInReference= new HashSet();
-			location.accept(new ImportReferencesCollector(fCuRewrite.getCu().getJavaProject(), null, new ArrayList(), staticImportsInReference));
+			if (fIs15)
+				location.accept(new ImportReferencesCollector(fCuRewrite.getCu().getJavaProject(), null, new ArrayList(), staticImportsInReference));
 			InitializerTraversal traversal= new InitializerTraversal(fInitializer, fStaticImportsInInitializer, location, staticImportsInReference, fCuRewrite);
 			ASTRewrite initializerRewrite= traversal.getInitializerRewrite();
 			IDocument document= new Document(fInitializerUnit.getBuffer().getContents()); // could reuse document when generating and applying undo edits
