@@ -27,7 +27,7 @@ public class SourceContextViewer  extends SourceViewer implements IErrorContextV
 	}
 
 	SourceContextViewer(Composite parent) {
-		super(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
+		super(parent, null, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION);
 		setEditable(false);
 	}
 

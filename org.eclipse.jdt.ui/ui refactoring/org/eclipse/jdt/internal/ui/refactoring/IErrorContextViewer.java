@@ -23,7 +23,6 @@ public interface  IErrorContextViewer {
 	 * 
 	 * @return the error context viewer's SWT control
 	 */
-	public Control getControl();
-
+	public Control getControl();	
 }
 

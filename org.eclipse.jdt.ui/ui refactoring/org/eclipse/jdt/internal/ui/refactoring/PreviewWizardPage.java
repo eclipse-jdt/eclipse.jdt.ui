@@ -7,9 +7,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.layout.GridData;
@@ -29,15 +26,14 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 
+import org.eclipse.compare.CompareUI;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 
-import org.eclipse.compare.CompareUI;
-import org.eclipse.compare.CompareViewerPane;
-
 import org.eclipse.jdt.core.ISourceReference;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -47,11 +43,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.ViewerPane;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Presents the changes made by the refactoring.
@@ -341,11 +339,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		
 		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
 
-		CompareViewerPane pane= new CompareViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
+		ViewerPane pane= new ViewerPane(sashForm, SWT.BORDER | SWT.FLAT);
 		pane.setText(RefactoringMessages.getString("PreviewWizardPage.changes")); //$NON-NLS-1$
-		ToolBarManager tbm= pane.getToolBarManager(pane);
-		// tbm.add(new ShowDetailsAction());
-		// tbm.add(new Separator());
+		ToolBarManager tbm= pane.getToolBarManager();
 		tbm.add(new NextChange());
 		tbm.add(new PreviousChange());
 		tbm.update(true);

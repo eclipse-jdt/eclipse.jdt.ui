@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
+import org.eclipse.core.runtime.IAdaptable;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -231,5 +233,15 @@ public abstract class JavaSourceContext extends Context {
 	 * @return the source range
 	 */
 	public abstract ISourceRange getSourceRange();
+	
+	/* (non-Javadoc)
+	 * Method declared on Context.
+	 */
+	public IAdaptable getCorrespondingElement() {
+		if (isBinary())
+			return getClassFile();
+		else
+			return getCompilationUnit();
+	}	
 }
 

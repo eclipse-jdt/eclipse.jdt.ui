@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jdt.core.ISourceRange;
 
@@ -68,5 +69,12 @@ public class FileContext extends Context {
 	public ISourceRange getSourceRange() {
 		return fSourceRange;
 	}
+	
+	/* (non-Javadoc)
+	 * Method declared on Context.
+	 */
+	public IAdaptable getCorrespondingElement() {
+		return getFile();
+	}	
 }
 
