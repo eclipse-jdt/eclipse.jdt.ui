@@ -12,6 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,6 +38,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -69,7 +71,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	public final OverlayPreferenceStore.OverlayKey[] fKeys= new OverlayPreferenceStore.OverlayKey[] {
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT),
+
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT),
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH),
 		
@@ -87,7 +92,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVA_DEFAULT),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVA_DEFAULT + "_bold"),
-		
+
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, IJavaColorConstants.JAVADOC_KEYWORD),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, IJavaColorConstants.JAVADOC_KEYWORD + "_bold"),
 		
@@ -128,7 +133,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		{ "JavaDoc keywords", IJavaColorConstants.JAVADOC_KEYWORD },
 		{ "JavaDoc HTML tags", IJavaColorConstants.JAVADOC_TAG },
 		{ "JavaDoc links", IJavaColorConstants.JAVADOC_LINK },
-		{"JavaDoc others", IJavaColorConstants.JAVADOC_DEFAULT }
+		{ "JavaDoc others", IJavaColorConstants.JAVADOC_DEFAULT }
 	};
 	
 	private OverlayPreferenceStore fOverlayStore;
@@ -164,7 +169,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	
 	private WorkbenchChainedTextFontFieldEditor fFontEditor;
 	private List fList;
-	private ColorEditor fColorEditor;
+	private ColorEditor fForegroundColorEditor;
+	private ColorEditor fBackgroundColorEditor;
+	private Button fBackgroundDefaultRadioButton;
+	private Button fBackgroundCustomRadioButton;
+	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
 	private SourceViewer fPreviewViewer;	
 	
@@ -187,9 +196,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		color= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
 		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND, color.getRGB());
+		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_FOREGROUND_SYSTEM_DEFAULT, true);
 		
 		color= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
 		PreferenceConverter.setDefault(store,  AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, color.getRGB());		
+		store.setDefault(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, true);
 		
 		store.setDefault(JavaSourceViewerConfiguration.PREFERENCE_TAB_WIDTH, 4);
 		
@@ -207,7 +218,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVA_DEFAULT, new RGB(0, 0, 0));
 		store.setDefault(IJavaColorConstants.JAVA_DEFAULT + "_bold", false);
-		
+
 		PreferenceConverter.setDefault(store, IJavaColorConstants.JAVADOC_KEYWORD, new RGB(127, 159, 191));
 		store.setDefault(IJavaColorConstants.JAVADOC_KEYWORD + "_bold", true);
 		
@@ -255,33 +266,75 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		int i= fList.getSelectionIndex();
 		String key= fListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, key);
-		fColorEditor.setColorValue(rgb);
+		fForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(key + "_bold"));
 	}
 	
-	private Control  createColorPage(Composite parent) {
+	private Control createColorPage(Composite parent) {
 		
 		Composite colorComposite= new Composite(parent, SWT.NULL);
 		colorComposite.setLayout(new GridLayout());
 
-		Label label= new Label(colorComposite, SWT.LEFT);
-		label.setText("C&olors:");
-		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		
-		Composite editorComposite= new Composite(colorComposite, SWT.NULL);
+		Composite backgroundComposite= new Composite(colorComposite, SWT.NULL);
 		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		backgroundComposite.setLayout(layout);
+
+		Label label= new Label(backgroundComposite, SWT.NULL);
+		label.setText("Bac&kground Color:");
+		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
+		label.setLayoutData(gd);
+
+		SelectionListener backgroundSelectionListener= new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {				
+				boolean custom= fBackgroundCustomRadioButton.getSelection();
+				int i= fList.getSelectionIndex();
+				String key= fListModel[i][1];
+				
+				fBackgroundColorButton.setEnabled(custom);
+				fOverlayStore.setValue(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT, !custom);
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		};
+
+		fBackgroundDefaultRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
+		fBackgroundDefaultRadioButton.setText("S&ystem Default");
+		gd= new GridData();
+		gd.horizontalSpan= 2;
+		fBackgroundDefaultRadioButton.setLayoutData(gd);
+		fBackgroundDefaultRadioButton.addSelectionListener(backgroundSelectionListener);
+
+		fBackgroundCustomRadioButton= new Button(backgroundComposite, SWT.RADIO | SWT.LEFT);
+		fBackgroundCustomRadioButton.setText("C&ustom");
+		fBackgroundCustomRadioButton.addSelectionListener(backgroundSelectionListener);
+
+		fBackgroundColorEditor= new ColorEditor(backgroundComposite);
+		fBackgroundColorButton= fBackgroundColorEditor.getButton();
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		fBackgroundColorButton.setLayoutData(gd);
+
+		label= new Label(colorComposite, SWT.LEFT);
+		label.setText("Fo&reground:");
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+
+		Composite editorComposite= new Composite(colorComposite, SWT.NULL);
+		layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		editorComposite.setLayout(layout);
-		GridData gd= new GridData(GridData.FILL_BOTH);
-		editorComposite.setLayoutData(gd);
-		
+		gd= new GridData(GridData.FILL_BOTH);
+		editorComposite.setLayoutData(gd);		
+
 		fList= new List(editorComposite, SWT.SINGLE | SWT.V_SCROLL);
 		gd= new GridData(GridData.FILL_BOTH);
 		gd.heightHint= convertHeightInCharsToPixels(5);
 		fList.setLayoutData(gd);
-		
+						
 		Composite stylesComposite= new Composite(editorComposite, SWT.NULL);
 		layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -291,16 +344,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("Fo&reground:");
+		label.setText("C&olor:");
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
 
-		fColorEditor= new ColorEditor(stylesComposite);
-		Button colorButton= fColorEditor.getButton();
+		fForegroundColorEditor= new ColorEditor(stylesComposite);
+		Button foregroundColorButton= fForegroundColorEditor.getButton();
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
-		colorButton.setLayoutData(gd);
+		foregroundColorButton.setLayoutData(gd);
 		
 		label= new Label(stylesComposite, SWT.LEFT);
 		label.setText("&Bold:");
@@ -333,17 +386,27 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		
-		colorButton.addSelectionListener(new SelectionListener() {
+		foregroundColorButton.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
 			}
 			public void widgetSelected(SelectionEvent e) {
 				int i= fList.getSelectionIndex();
 				String key= fListModel[i][1];
-				PreferenceConverter.setValue(fOverlayStore, key, fColorEditor.getColorValue());
+				
+				PreferenceConverter.setValue(fOverlayStore, key, fForegroundColorEditor.getColorValue());
 			}
 		});
-		
+
+		fBackgroundColorButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				PreferenceConverter.setValue(fOverlayStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, fBackgroundColorEditor.getColorValue());					
+			}
+		});
+
 		fBoldCheckBox.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				// do nothing
@@ -377,12 +440,68 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fOverlayStore.addPropertyChangeListener(new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
+				String p= event.getProperty();
+				if (p.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND) ||
+					p.equals(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT))
+				{
+					initializeViewerColors(fPreviewViewer);
+				}
+				
 				fPreviewViewer.invalidateTextPresentation();
 			}
 		});
 		
 		return fPreviewViewer.getControl();
 	}
+	
+	private Color fBackgroundColor;
+	
+	/**
+	 * Initializes the given viewer's colors.
+	 * 
+	 * @param viewer the viewer to be initialized
+	 */
+	private void initializeViewerColors(ISourceViewer viewer) {
+		
+		IPreferenceStore store= fOverlayStore;
+		if (store != null) {
+			
+			StyledText styledText= viewer.getTextWidget();
+						
+			// ---------- background color ----------------------
+			Color color= store.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT)
+				? null
+				: createColor(store, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND, styledText.getDisplay());
+			styledText.setBackground(color);
+				
+			if (fBackgroundColor != null)
+				fBackgroundColor.dispose();
+				
+			fBackgroundColor= color;
+		}
+	}
+
+	/**
+	 * Creates a color from the information stored in the given preference store.
+	 * Returns <code>null</code> if there is no such information available.
+	 */
+	private Color createColor(IPreferenceStore store, String key, Display display) {
+	
+		RGB rgb= null;		
+		
+		if (store.contains(key)) {
+			
+			if (store.isDefault(key))
+				rgb= PreferenceConverter.getDefaultColor(store, key);
+			else
+				rgb= PreferenceConverter.getColor(store, key);
+		
+			if (rgb != null)
+				return new Color(display, rgb);
+		}
+		
+		return null;
+	}	
 	
 	// sets enabled flag for a control and all its sub-tree
 	private static void setEnabled(Control control, boolean enable) {
@@ -552,6 +671,14 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			String key= (String) fTextFields.get(t);
 			t.setText(fOverlayStore.getString(key));
 		}
+
+		RGB rgb= PreferenceConverter.getColor(fOverlayStore, AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND);
+		fBackgroundColorEditor.setColorValue(rgb);		
+
+		boolean default_= fOverlayStore.getBoolean(AbstractTextEditor.PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT);
+		fBackgroundDefaultRadioButton.setSelection(default_);
+		fBackgroundCustomRadioButton.setSelection(!default_);
+		fBackgroundColorButton.setEnabled(!default_);
 		
 		setEnabled(fBracketHighlightColor, fBracketHighlightButton.getSelection());
 	}
