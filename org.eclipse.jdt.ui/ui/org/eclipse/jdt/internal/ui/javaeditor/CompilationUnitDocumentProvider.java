@@ -387,7 +387,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 
 				if (markerDeltas != null && markerDeltas.length > 0) {
 					try {
-						getWorkingCopy(fInput).reconcile(true, null);
+						ICompilationUnit workingCopy = getWorkingCopy(fInput);
+						if (workingCopy != null)
+							workingCopy.reconcile(true, null);
 					} catch (JavaModelException ex) {
 						handleCoreException(ex, ex.getMessage());
 					}
