@@ -26,6 +26,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected OpenOnSelectionAction fOpenHierarchyOnSelection;
 	protected TogglePresentationAction fTogglePresentationAction;
 	protected RetargetTextEditorAction fShowJavaDoc;
+	protected RetargetTextEditorAction fOpenExternalJavadoc;
 	
 	//protected RetargetTextEditorAction fDisplay;
 	//protected RetargetTextEditorAction fInspect;
@@ -42,7 +43,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fOpenHierarchyOnSelection= new OpenHierarchyOnSelectionAction();
 		fTogglePresentationAction= new TogglePresentationAction();
 		fShowJavaDoc= new RetargetTextEditorAction(bundle, "ShowJavaDoc."); //$NON-NLS-1$
-		
+		fOpenExternalJavadoc= new RetargetTextEditorAction(bundle, "OpenExternalJavadoc."); //$NON-NLS-1$
+				
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover= new ToggleTextHoverAction();
 		//fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
@@ -64,6 +66,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenHierarchyOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenExternalJavadoc);
 			
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
 			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
@@ -99,6 +102,7 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		fTogglePresentationAction.setEditor(textEditor);
 		
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
+		fOpenExternalJavadoc.setAction(getAction(textEditor, "OpenExternalJavadoc")); //$NON-NLS-1$
 
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover.setEditor(textEditor);

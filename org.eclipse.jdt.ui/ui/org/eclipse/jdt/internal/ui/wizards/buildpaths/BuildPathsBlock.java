@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -588,6 +590,18 @@ public class BuildPathsBlock {
 				CoreUtility.createFolder((IFolder)res, true, true, null);
 			}
 			classpath[i]= entry.getClasspathEntry();
+			
+			// set javadoc location
+			URL javadocLocation= entry.getJavadocLocation();
+			if (javadocLocation != null) {
+				IPath path= entry.getPath();
+				if (entry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+					path= JavaCore.getClasspathVariable(path.segment(0));
+				}
+				if (path != null) {
+					JavaDocLocations.setJavadocLocation(entry.getPath(), javadocLocation);
+				}
+			}
 		}	
 		monitor.worked(1);
 			

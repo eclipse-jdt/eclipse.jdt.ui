@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
@@ -193,6 +194,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		} catch (CoreException e) {
 			log(e);
 		}
+		try {
+			JavaDocLocations.loadJavadocLocations();
+		} catch (CoreException e) {
+			log(e);
+		}		
 	}
 		
 	/* (non - Javadoc)
@@ -220,6 +226,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 			fJavaTextTools.dispose();
 			fJavaTextTools= null;
 		}
+		
+		JavaDocLocations.saveJavadocLocations();
 	}
 	
 	private IWorkbenchPage internalGetActivePage() {

@@ -380,6 +380,24 @@
 		</action>
 	</objectContribution>
 	
+	<objectContribution
+		id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
+		objectClass="org.eclipse.jdt.core.IJavaElement">
+		<visibility> 
+              <not> 
+                  <objectClass name="org.eclipse.jdt.core.IJavaProject"/> 
+              </not> 
+        </visibility>		
+		<action
+			id="org.eclipse.jdt.ui.actions.OpenExternalJavadocAction"
+			label="%OpenExternalJavadocAction.label"
+			tooltip="%OpenExternalJavadocAction.tooltip"
+			menubarPath="group.open"
+			class="org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction"
+			enablesFor="1">
+		</action>
+	</objectContribution>	
+	
 </extension>
 
 <!-- =========================================================================== -->

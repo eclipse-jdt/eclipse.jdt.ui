@@ -21,6 +21,8 @@ public class CPListElement {
 	
 	private IPath fSourceAttachmentPath;
 	private IPath fSourceAttachmentPrefix;
+	private URL fJavadocLocation;
+	
 	
 	private boolean fIsExported;
 	
@@ -33,6 +35,7 @@ public class CPListElement {
 		fPath= path;
 		fSourceAttachmentPath= attachPath;
 		fSourceAttachmentPrefix= attachRoot;	
+		fJavadocLocation= null;
 		fResource= res;
 		fIsMissing= false;
 		fIsExported= isExported;
@@ -169,6 +172,20 @@ public class CPListElement {
 		}
 	}
 
+	/**
+	 * Gets the Javadoc location.
+	 * @return Returns a URL
+	 */
+	public URL getJavadocLocation() {
+		return fJavadocLocation;
+	}
 
+	/**
+	 * Sets the Javadoc location.
+	 * @param javadocLocation The javadocLocation to set
+	 */
+	public void setJavadocLocation(URL javadocLocation) {
+		fJavadocLocation= javadocLocation;
+	}
 
 }

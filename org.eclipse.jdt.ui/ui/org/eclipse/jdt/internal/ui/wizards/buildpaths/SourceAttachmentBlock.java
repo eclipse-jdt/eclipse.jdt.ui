@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
@@ -152,14 +153,14 @@ public class SourceAttachmentBlock {
 			fPrefixField.setDialogFieldListener(adapter);
 			fPrefixField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.label")); //$NON-NLS-1$
 			fPrefixField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.prefix.button")); //$NON-NLS-1$
+
 		}	
 		
-		// not used
 		fJavaDocField= new StringButtonDialogField(adapter);
 		fJavaDocField.setDialogFieldListener(adapter);
 		fJavaDocField.setLabelText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.label")); //$NON-NLS-1$
 		fJavaDocField.setButtonLabel(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.button"));		 //$NON-NLS-1$
-		
+	
 		// set the old settings
 		setDefaults();
 
@@ -177,6 +178,21 @@ public class SourceAttachmentBlock {
 		} else {
 			fPrefixField.setText(""); //$NON-NLS-1$
 		}
+		
+		String jdocText= "";
+		if (fOldEntry != null) {
+			IPath path= fJARPath;
+			if (path != null && fIsVariableEntry) {
+				path= getResolvedPath(path);
+			}
+			if (path != null) {
+				URL jdocLocation= JavaDocLocations.getJavadocLocation(path);
+				if (jdocLocation != null) {
+					jdocText= jdocLocation.toExternalForm();
+				}
+			}
+		}
+		fJavaDocField.setText(jdocText);
 	}
 	
 	/**
@@ -199,6 +215,14 @@ public class SourceAttachmentBlock {
 			return new Path(fPrefixField.getText());
 		}
 	}
+	
+	/**
+	 * Gets the Javadoc location chosen by the user
+	 */	
+	public URL getJavadocLocation() {
+		return fJavaDocLocation;
+	}
+	
 		
 	/**
 	 * Creates the control
@@ -231,10 +255,11 @@ public class SourceAttachmentBlock {
 			DialogField.createEmptySpace(composite, 1);
 			gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
 			gd.widthHint= widthHint;
+			gd.horizontalSpan= 2;
 			Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
 			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.filename.description"));
 			desc.setLayoutData(gd);
-			DialogField.createEmptySpace(composite, 2);
+			DialogField.createEmptySpace(composite, 1);
 		}
 		// archive name field
 		fFileNameField.doFillIntoGrid(composite, 4);
@@ -258,10 +283,11 @@ public class SourceAttachmentBlock {
 		DialogField.createEmptySpace(composite, 1);
 		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
 		gd.widthHint= widthHint;
+		gd.horizontalSpan= 2;
 		Label desc= new Label(composite, SWT.LEFT + SWT.WRAP);
 		desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.prefix.description"));
 		desc.setLayoutData(gd);
-		DialogField.createEmptySpace(composite, 2);		
+		DialogField.createEmptySpace(composite, 1);		
 		
 		// root path field	
 		fPrefixField.doFillIntoGrid(composite, 4);
@@ -279,12 +305,18 @@ public class SourceAttachmentBlock {
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 		
-		//DialogField.createEmptySpace(composite, 1);
-		//Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
-		//jdocDescription.setText(NewWizardMessages.getString(JAVADOC + ".description"));
-		//DialogField.createEmptySpace(composite, 1);
-			
-		//fJavaDocField.doFillIntoGrid(composite, 3);
+//		if (!fIsVariableEntry) {
+			DialogField.createEmptySpace(composite, 1);
+			gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+			gd.widthHint= widthHint;
+			gd.horizontalSpan= 2;
+			desc= new Label(composite, SWT.LEFT + SWT.WRAP);
+			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description"));
+			desc.setLayoutData(gd);
+			DialogField.createEmptySpace(composite, 1);		
+
+			fJavaDocField.doFillIntoGrid(composite, 4);
+//		}
 		
 		WorkbenchHelp.setHelp(composite, new Object[] { IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK });
 		return composite;
@@ -703,7 +735,6 @@ public class SourceAttachmentBlock {
 		return new Path(varName).append(path);
 	}
 	
-	
 	/**
 	 * Creates a runnable that sets the source attachment by modifying the project's classpath.
 	 */
@@ -721,6 +752,14 @@ public class SourceAttachmentBlock {
 					IClasspathEntry[] entries= modifyClasspath(jproject, newEntry, shell);		
 					if (entries != null) {
 						jproject.setRawClasspath(entries, monitor);
+					}
+
+					IPath path= fJARPath;
+					if (path != null && fIsVariableEntry) {
+						path= getResolvedPath(path);
+					}
+					if (path != null) {
+						JavaDocLocations.setJavadocLocation(path, getJavadocLocation());
 					}
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);

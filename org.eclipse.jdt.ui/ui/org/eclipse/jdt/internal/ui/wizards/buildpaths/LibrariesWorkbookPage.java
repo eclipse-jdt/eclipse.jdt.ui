@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -190,6 +191,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry());
 			if (dialog.open() == dialog.OK) {
 				selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
+				selElement.setJavadocLocation(dialog.getJavadocLocation());
 				fLibrariesList.refresh();
 				fClassPathList.refresh();
 			}
@@ -545,6 +547,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public IPath getSourceAttachmentRootPath() {
 			return fSourceAttachmentBlock.getSourceAttachmentRootPath();
 		}
+		
+		public URL getJavadocLocation() {
+			return fSourceAttachmentBlock.getJavadocLocation();
+		}	
 		
 	}
 	

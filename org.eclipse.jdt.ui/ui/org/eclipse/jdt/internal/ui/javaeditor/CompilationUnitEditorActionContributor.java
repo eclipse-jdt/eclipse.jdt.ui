@@ -33,6 +33,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected RetargetTextEditorAction fAddImportOnSelection;
 	protected RetargetTextEditorAction fOrganizeImports;
 	protected RetargetTextEditorAction fShowJavaDoc;
+	protected RetargetTextEditorAction fOpenExternalJavadoc;
 	protected TogglePresentationAction fTogglePresentation;
 	protected ToggleTextHoverAction fToggleTextHover;
 	protected GotoErrorAction fPreviousError;
@@ -59,6 +60,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fAddImportOnSelection= new RetargetTextEditorAction(bundle, "AddImportOnSelectionAction."); //$NON-NLS-1$
 		fOrganizeImports= new RetargetTextEditorAction(bundle, "OrganizeImportsAction."); //$NON-NLS-1$
 		fShowJavaDoc= new RetargetTextEditorAction(bundle, "ShowJavaDoc."); //$NON-NLS-1$
+		fOpenExternalJavadoc= new RetargetTextEditorAction(bundle, "OpenExternalJavadoc."); //$NON-NLS-1$
 		fTogglePresentation= new TogglePresentationAction();
 		fToggleTextHover= new ToggleTextHoverAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
@@ -86,6 +88,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fNextError);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fPreviousError);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);			
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenExternalJavadoc);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
@@ -136,6 +139,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fAddImportOnSelection.setAction(getAction(textEditor,"AddImportOnSelection")); //$NON-NLS-1$
 		fOrganizeImports.setAction(getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
+		fOpenExternalJavadoc.setAction(getAction(textEditor, "OpenExternalJavadoc")); //$NON-NLS-1$
+		
 		
 		fTogglePresentation.setEditor(textEditor);
 		fToggleTextHover.setEditor(textEditor);
