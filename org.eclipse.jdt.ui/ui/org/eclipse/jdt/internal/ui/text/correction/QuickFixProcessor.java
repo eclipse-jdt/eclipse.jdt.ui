@@ -71,7 +71,11 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.ReturnTypeAmbiguous:
 			case IProblem.SuperclassAmbiguous:
 			case IProblem.InterfaceAmbiguous:
-			case IProblem.AmbiguousType:				
+			case IProblem.AmbiguousType:
+			case IProblem.UnusedPrivateMethod:
+			case IProblem.UnusedPrivateConstructor:
+			case IProblem.UnusedPrivateField:
+			case IProblem.UnusedPrivateType:
 				return true;
 			default:
 				return false;
@@ -200,7 +204,14 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UndefinedConstructorInDefaultConstructor:
 			case IProblem.NotVisibleConstructorInDefaultConstructor:
 				LocalCorrectionsSubProcessor.addConstructorFromSuperclassProposal(context, proposals);
-				break;			
+				break;
+			case IProblem.UnusedPrivateMethod:
+			case IProblem.UnusedPrivateConstructor:
+			case IProblem.UnusedPrivateField:
+			case IProblem.UnusedPrivateType:				
+				LocalCorrectionsSubProcessor.addUnusedMemberProposal(context, proposals);
+				break;
+					
 			default:
 		}
 	}

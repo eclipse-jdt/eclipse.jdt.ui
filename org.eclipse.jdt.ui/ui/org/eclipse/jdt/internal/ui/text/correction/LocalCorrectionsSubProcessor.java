@@ -466,5 +466,23 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 	}
+
+	public static void addUnusedMemberProposal(ICorrectionContext context, List proposals) throws CoreException {
+		ASTNode selectedNode= context.getCoveringNode();
+		if (selectedNode == null) {
+			return;
+		}
+		BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (declaration != null) {
+			ASTRewrite rewrite= new ASTRewrite(declaration.getParent());
+			rewrite.markAsRemoved(declaration);
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removeunusedmember.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+			proposal.ensureNoModifications();
+			proposals.add(proposal);			
+		}
+		
+	}
 	
 }
