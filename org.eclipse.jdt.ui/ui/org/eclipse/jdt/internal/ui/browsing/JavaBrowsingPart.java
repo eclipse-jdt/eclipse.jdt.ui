@@ -69,7 +69,6 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.NewWizardMenu;
 import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ViewPart;
 
@@ -91,7 +90,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
 import org.eclipse.jdt.ui.actions.BuildActionGroup;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
@@ -104,19 +102,17 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.packageview.PackagesMessages;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -430,14 +426,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		IStructuredSelection selection= (IStructuredSelection) fViewer.getSelection();
 		int size= selection.size();		
 		Object element= selection.getFirstElement();
-		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
 		
-		if (size == 0 || (size == 1 && (isNewTarget(jElement) || element instanceof IContainer))) {
-			MenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
-			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-			new NewWizardMenu(newMenu, getSite().getWorkbenchWindow(), false);
-		}
-
 		if (size == 1)
 			addOpenNewWindowAction(menu, element);
 		fActionGroups.setContext(new ActionContext(selection));
@@ -472,6 +461,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected void createActions() {		
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new NewWizardsActionGroup(this.getSite()),
 				fOpenEditorGroup= new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 

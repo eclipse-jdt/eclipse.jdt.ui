@@ -73,6 +73,7 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 
 import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -109,6 +110,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		ISelectionProvider provider= site.getSelectionProvider();
 		IStructuredSelection selection= (IStructuredSelection) provider.getSelection();
 		setGroups(new ActionGroup[] {
+			new NewWizardsActionGroup(site),
 			fNavigateActionGroup= new NavigateActionGroup(fPart), 
 			new ShowActionGroup(fPart), 
 			fCCPActionGroup= new CCPActionGroup(fPart),
@@ -237,13 +239,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		IStructuredSelection selection= (IStructuredSelection)getContext().getSelection();
 		int size= selection.size();
 		Object element= selection.getFirstElement();
-		IJavaElement jElement= element instanceof IJavaElement ? (IJavaElement)element : null;
-		
-		if (size == 0 || (size == 1 && (isNewTarget(jElement) || element instanceof IContainer))) {
-			IMenuManager newMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.new")); //$NON-NLS-1$
-			menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-			new NewWizardMenu(newMenu, fPart.getSite().getWorkbenchWindow(), false);
-		}
 				
 		addGotoMenu(menu, element, size);
 		

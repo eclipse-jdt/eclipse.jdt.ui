@@ -90,6 +90,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
@@ -722,6 +723,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		WorkbenchHelp.setHelp(fPagebook, IJavaHelpContextIds.TYPE_HIERARCHY_VIEW);
 		
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
+				new NewWizardsActionGroup(this.getSite()),
 				new OpenEditorActionGroup(this), 
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
@@ -812,11 +814,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new Separator(GROUP_FOCUS));
 		// viewer entries
 		viewer.contributeToContextMenu(menu);
-//		IStructuredSelection selection= (IStructuredSelection)viewer.getSelection();
-//		if (JavaBasePreferencePage.openTypeHierarchyInPerspective()) {
-//			addOpenPerspectiveItem(menu, selection);
-//		}
-//		addOpenWithMenu(menu, selection);
 		
 		if (fFocusOnSelectionAction.canActionBeAdded())
 			menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
@@ -825,14 +822,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
 		fActionGroups.setContext(null);
-
-//		
-//		ContextMenuGroup.add(menu, new ContextMenuGroup[] { new BuildGroup(this, false)}, viewer);
-//		
-//		// XXX workaround until we have fully converted the code to use the new action groups
-//		fActionGroups.get(2).fillContextMenu(menu);		
-//		fActionGroups.get(3).fillContextMenu(menu);		
-//		fActionGroups.get(4).fillContextMenu(menu);		
 	}
 
 	/**
