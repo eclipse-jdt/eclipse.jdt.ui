@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class PullUpRefactoring extends Refactoring {
 
@@ -762,10 +763,11 @@ public class PullUpRefactoring extends Refactoring {
 		
 	private TextEdit createAddMemberEdit(String methodSource) throws JavaModelException {
 		IMethod sibling= getLastMethod(getSuperType(new NullProgressMonitor()));
+		String[] sourceLines= Strings.removeTrailingEmptyLines(Strings.convertIntoLines(methodSource));
 		if (sibling != null)
-			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, new String[]{ methodSource}, CodeFormatterUtil.getTabWidth());
+			return new MemberEdit(sibling, MemberEdit.INSERT_AFTER, sourceLines, CodeFormatterUtil.getTabWidth());
 		return
-			new MemberEdit(getSuperType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, new String[]{ methodSource}, CodeFormatterUtil.getTabWidth());
+			new MemberEdit(getSuperType(new NullProgressMonitor()), MemberEdit.ADD_AT_END, sourceLines, CodeFormatterUtil.getTabWidth());
 	}
 
 	private void addDeleteMembersChange(TextChangeManager manager) throws CoreException {
