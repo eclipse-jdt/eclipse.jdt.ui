@@ -38,7 +38,7 @@ public class TypeRefTest extends TestCase {
 	
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
-	private static final IPath SOURCES= new Path("test-resources/junit32src.jar");
+	private static final IPath SOURCES= new Path("test-resources/junit32-noUI.zip");
 	public TypeRefTest(String name) {
 		super(name);
 	}
@@ -114,14 +114,14 @@ public class TypeRefTest extends TestCase {
 		findTypeRef(result, "java.util.Vector");
 		findTypeRef(result, "junit.samples.VectorTest");
 		findTypeRef(result, "junit.util.Version");
-		System.out.println("Elements found: " + result.size());
+		//System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
 			TypeInfo ref= (TypeInfo) result.get(i);
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
 			} else {
-				System.out.println(resolvedType.getFullyQualifiedName());
+				//System.out.println(resolvedType.getFullyQualifiedName());
 			}
 		}
 
