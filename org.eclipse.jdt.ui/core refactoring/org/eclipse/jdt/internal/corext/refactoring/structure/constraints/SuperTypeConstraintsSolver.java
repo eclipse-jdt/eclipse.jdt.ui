@@ -26,10 +26,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.EquivalenceRepresentative;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IDeclaredConstraintVariable;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeSet;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SimpleTypeConstraint2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeSet;
 
 /**
@@ -101,22 +99,19 @@ public final class SuperTypeConstraintsSolver {
 		ConstraintVariable2 variable= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
-			if (variable instanceof TypeConstraintVariable2) {
-				final TypeConstraintVariable2 constraint= (TypeConstraintVariable2) variable;
-				EquivalenceRepresentative representative= constraint.getRepresentative();
-				if (representative == null) {
-					representative= new EquivalenceRepresentative(constraint);
-					representative.setTypeEstimate(TypeSet.create(constraint.getType()));
-					constraint.setRepresentative(representative);
-				} else {
-					ITypeSet estimate= representative.getTypeEstimate();
-					if (estimate == null) {
-						final TypeConstraintVariable2[] constraints= representative.getElements();
-						estimate= TypeSet.getUniverse();
-						for (int index= 0; index < constraints.length; index++)
-							estimate= estimate.restrictedTo(TypeSet.create(constraints[index].getType()));
-						representative.setTypeEstimate(estimate);
-					}
+			EquivalenceRepresentative representative= variable.getRepresentative();
+			if (representative == null) {
+				representative= new EquivalenceRepresentative(variable);
+				representative.setTypeEstimate(TypeSet.create(variable.getType()));
+				variable.setRepresentative(representative);
+			} else {
+				ITypeSet estimate= variable.getTypeEstimate();
+				if (estimate == null) {
+					final ConstraintVariable2[] constraints= representative.getElements();
+					estimate= TypeSet.getTypeUniverse();
+					for (int index= 0; index < constraints.length; index++)
+						estimate= estimate.restrictedTo(TypeSet.create(constraints[index].getType()));
+					representative.setTypeEstimate(estimate);
 				}
 			}
 		}
@@ -179,23 +174,17 @@ public final class SuperTypeConstraintsSolver {
 	private void processConstraints(final Collection constraints, final ConstraintVariable2 variable) {
 		Assert.isNotNull(constraints);
 		Assert.isNotNull(variable);
-		ITypeConstraint2 constraint= null;
+		TypeConstraint2 constraint= null;
 		for (final Iterator iterator= constraints.iterator(); iterator.hasNext();) {
-			constraint= (ITypeConstraint2) iterator.next();
-			if (constraint instanceof SimpleTypeConstraint2) {
-				final SimpleTypeConstraint2 simple= (SimpleTypeConstraint2) constraint;
-				final ConstraintVariable2 leftVariable= simple.getLeft();
-				final ConstraintVariable2 rightVariable= simple.getRight();
-				if (leftVariable instanceof TypeConstraintVariable2 && rightVariable instanceof TypeConstraintVariable2) {
-					final EquivalenceRepresentative rightEquivalence= ((TypeConstraintVariable2) rightVariable).getRepresentative();
-					final ITypeSet rightEstimate= rightEquivalence.getTypeEstimate();
-					final EquivalenceRepresentative leftEquivalence= ((TypeConstraintVariable2) leftVariable).getRepresentative();
-					final ITypeSet newEstimate= rightEstimate.restrictedTo(leftEquivalence.getTypeEstimate());
-					if (rightEstimate != newEstimate) {
-						rightEquivalence.setTypeEstimate(newEstimate);
-						fProcessable.addAll(Arrays.asList(rightEquivalence.getElements()));
-					}
-				}
+			constraint= (TypeConstraint2) iterator.next();
+			final TypeConstraint2 simple= constraint;
+			final ConstraintVariable2 rightVariable= simple.getRight();
+			final EquivalenceRepresentative representative= rightVariable.getRepresentative();
+			final ITypeSet rightEstimate= rightVariable.getTypeEstimate();
+			final ITypeSet newEstimate= rightEstimate.restrictedTo(simple.getLeft().getTypeEstimate());
+			if (rightEstimate != newEstimate) {
+				representative.setTypeEstimate(newEstimate);
+				fProcessable.addAll(Arrays.asList(representative.getElements()));
 			}
 		}
 	}
