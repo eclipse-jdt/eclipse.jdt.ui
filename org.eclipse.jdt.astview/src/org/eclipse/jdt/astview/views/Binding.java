@@ -127,6 +127,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName())); //$NON-NLS-1$
 
+					res.add(new Binding(this, "TYPE DECLARATION", typeBinding.getTypeDeclaration(), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "ERASURE", typeBinding.getErasure(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", typeBinding.getTypeParameters())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", typeBinding.getTypeArguments())); //$NON-NLS-1$
@@ -159,7 +160,7 @@ public class Binding extends ASTAttribute {
 					if (methodBinding.isParameterizedMethod()) genericsM.append(" isParameterizedMethod"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, genericsM.toString()));
 					
-					res.add(new Binding(this, "ERASURE", methodBinding.getErasure(), true)); //$NON-NLS-1$
+					res.add(new Binding(this, "METHOD DECLARATION", methodBinding.getMethodDeclaration(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE PARAMETERS", methodBinding.getTypeParameters())); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments())); //$NON-NLS-1$			
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic())); //$NON-NLS-1$
