@@ -2051,14 +2051,14 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
 		store.setDefault(PreferenceConstants.EDITOR_FORMAT_JAVADOCS, false);
 
-		String ctrl= Action.findModifierString(SWT.CTRL);
-		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
-		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + SWT.CTRL); //$NON-NLS-1$
+		String mod1Name= Action.findModifierString(SWT.MOD1);	// SWT.COMMAND on Mac; SWT.CONTROL elsewhere
+		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + mod1Name); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + SWT.MOD1); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE, true);
 		
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
-		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);
-		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.CTRL);
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, mod1Name);
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.MOD1);
 		
 		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR, new RGB(255, 230, 230));
 		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR, new RGB(230, 230, 255));
