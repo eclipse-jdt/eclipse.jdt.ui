@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -440,6 +441,11 @@ public class EditTemplateDialog extends StatusDialog {
 		viewer.setEditable(true);
 		viewer.setDocument(document);
 		
+		RGB rgb= getBackgroundColor();
+		if (rgb != null) {
+			viewer.getTextWidget().setBackground(tools.getColorManager().getColor(rgb));
+		}
+		
 		Font font= JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT);
 		viewer.getTextWidget().setFont(font);
 		
@@ -487,6 +493,39 @@ public class EditTemplateDialog extends StatusDialog {
 		
 		return viewer;
 	}
+	
+	private RGB getBackgroundColor() {
+		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		if (!store.getBoolean(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR)) {
+			if (store.isDefault(PreferenceConstants.EDITOR_BACKGROUND_COLOR))
+				return PreferenceConverter.getDefaultColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
+			else
+				return PreferenceConverter.getColor(store, PreferenceConstants.EDITOR_BACKGROUND_COLOR);
+		}
+		return null;
+	}
+
+	/**
+	 * Creates a color from the information stored in the given preference store.
+	 * Returns <code>null</code> if there is no such information available.
+	 */
+	private Color createColor(IPreferenceStore store, String key, Display display) {
+	
+		RGB rgb= null;		
+		
+		if (store.contains(key)) {
+			
+			if (store.isDefault(key))
+				rgb= PreferenceConverter.getDefaultColor(store, key);
+			else
+				rgb= PreferenceConverter.getColor(store, key);
+		
+			if (rgb != null)
+				return new Color(display, rgb);
+		}
+		
+		return null;
+	}	
 
 	private void handleKeyPressed(KeyEvent event) {
 		if (event.stateMask != SWT.MOD1)
