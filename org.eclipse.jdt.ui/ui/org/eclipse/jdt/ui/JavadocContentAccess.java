@@ -100,7 +100,7 @@ public class JavadocContentAccess {
 	 * does not contain a Javadoc comment or if no source is available
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
-	public Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
+	public static Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		Reader contentReader= getContentReader(member, allowInherited);
 		if (contentReader != null) {
 			return new JavaDoc2HTMLTextReader(contentReader);
