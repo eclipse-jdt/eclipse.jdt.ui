@@ -19,8 +19,8 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
@@ -36,7 +36,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style, boolean ignoreCase)
 	{
-		super(parent, new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_POSTFIX),
+		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX),
 			ignoreCase, true); 
 
 		Assert.isNotNull(context);
@@ -77,7 +77,7 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 		if (result != null) {
 			for (int i= 0; i < size; i++) {
 				try {
-					IType type= ((TypeRef)selection.get(i)).resolveType(fScope);
+					IType type= ((TypeInfo)selection.get(i)).resolveType(fScope);
 					if (type == null) {
 						String title= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogTitle"); //$NON-NLS-1$
 						String message= JavaUIMessages.getString("MultiTypeSelectionDialog.dialogMessage"); //$NON-NLS-1$

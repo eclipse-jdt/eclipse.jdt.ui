@@ -39,8 +39,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class StubUtility {
 
@@ -472,7 +472,7 @@ public class StubUtility {
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { project });
 
 		ArrayList typeRefsFound= new ArrayList(10);
-		ITypeNameRequestor requestor= new TypeRefRequestor(typeRefsFound);
+		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
 
 		searchEngine.searchAllTypeNames(
 			project.getWorkspace(), 
@@ -489,7 +489,7 @@ public class StubUtility {
 		int nTypesFound= typeRefsFound.size();
 		IType[] res= new IType[nTypesFound];
 		for (int i= 0; i < nTypesFound; i++) {
-			TypeRef ref= (TypeRef) typeRefsFound.get(i);
+			TypeInfo ref= (TypeInfo) typeRefsFound.get(i);
 			res[i]= ref.resolveType(searchScope);
 		}
 		return res;

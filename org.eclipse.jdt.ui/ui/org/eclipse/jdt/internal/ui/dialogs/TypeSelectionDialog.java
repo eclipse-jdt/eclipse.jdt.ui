@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;import org.eclipse.jdt.core.search.IJavaSearchScope;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.ElementChangedEvent;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IElementChangedListener;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IImportContainer;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IInitializer;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaElementDelta;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageDeclaration;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeInfo;import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 
@@ -23,8 +23,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	public TypeSelectionDialog(Shell parent, IRunnableContext context,
 		IJavaSearchScope scope, int style, boolean ignoreCase, boolean matchEmtpyString)
 	{
-		super(parent, new TypeRefLabelProvider(0),
-			new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_PACKAGE_ONLY + TypeRefLabelProvider.SHOW_ROOT_POSTFIX),
+		super(parent, new TypeInfoLabelProvider(0),
+			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX),
 			ignoreCase, matchEmtpyString);
 
 		Assert.isNotNull(context);
@@ -53,7 +53,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 			return CANCEL;
 		}
 			
-		TypeRef[] typeRefs= (TypeRef[])typeList.toArray(new TypeRef[typeList.size()]);
+		TypeInfo[] typeRefs= (TypeInfo[])typeList.toArray(new TypeInfo[typeList.size()]);
 		setElements(typeRefs);
 		setInitialSelection("A"); //$NON-NLS-1$
 		return super.open();
@@ -63,7 +63,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 * @private
 	 */
 	protected void computeResult() {
-		TypeRef ref= (TypeRef) getWidgetSelection();
+		TypeInfo ref= (TypeInfo) getWidgetSelection();
 
 		if (ref == null)
 			return;

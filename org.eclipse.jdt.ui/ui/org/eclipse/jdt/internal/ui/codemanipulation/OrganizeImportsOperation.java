@@ -36,8 +36,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 
 public class OrganizeImportsOperation extends WorkspaceModifyOperation {
@@ -118,7 +118,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 			
 			TypeRefProcessor processor= new TypeRefProcessor(oldSingleImports, oldDemandImports, impStructure, new SubProgressMonitor(monitor, 1));
 			for (int i= 0; i < references.length; i++) {
-				TypeRef[] ret= processor.process(references[i]);
+				TypeInfo[] ret= processor.process(references[i]);
 				if (ret != null) {
 					openChoices.add(ret);
 				}
@@ -126,7 +126,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 			processor= null;
 			
 			if (openChoices.size() > 0) {
-				TypeRef[][] choisesArray= new TypeRef[openChoices.size()][];
+				TypeInfo[][] choisesArray= new TypeInfo[openChoices.size()][];
 				openChoices.toArray(choisesArray);
 				
 				if (!openChoicesSelections(choisesArray, impStructure)) {
@@ -141,8 +141,8 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		}
 	}
 	
-	private boolean openChoicesSelections(TypeRef[][] openChoices, ImportsStructure impStructure) {
-		ILabelProvider labelProvider= new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_FULLYQUALIFIED);
+	private boolean openChoicesSelections(TypeInfo[][] openChoices, ImportsStructure impStructure) {
+		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 		
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
 		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
@@ -155,7 +155,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 			for (int i= 0; i < result.length; i++) {
 				List types= (List) result[i];
 				if (!types.isEmpty()) {
-					TypeRef typeRef= (TypeRef) types.get(0);
+					TypeInfo typeRef= (TypeInfo) types.get(0);
 					impStructure.addImport(typeRef.getPackageName(), typeRef.getEnclosingName(), typeRef.getTypeName());
 				}
 			}				
@@ -194,7 +194,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		}
 		
 		
-		public TypeRef[] process(String typeName) throws JavaModelException, CoreException {
+		public TypeInfo[] process(String typeName) throws JavaModelException, CoreException {
 			try {
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 			
@@ -204,7 +204,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 					// nothing found
 					return null;
 				} else if (nFound == 1) {
-					TypeRef typeRef= (TypeRef) typeRefsFound.get(0);
+					TypeInfo typeRef= (TypeInfo) typeRefsFound.get(0);
 					fImpStructure.addImport(typeRef.getTypeContainerName(), typeRef.getTypeName());
 					return null;
 				} else {
@@ -213,7 +213,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 									
 					// multiple found, use old import structure to find an entry
 					for (int i= 0; i < nFound; i++) {
-						TypeRef typeRef= (TypeRef) typeRefsFound.get(i);
+						TypeInfo typeRef= (TypeInfo) typeRefsFound.get(i);
 						String fullName= typeRef.getFullyQualifiedName();
 						String containerName= typeRef.getTypeContainerName();
 						if (fOldSingleImports.contains(fullName)) {
@@ -233,7 +233,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 						fImpStructure.addImport(containerToImport, typeName);
 						return null;
 					} else {
-						return (TypeRef[]) typeRefsFound.toArray(new TypeRef[nFound]);
+						return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[nFound]);
 					}
 				}
 			} finally {
@@ -243,7 +243,7 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 
 		private void findTypeRefs(String simpleTypeName, ArrayList typeRefsFound) {
 			for (int i= fAllTypes.size() - 1; i >= 0; i--) {
-				TypeRef curr= (TypeRef) fAllTypes.get(i);
+				TypeInfo curr= (TypeInfo) fAllTypes.get(i);
 				if (simpleTypeName.equals(curr.getTypeName())) {
 					typeRefsFound.add(curr);
 				}
