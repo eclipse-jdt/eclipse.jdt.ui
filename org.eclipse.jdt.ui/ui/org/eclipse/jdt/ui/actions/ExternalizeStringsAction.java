@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -115,14 +116,19 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	/**
 	 * Note: this method is for internal use only. Clients should not call this method.
 	 */
-	public void run(ICompilationUnit unit) {
+	public void run(final ICompilationUnit unit) {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
-		try {
-			openExternalizeStringsWizard(getShell(), unit);
-		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$
-		}
+		
+		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
+			public void run() {
+				try {
+					openExternalizeStringsWizard(getShell(), unit);
+				} catch(JavaModelException e) {
+					ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.getString("ExternalizeStringsAction.dialog.message")); //$NON-NLS-1$
+				}
+			}
+		});
 	}
 
 	private static ICompilationUnit getCompilationUnit(IStructuredSelection selection) {
