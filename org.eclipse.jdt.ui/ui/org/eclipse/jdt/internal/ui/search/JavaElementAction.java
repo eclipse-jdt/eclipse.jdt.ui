@@ -162,7 +162,7 @@ public abstract class JavaElementAction extends Action {
 			types= cu.getAllTypes();
 		} catch (JavaModelException ex) {
 			// silent mode
-			ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
+			ExceptionHandler.log(ex, SearchMessages.getString("JavaElementAction.error.open.message")); //$NON-NLS-1$
 			if (silent)
 				return RETURN_WITHOUT_BEEP;
 			else
@@ -174,8 +174,8 @@ public abstract class JavaElementAction extends Action {
 			return RETURN_WITHOUT_BEEP;
 		if (types.length == 0)
 			return null;
-		String title= SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.title"); //$NON-NLS-1$
-		String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
+		String title= SearchMessages.getString("JavaElementAction.typeSelectionDialog.title"); //$NON-NLS-1$
+		String message = SearchMessages.getString("JavaElementAction.typeSelectionDialog.message"); //$NON-NLS-1$
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
 
@@ -195,7 +195,7 @@ public abstract class JavaElementAction extends Action {
 		try {					
 			mainType= cf.getType();
 		} catch (JavaModelException ex) {
-			ExceptionHandler.log(ex, SearchMessages.getString("OpenTypeAction.error.open.message")); //$NON-NLS-1$
+			ExceptionHandler.log(ex, SearchMessages.getString("JavaElementAction.error.open.message")); //$NON-NLS-1$
 			return null;
 		}
 		return mainType;
