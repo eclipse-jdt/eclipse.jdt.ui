@@ -68,7 +68,7 @@ public class StatusBarUpdater implements ISelectionChangedListener {
 		
 	private String formatResourceMessage(IResource element) {
 		IContainer parent= element.getParent();
-		if (parent != null)
+		if (parent != null && parent.getType() != IResource.ROOT)
 			return element.getName() + JavaElementLabels.CONCAT_STRING + parent.getFullPath().makeRelative().toString();
 		else
 			return element.getName();
