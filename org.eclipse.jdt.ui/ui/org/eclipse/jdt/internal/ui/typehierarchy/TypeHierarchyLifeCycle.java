@@ -30,10 +30,8 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
@@ -46,6 +44,8 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	private IJavaElement fInputElement;
 	private boolean fIsSuperTypesOnly;
 	
+	private boolean fReconciled;
+	
 	private List fChangeListeners;
 	
 	public TypeHierarchyLifeCycle() {
@@ -57,6 +57,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		fInputElement= null;
 		fIsSuperTypesOnly= isSuperTypesOnly;
 		fChangeListeners= new ArrayList(2);
+		fReconciled= false;
 	}
 	
 	public ITypeHierarchy getHierarchy() {
@@ -194,7 +195,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 		
 		IJavaElement elem= event.getDelta().getElement();
-		if (!reconcileJavaViews() && elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
+		if (!isReconciled() && elem instanceof IWorkingCopy && ((IWorkingCopy)elem).isWorkingCopy()) {
 			return;
 		}
 		if (fHierarchyRefreshNeeded) {
@@ -260,14 +261,11 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 	}
 
 	private boolean isWorkingCopyRemove(ICompilationUnit cu, int deltaKind) {
-		if (!reconcileJavaViews())
-			return false;
-		return deltaKind == IJavaElementDelta.REMOVED && cu.isWorkingCopy();
+		return isReconciled() && deltaKind == IJavaElementDelta.REMOVED && cu.isWorkingCopy();
 	}
 	
 	private void processTypeDelta(IType type, ArrayList changedTypes) {
-		type= getOriginalType(type);
-		
+		type= JavaModelUtil.toOriginal(type);
 		if (getHierarchy().contains(type)) {
 			changedTypes.add(type);
 		}
@@ -280,37 +278,13 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 	
-	/*
-	 * Returns the type as member of a working copy
-	 * if reconcile everywhere is enabled and if there
-	 * is a corresponding working copy.
-	 */
-	private IType getSuitableType(IType type) {
-		if (reconcileJavaViews() && type.getCompilationUnit() != null) {
-			try {
-				IType typeInWc= (IType) EditorUtility.getWorkingCopy(type);
-				if (typeInWc != null)
-					return typeInWc;
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				// the original element is returned
-			}
-		}
-		return type;
+	public boolean isReconciled() {
+		return fReconciled;
 	}
 
-	/*
-	 * Returns the corresponding original type or
-	 * the type itself if it is not in a working copy.
-	 */
-	private IType getOriginalType(IType type) {
-		ICompilationUnit cu= type.getCompilationUnit();
-		if (cu != null && cu.isWorkingCopy())
-			return (IType)cu.getOriginal(type);
-		return type;
+	public void setReconciled(boolean reconciled) {
+		fReconciled= reconciled;
 	}
 
-	private boolean reconcileJavaViews() {
-		return JavaBasePreferencePage.reconcileJavaViews();
-	}
+
 }

@@ -84,13 +84,8 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		try {
-			IMember[] members= getSelectedMembers(selection);
-			setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			setEnabled(false);
-		}
+		IMember[] members= getSelectedMembers(selection);
+		setEnabled(members != null && members.length > 0 && JavaModelUtil.isEditable(members[0].getCompilationUnit()));
 	}
 	
 	/* (non-Javadoc)

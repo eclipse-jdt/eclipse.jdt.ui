@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.IWorkingCopyProvider;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -29,7 +31,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
  * Implementors must override 'getTypesInHierarchy'.
  * Java delta processing is also performed by the content provider
  */
-public abstract class TypeHierarchyContentProvider implements ITreeContentProvider {
+public abstract class TypeHierarchyContentProvider implements ITreeContentProvider, IWorkingCopyProvider {
 	protected static final Object[] NO_ELEMENTS= new Object[0];
 	
 	protected TypeHierarchyLifeCycle fTypeHierarchy;
@@ -37,14 +39,11 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected boolean fShowAllTypes;
 	
 	protected TreeViewer fViewer;
-
-	private boolean fIsReconciled;
 	
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy= lifecycle;
 		fMemberFilter= null;
 		fShowAllTypes= false;
-		fIsReconciled= JavaBasePreferencePage.reconcileJavaViews();
 	}
 	
 	/**
@@ -79,10 +78,10 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	
 	/* (non-Javadoc)
-	 * @see IReconciled#isReconciled()
+	 * @see IReconciled#providesWorkingCopies()
 	 */
-	public boolean isReconciled() {
-		return fIsReconciled;
+	public boolean providesWorkingCopies() {
+		return fTypeHierarchy.isReconciled();
 	}		
 	
 	
@@ -155,7 +154,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	private void addFilteredMembers(IType origType, List children) {
 		try {
-			IType parent= getSuitableType(origType);
+			IType parent= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(origType) : origType;
 			
 			IMethod[] methods= parent.getMethods();
 			for (int i= 0; i < fMemberFilter.length; i++) {
@@ -193,7 +192,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		if (fShowAllTypes) {
 			return true;
 		}
-		IType type= getSuitableType(origType);
+		IType type= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(origType) : origType;
 		
 		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < fMemberFilter.length; i++) {
@@ -245,17 +244,4 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return null;
 	}
 	
-	/*
-	 * Returns the type as member of a working copy
-	 * if reconcile everywhere is enabled and if there
-	 * is a corresponding working copy.
-	 */
-	private IType getSuitableType(IType type) throws JavaModelException {
-		if (isReconciled() && type.getCompilationUnit() != null) {
-			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
-			if (typeInWc != null)
-				return typeInWc;
-		}
-		return type;
-	}	
 }

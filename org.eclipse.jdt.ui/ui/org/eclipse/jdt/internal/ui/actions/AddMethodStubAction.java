@@ -178,29 +178,25 @@ public class AddMethodStubAction extends Action {
 	  * Tests if the action can run with given arguments
 	 */
 	public static boolean canActionBeAdded(IType parentType, ISelection selection) {
-		try {
-			if (parentType == null || parentType.getCompilationUnit() == null || !JavaModelUtil.isEditable(parentType.getCompilationUnit()) ||
-					!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
-				return false;
-			}
-	
-			Object[] elems= ((IStructuredSelection)selection).toArray();
-			int nSelected= elems.length;
-			if (nSelected > 0) {
-				for (int i= 0; i < nSelected; i++) {
-					Object elem= elems[i];
-					if (!(elem instanceof IMethod)) {
-						return false;
-					}
-					IMethod meth= (IMethod)elem;
-					if (meth.getDeclaringType().equals(parentType)) {
-						return false;
-					}
+		if (parentType == null || parentType.getCompilationUnit() == null || !JavaModelUtil.isEditable(parentType.getCompilationUnit()) ||
+				!(selection instanceof IStructuredSelection) || selection.isEmpty()) {
+			return false;
+		}
+
+		Object[] elems= ((IStructuredSelection)selection).toArray();
+		int nSelected= elems.length;
+		if (nSelected > 0) {
+			for (int i= 0; i < nSelected; i++) {
+				Object elem= elems[i];
+				if (!(elem instanceof IMethod)) {
+					return false;
 				}
-				return true;
+				IMethod meth= (IMethod)elem;
+				if (meth.getDeclaringType().equals(parentType)) {
+					return false;
+				}
 			}
-		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
+			return true;
 		}
 		return false;
 	}

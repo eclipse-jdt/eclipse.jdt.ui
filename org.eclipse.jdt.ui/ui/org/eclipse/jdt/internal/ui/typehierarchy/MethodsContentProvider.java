@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -54,7 +55,7 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	}
 	
 	/* (non-Javadoc)
-	 * @see IReconciled#isReconciled()
+	 * @see IStructuredContentProvider#providesWorkingCopies()
 	 */
 	public boolean providesWorkingCopies() {
 		return fIsReconciled;
@@ -91,18 +92,22 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 					// sort in from last to first: elements with same name
 					// will show up in hierarchy order 
 					for (int i= allSupertypes.length - 1; i >= 0; i--) {
-						IType superType= getSuitableType(allSupertypes[i]);
-						addAll(superType.getMethods(), res);
-						addAll(superType.getInitializers(), res);
-						addAll(superType.getFields(), res);
+						IType superType= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(allSupertypes[i]) : allSupertypes[i];
+						if (superType.exists()) {
+							addAll(superType.getMethods(), res);
+							addAll(superType.getInitializers(), res);
+							addAll(superType.getFields(), res);
+						}
 					}
 				}
-				type= getSuitableType(type);
-				addAll(type.getMethods(), res);
-				addAll(type.getInitializers(), res);
-				addAll(type.getFields(), res);				
+				type= providesWorkingCopies() ? JavaModelUtil.toWorkingCopy(type) : type;
+				if (type.exists()) {
+					addAll(type.getMethods(), res);
+					addAll(type.getInitializers(), res);
+					addAll(type.getFields(), res);
+				}
 			} catch (JavaModelException e) {
-				JavaPlugin.log(e.getStatus());
+				JavaPlugin.log(e);
 			}
 			return res.toArray();
 		}
@@ -124,20 +129,5 @@ public class MethodsContentProvider implements IStructuredContentProvider, IWork
 	 */	
 	public void dispose() {
 	}	
-
-	/*
-	 * Returns the type as member of a working copy 
-	 * if reconcile everywhere is enabled and if there
-	 * is a corresponding working copy.
-	 */
-	private IType getSuitableType(IType type) throws JavaModelException {
-		if (providesWorkingCopies() && type.getCompilationUnit() != null) {
-			IType typeInWc= (IType)EditorUtility.getWorkingCopy(type);
-			if (typeInWc != null)
-				return typeInWc;
-		}
-		return type;
-	}
-
 
 }

@@ -70,6 +70,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -186,6 +187,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fInputElement= null;
 		
 		fHierarchyLifeCycle= new TypeHierarchyLifeCycle();
+		fHierarchyLifeCycle.setReconciled(JavaBasePreferencePage.reconcileJavaViews());
 		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
 			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchy, IType[] changedTypes) {
 				doTypeHierarchyChanged(typeHierarchy, changedTypes);
@@ -306,7 +308,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		}
 		if (member.getElementType() != IJavaElement.TYPE) {
-			if (JavaBasePreferencePage.reconcileJavaViews() && cu != null) {
+			if (fHierarchyLifeCycle.isReconciled() && cu != null) {
 				try {
 					member= (IMember) EditorUtility.getWorkingCopy(member);
 					if (member == null) {
@@ -314,6 +316,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					}
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
+					return;
 				}
 			}
 			Control methodControl= fMethodsViewer.getControl();
@@ -1205,8 +1208,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			return;
 		}
 		if (fInputElement != null) {
-			memento.putString(TAG_INPUT, fInputElement.getHandleIdentifier());
-		}
+			String handleIndentifier=  fInputElement.getHandleIdentifier();
+			if (fInputElement instanceof IType) {
+				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
+				if (hierarchy != null && hierarchy.getSupertypes((IType) fInputElement).length > 1000) {
+					// for startup performance reasons do not try to recover huge hierarchies
+				}
+			}
+			memento.putString(TAG_INPUT, handleIndentifier);
+		}		
 		memento.putInteger(TAG_VIEW, getViewIndex());
 		memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);	
 		int weigths[]= fTypeMethodsSplitter.getWeights();

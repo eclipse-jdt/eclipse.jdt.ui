@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Utility methods for the Java Model.
@@ -95,7 +96,7 @@ public class JavaModelUtil {
 		}
 		return null;
 	}
-	
+		
 	/** 
 	 * Finds a a member in a compilation unit. Typical usage is to find the corresponding
 	 * member in a working copy.
@@ -457,13 +458,20 @@ public class JavaModelUtil {
 		}
 	}
 	
-	public static boolean isEditable(ICompilationUnit cu) throws JavaModelException {
+	/**
+	 * Returns if a CU can be edited.
+	 */
+	public static boolean isEditable(ICompilationUnit cu)  {
 		if (cu.isWorkingCopy()) {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 		}
-		return (cu.exists() && !cu.getCorrespondingResource().isReadOnly());
+		IResource resource= cu.getResource();
+		return (resource.exists() && !resource.isReadOnly());
 	}
-	
+
+	/**
+	 * Finds a qualified import for a type name.
+	 */	
 	public static IImportDeclaration findImport(ICompilationUnit cu, String simpleName) throws JavaModelException {
 		IImportDeclaration[] existing= cu.getImports();
 		for (int i= 0; i < existing.length; i++) {
@@ -476,11 +484,36 @@ public class JavaModelUtil {
 			}
 		}	
 		return null;
+	}
+	
+	/**
+	 * Returns the original type if the given type. If the type is already
+	 * an original input type is returned. The returned type must not exist
+	 */
+	public static IType toOriginal(IType type) {
+		ICompilationUnit cu= type.getCompilationUnit();
+		if (cu != null && cu.isWorkingCopy())
+			return (IType)cu.getOriginal(type);
+		return type;
+	}
+	
+	/**
+	 * Returns the working copy type of the given type. If the type is already in a
+	 * working copy or the type does not exist in the working copy the input type is returned.
+	 */
+	public static IType toWorkingCopy(IType type) {
+		ICompilationUnit cu= type.getCompilationUnit();
+		if (cu != null && !cu.isWorkingCopy()) {
+			ICompilationUnit workingCopy= EditorUtility.getWorkingCopy(cu);
+			if (workingCopy != null) {
+				IJavaElement[] types= workingCopy.findElements(type);
+				if (types != null && types.length > 0) {
+					return (IType) types[0];
+				}
+			}
+		}
+		return type;
 	}	
-		
 	
-	
-	
-
 	
 }

@@ -119,15 +119,11 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	protected void selectionChanged(IStructuredSelection selection) {
 		ICompilationUnit[] cus= getCompilationUnits(selection);
 		boolean isEnabled= cus.length > 0;
-		try {
-			for (int i= 0; i < cus.length; i++) {
-				if (!JavaModelUtil.isEditable(cus[i])) {
-					isEnabled= false;
-					break;
-				}
+		for (int i= 0; i < cus.length; i++) {
+			if (!JavaModelUtil.isEditable(cus[i])) {
+				isEnabled= false;
+				break;
 			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
 		setEnabled(isEnabled);
 	}
