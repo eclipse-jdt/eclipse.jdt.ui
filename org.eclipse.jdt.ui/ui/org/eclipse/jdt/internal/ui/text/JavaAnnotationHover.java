@@ -120,7 +120,7 @@ public class JavaAnnotationHover implements IAnnotationHover {
 						continue;
 				} else if (VERTICAL_RULER_HOVER.equals(fType)) {
 					AnnotationPreference preference= getAnnotationPreference(a.getAnnotationType());
-					if (preference == null || !fStore.getBoolean(preference.getVerticalRulerPreferenceKey()))
+					if (preference == null || preference.getVerticalRulerPreferenceKey() != null && !fStore.getBoolean(preference.getVerticalRulerPreferenceKey()))
 						continue;
 				}
 				
