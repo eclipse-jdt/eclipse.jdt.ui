@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -104,28 +104,28 @@ public class CompilationUnitRewrite {
 		fTextEditGroups.add(result);
 		return result;
 	}
-	
+
 	/**
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the ast rewrite encounters problems
 	 */
 	public CompilationUnitChange createChange() throws CoreException {
-		boolean needsAstRewrite= fRewrite != null; //TODO: do we need something like ASTRewrite#hasChanges() here? 
+		boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
 		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
-		boolean needsImportRewrite= fImportRewrite != null && ! fImportRewrite.isEmpty();
-		if (! needsAstRewrite && ! needsImportRemoval && ! needsImportRewrite)
+		boolean needsImportRewrite= fImportRewrite != null && !fImportRewrite.isEmpty();
+		if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
 			return null;
-			
+
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
-		TextBuffer buffer= TextBuffer.acquire(getFile(fCu));
-		IDocument document= buffer.getDocument();
-		MultiTextEdit multiEdit= new MultiTextEdit();
+		ITextFileBuffer buffer= RefactoringFileBuffers.connect(fCu);
 		try {
+			IDocument document= buffer.getDocument();
+			MultiTextEdit multiEdit= new MultiTextEdit();
 			cuChange.setEdit(multiEdit);
 			if (needsAstRewrite) {
 				TextEdit rewriteEdit= fRewrite.rewriteAST(document, fCu.getJavaProject().getOptions(true));
-				if (! isEmptyEdit(rewriteEdit)) {
+				if (!isEmptyEdit(rewriteEdit)) {
 					multiEdit.addChild(rewriteEdit);
 					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
 						cuChange.addTextEditGroup((TextEditGroup) iter.next());
@@ -137,30 +137,26 @@ public class CompilationUnitRewrite {
 				for (int i= 0; i < bindings.length; i++)
 					getImportRewrite().removeImport(bindings[i]);
 			}
-			if (fImportRewrite != null && ! fImportRewrite.isEmpty()) {
+			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
 				TextEdit importsEdit= fImportRewrite.createEdit(document);
-				if (! isEmptyEdit(importsEdit)) {
+				if (!isEmptyEdit(importsEdit)) {
 					multiEdit.addChild(importsEdit);
 					String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
 					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
 				}
 			}
+			if (isEmptyEdit(multiEdit))
+				return null;
+			return cuChange;
 		} finally {
-			TextBuffer.release(buffer);
+			RefactoringFileBuffers.disconnect(fCu);
 		}
-		if (isEmptyEdit(multiEdit))
-			return null;
-		return cuChange;
 	}
-	
+
 	private static boolean isEmptyEdit(TextEdit edit) {
 		return edit.getClass() == MultiTextEdit.class && ! edit.hasChildren();
 	}
 	
-	private static IFile getFile(ICompilationUnit cu) {
-		return (IFile) cu.getPrimary().getResource();
-	}
-
 	public ICompilationUnit getCu() {
 		return fCu;
 	}
