@@ -18,11 +18,14 @@ import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.swt.widgets.Display;
+
 import org.eclipse.jface.util.ListenerList;
 
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
  * Listens to resource deltas and filters for marker changes of type IMarker.PROBLEM
@@ -55,17 +58,16 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 					return false;
 				}
 			}
-			checkInvalidate(delta, res.getFullPath());
+			checkInvalidate(delta, res);
 			return true;
 		}
 		
-		private void checkInvalidate(IResourceDelta delta, IPath path) {
+		private void checkInvalidate(IResourceDelta delta, IResource resource) {
 			int kind= delta.getKind();
 			if (kind == IResourceDelta.REMOVED || kind == IResourceDelta.ADDED || (kind == IResourceDelta.CHANGED && isErrorDelta(delta))) {
-				// invalidate the path and all parent paths
-				while (!path.isEmpty() && !path.isRoot() && !fChangedElements.contains(path)) {
-					fChangedElements.add(path);
-					path= path.removeLastSegments(1);
+				// invalidate the resource and all parents
+				while (resource.getType() != IResource.ROOT && fChangedElements.add(resource)) {
+					resource= resource.getParent();
 				}
 			} 
 		}	
@@ -111,7 +113,8 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 		}
 
 		if (changedElements.size() > 0) {
-			fireChanges(changedElements);
+			IResource[] changes= (IResource[]) changedElements.toArray(new IResource[changedElements.size()]);
+			fireChanges(changes);
 		}
 	}
 	
@@ -135,12 +138,19 @@ public class ProblemMarkerManager implements IResourceChangeListener {
 		}
 	}
 	
-	private void fireChanges(Set changes) {
-		Object[] listeners= fListeners.getListeners();
-		for (int i= 0; i < listeners.length; i++) {
-			IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
-			curr.problemsChanged(changes);
-		}			
+	private void fireChanges(final IResource[] changes) {
+		Display display= SWTUtil.getStandardDisplay();
+		if (display != null && !display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+				public void run() {		
+					Object[] listeners= fListeners.getListeners();
+					for (int i= 0; i < listeners.length; i++) {
+						IProblemChangedListener curr= (IProblemChangedListener) listeners[i];
+						curr.problemsChanged(changes);
+					}	
+				}
+			});
+		}	
 	}
 
 }

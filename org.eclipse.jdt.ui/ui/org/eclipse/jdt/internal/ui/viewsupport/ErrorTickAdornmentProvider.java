@@ -144,19 +144,16 @@ public class ErrorTickAdornmentProvider implements IAdornmentProvider {
 	}
 			
 	private IMarker isAnnotationInRange(IAnnotationModel model, Annotation annot, ISourceRange range) throws CoreException {
-			if (annot instanceof MarkerAnnotation) {
-				IMarker marker= ((MarkerAnnotation)annot).getMarker();
-				if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
-					Position pos= model.getPosition(annot);
-					if (pos.overlapsWith(range.getOffset(), range.getLength())) {
-						return marker;
-					}
+		if (annot instanceof MarkerAnnotation) {
+			IMarker marker= ((MarkerAnnotation) annot).getMarker();
+			if (marker.exists() && marker.isSubtypeOf(IMarker.PROBLEM)) {
+				Position pos= model.getPosition(annot);
+				if (pos.overlapsWith(range.getOffset(), range.getLength())) {
+					return marker;
 				}
 			}
-				
+		}
 		return null;
 	}	
-
-
 
 }
