@@ -207,6 +207,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			result.merge(checkForMainMethods());
 			pm.worked(1);
 			
+			if (fPackage.isReadOnly())
+				result.addWarning("Package \'" + fPackage.getElementName() + "\' is read-only");
+				
+			if (fPackage.getCorrespondingResource().isReadOnly())
+				result.addWarning("Resource corresponding to package \'" + fPackage.getElementName() + "\' is read-only");
+				
 			if (!fUpdateReferences)
 				return result;
 				
