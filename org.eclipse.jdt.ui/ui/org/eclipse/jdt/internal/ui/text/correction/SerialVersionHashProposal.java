@@ -42,14 +42,17 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class SerialVersionHashProposal extends SerialVersionDefaultProposal {
 
-	/** The separator before type arguments start. */
-	private static final char TYPE_ARGS_SEPARATOR= '<';
+	/** The name separator */
+	private static final char NAME_SEPARATOR= '.';
+
+	/** The key separator */
+	private static final char KEY_SEPARATOR= '/';
 
 	/** The path separator */
-	public static final char PATH_SEPARATOR= '/';
+	private static final char PATH_SEPARATOR= '/';
 
 	/** The file url protocol */
-	public static final String PROTOCOL_FILE= "file://"; //$NON-NLS-1$
+	private static final String PROTOCOL_FILE= "file://"; //$NON-NLS-1$
 
 	/** The class whose serial version id has to be determined */
 	private Class fClass= null;
@@ -181,11 +184,15 @@ public class SerialVersionHashProposal extends SerialVersionDefaultProposal {
 	protected final String getQualifiedName(final ITypeBinding binding) {
 		Assert.isNotNull(binding);
 		
-		String name= binding.getQualifiedName();
-		int parameterStart= name.indexOf(TYPE_ARGS_SEPARATOR);
-		if (parameterStart == -1)
-			return name;
-		else
-			return name.substring(0, parameterStart);
+		/*
+		 * TODO: Should not rely on format of ITypeBinding#getKey(). 
+		 */
+		final StringBuffer buffer= new StringBuffer(binding.getKey());
+		for (int index= 0; index < buffer.length(); index++) {
+	
+			if (buffer.charAt(index) == KEY_SEPARATOR)
+				buffer.setCharAt(index, NAME_SEPARATOR);
+		}
+		return buffer.toString();
 	}
 }
