@@ -222,8 +222,10 @@ public class JarWriter {
 			return true;
 		File directory= new File(path.substring(0, separatorIndex));
 		if (!directory.exists()) {
-			if (JarPackagerUtil.askToCreateDirectory(parent))
+			if (JarPackagerUtil.askToCreateDirectory(parent, directory))
 				return directory.mkdirs();
+			else
+				return false;
 		}
 		return true;
 	}
