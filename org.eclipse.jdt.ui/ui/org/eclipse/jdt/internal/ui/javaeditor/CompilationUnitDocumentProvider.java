@@ -241,6 +241,11 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				// HackFinder.fixme("cannot commit the same working copy twice");
 				info.fCopy.commit(false, monitor);
 				
+				ICompilationUnit original= (ICompilationUnit) info.fCopy.getOriginalElement();
+				IResource resource= original.getUnderlyingResource();
+				if (resource != null)
+					info.fModificationStamp= resource.getModificationStamp();
+				
 				AbstractMarkerAnnotationModel model= (AbstractMarkerAnnotationModel) info.fModel;
 				model.updateMarkers(info.fDocument);
 						

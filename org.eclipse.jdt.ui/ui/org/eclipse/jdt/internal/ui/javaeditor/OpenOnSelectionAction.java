@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.ISelectionProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -36,16 +36,34 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
  * the connected java source viewer.
  */
 public class OpenOnSelectionAction extends OpenJavaElementAction {
+	
+	
+	class SelectionChangedListener implements ISelectionChangedListener {
+		
+		/*
+		 * @see ISelectionChangedListener#selectionChanged(SelectionChangedEvent)
+		 */
+		public void selectionChanged(SelectionChangedEvent event) {
+			ISelection s= event.getSelection();
+			if (s instanceof ITextSelection) {
+				ITextSelection ts= (ITextSelection) s;
+				setEnabled(ts.getLength() > 0);
+			}
+		}
+	};
+	
 		
 	protected ResourceBundle fBundle;
 	protected String fPrefix;
 	protected ITextEditor fEditor;
+	protected ISelectionChangedListener fListener= new SelectionChangedListener();
 	
 	public OpenOnSelectionAction(ResourceBundle bundle, String prefix, ITextEditor editor) {
 		super(bundle, prefix);
 		fBundle= bundle;
 		fPrefix= prefix;
 		fEditor= editor;
+		setEnabled(false);
 	}
 	
 	public OpenOnSelectionAction(ResourceBundle bundle, String prefix) {
@@ -53,7 +71,18 @@ public class OpenOnSelectionAction extends OpenJavaElementAction {
 	}
 	
 	public void setContentEditor(ITextEditor editor) {
+		
+		if (fEditor != null) {
+			ISelectionProvider p= fEditor.getSelectionProvider();
+			if (p != null) p.removeSelectionChangedListener(fListener);
+		}
+		
 		fEditor= editor;
+		
+		if (fEditor != null) {
+			ISelectionProvider p= fEditor.getSelectionProvider();
+			if (p != null) p.addSelectionChangedListener(fListener);
+		}
 	}
 	
 	protected String getResourceString(String key) {

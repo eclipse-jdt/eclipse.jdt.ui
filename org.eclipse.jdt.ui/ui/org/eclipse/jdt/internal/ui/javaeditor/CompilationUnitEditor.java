@@ -13,7 +13,7 @@ import java.util.Iterator;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.IDocument;import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
@@ -40,7 +40,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
 import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.IDocumentProvider;import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -161,10 +161,15 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	protected JavaOutlinePage createOutlinePage() {
 		JavaOutlinePage page= super.createOutlinePage();
-		page.setAction("DeleteElement", new DeleteISourceManipulationsAction(getResourceBundle(), "Outliner.DeleteISourceManipulations.", page));
+		
 		page.setAction("OrganizeImports", new OrganizeImportsAction(this));
 		page.setAction("ReplaceWithEdition", new JavaReplaceWithEditionAction(page));
 		page.setAction("AddEdition", new JavaAddElementFromHistory(this, page));
+		
+		DeleteISourceManipulationsAction deleteElement= new DeleteISourceManipulationsAction(getResourceBundle(), "Outliner.DeleteISourceManipulations.", page);
+		page.setAction("DeleteElement", deleteElement);
+		page.addSelectionChangedListener(deleteElement);
+		
 		return page;
 	}
 
@@ -183,25 +188,58 @@ public class CompilationUnitEditor extends JavaEditor {
 	 */
 	public void doSave(IProgressMonitor progressMonitor) {
 		
+		IDocumentProvider p= getDocumentProvider();
+		if (p == null)
+			return;
+			
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+		final ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
+		
+		WorkspaceModifyOperation operation= new WorkspaceModifyOperation() {
+			public void execute(final IProgressMonitor monitor) throws CoreException {
+				
+				if (fSavePolicy != null)
+					fSavePolicy.preSave(original);
+					
+				getDocumentProvider().saveDocument(monitor, getEditorInput(), getDocumentProvider().getDocument(getEditorInput()));
+				
+				if (fSavePolicy != null)
+					fSavePolicy.postSave(original);
+			}
+		};
 		
 		synchronized (unit) {
 			
-			ICompilationUnit original= (ICompilationUnit) unit.getOriginalElement();
-			
-			if (fSavePolicy != null)
-				fSavePolicy.preSave(original);
-			
-			super.doSave(progressMonitor);
-			
-			if (fSavePolicy != null)
-				fSavePolicy.postSave(original);
+			try {
+				
+				p.aboutToChange(getEditorInput());
+				operation.run(progressMonitor);
+				
+			} catch (InterruptedException x) {
+			} catch (InvocationTargetException x) {
+				
+				Shell shell= getSite().getShell();
+				String title= getResourceString("Error.save.title");
+				String msg= getResourceString("Error.save.message");
+				
+				Throwable t= x.getTargetException();
+				if (t instanceof CoreException) {
+					CoreException cx= (CoreException) t;
+					ErrorDialog.openError(shell, title, msg, cx.getStatus());
+				} else {
+					MessageDialog.openError(shell, title, msg + t.getMessage());
+				}
+				
+			} finally {
+				p.changed(getEditorInput());
+			}
 		}
 		
 		getStatusLineManager().setErrorMessage("");
 	}
-		
+	
+	
 	public void gotoError(boolean forward) {
 		
 		ISelectionProvider provider= getSelectionProvider();
