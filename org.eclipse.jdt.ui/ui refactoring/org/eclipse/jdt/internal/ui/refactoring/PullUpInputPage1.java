@@ -114,7 +114,7 @@ class PullUpInputPage1 extends UserInputWizardPage {
 				mac= (MemberActionInfo)((Item)element).getData();
 			} else
 				mac= (MemberActionInfo)element;
-			if (! canModify(mac, property))
+			if (! canModify(mac, property))//workaround for 37266 (which resulted in jdt ui bug 34926)
 				return;
 			Assert.isTrue(mac.isMethodInfo());
 			mac.setAction(action);
