@@ -37,6 +37,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		//setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		//setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(Messages.getString("Wizard.title.new")); //$NON-NLS-1$
+		initDialogSettings();
 	}
 
 	/*
@@ -99,6 +100,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 		if (finishPage(fPage.getRunnable())) {
 			if (!fPage.hasUpdatedExistingClass())
 				postCreatingType();
+			fPage.saveWidgetValues();				
 			return true;
 		}
 

@@ -10,6 +10,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.*;
+import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -22,6 +24,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
  * The wizard base class for JUnit creation wizards.
  */
 public abstract class JUnitWizard extends BasicNewResourceWizard {
+
+	protected static String DIALOG_SETTINGS_KEY= "JUnitWizards"; //$NON-NLS-1$
 
 	public JUnitWizard() {
 		setNeedsProgressMonitor(true);
@@ -70,4 +74,15 @@ public abstract class JUnitWizard extends BasicNewResourceWizard {
 			}
 		}
 	}
+
+	protected void initDialogSettings() {
+		IDialogSettings pluginSettings= JUnitPlugin.getDefault().getDialogSettings();
+		IDialogSettings wizardSettings= pluginSettings.getSection(DIALOG_SETTINGS_KEY);
+		if (wizardSettings == null) {
+			wizardSettings= new DialogSettings(DIALOG_SETTINGS_KEY);
+			pluginSettings.addSection(wizardSettings);
+		}
+		setDialogSettings(wizardSettings);
+	}
+
 }

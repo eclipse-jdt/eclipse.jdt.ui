@@ -22,7 +22,7 @@ import org.eclipse.swt.widgets.Label;
 /**
  * A group of controls used in the JUnit TestCase wizard.
  */
-public class SelectionButtonGroup {
+public class MethodStubsSelectionButtonGroup {
 
 	private Label fLabel;
 	protected String fLabelText;
@@ -48,13 +48,13 @@ public class SelectionButtonGroup {
 		/**
 		 * The dialog field has changed.
 		 */
-		void groupChanged(SelectionButtonGroup field);
+		void groupChanged(MethodStubsSelectionButtonGroup field);
 	}
 		
 	/**
 	 * Creates a group without border.
 	 */
-	public SelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns) {
+	public MethodStubsSelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns) {
 		this(buttonsStyle, buttonNames, nColumns, SWT.NONE);		
 	}	
 	
@@ -63,7 +63,7 @@ public class SelectionButtonGroup {
 	 * Accepted button styles are: SWT.RADIO, SWT.CHECK, SWT.TOGGLE
 	 * For border styles see <code>Group</code>
 	 */	
-	public SelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns, int borderStyle) {
+	public MethodStubsSelectionButtonGroup(int buttonsStyle, String[] buttonNames, int nColumns, int borderStyle) {
 		fEnabled= true;
 		fLabel= null;
 		fLabelText= ""; //$NON-NLS-1$
@@ -158,6 +158,30 @@ public class SelectionButtonGroup {
 		return button;
 	}
 
+	public String getMainMethod(String typeName) {
+		StringBuffer main= new StringBuffer("public static void main(String[] args) {"); //$NON-NLS-1$
+		if (isSelected(1)) {
+			main.append("junit."); //$NON-NLS-1$
+			switch (getComboSelection()) {
+				case 0:
+					main.append("textui"); //$NON-NLS-1$
+					break;
+				case 1:
+					main.append("swingui"); //$NON-NLS-1$
+					break;
+				case 2 :
+					main.append("awtui"); //$NON-NLS-1$
+					break;
+				default :
+					main.append("textui"); //$NON-NLS-1$
+					break;
+			}
+			main.append(".TestRunner.run(" + typeName + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		main.append("}\n\n"); //$NON-NLS-1$
+		return main.toString();
+	}
+
 	/**
 	 * Returns the group widget. When called the first time, the widget will be created.
 	 * @param The parent composite when called the first time, or <code>null</code>
@@ -205,6 +229,11 @@ public class SelectionButtonGroup {
 			for (int i= 0; i < nFillElements; i++) {
 				createEmptySpace(fButtonComposite);
 			}
+			setSelectionGroupListener(new SelectionButtonGroupListener() {
+				public void groupChanged(MethodStubsSelectionButtonGroup field) {
+					field.setEnabled(1, isEnabled() && field.isSelected(0));
+				}
+			});			
 		}
 		return fButtonComposite;
 	}
@@ -283,7 +312,7 @@ public class SelectionButtonGroup {
 					if (isOkToUse(button)) {
 						button.setEnabled(enabled);
 						if (index == 1)
-							fMainCombo.setEnabled(enabled);
+							fMainCombo.setEnabled(isEnabled() && enabled);
 					}
 				}
 			}

@@ -75,7 +75,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	
 	private String fDefaultClassToTest;
 	private NewTestCaseCreationWizardPage2 fPage2;
-	private SelectionButtonGroup fMethodStubsButtons;
+	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 
 	private IType fClassToTest;
 	protected IStatus fClassToTestStatus;
@@ -112,13 +112,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			Messages.getString("NewTestClassWizPage.methodStub.tearDown") //$NON-NLS-1$
 		};
 		
-		fMethodStubsButtons= new SelectionButtonGroup(SWT.CHECK, buttonNames, 1);
+		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
 		fMethodStubsButtons.setLabelText(Messages.getString("NewTestClassWizPage.method.Stub.label")); //$NON-NLS-1$
-		fMethodStubsButtons.setSelectionGroupListener(new SelectionButtonGroup.SelectionButtonGroupListener() {
-			public void groupChanged(SelectionButtonGroup field) {
-				field.setEnabled(1, field.isSelected(0));
-			}
-		});
 
 		fClassToTestStatus= new JUnitStatus();
 		fTestClassStatus= new JUnitStatus();
@@ -431,27 +426,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	}
 
 	protected void createMain(IType type) throws JavaModelException {
-		StringBuffer main= new StringBuffer("public static void main(String[] args) {"); //$NON-NLS-1$
-		if (fMethodStubsButtons.isSelected(1)) {
-			main.append("junit."); //$NON-NLS-1$
-			switch (fMethodStubsButtons.getComboSelection()) {
-				case 0:
-					main.append("textui"); //$NON-NLS-1$
-					break;
-				case 1:
-					main.append("swingui"); //$NON-NLS-1$
-					break;
-				case 2 :
-					main.append("awtui"); //$NON-NLS-1$
-					break;
-				default :
-					main.append("textui"); //$NON-NLS-1$
-					break;
-			}
-			main.append(".TestRunner.run(" + getTypeName() + ".class);"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		main.append("}\n\n"); //$NON-NLS-1$
-		type.createMethod(main.toString(), null, false, null);	
+		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 		fIndexOfFirstTestMethod++;		
 	}
 

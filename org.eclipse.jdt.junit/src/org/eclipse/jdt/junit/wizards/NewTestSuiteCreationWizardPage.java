@@ -26,9 +26,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -61,6 +63,11 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private final static String SELECTED_CLASSES_LABEL_TEXT_ONE= " class selected."; //$NON-NLS-1$
 	private final static String SELECTED_CLASSES_LABEL_TEXT_MANY= " classes selected.";	 //$NON-NLS-1$
 
+	protected final static String STORE_GENERATE_MAIN= PAGE_NAME + ".GENERATE_MAIN"; //$NON-NLS-1$
+	protected final static String STORE_USE_TESTRUNNER= PAGE_NAME + ".USE_TESTRUNNER";	//$NON-NLS-1$
+	protected final static String STORE_TESTRUNNER_TYPE= PAGE_NAME + ".TESTRUNNER_TYPE"; //$NON-NLS-1$
+
+
 	public static final String START_MARKER= "//$JUnit-BEGIN$"; //$NON-NLS-1$
 	public static final String endMarker= "//$JUnit-END$"; //$NON-NLS-1$
 	
@@ -73,6 +80,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	private Label fSuiteNameLabel;
 	private Text fSuiteNameText;
 	private String fSuiteNameTextInitialValue;
+	private MethodStubsSelectionButtonGroup fMethodStubsButtons;
 	
 	private boolean fUpdatedExistingClassButton;
 
@@ -86,6 +94,16 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		fSuiteNameTextInitialValue= ""; //$NON-NLS-1$
 		setTitle(Messages.getString("NewTestSuiteWizPage.title")); //$NON-NLS-1$
 		setDescription(Messages.getString("NewTestSuiteWizPage.description")); //$NON-NLS-1$
+		
+		String[] buttonNames= new String[] {
+			"public static void main(Strin&g[] args)", //$NON-NLS-1$
+			/* Add testrunner statement to main Method */
+			Messages.getString("NewTestClassWizPage.methodStub.testRunner"), //$NON-NLS-1$
+		};
+		
+		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
+		fMethodStubsButtons.setLabelText(Messages.getString("NewTestClassWizPage2.method.Stub.label")); //$NON-NLS-1$
+		
 		fClassesInSuiteStatus= new JUnitStatus();
 	}
 
@@ -109,8 +127,16 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		setTypeName("AllTests",true); //$NON-NLS-1$
 		createSeparator(composite, nColumns);
 		createClassesInSuiteControl(composite, nColumns);
-		setControl(composite);	
+		createMethodStubSelectionControls(composite, nColumns);
+		setControl(composite);
+		restoreWidgetValues();			
 	}
+
+	protected void createMethodStubSelectionControls(Composite composite, int nColumns) {
+		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getLabelControl(composite), nColumns);
+		LayoutUtil.createEmptySpace(composite,1);
+		LayoutUtil.setHorizontalSpan(fMethodStubsButtons.getSelectionButtonsGroup(composite), nColumns - 1);	
+	}	
 
 	/**
 	 * Should be called from the wizard with the input element.
@@ -120,6 +146,10 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		initContainerPage(jelem);
 		initTypePage(jelem);
 		doStatusUpdate();
+
+		fMethodStubsButtons.setSelection(0, false); //main
+		fMethodStubsButtons.setSelection(1, false); //add textrunner
+		fMethodStubsButtons.setEnabled(1, false); //add text
 	}
 	
 	/**
@@ -285,7 +315,13 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 	 */
 	protected void createTypeMembers(IType type, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
 		writeImports(imports);
+		if (fMethodStubsButtons.isEnabled() && fMethodStubsButtons.isSelected(0)) 
+			createMain(type);
 		type.createMethod(getSuiteMethodString(), null, false, null);	
+	}
+
+	protected void createMain(IType type) throws JavaModelException {
+		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 	}
 
 	public String getSuiteMethodString() throws JavaModelException {
@@ -500,9 +536,11 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
 			if (cu.exists()) {
 				status.setWarning(Messages.getString("NewTestSuiteWizPage.typeName.warning.already_exists")); //$NON-NLS-1$
+				fMethodStubsButtons.setEnabled(false);
 				return status;
 			}
 		}
+		fMethodStubsButtons.setEnabled(true);
 		return status;
 	}
 
@@ -527,117 +565,39 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 		imports.addImport("junit.framework.Test"); //$NON-NLS-1$
 		imports.addImport("junit.framework.TestSuite");		 //$NON-NLS-1$
 	}
+
+	/**
+	 *	Use the dialog store to restore widget values to the values that they held
+	 *	last time this wizard was used to completion
+	 */
+	private void restoreWidgetValues() {
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			boolean generateMain= settings.getBoolean(STORE_GENERATE_MAIN);
+			fMethodStubsButtons.setSelection(0, generateMain);
+			fMethodStubsButtons.setEnabled(1, generateMain);
+			fMethodStubsButtons.setSelection(1,settings.getBoolean(STORE_USE_TESTRUNNER));
+			//The next 2 lines are necessary. Otherwise, if fMethodsStubsButtons is disabled, and USE_TESTRUNNER gets enabled,
+			//then the checkbox for USE_TESTRUNNER will be the only enabled component of fMethodsStubsButton
+			fMethodStubsButtons.setEnabled(!fMethodStubsButtons.isEnabled());
+			fMethodStubsButtons.setEnabled(!fMethodStubsButtons.isEnabled());
+			try {
+				fMethodStubsButtons.setComboSelection(settings.getInt(STORE_TESTRUNNER_TYPE));
+			} catch(NumberFormatException e) {}
+		}		
+	}	
+
+	/**
+	 * 	Since Finish was pressed, write widget values to the dialog store so that they
+	 *	will persist into the next invocation of this wizard page
+	 */
+	void saveWidgetValues() {
+		IDialogSettings settings= getDialogSettings();
+		if (settings != null) {
+			settings.put(STORE_GENERATE_MAIN, fMethodStubsButtons.isSelected(0));
+			settings.put(STORE_USE_TESTRUNNER, fMethodStubsButtons.isSelected(1));
+			settings.put(STORE_TESTRUNNER_TYPE, fMethodStubsButtons.getComboSelection());
+		}
+	}
 	
-//	/**
-//	 * Creates a type using the current field values.
-//	 */
-//	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
-//		monitor.beginTask(Messages.getString("NewTestSuiteWizPage.createType.beginTask"), 10); //$NON-NLS-1$
-//		
-//		IPackageFragmentRoot root= getPackageFragmentRoot();
-//		IPackageFragment pack= getPackageFragment();
-//		if (pack == null) {
-//			pack= root.getPackageFragment(""); //$NON-NLS-1$
-//		}
-//		
-//		if (!pack.exists()) {
-//			String packName= pack.getElementName();
-//			pack= root.createPackageFragment(packName, true, null);
-//		}		
-//		
-//		monitor.worked(1);
-//		
-//		String clName= getTypeName();
-//		
-//		boolean isInnerClass= isEnclosingTypeSelected();
-//		
-//		IType createdType;
-//		ImportsStructure imports;
-//		int indent= 0;
-//
-//		String[] prefOrder= ImportOrganizePreferencePage.getImportOrderPreference();
-//		int threshold= ImportOrganizePreferencePage.getImportNumberThreshold();			
-//		
-//		String lineDelimiter= null;	
-//
-//			ICompilationUnit parentCU= pack.getCompilationUnit(clName + ".java"); //$NON-NLS-1$
-//
-//			imports= new ImportsStructure(parentCU, prefOrder, threshold, false);
-//			
-//			lineDelimiter= JUnitStubUtility.getLineDelimiterUsed(parentCU);
-//			
-//			String content= createTypeBody(imports, lineDelimiter, parentCU);
-//			createdType= parentCU.createType(content, null, false, new SubProgressMonitor(monitor, 5));
-//		
-//		// add imports for superclass/interfaces, so the type can be parsed correctly
-////		writeImports(imports);	
-//		imports.create(true, new SubProgressMonitor(monitor, 1));
-//		
-//		String[] methods= evalMethods(createdType, imports, new SubProgressMonitor(monitor, 1));
-//		if (methods.length > 0) {
-//			for (int i= 0; i < methods.length; i++) {
-//				createdType.createMethod(methods[i], null, false, null);
-//			}
-//			// add imports
-//			imports.create(!isInnerClass, null);
-//		} 
-//		monitor.worked(1);
-//		
-//		ICompilationUnit cu= createdType.getCompilationUnit();	
-//		ISourceRange range;
-//		if (isInnerClass) {
-//			synchronized(cu) {
-//				cu.reconcile();
-//			}
-//			range= createdType.getSourceRange();
-//		} else {
-//			range= cu.getSourceRange();
-//		}
-//		
-//		IBuffer buf= cu.getBuffer();
-//		String originalContent= buf.getText(range.getOffset(), range.getLength());
-//		String formattedContent= JUnitStubUtility.codeFormat(originalContent, indent, lineDelimiter);
-//		buf.replace(range.getOffset(), range.getLength(), formattedContent);
-//		if (!isInnerClass) {
-//			String fileComment= getFileComment(cu);
-//			if (fileComment != null) {
-//				buf.replace(0, 0, fileComment + lineDelimiter);
-//			}
-//			buf.save(new SubProgressMonitor(monitor, 1), false);
-//		} else {
-//			monitor.worked(1);
-//		}
-//		fCreatedType= createdType;
-//		monitor.done();
-//	}	
-//
-//	/*
-//	 * Called from createType to construct the source for this type
-//	 */		
-//	private String createTypeBody(IImportsStructure imports, String lineDelimiter, ICompilationUnit parentCU) {	
-//		StringBuffer buf= new StringBuffer();
-//		String typeComment= getTypeComment(parentCU);
-//		if (typeComment != null) {
-//			buf.append(typeComment);
-//			buf.append(lineDelimiter);
-//		}
-//		
-//		int modifiers= getModifiers();
-//		buf.append(Flags.toString(modifiers));
-//		if (modifiers != 0) {
-//			buf.append(' ');
-//		}
-//		buf.append("class "); //$NON-NLS-1$
-//		buf.append(getTypeName());
-//		buf.append(" {"); //$NON-NLS-1$
-//		buf.append(lineDelimiter);
-//		buf.append(lineDelimiter);
-//		buf.append('}');
-//		buf.append(lineDelimiter);
-//		return buf.toString();
-//	}
-//
-//	public IType getCreatedType() {
-//		return fCreatedType;
-//	}
 }
