@@ -123,6 +123,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocUndefinedType:
 			case IProblem.JavadocAmbiguousType:
 			case IProblem.JavadocNotVisibleType:
+			case IProblem.JavadocInvalidThrowsClassName:
+			case IProblem.JavadocDuplicateThrowsClassName:
+			case IProblem.JavadocDuplicateReturnTag:
+			case IProblem.JavadocDuplicateParamName:
+			case IProblem.JavadocInvalidParamName:
+			case IProblem.JavadocUnexpectedTag:
+			case IProblem.JavadocInvalidTag:
 			case IProblem.NonBlankFinalLocalAssignment:
 			case IProblem.DuplicateFinalLocalInitialization:
 			case IProblem.FinalFieldAssignment:
@@ -415,6 +422,15 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.JavadocMissingReturnTag:
 			case IProblem.JavadocMissingThrowsTag:
 				JavadocTagsSubProcessor.getMissingJavadocTagProposals(context, problem, proposals);
+				break;
+			case IProblem.JavadocInvalidThrowsClassName:
+			case IProblem.JavadocDuplicateThrowsClassName:
+			case IProblem.JavadocDuplicateReturnTag:
+			case IProblem.JavadocDuplicateParamName:
+			case IProblem.JavadocInvalidParamName:
+			case IProblem.JavadocUnexpectedTag:
+			case IProblem.JavadocInvalidTag:
+				JavadocTagsSubProcessor.getRemoveJavadocTagProposals(context, problem, proposals);
 				break;
 			case IProblem.LocalVariableHidingLocalVariable:
 			case IProblem.LocalVariableHidingField:

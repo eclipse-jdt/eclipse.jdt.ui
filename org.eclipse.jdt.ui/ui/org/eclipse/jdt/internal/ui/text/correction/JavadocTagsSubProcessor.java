@@ -28,6 +28,8 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ui.ISharedImages;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 
@@ -43,6 +45,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -350,5 +353,21 @@ public class JavadocTagsSubProcessor {
 			}
 		}
 		return null;
+	}
+
+	public static void getRemoveJavadocTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode node= problem.getCoveringNode(context.getASTRoot());
+		while (node != null && !(node instanceof TagElement)) {
+			node= node.getParent();
+		}
+		if (node == null) {
+			return;
+		}
+		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
+		rewrite.remove(node, null);
+		
+		String label= CorrectionMessages.getString("JavadocTagsSubProcessor.removetag.description"); //$NON-NLS-1$
+		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); //$NON-NLS-1$
 	}
 }
