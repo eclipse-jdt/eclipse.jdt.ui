@@ -1320,7 +1320,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		if (required == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
-					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_RES_NAV };
 				}
 
 			};

@@ -534,7 +534,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (key == IShowInTargetList.class) {
 			return new IShowInTargetList() {
 				public String[] getShowInTargetIds() {
-					return new String[] { IPageLayout.ID_RES_NAV, JavaUI.ID_PACKAGES };
+					return new String[] { JavaUI.ID_PACKAGES, IPageLayout.ID_RES_NAV  };
 				}
 
 			};
