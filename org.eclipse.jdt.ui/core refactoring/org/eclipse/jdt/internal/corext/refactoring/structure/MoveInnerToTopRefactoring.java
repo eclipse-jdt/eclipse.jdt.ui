@@ -21,11 +21,16 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleType;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTWithExistingFlattener;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -40,6 +45,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 public class MoveInnerToTopRefactoring extends Refactoring{
 	
@@ -163,7 +170,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			TextChangeManager manager= new TextChangeManager();
 			cutType(manager);
 			removeUnusedImports(new SubProgressMonitor(pm, 1));
-			updateTypeReferences(manager);
+			updateTypeReferences(manager, new SubProgressMonitor(pm, 1));
 			fImportEditManager.fill(manager);
 			return manager;
 		} finally{
@@ -171,9 +178,43 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		}	
 	}
 
-	private void updateTypeReferences(TextChangeManager manager) {
-		//XXX
+	private void updateTypeReferences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
+		ASTNodeMappingManager astmanager= new ASTNodeMappingManager();
+		ASTNode[] nodes= ReferenceASTNodeFinder.findReferenceNodes(fType, astmanager, pm);
+		for (int i= 0; i < nodes.length; i++) {
+			ASTNode node= nodes[i];
+			TextEdit edit= createReferenceUpdateEdit(node);
+			if (edit != null)
+				manager.get(astmanager.getCompilationUnit(node)).addTextEdit("Update Type Reference", edit);
+		}
 	}
+
+	private TextEdit createReferenceUpdateEdit(ASTNode node) {
+		if (node.getNodeType() == ASTNode.QUALIFIED_NAME){
+			return createReferenceUpdateEditForName((QualifiedName)node);
+		} else if (node.getNodeType() == ASTNode.SIMPLE_TYPE){
+			return createReferenceUpdateEditForName(((SimpleType)node).getName());
+		} else
+			return null;
+	}
+
+	private TextEdit createReferenceUpdateEditForName(Name name){
+		if (isFullyQualifiedName(name))
+			return SimpleTextEdit.createReplace(name.getStartPosition(), name.getLength(), getNewFullyQualifiedNameOfInputType());
+		return SimpleTextEdit.createReplace(name.getStartPosition(), name.getLength(), fType.getElementName());
+	}
+	
+	private boolean isFullyQualifiedName(Name name) {
+		ASTWithExistingFlattener flattener= new ASTWithExistingFlattener();
+		name.accept(flattener);
+		String result= flattener.getResult();
+		return result.equals(JavaElementUtil.createSignature(fType));
+	}
+
+	private String getNewFullyQualifiedNameOfInputType() {
+		return fType.getPackageFragment().getElementName() + "." + fType.getElementName();
+	}
+
 
 	private void removeUnusedImports(IProgressMonitor pm) throws CoreException {
 		IType[] types= getTypesReferencedOnlyInInputType(pm);
@@ -193,7 +234,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private ICompilationUnit getInputTypeCu() {
-		return fType.getCompilationUnit();
+		return WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
 	}
 
 	//----- methods related to creation of the new cu -------
