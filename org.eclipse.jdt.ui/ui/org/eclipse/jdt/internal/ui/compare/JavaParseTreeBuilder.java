@@ -203,7 +203,16 @@ class JavaParseTreeBuilder implements ISourceElementRequestor, ICompilationUnit 
 		buffer.append('(');
 		if (parameterTypes != null) {
 			for (int p= 0; p < parameterTypes.length; p++) {
-				buffer.append(parameterTypes[p]);
+				String parameterType= new String(parameterTypes[p]);
+				
+				// PR 1GF9WH7: ITPJUI:WINNT - Cannot replace main from local history
+				// we only use the last component of a type name
+				int pos= parameterType.lastIndexOf('.');
+				if (pos >= 0)
+					parameterType= parameterType.substring(pos+1);
+				// end fix
+				
+				buffer.append(parameterType);
 				if (p < parameterTypes.length-1)
 					buffer.append(", "); //$NON-NLS-1$
 			}
