@@ -23,6 +23,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.Page;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -117,11 +118,11 @@ public class OpenViewActionGroup extends ActionGroup {
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 
         fOpenPropertiesDialog= new PropertyDialogAction(site.getShell(), site.getSelectionProvider());
-        fOpenPropertiesDialog.setActionDefinitionId("org.eclipse.ui.file.properties"); //$NON-NLS-1$
+        fOpenPropertiesDialog.setActionDefinitionId(ITextEditorActionDefinitionIds.PROPERTIES);
 		
         initialize(site);
 	}
-	
+
 	private void initialize(IWorkbenchSite site) {
 		fSite= site;
 		ISelectionProvider provider= fSite.getSelectionProvider();
@@ -185,7 +186,9 @@ public class OpenViewActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_EXTERNAL_JAVA_DOC, fOpenExternalJavadoc);
 		actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_TYPE_HIERARCHY, fOpenTypeHierarchy);
         actionBars.setGlobalActionHandler(JdtActionConstants.OPEN_CALL_HIERARCHY, fOpenCallHierarchy);
-		actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);		
+        
+        if (!fEditorIsOwner)
+        	actionBars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fOpenPropertiesDialog);		
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
