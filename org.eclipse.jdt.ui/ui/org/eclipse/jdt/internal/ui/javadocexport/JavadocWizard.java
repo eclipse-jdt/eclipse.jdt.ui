@@ -49,9 +49,11 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -216,11 +218,14 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	}
 
 	private void setAllJavadocLocations(IJavaProject[] projects, URL newURL) {
+		Shell shell= getShell();
+		Image image= shell == null ? null : shell.getDisplay().getSystemImage(SWT.ICON_QUESTION);
+		String[] buttonlabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL };
+
 		for (int j= 0; j < projects.length; j++) {
 			IJavaProject iJavaProject= projects[j];
 			String message= JavadocExportMessages.getFormattedString("JavadocWizard.updatejavadoclocation.message", new String[] { iJavaProject.getElementName(), fDestination.toOSString()}); //$NON-NLS-1$
-			String[] buttonlabels= new String[] { IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.NO_TO_ALL_LABEL };
-			MessageDialog dialog= new MessageDialog(getShell(), JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), Dialog.getImage(Dialog.DLG_IMG_QUESTION), message, 4, buttonlabels, 1);//$NON-NLS-1$
+			MessageDialog dialog= new MessageDialog(shell, JavadocExportMessages.getString("JavadocWizard.updatejavadocdialog.label"), image, message, 4, buttonlabels, 1);//$NON-NLS-1$
 
 			switch (dialog.open()) {
 				case YES :
