@@ -14,6 +14,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -27,13 +30,12 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.text.IRewriteTarget;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -45,9 +47,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
-
-import org.eclipse.jface.text.IRewriteTarget;
-import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -74,7 +73,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -557,7 +555,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	}
 
 	private static class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
-		private GenerateConstructorUsingFieldsContentProvider fContentProvider;
 		private int fSuperIndex;
 		private int fWidth= 60;
 		private int fHeight= 18;
@@ -567,7 +564,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private IMethod[] fSuperConstructors;
 		private IDialogSettings fGenConstructorSettings;
 
-		protected CheckboxTreeViewer fTreeViewer;
 		private GenerateConstructorUsingFieldsTreeViewerAdapter fTreeViewerAdapter;
 
 		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
@@ -579,7 +575,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethod[] superConstructors) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, true);
-			fContentProvider= contentProvider;
 			fTreeViewerAdapter= new GenerateConstructorUsingFieldsTreeViewerAdapter();
 
 			fSuperConstructors= superConstructors;
@@ -630,13 +625,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				messageLabel.setLayoutData(gd);
 			}
 
-			fTreeViewer= createTreeViewer(inner);
+			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
 			gd= new GridData(GridData.FILL_BOTH);
 			gd.widthHint= convertWidthInCharsToPixels(fWidth);
 			gd.heightHint= convertHeightInCharsToPixels(fHeight);
-			fTreeViewer.getControl().setLayoutData(gd);
-			fTreeViewer.setContentProvider(fContentProvider);
-			fTreeViewer.addSelectionChangedListener(fTreeViewerAdapter);
+			treeViewer.getControl().setLayoutData(gd);
+			treeViewer.addSelectionChangedListener(fTreeViewerAdapter);
 
 			Composite buttonComposite= createSelectionButtons(inner);
 			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
@@ -726,13 +720,15 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			switch (buttonId) {
 				case UP_BUTTON :
 					{
-						fContentProvider.up(getElementList(), getTreeViewer());
+						GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
+						contentProvider.up(getElementList(), getTreeViewer());
 						updateOKStatus();
 						break;
 					}
 				case DOWN_BUTTON :
 					{
-						fContentProvider.down(getElementList(), getTreeViewer());
+						GenerateConstructorUsingFieldsContentProvider contentProvider= (GenerateConstructorUsingFieldsContentProvider) getTreeViewer().getContentProvider();
+						contentProvider.down(getElementList(), getTreeViewer());
 						updateOKStatus();
 						break;
 					}
@@ -782,10 +778,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return composite;
 		}
 
-		public CheckboxTreeViewer getTreeViewer() {
-			return fTreeViewer;
-		}
-
 		public IMethod getSuperConstructorChoice() {
 			return fSuperConstructors[fSuperIndex];
 		}
@@ -793,7 +785,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
 
 			public void selectionChanged(SelectionChangedEvent event) {
-				IStructuredSelection selection= (IStructuredSelection) fTreeViewer.getSelection();
+				IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
 
 				List selectedList= selection.toList();
 				GenerateConstructorUsingFieldsContentProvider cp= (GenerateConstructorUsingFieldsContentProvider) getContentProvider();

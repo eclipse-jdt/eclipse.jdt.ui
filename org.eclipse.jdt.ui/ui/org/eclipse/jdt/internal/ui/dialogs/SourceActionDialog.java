@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -34,6 +35,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 
@@ -83,7 +85,6 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	private final String SETTINGS_FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
 	private final String SETTINGS_SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
 	private final String SETTINGS_COMMENTS= "Comments"; //$NON-NLS-1$
-
 	
 	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
 		super(parent, labelProvider, contentProvider);
@@ -94,7 +95,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 
 		fWidth= 60;
 		fHeight= 18;
-			
+		
 		int insertionDefault= isConstructor ? 0 : 1;
 		boolean generateCommentsDefault= JavaPreferencesSettings.getCodeGenerationSettings().createComments;
 		
@@ -329,7 +330,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		gd.widthHint = convertWidthInCharsToPixels(fWidth);
 		gd.heightHint = convertHeightInCharsToPixels(fHeight);
 		treeViewer.getControl().setLayoutData(gd);			
-					
+		
 		Composite buttonComposite= createSelectionButtons(inner);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
 		buttonComposite.setLayoutData(gd);
@@ -415,7 +416,30 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			result.add(new Integer(array[i]));
 		}
 		return result;
-	}	
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.dialogs.CheckedTreeSelectionDialog#create()
+	 */
+	public void create() {
+		super.create();
+		
+		// select the first checked element, or if none are checked, the first element
+		CheckboxTreeViewer treeViewer= getTreeViewer();
+		TreeItem[] items= treeViewer.getTree().getItems();
+		if (items.length > 0) {
+			Object revealedElement= items[0];
+
+			for (int i= 0; i < items.length; i++) {
+				if (items[i].getChecked()) {
+					revealedElement= items[i].getData();
+					break;
+				}
+			}
+			treeViewer.setSelection(new StructuredSelection(revealedElement));
+			treeViewer.reveal(revealedElement);
+		}
+	}
 	
 	protected Composite createVisibilityControl(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
 		List allowedVisibilities= convertToIntegerList(availableVisibilities);
@@ -562,5 +586,4 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	public IJavaElement getElementPosition() {
 		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);	
 	}
-
 }

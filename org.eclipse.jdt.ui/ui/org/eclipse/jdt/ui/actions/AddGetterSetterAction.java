@@ -22,16 +22,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -40,7 +30,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -63,12 +52,25 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.AddGetterSetterOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.codemanipulation.IRequestQuery;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -84,10 +86,6 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
 
 
 /**
@@ -263,8 +261,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 		if (preselected.length > 0)  {
 			dialog.setInitialSelections(preselected);
-			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
-			cp.setPreselected(preselected[0]);
+			dialog.setExpandedElements(preselected);
 		}
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
@@ -739,19 +736,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private static final Object[] EMPTY= new Object[0];
 		private Viewer fViewer;
 		private Map fGetterSetterEntries;	//IField -> Object[] (with 0 to 2 elements of type GetterSetterEntry)
-		private IField fPreselected;
 		
 		public AddGetterSetterContentProvider(Map entries) {
 			fGetterSetterEntries= entries;		
 		}		
-
-		public IField getPreselected() {
-			return fPreselected;
-		}
-
-		public void setPreselected(IField preselected) {
-			fPreselected= preselected;
-		}
 
 		/*
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
@@ -810,7 +798,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	}
 	
 	private static class GetterSetterTreeSelectionDialog extends SourceActionDialog {
-		private IType fType;
 		private AddGetterSetterContentProvider fContentProvider;
 		private static final int SELECT_GETTERS_ID= IDialogConstants.CLIENT_ID + 1;
 		private static final int SELECT_SETTERS_ID= IDialogConstants.CLIENT_ID + 2;
@@ -824,7 +811,6 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
 			super(parent, labelProvider, contentProvider, editor, type, false);
 			fContentProvider= contentProvider;
-			fType= type;
 			
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
@@ -936,26 +922,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			layout.numColumns= 1;
 			
 			return buttonComposite;
-		}	
-		
-		/*
-		 * @see Dialog#createDialogArea(Composite)
-		 */
-		protected Control createDialogArea(Composite parent) {	
-			Control control= super.createDialogArea(parent);
-			applyDialogFont(control);
-			try {
-				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
-				getTreeViewer().setExpandedElements(fType.getFields());
-				IField preselected= fContentProvider.getPreselected();
-				if (preselected != null) {
-					getTreeViewer().reveal(preselected);
-				}
-			} catch (JavaModelException e) {
-			}
-	
-			return control;
-		}			
+		}		
 	}
 
 	private static class GetterSetterEntry {
