@@ -40,6 +40,7 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(JavaFormatterTest.suite());
 		addTest(TextMoveLineTest.suite());
 		addTest(JavaMoveLineTest.suite());
+		addTest(JavaExpandSelectionTest.suite());
 		addTest(EventDrivenTestSuite.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
