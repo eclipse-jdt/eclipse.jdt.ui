@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="org.eclipse.jdt.astview.feature"
-      version="1.0.0"
+      version="1.0.1"
       provider-name="Eclipse.org">
 
    <install-handler/>
@@ -11,7 +11,9 @@
       %description
    </description>
 
-   <license url="%licenseURL">%license</license>
+   <license url="%licenseURL">
+      %license
+   </license>
 
    <requires>
       <import plugin="org.eclipse.ui.ide"/>
@@ -30,6 +32,6 @@
          id="org.eclipse.jdt.astview"
          download-size="0"
          install-size="0"
-         version="1.0.0"/>
+         version="1.0.1"/>
 
 </feature>
