@@ -50,6 +50,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -786,6 +787,7 @@ public class BuildPathsBlock {
 		dialog.addFilter(filter);
 		dialog.setInput(fWorkspaceRoot);
 		dialog.setInitialSelection(initSelection);
+		dialog.setSorter(new ResourceSorter(ResourceSorter.NAME));
 		
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
 			return (IContainer)dialog.getFirstResult();
