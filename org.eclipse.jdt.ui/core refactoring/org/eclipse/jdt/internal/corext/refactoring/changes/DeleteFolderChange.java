@@ -58,7 +58,7 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 	/* non java-doc
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws CoreException{
+	protected void doDelete(ChangeContext context, IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());
 		folder.delete(false, true, new SubProgressMonitor(pm, 1));
