@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -75,7 +76,9 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 			assertTrue("incorrect renaming because of java model", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
 			return;
 		}
-		assertEquals("incorrect renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		String expectedRenaming= getFileContents(getOutputTestFileName("A"));
+		String actuaRenaming= cu.getSource();
+		SourceCompareUtil.compare("incorrect renaming", actuaRenaming, expectedRenaming);
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
@@ -386,6 +389,14 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	public void test34() throws Exception{
 		printTestDisabledMessage("test for bug#18553");
 //		helper2_0("A", "foo", new String[0], true, true);
+	}
+
+	public void test35() throws Exception{
+		helper2_0("foo", "bar", new String[] {"QObject;"}, true);
+	}
+
+	public void test36() throws Exception{
+		helper2_0("foo", "bar", new String[] {"QString;"}, true);
 	}
 	
 	//anonymous inner class

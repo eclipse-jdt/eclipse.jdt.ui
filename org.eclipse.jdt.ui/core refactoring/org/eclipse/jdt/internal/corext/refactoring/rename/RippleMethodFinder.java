@@ -113,7 +113,7 @@ public class RippleMethodFinder {
 			IType[] subTypes= getAllSubtypes(pm, workingCopies, type, hierarchies);
 			for (int i= 0; i < subTypes.length; i++){
 				if (!visitedTypes.contains(subTypes[i])){ 
-					IMethod subTypeMethod= Checks.findMethod(m, subTypes[i]);
+					IMethod subTypeMethod= Checks.findSimilarMethod(m, subTypes[i]);
 					if (subTypeMethod != null)
 						result.add(subTypeMethod);
 				}	
@@ -147,7 +147,7 @@ public class RippleMethodFinder {
 			IType t= superTypes[i];
 			if (visitedTypes.contains(t))
 				continue;
-			IMethod found= Checks.findMethod(method, t);	
+			IMethod found= Checks.findSimilarMethod(method, t);	
 			if (found == null)
 				continue;
 			if (! declaresAsVirtual(t, method))	
@@ -161,14 +161,14 @@ public class RippleMethodFinder {
 	
 	private static IMethod getTopMostMethod(IWorkingCopy[] workingCopies, Set visitedTypes, List methodQueue, IMethod method, IType type, IProgressMonitor pm)throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
-		IMethod methodInThisType= Checks.findMethod(method, type);
+		IMethod methodInThisType= Checks.findSimilarMethod(method, type);
 		Assert.isTrue(methodInThisType != null);
 		IType[] superTypes= type.newSupertypeHierarchy(workingCopies, new SubProgressMonitor(pm, 1)).getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++){
 			IType t= superTypes[i];
 			if (visitedTypes.contains(t))
 				continue;
-			IMethod found= Checks.findMethod(method, t);	
+			IMethod found= Checks.findSimilarMethod(method, t);	
 			if (found == null)
 				continue;
 			if (! declaresAsVirtual(t, method))	
@@ -181,7 +181,7 @@ public class RippleMethodFinder {
 	}
 	
 	private static boolean declaresAsVirtual(IType type, IMethod m) throws JavaModelException{
-		IMethod found= Checks.findMethod(m, type);
+		IMethod found= Checks.findSimilarMethod(m, type);
 		if (found == null)
 			return false;
 		if (JdtFlags.isStatic(found))	
@@ -201,7 +201,7 @@ public class RippleMethodFinder {
 		ITypeHierarchy hier= type.newTypeHierarchy(workingCopies, pm);
 		IType[] subtypes= hier.getAllSubtypes(type);
 		for (int i= 0; i < subtypes.length; i++){
-			IMethod subMethod= Checks.findMethod(method, subtypes[i]);
+			IMethod subMethod= Checks.findSimilarMethod(method, subtypes[i]);
 			if (subMethod != null){
 				methods.add(subMethod);
 			}
