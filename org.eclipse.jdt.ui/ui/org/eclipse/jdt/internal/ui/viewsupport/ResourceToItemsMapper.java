@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.IJavaElement;
  * Method <code>resourceChanged</code> updates all items that are affected from the changed
  * elements.
  */
-public class ResourceToItemMapper {
+class ResourceToItemsMapper {
 
 	private static final int NUMBER_LIST_REUSE= 10;
 
@@ -32,7 +32,7 @@ public class ResourceToItemMapper {
 	
 	private ContentViewer fContentViewer;
 
-	public ResourceToItemMapper(ContentViewer viewer) {
+	public ResourceToItemsMapper(ContentViewer viewer) {
 		fResourceToItem= new HashMap();
 		fReuseLists= new Stack();
 		

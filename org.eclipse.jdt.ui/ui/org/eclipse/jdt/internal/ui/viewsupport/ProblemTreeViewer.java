@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
  */
 public class ProblemTreeViewer extends TreeViewer {
 
-	private ResourceToItemMapper fResourceToItemMapper;
+	private ResourceToItemsMapper fResourceToItemsMapper;
 
 	/*
 	 * @see TreeViewer#TreeViewer(Composite)
@@ -68,7 +68,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	}
 	
 	private void initMapper() {
-		fResourceToItemMapper= new ResourceToItemMapper(this);
+		fResourceToItemsMapper= new ResourceToItemsMapper(this);
 	}
 	
 	
@@ -78,7 +78,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	protected void mapElement(Object element, Widget item) {
 		super.mapElement(element, item);
 		if (item instanceof Item) {
-			fResourceToItemMapper.addToMap(element, (Item) item);
+			fResourceToItemsMapper.addToMap(element, (Item) item);
 		}
 	}
 
@@ -87,7 +87,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	 */
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
-			fResourceToItemMapper.removeFromMap(element, (Item) item);
+			fResourceToItemsMapper.removeFromMap(element, (Item) item);
 		}		
 		super.unmapElement(element, item);
 	}
@@ -96,7 +96,7 @@ public class ProblemTreeViewer extends TreeViewer {
 	 * @see StructuredViewer#unmapAllElements()
 	 */
 	protected void unmapAllElements() {
-		fResourceToItemMapper.clearMap();
+		fResourceToItemsMapper.clearMap();
 		super.unmapAllElements();
 	}
 
@@ -112,12 +112,12 @@ public class ProblemTreeViewer extends TreeViewer {
 		}		
 		
 		Object[] changed= event.getElements();
-		if (changed != null && !fResourceToItemMapper.isEmpty()) {
+		if (changed != null && !fResourceToItemsMapper.isEmpty()) {
 			ArrayList others= new ArrayList();
 			for (int i= 0; i < changed.length; i++) {
 				Object curr= changed[i];
 				if (curr instanceof IResource) {
-					fResourceToItemMapper.resourceChanged((IResource) curr);
+					fResourceToItemsMapper.resourceChanged((IResource) curr);
 				} else {
 					others.add(curr);
 				}
