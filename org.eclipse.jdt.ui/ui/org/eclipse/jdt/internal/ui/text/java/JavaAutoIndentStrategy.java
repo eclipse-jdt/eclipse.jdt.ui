@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -297,7 +298,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				}
 			
 				buf.append(getLineDelimiter(d));
-				StringBuffer reference= indenter.getReferenceIndentation(c.offset);
+				StringBuffer reference= null;
+				int nonWS= findEndOfWhiteSpace(d, start, lineEnd);
+				if (nonWS < c.offset && d.getChar(nonWS) == '{')
+					reference= new StringBuffer(d.get(start, nonWS - start));
+				else
+					reference= indenter.getReferenceIndentation(c.offset);
 				if (reference != null)
 					buf.append(reference);
 				buf.append('}');
@@ -464,7 +470,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			
 		CompilationUnit compilationUnit= null;
 		try {
-			compilationUnit= AST.parseCompilationUnit(info.buffer);
+			ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+			parser.setSource(info.buffer);
+			compilationUnit= (CompilationUnit) parser.createAST(null);
 		} catch (ArrayIndexOutOfBoundsException x) {
 			// work around for parser problem
 			return false;
