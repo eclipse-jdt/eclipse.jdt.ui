@@ -310,8 +310,8 @@ public class BuildPathsBlock {
 			}
 		}
 		List exportedEntries = new ArrayList();
-		for (int i= 0; i < exportedEntries.size(); i++) {
-			CPListElement curr= (CPListElement) exportedEntries.get(i);
+		for (int i= 0; i < newClassPath.size(); i++) {
+			CPListElement curr= (CPListElement) newClassPath.get(i);
 			if (curr.isExported() || curr.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				exportedEntries.add(curr);
 			}

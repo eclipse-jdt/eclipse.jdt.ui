@@ -4,8 +4,10 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -27,9 +29,9 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 	
 	public HistoryDropDownAction(TypeHierarchyViewPart view) {
 		fHierarchyView= view;
-		setToolTipText(TypeHierarchyMessages.getString("HistoryDropDownAction.label")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(this, "forward_nav.gif"); //$NON-NLS-1$
-		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_BACKWARD_ACTION });
+		setToolTipText(TypeHierarchyMessages.getString("HistoryDropDownAction.tooltip")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.TYPEHIERARCHY_HISTORY_ACTION });
 		setMenuCreator(this);
 	}
 
@@ -43,17 +45,29 @@ public class HistoryDropDownAction extends Action implements IMenuCreator {
 
 	public Menu getMenu(Control parent) {
 		Menu menu= new Menu(parent);
+		boolean complete= addEntries(menu);
+		if (!complete) {
+			new MenuItem(menu, SWT.SEPARATOR);
+			Action others= new HistoryListAction(fHierarchyView);
+			others.setChecked(fHierarchyView.getCurrentHistoryIndex() >= RESULTS_IN_DROP_DOWN);
+			addActionToMenu(menu, others);
+		}
+		return menu;
+	}
+	
+	private boolean addEntries(Menu menu) {
 		for (int i= 0; i < RESULTS_IN_DROP_DOWN; i++) {
 			IType type= fHierarchyView.getHistoryEntry(i);
 			if (type == null) {
-				break;
+				return true;
 			}
 			HistoryAction action= new HistoryAction(fHierarchyView, i, type);
 			action.setChecked(i == fHierarchyView.getCurrentHistoryIndex());
 			addActionToMenu(menu, action);
-		}
-		return menu;
+		}	
+		return false;
 	}
+	
 
 	protected void addActionToMenu(Menu parent, Action action) {
 		ActionContributionItem item= new ActionContributionItem(action);

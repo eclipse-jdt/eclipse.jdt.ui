@@ -100,12 +100,12 @@ public class OpenTypeHierarchyUtil {
 		} catch (WorkbenchException e) {
 			JavaPlugin.log(e);
 			MessageDialog.openError(window.getShell(),
-				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_perspective"), //$NON-NLS-1$
+				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_perspective"), //$NON-NLS-1$
 				e.getMessage());
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 			MessageDialog.openError(window.getShell(),
-				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_editor"), //$NON-NLS-1$
+				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_editor"), //$NON-NLS-1$
 				e.getMessage());
 		}
 		return null;
@@ -122,7 +122,7 @@ public class OpenTypeHierarchyUtil {
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			MessageDialog.openError(window.getShell(), 
-				JavaUIMessages.getString("OpenTypeHierarchyHelper.error.open_view"), e.getMessage()); //$NON-NLS-1$
+				JavaUIMessages.getString("OpenTypeHierarchyUtil.error.open_view"), e.getMessage()); //$NON-NLS-1$
 		}
 		return null;		
 	}
@@ -200,8 +200,8 @@ public class OpenTypeHierarchyUtil {
 
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell,			
 			new JavaElementLabelProvider(flags));
-		dialog.setTitle(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.title"));  //$NON-NLS-1$
-		dialog.setMessage(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.message")); //$NON-NLS-1$
+		dialog.setTitle(JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.title"));  //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("OpenTypeHierarchyUtil.selectionDialog.message")); //$NON-NLS-1$
 		dialog.setElements(types);
 
 		if (dialog.open() == dialog.OK) {

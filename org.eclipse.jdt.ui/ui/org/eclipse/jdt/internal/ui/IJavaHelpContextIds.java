@@ -27,8 +27,7 @@ public interface IJavaHelpContextIds {
 	public static final String FOCUS_ON_SELECTION_ACTION= PREFIX + "focus_on_selection_action"; //$NON-NLS-1$
 	public static final String FOCUS_ON_TYPE_ACTION= PREFIX + "focus_on_type_action"; //$NON-NLS-1$
 
-	public static final String TYPEHIERARCHY_FORWARD_ACTION= PREFIX + "typehierarchy_forward_action"; //$NON-NLS-1$
-	public static final String TYPEHIERARCHY_BACKWARD_ACTION= PREFIX + "typehierarchy_backward_action"; //$NON-NLS-1$
+	public static final String TYPEHIERARCHY_HISTORY_ACTION= PREFIX + "typehierarchy_history_action"; //$NON-NLS-1$
 	public static final String FILTER_PUBLIC_ACTION= PREFIX + "filter_public_action"; //$NON-NLS-1$
 	public static final String FILTER_FIELDS_ACTION= PREFIX + "filter_fields_action"; //$NON-NLS-1$
 	public static final String FILTER_STATIC_ACTION= PREFIX + "filter_static_action"; //$NON-NLS-1$

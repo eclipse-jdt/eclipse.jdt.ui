@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -67,9 +68,11 @@ public class HistoryListAction extends Action {
 			fHistoryList.selectElements(sel);
 		}
 		
+		/*
+		 * @see Dialog#createDialogArea(Composite)
+		 */
 		protected Control createDialogArea(Composite parent) {
 			Composite composite= (Composite) super.createDialogArea(parent);
-			
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fHistoryList }, true, 420, 0, SWT.DEFAULT, SWT.DEFAULT);	
 			fHistoryList.getTableViewer().addDoubleClickListener(new IDoubleClickListener() {
 				public void doubleClick(DoubleClickEvent event) {
@@ -78,7 +81,6 @@ public class HistoryListAction extends Action {
 					}
 				}
 			});
-			//fHistoryList.postSetFocusOnDialogField(parent.getDisplay());
 			return composite;
 		}
 		
@@ -105,6 +107,8 @@ public class HistoryListAction extends Action {
 	
 	public HistoryListAction(TypeHierarchyViewPart view) {
 		fView= view;
+		setText(TypeHierarchyMessages.getString("HistoryListAction.label"));
+		JavaPluginImages.setLocalImageDescriptors(this, "history_list.gif"); //$NON-NLS-1$
 	}
 	
 		
