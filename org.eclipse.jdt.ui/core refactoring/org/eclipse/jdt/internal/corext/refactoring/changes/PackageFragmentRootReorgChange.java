@@ -148,6 +148,9 @@ abstract class PackageFragmentRootReorgChange extends Change {
 		IResource resource= getRoot().getResource();
 		if (resource == null)
 			return shallowCopy;
+		
+		if (! resource.isLinked())
+			return shallowCopy;
 
 		if (fDeepCopyQuery.performDeepCopy(resource))
 			return deepCopy;
