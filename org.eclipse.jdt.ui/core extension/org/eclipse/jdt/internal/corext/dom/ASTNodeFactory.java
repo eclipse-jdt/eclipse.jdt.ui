@@ -20,8 +20,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 public class ASTNodeFactory {
 
-	private static final String STATEMENT_HEADER= "class __X__ { void __x__() { ";
-	private static final String STATEMENT_FOOTER= "}}";
+	private static final String STATEMENT_HEADER= "class __X__ { void __x__() { "; //$NON-NLS-1$
+	private static final String STATEMENT_FOOTER= "}}"; //$NON-NLS-1$
 	
 	private static class PositionClearer extends GenericVisitor {
 		protected boolean visitNode(ASTNode node) {
@@ -45,7 +45,7 @@ public class ASTNodeFactory {
 	}
 	
 	public static Name newName(AST ast, String name) {
-		StringTokenizer tok= new StringTokenizer(name, ".");
+		StringTokenizer tok= new StringTokenizer(name, "."); //$NON-NLS-1$
 		Name res= null;
 		while (tok.hasMoreTokens()) {
 			SimpleName curr= ast.newSimpleName(tok.nextToken());

@@ -87,7 +87,7 @@ public class Bindings {
 		if (!baseType.isAnonymous()) {
 			buffer.append(type.getName());
 		} else {
-			buffer.append("$local$");
+			buffer.append("$local$"); //$NON-NLS-1$
 		}
 	}
 	
@@ -110,7 +110,7 @@ public class Bindings {
 		if (!baseType.isAnonymous()) {
 			list.add(type.getName());
 		} else {
-			list.add("$local$");
+			list.add("$local$"); //$NON-NLS-1$
 		}		
 	}	
 	

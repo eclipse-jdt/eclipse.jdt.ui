@@ -18,7 +18,7 @@ public final class CopyIndentedSourceEdit extends CopySourceEdit {
 
 	public CopyIndentedSourceEdit(int offset, int length) {
 		super(offset, length);
-		initialize(0, "", 4);
+		initialize(0, "", 4); //$NON-NLS-1$
 	}
 
 	public void initialize(int sourceIndentLevel, String destIndentString, int tabWidth) {

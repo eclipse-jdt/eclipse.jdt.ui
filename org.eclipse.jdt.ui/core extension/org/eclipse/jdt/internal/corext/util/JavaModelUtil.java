@@ -682,12 +682,12 @@ public class JavaModelUtil {
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
 		//workaround for bugs 23644 and 23656
 		try{
-			pm.beginTask("", 3);
+			pm.beginTask("", 3); //$NON-NLS-1$
 			ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new SubProgressMonitor(pm, 1));
 			
 			IProgressMonitor subPm= new SubProgressMonitor(pm, 2);
 			List typeList= Arrays.asList(hierarchy.getAllSupertypes(type));
-			subPm.beginTask("", typeList.size());
+			subPm.beginTask("", typeList.size()); //$NON-NLS-1$
 			Set types= new HashSet(typeList);
 			for (Iterator iter= typeList.iterator(); iter.hasNext();) {
 				IType superType= (IType)iter.next();

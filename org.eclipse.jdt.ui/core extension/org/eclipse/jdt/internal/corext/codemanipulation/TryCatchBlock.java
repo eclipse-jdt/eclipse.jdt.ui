@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class TryCatchBlock extends AbstractCodeBlock {
 
-	private static final String TRY_PLACE_HOLDER= "f();";
+	private static final String TRY_PLACE_HOLDER= "f();"; //$NON-NLS-1$
 
 	private AbstractCodeBlock fTryBody;
 	private ITypeBinding[] fExceptions;
@@ -77,7 +77,7 @@ public class TryCatchBlock extends AbstractCodeBlock {
 		for (int i= 0; i < fExceptions.length; i++) {
 			buffer.append("catch("); //$NON-NLS-1$
 			buffer.append(fExceptions[i].getName());
-			buffer.append(" e){" + lineSeparator + getCatchBody(fExceptions[i], lineSeparator) + "}"); // $NON-NLS-1$ $NON-NLS-2$
+			buffer.append(" e){" + lineSeparator + getCatchBody(fExceptions[i], lineSeparator) + "}"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return buffer.toString();	
 	}
@@ -85,7 +85,7 @@ public class TryCatchBlock extends AbstractCodeBlock {
 	private String getCatchBody(ITypeBinding exception, String lineSeparator) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.CATCHBLOCK);
 		if (template == null) {
-			return "";
+			return ""; //$NON-NLS-1$
 		}		
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), fJavaProject, lineSeparator, 0);
 		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exception.getName());

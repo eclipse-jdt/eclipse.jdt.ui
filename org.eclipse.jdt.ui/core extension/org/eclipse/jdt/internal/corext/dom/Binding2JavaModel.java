@@ -43,7 +43,7 @@ public class Binding2JavaModel {
 		}
 		if (typeBinding != null) {
 			IPackageBinding pack= typeBinding.getPackage();
-			String packageName= pack.isUnnamed() ? "" : pack.getName();
+			String packageName= pack.isUnnamed() ? "" : pack.getName(); //$NON-NLS-1$
 			IType type= project.findType(packageName, typeBinding.getName());
 			if (type != null) {
 				return type.getCompilationUnit();

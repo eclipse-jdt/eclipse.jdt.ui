@@ -28,8 +28,8 @@ public class TypeInfoFactory {
 	private TypeInfo fLast;
 	private char[] fBuffer;
 
-	private static final String CLASS= "class";
-	private static final String JAVA= "java";
+	private static final String CLASS= "class"; //$NON-NLS-1$
+	private static final String JAVA= "java"; //$NON-NLS-1$
 	
 	public TypeInfoFactory() {
 		super();
