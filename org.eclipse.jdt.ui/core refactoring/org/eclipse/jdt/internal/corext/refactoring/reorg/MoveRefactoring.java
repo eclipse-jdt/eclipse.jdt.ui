@@ -46,6 +46,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -77,6 +79,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();
+			result.merge(checkReferencesToNotPublicTypes(new SubProgressMonitor(pm, 1)));
 			result.merge(checkPackageVisibileClassReferences(new SubProgressMonitor(pm, 1)));
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
@@ -86,6 +89,29 @@ public class MoveRefactoring extends ReorgRefactoring {
 		} finally{
 			pm.done();
 		}	
+	}
+
+	private RefactoringStatus checkReferencesToNotPublicTypes(IProgressMonitor pm) throws JavaModelException {
+		if (! (getDestination() instanceof IPackageFragment))
+			return null;
+
+		ICompilationUnit[] movedCus= collectCus();
+		List movedCuList= Arrays.asList(movedCus);
+		IType[] types= ReferenceFinderUtil.getTypesReferencedIn(movedCus, pm);
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < types.length; i++) {
+			IType type= types[i];
+			if (JdtFlags.isPublic(type))
+				continue;
+			if (movedCuList.contains(type.getCompilationUnit()))
+				continue;
+			if (getDestination().equals(type.getCompilationUnit().getParent()))
+				continue;
+			String key= "Type ''{0}'' will not be accessible after moving.";
+			String message= MessageFormat.format(key, new String[]{JavaElementUtil.createSignature(type)});
+			result.addWarning(message);				
+		}
+		return result;
 	}
 
 	private RefactoringStatus checkPackageVisibileClassReferences(IProgressMonitor pm) throws JavaModelException {
@@ -102,7 +128,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 		ISearchPattern pattern= createSearchPattern(movedPackageVisibleTypes);
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern);
 		
-		RefactoringStatus status= new RefactoringStatus();
+		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
 			ICompilationUnit cu= group.getCompilationUnit();
@@ -114,10 +140,10 @@ public class MoveRefactoring extends ReorgRefactoring {
 				continue;
 			String key= "''{0}'' contains references to a type that will not be visible after moving.";
 			String message= MessageFormat.format(key, new String[]{cu.getElementName()});
-			status.addWarning(message);
+			result.addWarning(message);
 		}
 		pm.done();
-		return status;
+		return result;
 	}
 
 	private static ISearchPattern createSearchPattern(IType[] movedPackageVisibleTypes) {
