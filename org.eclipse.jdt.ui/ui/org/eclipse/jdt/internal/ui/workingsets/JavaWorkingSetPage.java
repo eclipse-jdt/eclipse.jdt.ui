@@ -31,7 +31,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
@@ -46,6 +45,7 @@ import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetPage;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -169,7 +169,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		if (fWorkingSet != null)
 			fWorkingSetName.setText(fWorkingSet.getName());
 		initializeCheckedState();
-		disableClosedProjects();
 		validateInput();
 
 		Dialog.applyDialogFont(composite);
@@ -194,7 +193,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			fFirstCheck= false;
 			fWorkingSetName.setText(fWorkingSet.getName());
 			initializeCheckedState();
-			disableClosedProjects();
 			validateInput();
 		}
 	}
@@ -212,7 +210,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		} else {
 			// Add inaccessible resources
 			IAdaptable[] oldItems= fWorkingSet.getElements();
-
+			ArrayList closedWithChildren= new ArrayList(elements.size());
 			for (int i= 0; i < oldItems.length; i++) {
 				IResource oldResource= null;
 				if (oldItems[i] instanceof IResource) {
@@ -221,7 +219,12 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 					oldResource= (IResource)oldItems[i].getAdapter(IResource.class);
 				}
 				if (oldResource != null && oldResource.isAccessible() == false) {
-					elements.add(oldResource);
+					IProject project= oldResource.getProject();
+					if (elements.contains(project) || closedWithChildren.contains(project)) {
+						elements.add(oldItems[i]);
+						elements.remove(project);
+						closedWithChildren.add(project);
+					}
 				}
 			}
 			fWorkingSet.setName(workingSetName);
@@ -271,14 +274,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		return false;
 	}
 	
-	private void disableClosedProjects() {
-		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		for (int i= 0; i < projects.length; i++) {
-			if (!projects[i].isOpen())
-				fTree.setGrayed(projects[i], true);
-		}
-	}
-
 	private void findCheckedElements(List checkedResources, Object parent) {
 		Object[] children= fTreeContentProvider.getChildren(parent);
 		for (int i= 0; i < children.length; i++) {
@@ -293,13 +288,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				IAdaptable element= (IAdaptable)event.getElement();
-				IResource resource= (IResource)element.getAdapter(IResource.class);
-				if (resource != null && !resource.isAccessible()) {
-					MessageDialog.openInformation(getShell(), WorkingSetMessages.getString("JavaWorkingSetPage.projectClosedDialog.title"), WorkingSetMessages.getString("JavaWorkingSetPage.projectClosedDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
-					fTree.setChecked(element, false);
-					fTree.setGrayed(element, true);
-					return;
-				}
 				boolean state= event.getChecked();		
 				fTree.setGrayed(element, false);
 				if (isExpandable(element))
@@ -368,11 +356,28 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 			public void run() {
 				Object[] elements= fWorkingSet.getElements();
+
+				// Use closed project for elements in closed project
+				for (int i= 0; i < elements.length; i++) {
+					Object element= elements[i];
+					if (element instanceof IResource) {
+						IProject project= ((IResource)element).getProject();
+						if (!project.isAccessible())
+							elements[i]= project;
+					}
+					if (element instanceof IJavaElement) {
+						IJavaProject jProject= ((IJavaElement)element).getJavaProject();
+						if (jProject != null && !jProject.getProject().isAccessible()) 
+							elements[i]= jProject.getProject();
+					}
+				}
+
 				fTree.setCheckedElements(elements);
 				for (int i= 0; i < elements.length; i++) {
 					Object element= elements[i];
 					if (isExpandable(element))
 						setSubtreeChecked(element, true, true);
+						
 					updateParentState(element, true);
 				}
 			}
