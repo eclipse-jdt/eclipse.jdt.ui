@@ -17,7 +17,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ExtractTempAction extends TextSelectionRefactoringAction {
 
 	public ExtractTempAction(CompilationUnitEditor editor) {
-		super(editor);
+		super(editor, RefactoringMessages.getString("ExtractTempAction.extract_temp")); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
@@ -38,12 +38,5 @@ public class ExtractTempAction extends TextSelectionRefactoringAction {
 		String helpId= IJavaHelpContextIds.RENAME_TEMP_ERROR_WIZARD_PAGE;
 		String pageTitle= RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 		return new ExtractTempWizard((ExtractTempRefactoring)refactoring, pageTitle, helpId);
-	}
-
-	/* (non-Javadoc)
-	 * Method declated in TextSelectionBasedRefactoringAction
-	 */	
-	protected String getMessageDialogTitle() {
-		return RefactoringMessages.getString("ExtractTempAction.extract_temp"); //$NON-NLS-1$
 	}
 }

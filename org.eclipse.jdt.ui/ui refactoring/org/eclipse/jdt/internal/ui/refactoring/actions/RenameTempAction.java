@@ -2,6 +2,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
@@ -18,11 +19,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 class RenameTempAction extends TextSelectionRefactoringAction {
 
 	public RenameTempAction(CompilationUnitEditor editor) {
-		super(editor);
+		super(editor, RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
 		setText(RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
 	}
 	
@@ -37,25 +39,25 @@ class RenameTempAction extends TextSelectionRefactoringAction {
 		return new RenameRefactoringWizard((RenameTempRefactoring)refactoring, getText(), message, wizardPageHelp, errorPageHelp);
 	}
 	
-	protected String getMessageDialogTitle() {
-		return RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"); //$NON-NLS-1$
+	protected void selectionChanged(ITextSelection selection) {
+		setEnabled(getCompilationUnit() != null);
 	}
 	
-	protected boolean canEnableOn(ITextSelection selection) {
-		return getCompilationUnit() != null;
-	}	
-	
 	protected boolean canRun(ITextSelection selection) {
-		if (! super.canRun(selection))
+		selectionChanged(selection);
+		if (! isEnabled())
 			return false;
 
 		Refactoring renameTempRefactoring= createRefactoring(getCompilationUnit(), (ITextSelection)selection);
 		try {
 			return (renameTempRefactoring.checkActivation(new NullProgressMonitor()).isOK());
 		} catch(JavaModelException e) {
-			//ignore the exception
+			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"), RefactoringMessages.getString("RenameTempAction.exception"));//$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		}
 	}
-
+		
+	private ICompilationUnit getCompilationUnit(){
+		return SelectionConverter.getInputAsCompilationUnit(getEditor());
+	}	
 }
