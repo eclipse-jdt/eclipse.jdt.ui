@@ -46,6 +46,8 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -60,6 +62,7 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -76,6 +79,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ArrayUtility;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -249,7 +254,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 			};
 			
 			
-			class JavaOutlineViewer extends TreeViewer {
+			class JavaOutlineViewer extends ProblemTreeViewer {
 				
 				/**
 				 * Indicates an item which has been reused. At the point of
@@ -527,6 +532,19 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					
 					return false;
 				}
+				
+				/**
+				 * @see ProblemTreeViewer#getUnderlyingResource
+				 */
+				protected IResource getUnderlyingResource(Object obj) throws CoreException {
+					Object input= getInput();
+					if (input instanceof IWorkingCopy) {
+						return ((ICompilationUnit)input).getOriginalElement().getCorrespondingResource();
+					}
+					return null;
+				}
+							
+				
 			};
 			
 			class LexicalSorter extends ViewerSorter {
@@ -753,6 +771,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 						JavaPlugin.getDefault().getPreferenceStore().setValue(fPreferenceKey, on);
 				}
 			};
+			
+			
 
 			
 	private IJavaElement fInput;
@@ -764,6 +784,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private ListenerList fSelectionChangedListeners= new ListenerList();
 	private Hashtable fActions= new Hashtable();
 	private ContextMenuGroup[] fActionGroups;
+	
+	private IProblemChangedListener fJavaProblemListener;
 	
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
@@ -789,9 +811,14 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		Tree tree= new Tree(parent, SWT.MULTI);
 		
+		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_TYPE);
+		lprovider.setErrorTickManager(new AnnotationErrorTickManager(fEditor));	
+		
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
-		fOutlineViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_TYPE));
+		fOutlineViewer.setLabelProvider(lprovider);
+		
+		JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fOutlineViewer);
 				
 		MenuManager manager= new MenuManager(fContextMenuID, fContextMenuID);
 		manager.setRemoveAllWhenShown(true);
@@ -832,6 +859,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		for (int i= 0; i < listeners.length; i++)
 			fSelectionChangedListeners.remove(listeners[i]);
 		fSelectionChangedListeners= null;
+		
+		JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fOutlineViewer);
 		
 		if (fMenu != null && !fMenu.isDisposed()) {
 			fMenu.dispose();

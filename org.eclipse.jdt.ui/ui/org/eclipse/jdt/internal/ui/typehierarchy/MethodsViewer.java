@@ -4,13 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.Collection;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.ScrollBar;
@@ -52,8 +53,10 @@ import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.SeverityItemMapper;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
+import org.eclipse.jdt.internal.ui.viewsupport.ProblemItemMapper;
 
 
 /**
@@ -61,18 +64,18 @@ import org.eclipse.jdt.internal.ui.viewsupport.SeverityItemMapper;
  * Offers filter actions.
  * No dependency to the type hierarchy view
  */
-public class MethodsViewer extends TableViewer {
+public class MethodsViewer extends TableViewer implements IProblemChangedListener {
 	
-	private SeverityItemMapper fSeverityItemMapper;
+	private ProblemItemMapper fProblemItemMapper;
 	
 	/**
 	 * Sorter that uses the unmodified labelprovider (No declaring class names)
 	 */
 	private static class MethodsViewerSorter extends ViewerSorter {
-		private JavaTextLabelProvider fLabelProvider;
+		private JavaTextLabelProvider fTextLabelProvider;
 		
 		public MethodsViewerSorter() {
-			fLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+			fTextLabelProvider= new JavaTextLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		}
 		
 		public boolean isSorterProperty(Object element, Object property) {
@@ -103,8 +106,8 @@ public class MethodsViewer extends TableViewer {
 				return cat1 - cat2;
 
 			// cat1 == cat2
-			String name1= fLabelProvider.getTextLabel((IJavaElement)e1);
-			String name2= fLabelProvider.getTextLabel((IJavaElement)e2);
+			String name1= fTextLabelProvider.getTextLabel((IJavaElement)e1);
+			String name2= fTextLabelProvider.getTextLabel((IJavaElement)e2);
 			return getCollator().compare(name1, name2);
 		}
 	}
@@ -129,7 +132,7 @@ public class MethodsViewer extends TableViewer {
 	public MethodsViewer(Composite parent, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fSeverityItemMapper= new SeverityItemMapper();
+		fProblemItemMapper= new ProblemItemMapper();
 		
 		final Table table= getTable();
 		final TableColumn column= new TableColumn(table, SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
@@ -139,8 +142,11 @@ public class MethodsViewer extends TableViewer {
 			}
 		});
 
+		JavaElementLabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
+		lprovider.setErrorTickManager(new MarkerErrorTickManager());
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
-		setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+
+		setLabelProvider(lprovider);
 		setContentProvider(contentProvider);
 				
 		fOpen= new OpenSourceReferenceAction(this);
@@ -308,15 +314,27 @@ public class MethodsViewer extends TableViewer {
 		tbm.add(fFilterActions[1]); // static
 		tbm.add(fFilterActions[2]); // public
 	}
+
+
+	/**
+	 * @see IProblemChangedListener#problemsChanged
+	 */
+	public void problemsChanged(final Set changed) {
+		Control control= getControl();
+		if (control != null && !control.isDisposed()) {
+			control.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					fProblemItemMapper.problemsChanged(changed, (ILabelProvider)getLabelProvider());
+				}
+			});
+		}
+	}
 	
 	private IResource getMappingResource(IMember member) {
 		try {
-			int type= member.getElementType();
-			if (type == IJavaElement.TYPE || type == IJavaElement.METHOD || type == IJavaElement.INITIALIZER) {
-				ICompilationUnit cu= member.getCompilationUnit();
-				if (cu != null) {
-					return cu.getCorrespondingResource();
-				}
+			ICompilationUnit cu= member.getCompilationUnit();
+			if (cu != null) {
+				return cu.getCorrespondingResource();
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
@@ -331,7 +349,7 @@ public class MethodsViewer extends TableViewer {
 		super.mapElement(element, widget);
 		IResource res= getMappingResource((IMember)element);
 		if (res != null && widget instanceof Item) {
-			fSeverityItemMapper.addToMap(res, (Item)widget);
+			fProblemItemMapper.addToMap(res, (Item)widget);
 		}
 	}
 
@@ -342,7 +360,7 @@ public class MethodsViewer extends TableViewer {
 		super.unmapElement(element);
 		IResource res= getMappingResource((IMember)element);
 		if (res != null) {
-			fSeverityItemMapper.removeFromMap(res, element);
+			fProblemItemMapper.removeFromMap(res, element);
 		}
 	}
 
@@ -352,14 +370,7 @@ public class MethodsViewer extends TableViewer {
 	 */	
 	protected void unmapAllElements() {
 		super.unmapAllElements();
-		fSeverityItemMapper.clearMap();
+		fProblemItemMapper.clearMap();
 	}
-
-	/**
-	 * Called when severities changed.
-	 */	
-	public void severitiesChanged(Collection changed) {
-		fSeverityItemMapper.severitiesChanged(changed, (ILabelProvider)getLabelProvider());
-	}	
 
 }

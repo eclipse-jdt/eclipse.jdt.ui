@@ -6,7 +6,6 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -38,7 +37,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -88,7 +86,8 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyHelper;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.IJavaProblemListener;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
+import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickManager;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionProviderMediator;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
@@ -119,7 +118,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private ArrayList fInputHistory;
 	private int fCurrHistoryIndex;
 	
-	private IJavaProblemListener fJavaProblemListener;
+	private IProblemChangedListener fHierarchyProblemListener;
 	
 	private TypeHierarchyLifeCycle fHierarchyLifeCycle;
 	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
@@ -138,7 +137,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private Label fEmptyTypesViewer;
 	
 	private CLabel fMethodViewerPaneLabel;
-	private ILabelProvider fPaneLabelProvider;
+	private JavaElementLabelProvider fPaneLabelProvider;
 	
 	private IDialogSettings fDialogSettings;
 	
@@ -166,13 +165,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		};
 		fHierarchyLifeCycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 		
-		fJavaProblemListener= new IJavaProblemListener() {
-			public void severitiesChanged(Set elements) {
-				doSeverityChanged(elements);
-			}
-		};
-		JavaPlugin.getDefault().getJavaProblemMarkerFilter().addListener(fJavaProblemListener);
-		
+		fHierarchyProblemListener= null;
 		
 		fIsEnableMemberFilter= false;
 		
@@ -211,6 +204,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
 		fPaneLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS);
+		fPaneLabelProvider.setErrorTickManager(new MarkerErrorTickManager());
 		
 		fAllViewers= new TypeHierarchyViewer[3];
 	
@@ -364,9 +358,13 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	public void dispose() {
 		fHierarchyLifeCycle.freeHierarchy();
 		fHierarchyLifeCycle.removeChangedListener(fTypeHierarchyLifeCycleListener);
-		JavaPlugin.getDefault().getJavaProblemMarkerFilter().removeListener(fJavaProblemListener);
 		fPaneLabelProvider.dispose();
 		getSite().getPage().removePartListener(fPartListener);
+
+		if (fHierarchyProblemListener != null) {
+			JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fHierarchyProblemListener);
+		}
+		JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fMethodsViewer);
 		super.dispose();
 	}
 		
@@ -481,6 +479,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				viewPartKeyShortcuts(event);
 			}
 		});
+		
+		JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fMethodsViewer);
 		return control;
 	}
 	
@@ -841,23 +841,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 			});
 		}
-	}
-	
-	/**
-	 * Called from ISeverityListener#severitiesChanged
-	 */	
-	private void doSeverityChanged(final Set changeElements) {
-		Display display= getDisplay();
-		if (display != null) {
-			display.asyncExec(new Runnable() {
-				public void run() {
-					getCurrentViewer().severitiesChanged(changeElements);
-					fMethodsViewer.severitiesChanged(changeElements);
-				}
-			});
-		}
-	}
-	
+	}	
 	
 	private Display getDisplay() {
 		if (fPagebook != null && !fPagebook.isDisposed()) {
@@ -893,8 +877,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	 * called from ToggleViewAction
 	 */	
 	public void setView(int viewerIndex) {
-		if (viewerIndex < fAllViewers.length && fCurrentViewerIndex != viewerIndex) {
+		if (viewerIndex < fAllViewers.length && fCurrentViewerIndex != viewerIndex) {			
 			fCurrentViewerIndex= viewerIndex;
+			
 			updateTypesViewer();
 			if (fInput != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
@@ -904,9 +889,16 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				if (!fIsEnableMemberFilter) {
 					typeSelectionChanged(getCurrentViewer().getSelection());
 				}
-			}
-		
+			}		
 			updateTitle();
+			
+			if (fHierarchyProblemListener != null) {
+				JavaPlugin.getDefault().getProblemMarkerFilter().removeListener(fHierarchyProblemListener);
+			}
+			fHierarchyProblemListener= getCurrentViewer();
+			JavaPlugin.getDefault().getProblemMarkerFilter().addListener(fHierarchyProblemListener);
+			
+			
 			fDialogSettings.put(DIALOGSTORE_HIERARCHYVIEW, viewerIndex);
 			getCurrentViewer().getTree().setFocus();
 		}

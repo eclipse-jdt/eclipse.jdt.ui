@@ -16,11 +16,19 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  {
 	
-	private ErrorTickManager fErrorTickManager;
+	private IErrorTickManager fErrorTickManager;
 	
 	public JavaElementDescriptorFactory() {
-		fErrorTickManager= new ErrorTickManager();
+		fErrorTickManager= null;
 	}
+	
+	/**
+	 * Sets the ErrorTickManager
+	 * @param errorTickManager The errorTickManager to set
+	 */
+	public void setErrorTickManager(IErrorTickManager errorTickManager) {
+		fErrorTickManager= errorTickManager;
+	}	
 	
 	/**
 	 * Although all methods of a Java interface are abstract, the 
@@ -53,12 +61,14 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 
 		int flags= 0;
 
-		IJavaElement jElement= (IJavaElement)element;
-		int info= fErrorTickManager.getErrorInfo(jElement);
-		if ((info & ErrorTickManager.ERRORTICK_ERROR) != 0) {
-			flags |= JavaOverlayDescriptor.ERROR;
-		} else if ((info & ErrorTickManager.ERRORTICK_WARNING) != 0) {
-			flags |= JavaOverlayDescriptor.WARNING;
+		if (fErrorTickManager != null) {
+			IJavaElement jElement= (IJavaElement)element;
+			int info= fErrorTickManager.getErrorInfo(jElement);
+			if ((info & IErrorTickManager.ERRORTICK_ERROR) != 0) {
+				flags |= JavaOverlayDescriptor.ERROR;
+			} else if ((info & IErrorTickManager.ERRORTICK_WARNING) != 0) {
+				flags |= JavaOverlayDescriptor.WARNING;
+			}
 		}
 					
 		if (element instanceof ISourceReference) { 
@@ -91,4 +101,7 @@ public class JavaElementDescriptorFactory implements IOverlayDescriptorFactory  
 		}
 		return 0;
 	}
+
+
+
 }	

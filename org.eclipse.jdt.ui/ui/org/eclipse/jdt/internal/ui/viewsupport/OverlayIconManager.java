@@ -112,4 +112,14 @@ public class OverlayIconManager {
 	public static boolean isManaged(String key) {
 		return fgBaseImageDescriptors.containsKey(key);
 	}
+	
+	/**
+	 * Gets the descriptorFactory
+	 * @return Returns a IOverlayDescriptorFactory
+	 */
+	public IOverlayDescriptorFactory getDescriptorFactory() {
+		return fDescriptorFactory;
+	}
+
+
 }

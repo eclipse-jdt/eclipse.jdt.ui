@@ -8,28 +8,30 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.resource.ImageDescriptor;import org.eclipse.jface.util.Assert;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
-import org.eclipse.ui.model.IWorkbenchAdapter;import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 
 
 /**
@@ -45,10 +47,16 @@ public class JavaImageLabelProvider {
 		
 	public JavaImageLabelProvider(int flags) {
 		fFlags= flags;
+		JavaElementDescriptorFactory factory= new JavaElementDescriptorFactory();
+		
 		if ((flags & JavaElementLabelProvider.SHOW_SMALL_ICONS) != 0)
-			fIconManager= new OverlayIconManager(new JavaElementDescriptorFactory(), SMALL_SIZE);
+			fIconManager= new OverlayIconManager(factory, SMALL_SIZE);
 		else 
-			fIconManager= new OverlayIconManager(new JavaElementDescriptorFactory(), BIG_SIZE);
+			fIconManager= new OverlayIconManager(factory, BIG_SIZE);
+	}
+	
+	public void setErrorTickManager(IErrorTickManager manager) {
+		((JavaElementDescriptorFactory)fIconManager.getDescriptorFactory()).setErrorTickManager(manager);
 	}
 	
 	public void turnOn(int flags) {

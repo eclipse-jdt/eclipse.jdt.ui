@@ -11,21 +11,18 @@ import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.ui.viewsupport.IErrorTickManager;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaTextLabelProvider;
 
@@ -204,6 +201,10 @@ public class JavaElementLabelProvider extends LabelProvider {
 		fWorkbenchLabelProvider.dispose();
 		disposeJarEntryImages();
 	}
+	
+	public void setErrorTickManager(IErrorTickManager manager) {
+		fImageLabelProvider.setErrorTickManager(manager);
+	}	
 	
 	/*
 	 * Dispose the cached images for JarEntry files

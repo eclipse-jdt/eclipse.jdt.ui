@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.text;/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */ import java.io.BufferedReader;import java.io.IOException;import java.io.Reader;import org.eclipse.swt.graphics.GC;
+package org.eclipse.jdt.internal.ui.text;/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */ import java.io.BufferedReader;import java.io.IOException;import java.io.Reader;import java.text.BreakIterator;import org.eclipse.swt.graphics.GC;
 
 /* * Not a real reader. Could change if requested */
 public class LineBreakingReader {
@@ -8,13 +8,12 @@ public class LineBreakingReader {
 	private int fMaxWidth;
 	
 	private String fLine;
-	private int fIndex;
+	private int fOffset;		private BreakIterator fLineBreakIterator;
 	/**	 * Creates a reader that breaks an input text to fit in a given width.	 * @param reader Reader of the input text	 * @param gc The graphic context that defines the currently used font sizes	 * @param maxLineWidth The max width (pixes) where the text has to fit in 	 */	public LineBreakingReader(Reader reader, GC gc, int maxLineWidth) {
 		fReader= new BufferedReader(reader);
 		fGC= gc;
 		fMaxWidth= maxLineWidth;
-		fLine= null;
-		fIndex= 0;
+		fOffset= 0;		fLine= null;		fLineBreakIterator= BreakIterator.getLineInstance();
 	}	
 		/**	 * Reads the next line. The lengths of the line will not exceed the gived maximum	 * width.	 */
 	public String readLine() throws IOException {
@@ -22,48 +21,30 @@ public class LineBreakingReader {
 			String line= fReader.readLine();
 			if (line == null) {
 				return null;
-			}
+			}								
 			int lineLen= fGC.textExtent(line).x;
 			if (lineLen < fMaxWidth) {
 				return line;
-			}
-			fLine= line;
-			fIndex= 0;
-		}
-		int breakIdx= findNextBreakIndex(fIndex);
-		String res= fLine.substring(fIndex, breakIdx);
-		if (breakIdx < fLine.length()) {
-			fIndex= findWordBegin(breakIdx);
-		} else {
+			}			fLine= line;
+			fLineBreakIterator.setText(line);
+			fOffset= 0;
+		}		int breakOffset= findNextBreakOffset(fOffset);
+		String res;
+		if (breakOffset != BreakIterator.DONE) {			res= fLine.substring(fOffset, breakOffset);
+			fOffset= findWordBegin(breakOffset);			if (fOffset == fLine.length()) {				fLine= null;			}
+		} else {			res= fLine.substring(fOffset);
 			fLine= null;
 		}
 		return res;
 	}
 	
-	private int findNextBreakIndex(int currIndex) {
-		int currWidth= 0;
-		int lineLength= fLine.length();
-
-		while (currIndex < lineLength) {
-			char ch= fLine.charAt(currIndex);
-			int nextIndex= currIndex + 1;
-			// leading whitespaces are counted to the following word
-			if (Character.isWhitespace(ch)) {
-				while (nextIndex < lineLength && Character.isWhitespace(fLine.charAt(nextIndex))) {
-					nextIndex++;
-				}
+	private int findNextBreakOffset(int currOffset) {		int currWidth= 0;		int nextOffset= fLineBreakIterator.following(currOffset);
+		while (nextOffset != BreakIterator.DONE) {			String word= fLine.substring(currOffset, nextOffset);			int wordWidth= fGC.textExtent(word).x;			int nextWidth= wordWidth + currWidth;
+			if (nextWidth > fMaxWidth) {				if (currWidth > 0) {					return currOffset;				} else {					return nextWidth;				}
 			}
-			while (nextIndex < lineLength && !Character.isWhitespace(fLine.charAt(nextIndex))) {
-				nextIndex++;
-			}
-			String word= fLine.substring(currIndex, nextIndex);			int wordWidth= fGC.textExtent(word).x;			int nextWidth= wordWidth + currWidth;
-			if (nextWidth > fMaxWidth && wordWidth < fMaxWidth) {
-				return currIndex;
-			}
-			currWidth= nextWidth;
-			currIndex= nextIndex;
+			currWidth= nextWidth;			currOffset= nextOffset;			nextOffset= fLineBreakIterator.next();
 		}
-		return currIndex;
+		return nextOffset;
 	}
 	
 	private int findWordBegin(int idx) {
