@@ -108,11 +108,19 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 	}
 	
 	/*
+	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#textModified(java.lang.String)
+	 */
+	protected void textModified(String text) {
+		getExtractTempRefactoring().setTempName(text);
+		updatePreviewLabel();
+		super.textModified(text);
+	}
+	
+	
+	/*
 	 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 	 */
 	protected RefactoringStatus validateTextField(String text) {
-		getExtractTempRefactoring().setTempName(text);
-		updatePreviewLabel();
 		return getExtractTempRefactoring().checkTempName(text);
 	}	
 	
