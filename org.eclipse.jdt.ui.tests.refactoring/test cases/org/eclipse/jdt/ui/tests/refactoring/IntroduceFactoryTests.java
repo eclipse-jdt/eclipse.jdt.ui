@@ -385,17 +385,32 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		Map/*<String,IJavaProject>*/ projName2Project= new HashMap();
 		Map/*<IJavaProject,IPackageFragmentRoot>*/ proj2PkgRoot= new HashMap();
 
-		createProjectPackageStructure(projName2PkgNames, projName2Project, proj2PkgRoot);
+		try {
+			createProjectPackageStructure(projName2PkgNames, projName2Project, proj2PkgRoot);
 
-		ICompilationUnit[] CUs = createCUs(inputFileBaseNames, projName2Project, proj2PkgRoot);
+			ICompilationUnit[] CUs= createCUs(inputFileBaseNames, projName2Project, proj2PkgRoot);
 
-		addProjectDependencies(dependencies, projName2Project);
+			addProjectDependencies(dependencies, projName2Project);
 
-		String	testName= getName();
-		String	testNumber= testName.substring("test".length());
-		String	testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
+			String testName= getName();
+			String testNumber= testName.substring("test".length());
+			String testPath= TEST_PATH_PREFIX + getRefactoringPath() + "Bugzilla/" + testNumber + "/";
 
-		doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
+			doMultiUnitTest(CUs, testPath, inputFileBaseNames, null);
+		
+		} finally {
+			for (Iterator iter= proj2PkgRoot.keySet().iterator(); iter.hasNext();) {
+				IJavaProject project= (IJavaProject) iter.next();
+				if (project.exists()) {
+					try {
+						project.getProject().delete(true, null);
+					} catch (CoreException e) {
+						// swallow exception to avoid destroying the original one
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 
 	private ICompilationUnit[] createCUs(String[] inputFileBaseNames, Map projName2Project, Map proj2PkgRoot) throws Exception {
