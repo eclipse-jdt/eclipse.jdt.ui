@@ -115,7 +115,7 @@ public class CodeFormatterUtil {
 		
 		TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
 		if (edit == null) {
-			JavaPlugin.logErrorMessage("formatter failed to format (null returned). Will use unformatted instead. node: " + node.getNodeType() + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
+			JavaPlugin.logErrorMessage("formatter failed to format (no edit returned). Will use unformatted text instead. node: " + node.getNodeType() + ", string: " + string); //$NON-NLS-1$ //$NON-NLS-2$
 			return string;
 		}
 		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
