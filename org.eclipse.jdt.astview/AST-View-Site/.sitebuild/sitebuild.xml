@@ -3,5 +3,5 @@
       autobuild="false"
       scrub-output="false"
       use-console="true">
-   <feature id="org.eclipse.jdt.astview.feature" version="1.0.2"/>
+   <feature id="org.eclipse.jdt.astview.feature" version="1.0.3"/>
 </site-build>

@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
 
-   <description>
+   <description url="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site">
       Update site for AST View
    </description>
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.1.jar" id="org.eclipse.jdt.astview.feature" version="1.0.1">
       <category name="ast-view"/>
    </feature>
-   <feature url="features/org.eclipse.jdt.astview.feature_1.0.2.jar" id="org.eclipse.jdt.astview.feature" version="1.0.2">
+   <feature url="features/org.eclipse.jdt.astview.feature_1.0.3.jar" id="org.eclipse.jdt.astview.feature" version="1.0.3">
       <category name="ast-view"/>
    </feature>
    <category-def name="ast-view" label="AST View">
       <description>
          Optional view to visualize the Java compilers abstract syntax tree generated for a Java file.
+         Use Version 1.0.1 for Eclipse 3.0, version 1.0.3 for 3.1 builds > I20050118
       </description>
    </category-def>
 </site>
