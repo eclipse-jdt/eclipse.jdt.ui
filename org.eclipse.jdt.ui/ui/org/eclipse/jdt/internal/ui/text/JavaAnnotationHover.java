@@ -102,6 +102,9 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		HashMap messagesAtPosition= new HashMap();
 		while (e.hasNext()) {
 			Annotation annotation= (Annotation) e.next();
+
+			if (annotation.getText() == null)
+				continue;
 			
 			Position position= model.getPosition(annotation);
 			if (position == null)
