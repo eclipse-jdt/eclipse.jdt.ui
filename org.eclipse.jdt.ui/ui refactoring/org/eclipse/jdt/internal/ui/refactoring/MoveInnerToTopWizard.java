@@ -26,42 +26,25 @@ import org.eclipse.jface.dialogs.Dialog;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
 public class MoveInnerToTopWizard extends RefactoringWizard {
 
-	public MoveInnerToTopWizard(Refactoring ref) {
-		super(ref, DIALOG_BASED_UESR_INTERFACE); 
-		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
-	}
-
-	/*
-	 * @see RefactoringWizard#addUserInputPages
-	 */ 
-	protected void addUserInputPages(){
-		final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
-		if (refactoring.isCreatingInstanceFieldPossible())
-			addPage(new MoveInnerToToplnputPage(refactoring.isCreatingInstanceFieldMandatory() ? refactoring.getEnclosingInstanceName() : "")); //$NON-NLS-1$
-		else
-			setChangeCreationCancelable(false);
-	}
-
-	private MoveInnerToTopRefactoring getMoveRefactoring() {
-		return (MoveInnerToTopRefactoring)getRefactoring();
-	}
-	
 	private class MoveInnerToToplnputPage extends TextInputWizardPage {
 
-		private final boolean fInitialInputValid;
-		private Button fFinalCheckBox;
-		private Label fFieldNameLabel;
 		private Text fFieldNameEntryText;
+
+		private Label fFieldNameLabel;
+
+		private Button fFinalCheckBox;
+
+		private final boolean fInitialInputValid;
 
 		public MoveInnerToToplnputPage(String initialValue) {
 			super(RefactoringMessages.getString("MoveInnerToToplnputPage.description"), true, initialValue); //$NON-NLS-1$
@@ -70,27 +53,6 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			fInitialInputValid= (!initialValue.equals("")) || !mandatory; //$NON-NLS-1$
 			if (!mandatory)
 				refactoring.setCreateInstanceField(false);
-		}
-
-		public void createControl(Composite parent) {
-			initializeDialogUnits(parent);
-			Composite newControl= new Composite(parent, SWT.NONE);
-			setControl(newControl);
-			WorkbenchHelp.setHelp(newControl, IJavaHelpContextIds.MOVE_INNER_TO_TOP_WIZARD_PAGE);
-			newControl.setLayout(new GridLayout());
-			Dialog.applyDialogFont(newControl);
-
-			GridLayout layout= new GridLayout();
-			layout.numColumns= 2;
-			layout.verticalSpacing= 8;
-			newControl.setLayout(layout);
-
-			addFieldNameEntry(newControl);
-			addFinalCheckBox(newControl);
-			
-			final boolean mandatory= getMoveRefactoring().isCreatingInstanceFieldMandatory();
-			fFinalCheckBox.setSelection(mandatory);
-			fFinalCheckBox.setEnabled(mandatory);
 		}
 
 		private void addFieldNameEntry(Composite newControl) {
@@ -140,6 +102,54 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			});
 		}
 
+		public void createControl(Composite parent) {
+			initializeDialogUnits(parent);
+			Composite newControl= new Composite(parent, SWT.NONE);
+			setControl(newControl);
+			WorkbenchHelp.setHelp(newControl, IJavaHelpContextIds.MOVE_INNER_TO_TOP_WIZARD_PAGE);
+			newControl.setLayout(new GridLayout());
+			Dialog.applyDialogFont(newControl);
+
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
+			layout.verticalSpacing= 8;
+			newControl.setLayout(layout);
+
+			addFieldNameEntry(newControl);
+			addFinalCheckBox(newControl);
+
+			final boolean mandatory= getMoveRefactoring().isCreatingInstanceFieldMandatory();
+			fFinalCheckBox.setSelection(mandatory);
+			fFinalCheckBox.setEnabled(mandatory);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isEmptyInputValid()
+		 */
+		protected boolean isEmptyInputValid() {
+			return !getMoveRefactoring().isCreatingInstanceFieldMandatory();
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
+		 */
+		protected boolean isInitialInputValid() {
+			return fInitialInputValid;
+		}
+
+		/*
+		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
+		 */
+		public void setVisible(boolean visible) {
+			super.setVisible(visible);
+			if (visible)
+				setPageComplete(RefactoringStatus.createInfoStatus(RefactoringMessages.getString("MoveInnerToToplnputPage.optional.info"))); //$NON-NLS-1$
+			else {
+				setPageComplete(new RefactoringStatus());
+				getContainer().updateMessage();
+			}
+		}
+
 		/*
 		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#validateTextField(String)
 		 */
@@ -151,21 +161,27 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			else if (!text.equals("")) //$NON-NLS-1$
 				return refactoring.checkEnclosingInstanceName(text);
 			else
-				return RefactoringStatus.createInfoStatus(RefactoringMessages.getString("MoveInnerToToplnputPage.optional.info")); //$NON-NLS-1$
+				return new RefactoringStatus();
 		}
+	}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isInitialInputValid()
-		 */
-		protected boolean isInitialInputValid() {
-			return fInitialInputValid;
-		}
+	public MoveInnerToTopWizard(Refactoring refactoring) {
+		super(refactoring, DIALOG_BASED_UESR_INTERFACE);
+		setDefaultPageTitle(RefactoringMessages.getString("MoveInnerToTopWizard.Move_Inner")); //$NON-NLS-1$
+	}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage#isEmptyInputValid()
-		 */
-		protected boolean isEmptyInputValid() {
-			return !getMoveRefactoring().isCreatingInstanceFieldMandatory();
-		}
+	/*
+	 * @see RefactoringWizard#addUserInputPages
+	 */
+	protected void addUserInputPages() {
+		final MoveInnerToTopRefactoring refactoring= getMoveRefactoring();
+		if (refactoring.isCreatingInstanceFieldPossible())
+			addPage(new MoveInnerToToplnputPage(refactoring.isCreatingInstanceFieldMandatory() ? refactoring.getEnclosingInstanceName() : "")); //$NON-NLS-1$
+		else
+			setChangeCreationCancelable(false);
+	}
+
+	private MoveInnerToTopRefactoring getMoveRefactoring() {
+		return (MoveInnerToTopRefactoring) getRefactoring();
 	}
 }
