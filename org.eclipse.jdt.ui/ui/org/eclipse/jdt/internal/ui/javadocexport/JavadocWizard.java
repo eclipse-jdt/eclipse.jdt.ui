@@ -148,7 +148,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				for (int i= 0; i < projects.length; i++) {
 					IJavaProject iJavaProject= projects[i];
 					URL currURL= JavaDocLocations.getProjectJavadocLocation(iJavaProject);
-					if (!(currURL.getFile().equals(newURL.getFile()))) {
+					if (!newURL.equals(currURL)) { // currURL can be null
 						//if not all projects have the same javadoc location ask if you want to change
 						//them to have the same javadoc location
 						projs.add(iJavaProject);
