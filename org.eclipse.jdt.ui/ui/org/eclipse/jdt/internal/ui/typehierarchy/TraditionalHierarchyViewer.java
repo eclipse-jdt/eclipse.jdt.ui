@@ -157,9 +157,13 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 
 		private boolean isInScope(IType type) {
 			IJavaElement input= fTypeHierarchy.getInputElement();
+			int inputType= input.getElementType();
+			if (inputType ==  IJavaElement.TYPE) {
+				return true;
+			}
 			
 			IJavaElement parent= type.getAncestor(input.getElementType());
-			if (input.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+			if (inputType == IJavaElement.PACKAGE_FRAGMENT) {
 				if (parent == null || parent.getElementName().equals(input.getElementName())) {
 					return true;
 				}
@@ -184,11 +188,17 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 						}
 					}
 				} else {
-					boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
-					for (int i= 0; i < types.length; i++) {
-						IType curr= types[i];
-						if (isClass || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
+					if (fTypeHierarchy.getInputElement() instanceof IType) {
+						for (int i= 0; i < types.length; i++) {
 							res.add(types[i]);
+						}
+					} else {
+						boolean isClass= !Flags.isInterface(hierarchy.getCachedFlags(type));
+						for (int i= 0; i < types.length; i++) {
+							IType curr= types[i];
+							if (isClass || isRootOfInterfaceOrAnonym(hierarchy, curr)) {
+								res.add(types[i]);
+							}
 						}
 					}
 				}
