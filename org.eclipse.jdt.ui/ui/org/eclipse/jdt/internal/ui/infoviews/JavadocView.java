@@ -59,6 +59,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -387,15 +388,26 @@ public class JavadocView extends AbstractInfoView {
 			return null;
 
 		IJavaElement je= (IJavaElement)input;
-		String javadocHtml= null;
-		if (je.getElementType() == IJavaElement.COMPILATION_UNIT) {
-			try {
-				javadocHtml= getJavadocHtml(((ICompilationUnit)je).getTypes());
-			} catch (JavaModelException ex) {
-				return null;
-			}
-		} else
-			javadocHtml= getJavadocHtml(new IJavaElement[] { je });
+		String javadocHtml;
+
+		switch (je.getElementType()) {
+			case IJavaElement.COMPILATION_UNIT:
+				try {
+					javadocHtml= getJavadocHtml(((ICompilationUnit)je).getTypes());
+				} catch (JavaModelException ex) {
+					javadocHtml= null;
+				}
+				break;
+			case IJavaElement.CLASS_FILE:
+				try {
+					javadocHtml= getJavadocHtml(new IJavaElement[] {((IClassFile)je).getType()});
+				} catch (JavaModelException ex) {
+					javadocHtml= null;
+				}
+				break;
+			default:
+				javadocHtml= getJavadocHtml(new IJavaElement[] { je });
+		}
 
 		return javadocHtml;
 	}
