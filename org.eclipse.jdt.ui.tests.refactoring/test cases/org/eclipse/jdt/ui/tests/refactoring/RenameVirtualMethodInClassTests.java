@@ -30,6 +30,8 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private static final Class clazz= RenameVirtualMethodInClassTests.class;
 	private static final String REFACTORING_PATH= "RenameVirtualMethodInClass/";
+	
+	private static final boolean BUG_79976_Generics= true;
 		
 	public RenameVirtualMethodInClassTests(String name) {
 		super(name);
@@ -117,6 +119,14 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	private void helper2_fail() throws Exception{
 		helper2_0("m", "k", new String[0], false);
+	}
+	
+	public void testGenerics1() throws Exception {
+		if (BUG_79976_Generics) {
+			printTestDisabledMessage("Bug 79976: RippleMethodFinder doesn't account for generics");
+			return;
+		}
+		helper2_0("m", "k", new String[]{"QG;"});
 	}
 	
 	public void testFail0() throws Exception{
@@ -438,5 +448,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
 	public void testLocal0() throws Exception{
 		helper2();
-	}			
+	}
+	
 }
