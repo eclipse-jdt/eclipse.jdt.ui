@@ -23,7 +23,8 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
   and offers a reconcile listener to inform internal clients about the new AST.
 - An ASTProvider has been introduced which caches the active editor's AST. Clients
   who use an AST should use ASTProvider.getAST(...) to get the AST.
-- Rename Refactorings also update references in javadoc tags. Simplified rename dialogs.
+- Rename and move refactorings also update references in javadoc tags.
+- Simplified rename dialogs.
 - Semantic change in RenameSupport (org.eclipse.jdt.ui.refactoring):
   The flags UPDATE_JAVADOC_COMMENTS, UPDATE_REGULAR_COMMENTS, and
   UPDATE_STRING_LITERALS are deprecated and replaced by UPDATE_TEXTUAL_MATCHES.
