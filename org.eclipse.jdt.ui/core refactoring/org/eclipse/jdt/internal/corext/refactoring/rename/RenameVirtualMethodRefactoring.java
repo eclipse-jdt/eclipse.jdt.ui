@@ -26,16 +26,19 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 	
-	RenameVirtualMethodRefactoring(IMethod method) {
+	private RenameVirtualMethodRefactoring(IMethod method) {
 		super(method);
 	}
 	
+	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
+		RenameVirtualMethodRefactoring ref= new RenameVirtualMethodRefactoring(method);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref; 
+	}
 	//------------ preconditions -------------
 	
-	/* non java-doc
-	 * @see IPreactivatedRefactoring@checkPreactivation
-	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		result.merge(Checks.checkAvailability(getMethod()));

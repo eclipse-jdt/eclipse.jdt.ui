@@ -36,8 +36,15 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	
-	RenamePrivateMethodRefactoring(IMethod method) {
+	private RenamePrivateMethodRefactoring(IMethod method) {
 		super(method);
+	}
+	
+	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
+		RenamePrivateMethodRefactoring ref= new RenamePrivateMethodRefactoring(method);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	//----------- preconditions --------------
@@ -45,7 +52,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	/* non java-doc
 	 * @see IPreactivatedRefactoring@checkPreactivation
 	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		result.merge(Checks.checkAvailability(getMethod()));

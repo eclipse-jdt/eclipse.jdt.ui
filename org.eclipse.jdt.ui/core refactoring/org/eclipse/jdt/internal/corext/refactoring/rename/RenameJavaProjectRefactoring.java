@@ -34,11 +34,18 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 	private String fNewName;
 	private boolean fUpdateReferences;
 	
-	public RenameJavaProjectRefactoring(IJavaProject project){
+	private RenameJavaProjectRefactoring(IJavaProject project){
 		Assert.isNotNull(project); 
 		fProject= project;
 		fNewName= project.getElementName();
 		fUpdateReferences= false;
+	}
+	
+	public static RenameJavaProjectRefactoring create(IJavaProject project) throws JavaModelException{
+		RenameJavaProjectRefactoring ref= new RenameJavaProjectRefactoring(project);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	public Object getNewElement() throws JavaModelException{
@@ -101,10 +108,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		
 	//-- preconditions
 	
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		if (! fProject.exists())
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
@@ -118,6 +122,16 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
 		return new RefactoringStatus();
+	}
+
+	/* non java-doc
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);  //$NON-NLS-1$
+		pm.done();
+		//TODO could simply return OK status
+		return checkPreactivation();
 	}
 	
 	/* non java-doc

@@ -45,12 +45,19 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
 	
-	public RenameCompilationUnitRefactoring(ICompilationUnit cu){
+	private RenameCompilationUnitRefactoring(ICompilationUnit cu) throws JavaModelException{
 		Assert.isNotNull(cu);
 		Assert.isTrue(! cu.isWorkingCopy());
 		fCu= cu;
 		computeRenameTypeRefactoring();
 		fNewName= fCu.getElementName();
+	}
+	
+	public static RenameCompilationUnitRefactoring create(ICompilationUnit cu) throws JavaModelException{
+		RenameCompilationUnitRefactoring ref= new RenameCompilationUnitRefactoring(cu);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	public Object getNewElement(){
@@ -259,7 +266,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	/* non java-doc
 	 * @see IPreactivatedRefactoring#checkPreactivation
 	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException {
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		try{
 			ICompilationUnit cu= fCu;
 			
@@ -269,10 +276,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			if (cancelTypeRenameDueToParseErrors())
 				fWillRenameType= false;
 			
-			if (fWillRenameType)
-				return fRenameTypeRefactoring.checkPreactivation();
-			else	
-				return new RefactoringStatus();
+			return new RefactoringStatus();
 		} catch (JavaModelException e){
 			if (e.isDoesNotExist())
 				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
@@ -326,7 +330,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		}		
 	}
 	
-	private void computeRenameTypeRefactoring(){
+	private void computeRenameTypeRefactoring() throws JavaModelException{
 		if (getSimpleCUName().indexOf(".") != -1){ //$NON-NLS-1$
 			fRenameTypeRefactoring= null;
 			fWillRenameType= false;
@@ -334,7 +338,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		}
 		IType type= getTypeWithTheSameName();
 		if (type != null)
-			fRenameTypeRefactoring= new RenameTypeRefactoring(type);
+			fRenameTypeRefactoring= RenameTypeRefactoring.create(type);
 		else
 			fRenameTypeRefactoring= null;
 		fWillRenameType= (fRenameTypeRefactoring != null);	

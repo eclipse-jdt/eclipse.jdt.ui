@@ -68,23 +68,21 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		fUpdateReferences= true;
 	}
 		
-	/**
-	 * Factory method to create appropriate instances
-	 */
-	public static RenameMethodRefactoring createInstance(IMethod method) throws JavaModelException{
-		 if (JdtFlags.isPrivate(method))
-		 	return new RenamePrivateMethodRefactoring(method);
-		 else if (JdtFlags.isStatic(method))
-		 	return new RenameStaticMethodRefactoring(method);
-		 else if (method.getDeclaringType().isClass())	
-		 	return new RenameVirtualMethodRefactoring(method);
-		 else 	
-		 	return new RenameMethodInInterfaceRefactoring(method);	
+	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
+		if (JdtFlags.isPrivate(method))
+		   return RenamePrivateMethodRefactoring.create(method);
+		else if (JdtFlags.isStatic(method))
+		   return RenameStaticMethodRefactoring.create(method);
+		else if (method.getDeclaringType().isClass())	
+		   return RenameVirtualMethodRefactoring.create(method);
+		else 	
+		   return RenameMethodInInterfaceRefactoring.create(method);	
 	}
 	
-	public static RenameMethodRefactoring createInstance(IMethod method, RenameMethodRefactoring other) throws JavaModelException {
-		RenameMethodRefactoring result= createInstance(method);
-		result.setData(other);
+	public static RenameMethodRefactoring create(IMethod method, RenameMethodRefactoring other) throws JavaModelException {
+		RenameMethodRefactoring result= RenameMethodRefactoring.create(method);
+		if (result != null)
+			result.setData(other);
 		return result;
 	}
 	
@@ -169,7 +167,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	 * non java-doc
 	 * @see IPreactivatedRefactoring#checkPreactivation
 	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkAvailability(fMethod));
 		if (isSpecialCase(fMethod))

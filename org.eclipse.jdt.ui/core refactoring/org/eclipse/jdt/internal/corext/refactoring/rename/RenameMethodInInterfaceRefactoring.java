@@ -32,8 +32,15 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 
-	RenameMethodInInterfaceRefactoring(IMethod method) {
+	private RenameMethodInInterfaceRefactoring(IMethod method) {
 		super(method);
+	}
+	
+	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
+		RenameMethodInInterfaceRefactoring ref= new RenameMethodInInterfaceRefactoring(method);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 		
 	//---- preconditions ---------------------------
@@ -41,7 +48,7 @@ class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 	/* non java-doc
 	 * @see IPreactivatedRefactoring#checkPreactivation
 	 */	
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		if (! getMethod().getDeclaringType().isInterface())

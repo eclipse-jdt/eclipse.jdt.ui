@@ -70,7 +70,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 	
-	public RenameFieldRefactoring(IField field){
+	private RenameFieldRefactoring(IField field){
 		Assert.isNotNull(field);
 		fField= field;
 		fNewName= fField.getElementName();
@@ -81,6 +81,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 		fRenameGetter= false;
 		fRenameSetter= false;
+	}
+	
+	public static RenameFieldRefactoring create(IField field) throws JavaModelException{
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(field);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	public Object getNewElement(){
@@ -274,7 +281,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 	// -------------- Preconditions -----------------------
 	
-	public RefactoringStatus checkPreactivation() throws JavaModelException {
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		return Checks.checkAvailability(fField);	
 	}
 

@@ -125,7 +125,7 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
 	
-	public RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	private RenameTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		Assert.isTrue(cu.exists());
@@ -134,6 +134,10 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		fSelectionLength= selectionLength;
 		fCu= cu;
 		fNewName= "";//the only thing we can set //$NON-NLS-1$
+	}
+	
+	public static RenameTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
+		return new RenameTempRefactoring(cu, selectionStart, selectionLength);
 	}
 	
 	public Object getNewElement(){

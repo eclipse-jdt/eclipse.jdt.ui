@@ -26,16 +26,23 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class RenameStaticMethodRefactoring extends RenameMethodRefactoring {
 
-	RenameStaticMethodRefactoring(IMethod method) {
+	private RenameStaticMethodRefactoring(IMethod method) {
 		super(method);
 	}
-
+	
+	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
+		RenameStaticMethodRefactoring ref= new RenameStaticMethodRefactoring(method);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
+	}
+	
 	//---------- preconditions --------------
 		
 	/* non java-doc
 	 * @see IPreactivatedRefactoring@checkPreactivation
 	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(super.checkPreactivation());
 		result.merge(Checks.checkAvailability(getMethod()));

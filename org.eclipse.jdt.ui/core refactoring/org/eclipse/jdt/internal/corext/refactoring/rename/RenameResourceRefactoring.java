@@ -31,10 +31,17 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	private IResource fResource;
 	private String fNewName;
 	
-	public RenameResourceRefactoring(IResource resource){
+	private RenameResourceRefactoring(IResource resource){
 		Assert.isNotNull(resource); 
 		fResource= resource;
 		fNewName= resource.getName();
+	}
+	
+	public static RenameResourceRefactoring create(IResource resource) throws JavaModelException{
+		RenameResourceRefactoring ref= new RenameResourceRefactoring(resource);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/* non java-doc
@@ -73,11 +80,8 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	}
 		
 	//--- preconditions 
-	
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		if (! fResource.exists())
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
@@ -85,6 +89,16 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 				
 		return new RefactoringStatus();
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);  //$NON-NLS-1$
+		pm.done();
+		//TODO could simply return OK status
+		return checkPreactivation();
 	}
 	
 	/* non java-doc

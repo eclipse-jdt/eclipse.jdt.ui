@@ -35,10 +35,17 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	private IPackageFragmentRoot fSourceFolder;
 	private String fNewName;
 	
-	public RenameSourceFolderRefactoring(IPackageFragmentRoot sourceFolder){
+	private RenameSourceFolderRefactoring(IPackageFragmentRoot sourceFolder){
 		Assert.isNotNull(sourceFolder); 
 		fSourceFolder= sourceFolder;
 		fNewName= fSourceFolder.getElementName();
+	}
+	
+	public static RenameSourceFolderRefactoring create(IPackageFragmentRoot sourceFolder) throws JavaModelException{
+		RenameSourceFolderRefactoring ref= new RenameSourceFolderRefactoring(sourceFolder);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/* non java-doc
@@ -81,10 +88,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 		return fSourceFolder.getElementName();
 	}
 			
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+	private RefactoringStatus checkPreactivation() throws JavaModelException {
 		if (! fSourceFolder.exists())
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		
@@ -107,6 +111,16 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 
 		return new RefactoringStatus();
+	}
+	
+	/* non java-doc
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+		pm.beginTask("", 1);  //$NON-NLS-1$
+		pm.done();
+		//TODO could simply return OK status
+		return checkPreactivation();
 	}
 
 	/* non java-doc

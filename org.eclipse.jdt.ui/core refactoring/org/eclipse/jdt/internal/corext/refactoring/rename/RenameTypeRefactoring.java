@@ -88,7 +88,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
-	public RenameTypeRefactoring(IType type) {
+	private RenameTypeRefactoring(IType type) {
 		Assert.isNotNull(type);
 		fType= type;
 		fNewName= type.getElementName();
@@ -98,6 +98,13 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		fUpdateStrings= false;
 	}
 	
+	public static RenameTypeRefactoring create(IType type) throws JavaModelException{
+		RenameTypeRefactoring ref= new RenameTypeRefactoring(type);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
+	}
+	 
 	public Object getNewElement(){
 		IPackageFragment parent= fType.getPackageFragment();
 		ICompilationUnit cu;
@@ -262,10 +269,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	
 	//------------- Conditions -----------------
 	
-	/* non java-doc
-	 * @see IPreactivatedRefactoring#checkPreactivation
-	 */
-	public RefactoringStatus checkPreactivation() throws JavaModelException{
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkAvailability(fType));
 		if (isSpecialCase(fType))

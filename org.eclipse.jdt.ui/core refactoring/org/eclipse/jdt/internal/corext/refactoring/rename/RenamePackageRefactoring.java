@@ -77,7 +77,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 	
-	public RenamePackageRefactoring(IPackageFragment pack){
+	private RenamePackageRefactoring(IPackageFragment pack){
 		Assert.isNotNull(pack);
 		fPackage= pack;
 		fNewName= pack.getElementName();
@@ -85,6 +85,13 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
+	}
+	
+	public static RenamePackageRefactoring create(IPackageFragment pack) throws JavaModelException{
+		RenamePackageRefactoring ref= new RenamePackageRefactoring(pack);
+		if (ref.checkPreactivation().hasFatalError())
+			return null;
+		return ref;
 	}
 	
 	/* non java-doc
@@ -234,13 +241,19 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	//--- preconditions
 	
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", 1); //$NON-NLS-1$
+	private RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(Checks.checkAvailability(fPackage));
 		
 		if (fPackage.isDefaultPackage())
 			result.addFatalError(""); //$NON-NLS-1$
+		return result;
+	}
+	
+	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("", 1); //$NON-NLS-1$
+		RefactoringStatus result= checkPreactivation();
+		//TODO fix this 		
 		pm.done();	
 		return result;
 	}
