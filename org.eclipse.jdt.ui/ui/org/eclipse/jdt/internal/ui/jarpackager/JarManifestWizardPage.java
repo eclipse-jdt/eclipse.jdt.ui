@@ -68,8 +68,21 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 /**
  *	Page 3 of the JAR Package wizard
  */
-public class JarManifestWizardPage extends WizardPage implements Listener, IJarPackageWizardPage {
-	
+public class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage {
+
+	// Untyped listener
+	private class UntypedListener implements Listener {
+		/*
+		 * Implements method from Listener
+		 */	
+		public void handleEvent(Event e) {
+			if (getControl() == null)
+				return;
+			update();
+		}
+	}
+	private UntypedListener fUntypedListener= new UntypedListener();
+
 	// Constants
 	protected static final int SIZING_TEXT_FIELD_WIDTH= 250;
 
@@ -173,7 +186,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		fGenerateManifestRadioButton= new Button(fManifestGroup, SWT.RADIO | SWT.LEFT);
 		fGenerateManifestRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.genetateManifest.text")); //$NON-NLS-1$
-		fGenerateManifestRadioButton.addListener(SWT.Selection, this);
+		fGenerateManifestRadioButton.addListener(SWT.Selection, fUntypedListener);
 
 			Composite saveOptions= new Composite(fManifestGroup, SWT.NONE);
 			GridLayout saveOptionsLayout= new GridLayout();
@@ -186,10 +199,11 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	
 			fSaveManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
 			fSaveManifestCheckbox.setText(JarPackagerMessages.getString("JarManifestWizardPage.saveManifest.text")); //$NON-NLS-1$
-			fSaveManifestCheckbox.addListener(SWT.MouseUp, this);
+			fSaveManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
 	
 			fReuseManifestCheckbox= new Button(saveOptions, SWT.CHECK | SWT.LEFT);
 			fReuseManifestCheckbox.setText(JarPackagerMessages.getString("JarManifestWizardPage.reuseManifest.text")); //$NON-NLS-1$
+			fReuseManifestCheckbox.addListener(SWT.MouseUp, fUntypedListener);
 			
 			createNewManifestFileGroup(saveOptions);
 
@@ -221,7 +235,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// entry field
 		fNewManifestFileText= new Text(manifestFileGroup, SWT.SINGLE | SWT.BORDER);
-		fNewManifestFileText.addListener(SWT.Modify, this);
+		fNewManifestFileText.addListener(SWT.Modify, fUntypedListener);
 		
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
@@ -254,7 +268,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// entry field
 		fManifestFileText= new Text(manifestFileGroup, SWT.SINGLE | SWT.BORDER);
-		fManifestFileText.addListener(SWT.Modify, this);
+		fManifestFileText.addListener(SWT.Modify, fUntypedListener);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
 		fManifestFileText.setLayoutData(data);
@@ -294,7 +308,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	protected void createSealJarGroup(Composite sealGroup) {
 		fSealJarRadioButton= new Button(sealGroup, SWT.RADIO);
 		fSealJarRadioButton.setText(JarPackagerMessages.getString("JarManifestWizardPage.sealJar.text")); //$NON-NLS-1$
-		fSealJarRadioButton.addListener(SWT.Selection, this);
+		fSealJarRadioButton.addListener(SWT.Selection, fUntypedListener);
 
 		fSealJarLabel= new Label(sealGroup, SWT.RIGHT);
 		fSealJarLabel.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL));
@@ -346,7 +360,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 
 		// entry field
 		fMainClassText= new Text(mainClassGroup, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
-		fMainClassText.addListener(SWT.Modify, this);
+		fMainClassText.addListener(SWT.Modify, fUntypedListener);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
 		fMainClassText.setLayoutData(data);
@@ -364,15 +378,6 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 	
 	// ----------- Event handlers  -----------
 		
-	/*
-	 * Implements method from Listener
-	 */
-	public void handleEvent(Event e) {
-		if (getControl() == null)
-			return;
-		update();
-	}
-
 	private void update() {
 		updateModel();
 		updateEnableState();

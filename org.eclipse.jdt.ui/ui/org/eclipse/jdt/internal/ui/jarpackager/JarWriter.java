@@ -51,15 +51,15 @@ public class JarWriter {
 	 */
 	public JarWriter(JarPackage jarPackage, Shell parent) throws IOException, CoreException, OperationCanceledException {
 		Assert.isNotNull(jarPackage, "The JAR specification is null"); //$NON-NLS-1$
-		Assert.isTrue(jarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
-		if (!jarPackage.canCreateJar(parent))
-			throw new OperationCanceledException();
-		if (jarPackage.usesManifest() && jarPackage.areClassFilesExported()) {
-			Manifest manifest= ManifestFactory.getInstance().create(jarPackage);
-			fJarOutputStream= new JarOutputStream(new FileOutputStream(jarPackage.getJarLocation().toOSString()), manifest);
-		} else
-			fJarOutputStream= new JarOutputStream(new FileOutputStream(jarPackage.getJarLocation().toOSString()));
 		fJarPackage= jarPackage;
+		Assert.isTrue(fJarPackage.isValid(), "The JAR package specification is invalid"); //$NON-NLS-1$
+		if (!fJarPackage.canCreateJar(parent))
+			throw new OperationCanceledException();
+		if (fJarPackage.usesManifest() && fJarPackage.areClassFilesExported()) {
+			Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
+			fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()), manifest);
+		} else
+			fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getJarLocation().toOSString()));
 	}
 
 	/**

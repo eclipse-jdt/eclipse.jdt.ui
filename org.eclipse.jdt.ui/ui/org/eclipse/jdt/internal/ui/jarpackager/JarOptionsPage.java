@@ -10,7 +10,19 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 /**
  *	Page 2 of the JAR Package wizard
  */
-public class JarOptionsPage extends WizardPage implements Listener, IJarPackageWizardPage {
+public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage {
+
+	// Untyped listener
+	private class UntypedListener implements Listener {
+		/*
+		 * Implements method from Listener
+		 */	
+		public void handleEvent(Event e) {
+			if (getControl() == null)
+				return;
+			update();
+		}
+	}
 
 	// Constants
 	protected static final int SIZING_TEXT_FIELD_WIDTH= 250;
@@ -35,6 +47,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	private final static String STORE_SAVE_DESCRIPTION= PAGE_NAME + ".SAVE_DESCRIPTION"; //$NON-NLS-1$
 	private final static String STORE_DESCRIPTION_LOCATION= PAGE_NAME + ".DESCRIPTION_LOCATION"; //$NON-NLS-1$
 	private final static String STORE_USE_SRC_FOLDERS= PAGE_NAME + ".STORE_USE_SRC_FOLDERS"; //$NON-NLS-1$
+
 	/**
 	 *	Create an instance of this class
 	 */
@@ -56,12 +69,8 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		createOptionsGroup(composite);
 
 		restoreWidgetValues();
-
 		setControl(composite);
-
-		updateModel();
-		updateWidgetEnablements();
-		updatePageCompletion();
+		update();
 
 		WorkbenchHelp.setHelp(composite, new DialogPageContextComputer(this, IJavaHelpContextIds.JAROPTIONS_WIZARD_PAGE));								
 		
@@ -82,26 +91,28 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 
 		createLabel(optionsGroup, JarPackagerMessages.getString("JarOptionsPage.howTreatProblems.label"), false); //$NON-NLS-1$
 
+		UntypedListener selectionListener= new UntypedListener();
+
 		fExportErrorsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportErrorsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportErrors.text")); //$NON-NLS-1$
-		fExportErrorsCheckbox.addListener(SWT.Selection, this);
+		fExportErrorsCheckbox.addListener(SWT.Selection, selectionListener);
 
 		fExportWarningsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fExportWarningsCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.exportWarnings.text")); //$NON-NLS-1$
-		fExportWarningsCheckbox.addListener(SWT.Selection, this);
+		fExportWarningsCheckbox.addListener(SWT.Selection, selectionListener);
 
 		createSpacer(optionsGroup);
 
 		fUseSourceFoldersCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fUseSourceFoldersCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.useSourceFoldersHierarchy")); //$NON-NLS-1$
-		fUseSourceFoldersCheckbox.addListener(SWT.Selection, this);
+		fUseSourceFoldersCheckbox.addListener(SWT.Selection, selectionListener);
 		fUseSourceFoldersCheckbox.setEnabled(fJarPackage.areJavaFilesExported() && !fJarPackage.areClassFilesExported());
 
 		createSpacer(optionsGroup);
 
 		fSaveDescriptionCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fSaveDescriptionCheckbox.setText(JarPackagerMessages.getString("JarOptionsPage.saveDescription.text")); //$NON-NLS-1$
-		fSaveDescriptionCheckbox.addListener(SWT.Selection, this);
+		fSaveDescriptionCheckbox.addListener(SWT.Selection, selectionListener);
 
 		createDescriptionFileGroup(parent);
 	}
@@ -143,6 +154,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fSaveDescriptionCheckbox.setSelection(fJarPackage.isDescriptionSaved());
 		fDescriptionFileText.setText(fJarPackage.getDescriptionLocation().toString());
 	}
+
 	/**
 	 *	Initializes the JAR package from last used wizard page values.
 	 */
@@ -159,6 +171,13 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 			fJarPackage.setDescriptionLocation(new Path(pathStr));
 		}
 	}
+
+	private void update() {
+		updateModel();
+		updateWidgetEnablements();
+		updatePageCompletion();
+	}
+
 	/**
 	 *	Stores the widget values in the JAR package.
 	 */
@@ -171,6 +190,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 		fJarPackage.setDescriptionLocation(new Path(fDescriptionFileText.getText()));
 		fJarPackage.setUseSourceFolderHierarchy(fUseSourceFoldersCheckbox.getSelection());
 	}
+
 	/**
 	 *	Open an appropriate destination browser so that the user can specify a source
 	 *	to import from
@@ -236,16 +256,6 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 	}
 	
 	/*
-	 * Implements method from Listener
-	 */	
-	public void handleEvent(Event e) {
-		if (getControl() == null)
-			return;
-		updateModel();
-		updateWidgetEnablements();
-		updatePageCompletion();
-	}
-	/*
 	 * Overrides method from WizardDataTransferPage
 	 */
 	protected void createDescriptionFileGroup(Composite parent) {
@@ -261,7 +271,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 
 		// destination name entry field
 		fDescriptionFileText= new Text(fDescriptionFileGroup, SWT.SINGLE | SWT.BORDER);
-		fDescriptionFileText.addListener(SWT.Modify, this);
+		fDescriptionFileText.addListener(SWT.Modify, new UntypedListener());
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
 		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
 		fDescriptionFileText.setLayoutData(data);

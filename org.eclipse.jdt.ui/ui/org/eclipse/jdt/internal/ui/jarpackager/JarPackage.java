@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.Collection;import java.util.Collections;import java.util.HashSet;import java.util.Iterator;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayOutputStream;import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.Collection;import java.util.Collections;import java.util.HashSet;import java.util.Iterator;import java.util.List;import java.util.Set;import java.util.jar.Manifest;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.MessageDialog;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaModelMarker;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Model for a JAR package. Describes a JAR package including all
@@ -33,8 +33,8 @@ public class JarPackage {
 	 * - it can be generated (fGenerateManifest is true) and
 	 *		- saved (fSaveManifest is true)
 	 *		- saved and reused (fReuseManifest is true implies: fSaveManifest is true)
-	 * - it can be specified (fGenerateManifest is false) and the
-	 *		manifest location must be specified (fManifestLocation)
+	 * - it can be specified (fGenerateManifest is false and the
+	 *		manifest location must be specified (fManifestLocation))
 	 */
 	private boolean fUsesManifest;
 	private boolean fSaveManifest;
@@ -57,7 +57,7 @@ public class JarPackage {
  	private IType fMainClass;
 	
 	private String fDownloadExtensionsPath;	
-	/*	 * Error handling	 */	 private boolean fExportErrors;	 private boolean fExportWarnings;	 private boolean fLogErrors;	 private boolean fLogWarnings;
+	/*	 * Error handling	 */	private boolean fExportErrors;	private boolean fExportWarnings;	private boolean fLogErrors;	private boolean fLogWarnings;		// The provider for the manifest file	private ManifestProvider fManifestProvider;
 	public JarPackage() {		setIsUsedToInitialize(false);
 		setExportClassFiles(true);		setUseSourceFolderHierarchy(false);
 		setCompress(true);
@@ -70,8 +70,8 @@ public class JarPackage {
 		setSaveManifest(false);
 		setManifestLocation(new Path("")); //$NON-NLS-1$
 		setDownloadExtensionsPath(""); //$NON-NLS-1$		setExportErrors(true);		setExportWarnings(true);		
-		setLogErrors(true);		setLogWarnings(true);			}
-	// ----------- Accessors -----------
+		setLogErrors(true);		setLogWarnings(true);		fManifestProvider= new ManifestProvider();	}
+	// ----------- Accessors -----------
 		/**	 * Tells whether the JAR is compressed or not.	 * 	 * @return	<code>true</code> if the JAR is compressed	 */
 	public boolean isCompressed() {
 		return fCompress;
@@ -171,7 +171,7 @@ public class JarPackage {
 	public void setManifestLocation(IPath manifestLocation) {
 		fManifestLocation= manifestLocation;
 	}
-	/**
+	/**	 * Gets the manifest provider for this JAR package	 */	public ManifestProvider getManifestProvider() {		return fManifestProvider;	}	/**
 	 * Gets the manifest file (as workspace resource)
 	 * @return Returns a IFile
 	 */

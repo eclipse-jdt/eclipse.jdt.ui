@@ -4,10 +4,32 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.BufferedOutputStream;import java.io.BufferedWriter;import java.io.IOException;import java.io.ObjectOutputStream;import java.io.OutputStream;import java.io.OutputStreamWriter;import java.util.Iterator;import javax.xml.parsers.DocumentBuilder;import javax.xml.parsers.DocumentBuilderFactory;import javax.xml.parsers.ParserConfigurationException;import org.apache.xml.serialize.Method;import org.apache.xml.serialize.OutputFormat;import org.apache.xml.serialize.Serializer;import org.apache.xml.serialize.SerializerFactory;import org.w3c.dom.Document;
+import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.util.Iterator;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.util.Assert;
+
+import org.w3c.dom.DOMException;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import org.eclipse.core.resources.IResource;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+
+import org.apache.xml.serialize.Method;
+import org.apache.xml.serialize.OutputFormat;
+import org.apache.xml.serialize.Serializer;
+import org.apache.xml.serialize.SerializerFactory;
 
 /**
  * Writes a JarPackage to an underlying OutputStream
@@ -26,33 +48,46 @@ public class JarPackageWriter extends Object {
 	}
 
 	/**
-     * Writes a XML representation of the JAR specification
-     * to to the underlying stream.
-     * 
-     * @exception IOException	if writing to the underlying stream fails
-     */
-    public void writeXML(JarPackage jarPackage) throws IOException {
-    	Assert.isNotNull(jarPackage);
-    	DocumentBuilder docBuilder= null;
-    	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-    	factory.setValidating(false);
- 		try {   	
+	 * Writes a XML representation of the JAR specification
+	 * to to the underlying stream.
+	 * 
+	 * @exception IOException	if writing to the underlying stream fails
+	 */
+	public void writeXML(JarPackage jarPackage) throws IOException {
+		Assert.isNotNull(jarPackage);
+		DocumentBuilder docBuilder= null;
+		DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
+		factory.setValidating(false);
+		try {   	
 	    	docBuilder= factory.newDocumentBuilder();
 		} catch (ParserConfigurationException ex) {
 			throw new IOException(JarPackagerMessages.getString("JarWriter.error.couldNotGetXmlBuilder")); //$NON-NLS-1$
- 		}
+		}
 		Document document= docBuilder.newDocument();
 		
-		// Document and root node
+		// Create the document
 		Element xmlJarDesc= document.createElement(JarPackage.DESCRIPTION_EXTENSION);
 		document.appendChild(xmlJarDesc);
+		xmlWriteJarLocation(jarPackage, document, xmlJarDesc);
+		xmlWriteOptions(jarPackage, document, xmlJarDesc);
+		xmlWriteManifest(jarPackage, document, xmlJarDesc);
+		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
 
-		// JAR location
+		// Write the document to the stream
+		OutputFormat format= new OutputFormat();
+		format.setIndenting(true);
+		SerializerFactory serializerFactory= SerializerFactory.getSerializerFactory(Method.XML);
+		Serializer serializer= serializerFactory.makeSerializer(fOutputStream,	format);
+		serializer.asDOMSerializer().serialize(document);
+	}
+
+	private void xmlWriteJarLocation(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element jar= document.createElement(JarPackage.EXTENSION);
 		xmlJarDesc.appendChild(jar);
 		jar.setAttribute("path", jarPackage.getJarLocation().toString()); //$NON-NLS-1$
-		
-		// Options
+	}
+
+	private void xmlWriteOptions(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element options= document.createElement("options"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(options);
 		options.setAttribute("overwrite", "" + jarPackage.allowOverwrite()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -64,7 +99,9 @@ public class JarPackageWriter extends Object {
 		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString()); //$NON-NLS-1$
 		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$
-		// Manifest
+	}
+
+	private void xmlWriteManifest(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element manifest= document.createElement("manifest"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(manifest);
 		manifest.setAttribute("manifestVersion", jarPackage.getManifestVersion()); //$NON-NLS-1$
@@ -75,7 +112,10 @@ public class JarPackageWriter extends Object {
 		manifest.setAttribute("manifestLocation", jarPackage.getManifestLocation().toString()); //$NON-NLS-1$
 		if (jarPackage.getMainClass() != null)
 			manifest.setAttribute("mainClassHandleIdentifier", jarPackage.getMainClass().getHandleIdentifier()); //$NON-NLS-1$
-		// Sealing
+		xmlWriteSealingInfo(jarPackage, document, manifest);
+	}
+
+	private void xmlWriteSealingInfo(JarPackage jarPackage, Document document, Element manifest) throws DOMException {
 		Element sealing= document.createElement("sealing"); //$NON-NLS-1$
 		manifest.appendChild(sealing);
 		sealing.setAttribute("sealJar", "" + jarPackage.isJarSealed()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -85,8 +125,9 @@ public class JarPackageWriter extends Object {
 		Element packagesToUnSeal= document.createElement("packagesToUnSeal"); //$NON-NLS-1$
 		sealing.appendChild(packagesToUnSeal);
 		add(jarPackage.getPackagesToUnseal(), packagesToUnSeal, document);
+	}
 
-		// Selected elements
+	private void xmlWriteSelectedElements(JarPackage jarPackage, Document document, Element xmlJarDesc) throws DOMException {
 		Element selectedElements= document.createElement("selectedElements"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(selectedElements);
 		selectedElements.setAttribute("exportClassFiles", "" + jarPackage.areClassFilesExported()); //$NON-NLS-2$ //$NON-NLS-1$
@@ -100,14 +141,7 @@ public class JarPackageWriter extends Object {
 				add((IJavaElement)element, selectedElements, document);
 			// Note: Other file types are not handled by this writer
 		}
-
-		// Write the document to the stream
-		OutputFormat format= new OutputFormat();
-		format.setIndenting(true);
-		SerializerFactory serializerFactory= SerializerFactory.getSerializerFactory(Method.XML);
-		Serializer serializer= serializerFactory.makeSerializer(fOutputStream,	format);
-		serializer.asDOMSerializer().serialize(document);
-    }
+	}
 
 	/**
      * Writes a String representation of the JAR specification

@@ -5,27 +5,14 @@ import java.util.jar.Manifest;
 import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;
 
 /**
- * This factory creates manifest files.
+ * A manifest provider creates manifest files.
  */
-public class ManifestFactory {
-
-	private static final ManifestFactory fgSingleton= new ManifestFactory();
+public class ManifestProvider {
 
 	// Constants
 	private static final String SEALED_VALUE= "true"; //$NON-NLS-1$
 	private static final String UNSEALED_VALUE= "false"; //$NON-NLS-1$
 	
-	private ManifestFactory() {
-	}
-
-	/**
-	 * Returns the sole instance of this factory.
-	 * 
-	 * @return	the sole factory instance
-	 */	
-	public static ManifestFactory getInstance() {
-		return fgSingleton;
-	}
 	/**
 	 * Creates a manifest as defined by the <code>JarPackage</code>.
 	 * 
@@ -38,7 +25,7 @@ public class ManifestFactory {
 		else
 			return createSuppliedManifest(jarPackage);
 	}
-	/**
+	/**
 	 * Creates a default manifest.
 	 * 
 	 * @param manifestVersion	the version of the manifest
@@ -48,15 +35,7 @@ public class ManifestFactory {
 		manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, manifestVersion);
 		return manifest;
 	}
-	/**
-	 * Hook for subclasses to add additional manifest entries.
-	 * 
-	 * @param	manifest	the manifest to which the entries should be added
-	 * @param	jarPackage	the JAR package specification
-	 */
-	protected void putAdditionalEntries(Manifest manifest, JarPackage jarPackage) {
-	}
-
+	/**	 * Hook for subclasses to add additional manifest entries.	 * 	 * @param	manifest	the manifest to which the entries should be added	 * @param	jarPackage	the JAR package specification	 */	protected void putAdditionalEntries(Manifest manifest, JarPackage jarPackage) {	}
 	private Manifest createGeneratedManifest(JarPackage jarPackage) {
 		Manifest manifest= new Manifest();
 		putVersion(manifest, jarPackage);

@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayInputStream;import java.io.ByteArrayOutputStream;import java.io.IOException;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import java.util.jar.Manifest;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.operation.ModalContext;import org.eclipse.jface.util.Assert;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.xml.sax.SAXException;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.jarpackager;import java.io.ByteArrayInputStream;import java.io.ByteArrayOutputStream;import java.io.IOException;import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Collections;import java.util.HashMap;import java.util.Iterator;import java.util.List;import java.util.Map;import java.util.jar.Manifest;import org.eclipse.core.resources.IContainer;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Status;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.operation.ModalContext;import org.eclipse.jface.util.Assert;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.xml.sax.SAXException;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.corext.util.JavaModelUtil;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaStatusConstants;import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
  */
@@ -20,9 +20,9 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	message		the message
 	 * @param	exception	the throwable that caused the warning, or <code>null</code>
 	 */
-	private JarFileExportOperation(Shell parent) {		fParentShell= parent;		fProblems= new MultiStatus(JavaPlugin.getPluginId(), 0, JarPackagerMessages.getString("JarFileExportOperation.exportFinishedWithWarnings"), null); //$NON-NLS-1$	}	protected void addWarning(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logWarnings())
-			fProblems.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
-	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logErrors())			fProblems.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, message, error));	}	/**
+	private JarFileExportOperation(Shell parent) {		fParentShell= parent;		fProblems= new MultiStatus(JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, JarPackagerMessages.getString("JarFileExportOperation.exportFinishedWithWarnings"), null); //$NON-NLS-1$	}	protected void addWarning(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logWarnings())
+			fProblems.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));
+	}	/**	 * Adds a new error to the list with the passed information.	 * Normally an error terminates the export operation.	 * @param	message		the message	 * @param	exception	the throwable that caused the error, or <code>null</code>	 */	protected void addError(String message, Throwable error) {		if (fJarPackage == null || fJarPackage.logErrors())			fProblems.add(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, message, error));	}	/**
 	 * Answers the number of file resources specified by the JAR package.
 	 *
 	 * @return int
@@ -47,24 +47,76 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			progressMonitor.subTask(destinationPath.toString());
 						boolean isInOutputFolder= false;			if (isInJavaProject) {				try {					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());				} catch (JavaModelException ex) {					isInOutputFolder= false;				}			}			
-			// Binary Export			if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {				try {					// find corresponding file(s) on classpath and export
-					Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
-					IPath baseDestinationPath= destinationPath.removeLastSegments(1);
-					while (iter.hasNext()) {
-						IFile file= (IFile)iter.next();						if (!resource.isLocal(IResource.DEPTH_ZERO))													file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);						fJarWriter.write(file, baseDestinationPath.append(file.getName()));					}				} catch (IOException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message , ex);				} catch (CoreException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message, ex);				}			}							// Java Files and resources			boolean isNonJavaResource= !isInJavaProject || (pkgRoot == null && !isInOutputFolder);			boolean isInClassFolder= false;			try {				isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == pkgRoot.K_BINARY;			} catch (JavaModelException ex) {				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.cantGetRootKind", resource.getFullPath()), ex); //$NON-NLS-1$			}			if ((fJarPackage.areClassFilesExported() &&						((isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource)))						|| isInClassFolder && isClassFile(resource)))				|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource))))) {				try {					fJarWriter.write((IFile) resource, destinationPath);				} catch (IOException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message , ex);				} catch (CoreException ex) {					String message= ex.getMessage();					if (message == null)						message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$					addWarning(message, ex);				}			}								progressMonitor.worked(1);
+			exportClassFiles(progressMonitor, pkgRoot, resource, jProject, destinationPath);
+			exportResourceFiles(pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
+			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
-		} else {
-			IResource[] children= null;
+		} else			exportContainer(progressMonitor, resource);
+	}
 
+	private void exportContainer(IProgressMonitor progressMonitor, IResource resource) throws java.lang.InterruptedException {
+		IResource[] children= null;
+		try {
+			children= ((IContainer) resource).members();
+		} catch (CoreException e) {
+			// this should never happen because an #isAccessible check is done before #members is invoked
+			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", resource.getFullPath()), e); //$NON-NLS-1$
+		}
+		for (int i= 0; i < children.length; i++)
+			exportElement(children[i], progressMonitor);
+	}
+
+	private void exportResourceFiles(IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
+		boolean isNonJavaResource= !isInJavaProject || (pkgRoot == null && !isInOutputFolder);
+		boolean isInClassFolder= false;
+		try {
+			isInClassFolder= pkgRoot != null && !pkgRoot.isArchive() && pkgRoot.getKind() == pkgRoot.K_BINARY;
+		} catch (JavaModelException ex) {
+			addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.cantGetRootKind", resource.getFullPath()), ex); //$NON-NLS-1$
+		}
+		if ((fJarPackage.areClassFilesExported() &&
+					((isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource)))
+					|| isInClassFolder && isClassFile(resource)))
+			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource))))) {
 			try {
-				children= ((IContainer) resource).members();
-			} catch (CoreException e) {
-				// this should never happen because an #isAccessible check is done before #members is invoked
-				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorDuringExport", resource.getFullPath()), e); //$NON-NLS-1$
+				fJarWriter.write((IFile) resource, destinationPath);
+			} catch (IOException ex) {
+				String message= ex.getMessage();
+				if (message == null)
+					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
+				addWarning(message , ex);
+			} catch (CoreException ex) {
+				String message= ex.getMessage();
+				if (message == null)
+					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
+				addWarning(message, ex);
 			}
+		}					
+	}
 
-			for (int i= 0; i < children.length; i++)
-				exportElement(children[i], progressMonitor);
+	private void exportClassFiles(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, IResource resource, IJavaProject jProject, IPath destinationPath) {
+		if (fJarPackage.areClassFilesExported() && isJavaFile(resource) && pkgRoot != null) {
+			try {
+				// find corresponding file(s) on classpath and export
+				Iterator iter= filesOnClasspath((IFile)resource, destinationPath, jProject, progressMonitor);
+				IPath baseDestinationPath= destinationPath.removeLastSegments(1);
+				while (iter.hasNext()) {
+					IFile file= (IFile)iter.next();
+					if (!resource.isLocal(IResource.DEPTH_ZERO))						
+						file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);
+					fJarWriter.write(file, baseDestinationPath.append(file.getName()));
+				}
+			} catch (IOException ex) {
+				String message= ex.getMessage();
+				if (message == null)
+					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
+				addWarning(message , ex);
+			} catch (CoreException ex) {
+				String message= ex.getMessage();
+				if (message == null)
+					message= JarPackagerMessages.getFormattedString("JarFileExportOperation.coreErrorDuringExport", resource.getFullPath()); //$NON-NLS-1$
+				addWarning(message, ex);
+			}
 		}
 	}
 	/**
@@ -84,10 +136,10 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 * @param	javaProject		the javaProject that contains the file
 	 * @return	the iterator over the corresponding classpath files for the given file
 	 */
-	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException, IOException {
+	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException {
 		IPath outputPath= javaProject.getOutputLocation();		IContainer outputContainer;				if (javaProject.getProject().getFullPath().equals(outputPath))			outputContainer= javaProject.getProject();		else {			outputContainer= createFolderHandle(outputPath);
-			if (outputContainer == null || !outputContainer.isAccessible())
-				throw new IOException(JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible")); //$NON-NLS-1$		}
+			if (outputContainer == null || !outputContainer.isAccessible()) {
+				String msg= JarPackagerMessages.getString("JarFileExportOperation.outputContainerNotAccessible"); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}		}
 		if (isJavaFile(file)) {
 			// Java CU - search files with .class ending			boolean hasErrors= fJarPackage.hasCompileErrors(file);			boolean hasWarnings= fJarPackage.hasCompileWarnings(file);			boolean canBeExported= canBeExported(hasErrors, hasWarnings);			reportPossibleCompileProblems(file, hasErrors, hasWarnings, canBeExported);			if (!canBeExported)				return Collections.EMPTY_LIST.iterator();			IContainer classContainer= outputContainer;			if (pathInJar.segmentCount() > 1)				classContainer= outputContainer.getFolder(pathInJar.removeLastSegments(1));
 			if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
@@ -95,16 +147,15 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 				fClassFilesMapContainer= classContainer;
 			}
 			ArrayList classFiles= (ArrayList)fJavaNameToClassFilesMap.get(file.getName());
-			if (classFiles == null || classFiles.isEmpty())
-				throw new IOException(JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileOnClasspathNotAccessible", file.getFullPath())); //$NON-NLS-1$
+			if (classFiles == null || classFiles.isEmpty()) {
+				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileOnClasspathNotAccessible", file.getFullPath()); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}
 			return classFiles.iterator();
 		}
 		else {
 			// resource  - search file with same name
 			List binaryFiles= new ArrayList(1);			IFile cpFile= outputContainer.getFile(pathInJar);
 			if (cpFile.isAccessible()) {				if (!cpFile.isLocal(IResource.DEPTH_ZERO))					cpFile.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);				binaryFiles.add(cpFile);			}
-			else 
-				throw new IOException(JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceOnCasspathNotAccessible", cpFile.getFullPath())); //$NON-NLS-1$
+			else {				String msg= JarPackagerMessages.getFormattedString("JarFileExportOperation.resourceOnCasspathNotAccessible", cpFile.getFullPath()); //$NON-NLS-1$				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, msg, null));			}
 			return binaryFiles.iterator();
 		}
 	}
@@ -138,7 +189,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 */
 	private Map buildJavaToClassMap(IContainer container) throws CoreException {		if (container == null || !container.isAccessible())
 			return new HashMap(0);
-		/*		 * XXX Should not use internal classes from JCore		 */
+		/*		 * XXX: Bug 6584: Need a way to get class files for a java file (or CU)		 */
 		org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader cfReader;
 		IResource[] members= container.members();
 		Map map= new HashMap(members.length);
@@ -204,14 +255,14 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	public IStatus getStatus() {
 		if (fProblems.getSeverity() == IStatus.ERROR) {			String message= null;			if (fDescriptionFiles != null && fDescriptionFiles.length > 1)				message= JarPackagerMessages.getString("JarFileExportOperation.creationOfSomeJARsFailed"); //$NON-NLS-1$			else				message= JarPackagerMessages.getString("JarFileExportOperation.jarCreationFailed"); //$NON-NLS-1$			// Create new status because we want another message - no API to set message			return new MultiStatus(JavaPlugin.getPluginId(), 0, fProblems.getChildren(), message, null);		}			return fProblems;	}
 	/**
-	 * Answer a boolean indicating whether the passed child is a descendent
+	 * Answer a boolean indicating whether the passed child is a descendant
 	 * of one or more members of the passed resources collection
 	 *
-	 * @param resources	java.util.Vector
-	 * @param child		org.eclipse.core.resources.IResource
-	 * @return boolean
+	 * @param	resources	a List contain potential parents
+	 * @param	child		the resource to test
+	 * @return	a <code>boolean</code> indicating if the child is a descendant
 	 */
-	protected boolean isDescendent(List resources, IResource child) {
+	protected boolean isDescendant(List resources, IResource child) {
 		if (child.getType() == IResource.PROJECT)
 			return false;
 
@@ -219,7 +270,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 		if (resources.contains(parent))
 			return true;
 
-		return isDescendent(resources, parent);
+		return isDescendant(resources, parent);
 	}	protected boolean canBeExported(boolean hasErrors, boolean hasWarnings) throws CoreException {		return (!hasErrors && !hasWarnings)			|| (hasErrors && fJarPackage.exportErrors())			|| (hasWarnings && fJarPackage.exportWarnings());	}	protected void reportPossibleCompileProblems(IFile file, boolean hasErrors, boolean hasWarnings, boolean canBeExported) {		if (hasErrors) {			if (canBeExported)				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.exportedWithCompileErrors", file.getFullPath()), null); //$NON-NLS-1$			else				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.notExportedDueToCompileErrors", file.getFullPath()), null); //$NON-NLS-1$		}		if (hasWarnings) {			if (canBeExported)				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.exportedWithCompileWarnings", file.getFullPath()), null); //$NON-NLS-1$			else				addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.notExportedDueToCompileWarnings", file.getFullPath()), null); //$NON-NLS-1$		}	}	/**
 	 * Exports the resources as specified by the JAR package.
 	 * 
@@ -246,4 +297,4 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			progressMonitor.done();
 		}
 	}
-		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError(JarPackagerMessages.getString("JarFileExportOperation.noExportTypeChosen"), null); //$NON-NLS-1$			return false;		}		if (fJarPackage.getSelectedElements() == null || fJarPackage.getSelectedElements().size() == 0) {			addError(JarPackagerMessages.getString("JarFileExportOperation.noResourcesSelected"), null); //$NON-NLS-1$			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidJarLocation"), null); //$NON-NLS-1$			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError(JarPackagerMessages.getString("JarFileExportOperation.manifestDoesNotExist"), null); //$NON-NLS-1$			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidMainClass"), null); //$NON-NLS-1$			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedResources();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError(JarPackagerMessages.getFormattedString("JarFileExportOperation.fileUnsaved", dirtyFile.getFullPath()), null); //$NON-NLS-1$					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}	protected void saveFiles() {		// Save the manifest		if (fJarPackage.isManifestSaved()) {			try {				saveManifest();			} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingManifest"), ex); //$NON-NLS-1$			} catch (IOException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingManifest"), ex); //$NON-NLS-1$			}		}				// Save the description		if (fJarPackage.isDescriptionSaved()) {			try {				saveDescription();			} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingDescription"), ex); //$NON-NLS-1$			} catch (IOException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingDescription"), ex); //$NON-NLS-1$			}		}	}	protected void saveDescription() throws CoreException, IOException {		// Adjust JAR package attributes		if (fJarPackage.isManifestReused())			fJarPackage.setGenerateManifest(false);		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();		JarPackageWriter objectStream= new JarPackageWriter(objectStreamOutput);		ByteArrayInputStream fileInput= null;		try {			objectStream.writeXML(fJarPackage);			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());			if (fJarPackage.getDescriptionFile().isAccessible()) {				if (fJarPackage.canOverwriteDescription(fParentShell))					fJarPackage.getDescriptionFile().setContents(fileInput, true, true, null);			}			else {				fJarPackage.getDescriptionFile().create(fileInput, true, null);				}		} finally {			if (fileInput != null)				fileInput.close();			if (objectStream != null)				objectStream.close();		}	}	protected void saveManifest() throws CoreException, IOException {		ByteArrayOutputStream manifestOutput= new ByteArrayOutputStream();		ByteArrayInputStream fileInput= null;		try {			Manifest manifest= ManifestFactory.getInstance().create(fJarPackage);			manifest.write(manifestOutput);			fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());			if (fJarPackage.getManifestFile().isAccessible()) {				if (fJarPackage.canOverwriteManifest(fParentShell))				fJarPackage.getManifestFile().setContents(fileInput, true, true, null);			}			else {				fJarPackage.getManifestFile().create(fileInput, true, null);			}		} finally {			if (manifestOutput != null)				manifestOutput.close();			if (fileInput != null)				fileInput.close();		}	}	/**	 * Reads the JAR package spec from file.	 */	protected JarPackage readJarPackage(IFile description) {		Assert.isLegal(description.isAccessible());		Assert.isNotNull(description.getFileExtension());		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));		JarPackage jarPackage= null;		JarPackageReader reader= null;		try {			reader= new JarPackageReader(description.getContents());			// Do not save - only generate JAR			jarPackage= reader.readXML();			jarPackage.setSaveManifest(false);			jarPackage.setSaveDescription(false);		} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorReadingJarPackageFromDescription"), ex); //$NON-NLS-1$		} catch (IOException ex) {				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getMessage()); //$NON-NLS-1$				addError(message, null);		} catch (SAXException ex) {				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.badXmlFormat", description.getFullPath(), ex.getMessage()); //$NON-NLS-1$				addError(message, null);		} finally {			if ((jarPackage == null || jarPackage.logWarnings()) && reader != null)				// AddWarnings				fProblems.addAll(reader.getWarnings());			try {				if (reader != null)					reader.close();			}			catch (IOException ex) {				addError(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorClosingJarPackageDescriptionReader", description.getFullPath()), ex); //$NON-NLS-1$			}		}		return jarPackage;	}}
+		protected boolean preconditionsOK() {		if (!fJarPackage.areClassFilesExported() && !fJarPackage.areJavaFilesExported()) {			addError(JarPackagerMessages.getString("JarFileExportOperation.noExportTypeChosen"), null); //$NON-NLS-1$			return false;		}		if (fJarPackage.getSelectedElements() == null || fJarPackage.getSelectedElements().size() == 0) {			addError(JarPackagerMessages.getString("JarFileExportOperation.noResourcesSelected"), null); //$NON-NLS-1$			return false;		}		if (fJarPackage.getJarLocation() == null) {			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidJarLocation"), null); //$NON-NLS-1$			return false;		}		if (!fJarPackage.doesManifestExist()) {			addError(JarPackagerMessages.getString("JarFileExportOperation.manifestDoesNotExist"), null); //$NON-NLS-1$			return false;		}		if (!fJarPackage.isMainClassValid(new BusyIndicatorRunnableContext())) {			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidMainClass"), null); //$NON-NLS-1$			return false;		}		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();		if (dirtyEditors.length > 0) {			List unsavedFiles= new ArrayList(dirtyEditors.length);			List selection= fJarPackage.getSelectedResources();			for (int i= 0; i < dirtyEditors.length; i++) {				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();					if (selection.contains(dirtyFile)) {						unsavedFiles.add(dirtyFile);						addError(JarPackagerMessages.getFormattedString("JarFileExportOperation.fileUnsaved", dirtyFile.getFullPath()), null); //$NON-NLS-1$					}				}			}			if (!unsavedFiles.isEmpty())				return false;		}		return true;	}	protected void saveFiles() {		// Save the manifest		if (fJarPackage.isManifestSaved()) {			try {				saveManifest();			} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingManifest"), ex); //$NON-NLS-1$			} catch (IOException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingManifest"), ex); //$NON-NLS-1$			}		}				// Save the description		if (fJarPackage.isDescriptionSaved()) {			try {				saveDescription();			} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingDescription"), ex); //$NON-NLS-1$			} catch (IOException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorSavingDescription"), ex); //$NON-NLS-1$			}		}	}	protected void saveDescription() throws CoreException, IOException {		// Adjust JAR package attributes		if (fJarPackage.isManifestReused())			fJarPackage.setGenerateManifest(false);		ByteArrayOutputStream objectStreamOutput= new ByteArrayOutputStream();		JarPackageWriter objectStream= new JarPackageWriter(objectStreamOutput);		ByteArrayInputStream fileInput= null;		try {			objectStream.writeXML(fJarPackage);			fileInput= new ByteArrayInputStream(objectStreamOutput.toByteArray());			if (fJarPackage.getDescriptionFile().isAccessible()) {				if (fJarPackage.canOverwriteDescription(fParentShell))					fJarPackage.getDescriptionFile().setContents(fileInput, true, true, null);			}			else {				fJarPackage.getDescriptionFile().create(fileInput, true, null);				}		} finally {			if (fileInput != null)				fileInput.close();			if (objectStream != null)				objectStream.close();		}	}	protected void saveManifest() throws CoreException, IOException {		ByteArrayOutputStream manifestOutput= new ByteArrayOutputStream();		ByteArrayInputStream fileInput= null;		try {			Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);			manifest.write(manifestOutput);			fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());			if (fJarPackage.getManifestFile().isAccessible()) {				if (fJarPackage.canOverwriteManifest(fParentShell))				fJarPackage.getManifestFile().setContents(fileInput, true, true, null);			}			else {				fJarPackage.getManifestFile().create(fileInput, true, null);			}		} finally {			if (manifestOutput != null)				manifestOutput.close();			if (fileInput != null)				fileInput.close();		}	}	/**	 * Reads the JAR package spec from file.	 */	protected JarPackage readJarPackage(IFile description) {		Assert.isLegal(description.isAccessible());		Assert.isNotNull(description.getFileExtension());		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));		JarPackage jarPackage= null;		JarPackageReader reader= null;		try {			reader= new JarPackageReader(description.getContents());			// Do not save - only generate JAR			jarPackage= reader.readXML();			jarPackage.setSaveManifest(false);			jarPackage.setSaveDescription(false);		} catch (CoreException ex) {				addError(JarPackagerMessages.getString("JarFileExportOperation.errorReadingJarPackageFromDescription"), ex); //$NON-NLS-1$		} catch (IOException ex) {				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.errorReadingFile", description.getFullPath(), ex.getMessage()); //$NON-NLS-1$				addError(message, null);		} catch (SAXException ex) {				String message= JarPackagerMessages.getFormattedString("JarFileExportOperation.badXmlFormat", description.getFullPath(), ex.getMessage()); //$NON-NLS-1$				addError(message, null);		} finally {			if ((jarPackage == null || jarPackage.logWarnings()) && reader != null)				// AddWarnings				fProblems.addAll(reader.getWarnings());			try {				if (reader != null)					reader.close();			}			catch (IOException ex) {				addError(JarPackagerMessages.getFormattedString("JarFileExportOperation.errorClosingJarPackageDescriptionReader", description.getFullPath()), ex); //$NON-NLS-1$			}		}		return jarPackage;	}}

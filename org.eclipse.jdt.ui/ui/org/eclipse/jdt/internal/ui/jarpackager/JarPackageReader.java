@@ -90,68 +90,87 @@ public class JarPackageReader extends Object {
 			if (node.getNodeType() != Node.ELEMENT_NODE)
 				continue;
 			Element element= (Element)node;
-			if (element.getNodeName().equals(JarPackage.EXTENSION)) {
-				jarPackage.setJarLocation(new Path(element.getAttribute("path"))); //$NON-NLS-1$
-			}		
-			if (element.getNodeName().equals("options")) { //$NON-NLS-1$
-				jarPackage.setOverwrite(getBooleanAttribute(element, "overwrite")); //$NON-NLS-1$
-				jarPackage.setCompress(getBooleanAttribute(element, "compress")); //$NON-NLS-1$
-				jarPackage.setExportErrors(getBooleanAttribute(element, "exportErrors")); //$NON-NLS-1$
-				jarPackage.setExportWarnings(getBooleanAttribute(element, "exportWarnings")); //$NON-NLS-1$
-				jarPackage.setLogErrors(getBooleanAttribute(element, "logErrors")); //$NON-NLS-1$
-				jarPackage.setLogWarnings(getBooleanAttribute(element, "logWarnings")); //$NON-NLS-1$
-				jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
-				jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
-				jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
-			}
-			if (element.getNodeName().equals("manifest")) { //$NON-NLS-1$
-				jarPackage.setManifestVersion(element.getAttribute("manifestVersion")); //$NON-NLS-1$
-				jarPackage.setUsesManifest(getBooleanAttribute(element, "usesManifest")); //$NON-NLS-1$
-				jarPackage.setReuseManifest(getBooleanAttribute(element, "reuseManifest")); //$NON-NLS-1$
-				jarPackage.setSaveManifest(getBooleanAttribute(element,"saveManifest")); //$NON-NLS-1$
-				jarPackage.setGenerateManifest(getBooleanAttribute(element, "generateManifest")); //$NON-NLS-1$
-				jarPackage.setManifestLocation(new Path(element.getAttribute("manifestLocation"))); //$NON-NLS-1$
-				jarPackage.setMainClass(getMainClass(element));
-				/*
-				 * Try to find sealing info. Could ask for single child node
-				 * but this would stop others from adding more child nodes to
-				 * the manifest node.
-				 */
-				NodeList sealingElementContainer= element.getChildNodes();
-				for (int j= 0; j < sealingElementContainer.getLength(); j++) {
-					Node sealingNode= sealingElementContainer.item(j);
-					if (sealingNode.getNodeType() == Node.ELEMENT_NODE
-						&& sealingNode.getNodeName().equals("sealing")) { //$NON-NLS-1$
-						// Sealing
-						Element sealingElement= (Element)sealingNode;
-						jarPackage.setSealJar(getBooleanAttribute(sealingElement, "sealJar")); //$NON-NLS-1$
-						jarPackage.setPackagesToSeal(getPackages(sealingElement.getElementsByTagName("packagesToSeal"))); //$NON-NLS-1$
-						jarPackage.setPackagesToUnseal(getPackages(sealingElement.getElementsByTagName("packagesToUnSeal"))); //$NON-NLS-1$
-					}		
-				}
-			}
-			if (element.getNodeName().equals("selectedElements")) { //$NON-NLS-1$
-				jarPackage.setExportClassFiles(getBooleanAttribute(element, "exportClassFiles")); //$NON-NLS-1$
-				jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
-				NodeList selectedElements= element.getChildNodes();
-				for (int j= 0; j < selectedElements.getLength(); j++) {
-					Node selectedNode= selectedElements.item(j);
-					if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
-						continue;
-					Element selectedElement= (Element)selectedNode;
-					if (selectedElement.getNodeName().equals("file")) //$NON-NLS-1$
-						addFile(jarPackage.getSelectedElements(), selectedElement);
-					else if (selectedElement.getNodeName().equals("folder")) //$NON-NLS-1$
-						addFolder(jarPackage.getSelectedElements() ,selectedElement);
-					else if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
-						addProject(jarPackage.getSelectedElements() ,selectedElement);
-					else if (selectedElement.getNodeName().equals("javaElement")) //$NON-NLS-1$
-						addJavaElement(jarPackage.getSelectedElements() ,selectedElement);
-					// Note: Other file types are not handled by this writer
-				}
-			}
+			xmlReadJarLocation(jarPackage, element);
+			xmlReadOptions(jarPackage, element);
+			xmlReadManifest(jarPackage, element);
+			xmlReadSelectedElements(jarPackage, element);
 		}
 		return jarPackage;
+	}
+
+	private void xmlReadJarLocation(JarPackage jarPackage, Element element) {
+		if (element.getNodeName().equals(JarPackage.EXTENSION))
+			jarPackage.setJarLocation(new Path(element.getAttribute("path"))); //$NON-NLS-1$
+	}
+
+	private void xmlReadOptions(JarPackage jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("options")) { //$NON-NLS-1$
+			jarPackage.setOverwrite(getBooleanAttribute(element, "overwrite")); //$NON-NLS-1$
+			jarPackage.setCompress(getBooleanAttribute(element, "compress")); //$NON-NLS-1$
+			jarPackage.setExportErrors(getBooleanAttribute(element, "exportErrors")); //$NON-NLS-1$
+			jarPackage.setExportWarnings(getBooleanAttribute(element, "exportWarnings")); //$NON-NLS-1$
+			jarPackage.setLogErrors(getBooleanAttribute(element, "logErrors")); //$NON-NLS-1$
+			jarPackage.setLogWarnings(getBooleanAttribute(element, "logWarnings")); //$NON-NLS-1$
+			jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
+			jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
+			jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
+		}
+	}
+
+	private void xmlReadManifest(JarPackage jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("manifest")) { //$NON-NLS-1$
+			jarPackage.setManifestVersion(element.getAttribute("manifestVersion")); //$NON-NLS-1$
+			jarPackage.setUsesManifest(getBooleanAttribute(element, "usesManifest")); //$NON-NLS-1$
+			jarPackage.setReuseManifest(getBooleanAttribute(element, "reuseManifest")); //$NON-NLS-1$
+			jarPackage.setSaveManifest(getBooleanAttribute(element,"saveManifest")); //$NON-NLS-1$
+			jarPackage.setGenerateManifest(getBooleanAttribute(element, "generateManifest")); //$NON-NLS-1$
+			jarPackage.setManifestLocation(new Path(element.getAttribute("manifestLocation"))); //$NON-NLS-1$
+			jarPackage.setMainClass(getMainClass(element));
+			xmlReadSealingInfo(jarPackage, element);
+		}
+	}
+
+	private void xmlReadSealingInfo(JarPackage jarPackage, Element element) throws java.io.IOException {
+		/*
+		 * Try to find sealing info. Could ask for single child node
+		 * but this would stop others from adding more child nodes to
+		 * the manifest node.
+		 */
+		NodeList sealingElementContainer= element.getChildNodes();
+		for (int j= 0; j < sealingElementContainer.getLength(); j++) {
+			Node sealingNode= sealingElementContainer.item(j);
+			if (sealingNode.getNodeType() == Node.ELEMENT_NODE
+				&& sealingNode.getNodeName().equals("sealing")) { //$NON-NLS-1$
+				// Sealing
+				Element sealingElement= (Element)sealingNode;
+				jarPackage.setSealJar(getBooleanAttribute(sealingElement, "sealJar")); //$NON-NLS-1$
+				jarPackage.setPackagesToSeal(getPackages(sealingElement.getElementsByTagName("packagesToSeal"))); //$NON-NLS-1$
+				jarPackage.setPackagesToUnseal(getPackages(sealingElement.getElementsByTagName("packagesToUnSeal"))); //$NON-NLS-1$
+			}		
+		}
+	}
+
+	private void xmlReadSelectedElements(JarPackage jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("selectedElements")) { //$NON-NLS-1$
+			jarPackage.setExportClassFiles(getBooleanAttribute(element, "exportClassFiles")); //$NON-NLS-1$
+			jarPackage.setExportJavaFiles(getBooleanAttribute(element, "exportJavaFiles")); //$NON-NLS-1$
+			NodeList selectedElements= element.getChildNodes();
+			for (int j= 0; j < selectedElements.getLength(); j++) {
+				Node selectedNode= selectedElements.item(j);
+				if (selectedNode.getNodeType() != Node.ELEMENT_NODE)
+					continue;
+				Element selectedElement= (Element)selectedNode;
+				if (selectedElement.getNodeName().equals("file")) //$NON-NLS-1$
+					addFile(jarPackage.getSelectedElements(), selectedElement);
+				else if (selectedElement.getNodeName().equals("folder")) //$NON-NLS-1$
+					addFolder(jarPackage.getSelectedElements() ,selectedElement);
+				else if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
+					addProject(jarPackage.getSelectedElements() ,selectedElement);
+				else if (selectedElement.getNodeName().equals("javaElement")) //$NON-NLS-1$
+					addJavaElement(jarPackage.getSelectedElements() ,selectedElement);
+				// Note: Other file types are not handled by this writer
+			}
+		}
 	}
 
 	protected boolean getBooleanAttribute(Element element, String name, boolean defaultValue) throws IOException {
@@ -261,6 +280,7 @@ public class JarPackageReader extends Object {
 		else
 			return fWarnings;
 	}
+	
 	/**
 	 * Adds a new warning to the list with the passed information.
 	 * Normally the export operation continues after a warning.
