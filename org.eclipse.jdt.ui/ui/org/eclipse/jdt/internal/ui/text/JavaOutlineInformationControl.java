@@ -39,6 +39,7 @@ import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
@@ -46,10 +47,13 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -57,15 +61,13 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.actions.LexicalSortingAction;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditorMessages;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -82,23 +84,48 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private OutlineContentProvider fOutlineContentProvider;
 	private IJavaElement fInput= null;
 
-	private AppearanceAwareLabelProvider fInnerLabelProvider;
+	private OutlineSorter fOutlineSorter;
+	
+	private OutlineLabelProvider fInnerLabelProvider;
 	protected Color fForegroundColor;
 	
 	private boolean fShowOnlyMainType;
 	private LexicalSortingAction fLexicalSortingAction;
 	private SortByDefiningTypeAction fSortByDefiningTypeAction;
 	private ShowOnlyMainTypeAction fShowOnlyMainTypeAction;
+	private Map fTypeHierarchies= new HashMap();
 
 	
 	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
+
+		private boolean fShowDefiningType;
 
 		private OutlineLabelProvider() {
 			super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		}
 		
-		/**
-		 * {@inheritDoc}
+		/*
+		 * @see ILabelProvider#getText
+		 */ 	
+		public String getText(Object element) {
+			String text= super.getText(element);
+			if (fShowDefiningType) {
+				try {
+					IType type= getDefiningType(element);
+					if (type != null) {
+						StringBuffer buf= new StringBuffer(super.getText(type));
+						buf.append(JavaElementLabels.CONCAT_STRING);
+						buf.append(text);
+						return buf.toString();			
+					}
+				} catch (JavaModelException e) {
+				}
+			}
+			return text;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider#getForeground(java.lang.Object)
 		 */
 		public Color getForeground(Object element) {
 			if (fOutlineContentProvider.isShowingInheritedMembers()) {
@@ -115,6 +142,40 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				return fForegroundColor;
 			}
 			return null;
+		}
+		
+		public void setShowDefiningType(boolean showDefiningType) {
+			fShowDefiningType= showDefiningType;
+		}
+		
+		public boolean isShowDefiningType() {
+			return fShowDefiningType;
+		}	
+		
+		private IType getDefiningType(Object element) throws JavaModelException {
+			int kind= ((IJavaElement) element).getElementType();
+		
+			if (kind != IJavaElement.METHOD && kind != IJavaElement.FIELD && kind != IJavaElement.INITIALIZER) {
+				return null;
+			}
+			IType declaringType= ((IMember) element).getDeclaringType();
+			if (kind != IJavaElement.METHOD) {
+				return declaringType;
+			}
+			ITypeHierarchy hierarchy= getSuperTypeHierarchy(declaringType);
+			if (hierarchy == null) {
+				return declaringType;
+			}
+			IMethod method= (IMethod) element;
+			int flags= method.getFlags();
+			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
+				return declaringType;
+			}
+			IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), false);
+			if (res == null || method.equals(res)) {
+				return declaringType;
+			}
+			return res.getDeclaringType();
 		}
 	}
 
@@ -179,7 +240,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	
 	private class OutlineContentProvider extends StandardJavaElementContentProvider {
 
-		private Map fTypeHierarchies= new HashMap();
 		private boolean fShowInheritedMembers;
 
 		/**
@@ -217,20 +277,13 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		public Object[] getChildren(Object element) {
 			if (fShowOnlyMainType) {
 				if (element instanceof ICompilationUnit) {
-					try {
-						IType type= getMainType((ICompilationUnit)element);
-						return type != null ? type.getChildren() : NO_CHILDREN;
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}
+					element= getMainType((ICompilationUnit)element);
 				} else if (element instanceof IClassFile) {
-					try {
-						IType type= getMainType((IClassFile)element);
-						return type != null ? type.getChildren() : NO_CHILDREN;
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
-					}							
+					element= getMainType((IClassFile)element);
 				}
+
+				if (element == null)
+					return NO_CHILDREN;
 			}
 			
 			if (fShowInheritedMembers && element instanceof IType) {
@@ -248,31 +301,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				}
 			}
 			return super.getChildren(element);
-		}
-		
-		private ITypeHierarchy getSuperTypeHierarchy(IType type) {
-			ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
-			if (th == null) {
-				try {
-					th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());
-				} catch (JavaModelException e) {
-					return null;
-				}
-				fTypeHierarchies.put(type, th);
-			}
-			return th;
-		}
-		
-		private IProgressMonitor getProgressMonitor() {
-			IWorkbenchPage wbPage= JavaPlugin.getActivePage();
-			if (wbPage == null)
-				return null;
-			
-			IEditorPart editor= wbPage.getActiveEditor();
-			if (editor == null)
-				return null;
-			
-			return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();			
 		}
 		
 		/**
@@ -332,18 +360,22 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	
 	private class ShowOnlyMainTypeAction extends Action {
 		
+		private static final String STORE_GO_INTO_TOP_LEVEL_TYPE_CHECKED= "GoIntoTopLevelTypeAction.isChecked"; //$NON-NLS-1$
+		
 		private TreeViewer fOutlineViewer;
 
 		private ShowOnlyMainTypeAction(TreeViewer outlineViewer) {
-			super(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
-			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
-			setToolTipText(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
-			setDescription(JavaEditorMessages.getString("JavaOutlinePage.GoIntoTopLevelType.description")); //$NON-NLS-1$
+			super(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
+			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.tooltip")); //$NON-NLS-1$
+			setDescription(TextMessages.getString("JavaOutlineInformationControl.GoIntoTopLevelType.description")); //$NON-NLS-1$
+			
 			JavaPluginImages.setLocalImageDescriptors(this, "gointo_toplevel_type.gif"); //$NON-NLS-1$
+			
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.GO_INTO_TOP_LEVEL_TYPE_ACTION);
 			
 			fOutlineViewer= outlineViewer;
 
-			boolean showclass= getDialogSettings().getBoolean("GoIntoTopLevelTypeAction.isChecked"); //$NON-NLS-1$
+			boolean showclass= getDialogSettings().getBoolean(STORE_GO_INTO_TOP_LEVEL_TYPE_CHECKED);
 			setTopLevelTypeOnly(showclass);
 		}
 
@@ -357,16 +389,202 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		private void setTopLevelTypeOnly(boolean show) {
 			fShowOnlyMainType= show;
 			setChecked(show);
+			
+			Tree tree= fOutlineViewer.getTree();
+			tree.setRedraw(false);
+			
 			fOutlineViewer.refresh(false);
 			if (!fShowOnlyMainType)
 				fOutlineViewer.expandToLevel(2);
 			
-			getDialogSettings().put("GoIntoTopLevelTypeAction.isChecked", show); //$NON-NLS-1$
+			tree.setRedraw(true);
+			
+			// reveal selection
+			Object selectedElement= getSelectedElement();
+			if (selectedElement != null)
+				fOutlineViewer.reveal(selectedElement);
+					
+			getDialogSettings().put(STORE_GO_INTO_TOP_LEVEL_TYPE_CHECKED, show);
 		}
 	}
 	
+	private class OutlineSorter extends ViewerSorter {
+
+		private static final int OTHER= 1;
+		private static final int CLASS= 2;
+		private static final int INTERFACE= 3;
+		private static final int ANONYM= 4;
+
+		private JavaElementSorter fJavaElementSorter= new JavaElementSorter();
+		
+		/*
+		 * @see org.eclipse.jface.viewers.ViewerSorter#sort(org.eclipse.jface.viewers.Viewer, java.lang.Object[])
+		 */
+		public void sort(Viewer viewer, Object[] elements) {
+			if (!fLexicalSortingAction.isChecked() && !fSortByDefiningTypeAction.isChecked())
+				return;
+			
+			super.sort(viewer, elements);
+		}
+		
+		/*
+		 * @see org.eclipse.jface.viewers.ViewerSorter#compare(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
+		 */
+		public int compare(Viewer viewer, Object e1, Object e2) {
+			int cat1= category(e1);
+			int cat2= category(e2);
+
+			if (cat1 != cat2)
+				return cat1 - cat2;
+			
+			if (cat1 == OTHER) { // method or field
+				if (fSortByDefiningTypeAction.isChecked()) {
+					try {
+						IType def1= (e1 instanceof IMethod) ? getDefiningType((IMethod) e1) : null;
+						IType def2= (e2 instanceof IMethod) ? getDefiningType((IMethod) e2) : null;
+						if (def1 != null) {
+							if (def2 != null) {
+								if (!def2.equals(def1)) {
+									return compareInHierarchy(getSuperTypeHierarchy(def1), def1, def2);
+								}
+							} else {
+								return -1;						
+							}					
+						} else {
+							if (def2 != null) {
+								return 1;
+							}	
+						}
+					} catch (JavaModelException e) {
+						// ignore, default to normal comparison
+					}
+				}
+			} else if (cat1 == ANONYM) {
+				return 0;
+			}
+			if (fLexicalSortingAction.isChecked())
+				return fJavaElementSorter.compare(viewer, e1, e2); // use appearance preference page settings
+			else
+				return 0;
+		}
+		
+		private IType getDefiningType(IMethod method) throws JavaModelException {
+			IType declaringType= method.getDeclaringType();
+			int flags= method.getFlags();
+			if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
+				return null;
+			}
+		
+			IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(getSuperTypeHierarchy(declaringType), declaringType, method.getElementName(), method.getParameterTypes(), false);
+			if (res == null || method.equals(res)) {
+				return null;
+			}
+			return res.getDeclaringType();
+		}
+
+		/*
+		 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
+		 */
+		public int category(Object element) {
+			if (element instanceof IType) {
+				IType type= (IType) element;
+				if (type.getElementName().length() == 0) {
+					return ANONYM;
+				}
+				ITypeHierarchy hierarchy= getSuperTypeHierarchy(type);
+				if (hierarchy != null) {
+					if (Flags.isInterface(hierarchy.getCachedFlags((IType) element))) {
+						return INTERFACE;
+					} else {
+						return CLASS;
+					}
+				}
+			}
+			return OTHER;
+		}
+
+		private int compareInHierarchy(ITypeHierarchy hierarchy, IType def1, IType def2) {
+			if (isSuperType(hierarchy, def1, def2)) {
+				return 1;
+			} else if (isSuperType(hierarchy, def2, def1)) {
+				return -1;
+			}
+			// interfaces after classes
+			int flags1= hierarchy.getCachedFlags(def1);
+			int flags2= hierarchy.getCachedFlags(def2);
+			if (Flags.isInterface(flags1)) {
+				if (!Flags.isInterface(flags2)) {
+					return 1;
+				}
+			} else if (Flags.isInterface(flags2)) {
+				return -1;
+			}
+			String name1= def1.getElementName();
+			String name2= def2.getElementName();
+			
+			return getCollator().compare(name1, name2);
+		}
+
+		private boolean isSuperType(ITypeHierarchy hierarchy, IType def1, IType def2) {
+			IType superType= hierarchy.getSuperclass(def1);
+			if (superType != null) {
+				if (superType.equals(def2) || isSuperType(hierarchy, superType, def2)) {
+					return true;
+				}
+			}
+			IType[] superInterfaces= hierarchy.getAllSuperInterfaces(def1);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IType curr= superInterfaces[i];
+				if (curr.equals(def2) || isSuperType(hierarchy, curr, def2)) {
+					return true;
+				}		
+			}
+			return false;
+		}
+	}
+	
+	
+	private class LexicalSortingAction extends Action {
+		
+		private static final String STORE_LEXICAL_SORTING_CHECKED= "LexicalSortingAction.isChecked"; //$NON-NLS-1$
+		
+		private TreeViewer fOutlineViewer;
+
+		private LexicalSortingAction(TreeViewer outlineViewer) {
+			super(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.label"), IAction.AS_CHECK_BOX); //$NON-NLS-1$
+			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.tooltip")); //$NON-NLS-1$
+			setDescription(TextMessages.getString("JavaOutlineInformationControl.LexicalSortingAction.description")); //$NON-NLS-1$
+			
+			JavaPluginImages.setLocalImageDescriptors(this, "alphab_sort_co.gif"); //$NON-NLS-1$
+			
+			fOutlineViewer= outlineViewer;
+			
+			boolean checked=getDialogSettings().getBoolean(STORE_LEXICAL_SORTING_CHECKED);
+			setChecked(checked);
+			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.LEXICAL_SORTING_BROWSING_ACTION);
+		}
+
+		public void run() {
+			valueChanged(isChecked(), true);
+		}
+
+		private void valueChanged(final boolean on, boolean store) {
+			setChecked(on);
+			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
+				public void run() {
+					fOutlineViewer.refresh(false);
+				}
+			});
+			
+			if (store)
+				getDialogSettings().put(STORE_LEXICAL_SORTING_CHECKED, on);
+		}
+	}
+
 
 	private class SortByDefiningTypeAction extends Action {
+		
+		private static final String STORE_SORT_BY_DEFINING_TYPE_CHECKED= "SortByDefiningType.isChecked"; //$NON-NLS-1$
 		
 		private TreeViewer fOutlineViewer;
 		
@@ -374,18 +592,19 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		 * Creates the action.
 		 */
 		private SortByDefiningTypeAction(TreeViewer outlineViewer) {
-			super(TypeHierarchyMessages.getString("SortByDefiningTypeAction.label")); //$NON-NLS-1$
-			setDescription(TypeHierarchyMessages.getString("SortByDefiningTypeAction.description")); //$NON-NLS-1$
-			setToolTipText(TypeHierarchyMessages.getString("SortByDefiningTypeAction.tooltip")); //$NON-NLS-1$
+			super(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.label")); //$NON-NLS-1$
+			setDescription(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.description")); //$NON-NLS-1$
+			setToolTipText(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.tooltip")); //$NON-NLS-1$
+			
+			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
 			
 			fOutlineViewer= outlineViewer;
 			
-			JavaPluginImages.setLocalImageDescriptors(this, "definingtype_sort_co.gif"); //$NON-NLS-1$
-
 			WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SORT_BY_DEFINING_TYPE_ACTION);
 	 
-			boolean state= getDialogSettings().getBoolean("SortByDefiningType.isChecked"); //$NON-NLS-1$
+			boolean state= getDialogSettings().getBoolean(STORE_SORT_BY_DEFINING_TYPE_CHECKED);
 			setChecked(state);
+			fInnerLabelProvider.setShowDefiningType(state);
 		}
 		
 		/*
@@ -394,7 +613,15 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		public void run() {
 			BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 				public void run() {
-//					sortByDefiningType(isChecked());
+					fInnerLabelProvider.setShowDefiningType(isChecked());
+					getDialogSettings().put(STORE_SORT_BY_DEFINING_TYPE_CHECKED, isChecked());
+					
+					fOutlineViewer.refresh(true);
+					
+					// reveal selection
+					Object selectedElement= getSelectedElement();
+					if (selectedElement != null)
+						fOutlineViewer.reveal(selectedElement);
 				}
 			});		
 		}	
@@ -431,7 +658,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	
 		final TreeViewer treeViewer= new OutlineTreeViewer(tree);
 	
-		// Hide import declartions but show the container
+		// Hide import declarations but show the container
 		treeViewer.addFilter(new ViewerFilter() {
 			public boolean select(Viewer viewer, Object parentElement, Object element) {
 				return !(element instanceof IImportDeclaration);
@@ -443,16 +670,18 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.addFilter(new MemberFilter());
 
 		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
-		fLexicalSortingAction= new LexicalSortingAction(treeViewer, getId());
-//		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
+		fInnerLabelProvider= new OutlineLabelProvider();
+		
+		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
+		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
 		fShowOnlyMainTypeAction= new ShowOnlyMainTypeAction(treeViewer);
 		
 		fOutlineContentProvider= new OutlineContentProvider(false);
 		treeViewer.setContentProvider(fOutlineContentProvider);
-		treeViewer.setSorter(new JavaElementSorter());
+		fOutlineSorter= new OutlineSorter();
+		treeViewer.setSorter(fOutlineSorter);
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
-		fInnerLabelProvider= new OutlineLabelProvider();
 		
 		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fInnerLabelProvider));
 		treeViewer.getTree().addKeyListener(getKeyAdapter());
@@ -550,6 +779,31 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		viewMenu.add(new Separator("Sorters")); //$NON-NLS-1$
 		viewMenu.add(fLexicalSortingAction);
 		
-//		viewMenu.add(fSortByDefiningTypeAction);
+		viewMenu.add(fSortByDefiningTypeAction);
+	}
+	
+	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
+		ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
+		if (th == null) {
+			try {
+				th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());
+			} catch (JavaModelException e) {
+				return null;
+			}
+			fTypeHierarchies.put(type, th);
+		}
+		return th;
+	}
+	
+	private IProgressMonitor getProgressMonitor() {
+		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
+		if (wbPage == null)
+			return null;
+		
+		IEditorPart editor= wbPage.getActiveEditor();
+		if (editor == null)
+			return null;
+		
+		return editor.getEditorSite().getActionBars().getStatusLineManager().getProgressMonitor();			
 	}
 }

@@ -749,6 +749,9 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * Implementers can modify
 	 */
 	protected Object getSelectedElement() {
+		if (fTreeViewer == null)
+			return null;
+		
 		return ((IStructuredSelection) fTreeViewer.getSelection()).getFirstElement();
 	}
 
