@@ -225,6 +225,7 @@ public class IndentAction extends TextEditorAction {
 		String indent= null;
 		if (offset < document.getLength()) {
 			ITypedRegion partition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, true);
+			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
 				
@@ -249,7 +250,7 @@ public class IndentAction extends TextEditorAction {
 					to++;
 				indent= command.text.substring(1, to);
 				
-			} else if (!fIsTabAction && partition.getOffset() == offset && type.equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
+			} else if (!fIsTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
 				int slashes= 2;
