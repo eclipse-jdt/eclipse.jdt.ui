@@ -44,6 +44,10 @@ public class MemberEdit extends SimpleTextEdit {
 		fTabWidth= tabWidth;
 	}
 	
+	public void setUseFormatter(boolean useFormatter) {
+		fUseFormatter= useFormatter;
+	}
+	
 	/* non Java-doc
 	 * @see TextEdit#getCopy
 	 */
@@ -59,7 +63,7 @@ public class MemberEdit extends SimpleTextEdit {
 			return fMember;
 		return fMember.getParent();
 	}
-	
+		
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
@@ -79,9 +83,9 @@ public class MemberEdit extends SimpleTextEdit {
 		switch (fInsertionKind) {
 			
 		case REPLACE:
-			sb.append(getSource(getLineIndent(buffer), lineDelimiter));
-			offset= range.getOffset();
+			offset= start;
 			length= range.getLength();
+			sb.append(getSource(getLineIndent(buffer), lineDelimiter, false));
 			break;
 			
 		case ADD_AT_BEGINNING:	// add text at end of container
@@ -103,7 +107,7 @@ public class MemberEdit extends SimpleTextEdit {
 					while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
 						switch (token) {
 						case Scanner.TokenNameWHITESPACE:
-							s= extract(buffer, scanner);
+							s= extract(buffer, start, scanner);
 							emptyLines+= countEmptyLines(s);
 							continue;
 						case TerminalSymbols.TokenNameRBRACE:
@@ -119,7 +123,7 @@ public class MemberEdit extends SimpleTextEdit {
 					throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
 				}
 				sb.append(lineDelimiter);
-				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter));
+				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter, true));
 				if (sawClosingBracket) {
 //					if (emptyLines == 0)
 //						fill(sb, 1, lineDelimiter);
@@ -154,13 +158,13 @@ public class MemberEdit extends SimpleTextEdit {
 				} catch (InvalidInputException e) {
 					throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
 				}
-				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter));
+				sb.append(getSource(getLineIndent(buffer)+1, lineDelimiter, true));
 				sb.append(lineDelimiter);
 				break;
 
 			case IJavaElement.COMPILATION_UNIT:
 				fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
-				sb.append(getSource(0, lineDelimiter));
+				sb.append(getSource(0, lineDelimiter, true));
 				// insert at the very end of the file
 				offset= buffer.getLength();
 				break;
@@ -172,13 +176,13 @@ public class MemberEdit extends SimpleTextEdit {
 			
 		case INSERT_AFTER:
 			fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
-			sb.append(getSource(getLineIndent(buffer), lineDelimiter));
+			sb.append(getSource(getLineIndent(buffer), lineDelimiter, true));
 			
 			offset= end;
 			break;
 			
 		case INSERT_BEFORE:
-			sb.append(getSource(getLineIndent(buffer), lineDelimiter));
+			sb.append(getSource(getLineIndent(buffer), lineDelimiter, true));
 			fill(sb, fEmptyLinesBetweenMembers+1, lineDelimiter);
 		
 			int line= buffer.getLineOfOffset(range.getOffset());
@@ -199,10 +203,10 @@ public class MemberEdit extends SimpleTextEdit {
 		super.connect(buffer);
 	}
 	
-	private static String extract(TextBuffer buffer, Scanner scanner) {
+	private static String extract(TextBuffer buffer, int offset, Scanner scanner) {
 		int start= scanner.startPosition;
 		int length= scanner.currentPosition - start + 1;
-		return buffer.getContent(start, length);
+		return buffer.getContent(offset+start, length);
 	}
 	
 	private static int countEmptyLines(String line) {
@@ -211,7 +215,7 @@ public class MemberEdit extends SimpleTextEdit {
 		for (int i= 0; i < l; i++) {
 			char c= line.charAt(i);
 			if (c == '\r') {
-				if ((i < l - 1) && line.charAt(i+1) == '\n') {
+				if ((i < (l - 1)) && line.charAt(i+1) == '\n') {
 					emptyLines++;
 					i++;
 				}
@@ -221,36 +225,6 @@ public class MemberEdit extends SimpleTextEdit {
 		return emptyLines;
 	}
 
-	private int addAtBeginningOfType(TextBuffer buffer, StringBuffer sb) throws JavaModelException {
-		int position= -1;
-		Scanner scanner= new Scanner(true, true);	// no whitespace, no comments
-		scanner.setSourceBuffer(buffer.getContent().toCharArray());
-		try {
-			int token;
-			while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-				if (token == TerminalSymbols.TokenNameLBRACE)
-					break;
-			}
-			position= scanner.currentPosition;
-			while ((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-				switch (token) {
-				case Scanner.TokenNameCOMMENT_BLOCK:
-					System.out.print('c');
-					continue;
-				case Scanner.TokenNameWHITESPACE:
-					System.out.print('w');
-					continue;
-				}
-				break;
-			}
-			System.out.println();
-			
-		} catch (InvalidInputException e) {
-			throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
-		}
-		return position;
-	}
-	
 	// private helpers
 	
 	private ISourceRange getSourceRange() throws CoreException {
@@ -261,14 +235,15 @@ public class MemberEdit extends SimpleTextEdit {
 	 */
 	private int getLineIndent(TextBuffer buffer) throws CoreException {
 		int offset= getSourceRange().getOffset();
-		int line= buffer.getLineOfOffset(getSourceRange().getOffset());
+		int line= buffer.getLineOfOffset(offset);
 		return buffer.getLineIndent(line, fTabWidth);
 	}
-		
+	
 	/**
 	 * Prepares the text lines for insertion.
 	 */
-	private String getSource(int initialIndentationLevel, String lineDelimiter) {
+	private String getSource(int initialIndentationLevel, String lineDelimiter,
+													boolean indentFirstLine) {
 		
 		StringBuffer buffer= new StringBuffer();
 		int last= fSource.length-1;
@@ -276,8 +251,10 @@ public class MemberEdit extends SimpleTextEdit {
 		removeIndentation(fSource);
 		
 		for (int i= 0; i < fSource.length; i++) {
-			if (! fUseFormatter)
-				fill(buffer, initialIndentationLevel, "\t");
+			if (! fUseFormatter) {
+				if (i > 0 || (i == 0 && indentFirstLine))
+					fill(buffer, initialIndentationLevel, "\t");
+			}
 			buffer.append(fSource[i]);
 			if (i < last)
 				buffer.append(lineDelimiter);
