@@ -104,13 +104,13 @@ class UseSupertypeWherePossibleUtil {
 		fManager= manager;
 		fExtractedMemberSet= new HashSet(Arrays.asList(extractedMembers));
 		fSuperTypeName= superTypeName;
-		fInputClass= inputClass;
+		fInputClass= (IType)JavaModelUtil.toWorkingCopy(inputClass);
 		fCodeGenerationSettings= codeGenerationSettings;
 		fASTMappingManager= astManager;
 		fBadVarSet= new HashSet(0);
 		fReferenceNodeCache= new HashMap();
 		fRippleMethodCache= new HashMap();
-		fSuperTypeToUse= supertypeToUse;
+		fSuperTypeToUse= (IType)JavaModelUtil.toWorkingCopy(supertypeToUse);
 		fSuperTypeSet= createSuperTypeSet(fSuperTypeToUse, fInputClass.getJavaProject());
 		fUpdateInstanceOf= updateInstanceOf;
 	}
@@ -140,7 +140,15 @@ class UseSupertypeWherePossibleUtil {
 			result.add(project.findType("java.lang.Object"));
 			return result;
 		}	
-		return new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor())));
+		return toWorkingCopyMembersSet(new HashSet(Arrays.asList(JavaModelUtil.getAllSuperTypes(type, new NullProgressMonitor()))));
+	}
+	
+	private static Set toWorkingCopyMembersSet(Set members){
+		Set result= new HashSet(members.size());
+		for (Iterator iter= members.iterator(); iter.hasNext();) {
+            result.add(JavaModelUtil.toWorkingCopy((IMember) iter.next()));
+        }
+        return result;
 	}
 	
 	private static SearchResultGroup[] getMemberReferences(IMember member, IProgressMonitor pm) throws JavaModelException{
