@@ -4,8 +4,7 @@
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
 		<property name="plugin"  value="org.junit" />
-		<property name="version"  value="_3.8.1" />
-		<property name="dest"  value="${destdir}/${plugin}${version}" />
+		<property name="dest"  value="${destdir}/${plugin}" />
 	</target>
 
 	<target name="build" depends="init">
@@ -18,9 +17,9 @@
 		<mkdir dir="${dest}" />
 
 		<copy file="junit.jar" todir="${dest}"/>
-		<copy file="junitsrc.jar" todir="${dest}"/>
+		<copy file="junitsrc.zip" todir="${dest}"/>
 		<copy file="plugin.xml" todir="${dest}"/>
-		<copy file="about.html" todir="${dest}"/>
+		<copy file="about.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 				
 	</target>
