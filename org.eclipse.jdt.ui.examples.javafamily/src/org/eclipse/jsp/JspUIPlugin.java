@@ -158,9 +158,9 @@ public class JspUIPlugin extends AbstractUIPlugin implements IResourceChangeList
 	}
 	
 	void jspAdded(IFile jspFile) {
-		if (DEBUG) System.out.println("Added: " + jspFile); //$NON-NLS-1$
-		AddJspFileToIndex job= new AddJspFileToIndex(jspFile, jspFile.getProject().getFullPath(), fSearchEngine.getIndexManager());
-		fSearchEngine.add(job);
+		if (DEBUG) System.out.println("Added: " + jspFile); //$NON-NLS-1$		
+		JspIndexParser indexer= new JspIndexParser(jspFile);
+		fSearchEngine.add(jspFile.getProject().getFullPath(), indexer);
 	}
 	
 	void jspRemoved(IFile jspFile) {

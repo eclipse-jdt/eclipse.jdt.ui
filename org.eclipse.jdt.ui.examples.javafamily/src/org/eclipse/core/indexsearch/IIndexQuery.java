@@ -11,12 +11,11 @@
 package org.eclipse.core.indexsearch;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.internal.core.index.IIndex;
-import org.eclipse.jdt.internal.core.search.PathCollector;
 
 /**
  * An IndeyQuery is used to perform a query against the indexing framework.
@@ -31,7 +30,7 @@ public interface IIndexQuery {
 	/**
 	 * Perform the query on the given index and adds the paths of all found documents to the given collector.
 	 */
-	void findIndexMatches(IIndex index, PathCollector collector, IProgressMonitor progressMonitor) throws IOException;
+	void findIndexMatches(IIndex index, HashSet collector, IProgressMonitor progressMonitor) throws IOException;
 
 	/**
 	 * Locate all matches of this query in the given file candidate and return them via the resultcollector. 

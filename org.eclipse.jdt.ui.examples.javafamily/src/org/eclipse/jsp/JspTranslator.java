@@ -20,9 +20,7 @@ import org.eclipse.jface.text.source.ITranslator;
 
 import org.eclipse.jdt.internal.ui.examples.jspeditor.JspTranslatorResultCollector;
 
-/**
- * @author weinand
- */
+
 public class JspTranslator extends AbstractJspParser implements ITranslator {
 	
 	private StringBuffer fDeclarations= new StringBuffer();

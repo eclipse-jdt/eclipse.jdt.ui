@@ -11,6 +11,7 @@
 package org.eclipse.jsp;
 
 import java.io.IOException;
+import java.util.*;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
@@ -24,9 +25,6 @@ import org.eclipse.core.indexsearch.*;
 import org.eclipse.core.indexsearch.IIndexQuery;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.index.IIndex;
-import org.eclipse.jdt.internal.core.index.IQueryResult;
-import org.eclipse.jdt.internal.core.search.PathCollector;
 
 /**
  * Implementation for a JSP type query.
@@ -64,17 +62,11 @@ public class JspTypeQuery implements IIndexQuery {
 	/* (non-Javadoc)
 	 * @see org.eclipse.core.search.ISearch#findIndexMatches(org.eclipse.jdt.internal.core.index.IIndex, org.eclipse.jdt.internal.core.search.PathCollector, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public void findIndexMatches(IIndex index, PathCollector pathCollector, IProgressMonitor progressMonitor) throws IOException {
+	public void findIndexMatches(IIndex index, HashSet pathCollector, IProgressMonitor progressMonitor) throws IOException {
 
 		String typeName= fType.getFullyQualifiedName();
 		String s= JspIndexParser.JSP_TYPE_REF + "/" + typeName; //$NON-NLS-1$
-
-		/* TODO_SEARCH
-		IQueryResult[] result= index.queryPrefix(s.toCharArray());
-		if (result != null)
-			for (int i= 0; i < result.length; i++)
-				pathCollector.acceptTypeReference(result[i].getPath(), typeName.toCharArray());
-		*/
+		index.queryPrefix(pathCollector, s);
 	}
 
 	/* (non-Javadoc)
