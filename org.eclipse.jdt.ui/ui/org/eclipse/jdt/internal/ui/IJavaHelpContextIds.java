@@ -130,6 +130,7 @@ public interface IJavaHelpContextIds {
 	public static final String FIND_WRITE_REFERENCES_IN_WORKSPACE_ACTION= 					PREFIX + "find_write_references_in_workspace_action"; //$NON-NLS-1$
 	public static final String FIND_OCCURRENCES_IN_FILE_ACTION= 								PREFIX + "find_occurrences_in_file_action"; //$NON-NLS-1$
 	public static final String FIND_EXCEPTION_OCCURRENCES= 								PREFIX + "find_exception_occurrences"; //$NON-NLS-1$
+	public static final String FIND_IMPLEMENT_OCCURRENCES= 								PREFIX + "find_implement_occurrences"; //$NON-NLS-1$
 	public static final String WORKING_SET_FIND_ACTION=										PREFIX + "working_set_find_action"; //$NON-NLS-1$
 	public static final String FIND_STRINGS_TO_EXTERNALIZE_ACTION= 					PREFIX + "find_strings_to_externalize_action"; //$NON-NLS-1$
 	public static final String INLINE_ACTION= 												PREFIX + "inline_action"; //$NON-NLS-1$

@@ -25,15 +25,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -62,6 +53,16 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Preferences;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.GroupMarker;
@@ -129,6 +130,10 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
+
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -141,9 +146,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -198,6 +200,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -211,6 +214,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.CustomSourceInformationControl;
@@ -2162,7 +2166,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.swt.events.ShellAdapter#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellDeactivated(ShellEvent e) {
-			removeOccurrenceAnnotations();
+			if (fMarkOccurrenceAnnotations && isActivePart())
+				removeOccurrenceAnnotations();
 		}
 	}
 
@@ -2284,13 +2289,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
 	 * @since 3.0
 	 */
-	private boolean fMarkExceptionOccurrences;
+	private boolean fMarkExceptions;
 	/**
 	 * Tells whether to mark method exits in this editor.
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
 	 * @since 3.0
 	 */
 	private boolean fMarkMethodExitPoints;
+	/**
+	 * Tells whether to mark implementors in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.1
+	 */
+	private boolean fMarkImplementors;
 	/**
 	 * 
 	 */
@@ -2380,7 +2391,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkConstantOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_CONSTANT_OCCURRENCES);
 		fMarkFieldOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES);
 		fMarkLocalVariableypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES);
-		fMarkExceptionOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES);
+		fMarkExceptions= store.getBoolean(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES);
+		fMarkImplementors= store.getBoolean(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS);
 		fMarkMethodExitPoints= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS);
 	}
 	
@@ -3151,12 +3163,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 			if (PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES.equals(property)) {
 				if (event.getNewValue() instanceof Boolean)
-					fMarkExceptionOccurrences= ((Boolean)event.getNewValue()).booleanValue();
+					fMarkExceptions= ((Boolean)event.getNewValue()).booleanValue();
 				return;
 			}
 			if (PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS.equals(property)) {
 				if (event.getNewValue() instanceof Boolean)
 					fMarkMethodExitPoints= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
+			if (PreferenceConstants.EDITOR_MARK_IMPLEMENTORS.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkImplementors= ((Boolean)event.getNewValue()).booleanValue();
 				return;
 			}
 			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
@@ -3684,53 +3701,54 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IDocument document= getSourceViewer().getDocument();
 		if (document == null)
 			return;
-				
-		List matches= new ArrayList();
-		String message;
-		if (fMarkExceptionOccurrences || fMarkTypeOccurrences) {
+		
+		List matches= null;
+		if (fMarkExceptions || fMarkTypeOccurrences) {
 			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
-			message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
 			if (message == null) {
 				matches= exceptionFinder.perform();
+				if (!fMarkExceptions && !matches.isEmpty())
+					matches.clear();
 			}
 		}
-		if (matches.size() == 0) {
-			if (fMarkMethodExitPoints || fMarkTypeOccurrences) {
-				MethodExitsFinder finder= new MethodExitsFinder();
-				message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
-				if (message == null) {
-					matches= finder.perform();
-				}
+		
+		if ((matches == null || matches.isEmpty()) && (fMarkMethodExitPoints || fMarkTypeOccurrences)) {
+			MethodExitsFinder finder= new MethodExitsFinder();
+			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= finder.perform();
+				if (!fMarkMethodExitPoints && !matches.isEmpty())
+					matches.clear();
 			}
-			if (matches.size() == 0) {
-				ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
-				if (!(node instanceof Name)) {
-					if (!fStickyOccurrenceAnnotations)
-						removeOccurrenceAnnotations();
-					return;
-				}
-				
-				IBinding binding= ((Name)node).resolveBinding();
-				if (binding == null && fStickyOccurrenceAnnotations)
-					return;
-				
-				if (!markOccurrencesOfType(binding)) {
-					if (!fStickyOccurrenceAnnotations)
-						removeOccurrenceAnnotations();
-					return;
-				}
-				
+		}
+		
+		if ((matches == null || matches.isEmpty()) && (fMarkImplementors || fMarkTypeOccurrences)) {
+			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
+			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= finder.perform();
+				if (!fMarkImplementors && !matches.isEmpty())
+					matches.clear();
+			}
+		}
+		
+		if (matches == null) {
+			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+			IBinding binding= null;
+			if (node instanceof Name)
+				binding= ((Name)node).resolveBinding();
+
+			if (binding != null && markOccurrencesOfType(binding)) {
 				// Find the matches && extract positions so we can forget the AST
 				OccurrencesFinder finder = new OccurrencesFinder(binding);
-				message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+				String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
 				if (message == null)
 					matches= finder.perform();
-			} else if (!fMarkMethodExitPoints) {
-				if (!fStickyOccurrenceAnnotations)
-					removeOccurrenceAnnotations();
-				return;
 			}
-		} else if (!fMarkExceptionOccurrences) {
+		}
+		
+		if (matches == null || matches.size() == 0) {
 			if (!fStickyOccurrenceAnnotations)
 				removeOccurrenceAnnotations();
 			return;

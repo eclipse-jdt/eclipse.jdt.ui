@@ -2121,6 +2121,14 @@
          </action>
 <!-- Occurrences menu group  -->
          <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
+               label="%ImplementOccurrences.label"
+               retarget="true"
+               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
+               allowLabelUpdate="true"
+               id="org.eclipse.jdt.ui.actions.ImplementOccurrences">
+         </action>
+         <action
                definitionId="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
                label="%ExceptionOccurrences.label"
                retarget="true"
@@ -4022,6 +4030,18 @@
             string=""
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.implementOccurrences.name"
+            description="%ActionDefinition.implementOccurrences.description"
+            category="org.eclipse.search.ui.category.search"
+            id="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences">
+      </command>
+      <keyBinding
+            string=""
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command

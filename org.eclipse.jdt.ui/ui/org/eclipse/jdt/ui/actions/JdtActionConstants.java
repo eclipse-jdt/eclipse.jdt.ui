@@ -526,5 +526,13 @@ public class JdtActionConstants {
 	 * 
 	 * @since 3.0
 	 */
-	public static final String FIND_EXCEPTION_OCCURRENCES= "org.eclipse.jdt.ui.actions.ExceptionOccurrences"; //$NON-NLS-1$		
+	public static final String FIND_EXCEPTION_OCCURRENCES= "org.eclipse.jdt.ui.actions.ExceptionOccurrences"; //$NON-NLS-1$
+	
+	/**
+	 * Search menu: name of standard Find implement occurrences global action (value
+	 * <code>"org.eclipse.jdt.ui.actions.ImplementOccurrences"</code>).
+	 * 
+	 * @since 3.1
+	 */
+	public static final String FIND_IMPLEMENT_OCCURRENCES= "org.eclipse.jdt.ui.actions.ImplementOccurrences"; //$NON-NLS-1$		
 }

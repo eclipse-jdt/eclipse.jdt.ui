@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
+import org.eclipse.jdt.internal.ui.actions.FindImplementOccurrencesAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -52,6 +53,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 	
 	private FindOccurrencesInFileAction fOccurrencesInFileAction;
 	private FindExceptionOccurrences fExceptionOriginatorsAction;
+	private FindImplementOccurrencesAction fFindImplementorOccurrencesAction;
 	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
@@ -94,6 +96,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
 		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
 		fExceptionOriginatorsAction= new FindExceptionOccurrences(fEditor);
+		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(fEditor);
 	}
 
 	private JavaSearchActionGroup(IWorkbenchSite site) {
@@ -128,6 +131,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fWriteAccessGroup.fillActionBars(actionBar);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_OCCURRENCES_IN_FILE, fOccurrencesInFileAction);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, fExceptionOriginatorsAction);
+		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, fFindImplementorOccurrencesAction);
 	}
 	
 	/* 
