@@ -64,6 +64,9 @@
 		targetID="org.eclipse.jdt.ui.JavaPerspective">
 		<perspectiveShortcut id="org.eclipse.debug.ui.DebugPerspective"/>
 	</perspectiveExtension>
+	<perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+			<perspectiveShortcut id="org.eclipse.vcm.ui.vcmPerspective" /> 
+		</perspectiveExtension>
 	<perspectiveExtension 
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
