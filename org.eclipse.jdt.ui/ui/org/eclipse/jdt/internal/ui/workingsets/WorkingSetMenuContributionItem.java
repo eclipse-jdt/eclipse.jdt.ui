@@ -54,7 +54,7 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
 		mi.setText("&" + fId + " " + fWorkingSet.getName());  //$NON-NLS-1$  //$NON-NLS-2$
 		/*
-		 * XXX: Don't set the image - would looks bad because other menu items don't provide image
+		 * XXX: Don't set the image - would look bad because other menu items don't provide image
 		 * XXX: Get working set specific image name from XML - would need to cache icons
 		 */
 //		mi.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVA_WORKING_SET));
