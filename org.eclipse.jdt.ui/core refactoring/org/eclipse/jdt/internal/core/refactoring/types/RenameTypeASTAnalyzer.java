@@ -174,7 +174,7 @@ class RenameTypeASTAnalyzer extends RefactoringASTAnalyzer {
 	}
 	//-----------------------------------------------------------
 	private void addError(AstNode node){
-		addError("Name " + fNewName + " is already used in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + ")");
+		addError("Name " + fNewName + " is already visible in \"" + cuFullPath() + "\" (line number: " + getLineNumber(node) + ")");
 	}
 	
 	private boolean isNewNameHiddenByAnotherType(AstNode node, Scope scope) {
