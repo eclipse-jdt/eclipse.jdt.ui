@@ -1,7 +1,5 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.io.InputStreamReader;
-import java.io.StringBufferInputStream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -20,13 +18,8 @@ import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.util.IClassFileReader;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
   */
@@ -156,9 +149,10 @@ public class ClassPathDetector implements IResourceVisitor {
 	}
 		
 	private boolean visitClassFile(IFile file) {
-		IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), 0);
+		/*IClassFileReader reader= ToolFactory.createDefaultClassFileReader(file.getLocation().toOSString(), 0);
 		char[] className= reader.getClassName();
 		String str= new String(className);
+		*/
 		return true;
 	}	
 		

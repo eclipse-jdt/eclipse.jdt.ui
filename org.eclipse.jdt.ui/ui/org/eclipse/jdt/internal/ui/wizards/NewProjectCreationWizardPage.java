@@ -5,18 +5,12 @@
 package org.eclipse.jdt.internal.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
-import java.util.Iterator;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceVisitor;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -27,14 +21,9 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.dialogs.WizardNewProjectCreationPage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -159,92 +148,19 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 				init(JavaCore.create(project), null, null, false);
 				monitor.worked(2);
 			} else{
-				final HashSet sourceFolders= new HashSet();
-				IResourceVisitor visitor= new IResourceVisitor() {
-					public boolean visit(IResource resource) throws CoreException {
-						return doVisit(resource, sourceFolders);
-					}
-				};
-				project.accept(visitor);
-				monitor.worked(1);
-								
-				IClasspathEntry[] entries= null;
-				IPath outputLocation= null;
-				
-				if (!sourceFolders.isEmpty()) {
-					int nSourceFolders= sourceFolders.size();
-					IClasspathEntry[] jreEntries= PreferenceConstants.getDefaultJRELibrary();
-					entries= new IClasspathEntry[nSourceFolders + jreEntries.length];
-					Iterator iter = sourceFolders.iterator();
-					for (int i = 0; i < nSourceFolders; i++) {
-						entries[i]= JavaCore.newSourceEntry((IPath) iter.next());
-					}
-					System.arraycopy(jreEntries, 0, entries, nSourceFolders, jreEntries.length);
-					
-					IPath projPath= project.getFullPath();
-					if (nSourceFolders == 1 && entries[0].getPath().equals(projPath)) {
-						outputLocation= projPath;
-					} else {
-						outputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
-					} 				
-					if (!JavaConventions.validateClasspath(JavaCore.create(project), entries, outputLocation).isOK()) {
-						outputLocation= null;
-						entries= null;
-					}
-				}
+				ClassPathDetector detector= new ClassPathDetector(project);
+				IClasspathEntry[] entries= detector.getClasspath();
+				IPath outputLocation= detector.getOutputLocation();
+
 				init(JavaCore.create(project), outputLocation, entries, false);
-				monitor.worked(1);
+				monitor.worked(2);
 			}
 		} finally {
 			monitor.done();
 		}
 		
 	}
-	
-	private boolean doVisit(IResource resource, HashSet sourceFolders) throws JavaModelException {
-		if (!sourceFolders.isEmpty()) {
-			IResource curr= resource;
-			while (curr.getType() != IResource.ROOT) {
-				if (sourceFolders.contains(curr.getFullPath())) {
-					return false;
-				}
-				curr= curr.getParent();
-			}
-		}
-		if (resource.getType() == IResource.FILE) {
-			if ("java".equals(resource.getFileExtension())) { //$NON-NLS-1$
-				ICompilationUnit cu= JavaCore.createCompilationUnitFrom((IFile) resource);
-				if (cu != null) {
-					ICompilationUnit workingCopy= null;
-					try {
-						workingCopy= (ICompilationUnit) cu.getWorkingCopy();
-						IPath packPath= resource.getParent().getFullPath();
-						IPackageDeclaration[] decls= workingCopy.getPackageDeclarations();
-						if (decls.length == 0) {
-							sourceFolders.add(packPath);
-						} else {
-							IPath relpath= new Path(decls[0].getElementName().replace('.', '/'));
-							int remainingSegments= packPath.segmentCount() - relpath.segmentCount();
-							if (remainingSegments >= 0) {
-								IPath prefix= packPath.uptoSegment(remainingSegments);
-								IPath common= packPath.removeFirstSegments(remainingSegments);
-								if (common.equals(relpath)) {
-									sourceFolders.add(prefix);
-								}
-							}
-						}						
-					} finally {
-						if (workingCopy != null) {
-							workingCopy.destroy();
-						}
-					}
-				}
-			}
-		}
-		return true;
-	}
-
-	
+		
 	/**
 	 * Called from the wizard on cancel.
 	 */
