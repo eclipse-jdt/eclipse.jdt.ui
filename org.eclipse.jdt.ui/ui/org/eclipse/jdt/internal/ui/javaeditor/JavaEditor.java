@@ -90,6 +90,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ISelectionValidator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.ITextInputListener;
@@ -2094,7 +2095,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 */
 	private ActivationListener fActivationListener= new ActivationListener();
 	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
-	private Job fOccurrencesFinderJob;
+	private OccurrencesFinderJob fOccurrencesFinderJob;
 		
 	/**
 	 * Returns the most narrow java element including the given offset.
@@ -3152,19 +3153,26 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	class OccurrencesFinderJob extends Job implements IDocumentListener {
 		
 		private IDocument fDocument;
+		private ISelection fSelection;
+		private ISelectionValidator fPostSelectionValidator;
 		private boolean fCancelled= false;
 		private IProgressMonitor fProgressMonitor;
 		private Position[] fPositions;
 		
-		public OccurrencesFinderJob(IDocument document, Position[] positions) {
+		public OccurrencesFinderJob(IDocument document, Position[] positions, ISelection selection) {
 			super("Occurrences Marker"); //$NON-NLS-1$
 			fDocument= document;
+			fSelection= selection;
 			fPositions= positions;
 			fDocument.addDocumentListener(this);
+			
+			if (getSelectionProvider() instanceof ISelectionValidator)
+				fPostSelectionValidator= (ISelectionValidator)getSelectionProvider(); 
 		}
 		
 		private boolean isCancelled() {
-			return fCancelled || fProgressMonitor.isCanceled();
+			return fCancelled || fProgressMonitor.isCanceled()
+				||  fPostSelectionValidator != null && !fPostSelectionValidator.isValid(fSelection);
 		}
 		
 		/*
@@ -3310,12 +3318,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			positions[i++]= new Position(currentNode.getStartPosition(), currentNode.getLength());
 		}
 		
-		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions);
+		fOccurrencesFinderJob= new OccurrencesFinderJob(document, positions, selection);
 		//fOccurrencesFinderJob.setPriority(Job.DECORATE);
 		//fOccurrencesFinderJob.setSystem(true);
 		//fOccurrencesFinderJob.schedule();
-		((OccurrencesFinderJob) fOccurrencesFinderJob).run(new NullProgressMonitor());
-		
+		fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
 	
 	protected void installOccurrencesFinder() {
