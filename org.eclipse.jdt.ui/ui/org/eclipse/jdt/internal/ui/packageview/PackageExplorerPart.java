@@ -680,11 +680,11 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		if (selection.size() == 1) {
 			if (obj instanceof IJavaElement) {
-				IJavaElement cu= JavaModelUtil.findParentOfKind((IJavaElement)obj, IJavaElement.COMPILATION_UNIT);
+				IJavaElement cu= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.COMPILATION_UNIT);
 				if (cu != null)
 					element= getResourceFor(cu);
 				if (element == null)
-					element= JavaModelUtil.findParentOfKind((IJavaElement)obj, IJavaElement.CLASS_FILE);
+					element= JavaModelUtil.findElementOfKind((IJavaElement)obj, IJavaElement.CLASS_FILE);
 			}
 			else if (obj instanceof IFile)
 				element= obj;
