@@ -249,6 +249,7 @@ public class PullUpRefactoring extends Refactoring {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
+			fElementsToPullUp= getOriginals(fElementsToPullUp);
 						
 			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
 			pm.worked(1);
@@ -260,7 +261,6 @@ public class PullUpRefactoring extends Refactoring {
 			if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PullUpRefactoring.subtypes_of_binary_types")); //$NON-NLS-1$
 
-			fElementsToPullUp= getOriginals(fElementsToPullUp);
 			for (int i= 0; i < fElementsToPullUp.length; i++) {
 				IMember orig= fElementsToPullUp[i];
 				if (orig == null || ! orig.exists()){
