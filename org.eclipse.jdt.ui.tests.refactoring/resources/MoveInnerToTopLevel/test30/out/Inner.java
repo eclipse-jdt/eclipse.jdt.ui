@@ -3,7 +3,7 @@ import static java.lang.Math.E;
 public class Inner
 {
 	/** Comment */
-	private A a
+	private A a;
 
 	Inner(A a) {
 		this.a= a;

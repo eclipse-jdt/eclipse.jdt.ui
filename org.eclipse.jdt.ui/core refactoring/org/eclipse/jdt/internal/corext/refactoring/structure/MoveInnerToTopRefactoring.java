@@ -741,7 +741,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
-		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation());
+		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
 		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 

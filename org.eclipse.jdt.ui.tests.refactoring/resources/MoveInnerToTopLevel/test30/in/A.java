@@ -1,7 +1,7 @@
 import static java.lang.Math.E;
 class A extends B
 {
-	private int foo() {return 0};
+	private int foo() {return 0;}
 	public class Inner
 	{
 		Inner() {
@@ -20,5 +20,5 @@ class A extends B
 class B extends C {
 }
 class C {
-	protected int bar() {return 0};
+	protected int bar() {return 0;}
 }

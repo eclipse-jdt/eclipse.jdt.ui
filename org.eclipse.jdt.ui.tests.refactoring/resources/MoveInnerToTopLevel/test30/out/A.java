@@ -1,6 +1,6 @@
 class A extends B
 {
-	int foo() {return 0);
+	int foo() {return 0;}
 	public A()
 	{
 		super();
@@ -10,5 +10,5 @@ class A extends B
 class B extends C {
 }
 class C {
-	protected int bar() {return 0};
+	protected int bar() {return 0;}
 }
