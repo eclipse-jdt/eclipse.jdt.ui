@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.sef.SelfEncapsulateFieldWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
@@ -22,7 +23,7 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 public class SelfEncapsulateFieldAction extends RefactoringAction {
 
 	public SelfEncapsulateFieldAction(StructuredSelectionProvider provider) {
-		super("Self Encapsulate...", provider);
+		super(RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate"), provider); //$NON-NLS-1$
 	}
 	
 	public void run() {
@@ -33,7 +34,7 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 		} catch (JavaModelException e) {
 		}
 		if (field == null) {
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Self Encapsulate Field", "Field '" + selectedField.getElementName() + "' doesn't exist in editor buffer anymore.");
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), "Field '" + selectedField.getElementName() + "' doesn't exist in editor buffer anymore."); //$NON-NLS-1$
 			return;
 		}
 			
@@ -42,9 +43,9 @@ public class SelfEncapsulateFieldAction extends RefactoringAction {
 			new RefactoringStarter().activate(
 				refactoring, 
 				new SelfEncapsulateFieldWizard(refactoring),
-				"Self Encapsulate Field", true);
+				RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), true); //$NON-NLS-1$
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, "Self Encapsulate Field", "Cannot perform refactoring. See log for more details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("SelfEncapsulateFieldAction.self_Encapsulate1"), RefactoringMessages.getString("SelfEncapsulateFieldAction.cannot_perform")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
