@@ -66,6 +66,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertTrue("rt not found", JavaProjectHelper.addRTJar(fJProject1) != null);
 		
 		CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE).setPattern("");
+		CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT).setPattern("");
 		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
