@@ -516,7 +516,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			String comment= CodeGeneration.getMethodComment(fCu, getEnclosingTypeName(), getEnclosingTypeName(), new String[0], new String[0], null, null, getLineSeperator());
 			if (comment == null)
 				return ""; //$NON-NLS-1$
-			return comment;
+			return comment + getLineSeperator();
 		} else
 			return "";//$NON-NLS-1$
 	}

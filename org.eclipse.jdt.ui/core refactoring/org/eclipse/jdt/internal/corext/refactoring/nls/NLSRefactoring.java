@@ -877,7 +877,7 @@ public class NLSRefactoring extends Refactoring {
 			String comment= CodeGeneration.getMethodComment(fCu, fAccessorClassName, fAccessorClassName, new String[0], new String[0], null, null, fgLineDelimiter);
 			if (comment == null)
 				return ""; //$NON-NLS-1$
-			return comment;
+			return comment + fgLineDelimiter;
 		}else
 			return "";//$NON-NLS-1$
 	}
@@ -904,7 +904,7 @@ public class NLSRefactoring extends Refactoring {
 			String comment= CodeGeneration.getMethodComment(fCu, fAccessorClassName, "getString", new String[]{"key"}, new String[0], "QString;", null, fgLineDelimiter); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			if (comment == null)
 				return "";//$NON-NLS-1$
-			return comment;	
+			return comment + fgLineDelimiter;
 		}else
 			return "";//$NON-NLS-1$
 	}
