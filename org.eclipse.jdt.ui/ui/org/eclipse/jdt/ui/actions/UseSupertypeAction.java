@@ -43,7 +43,6 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
-//		setEnabled(false);
 	}
 
 	/**
@@ -57,7 +56,6 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 		super(site);
 		setText("Use Supertype &Where Possible...");
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.USE_SUPERTYPE_ACTION);
-//		setEnabled(false);
 	}
 	
 	/*
@@ -73,7 +71,6 @@ public class UseSupertypeAction extends SelectionDispatchAction{
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	protected void selectionChanged(ITextSelection selection) {
-//		setEnabled(false);
 	}
 	
 	/*
@@ -103,8 +100,6 @@ public class UseSupertypeAction extends SelectionDispatchAction{
 	}
 		
 	private boolean canEnable(IStructuredSelection selection){
-//		if (true) return false;
-		
 		try {
 			if (selection.isEmpty() || selection.size() != 1) 
 				return false;
