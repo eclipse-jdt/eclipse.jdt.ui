@@ -17,7 +17,6 @@ import java.util.List;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.Viewer;
@@ -26,6 +25,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -104,10 +105,10 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 			return;
 		final Object[] projects= dialog.getResult();
 		final List nonJavaProjects= new ArrayList(3);
-		IRunnableWithProgress runnable= createRunnable(projects, nonJavaProjects);
+		IWorkspaceRunnable runnable= createRunnable(projects, nonJavaProjects);
 		ProgressMonitorDialog pd= new ProgressMonitorDialog(fSite.getShell());
 		try {
-			pd.run(true, true, runnable);	
+			pd.run(true, true, new WorkbenchRunnableAdapter(runnable));
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, fSite.getShell(), 
 				ActionMessages.getString("OpenProjectAction.dialog.title"), //$NON-NLS-1$
@@ -117,11 +118,9 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 		showWarningDialog(nonJavaProjects);
 	}
 	
-	private IRunnableWithProgress createRunnable(
-		final Object[] projects,
-		final List nonJavaProjects) {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	private IWorkspaceRunnable createRunnable(final Object[] projects, final List nonJavaProjects) {
+		return new IWorkspaceRunnable() {
+			public void run(IProgressMonitor monitor) throws CoreException {
 				monitor.beginTask("", projects.length); //$NON-NLS-1$
 				MultiStatus errorStatus= null;
 				for (int i = 0; i < projects.length; i++) {
@@ -139,7 +138,7 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 				}
 				monitor.done();
 				if (errorStatus != null)
-					throw new InvocationTargetException(new CoreException(errorStatus));
+					throw new CoreException(errorStatus);
 			}
 		};
 	}

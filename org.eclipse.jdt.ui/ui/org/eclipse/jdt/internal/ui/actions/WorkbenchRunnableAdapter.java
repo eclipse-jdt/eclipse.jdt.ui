@@ -14,7 +14,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * An <code>IRunnableWithProgress</code> that adapts and  <code>IWorkspaceRunnable</code>
  * so that is can be executed inside <code>IRunnableContext</code>. <code>OperationCanceledException</code> 
- * throws by the apapted runnabled are cought and rethrown as a <code>InterruptedException</code>.
+ * thrown by the apapted runnabled are cought and rethrown as a <code>InterruptedException</code>.
  */
 public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	
