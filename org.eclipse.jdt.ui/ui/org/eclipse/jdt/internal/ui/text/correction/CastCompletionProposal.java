@@ -34,9 +34,15 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class CastCompletionProposal extends LinkedCorrectionProposal {
 
 	private Expression fNodeToCast;
-	private final String fCastType;
-	
+	private final Object fCastType; // String or ITypeBinding or null: Should become ITypeBinding
+	 
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, String castType, int relevance) {
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
+		fNodeToCast= nodeToCast;
+		fCastType= castType;
+	}
+	
+	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
 		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
@@ -45,8 +51,12 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 	private Type getNewCastTypeNode(ASTRewrite rewrite) throws CoreException {
 		AST ast= rewrite.getAST();
 		if (fCastType != null) {
-			String string= getImportRewrite().addImport(fCastType);
-			return ASTNodeFactory.newType(ast, string);
+			if (fCastType instanceof ITypeBinding) {
+				return getImportRewrite().addImport((ITypeBinding) fCastType, ast);
+			} else {
+				String string= getImportRewrite().addImport((String) fCastType);
+				return ASTNodeFactory.newType(ast, string);
+			}
 		}
 		
 		ASTNode node= fNodeToCast;

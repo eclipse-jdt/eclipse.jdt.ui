@@ -443,7 +443,7 @@ public final class ImportsStructure implements IImportsStructure {
 		
 		if (normalizedBinding.isTypeVariable()) {
 			// no import
-			return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
+			return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(binding)));
 		}
 		if (normalizedBinding.isWildcardType()) {
 			WildcardType wcType= ast.newWildcardType();
@@ -460,26 +460,25 @@ public final class ImportsStructure implements IImportsStructure {
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
-		if (normalizedBinding.isParameterizedType()) {
-			ITypeBinding erasure= normalizedBinding.getErasure();
-			
-			Type erasureType= addImport(erasure, ast);
-			ParameterizedType paramType= ast.newParameterizedType(erasureType);
-			List arguments= paramType.typeArguments();
-			
-			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
-			for (int i= 0; i < typeArguments.length; i++) {
-				arguments.add(addImport(typeArguments[i], ast));
-			}
-			return paramType;
-		}
-		
-		String qualifiedName= Bindings.getRawQualifiedName(binding);
+		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
 		if (qualifiedName.length() > 0) {
 			String res= internalAddImport(qualifiedName);
+			
+			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
+			if (typeArguments.length > 0) {
+				Type erasureType= ast.newSimpleType(ast.newSimpleName(res));
+				ParameterizedType paramType= ast.newParameterizedType(erasureType);
+				List arguments= paramType.typeArguments();
+				
+
+				for (int i= 0; i < typeArguments.length; i++) {
+					arguments.add(addImport(typeArguments[i], ast));
+				}
+				return paramType;
+			}
 			return ast.newSimpleType(ast.newSimpleName(res));
 		}
-		return ast.newSimpleType(ast.newSimpleName(normalizedBinding.getName()));
+		return ast.newSimpleType(ast.newSimpleName(Bindings.getRawName(normalizedBinding)));
 	}
 	
 
@@ -524,26 +523,28 @@ public final class ImportsStructure implements IImportsStructure {
 			return res.toString();
 		}
 		
-		if (normalizedBinding.isParameterizedType()) {
-			ITypeBinding erasure= normalizedBinding.getErasure();
-			StringBuffer res= new StringBuffer(addImport(erasure));
-			res.append('<');
-			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
-			for (int i= 0; i < typeArguments.length; i++) {
-				if (i > 0) {
-					res.append(','); //$NON-NLS-1$
-				}
-				res.append(addImport(typeArguments[i]));
-			}
-			res.append('>');
-			return res.toString();
-		}
+
 		
-		String qualifiedName= Bindings.getRawQualifiedName(binding);
+		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
 		if (qualifiedName.length() > 0) {
-			return internalAddImport(qualifiedName);
+			String str= internalAddImport(qualifiedName);
+			
+			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
+			if (typeArguments.length > 0) {
+				StringBuffer res= new StringBuffer(str);
+				res.append('<');
+				for (int i= 0; i < typeArguments.length; i++) {
+					if (i > 0) {
+						res.append(','); //$NON-NLS-1$
+					}
+					res.append(addImport(typeArguments[i]));
+				}
+				res.append('>');
+				return res.toString();
+			}
+			return str;
 		}
-		return normalizedBinding.getName();
+		return Bindings.getRawName(normalizedBinding);
 	}
 		
 	/**
@@ -554,6 +555,10 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @return Returns either the simple type name if the import was succesful or else the qualified type name
 	 */
 	public String addImport(String qualifiedTypeName) {
+		int angleBracketOffset= qualifiedTypeName.indexOf('<');
+		if (angleBracketOffset != -1) {
+			return internalAddImport(qualifiedTypeName.substring(0, angleBracketOffset)) + qualifiedTypeName.substring(angleBracketOffset);
+		}
 		int bracketOffset= qualifiedTypeName.indexOf('[');
 		if (bracketOffset != -1) {
 			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);

@@ -108,7 +108,7 @@ public class TypeMismatchSubProcessor {
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
 		if (binding == null || canCast(castTypeName, castTypeBinding, binding)) {
-			proposals.add(createCastProposal(context, castTypeName, nodeToCast, 7));
+			proposals.add(createCastProposal(context, castTypeName, castTypeBinding, nodeToCast, 7));
 		}
 		
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
@@ -256,7 +256,7 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 	
-	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, Expression nodeToCast, int relevance) {
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		
 		String label;
@@ -264,6 +264,9 @@ public class TypeMismatchSubProcessor {
 			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.changecast.description", castType); //$NON-NLS-1$
 		} else {
 			label= CorrectionMessages.getFormattedString("TypeMismatchSubProcessor.addcast.description", castType); //$NON-NLS-1$
+		}
+		if (castTypeBinding != null) {
+			return new CastCompletionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 		}
 		return new CastCompletionProposal(label, cu, nodeToCast, castType, relevance);
 	}

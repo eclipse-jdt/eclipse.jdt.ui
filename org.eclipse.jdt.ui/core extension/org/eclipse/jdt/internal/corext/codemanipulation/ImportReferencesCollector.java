@@ -107,6 +107,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 			IMethodBinding methodBinding= (IMethodBinding) binding;
 			declaringClass= methodBinding.getDeclaringClass();
 			flags= ScopeAnalyzer.METHODS;
+			binding= methodBinding.getErasure();
 		}
 		if (declaringClass != null && !declaringClass.isLocal()) {
 			IBinding[] declarationsInScope= new ScopeAnalyzer((CompilationUnit) name.getRoot()).getDeclarationsInScope(name.getStartPosition(), flags);

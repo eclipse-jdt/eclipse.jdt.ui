@@ -175,6 +175,9 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 						if (typeBinding.isArray()) {
 							typeBinding= typeBinding.getElementType();
 						}
+						if (typeBinding.isParameterizedType()) {
+							typeBinding= typeBinding.getErasure();
+						}
 						if (needsImport(typeBinding, ref)) {
 							fImpStructure.addImport(typeBinding);
 							fImportsAdded.add(typeName);
