@@ -19,26 +19,26 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 
 /**
- * Object contains a list of package fragments with the same name
+ * Contains a list of package fragments with the same name
  * but residing in different source folders of a unique Java project.
  */
-class CompoundElement {
+class LogicalPackage {
 
 	private Set fPackages;
 	private String fName;
-	private IJavaProject fProject;
+	private IJavaProject fJavaProject;
 	
-	public CompoundElement(IPackageFragment fragment){
+	public LogicalPackage(IPackageFragment fragment){
 		Assert.isNotNull(fragment);
 		fPackages= new HashSet();
-		fProject= fragment.getJavaProject();
-		Assert.isNotNull(fProject);
+		fJavaProject= fragment.getJavaProject();
+		Assert.isNotNull(fJavaProject);
 		add(fragment);
 		fName= fragment.getElementName();
 	}
 	
 	public IJavaProject getJavaProject(){
-		return fProject;	
+		return fJavaProject;	
 	}
 	
 	public IPackageFragment[] getFragments(){
@@ -46,7 +46,7 @@ class CompoundElement {
 	}
 	
 	public void add(IPackageFragment fragment){
-		Assert.isTrue(fragment != null && fProject.equals(fragment.getJavaProject()));
+		Assert.isTrue(fragment != null && fJavaProject.equals(fragment.getJavaProject()));
 		fPackages.add(fragment);
 	}
 	
@@ -79,7 +79,7 @@ class CompoundElement {
 		if(fragment==null)
 			return false;
 		
-		if(fProject.equals(fragment.getJavaProject())){
+		if(fJavaProject.equals(fragment.getJavaProject())){
 			return fName.equals(fragment.getElementName());
 		}
 	

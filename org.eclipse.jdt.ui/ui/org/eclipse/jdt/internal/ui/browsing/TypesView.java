@@ -156,8 +156,8 @@ public class TypesView extends JavaBrowsingPart {
 		IStructuredSelection sel= (IStructuredSelection) selection;
 		if (sel.size() == 1) {
 			Object selectedElement= sel.getFirstElement();
-			if (selectedElement instanceof CompoundElement){
-				IPackageFragment[] fragments= ((CompoundElement)selectedElement).getFragments();
+			if (selectedElement instanceof LogicalPackage){
+				IPackageFragment[] fragments= ((LogicalPackage)selectedElement).getFragments();
 				List selectedElements= Arrays.asList(fragments);
 				if (selectedElements.size() > 1)
 					adjustInput(part, selectedElements);
