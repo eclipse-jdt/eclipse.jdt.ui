@@ -223,7 +223,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFile file= JavaPlugin.getWorkspace().getRoot().getFile(path);
-			if (file != null && file.exists())
+			if (file != null)
 				selectedElements.add(file);
 		}
 	}
@@ -232,7 +232,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		IPath path= getPath(element);
 		if (path != null) {
 			IFolder folder= JavaPlugin.getWorkspace().getRoot().getFolder(path);
-			if (folder != null && folder.exists())
+			if (folder != null)
 				selectedElements.add(folder);
 		}
 	}
@@ -242,7 +242,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		if (name.equals("")) //$NON-NLS-1$
 			throw new IOException(JarPackagerMessages.getString("JarPackageReader.error.tagNameNotFound")); //$NON-NLS-1$
 		IProject project= JavaPlugin.getWorkspace().getRoot().getProject(name);
-		if (project != null && project.isAccessible())
+		if (project != null)
 			selectedElements.add(project);
 	}
 
