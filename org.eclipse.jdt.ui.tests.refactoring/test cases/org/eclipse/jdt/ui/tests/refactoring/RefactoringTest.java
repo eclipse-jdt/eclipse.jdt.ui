@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 
 import junit.framework.TestCase;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
@@ -24,17 +23,15 @@ import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.text.ITextBufferChangeCreator;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-import org.eclipse.jdt.ui.tests.refactoring.infra.TextBufferChangeCreator;
 
 public abstract class RefactoringTest extends TestCase {
 
@@ -49,7 +46,6 @@ public abstract class RefactoringTest extends TestCase {
 	protected static final String TEST_INPUT_INFIX= "/in/";
 	protected static final String TEST_OUTPUT_INFIX= "/out/";
 	protected static final String CONTAINER= "src";
-	protected static final ITextBufferChangeCreator fgChangeCreator= new TextBufferChangeCreator();
 	
 	private static final IProgressMonitor fgNullProgressMonitor= new NullProgressMonitor();
 
