@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -34,6 +35,8 @@ import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
+
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -173,67 +176,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				GridData data= new GridData(GridData.FILL_HORIZONTAL);
 				data.heightHint= 2;
 				separator.setLayoutData(data);
-		
+				
 				try {
-
-					final IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
+					IPackageFragmentRoot root= getPackageFragmentRoot(fFile);
 					if (root != null) {
-						
-						IClasspathEntry entry= root.getRawClasspathEntry();	
-						
-						if (!root.isArchive()) {
-							createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
-			
-						} else if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {	
-							IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
-							String containerName= container == null ? entry.getPath().toString() : container.getDescription();
-							createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.containerEntry", containerName));  //$NON-NLS-1$
-	
-						} else {
-							
-							Button button;
-		
-							IPath path= root.getSourceAttachmentPath();			
-							if (path == null) {			
-								createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
-								createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
-								createLabel(composite, null);
-		
-								button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		 //$NON-NLS-1$
-		
-							} else {
-								createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
-								createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
-								createLabel(composite, null);
-		
-								button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
-							}
-		
-							button.addSelectionListener(new SelectionListener() {
-								public void widgetSelected(SelectionEvent event) {				
-									try {
-										SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), root);
-										if (dialog.open() == SourceAttachmentDialog.OK)
-											verifyInput(getEditorInput());
-		
-									} catch (CoreException e) {
-										String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
-										String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
-										ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-									}
-								}
-		
-								public void widgetDefaultSelected(SelectionEvent e) {}
-							});
-		
-						}
-					}
-
+						createSourceAttachmentControls(composite, root);
+					}					
 				} catch (JavaModelException e) {
 					String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
 					String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
 					ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
-				}
+				}	
 				
 				separator= createCompositeSeparator(composite);
 				data= new GridData(GridData.FILL_HORIZONTAL);
@@ -250,6 +203,66 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				
 				return fScrolledComposite;
 			}
+			
+			private void createSourceAttachmentControls(Composite composite, IPackageFragmentRoot root) throws JavaModelException {
+				IClasspathEntry entry= root.getRawClasspathEntry();	
+				IPath containerPath= null;
+				IJavaProject jproject= root.getJavaProject();
+				
+				if (entry == null || !root.isArchive()) {
+					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSource", fFile.getElementName())); //$NON-NLS-1$
+					return;
+				}
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					containerPath= entry.getPath();
+					entry= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, root.getPath());
+					if (entry == null) {
+						IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());							
+						String containerName= container == null ? entry.getPath().toString() : container.getDescription();
+						createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.containerEntry", containerName));  //$NON-NLS-1$
+						return;
+					}
+				}
+				Button button;
+
+				IPath path= entry.getSourceAttachmentPath();			
+				if (path == null || path.isEmpty()) {			
+					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceAttachment", root.getElementName())); //$NON-NLS-1$
+					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToAttach")); //$NON-NLS-1$
+					createLabel(composite, null);
+
+					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.attachSource"));		 //$NON-NLS-1$
+
+				} else {
+					createLabel(composite, JavaEditorMessages.getFormattedString("SourceAttachmentForm.message.noSourceInAttachment", fFile.getElementName())); //$NON-NLS-1$
+					createLabel(composite, JavaEditorMessages.getString("SourceAttachmentForm.message.pressButtonToChange")); //$NON-NLS-1$
+					createLabel(composite, null);
+
+					button= createButton(composite, JavaEditorMessages.getString("SourceAttachmentForm.button.changeAttachedSource")); //$NON-NLS-1$
+				}
+
+				button.addSelectionListener(getButtonListener(entry, containerPath, jproject));
+			}
+			
+			private SelectionListener getButtonListener(final IClasspathEntry entry, final IPath containerPath, final IJavaProject jproject) {
+				return new SelectionListener() {
+					public void widgetSelected(SelectionEvent event) {				
+						try {
+							SourceAttachmentDialog dialog= new SourceAttachmentDialog(fScrolledComposite.getShell(), entry, containerPath, jproject, true);
+							if (dialog.open() == SourceAttachmentDialog.OK)
+								verifyInput(getEditorInput());
+	
+						} catch (CoreException e) {
+							String title= JavaEditorMessages.getString("SourceAttachmentForm.error.title"); //$NON-NLS-1$
+							String message= JavaEditorMessages.getString("SourceAttachmentForm.error.message"); //$NON-NLS-1$
+							ExceptionHandler.handle(e, fScrolledComposite.getShell(), title, message);				
+						}
+					}
+	
+					public void widgetDefaultSelected(SelectionEvent e) {}
+				};
+			}	
+			
 		
 			/*
 			 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)

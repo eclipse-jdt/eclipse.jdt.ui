@@ -9,9 +9,9 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentDialog;
 
 /**
  * Property page to configure a archive's JARs source attachment
@@ -47,7 +48,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
 public class SourceAttachmentPropertyPage extends PropertyPage implements IStatusChangeListener {
 
 	private SourceAttachmentBlock fSourceAttachmentBlock;
-	private IPackageFragmentRoot fJarRoot;
+	private IPackageFragmentRoot fRoot;
 
 	public SourceAttachmentPropertyPage() {
 	}
@@ -59,22 +60,30 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		initializeDialogUnits(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
 
-		fJarRoot= getJARPackageFragmentRoot();
-		if (fJarRoot == null) {
-			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
-		}
 		try {
-			IClasspathEntry entry= fJarRoot.getRawClasspathEntry();
+			fRoot= getJARPackageFragmentRoot();
+			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
+				return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+			}
+
+			IPath containerPath= null;
+			IJavaProject jproject= fRoot.getJavaProject();
+			IClasspathEntry entry= fRoot.getRawClasspathEntry();
 			if (entry == null) {
 				// use a dummy entry to use for initialization
-				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
-			} else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-				IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), fJarRoot.getJavaProject());
-				String containerName= container != null ? container.getDescription() : entry.getPath().toString();
-				return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+				entry= JavaCore.newLibraryEntry(fRoot.getPath(), null, null);
+			} else {
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					containerPath= entry.getPath();
+					entry= SourceAttachmentDialog.getClasspathEntryToEdit(jproject, containerPath, fRoot.getPath());
+					if (entry == null) {
+						IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+						String containerName= container != null ? container.getDescription() : containerPath.toString();
+						return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+					}
+				}
 			}
-			IWorkspaceRoot wsroot= fJarRoot.getJavaModel().getWorkspace().getRoot();
-			fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry, containerPath, jproject);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -105,7 +114,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	public boolean performOk() {
 		if (fSourceAttachmentBlock != null) {
 			try {
-				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable(fJarRoot.getJavaProject(), getShell());		
+				IRunnableWithProgress runnable= fSourceAttachmentBlock.getRunnable();		
 				new ProgressMonitorDialog(getShell()).run(true, true, runnable);						
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("SourceAttachmentPropertyPage.error.title"); //$NON-NLS-1$
@@ -130,29 +139,20 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 		super.performDefaults();
 	}	
 				
-	private IPackageFragmentRoot getJARPackageFragmentRoot() {
+	private IPackageFragmentRoot getJARPackageFragmentRoot() throws CoreException {
 		// try to find it as Java element (needed for external jars)
 		IAdaptable adaptable= getElement();
 		IJavaElement elem= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
 		if (elem instanceof IPackageFragmentRoot) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
-			if (root.isArchive()) {
-				return root;
-			} else {
-				return null;
-			}
+			return (IPackageFragmentRoot) elem;
 		}
 		// not on classpath or not in a java project
 		IResource resource= (IResource) adaptable.getAdapter(IResource.class);
 		if (resource instanceof IFile) {
 			IProject proj= resource.getProject();
-			try {
-				if (proj.hasNature(JavaCore.NATURE_ID)) {
-					IJavaProject jproject= JavaCore.create(proj);
-					return jproject.getPackageFragmentRoot(resource);
-				}
-			} catch (CoreException e) {
-				JavaPlugin.log(e.getStatus());
+			if (proj.hasNature(JavaCore.NATURE_ID)) {
+				IJavaProject jproject= JavaCore.create(proj);
+				return jproject.getPackageFragmentRoot(resource);
 			}
 		}
 		return null;		

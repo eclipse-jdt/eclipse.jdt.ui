@@ -279,7 +279,15 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			CPListElement selElement= (CPListElement) elem.getParent();
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement);
+			
+			IPath containerPath= null;
+			boolean applyChanges= false;
+			CPListElement parentContainer= selElement.getParentContainer();
+			if (parentContainer != null) {
+				containerPath= parentContainer.getPath();
+				applyChanges= true;
+			}
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getClasspathEntry(), containerPath, fCurrJProject, applyChanges);
 			if (dialog.open() == SourceAttachmentDialog.OK) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
 				fLibrariesList.refresh();
@@ -342,10 +350,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			/*CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			if (attrib.getKey().equals(CPListElement.JAVADOC)) {
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			if (attrib.getKey().equals(CPListElement.SOURCEATTACHMENT)) {
 				return true;
-			}*/
+			}
 			return ((CPListElementAttribute) elem).getParent().getParentContainer() == null;
 		}
 		return false;
@@ -799,48 +807,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		return currEntries;
 	}
 		
-					
-	// a dialog to set the source attachment properties
-	private static class SourceAttachmentDialog extends StatusDialog implements IStatusChangeListener {
-		
-		private SourceAttachmentBlock fSourceAttachmentBlock;
-				
-		public SourceAttachmentDialog(Shell parent, IWorkspaceRoot root, CPListElement element) {
-			super(parent);
-			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.SourceAttachmentDialog.title", element.getPath().toString())); //$NON-NLS-1$
-			fSourceAttachmentBlock= new SourceAttachmentBlock(root, this, element.getClasspathEntry());
-		}
-		
-		/*
-		 * @see Windows#configureShell
-		 */
-		protected void configureShell(Shell newShell) {
-			super.configureShell(newShell);
-			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.SOURCE_ATTACHMENT_DIALOG);
-		}		
-				
-		protected Control createDialogArea(Composite parent) {
-			Composite composite= (Composite)super.createDialogArea(parent);
-						
-			Control inner= fSourceAttachmentBlock.createControl(composite);
-			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-			return composite;
-		}
-		
-		public void statusChanged(IStatus status) {
-			updateStatus(status);
-		}
-		
-		public IPath getSourceAttachmentPath() {
-			return fSourceAttachmentBlock.getSourceAttachmentPath();
-		}
-		
-		public IPath getSourceAttachmentRootPath() {
-			return fSourceAttachmentBlock.getSourceAttachmentRootPath();
-		}
-				
-	}
-	
 	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
 
 		private JavadocConfigurationBlock fJavadocConfigurationBlock;
