@@ -73,8 +73,6 @@ public class JavaDocLocations {
 	private static final String NODE_PATH= "path"; //$NON-NLS-1$
 	private static final String NODE_URL= "url"; //$NON-NLS-1$
 	
-	
-	
 	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
 	
 	private static Map fgJavadocLocations= null;
@@ -377,15 +375,22 @@ public class JavaDocLocations {
 			}
 		}
 		
+		updateVMInstallJavadocLocations(cpElement);
+	}
+
+	/**
+	 * Get the javadoc locations from vminstalls and update them if they are different to stored vm installs
+	 * @param cpElement The root node or null
+	 */
+	private static void updateVMInstallJavadocLocations(Element cpElement) {
 		// check for updates in the vm installs
 		ArrayList paths= new ArrayList(), urls= new ArrayList();
 		JavaDocVMInstallListener.collectChangedVMInstallJavadocLocations(cpElement, paths, urls);
 		for (int i= 0; i < paths.size(); i++) {
 			setJavadocBaseLocation(canonicalizedPath((IPath) paths.get(i)), (URL) urls.get(i), false);
 		}
-	}	
-	
-	
+	}
+
 	public static void shutdownJavadocLocations() {
 		if (fgVMInstallListener == null) {
 			return;
@@ -400,6 +405,7 @@ public class JavaDocLocations {
 			boolean res= loadFromPreferences();
 			if (!res) {
 				loadOldForCompatibility();
+				updateVMInstallJavadocLocations(null); // initialize all javadoc location from VM installs
 			}
 		} finally {
 			fgVMInstallListener= new JavaDocVMInstallListener();

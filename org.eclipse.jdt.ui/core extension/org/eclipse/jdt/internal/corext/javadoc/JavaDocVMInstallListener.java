@@ -83,9 +83,15 @@ public class JavaDocVMInstallListener implements IVMInstallChangedListener {
 	}
 		
 	public static void collectChangedVMInstallJavadocLocations(Element rootElement, List resPaths, List resURLs) {
-		NodeList vmRoots= rootElement.getElementsByTagName(NODE_VM_ROOT);
-		Node root= (vmRoots.getLength() == 1) ? vmRoots.item(0) : null; // root == null:  no vm installs remembered
-			
+		Node root= null;
+		if (rootElement != null) {
+			NodeList vmRoots= rootElement.getElementsByTagName(NODE_VM_ROOT);
+			if (vmRoots.getLength() == 1) {
+				root= vmRoots.item(0);
+			}
+		}
+		// root == null:  no vm installs remembered
+		
 		IVMInstallType[] vmTypes= JavaRuntime.getVMInstallTypes();
 		for (int i = 0; i < vmTypes.length; i++) {
 			IVMInstallType vmType= vmTypes[i];
@@ -116,6 +122,7 @@ public class JavaDocVMInstallListener implements IVMInstallChangedListener {
 		LibraryLocation[] libraryLocations= JavaRuntime.getLibraryLocations(vmInstall);
 		for (int i= 0; i < libraryLocations.length; i++) {
 			IPath libPath= libraryLocations[i].getSystemLibraryPath();
+			// if update required or library is new (not found in remembered vmInstall)
 			if (updateAll || findElement(rememberedVmInstall, NODE_VM_LIBRARY, NODE_VM_LIB_PATH, libPath.toPortableString()) == null) {
 				resPaths.add(libPath);
 				resURLs.add(url);
