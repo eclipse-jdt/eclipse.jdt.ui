@@ -13,6 +13,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -54,22 +55,29 @@ public class ExperimentalProposal extends JavaCompletionProposal {
 
 		int replacementOffset= getReplacementOffset();
 		String replacementString= getReplacementString();
-		
-		try {
-			LinkedPositionManager manager= new LinkedPositionManager(document);
-			for (int i= 0; i != fPositionOffsets.length; i++)
-				manager.addPosition(replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+
+		if (LinkedPositionManager.hasActiveManager(document)) {
+			fSelectedRegion= (fPositionOffsets.length == 0)
+				? new Region(replacementOffset + replacementString.length(), 0)
+				: new Region(replacementOffset + fPositionOffsets[0], fPositionLengths[0]);
 			
-			LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-			editor.setFinalCaretOffset(replacementOffset + replacementString.length());
-			editor.enter();
-
-			fSelectedRegion= editor.getSelectedRegion();
-
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);	
-			openErrorDialog(e);
-		}		
+		} else {
+			try {
+				LinkedPositionManager manager= new LinkedPositionManager(document);
+				for (int i= 0; i != fPositionOffsets.length; i++)
+					manager.addPosition(replacementOffset + fPositionOffsets[i], fPositionLengths[i]);
+				
+				LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
+				editor.setFinalCaretOffset(replacementOffset + replacementString.length());
+				editor.enter();
+	
+				fSelectedRegion= editor.getSelectedRegion();
+	
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);	
+				openErrorDialog(e);
+			}		
+		}
 	}
 	
 	/**

@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.JFaceResources;
@@ -63,7 +64,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateContentProvider;
 import org.eclipse.jdt.internal.ui.text.template.TemplateLabelProvider;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
-public class TemplatePreferencePage	extends PreferencePage implements IWorkbenchPreferencePage {
+public class TemplatePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
 	// preference store keys
 	private static final String PREF_FORMAT_TEMPLATES= JavaUI.ID_PLUGIN + ".template.format"; //$NON-NLS-1$
@@ -389,9 +390,25 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 	}
 
 	private void edit(Template template) {
-		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), template, true);
+		Template newTemplate= new Template(template);
+		EditTemplateDialog dialog= new EditTemplateDialog(getShell(), newTemplate, true);
 		if (dialog.open() == dialog.OK) {
-			fTableViewer.refresh(template);
+
+			if (!newTemplate.getName().equals(template.getName()) &&
+				MessageDialog.openQuestion(getShell(),
+				TemplateMessages.getString("TemplatePreferencePage.question.create.new.title"),
+				TemplateMessages.getString("TemplatePreferencePage.question.create.new.message")))
+			{
+				template= newTemplate;
+				fTemplates.add(template);
+				fTableViewer.refresh();
+			} else {
+				template.setName(newTemplate.getName());
+				template.setDescription(newTemplate.getDescription());
+				template.setContext(newTemplate.getContextTypeName());
+				template.setPattern(newTemplate.getPattern());
+				fTableViewer.refresh(template);
+			}
 			fTableViewer.setChecked(template, template.isEnabled());
 			fTableViewer.setSelection(new StructuredSelection(template));			
 		}
@@ -443,14 +460,23 @@ public class TemplatePreferencePage	extends PreferencePage implements IWorkbench
 		if (path == null)
 			return;
 		
-		try {
-			templateSet.saveToFile(new File(path));			
-		} catch (CoreException e) {			
-			JavaPlugin.log(e);
-			openWriteErrorDialog(e);
-		}		
+		File file= new File(path);		
+
+		if (!file.exists() || confirmOverwrite(file)) {
+			try {
+				templateSet.saveToFile(file);			
+			} catch (CoreException e) {			
+				JavaPlugin.log(e);
+				openWriteErrorDialog(e);
+			}		
+		}
 	}
-	
+
+	private boolean confirmOverwrite(File file) {
+		return MessageDialog.openQuestion(getShell(),
+			TemplateMessages.getString("TemplatePreferencePage.export.exists.title"),
+			TemplateMessages.getFormattedString("TemplatePreferencePage.export.exists.message", file.getAbsolutePath()));
+	}
 	
 	private void remove() {
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();

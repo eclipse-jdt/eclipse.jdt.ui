@@ -26,6 +26,13 @@ public class Template {
 	public Template() {
 		this("", "", "", ""); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 	}
+	
+	/**
+	 * Creates a copy of a template.
+	 */
+	public Template(Template template) {
+		this(template.getName(), template.getDescription(), template.getContextTypeName(), template.getPattern());	
+	}
 
 	/**
 	 * Creates a template.

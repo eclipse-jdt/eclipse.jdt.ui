@@ -111,10 +111,14 @@ public class TemplateSet {
 				if (attributes == null)
 					continue;
 
-				String name= attributes.getNamedItem(NAME_ATTRIBUTE).getNodeValue();
-				String description= attributes.getNamedItem(DESCRIPTION_ATTRIBUTE).getNodeValue();
-				String context= attributes.getNamedItem(CONTEXT_ATTRIBUTE).getNodeValue();
+				String name= getAttributeValue(attributes, NAME_ATTRIBUTE);
+				String description= getAttributeValue(attributes, DESCRIPTION_ATTRIBUTE);
+				String context= getAttributeValue(attributes, CONTEXT_ATTRIBUTE);
 				Node enabledNode= attributes.getNamedItem(ENABLED_ATTRIBUTE);
+
+				if (name == null || description == null || context == null)
+					throw new SAXException("Missing required attribute");
+
 				boolean enabled= (enabledNode == null) || (enabledNode.getNodeValue().equals("true")); //$NON-NLS-1$
 
 				StringBuffer buffer= new StringBuffer();
@@ -140,6 +144,14 @@ public class TemplateSet {
 		} catch (SAXException e) {
 			throwReadException(e);
 		}
+	}
+	
+	private String getAttributeValue(NamedNodeMap attributes, String name) {
+		Node node= attributes.getNamedItem(name);
+
+		return node == null
+			? null
+			: node.getNodeValue();
 	}
 
 	/**

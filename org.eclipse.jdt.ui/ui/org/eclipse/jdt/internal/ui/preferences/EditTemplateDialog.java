@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
 import java.util.Vector;
 
 import org.eclipse.swt.SWT;
@@ -31,6 +30,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -45,6 +45,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -69,15 +71,14 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
-import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.template.TemplateVariableProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -100,21 +101,53 @@ public class EditTemplateDialog extends StatusDialog {
 		 */
 		public IContentAssistant getContentAssistant(ISourceViewer sourceViewer) {
 
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+
 			ContentAssistant assistant= new ContentAssistant();
 			assistant.setContentAssistProcessor(fProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 
-			assistant.enableAutoActivation(true);
-			assistant.setAutoActivationDelay(500);
+			assistant.enableAutoInsert(store.getBoolean(ContentAssistPreference.AUTOINSERT));
+			assistant.enableAutoActivation(store.getBoolean(ContentAssistPreference.AUTOACTIVATION));
+			assistant.setAutoActivationDelay(store.getInt(ContentAssistPreference.AUTOACTIVATION_DELAY));
 			assistant.setProposalPopupOrientation(assistant.PROPOSAL_OVERLAY);
 			assistant.setContextInformationPopupOrientation(assistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
+
+			Display display= sourceViewer.getTextWidget().getDisplay();
 			
-			Color background= getColorManager().getColor(new RGB(254, 241, 233));
+			Color background= createColor(store, ContentAssistPreference.PROPOSALS_BACKGROUND, display);			
 			assistant.setContextInformationPopupBackground(background);
 			assistant.setContextSelectorBackground(background);
 			assistant.setProposalSelectorBackground(background);
+
+			Color foreground= createColor(store, ContentAssistPreference.PROPOSALS_FOREGROUND, display);
+			assistant.setContextInformationPopupForeground(foreground);
+			assistant.setContextSelectorForeground(foreground);
+			assistant.setProposalSelectorForeground(foreground);
 			
 			return assistant;
+		}	
+
+		/**
+		 * Creates a color from the information stored in the given preference store.
+		 * Returns <code>null</code> if there is no such information available.
+		 */
+		private Color createColor(IPreferenceStore store, String key, Display display) {
+		
+			RGB rgb= null;		
+			
+			if (store.contains(key)) {
+				
+				if (store.isDefault(key))
+					rgb= PreferenceConverter.getDefaultColor(store, key);
+				else
+					rgb= PreferenceConverter.getColor(store, key);
+			
+				if (rgb != null)
+					return new Color(display, rgb);
+			}
+			
+			return null;
 		}	
 	}
 
@@ -156,19 +189,16 @@ public class EditTemplateDialog extends StatusDialog {
 		}
 	}	
 
-	private Template fTemplate;
-
+	private final Template fTemplate;
+	
 	private Text fNameText;
 	private Text fDescriptionText;
 	private Combo fContextCombo;
-	private SourceViewer fPatternEditor;
-	
+	private SourceViewer fPatternEditor;	
 	private Button fInsertVariableButton;
 
-	private TemplateTranslator fTranslator= new TemplateTranslator();
-	
-	private boolean fSuppressError= true; // #4354
-	
+	private TemplateTranslator fTranslator= new TemplateTranslator();	
+	private boolean fSuppressError= true; // #4354	
 	private Map fGlobalActions= new HashMap(10);
 	private List fSelectionActions = new ArrayList(3);	
 	private Vector fContextTypes= new Vector();
