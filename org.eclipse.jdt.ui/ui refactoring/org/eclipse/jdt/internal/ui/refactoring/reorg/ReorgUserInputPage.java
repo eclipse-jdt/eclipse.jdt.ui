@@ -80,15 +80,15 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 
 		if (resources == 0 && javaElements == 1) {
 			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.select_destination_single", //$NON-NLS-1$
+					"ReorgUserInputPage.choose_destination_single", //$NON-NLS-1$
 					JavaElementLabels.getElementLabel(getJavaElements()[0], LABEL_FLAGS));
 		} else if (resources == 1 && javaElements == 0) {
 			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.select_destination_single", //$NON-NLS-1$
+					"ReorgUserInputPage.choose_destination_single", //$NON-NLS-1$
 					getResources()[0].getName());
 		} else {
 			text= ReorgMessages.getFormattedString(
-					"ReorgUserInputPage.select_destination_multi", //$NON-NLS-1$
+					"ReorgUserInputPage.choose_destination_multi", //$NON-NLS-1$
 					String.valueOf(resources + javaElements));
 		}
 
