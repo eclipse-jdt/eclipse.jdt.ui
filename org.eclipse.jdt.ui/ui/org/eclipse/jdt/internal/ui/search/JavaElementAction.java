@@ -54,8 +54,11 @@ public abstract class JavaElementAction extends Action {
 
 		if (fValidTypes.length == 0)
 			return false;
-
-		IJavaElement element= getJavaElement(sel, true);
+
+		return canOperateOn(getJavaElement(sel, true));
+	}
+		
+	protected boolean canOperateOn(IJavaElement element) {
 		if (element != null) {
 			for (int i= 0; i < fValidTypes.length; i++) {
 				if (fValidTypes[i].isInstance(element))
