@@ -227,7 +227,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 	
-	public static void addModfierChangeProposal(ProblemPosition problemPos, ArrayList proposals, boolean visibilityChange) throws JavaModelException {
+	public static void addNonAccessibleMemberProposal(ProblemPosition problemPos, ArrayList proposals, boolean visibilityChange) throws JavaModelException {
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
@@ -296,7 +296,7 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(new ModifierChangeCompletionProposal(label, targetCU, binding, selectedNode, includedModifiers, excludedModifiers, 0, image));
 		}
 	}
-	
+		
 	private static String getVisibilityString(int code) {
 		if (Modifier.isPublic(code)) {
 			return "public";
@@ -309,6 +309,9 @@ public class LocalCorrectionsSubProcessor {
 	
 	private static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {
 		ITypeBinding currNodeBinding= ASTResolving.getBindingOfParentType(currNode);
+		if (currNodeBinding == null) { // import
+			return Modifier.PUBLIC;
+		}
 		
 		ITypeBinding curr= currNodeBinding;
 		while (curr != null) {

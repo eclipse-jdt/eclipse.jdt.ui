@@ -79,12 +79,20 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.NonStaticAccessToStaticField:
 			case IProblem.NonStaticAccessToStaticMethod:
 			case IProblem.StaticMethodRequested:
-			case IProblem.NotVisibleMethod:
-			case IProblem.NotVisibleConstructor:
-			case IProblem.NotVisibleField:
 			case IProblem.NonStaticFieldFromStaticInvocation:
 			case IProblem.InstanceMethodDuringConstructorInvocation:
 			case IProblem.InstanceFieldDuringConstructorInvocation:			
+			case IProblem.NotVisibleMethod:
+			case IProblem.NotVisibleConstructor:
+			case IProblem.NotVisibleType:
+			case IProblem.SuperclassNotVisible:
+			case IProblem.InterfaceNotVisible:
+			case IProblem.FieldTypeNotVisible:
+			case IProblem.ArgumentTypeNotVisible:
+			case IProblem.ReturnTypeNotVisible:
+			case IProblem.ExceptionTypeNotVisible:
+			case IProblem.NotVisibleField:
+			case IProblem.ImportNotVisible:		
 				return true;
 			default:
 				return false;
@@ -244,7 +252,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.NonStaticFieldFromStaticInvocation:
 				case IProblem.InstanceMethodDuringConstructorInvocation:
 				case IProblem.InstanceFieldDuringConstructorInvocation:
-					LocalCorrectionsSubProcessor.addModfierChangeProposal(problemPos, proposals, false); 
+					LocalCorrectionsSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, false); 
 					break;				
 				case IProblem.NotVisibleMethod:
 				case IProblem.NotVisibleConstructor:
@@ -256,7 +264,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.ReturnTypeNotVisible:
 				case IProblem.ExceptionTypeNotVisible:
 				case IProblem.NotVisibleField:
-					LocalCorrectionsSubProcessor.addModfierChangeProposal(problemPos, proposals, true); 
+				case IProblem.ImportNotVisible:
+					LocalCorrectionsSubProcessor.addNonAccessibleMemberProposal(problemPos, proposals, true); 
 					break;
 				default:
 			}
