@@ -22,11 +22,11 @@ public class CPListElement {
 	
 	private URL fJavaDocLocation;
 					
-	public CPListElement(IClasspathEntry entry, IResource resource) {
+	public CPListElement(IClasspathEntry entry, IResource res) {
 		fEntry= entry;
-		fResource= resource;
 		fSourceAttachmentPath= null;
 		fSourceAttachmentPrefix= null;
+		fResource= res;
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
@@ -40,10 +40,16 @@ public class CPListElement {
 	public int getEntryKind() {
 		return fEntry.getEntryKind();
 	}
-	
+
+	/**
+	 * The resources is used for LIBRARY entries to destinguish
+	 * between folders, intrenal and external JARs
+	 * External jars do not have a resource
+	 */
 	public IResource getResource() {
 		return fResource;
 	}
+
 
 	/**
 	 * Sets the paths for source annotation
@@ -85,6 +91,15 @@ public class CPListElement {
 	public URL getJavaDocLocation() {
 		return fJavaDocLocation;
 	}
-			
+
+	/**
+	 * @see Object#equals(java.lang.Object)
+	 */
+	public boolean equals(Object other) {
+		if (other.getClass() == getClass()) {
+			return fEntry.equals(((CPListElement)other).getClasspathEntry());
+		}
+		return false;
+	}
 
 }

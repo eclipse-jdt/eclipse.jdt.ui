@@ -5,46 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.ViewerFilter;
-
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-
-import org.eclipse.ui.model.WorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
+import java.text.MessageFormat;import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.core.runtime.IPath;import org.eclipse.jface.util.Assert;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.ViewerFilter;import org.eclipse.ui.model.WorkbenchContentProvider;import org.eclipse.ui.model.WorkbenchLabelProvider;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedElementSelectionValidator;import org.eclipse.jdt.internal.ui.dialogs.TypedViewerFilter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;import org.eclipse.jdt.internal.ui.wizards.swt.MGridUtil;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
@@ -323,7 +284,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement newCPSourceElement(IResource res) {
 		Assert.isNotNull(res);
-		return new CPListElement(fCurrJProject.newSourceEntry(res.getFullPath()), res);
+		return new CPListElement(JavaCore.newSourceEntry(res.getFullPath()), res);
 	}
 	
 	/**

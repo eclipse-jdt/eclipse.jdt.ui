@@ -5,7 +5,29 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.swt.widgets.Composite;import org.eclipse.jface.preference.BooleanFieldEditor;import org.eclipse.jface.preference.FieldEditorPreferencePage;import org.eclipse.jface.preference.FileFieldEditor;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.ui.IWorkbench;import org.eclipse.ui.IWorkbenchPreferencePage;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jface.preference.BooleanFieldEditor;
+import org.eclipse.jface.preference.FieldEditorPreferencePage;
+import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPreferencePage;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /*
  * The page for setting java plugin preferences.
@@ -18,6 +40,8 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 	public static final String KEY_DESCRIPTION= "org.eclipse.jdt.ui.build.jdk.library.description";
 	public static final String KEY_LINK_MOVE_CU_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkMoveCuToRefactoring";
 	public static final String KEY_LINK_RENAME_PACKAGE_IN_PACKAGES_TO_REFACTORING= "org.eclipse.jdt.ui.packages.linkRenamePackageToRefactoring";
+
+	public static final String JDKLIB_VARIABLE= "JDK_LIBRARY";
 
 	public JavaBasePreferencePage() {
 		super(GRID);
@@ -100,13 +124,42 @@ public class JavaBasePreferencePage extends FieldEditorPreferencePage implements
 		return null;
 	}
 	
-	/**
-	 * @deprecated, use getJDKSourceAttachment
-	 */
-	public static IPath[] getJDKSourceAnnotation() {
-		return getJDKSourceAttachment();
+	
+	// ------------- shared jdk variable
+	
+	
+	public static void initSharedJDKVariable() throws JavaModelException {
+		updateJDKLibraryEntry();
+		
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		store.addPropertyChangeListener(new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (event.getProperty().equals(JavaBasePreferencePage.PROP_JDK)) {
+					try {
+						updateJDKLibraryEntry();
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus());
+					}
+				}
+			}
+		});
+	}
+		
+	
+	private static IJavaProject getJavaProject() {
+		// workaround (1GDKGEO: ITPJUI:WINNT - no JavaCore.newVariableEntry)
+		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProject("p");
 	}
 	
+	
+	private static void updateJDKLibraryEntry() throws JavaModelException {
+		IPath jdkPath= JavaBasePreferencePage.getJDKPath();
+		if (jdkPath == null) {
+			jdkPath= new Path("");
+		}
+		IClasspathEntry entry= getJavaProject().newLibraryEntry(jdkPath);
+		JavaCore.setClasspathVariable(JDKLIB_VARIABLE, entry);
+	}
 	
 
 }

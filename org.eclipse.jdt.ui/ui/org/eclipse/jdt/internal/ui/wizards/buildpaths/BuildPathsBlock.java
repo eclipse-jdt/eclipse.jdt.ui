@@ -229,10 +229,14 @@ public class BuildPathsBlock {
 					}
 					
 					List newClassPath= new ArrayList();
-					IClasspathEntry[] cp= fCurrJProject.getClasspath();
+					IClasspathEntry[] cp= fCurrJProject.getRawClasspath();
 					for (int i= 0; i < cp.length; i++) {
 						IClasspathEntry curr= cp[i];
-						IResource res= fWorkspaceRoot.findMember(curr.getPath());
+						int entryKind= curr.getEntryKind();
+						IResource res= null;
+						if (entryKind != IClasspathEntry.CPE_VARIABLE) {
+							res= fWorkspaceRoot.findMember(curr.getPath());
+						}
 						CPListElement elem= new CPListElement(curr, res);
 						if (curr.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 							IPackageFragmentRoot root= fCurrJProject.findPackageFragmentRoot(curr.getPath());
@@ -285,7 +289,7 @@ public class BuildPathsBlock {
 	private List getClassPathDefault(IProject project) {
 		List vec= new ArrayList();
 		if (fClassPathDefault == null) {
-			IClasspathEntry entry= fCurrJProject.newSourceEntry(project.getFullPath());
+			IClasspathEntry entry= JavaCore.newSourceEntry(project.getFullPath());
 			vec.add(new CPListElement(entry, project));
 		} else {
 			for (int i= 0; i < fClassPathDefault.length; i++) {
@@ -296,19 +300,12 @@ public class BuildPathsBlock {
 		}
 		
 		if (fAddJDKToDefault || fClassPathDefault == null) {
-			IPath jdkPath= JavaBasePreferencePage.getJDKPath();
-			if (jdkPath != null) {
-				IFile file= fWorkspaceRoot.getFileForLocation(jdkPath);
-				if (file != null) {
-					jdkPath= file.getFullPath(); // modify path if internal
-				}
-				CPListElement elem= new CPListElement(fCurrJProject.newLibraryEntry(jdkPath), file);
-				IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
-				if (attach != null) {
-					elem.setSourceAttachment(attach[0], attach[1]);
-				}
-				vec.add(elem);
+			CPListElement elem= new CPListElement(JavaCore.newVariableEntry(JavaBasePreferencePage.JDKLIB_VARIABLE), null);
+			IPath[] attach= JavaBasePreferencePage.getJDKSourceAttachment();
+			if (attach != null) {
+				elem.setSourceAttachment(attach[0], attach[1]);
 			}
+			vec.add(elem);
 		}
 		return vec;
 	}
@@ -514,24 +511,31 @@ public class BuildPathsBlock {
 		}	
 		monitor.worked(1);
 		
-		fCurrJProject.setClasspath(classpath, new SubProgressMonitor(monitor, 3));
+		fCurrJProject.setRawClasspath(classpath, new SubProgressMonitor(monitor, 3));
 
 		// attach source for libraries
 		for (int i= 0; i < nEntries; i++) {
 			CPListElement entry= ((CPListElement)classPathEntries.get(i));
-			if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-				IPackageFragmentRoot root= fCurrJProject.findPackageFragmentRoot(entry.getPath());
-				if (root != null && root.isArchive()) {
-					IPath sourcePath= entry.getSourceAttachmentPath();
-					IPath sourcePrefix= entry.getSourceAttachmentRootPath();
-					root.attachSource(sourcePath, sourcePrefix, null);
-					JavaDocAccess.setJavaDocLocation(root, entry.getJavaDocLocation());
-				}
+			IClasspathEntry cp= entry.getClasspathEntry();
+			if (cp.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				cp= JavaCore.getResolvedClasspathVariable(JavaBasePreferencePage.JDKLIB_VARIABLE);
+			}
+			if (cp != null && cp.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
+				attachSource(cp.getPath(), entry);
 			}
 		}
 		monitor.worked(1);
-	}	
+	}
 	
+	private void attachSource(IPath path, CPListElement entry) throws CoreException {
+		IPackageFragmentRoot root= fCurrJProject.findPackageFragmentRoot(path);
+		if (root != null && root.isArchive()) {
+			IPath sourcePath= entry.getSourceAttachmentPath();
+			IPath sourcePrefix= entry.getSourceAttachmentRootPath();
+			root.attachSource(sourcePath, sourcePrefix, null);
+			JavaDocAccess.setJavaDocLocation(root, entry.getJavaDocLocation());
+		}
+	}	
 	
 	// ---------- util method ------------
 		

@@ -31,7 +31,7 @@ class CPListLabelProvider extends LabelProvider {
 		
 	private String fNewLabel, fClassLabel;
 	private Image fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
-	private Image fFolderImage, fProjectImage;
+	private Image fFolderImage, fProjectImage, fVariableImage;
 	
 	public CPListLabelProvider() {
 		fNewLabel= JavaPlugin.getResourceString(R_NEW);
@@ -44,6 +44,8 @@ class CPListLabelProvider extends LabelProvider {
 		fExtJarWSrcIcon= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR_WSRC);
 		fFolderImage= reg.get(JavaPluginImages.IMG_OBJS_PACKFRAG_ROOT);
 		
+		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
+		
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		fProjectImage= workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_PROJECT);
 	}
@@ -51,23 +53,38 @@ class CPListLabelProvider extends LabelProvider {
 	public String getText(Object element) {
 		if (element instanceof CPListElement) {
 			CPListElement cpentry= (CPListElement)element;
-			if (cpentry.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
-				String name= cpentry.getPath().toString();
-				IResource resource= cpentry.getResource();
-				if (resource == null || !resource.exists()) {				
-					return name + ' ' + fNewLabel;
+			IResource resource= cpentry.getResource();
+			switch (cpentry.getEntryKind()) {
+				case IClasspathEntry.CPE_LIBRARY: {
+					IPath path= cpentry.getPath();
+					if (cpentry.getResource() instanceof IFolder) {
+						StringBuffer buf= new StringBuffer(path.toString());
+						buf.append(' ');
+						buf.append(fClassLabel);
+						if (!resource.exists()) {
+							buf.append(' ');
+							buf.append(fNewLabel);
+						}
+						return buf.toString();
+					} else {
+						return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
+					}
 				}
-				return name;
-			} else { // CPE_LIBRARY
-				IPath path= cpentry.getPath();
-				if (cpentry.getResource() instanceof IFolder) {
-					return path.toString() + ' ' + fClassLabel;
-				} else {
-					return path.lastSegment() + " - " + path.removeLastSegments(1).toString();
+				case IClasspathEntry.CPE_VARIABLE:
+					return cpentry.getPath().lastSegment();
+				case IClasspathEntry.CPE_PROJECT:
+					return cpentry.getPath().lastSegment();
+				case IClasspathEntry.CPE_SOURCE: {
+					StringBuffer buf= new StringBuffer(cpentry.getPath().toString());
+					if (!resource.exists()) {
+						buf.append(' ');
+						buf.append(fNewLabel);
+					}
+					return buf.toString();
 				}
 			}
 		}
-		return "";
+		return super.getText(element);
 	}			
 			
 	public Image getImage(Object element) {
@@ -95,6 +112,8 @@ class CPListLabelProvider extends LabelProvider {
 					}
 				case IClasspathEntry.CPE_PROJECT:
 					return fProjectImage;
+				case IClasspathEntry.CPE_VARIABLE:
+					return fVariableImage;					
 			}
 		}
 		return null;

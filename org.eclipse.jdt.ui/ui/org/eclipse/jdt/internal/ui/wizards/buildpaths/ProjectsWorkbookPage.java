@@ -5,29 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.core.resources.IProject;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
-import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.core.resources.IProject;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class ProjectsWorkbookPage extends BuildPathBasePage {
@@ -81,7 +59,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			for (int i= 0; i < jprojects.length; i++) {
 				IProject proj= jprojects[i].getProject();
 				if (!existingProjects.contains(proj)) {
-					IClasspathEntry cpentry= currJProject.newProjectEntry(proj.getFullPath());
+					IClasspathEntry cpentry= JavaCore.newProjectEntry(proj.getFullPath());
 					projects.add(new CPListElement(cpentry, proj));
 				}
 			}	

@@ -79,6 +79,8 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif";
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif";
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	
+	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif";
+	
 	
 	public static final String IMG_OBJS_JAVADOCTAG= NAME_PREFIX + "jdoc_tag_obj.gif";
 	public static final String IMG_OBJS_HTMLTAG= NAME_PREFIX + "html_tag_obj.gif";
@@ -171,8 +173,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_JAR= createManaged(T_OBJ, IMG_OBJS_JAR);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManaged(T_OBJ, IMG_OBJS_EXTJAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_WSRC= createManaged(T_OBJ, IMG_OBJS_JAR_WSRC);
-	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManaged(T_OBJ, IMG_OBJS_EXTJAR_WSRC);	
-	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG= createManaged(T_OBJ, IMG_OBJS_JAVADOCTAG);
+	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManaged(T_OBJ, IMG_OBJS_EXTJAR_WSRC);
+	public static final ImageDescriptor DESC_OBJS_ENV_VAR= createManaged(T_OBJ, IMG_OBJS_ENV_VAR);
+		
+	public static final ImageDescriptor DESC_OBJS_JAVADOCTAG= createManaged(T_OBJ, IMG_OBJS_ENV_VAR);
 	public static final ImageDescriptor DESC_OBJS_HTMLTAG= createManaged(T_OBJ, IMG_OBJS_HTMLTAG);
 
 	public static final ImageDescriptor DESC_OBJS_EXCEPTION= createManaged(T_OBJ, IMG_OBJS_EXCEPTION);
@@ -209,8 +213,8 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_TERMSNIPPET= create(T_CTOOL, "term_sbook.gif");
 	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= create(T_CTOOL, "show_empty_pkg.gif");
 	public static final ImageDescriptor DESC_TOOL_SHOW_SEGMENTS= create(T_CTOOL, "segment_edit.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "next_error_nav.gif");
-	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "prev_error_nav.gif");
+	public static final ImageDescriptor DESC_TOOL_GOTO_NEXT_ERROR= create(T_CTOOL, "goto_next_error.gif");
+	public static final ImageDescriptor DESC_TOOL_GOTO_PREV_ERROR= create(T_CTOOL, "goto_prev_error.gif");
 
 	public static final ImageDescriptor DESC_TOOL_OPENTYPE= create(T_CTOOL, "opentype.gif");
 	public static final ImageDescriptor DESC_TOOL_NEWPROJECT= create(T_CTOOL, "newjprj_wiz.gif");
