@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.EmptyStatement;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
@@ -49,8 +50,11 @@ public class NewStatementAnalyzer extends NewSelectionAnalyzer{
 		for (int i= 0; i < fSelectedNodes.size() - 1; i++) {
 			AstNode first= (AstNode)fSelectedNodes.get(i);
 			AstNode second= (AstNode)fSelectedNodes.get(i + 1);
-			if (isMultiLocalDeclaration(first, second))
-				continue;
+			if (second instanceof EmptyStatement)
+				continue;			
+			// XXX Not working: see http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
+			// if (isMultiLocalDeclaration(first, second))
+			//	continue;
 			pos= fBuffer.indexOfStatementCharacter(ASTUtil.getSourceEnd(first) + 1);
 			if (pos != ASTUtil.getSourceStart(second)) {
 				invalidSelection("Selected statements do not belong to the same category. For example, a while statement's expression and action are selected.");
@@ -65,7 +69,7 @@ public class NewStatementAnalyzer extends NewSelectionAnalyzer{
 	}
 
 	private boolean isMultiLocalDeclaration(AstNode first, AstNode second) {
-		// Not working: see http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
+		// XXX Not working: see http://dev.eclipse.org/bugs/show_bug.cgi?id=7106
 		return first instanceof LocalDeclaration && second instanceof LocalDeclaration && 
 			((LocalDeclaration)first).declarationSourceStart == ((LocalDeclaration)second).declarationSourceStart;
 	}

@@ -199,14 +199,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 		AstNode[] nodes= getSelectedNodes();
 		if (nodes != null && nodes.length == 1) {
 			AstNode node= nodes[0];
-			if (node instanceof ClassLiteralAccess) {
-				status.addFatalError("Cannot extract a single access to a class literal.");
-			} else if (node instanceof NullLiteral) {
+			if (node instanceof NullLiteral) {
 				status.addFatalError("Cannot extract the single keyword null.");
 			} else if (node instanceof ArrayInitializer) {
-				status.addFatalError("Cannot extract an array initializer");
+				status.addFatalError("Currently no support to extract an array initializer.");
 			} else if (node instanceof TypeReference) {
-				status.addFatalError("Cannot extract a single type reference");
+				status.addFatalError("Currently no support to extract a single type reference.");
 			} else if (node instanceof Assignment) {
 				if (isExpressionPartOfOperator())
 					status.addFatalError("Cannot extract assignment that is part of another expression.");

@@ -6,11 +6,14 @@ package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ForStatement;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.corext.refactoring.util.Selection;
 
@@ -55,6 +58,20 @@ public class InOutFlowAnalyzer extends FlowAnalyzer {
 	public void endVisit(ForStatement node, BlockScope scope) {
 		super.endVisit(node, scope);
 		clearAccessMode(accessFlowInfo(node), node.initializations);
+	}
+	
+	public void endVisit(ConstructorDeclaration node, ClassScope scope) {
+		super.endVisit(node, scope);
+		FlowInfo info= accessFlowInfo(node);
+		clearAccessMode(info, node.statements);
+		clearAccessMode(info, node.arguments);
+	}
+
+	public void endVisit(MethodDeclaration node, ClassScope scope) {
+		super.endVisit(node, scope);
+		FlowInfo info= accessFlowInfo(node);
+		clearAccessMode(info, node.statements);
+		clearAccessMode(info, node.arguments);
 	}
 	
 	private void clearAccessMode(FlowInfo info, Statement[] statements) {

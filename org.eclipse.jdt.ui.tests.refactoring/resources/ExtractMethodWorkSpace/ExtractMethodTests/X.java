@@ -1,10 +1,15 @@
-import java.io.*;
-public class X {
-	void foo(final int out){
-		new Object(){
-			void bar(){
-				/*START*/System.out.println(out)/*END*/;
-			}
-		};        
+class X{
+	void f(){
+		int i= 0;
+		int j= 1;
+		switch (j){
+			case 1:
+				/*[*/i= 1;/*]*/
+				// break;
+			default:
+				i--;
+				i= -1;
+				break;
+		}
 	}
 }

@@ -29,6 +29,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 	private IPackageFragment fSelectionPackage;
 	private IPackageFragment fInvalidSelectionPackage;
 	private IPackageFragment fValidSelectionPackage;
+	private IPackageFragment fValidSelectionCheckedPackage;
 	private IPackageFragment fSemicolonPackage;
 	private IPackageFragment fTryPackage;
 	private IPackageFragment fLocalsPackage;
@@ -61,6 +62,7 @@ public class ExtractMethodTestSetup extends TestSetup {
 		fSelectionPackage= getRoot().createPackageFragment("selection", true, null);
 		fInvalidSelectionPackage= fRoot.createPackageFragment("invalidSelection", true, null);
 		fValidSelectionPackage= fRoot.createPackageFragment("validSelection", true, null);
+		fValidSelectionCheckedPackage= fRoot.createPackageFragment("validSelection_in", true, null);
 		fSemicolonPackage= getRoot().createPackageFragment("semicolon_in", true, null);
 		fTryPackage= getRoot().createPackageFragment("try_in", true, null);
 		fLocalsPackage= getRoot().createPackageFragment("locals_in", true, null);
@@ -118,6 +120,10 @@ public class ExtractMethodTestSetup extends TestSetup {
 		return fValidSelectionPackage;
 	}
 
+	public IPackageFragment getValidSelectionCheckedPackage() {
+		return fValidSelectionCheckedPackage;
+	}
+	
 	public IPackageFragment getBranchPackage() {
 		return fBranchPackage;
 	}

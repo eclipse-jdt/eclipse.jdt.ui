@@ -90,6 +90,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		performTest(fgTestSetup.getValidSelectionPackage(), "A", VALID_SELECTION, null);
 	}
 	
+	protected void validSelectionTestChecked() throws Exception {
+		performTest(fgTestSetup.getValidSelectionCheckedPackage(), "A", COMPARE_WITH_OUTPUT, "validSelection_out");
+	}
+	
 	protected void semicolonTest() throws Exception {
 		performTest(fgTestSetup.getSemicolonPackage(), "A", COMPARE_WITH_OUTPUT, "semicolon_out");
 	}
@@ -786,6 +790,22 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	public void test353() throws Exception {
 		validSelectionTest();
+	}
+	
+	public void test360() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test361() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test362() throws Exception {
+		validSelectionTestChecked();
+	}
+	
+	public void test363() throws Exception {
+		validSelectionTestChecked();
 	}
 	
 	//====================================================================================

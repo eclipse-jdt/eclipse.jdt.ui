@@ -402,7 +402,7 @@ import org.eclipse.jdt.internal.core.Assert;
 			if (!node.validate(bufferLength))
 				return false;
 			TextRange range= node.fEdit.getTextRange();
-			if (range.fOffset + range.fLength > bufferLength)
+			if (!range.isValid() || range.fOffset + range.fLength > bufferLength)
 				return false;
 			if (lastRange != null && !(range.isInsertionPointAt(lastRange.fOffset) || range.liesBehind(lastRange)))
 				return false;

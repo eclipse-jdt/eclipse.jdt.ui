@@ -118,6 +118,20 @@ public final class TextRange {
 		return UNDEFINED == this;
 	}
 	
+	/**
+	 * Checks if this <code>TextRange</code> is valid. For valid text range the following
+	 * expression evaluates to <code>true</code>:
+	 * <pre>
+	 * 	getOffset() >= 0 && getLength() >= 0
+	 * </pre>
+	 * 
+	 * @return <code>true</code> if this text range is a valid range. Otherwise <code>
+	 * 	false</code>
+	 */
+	public boolean isValid() {
+		return fOffset >= 0 && fLength >= 0;
+	}
+	
 	/* package */ boolean isInsertionPoint() {
 		return fLength == 0;
 	}

@@ -407,6 +407,12 @@ public class NewSelectionAnalyzer extends GenericVisitor {
 		return visitLiteral(node, scope);
 	}
 	
+	public boolean visit(ClassLiteralAccess node, BlockScope scope) {
+		boolean result= super.visit(node, scope);
+		trackExpressionTypeBinding(node, scope.getJavaLangClass(), scope);
+		return result;
+	}
+	
 	public boolean visit(CompoundAssignment node, BlockScope scope) {
 		return visitAssignment(node, scope);
 	}
