@@ -72,7 +72,9 @@ public class SnippetFinder extends GenericVisitor {
 		public boolean match(SimpleName candidate, Object s) {
 			if (!(s instanceof SimpleName))
 				return false;
-
+			if (candidate.isDeclaration())
+				return false;
+				
 			SimpleName snippet= (SimpleName)s;
 			IBinding cb= candidate.resolveBinding();
 			IBinding sb= snippet.resolveBinding();
