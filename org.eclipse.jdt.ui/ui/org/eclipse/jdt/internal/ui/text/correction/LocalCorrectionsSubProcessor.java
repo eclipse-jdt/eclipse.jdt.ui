@@ -667,7 +667,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
+	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		
 		SimpleName name= null;
@@ -684,13 +684,13 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
+	public static void addSuperfluousSemicolonProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
 		String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removesemicolon.description"); //$NON-NLS-1$
 		ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(label, context.getCompilationUnit(), problem.getOffset(), problem.getLength(), "", 6); //$NON-NLS-1$
 		proposals.add(proposal);
 	}
 	
-	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) throws CoreException {
+	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
 		
 		ASTNode curr= selectedNode;
@@ -747,6 +747,28 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	
+	}
+
+	public static void addUnnecessaryThrownExceptionProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode == null) {
+			return;
+		}
+		if (selectedNode.getParent() instanceof MethodDeclaration) {
+			MethodDeclaration decl= (MethodDeclaration) selectedNode.getParent();
+			List thrownExceptions= decl.thrownExceptions();
+			if (!thrownExceptions.contains(selectedNode)) {
+				return;
+			}
+			
+			ASTRewrite rewrite= new ASTRewrite(decl);
+			rewrite.markAsRemoved(selectedNode);
+			
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.unnecessarythrow.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposals.add(proposal);
+		}
 	}
 
 

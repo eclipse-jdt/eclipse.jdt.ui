@@ -109,6 +109,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IndirectAccessToStaticField:
 			case IProblem.IndirectAccessToStaticMethod:
 			case IProblem.Task:
+			case IProblem.UnusedMethodDeclaredThrownException:
+			case IProblem.UnusedConstructorDeclaredThrownException:
 				return true;
 			default:
 				return false;
@@ -301,7 +303,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.addUnnecessaryCastProposal(context, problem, proposals);
 				break;
 			case IProblem.UnnecessaryInstanceof:	
-			LocalCorrectionsSubProcessor.addUnnecessaryInstanceofProposal(context, problem, proposals);
+				LocalCorrectionsSubProcessor.addUnnecessaryInstanceofProposal(context, problem, proposals);
+				break;
+			case IProblem.UnusedMethodDeclaredThrownException:
+			case IProblem.UnusedConstructorDeclaredThrownException:
+				LocalCorrectionsSubProcessor.addUnnecessaryThrownExceptionProposal(context, problem, proposals);
 				break;				
 			case IProblem.Task:
 				proposals.add(new TaskMarkerProposal(context.getCompilationUnit(), problem, 10));
