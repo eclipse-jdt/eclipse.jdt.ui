@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.dialogs;
 
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -68,22 +69,44 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		readSettings();
 		return control;
 	}
-
-
-	/**
-	 * Returns the dialog settings object used to share state
-	 * between several find/replace dialogs.
-	 *
-	 * @return the dialog settings to be used
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
-	private IDialogSettings getDialogSettings() {
-		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-		String sectionName= getClass().getName();
-		IDialogSettings subSettings= settings.getSection(sectionName);
-		if (subSettings == null)
-			subSettings= settings.addNewSection(sectionName);
-		return subSettings;
+	protected Point getInitialSize() {
+		Point result= super.getInitialSize();
+		if (fSize != null) {
+			result.x= Math.max(result.x, fSize.x);
+			result.y= Math.max(result.y, fSize.y);
+			Rectangle display= getShell().getDisplay().getClientArea();
+			result.x= Math.min(result.x, display.width);
+			result.y= Math.min(result.y, display.height);
+		}
+		return result;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#getInitialLocation(org.eclipse.swt.graphics.Point)
+	 */
+	protected Point getInitialLocation(Point initialSize) {
+		Point result= super.getInitialLocation(initialSize);
+		if (fLocation != null) {
+			result.x= fLocation.x;
+			result.y= fLocation.y;
+			Rectangle display= getShell().getDisplay().getClientArea();
+			int xe= result.x + initialSize.x;
+			if (xe > display.width) {
+				result.x-= xe - display.width; 
+			}
+			int ye= result.y + initialSize.y;
+			if (ye > display.height) {
+				result.y-= ye - display.height; 
+			}
+		}
+		return result;
+	}
+
+
 
 	/**
 	 * Initializes itself from the dialog settings with the same state
@@ -91,17 +114,13 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	 */
 	private void readSettings() {
 		IDialogSettings s= getDialogSettings();
-
 		try {
-			Shell shell= getShell();
-
 			int x= s.getInt("x"); //$NON-NLS-1$
 			int y= s.getInt("y"); //$NON-NLS-1$
-			shell.setLocation(x, y);
-
+			fLocation= new Point(x, y);
 			int width= s.getInt("width"); //$NON-NLS-1$
 			int height= s.getInt("height"); //$NON-NLS-1$
-			shell.setSize(width, height);
+			fSize= new Point(width, height);
 
 		} catch (NumberFormatException e) {
 			fLocation= null;
@@ -124,4 +143,18 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		s.put("height", size.y); //$NON-NLS-1$
 	}
 
+	/**
+	 * Returns the dialog settings object used to share state
+	 * between several find/replace dialogs.
+	 *
+	 * @return the dialog settings to be used
+	 */
+	private IDialogSettings getDialogSettings() {
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		String sectionName= getClass().getName();
+		IDialogSettings subSettings= settings.getSection(sectionName);
+		if (subSettings == null)
+			subSettings= settings.addNewSection(sectionName);
+		return subSettings;
+	}
 }
