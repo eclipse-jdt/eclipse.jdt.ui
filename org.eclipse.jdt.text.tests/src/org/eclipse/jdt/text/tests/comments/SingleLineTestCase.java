@@ -212,4 +212,28 @@ public class SingleLineTestCase extends CommentTestCase {
 		assertEquals(PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER + PREFIX + "test" + DELIMITER, testFormat("//   test\t\t\ttest\ttest" + DELIMITER + PREFIX + "test test test test")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 		fMap= null;
 	}
+	
+	public void testIndentedComment1() {
+		String prefix= "public class Test {" + DELIMITER + "\t";
+		String comment= PREFIX + "test" + DELIMITER;
+		String postfix= "}" + DELIMITER;
+		String string= prefix + comment + postfix;
+		assertEquals(string, testFormat(string, prefix.length(), comment.length()));
+	}
+	
+	public void testIndentedComment2() {
+		String prefix= "public class Test {" + DELIMITER + "\tpublic void test() {" + DELIMITER + "\t\t";
+		String comment= PREFIX + "test" + DELIMITER;
+		String postfix= "\t}" + DELIMITER + "}" + DELIMITER;
+		String string= prefix + comment + postfix;
+		assertEquals(string, testFormat(string, prefix.length(), comment.length()));
+	}
+	
+	public void testIndentedComment3() {
+		String prefix= "public class Test {" + DELIMITER + "\tpublic void test() {" + DELIMITER + "\t\tif (true) {" + DELIMITER + "\t\t\t";
+		String comment= PREFIX + "test" + DELIMITER;
+		String postfix= "\t\t}" + DELIMITER + "\t}" + DELIMITER + "}" + DELIMITER;
+		String string= prefix + comment + postfix;
+		assertEquals(string, testFormat(string, prefix.length(), comment.length()));
+	}
 }
