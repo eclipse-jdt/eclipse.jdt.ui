@@ -19,6 +19,7 @@ import java.util.Set;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -60,5 +61,21 @@ public class SearchResultGroup {
 		if (getSearchResults() == null || getSearchResults().length == 0)
 			return null;
 		return SearchUtils.getCompilationUnit(getSearchResults()[0]);
+	}
+	
+	public String toString() {
+		StringBuffer buf= new StringBuffer(fResouce.getFullPath().toString());
+		buf.append('\n');
+		for (int i= 0; i < fSearchMatches.size(); i++) {
+			SearchMatch match= (SearchMatch) fSearchMatches.get(i);
+			buf.append("  ").append(match.getOffset()).append(", ").append(match.getLength()); //$NON-NLS-1$//$NON-NLS-2$
+			buf.append(match.getAccuracy() == SearchMatch.A_ACCURATE ? "; acc" : "; inacc"); //$NON-NLS-1$//$NON-NLS-2$
+			if (match.isInsideDocComment())
+				buf.append("; inDoc"); //$NON-NLS-1$
+			if (match.getElement() instanceof IJavaElement)
+				buf.append("; in: ").append(((IJavaElement) match.getElement()).getElementName()); //$NON-NLS-1$
+			buf.append('\n');
+		}
+		return buf.toString();
 	}
 }
