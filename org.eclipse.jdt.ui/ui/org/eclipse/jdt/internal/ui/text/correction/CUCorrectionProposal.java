@@ -278,8 +278,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		
 		LinkedEnvironment environment= LinkedEnvironment.createLinkedEnvironment(document);
 		boolean added= false;
-		for (Iterator it= map.keySet().iterator(); it.hasNext(); ) {
-			LinkedPositionGroup group= (LinkedPositionGroup) map.get(it.next());
+		for (Iterator it= map.values().iterator(); it.hasNext(); ) {
+			LinkedPositionGroup group= (LinkedPositionGroup) it.next();
 			if (!group.isEmtpy()) {
 				environment.addGroup(group);
 				added= true;
@@ -293,12 +293,12 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				if (textEdits.length > 0) {
 					IRegion range= change.getNewTextRange(textEdits);
 					if (range != null)
-						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, false);
+						ui.setExitPosition(viewer, range.getOffset() + range.getLength(), 0, true);
 				}					
 			} else {
 				int cursorPosition= viewer.getSelectedRange().x;
 				if (cursorPosition != 0) {
-					ui.setExitPosition(viewer, cursorPosition, 0, false);
+					ui.setExitPosition(viewer, cursorPosition, 0, true);
 				}
 			}	
 			ui.enter();
