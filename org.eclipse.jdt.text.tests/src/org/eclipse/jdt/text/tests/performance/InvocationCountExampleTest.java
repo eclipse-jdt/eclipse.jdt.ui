@@ -22,7 +22,7 @@ import org.eclipse.test.performance.Performance;
 
 /**
  * To run this test add the following VM arguments:
- * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT,suspend=n,server=y -Decilpse.perf.debugPort=PORT</code>
+ * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT_NR_X,suspend=n,server=y -Decilpse.perf.debugPort=PORT_NR_X</code>
  * where PORT is the port on which the debugger will listen and connect to.
  */
 public class InvocationCountExampleTest extends TestCase {
