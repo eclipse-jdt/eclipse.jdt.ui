@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -619,6 +620,8 @@ public class ExtractTempRefactoring extends Refactoring {
     	}
     	if (isMethodParameter(node))
 			return false;	
+		if (isThrowableInCatchBlock(node))
+			return false;
     	if (parent instanceof ExpressionStatement)
     		return false;	
     	if (isLeftValue(node))
@@ -626,7 +629,13 @@ public class ExtractTempRefactoring extends Refactoring {
         return true;
     }
     
-    private static boolean isMethodParameter(ASTNode node) {
+    private static boolean isThrowableInCatchBlock(ASTNode node) {
+		return (node instanceof SimpleName) 
+			 && (node.getParent() instanceof SingleVariableDeclaration)
+			 && (node.getParent().getParent() instanceof CatchClause);
+	}
+
+	private static boolean isMethodParameter(ASTNode node) {
     	return (node instanceof SimpleName) 
     		&& (node.getParent() instanceof SingleVariableDeclaration) 
     		&& (node.getParent().getParent() instanceof MethodDeclaration);
