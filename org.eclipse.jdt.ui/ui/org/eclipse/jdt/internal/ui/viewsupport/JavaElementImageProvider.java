@@ -19,6 +19,7 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
@@ -147,17 +148,17 @@ public class JavaElementImageProvider {
 	 * Returns an image descriptor for a java element. This is the base image, no overlays.
 	 */
 	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
+
 		try {			
-			switch (element.getElementType()) {
-				
+			int flags;
+			switch (element.getElementType()) {	
 				case IJavaElement.INITIALIZER:
 				case IJavaElement.METHOD:
-				case IJavaElement.FIELD: {
 					IMember member= (IMember) element;
 					if (member.getDeclaringType().isInterface())
 						return JavaPluginImages.DESC_MISC_PUBLIC;
 					
-					int flags= member.getFlags();
+					flags= member.getFlags();
 					if (Flags.isPublic(flags))
 						return JavaPluginImages.DESC_MISC_PUBLIC;
 					if (Flags.isProtected(flags))
@@ -166,7 +167,24 @@ public class JavaElementImageProvider {
 						return JavaPluginImages.DESC_MISC_PRIVATE;
 					
 					return JavaPluginImages.DESC_MISC_DEFAULT;
-				}
+					
+				case IJavaElement.FIELD:
+					// This is for testing. We are trying to use different icons for fields and methods. But first try was
+					// not very successful.
+					IField field= (IField)element;
+					if (field.getDeclaringType().isInterface())
+						return JavaPluginImages.DESC_FIELD_PUBLIC;
+					
+					flags= field.getFlags();
+					if (Flags.isPublic(flags))
+						return JavaPluginImages.DESC_FIELD_PUBLIC;
+					if (Flags.isProtected(flags))
+						return JavaPluginImages.DESC_FIELD_PROTECTED;
+					if (Flags.isPrivate(flags))
+						return JavaPluginImages.DESC_FIELD_PRIVATE;
+					
+					return JavaPluginImages.DESC_FIELD_DEFAULT;
+					
 				case IJavaElement.PACKAGE_DECLARATION:
 					return JavaPluginImages.DESC_OBJS_PACKDECL;
 				
@@ -189,7 +207,7 @@ public class JavaElementImageProvider {
 					IJavaElement parent= type.getParent();
 					int typeType= parent != null ? parent.getElementType() : 0;
 					if (parent == null || typeType == IJavaElement.COMPILATION_UNIT || typeType == IJavaElement.CLASS_FILE) {
-						int flags= type.getFlags();
+						flags= type.getFlags();
 						boolean hasVisibility= Flags.isPublic(flags) || Flags.isPrivate(flags) || Flags.isProtected(flags);
 						
 						if (type.isClass())
@@ -223,6 +241,7 @@ public class JavaElementImageProvider {
 						return JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
 					}
 				}
+				
 				case IJavaElement.PACKAGE_FRAGMENT:
 					IPackageFragment fragment= (IPackageFragment)element;
 					try {

@@ -124,6 +124,11 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_MISC_PROTECTED= createManaged(T_OBJ, IMG_MISC_PROTECTED);
 	public static final ImageDescriptor DESC_MISC_PRIVATE= createManaged(T_OBJ, IMG_MISC_PRIVATE);
 	public static final ImageDescriptor DESC_MISC_DEFAULT= createManaged(T_OBJ, IMG_MISC_DEFAULT);
+
+	public static final ImageDescriptor DESC_FIELD_PUBLIC= create(T_OBJ, "field_public_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_PROTECTED= create(T_OBJ, "field_protected_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_PRIVATE= create(T_OBJ, "field_private_obj.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_FIELD_DEFAULT= create(T_OBJ, "field_default_obj.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_MENU_SHIFT_RIGHT= create(T_CTOOL, "shift_r_edit.gif"); 	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_MENU_SHIFT_LEFT= create(T_CTOOL, "shift_l_edit.gif"); 	//$NON-NLS-1$
@@ -198,6 +203,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_ERROR= create(T_OVR, "error_co.gif"); 						//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_OVERRIDES= create(T_OVR, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_IMPLEMENTS= create(T_OVR, "implm_co.gif");  				//$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= create(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
 	// public static final ImageDescriptor DESC_OVR_TYPE_IN_FOCUS_UNDERLAY= create(T_OVR, "typeinfocus_underlay.gif"); //$NON-NLS-1$
 		
 	public static final ImageDescriptor DESC_WIZBAN_NEWCLASS= create(T_WIZBAN, "newclass_wiz.gif"); 			//$NON-NLS-1$
