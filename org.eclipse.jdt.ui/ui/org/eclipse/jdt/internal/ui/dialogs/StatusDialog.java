@@ -37,6 +37,7 @@ public abstract class StatusDialog extends Dialog {
 	private IStatus fLastStatus;
 	private String fTitle;
 	private Image fImage;
+    private boolean fStatusLineAboveButtons= true;
 	
 	/**
 	 * Creates an instane of a status dialog.
@@ -54,6 +55,7 @@ public abstract class StatusDialog extends Dialog {
 	 * 	<code>false</code> to the right
 	 */
 	public void setStatusLineAboveButtons(boolean aboveButtons) {
+	    fStatusLineAboveButtons= aboveButtons;
 	}	
 	
 	/**
@@ -124,7 +126,13 @@ public abstract class StatusDialog extends Dialog {
 	protected Control createButtonBar(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NULL);
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
+	
+		if (fStatusLineAboveButtons) {
+		    layout.numColumns= 1;
+		} else {
+		    layout.numColumns= 2;
+		}
+		
 		layout.marginHeight= 0;
 		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		composite.setLayout(layout);
@@ -133,7 +141,7 @@ public abstract class StatusDialog extends Dialog {
 		fStatusLine= new MessageLine(composite);
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusLine.setErrorStatus(null); //$NON-NLS-1$
+		fStatusLine.setErrorStatus(null);
 		applyDialogFont(composite);
 		super.createButtonBar(composite);
 		return composite;
