@@ -240,7 +240,7 @@ class ConstructorReferenceFinder {
 		return result;
 	}
 
-	private static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node){
+	public static boolean isImplicitConstructorReferenceNodeInClassCreations(ASTNode node){
 		if (node instanceof Name && node.getParent() instanceof ClassInstanceCreation){
 			ClassInstanceCreation cic= (ClassInstanceCreation)node.getParent();
 			return (node.equals(cic.getName()));
