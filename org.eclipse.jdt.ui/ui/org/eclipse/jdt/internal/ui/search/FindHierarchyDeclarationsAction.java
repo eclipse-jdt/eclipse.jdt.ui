@@ -20,19 +20,26 @@ public class FindHierarchyDeclarationsAction extends FindDeclarationsAction {
 		setToolTipText(SearchMessages.getString("Search.FindHierarchyDeclarationsAction.tooltip")); //$NON-NLS-1$
 	}
 	
-	protected IJavaSearchScope getScope(IType type) throws JavaModelException {
-		ICompilationUnit cu= type.getCompilationUnit();
-			if (cu != null && cu.isWorkingCopy()) {
-				type= (IType)cu.getOriginal(type);
-			}
-		return SearchEngine.createHierarchyScope(type);
+	protected IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
+		if (element instanceof IType) {
+			IType type= (IType)element;
+			ICompilationUnit cu= type.getCompilationUnit();
+				if (cu != null && cu.isWorkingCopy()) {
+					type= (IType)cu.getOriginal(type);
+				}
+			return SearchEngine.createHierarchyScope(type);
+		} else
+			return super.getScope(element);
 	}
 	
 	protected boolean shouldUserBePrompted() {
 		return true;
 	}
 
-	protected String getScopeDescription(IType type) {
-		return SearchMessages.getFormattedString("HierarchyScope", new String[] {type.getElementName()}); //$NON-NLS-1$
+	protected String getScopeDescription(IJavaElement element) {
+		if (element instanceof IJavaElement) 
+			return SearchMessages.getFormattedString("HierarchyScope", new String[] {((IType)element).getElementName()}); //$NON-NLS-1$
+		else
+			return super.getScopeDescription(element);
 	}
 }

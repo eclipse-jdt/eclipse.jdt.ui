@@ -59,8 +59,4 @@ public class FindDeclarationsAction extends ElementSearchAction {
 	protected boolean shouldUserBePrompted() {
 		return false;
 	}
-	
-	protected String getScopeDescription(IType type) {
-		return super.getScopeDescription(type);
-	}
 }
