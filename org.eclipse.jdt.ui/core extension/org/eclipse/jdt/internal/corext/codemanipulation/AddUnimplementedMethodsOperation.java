@@ -11,105 +11,190 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
+
+import org.eclipse.ltk.core.refactoring.Change;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Evaluates all unimplemented methods and creates them.
- * If the type is open in an editor, be sure to pass over the types working working copy.
+ * Workspace runnable to add unimplemented methods.
+ * 
+ * @since 3.1
  */
-public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
+public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 
-	private IJavaElement fInsertPosition;
-	private IMethod[] fSelected;
-	private IType fType;
-	private IMethod[] fCreatedMethods;
-	private boolean fDoSave;
-	private CodeGenerationSettings fSettings;
-	
-	public AddUnimplementedMethodsOperation(IType type, CodeGenerationSettings settings, IMethod[] selected, boolean save, IJavaElement insertPosition) {
-		super();
+	/** Should annotations be generated? */
+	private final boolean fAnnotations;
+
+	/** The method binding keys for which a method was generated */
+	private final List fCreated= new ArrayList();
+
+	/** The insertion point, or <code>null</code> */
+	private final IJavaElement fInsert;
+
+	/** The method binding keys to implement */
+	private final String[] fKeys;
+
+	/** Should the compilation unit content be saved? */
+	private final boolean fSave;
+
+	/** The code generation settings to use */
+	private final CodeGenerationSettings fSettings;
+
+	/** The type declaration to add the methods to */
+	private final IType fType;
+
+	/**
+	 * Creates a new add unimplemented methods operation.
+	 * 
+	 * @param type the type to add the methods to
+	 * @param insert the insertion point, or <code>null</code>
+	 * @param keys the method binding keys to implement
+	 * @param settings the code generation settings to use
+	 * @param annotations <code>true</code> if annotations should be generated,
+	 *        <code>false</code> otherwise
+	 * @param save <code>true</code> if the changed compilation unit should be saved,
+	 *        <code>false</code> otherwise
+	 */
+	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final String[] keys, final CodeGenerationSettings settings, final boolean annotations, final boolean save) {
+		Assert.isNotNull(type);
+		Assert.isNotNull(keys);
+		Assert.isNotNull(settings);
 		fType= type;
-		fDoSave= save;
-		fCreatedMethods= null;
+		fInsert= insert;
+		fKeys= keys;
 		fSettings= settings;
-		fSelected= selected;
-		fInsertPosition= insertPosition;
+		fAnnotations= annotations;
+		fSave= save;
 	}
 
 	/**
-	 * Runs the operation.
-	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 * Returns the method binding keys for which a method has been generated.
+	 * 
+	 * @return the method binding keys
 	 */
-	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		try {
-			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
-			monitor.beginTask("", 3); //$NON-NLS-1$
-			
-			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
-			monitor.worked(1);
-			
-			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
-			String[] toImplement= StubUtility.genOverrideStubs(fSelected, fType, hierarchy, fSettings, imports);
-			
-			int nToImplement= toImplement.length;
-			ArrayList createdMethods= new ArrayList(nToImplement);
-			
-			if (nToImplement > 0) {
-				String lineDelim= StubUtility.getLineDelimiterUsed(fType);
-				int indent= StubUtility.getIndentUsed(fType) + 1;
-				
-				for (int i= 0; i < nToImplement; i++) {
-					String formattedContent= CodeFormatterUtil.format(CodeFormatter.K_CLASS_BODY_DECLARATIONS, toImplement[i], indent, null, lineDelim, fType.getJavaProject()) + lineDelim; 
-					IMethod curr= fType.createMethod(formattedContent, fInsertPosition, true, null);
-					createdMethods.add(curr);
-				}
-				monitor.worked(1);	
-	
-				imports.create(fDoSave, null);
-				monitor.worked(1);
-			} else {
-				monitor.worked(2);
-			}
+	public final String[] getCreatedMethods() {
+		final String[] keys= new String[fCreated.size()];
+		fCreated.toArray(keys);
+		return keys;
+	}
 
-			fCreatedMethods= new IMethod[createdMethods.size()];
-			createdMethods.toArray(fCreatedMethods);
+	/**
+	 * Returns the scheduling rule for this operation.
+	 * 
+	 * @return the scheduling rule
+	 */
+	public final ISchedulingRule getSchedulingRule() {
+		return ResourcesPlugin.getWorkspace().getRoot();
+	}
+
+	/*
+	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public final void run(final IProgressMonitor monitor) throws CoreException {
+		Assert.isNotNull(monitor);
+		try {
+			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.setTaskName(CodeGenerationMessages.getString("AddUnimplementedMethodsOperation.description")); //$NON-NLS-1$
+			fCreated.clear();
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+			ITypeBinding binding= null;
+			ListRewrite rewriter= null;
+			if (fType.isAnonymous()) {
+				final ClassInstanceCreation creation= ASTNodeSearchUtil.getClassInstanceCreationNode(fType, rewrite.getRoot());
+				if (creation != null) {
+					binding= creation.resolveTypeBinding();
+					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+					if (declaration != null)
+						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				}
+			} else {
+				final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fType, rewrite.getRoot());
+				if (declaration != null) {
+					binding= declaration.resolveBinding();
+					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
+				}
+			}
+			if (binding != null && rewriter != null) {
+				final IMethodBinding[] bindings= StubUtility2.getOverridableMethods(binding, false);
+				if (bindings != null && bindings.length > 0) {
+					try {
+						final ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fType.getCompilationUnit());
+						ASTNode insertion= null;
+						if (fInsert instanceof IMethod)
+							insertion= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) fInsert, rewrite.getRoot());
+						String key= null;
+						MethodDeclaration stub= null;
+						for (int index= 0; index < fKeys.length; index++) {
+							key= fKeys[index];
+							for (int offset= 0; offset < bindings.length; offset++) {
+								if (bindings[offset].getKey().equals(key)) {
+									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], binding.getName(), fSettings, fAnnotations);
+									if (stub != null) {
+										fCreated.add(key);
+										if (insertion != null)
+											rewriter.insertBefore(stub, insertion, null);
+										else
+											rewriter.insertLast(stub, null);
+									}
+									break;
+								}
+							}
+						}
+						final Change result= rewrite.createChange();
+						if (result instanceof CompilationUnitChange) {
+							final CompilationUnitChange change= (CompilationUnitChange) result;
+							final TextEdit edit= change.getEdit();
+							if (edit != null) {
+								try {
+									edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
+									if (fSave)
+										buffer.commit(new SubProgressMonitor(monitor, 1), true);
+								} catch (Exception exception) {
+									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
+								}
+							}
+						}
+					} finally {
+						RefactoringFileBuffers.release(fType.getCompilationUnit());
+					}
+				}
+			}
 		} finally {
 			monitor.done();
 		}
 	}
-
-	/**
-	 * Returns the created accessors. To be called after a sucessful run.
-	 */	
-	public IMethod[] getCreatedMethods() {
-		return fCreatedMethods;
-	}
-	
-	/**
-	 * @return Returns the scheduling rule for this operation
-	 */
-	public ISchedulingRule getScheduleRule() {
-		return ResourcesPlugin.getWorkspace().getRoot();
-	}
-	
-		
 }
