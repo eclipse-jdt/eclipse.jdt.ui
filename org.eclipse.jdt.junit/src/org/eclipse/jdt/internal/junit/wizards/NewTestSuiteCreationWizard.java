@@ -40,7 +40,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	
 	public NewTestSuiteCreationWizard() {
 		super();
-		setWindowTitle(WizardMessages.getString("Wizard.title.new")); //$NON-NLS-1$
+		setWindowTitle(WizardMessages.getString("Wizard.title.new.testsuite")); //$NON-NLS-1$
 		initDialogSettings();
 	}
 
