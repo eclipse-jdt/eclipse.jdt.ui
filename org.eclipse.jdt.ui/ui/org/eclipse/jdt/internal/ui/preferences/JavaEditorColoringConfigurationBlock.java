@@ -330,14 +330,11 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 	
 	private FontMetrics fFontMetrics;
 
-
-
 	public JavaEditorColoringConfigurationBlock(PreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
 		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
-		fStore.addKeys(createOverlayStoreKeys());
 		
 		fColorManager= new JavaColorManager(false);
 		Color itemColor= fColorManager.getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
@@ -345,6 +342,7 @@ class JavaEditorColoringConfigurationBlock implements IPreferenceConfigurationBl
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
 			fSemanticHighlightingColorList.add(new SemanticHighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getEnabledPreferenceKey(semanticHighlightings[i]), itemColor));
 
+		fStore.addKeys(createOverlayStoreKeys());
 	}
 
 
