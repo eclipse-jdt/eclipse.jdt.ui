@@ -30,7 +30,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -104,7 +103,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDragAdapter;
@@ -122,12 +120,10 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringGroup;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.*;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
+import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterActionGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -156,15 +152,13 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
 	static final String TAG_WORKINGSET = "workingset"; //$NON-NLS-1$
-	static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
-	static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
-	static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
 	private BinaryProjectFilter fBinaryFilter= new BinaryProjectFilter();
 	private WorkingSetFilter fWorkingSetFilter= new WorkingSetFilter();
-	private MemberFilter fMemberFilter;
+	
+	private MemberFilterActionGroup fMemberFilterActionGroup;
 
 	private ProblemTreeViewer fViewer; 
 	private StandardJavaUILabelProvider fJavaElementLabelProvider;
@@ -187,9 +181,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private GotoPackageAction fGotoPackageAction;
 	private AddBookmarkAction fAddBookmarkAction;
 	
-	private ActionContributionItem[] fFilterActions;
-	private Separator fFilterSeparator;
-
  	private FilterSelectionAction fFilterAction;
  	private ShowLibrariesAction fShowLibrariesAction;
 	private ShowBinariesAction fShowBinariesAction;
@@ -309,40 +300,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fViewer.addFilter(fPatternFilter);
 		fViewer.addFilter(fLibraryFilter);
 		
-		// fields
-		String title= TypeHierarchyMessages.getString("MethodsViewer.hide_fields.label"); //$NON-NLS-1$
-		String helpContext= IJavaHelpContextIds.FILTER_FIELDS_ACTION;
-		MembersFilterAction hideFields= new MembersFilterAction(this, title, MemberFilter.FILTER_FIELDS, helpContext, false);
-		hideFields.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.description")); //$NON-NLS-1$
-		hideFields.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.checked")); //$NON-NLS-1$
-		hideFields.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_fields.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideFields, "fields_co.gif"); //$NON-NLS-1$
-		
-		// static
-		title= TypeHierarchyMessages.getString("MethodsViewer.hide_static.label"); //$NON-NLS-1$
-		helpContext= IJavaHelpContextIds.FILTER_STATIC_ACTION;
-		MembersFilterAction hideStatic= new MembersFilterAction(this, title, MemberFilter.FILTER_STATIC, helpContext, false);
-		hideStatic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_static.description")); //$NON-NLS-1$
-		hideStatic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.checked")); //$NON-NLS-1$
-		hideStatic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_static.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideStatic, "static_co.gif"); //$NON-NLS-1$
-		
-		// non-public
-		title= TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.label"); //$NON-NLS-1$
-		helpContext= IJavaHelpContextIds.FILTER_PUBLIC_ACTION;
-		MembersFilterAction hideNonPublic= new MembersFilterAction(this, title, MemberFilter.FILTER_NONPUBLIC, helpContext, false);
-		hideNonPublic.setDescription(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.description")); //$NON-NLS-1$
-		hideNonPublic.setToolTipChecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.checked")); //$NON-NLS-1$
-		hideNonPublic.setToolTipUnchecked(TypeHierarchyMessages.getString("MethodsViewer.hide_nonpublic.tooltip.unchecked")); //$NON-NLS-1$
-		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
-
-		fFilterActions= new ActionContributionItem[] { 
-			new ActionContributionItem(hideFields), 
-			new ActionContributionItem(hideStatic), 
-			new ActionContributionItem(hideNonPublic) 
-		};
-		fMemberFilter= new MemberFilter();
-		fViewer.addFilter(fMemberFilter);
+		fMemberFilterActionGroup= new MemberFilterActionGroup(fViewer, "PackageView"); // adds filter
 	
 		fViewer.addFilter(fWorkingSetFilter);
 		if(fMemento != null) 
@@ -401,13 +359,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private void fillActionBars() {
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
-		toolBar.add(fBackAction);
-		toolBar.add(fForwardAction);
-		toolBar.add(fUpAction);
-		
-		fFilterSeparator= new Separator();
-		if (JavaBasePreferencePage.showCompilationUnitChildren()) 
-			addFilterActions(toolBar);
+		fillToolBar(toolBar);
+
 		actionBars.updateActionBars();
 	
 		IMenuManager menu= actionBars.getMenuManager();
@@ -421,6 +374,20 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$
 	}
+	
+	private void fillToolBar(IToolBarManager toolBar) {
+		toolBar.removeAll();
+		
+		toolBar.add(fBackAction);
+		toolBar.add(fForwardAction);
+		toolBar.add(fUpAction);
+		
+		if (JavaBasePreferencePage.showCompilationUnitChildren()) {
+			toolBar.add(new Separator());
+			fMemberFilterActionGroup.contributeToToolBar(toolBar);
+		}
+	}
+	
 		
 	private Object findInputElement() {
 		Object input= getSite().getPage().getInput();
@@ -491,30 +458,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fRemoveWorkingSetAction.setEnabled(ws != null);
 	} 
 	
-	/**
-	 * Filters the members list
-	 */	
-	public void setMemberFilter(int filterProperty, boolean set) {
-		if (set) {
-			fMemberFilter.addFilter(filterProperty);
-		} else {
-			fMemberFilter.removeFilter(filterProperty);
-		}
-		for (int i= 0; i < fFilterActions.length; i++) {
-			if (((MembersFilterAction)fFilterActions[i].getAction()).getFilterProperty() == filterProperty) {
-				fFilterActions[i].getAction().setChecked(set);
-			}
-		}
-		getViewer().refresh();
-	}
-
-	/**
-	 * Returns <code>true</code> if the given filter is set.
-	 */	
-	public boolean hasMemberFilter(int filterProperty) {
-		return fMemberFilter.hasFilter(filterProperty);
-	}
-
 	/**
 	 * Returns the shell to use for opening dialogs.
 	 * Used in this class, and in the actions.
@@ -944,21 +887,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Saves the state of the filter actions
 	 */
 	public void saveMemberFilterState(IMemento memento) {
-		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(MemberFilter.FILTER_FIELDS)));
-		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(MemberFilter.FILTER_STATIC)));
-		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(MemberFilter.FILTER_NONPUBLIC)));
-	}
-
-	/**
-	 * Restores the state of the member filter actions
-	 */	
-	public void restoreMemberFilterState(IMemento memento) {
-		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(MemberFilter.FILTER_FIELDS, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(MemberFilter.FILTER_STATIC, set);
-		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		setMemberFilter(MemberFilter.FILTER_NONPUBLIC, set);		
+		fMemberFilterActionGroup.saveState(memento);
 	}
 
 	void restoreState(IMemento memento) {
@@ -1222,7 +1151,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 				getWorkingSetFilter().setWorkingSet(ws);
 			}
 		}
-		restoreMemberFilterState(fMemento);
+		fMemberFilterActionGroup.restoreState(fMemento);
 	}
 	
 	void initFilterFromPreferences() {
@@ -1284,28 +1213,17 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	
 		if (event.getProperty() == JavaBasePreferencePage.SHOW_CU_CHILDREN) {
 			IActionBars actionBars= getViewSite().getActionBars();
-			IToolBarManager toolBar= actionBars.getToolBarManager();
-			boolean b= JavaBasePreferencePage.showCompilationUnitChildren();
-			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(b);
-			if (b) {
-				addFilterActions(toolBar);
-			} else {
-				toolBar.remove(fFilterSeparator);
-				for (int i= 0; i < fFilterActions.length; i++)	
-					toolBar.remove(fFilterActions[i]);
-			}
+			fillToolBar(actionBars.getToolBarManager());
 			actionBars.updateActionBars();
+			
+			boolean showCUChildren= JavaBasePreferencePage.showCompilationUnitChildren();
+			((JavaElementContentProvider)fViewer.getContentProvider()).setProvideMembers(showCUChildren);
+			
 			refreshViewer= true;
 		}			
 
 		if (refreshViewer)
 			fViewer.refresh();
-	}
-
-	protected void addFilterActions(IToolBarManager toolBar) {
-		toolBar.add(fFilterSeparator);
-		for (int i= 0; i < fFilterActions.length; i++)	
-			toolBar.add(fFilterActions[i]);  
 	}
 
 }
