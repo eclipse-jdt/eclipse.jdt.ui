@@ -256,7 +256,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		RefactoringStatus result= new RefactoringStatus();
 		try{
 			pm.beginTask("", 110); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
 			result.merge(checkNewName(fNewName));
 			if (result.hasFatalError())
 				return result;
@@ -311,11 +311,13 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 				return result;
 			
 			fReferences= null;
-			if (fUpdateReferences)
+			if (fUpdateReferences){
+				pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
 				fReferences= getReferences(new SubProgressMonitor(pm, 35));
-			else
+			} else
 				pm.worked(35);
-			
+
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
@@ -457,7 +459,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
 		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 	
