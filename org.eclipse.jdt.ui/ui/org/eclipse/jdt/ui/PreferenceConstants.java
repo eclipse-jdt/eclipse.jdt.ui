@@ -11,9 +11,7 @@
 package org.eclipse.jdt.ui;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -24,10 +22,10 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.text.IJavaColorConstants;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
-
-import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 /**
  * Preference constants used in the JDT-UI preference store. Clients should only read the
@@ -898,6 +896,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text foreground.
+	 * This value has not effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -919,6 +918,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that holds the color used as the text background.
+	 * This value has not effect if the system default color is used.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
 	 * using class <code>PreferenceConverter</code>
@@ -931,7 +931,7 @@ public class PreferenceConstants {
 
 	/**
 	 * A named preference that describes if the system default background color
-	 * is used as the text foreground.
+	 * is used as the text background.
 	 * <p>
 	 * Value is of type <code>Boolean</code>. 
 	 * </p>
@@ -1686,25 +1686,8 @@ public class PreferenceConstants {
 		store.addPropertyChangeListener(JavaPlugin.getDefault().getMemberOrderPreferenceCache());
 
 		// JavaEditorPreferencePage
-		/*
-		 * Ensure that the display is accessed only in the UI thread.
-		 * Ensure that there are no side effects of switching the thread.
-		 */
-		final RGB[] rgbs= new RGB[3];
-		final Display display= Display.getDefault();
-		display.syncExec(new Runnable() {
-			public void run() {
-				Color c= display.getSystemColor(SWT.COLOR_GRAY);
-				rgbs[0]= c.getRGB();
-				c= display.getSystemColor(SWT.COLOR_LIST_FOREGROUND);
-				rgbs[1]= c.getRGB();
-				c= display.getSystemColor(SWT.COLOR_LIST_BACKGROUND);
-				rgbs[2]= c.getRGB();
-			}
-		});
-
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR,  rgbs[0]);
+		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192));
 
 		store.setDefault(PreferenceConstants.EDITOR_CURRENT_LINE, true);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_CURRENT_LINE_COLOR, new RGB(225, 235, 224));
@@ -1752,10 +1735,8 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINKED_POSITION_COLOR, new RGB(0, 200 , 100));
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_LINK_COLOR, new RGB(0, 0, 255));
 
-		PreferenceConverter.setDefault(store,  PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgbs[1]);
 		store.setDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR, true);
 
-		PreferenceConverter.setDefault(store,  PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgbs[2]);
 		store.setDefault(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR, true);
 
 		store.setDefault(PreferenceConstants.EDITOR_TAB_WIDTH, 4);

@@ -1099,6 +1099,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	protected Control createContents(Composite parent) {
 		
+		initializeDefaultColors();
+		
 		fOverlayStore.load();
 		fOverlayStore.start();
 		
@@ -1228,6 +1230,19 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fGuessMethodArgumentsButton.setEnabled(fillMethodArguments);
 		
         updateAutoactivationControls();
+	}
+
+	private void initializeDefaultColors() {	
+		if (!getPreferenceStore().contains(PreferenceConstants.EDITOR_BACKGROUND_COLOR)) {
+			RGB rgb= getControl().getDisplay().getSystemColor(SWT.COLOR_LIST_BACKGROUND).getRGB();
+			PreferenceConverter.setDefault(fOverlayStore, PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgb);
+			PreferenceConverter.setDefault(getPreferenceStore(), PreferenceConstants.EDITOR_BACKGROUND_COLOR, rgb);
+		}
+		if (!getPreferenceStore().contains(PreferenceConstants.EDITOR_FOREGROUND_COLOR)) {
+			RGB rgb= getControl().getDisplay().getSystemColor(SWT.COLOR_LIST_FOREGROUND).getRGB();
+			PreferenceConverter.setDefault(fOverlayStore, PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
+			PreferenceConverter.setDefault(getPreferenceStore(), PreferenceConstants.EDITOR_FOREGROUND_COLOR, rgb);
+		}
 	}
 	
     private void updateAutoactivationControls() {
