@@ -361,9 +361,16 @@ public class CodeTemplateBlock {
 			File file= new File(path);
 			if (file.exists()) {
 				InputStream input= new BufferedInputStream(new FileInputStream(file));
-				TemplatePersistenceData[] datas= reader.read(input, null);
-				for (int i= 0; i < datas.length; i++) {
-					updateTemplate(datas[i]);
+				try {
+					TemplatePersistenceData[] datas= reader.read(input, null);
+					for (int i= 0; i < datas.length; i++) {
+						updateTemplate(datas[i]);
+					}
+				} finally {
+					try {
+						input.close();
+					} catch (IOException x) {
+					}
 				}
 			}
 

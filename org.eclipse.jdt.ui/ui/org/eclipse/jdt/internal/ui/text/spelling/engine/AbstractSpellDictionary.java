@@ -368,9 +368,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		if (url != null) {
 
+			InputStream stream= null;
 			try {
 
-				final InputStream stream= url.openStream();
+				stream= url.openStream();
 				if (stream != null) {
 
 					String word= null;
@@ -383,6 +384,12 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 				}
 			} catch (IOException exception) {
 				// Do nothing
+			} finally {
+				try {
+					if (stream != null)
+						stream.close();
+				} catch (IOException x) {
+				}
 			}
 		}
 		return false;

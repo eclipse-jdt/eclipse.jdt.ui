@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ResourceBundle;
 
@@ -84,7 +85,16 @@ public class CodeTemplates extends org.eclipse.jdt.internal.corext.template.java
 	 */
 	public void restoreDefaults() throws CoreException {
 		clear();
-		addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
+		InputStream stream= getDefaultsAsStream();
+		try {
+			addFromStream(stream, false, true, fgResourceBundle);
+		} finally {
+			try {
+				if (stream != null)
+					stream.close();
+			} catch (IOException x) {
+			}
+		}
 	}
 
 	/**
