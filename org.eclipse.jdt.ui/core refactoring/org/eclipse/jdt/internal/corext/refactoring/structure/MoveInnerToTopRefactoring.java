@@ -278,7 +278,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			result.merge(Checks.checkCompilationUnitName(getNameForNewCu()));
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 			result.merge(validateModifiesFiles());
 			return result;
 		} finally {
@@ -341,16 +341,16 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			fImportManager.clear();	
 		}
 	}
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("MoveInnerToTopRefactoring.29"), 2); //$NON-NLS-1$
 		TextChangeManager manager= new TextChangeManager();
-		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1));	//Map<ICompilationUnit, SearchMatch[]>
+		Map typeReferences= createTypeReferencesMapping(new SubProgressMonitor(pm, 1), status);	//Map<ICompilationUnit, SearchMatch[]>
 		Map constructorReferences;	//Map<ICompilationUnit, SearchMatch[]>
 		if (isInputTypeStatic()){
 			constructorReferences= new HashMap(0);
 			pm.worked(1);
 		} else {
-			constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(pm, 1));
+			constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(pm, 1), status);
 		}
 		ICompilationUnit declaringCu= getDeclaringCu();
 		for (Iterator iter= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iter.hasNext();) {
@@ -523,16 +523,16 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	//Map<ICompilationUnit, SearchMatch[]>
-	private Map createTypeReferencesMapping(IProgressMonitor pm) throws JavaModelException {
+	private Map createTypeReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.ALL_OCCURRENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		return createSearchResultMapping(groups);
 	}
 
 	//Map<ICompilationUnit, SearchMatch[]>
-	private Map createConstructorReferencesMapping(IProgressMonitor pm) throws JavaModelException {
-		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm);
+	private Map createConstructorReferencesMapping(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(fType, pm, status);
 		return createSearchResultMapping(groups);
 	}
 

@@ -304,7 +304,7 @@ abstract class TargetProvider {
 			Assert.isTrue(method != null);
 			ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(	
 				SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
-				pm);
+				pm, new RefactoringStatus()); //TODO: drops reported errors from search
 			return result;
 		}
 	

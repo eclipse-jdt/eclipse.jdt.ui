@@ -1669,7 +1669,7 @@ class ReorgPolicyFactory {
 				//XX workaround for bug 13558
 				//<workaround>
 				if (fChangeManager == null){
-					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+					fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), new RefactoringStatus()); //TODO: non-CU matches silently dropped
 					RefactoringStatus status= Checks.validateModifiesFiles(getAllModifiedFiles());
 					if (status.hasFatalError())
 						fChangeManager= new TextChangeManager();
@@ -1690,7 +1690,7 @@ class ReorgPolicyFactory {
 			}
 		}
 
-		private TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException {
+		private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 			pm.beginTask("", 1);//$NON-NLS-1$
 			try{
 				if (! fUpdateReferences)
@@ -1699,7 +1699,7 @@ class ReorgPolicyFactory {
 				IPackageFragment packageDest= getDestinationAsPackageFragment();
 				if (packageDest != null){			
 					MoveCuUpdateCreator creator= new MoveCuUpdateCreator(getCus(), packageDest);
-					return creator.createChangeManager(new SubProgressMonitor(pm, 1));
+					return creator.createChangeManager(new SubProgressMonitor(pm, 1), status);
 				} else 
 					return new TextChangeManager();
 			} finally {
@@ -1796,12 +1796,13 @@ class ReorgPolicyFactory {
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException {
 			try{
 				pm.beginTask("", fUpdateQualifiedNames ? 7 : 3); //$NON-NLS-1$
+				RefactoringStatus result= new RefactoringStatus();
 				confirmMovingReadOnly(reorgQueries);
-				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 2));
+				fChangeManager= createChangeManager(new SubProgressMonitor(pm, 2), result);
 				if (fUpdateQualifiedNames)
 					computeQualifiedNameMatches(new SubProgressMonitor(pm, 4));
-				RefactoringStatus status= super.checkFinalConditions(new SubProgressMonitor(pm, 1), context, reorgQueries);
-				return status;
+				result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), context, reorgQueries));
+				return result;
 			} catch (JavaModelException e){
 				throw e;
 			} catch (CoreException e) {

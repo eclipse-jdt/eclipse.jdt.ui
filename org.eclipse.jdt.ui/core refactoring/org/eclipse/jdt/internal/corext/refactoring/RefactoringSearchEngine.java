@@ -37,6 +37,8 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 /**
  * Convenience wrapper for {@link SearchEngine} - performs searching and sorts the results by {@link IResource}.
  * TODO: throw CoreExceptions from search(..) methods instead of wrapped JavaModelExceptions.
@@ -49,12 +51,17 @@ public class RefactoringSearchEngine {
 	
 	//TODO: throw CoreException
 	public static ICompilationUnit[] findAffectedCompilationUnits(SearchPattern pattern,
-			IJavaSearchScope scope, final IProgressMonitor pm) throws JavaModelException {
+			IJavaSearchScope scope, final IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		
+		final boolean[] hasPotentialMatches= { false };
+		boolean hasNonCuMatches= false;
 		
 		final Set resources= new HashSet(5);
 		SearchRequestor requestor = new SearchRequestor() {
 			private IResource fLastResource;
 			public void acceptSearchMatch(SearchMatch match) {
+				if (match.getAccuracy() == SearchMatch.A_INACCURATE)
+					hasPotentialMatches[0]= true;
 				if (fLastResource != match.getResource()) {
 					fLastResource= match.getResource();
 					resources.add(fLastResource);	
@@ -73,71 +80,90 @@ public class RefactoringSearchEngine {
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
 				result.add(element);
+			} else {
+				hasNonCuMatches= true;
 			}
 		}
+		addStatusErrors(status, hasPotentialMatches[0], hasNonCuMatches);
 		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
 	}
-			
+	
 	/**
 	 * Performs a search and groups the resulting {@link SearchMatch}es by
-	 * {@link SearchMatch#getResource()}.
-	 * 
+	 * {@link SearchResultGroup#getCompilationUnit()()}.
+	 *
+	 * @param status an error is added here if inaccurate or non-cu matches have been found
 	 * @return a {@link SearchResultGroup}[], where each {@link SearchResultGroup} 
 	 * 		has a different {@link SearchMatch#getResource() getResource()}s.
 	 * @see SearchMatch
 	 * @throws CoreException when the search failed
 	 */
 	//TODO: throw CoreException
-	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, IProgressMonitor monitor)
+	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, IProgressMonitor monitor, RefactoringStatus status)
 			throws JavaModelException {
-		return internalSearch(new SearchEngine(), pattern, scope, new CollectingSearchRequestor(), monitor);
+		return internalSearch(new SearchEngine(), pattern, scope, new CollectingSearchRequestor(), monitor, status);
 	}
 	
 	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
-			IProgressMonitor monitor) throws JavaModelException {
-		return internalSearch(new SearchEngine(), pattern, scope, requestor, monitor);
+			IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
+		return internalSearch(new SearchEngine(), pattern, scope, requestor, monitor, status);
 	}
 	
 	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope, CollectingSearchRequestor requestor,
-			IProgressMonitor monitor, WorkingCopyOwner owner) throws JavaModelException {
-		return internalSearch(new SearchEngine(owner), pattern, scope, requestor, monitor);
+			IProgressMonitor monitor, WorkingCopyOwner owner, RefactoringStatus status) throws JavaModelException {
+		return internalSearch(new SearchEngine(owner), pattern, scope, requestor, monitor, status);
 	}
 	
-	/** @deprecated use {@link #search(SearchPattern, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, WorkingCopyOwner)} */
+	/** @deprecated use {@link #search(SearchPattern, IJavaSearchScope, CollectingSearchRequestor, IProgressMonitor, WorkingCopyOwner, RefactoringStatus)} */
 	//TODO: throw CoreException
 	public static SearchResultGroup[] search(SearchPattern pattern, IJavaSearchScope scope,
-			IProgressMonitor monitor, ICompilationUnit[] workingCopies) throws JavaModelException {
-		return internalSearch(new SearchEngine(workingCopies), pattern, scope, new CollectingSearchRequestor(), monitor);
+			IProgressMonitor monitor, ICompilationUnit[] workingCopies, RefactoringStatus status) throws JavaModelException {
+		return internalSearch(new SearchEngine(workingCopies), pattern, scope, new CollectingSearchRequestor(), monitor, status);
 	}
 	
 	//TODO: throw CoreException
 	private static SearchResultGroup[] internalSearch(SearchEngine searchEngine, SearchPattern pattern, IJavaSearchScope scope,
-			CollectingSearchRequestor requestor, IProgressMonitor monitor) throws JavaModelException {
+			CollectingSearchRequestor requestor, IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
 		try {
 			searchEngine.search(pattern, SearchUtils.getDefaultSearchParticipants(), scope, requestor, monitor);
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
-		return groupByResource(requestor.getResults());
+		return groupByCu(requestor.getResults(), status);
 	}
 
-	public static SearchResultGroup[] groupByResource(SearchMatch[] matches){
-		return groupByResource(Arrays.asList(matches));	
+	public static SearchResultGroup[] groupByCu(SearchMatch[] matches, RefactoringStatus status) {
+		return groupByCu(Arrays.asList(matches), status);	
 	}
 	
 	/**
 	 * @param matchList a List of SearchMatch
-	 * @return a SearchResultGroup[], sorted by SearchMatch#getResource()
+	 * @param status the status to report errors.
+	 * @return a SearchResultGroup[], grouped by SearchMatch#getResource()
 	 */
-	public static SearchResultGroup[] groupByResource(List matchList) {
-		Map grouped= new HashMap();
+	public static SearchResultGroup[] groupByCu(List matchList, RefactoringStatus status) {
+		Map/*<IResource, List<SearchMatch>>*/ grouped= new HashMap();
+		boolean hasPotentialMatches= false;
+		boolean hasNonCuMatches= false;
+		
 		for (Iterator iter= matchList.iterator(); iter.hasNext();) {
 			SearchMatch searchMatch= (SearchMatch) iter.next();
+			if (searchMatch.getAccuracy() == SearchMatch.A_INACCURATE)
+				hasPotentialMatches= true;
 			if (! grouped.containsKey(searchMatch.getResource()))
 				grouped.put(searchMatch.getResource(), new ArrayList(1));
 			((List) grouped.get(searchMatch.getResource())).add(searchMatch);
+		}
+		
+		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
+			IResource resource= (IResource) iter.next();
+			IJavaElement element= JavaCore.create(resource);
+			if (! (element instanceof ICompilationUnit)) {
+				iter.remove();
+				hasNonCuMatches= true;
+			}
 		}
 		
 		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
@@ -149,6 +175,7 @@ public class RefactoringSearchEngine {
 			result[i]= new SearchResultGroup(resource, matchArray);
 			i++;
 		}
+		addStatusErrors(status, hasPotentialMatches, hasNonCuMatches);
 		return result;
 	}
 	
@@ -164,5 +191,12 @@ public class RefactoringSearchEngine {
 			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(each, limitTo));
 		}
 		return pattern;
+	}
+	
+	private static void addStatusErrors(RefactoringStatus status, boolean hasPotentialMatches, boolean hasNonCuMatches) {
+		if (hasPotentialMatches)
+			status.addError(RefactoringCoreMessages.getString("RefactoringSearchEngine.potential_matches")); //$NON-NLS-1$
+		if (hasNonCuMatches)
+			status.addError(RefactoringCoreMessages.getString("RefactoringSearchEngine.non_cu_matches")); //$NON-NLS-1$
 	}
 }

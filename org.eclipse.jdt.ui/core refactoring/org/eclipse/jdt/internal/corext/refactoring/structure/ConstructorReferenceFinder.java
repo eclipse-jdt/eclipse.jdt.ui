@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -66,24 +68,24 @@ class ConstructorReferenceFinder {
 		fType= constructor.getDeclaringType();
 	}
 
-	public static SearchResultGroup[] getConstructorReferences(IType type, IProgressMonitor pm) throws JavaModelException{
-		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, IJavaSearchConstants.REFERENCES);
+	public static SearchResultGroup[] getConstructorReferences(IType type, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
+		return new ConstructorReferenceFinder(type).getConstructorReferences(pm, IJavaSearchConstants.REFERENCES, status);
 	}
 
-	public static SearchResultGroup[] getConstructorOccurrences(IMethod constructor, IProgressMonitor pm) throws JavaModelException{
+	public static SearchResultGroup[] getConstructorOccurrences(IMethod constructor, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		Assert.isTrue(constructor.isConstructor());
-		return new ConstructorReferenceFinder(constructor).getConstructorReferences(pm, IJavaSearchConstants.ALL_OCCURRENCES);
+		return new ConstructorReferenceFinder(constructor).getConstructorReferences(pm, IJavaSearchConstants.ALL_OCCURRENCES, status);
 	}
 
-	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, int limitTo) throws JavaModelException{
+	private SearchResultGroup[] getConstructorReferences(IProgressMonitor pm, int limitTo, RefactoringStatus status) throws JavaModelException{
 		IJavaSearchScope scope= createSearchScope();
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fConstructors, limitTo);
 		if (pattern == null){
 			if (fConstructors.length != 0)
 				return new SearchResultGroup[0];
-			return getImplicitConstructorReferences(pm);	
+			return getImplicitConstructorReferences(pm, status);	
 		}	
-		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, pm));
+		return removeUnrealReferences(RefactoringSearchEngine.search(pattern, scope, pm, status));
 	}
 	
 	//XXX this method is a workaround for jdt core bug 27236
@@ -139,21 +141,21 @@ class ConstructorReferenceFinder {
 		return candidate;
 	}
 
-	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm) throws JavaModelException {
+	private SearchResultGroup[] getImplicitConstructorReferences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		List searchMatches= new ArrayList();
 		searchMatches.addAll(getImplicitConstructorReferencesFromHierarchy(new SubProgressMonitor(pm, 1)));
-		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1)));
+		searchMatches.addAll(getImplicitConstructorReferencesInClassCreations(new SubProgressMonitor(pm, 1), status));
 		pm.done();
-		return RefactoringSearchEngine.groupByResource((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]));
+		return RefactoringSearchEngine.groupByCu((SearchMatch[]) searchMatches.toArray(new SearchMatch[searchMatches.size()]), status);
 	}
 		
 	//List of SearchResults
-	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm) throws JavaModelException {
+	private List getImplicitConstructorReferencesInClassCreations(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		//XXX workaround for jdt core bug 23112
 		SearchPattern pattern= SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] refs= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		List result= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
 			SearchResultGroup group= refs[i];

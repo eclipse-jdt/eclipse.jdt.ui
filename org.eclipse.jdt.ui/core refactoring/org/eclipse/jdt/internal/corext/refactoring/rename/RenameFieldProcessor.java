@@ -289,7 +289,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			fReferences= null;
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
-				fReferences= getReferences(new SubProgressMonitor(pm, 3));
+				fReferences= getReferences(new SubProgressMonitor(pm, 3), result);
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 			} else {
 				pm.worked(3);
@@ -352,7 +352,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		RefactoringStatus result= new RefactoringStatus();
 		SearchPattern pattern= SearchPattern.createPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS);
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(fField.getDeclaringType());
-		SearchResultGroup[] groupDeclarations= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] groupDeclarations= RefactoringSearchEngine.search(pattern, scope, pm, result);
 		Assert.isTrue(groupDeclarations.length > 0);
 		if (groupDeclarations.length != 1){
 			String message= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.overridden", //$NON-NLS-1$
@@ -442,8 +442,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return RefactoringScopeFactory.create(fField);
 	}
 	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException{
-		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm);
+	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
+		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm, status);
 	}
 	
 	// ---------- Changes -----------------
@@ -478,13 +478,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 		
 		if (getGetter() != null && fRenameGetter) {
-			addGetterOccurrences(new SubProgressMonitor(pm, 1));
+			addGetterOccurrences(new SubProgressMonitor(pm, 1), result);
 		} else {
 			pm.worked(1);
 		}
 					
 		if (getSetter() != null && fRenameSetter) {
-			addSetterOccurrences(new SubProgressMonitor(pm, 1));
+			addSetterOccurrences(new SubProgressMonitor(pm, 1), result);
 		} else {
 			pm.worked(1);
 		}
@@ -526,21 +526,21 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return new ReplaceEdit(offset, oldName.length(), getNewElementName());
 	}
 	
-	private void addGetterOccurrences(IProgressMonitor pm) throws CoreException {
-		addAccessorOccurrences(pm, getGetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_getter_occurrence"), getNewGetterName()); //$NON-NLS-1$
+	private void addGetterOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		addAccessorOccurrences(pm, getGetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_getter_occurrence"), getNewGetterName(), status); //$NON-NLS-1$
 	}
 	
-	private void addSetterOccurrences(IProgressMonitor pm) throws CoreException {
-		addAccessorOccurrences(pm, getSetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_setter_occurrence"), getNewSetterName()); //$NON-NLS-1$
+	private void addSetterOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		addAccessorOccurrences(pm, getSetter(), RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_setter_occurrence"), getNewSetterName(), status); //$NON-NLS-1$
 	}
 
-	private void addAccessorOccurrences(IProgressMonitor pm, IMethod accessor, String editName, String newAccessorName) throws CoreException {
+	private void addAccessorOccurrences(IProgressMonitor pm, IMethod accessor, String editName, String newAccessorName, RefactoringStatus status) throws CoreException {
 		Assert.isTrue(accessor.exists());
 		
 		IJavaSearchScope scope= RefactoringScopeFactory.create(accessor);
 		SearchPattern pattern= SearchPattern.createPattern(accessor, IJavaSearchConstants.ALL_OCCURRENCES);
 		SearchResultGroup[] groupedResults= RefactoringSearchEngine.search(
-			pattern, scope, new MethodOccurenceCollector(accessor.getElementName()), pm);
+			pattern, scope, new MethodOccurenceCollector(accessor.getElementName()), pm, status);
 		
 		for (int i= 0; i < groupedResults.length; i++) {
 			ICompilationUnit cu= groupedResults[i].getCompilationUnit();
@@ -563,9 +563,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
+			RefactoringStatus result= new RefactoringStatus();
 			SearchResultGroup[] oldReferences= fReferences;
-			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), fChangeManager);
-			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName());
+			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), fChangeManager, result);
+			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName()));
 			return result;
 		} finally{
 			pm.done();
@@ -577,7 +578,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		}
 	}
 
-	private SearchResultGroup[] getNewReferences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
+	private SearchResultGroup[] getNewReferences(IProgressMonitor pm, TextChangeManager manager, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
 		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
@@ -591,7 +592,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 		
 		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);			
-		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new SubProgressMonitor(pm, 1), fNewWorkingCopies);
+		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new SubProgressMonitor(pm, 1), fNewWorkingCopies, status);
 	}
 
 	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{

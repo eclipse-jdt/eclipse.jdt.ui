@@ -579,7 +579,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			pm.beginTask("", 1); //$NON-NLS-1$
 		}
 
-		IType[] blindAccessorTypes= getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1));
+		IType[] blindAccessorTypes= getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1), result);
 		for (int k= 0; k < blindAccessorTypes.length; k++) {
 			String message= createNonAccessibleMemberMessage(memberToMove, blindAccessorTypes[k],/*moved*/true);
 			result.addError(message, JavaStatusContext.create(memberToMove));
@@ -588,12 +588,12 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return result;
 	}
 	
-	private IType[] getTypesNotSeeingMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
+	private IType[] getTypesNotSeeingMovedMember(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		if (JdtFlags.isPublic(member) && JdtFlags.isPublic(fDestinationType))
 			return new IType[0];
 
 		HashSet blindAccessorTypes= new HashSet(); // referencing, but access to destination type illegal
-		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1));
+		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1), status);
 		for (int i = 0; i < references.length; i++) {
 			SearchMatch[] searchResults= references[i].getSearchResults();
 			for (int k= 0; k < searchResults.length; k++) {
@@ -661,10 +661,10 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 	}
 	
-	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm) throws JavaModelException {
+	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
 		SearchPattern pattern= SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] references= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] references= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		return references;
 	}
 
@@ -773,7 +773,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			return;
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
 			RefactoringSearchEngine.createOrPattern(fMembersToMove, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fMembersToMove),
-			new SubProgressMonitor(pm, 1));
+			new SubProgressMonitor(pm, 1), status);
 		modifiedCus.addAll(Arrays.asList(affectedCUs));
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", affectedCUs.length); //$NON-NLS-1$

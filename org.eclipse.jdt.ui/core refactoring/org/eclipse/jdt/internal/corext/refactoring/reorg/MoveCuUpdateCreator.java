@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class MoveCuUpdateCreator {
@@ -83,11 +84,11 @@ public class MoveCuUpdateCreator {
 		fImportRewrites= new HashMap();
 	}
 	
-	public TextChangeManager createChangeManager(IProgressMonitor pm) throws JavaModelException{
+	public TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		pm.beginTask("", 5); //$NON-NLS-1$
 		try{
 			TextChangeManager changeManager= new TextChangeManager();
-			addUpdates(changeManager, new SubProgressMonitor(pm, 4));
+			addUpdates(changeManager, new SubProgressMonitor(pm, 4), status);
 			addImportRewriteUpdates(changeManager);
 			return changeManager;
 		} catch (JavaModelException e){
@@ -117,17 +118,17 @@ public class MoveCuUpdateCreator {
 		}
 	}
 
-	private void addUpdates(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException {
+	private void addUpdates(TextChangeManager changeManager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", fCus.length);  //$NON-NLS-1$
 		for (int i= 0; i < fCus.length; i++){
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		
-			addUpdates(changeManager, fCus[i], new SubProgressMonitor(pm, 1));
+			addUpdates(changeManager, fCus[i], new SubProgressMonitor(pm, 1), status);
 		}
 	}
 	
-	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws CoreException{
+	private void addUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		try{
 			pm.beginTask("", 3);  //$NON-NLS-1$
 		  	pm.subTask(RefactoringCoreMessages.getFormattedString("MoveCuUpdateCreator.searching", movedUnit.getElementName())); //$NON-NLS-1$
@@ -139,15 +140,15 @@ public class MoveCuUpdateCreator {
 
 		  	addImportToSourcePackageTypes(movedUnit, new SubProgressMonitor(pm, 1));
 			removeImportsToDestinationPackageTypes(movedUnit);
-			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 2));
+			addReferenceUpdates(changeManager, movedUnit, new SubProgressMonitor(pm, 2), status);
 		} finally{
 			pm.done();
 		}
 	}
 
-	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm) throws JavaModelException, CoreException {
+	private void addReferenceUpdates(TextChangeManager changeManager, ICompilationUnit movedUnit, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException, CoreException {
 		List cuList= Arrays.asList(fCus);
-		SearchResultGroup[] references= getReferences(movedUnit, pm);
+		SearchResultGroup[] references= getReferences(movedUnit, pm, status);
 		for (int i= 0; i < references.length; i++){
 			SearchResultGroup searchResultGroup= references[i];
 			ICompilationUnit referencingCu= searchResultGroup.getCompilationUnit();
@@ -283,10 +284,10 @@ public class MoveCuUpdateCreator {
 		return ! cuPack.equals(pack) && JavaModelUtil.isSamePackage(cuPack, pack);
 	}
 	
-	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws CoreException {
+	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
 		SearchPattern pattern= createSearchPattern(unit);
-		return RefactoringSearchEngine.search(pattern, scope, new Collector(getPackage(unit)), new SubProgressMonitor(pm, 1));
+		return RefactoringSearchEngine.search(pattern, scope, new Collector(getPackage(unit)), new SubProgressMonitor(pm, 1), status);
 	}
 
 	private static IPackageFragment getPackage(ICompilationUnit cu){

@@ -532,7 +532,7 @@ public class PushDownRefactoring extends Refactoring {
 		for (int i= 0; i < membersToPush.length; i++) {
 			IMember member= membersToPush[i];
 			String label= createLabel(member);
-			IJavaElement[] referencing= getReferencingElementsFromSameClass(member, new SubProgressMonitor(pm, 1));
+			IJavaElement[] referencing= getReferencingElementsFromSameClass(member, new SubProgressMonitor(pm, 1), result);
 			for (int j= 0; j < referencing.length; j++) {
 				IJavaElement element= referencing[j];
 				if (movedMembers.contains(element))
@@ -549,10 +549,10 @@ public class PushDownRefactoring extends Refactoring {
 		return result;	
 	}
 
-	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm) throws JavaModelException {
+	private static IJavaElement[] getReferencingElementsFromSameClass(IMember member, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(new IJavaElement[]{member}, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{member.getDeclaringType()});
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		Set result= new HashSet(3);
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
@@ -710,10 +710,10 @@ public class PushDownRefactoring extends Refactoring {
 	}
 	
 	private RefactoringStatus checkCallsToDeclaringClassConstructors(IProgressMonitor pm) throws JavaModelException {
-		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(getDeclaringClass(), pm);
-
-		String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.gets_instantiated", new Object[]{createTypeLabel(getDeclaringClass())}); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
+		SearchResultGroup[] groups= ConstructorReferenceFinder.getConstructorReferences(getDeclaringClass(), pm, result);
+		String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.gets_instantiated", new Object[]{createTypeLabel(getDeclaringClass())}); //$NON-NLS-1$
+
 		for (int i= 0; i < groups.length; i++) {
 			ICompilationUnit cu= groups[i].getCompilationUnit();
 			if (cu == null)

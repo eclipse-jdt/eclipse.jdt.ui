@@ -92,11 +92,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	/*
 	 * XXX working around bug 39700
 	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
+	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		SearchPattern pattern= createReferenceSearchPattern();
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1));
+			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);
 		//Workaround bug 39700. Manually add declaration match:
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
@@ -114,11 +114,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	}
 		
 	/*
-	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor)
+	 * @see RenameMethodProcessor#addOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.core.runtime.IProgressMonitor, RefactoringStatus)
 	 */
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		addReferenceUpdates(manager, pm);
+		addReferenceUpdates(manager, pm, status);
 		addDeclarationUpdate(manager.get(getDeclaringCU()));
 		pm.worked(1);
 	}
@@ -141,8 +141,8 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		return SearchPattern.createPattern(getMethod(), IJavaSearchConstants.REFERENCES);
 	}
 	
-	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
-		SearchResultGroup[] grouped= getReferences(pm);
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		SearchResultGroup[] grouped= getReferences(pm, status);
 		for (int i= 0; i < grouped.length; i++) {
 			SearchResultGroup group= grouped[i];
 			SearchMatch[] results= group.getSearchResults();
@@ -155,11 +155,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		}	
 	}
 
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
+	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		//TODO: should not do the search again!
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		SearchPattern pattern= createReferenceSearchPattern();
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1));	
+			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
 	}
 }

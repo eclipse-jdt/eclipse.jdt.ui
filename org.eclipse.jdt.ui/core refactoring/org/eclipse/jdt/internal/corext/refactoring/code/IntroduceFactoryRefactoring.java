@@ -427,17 +427,18 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * that contains the compilation unit <code>fCUHandle</code>.
 	 * @param methodBinding
 	 * @param pm
+	 * @param status
 	 * @return an array of <code>SearchResultGroup</code>'s that identify the search matches
 	 * @throws JavaModelException
 	 */
-	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm) throws JavaModelException {
+	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		ICompilationUnit unit= ASTCreator.getCu(fSelectedNode);
 		IJavaProject javaProject= (IJavaProject) unit.getAncestor(IJavaElement.JAVA_PROJECT);
 		IMethod method= Bindings.findMethod(methodBinding, javaProject);
 		
 		SearchPattern pattern= createSearchPattern(method, methodBinding);
 		IJavaSearchScope scope= createSearchScope(method, methodBinding, javaProject);
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm);
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, status);
 		
 		return groups;
 	}
@@ -450,11 +451,12 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * constructor signature to search for
 	 * @param pm an <code>IProgressMonitor</code> to use during this potentially
 	 * lengthy operation
+	 * @param status
 	 * @return an array of <code>SearchResultGroup</code>'s identifying all
 	 * calls to the given constructor signature
 	 */
-	private SearchResultGroup[] findAllCallsTo(IMethodBinding ctorBinding, IProgressMonitor pm) throws JavaModelException {
-		SearchResultGroup[] groups= excludeBinaryUnits(searchForCallsTo(ctorBinding, pm));
+	private SearchResultGroup[] findAllCallsTo(IMethodBinding ctorBinding, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+		SearchResultGroup[] groups= excludeBinaryUnits(searchForCallsTo(ctorBinding, pm, status));
 
 		return groups;
 	}
@@ -465,13 +467,14 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("IntroduceFactory.checking_preconditions"), 1); //$NON-NLS-1$
-
+			RefactoringStatus result= new RefactoringStatus();
+			
 			fArgTypes= fCtorBinding.getParameterTypes();
-			fAllCallsTo= findAllCallsTo(fCtorBinding, pm);
+			fAllCallsTo= findAllCallsTo(fCtorBinding, pm, result);
 			fFormalArgNames= findCtorArgNames();
  
 			ICompilationUnit[]	affectedFiles= collectAffectedUnits(fAllCallsTo);
-			RefactoringStatus	result= Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedFiles));
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(affectedFiles)));
 
 			if (fCallSitesInBinaryUnits)
 				result.merge(RefactoringStatus.createWarningStatus(RefactoringCoreMessages.getString("IntroduceFactory.callSitesInBinaryClass"))); //$NON-NLS-1$

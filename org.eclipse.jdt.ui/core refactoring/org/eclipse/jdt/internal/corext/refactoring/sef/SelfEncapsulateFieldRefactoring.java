@@ -283,8 +283,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			return result;
 		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.searching_for_cunits")); //$NON-NLS-1$
 		ICompilationUnit[] affectedCUs= RefactoringSearchEngine.findAffectedCompilationUnits(
-			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(fField),
-			new SubProgressMonitor(pm, 5));
+			SearchPattern.createPattern(fField, IJavaSearchConstants.REFERENCES),
+			RefactoringScopeFactory.create(fField),
+			new SubProgressMonitor(pm, 5),
+			result);
 		
 		checkInHierarchy(result);
 		if (result.hasFatalError())
@@ -396,7 +398,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 	
-	private void checkInHierarchy(RefactoringStatus status)	throws CoreException {
+	private void checkInHierarchy(RefactoringStatus status) {
 		TypeDeclaration declaration= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, ASTNode.TYPE_DECLARATION);
 		ITypeBinding type= declaration.resolveBinding();
 		if (type != null) {
@@ -594,15 +596,15 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			fArgName= "_" + fieldName; //$NON-NLS-1$
 	}
 	
-	private static IFile getFile(ICompilationUnit cu) throws CoreException {
+	private static IFile getFile(ICompilationUnit cu) {
 		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles(){
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}			
 
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify(){
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	

@@ -256,7 +256,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			
 			initializeMethodsToRename(new SubProgressMonitor(pm, 3));
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
-			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4));	
+			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4), result);	
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
 			
 			if (fUpdateReferences)
@@ -270,7 +270,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (result.hasFatalError())
 				return result;
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3), result);
 			if (fUpdateReferences & mustAnalyzeShadowing)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
 			else
@@ -360,11 +360,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	/*
 	 * XXX made protected to allow overriding and working around bug 39700
 	 */
-	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
+	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		SearchPattern pattern= createOccurrenceSearchPattern(new SubProgressMonitor(pm, 1));
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1));	
+			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
 	}
 
 	private static boolean isSpecialCase(IMethod method) throws CoreException {
@@ -431,6 +431,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		ICompilationUnit[] newDeclarationWCs= null;
 		try {
 			pm.beginTask("", 4); //$NON-NLS-1$
+			RefactoringStatus result= new RefactoringStatus();
 			ICompilationUnit[] declarationCUs= getDeclarationCUs();
 			newDeclarationWCs= RenameAnalyzeUtil.createNewWorkingCopies(declarationCUs,
 					fChangeManager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
@@ -444,9 +445,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			}
 			
 //			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3));
-			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3));
+			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3), result);
 			
-			return RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, fOccurrences, newOccurrences, getNewElementName());
+			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, fOccurrences, newOccurrences, getNewElementName()));
+			return result;
 		} finally{
 			pm.done();
 			if (newDeclarationWCs != null){
@@ -490,7 +492,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 //		return newResults;
 //	}
 
-	private SearchResultGroup[] batchFindNewOccurrences(IMethod[] newMethods, ICompilationUnit[] newDeclarationWCs, IProgressMonitor pm) throws CoreException {
+	private SearchResultGroup[] batchFindNewOccurrences(IMethod[] newMethods, ICompilationUnit[] newDeclarationWCs, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		
 		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(newMethods, IJavaSearchConstants.REFERENCES);
@@ -522,7 +524,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			}
 		}
-		SearchResultGroup[] newResults= RefactoringSearchEngine.groupByResource(requestor.getResults());
+		SearchResultGroup[] newResults= RefactoringSearchEngine.groupByCu(requestor.getResults(), status);
 		return newResults;
 	}
 	
@@ -601,7 +603,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}	
 	}
 	
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
+	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		TextChangeManager manager= new TextChangeManager(true);
 		
 		/* don't really want to add declaration and references separetely in this refactoring 
@@ -610,11 +612,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		if (! fUpdateReferences)
 			addDeclarationUpdate(manager); // TODO: only one declaration updated, not all of them
 		else
-			addOccurrences(manager, pm);	
+			addOccurrences(manager, pm, status);	
 		return manager;
 	}
 	
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException/*thrown in subtype*/{
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();

@@ -547,7 +547,7 @@ public class InlineConstantRefactoring extends Refactoring {
 			Assert.isNotNull(refactoring);
 			Assert.isNotNull(pm);
 			
-			InlineTargetCompilationUnit[] results= prepareTargetsUnchecked(refactoring, pm);
+			InlineTargetCompilationUnit[] results= prepareTargetsUnchecked(refactoring, pm, status);
 			validateResults(results, status);
 			return results;
 		}
@@ -559,18 +559,18 @@ public class InlineConstantRefactoring extends Refactoring {
 			status.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(cus)));
 		}		
 		
-		private static InlineTargetCompilationUnit[] prepareTargetsUnchecked(InlineConstantRefactoring refactoring, IProgressMonitor pm) throws JavaModelException {		
+		private static InlineTargetCompilationUnit[] prepareTargetsUnchecked(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {		
 			if(refactoring.getReplaceAllReferences())
-				return findTargetsForAllReferences(refactoring, pm);
+				return findTargetsForAllReferences(refactoring, pm, status);
 			else
 				return new InlineTargetCompilationUnit[] { getTargetForOnlySelectedReference(refactoring) };
 		}
 		
-		private static InlineTargetCompilationUnit[] findTargetsForAllReferences(InlineConstantRefactoring refactoring, IProgressMonitor pm) throws JavaModelException {
+		private static InlineTargetCompilationUnit[] findTargetsForAllReferences(InlineConstantRefactoring refactoring, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 			IField field= refactoring.getField();
 			Assert.isNotNull(field);
 			
-			SearchResultGroup[] searchResultGroups= search(field, pm);
+			SearchResultGroup[] searchResultGroups= search(field, pm, status);
 			
 			InlineTargetCompilationUnit[] result= new InlineTargetCompilationUnit[searchResultGroups.length];
 			for(int i= 0; i < searchResultGroups.length; i++)
@@ -584,12 +584,12 @@ public class InlineConstantRefactoring extends Refactoring {
 			return new InlineTargetCompilationUnit(refactoring.getSelectionCompilationUnit(), refactoring.getConstantNameNode(), refactoring.getInitializer(), refactoring.getDeclaringCompilationUnit(), refactoring.getCodeGenSettings());
 		}
 		
-		private static SearchResultGroup[] search(IField field, IProgressMonitor pm) throws JavaModelException {		
+		private static SearchResultGroup[] search(IField field, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {		
 			Assert.isNotNull(pm);
 			Assert.isNotNull(field);
 			IJavaSearchScope scope= RefactoringScopeFactory.create(field);
 			SearchPattern pattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);
-			return RefactoringSearchEngine.search(pattern, scope, pm);
+			return RefactoringSearchEngine.search(pattern, scope, pm, status);
 		}
 		
 		private InlineTargetCompilationUnit(SearchResultGroup group, Expression initializer, ICompilationUnit initializerUnit, CodeGenerationSettings codeGenSettings) {

@@ -1241,7 +1241,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 					pattern,
 					scope,
 					new SubProgressMonitor(pm, 80),
-					workingCopies);
+					workingCopies,
+					new RefactoringStatus()); //TODO: deal with errors from non-CU matches
 				
 				fAffectedUnits= getCus(groups);
 			}
@@ -1256,7 +1257,8 @@ public class ChangeTypeRefactoring extends Refactoring {
 			IJavaSearchScope scope= RefactoringScopeFactory.create(iField);
 			ICompilationUnit[] workingCopies= null;
 			SearchResultGroup[] groups=
-				RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 100), workingCopies);
+				RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 100), workingCopies,
+						new RefactoringStatus()); //TODO: deal with errors from non-CU matches
 			fAffectedUnits= getCus(groups);
 		} else {
 			// otherwise, selection was a local variable and we only have to search the CU

@@ -319,7 +319,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			fReferences= null;
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
-				fReferences= getReferences(new SubProgressMonitor(pm, 35));
+				fReferences= getReferences(new SubProgressMonitor(pm, 35), result);
 			} else
 				pm.worked(35);
 	
@@ -458,8 +458,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES);
 	}
 	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
-		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm);
+	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		return RefactoringSearchEngine.search(createSearchPattern(), createRefactoringScope(), pm, status);
 	}
 	
 	private RefactoringStatus checkForMethodsWithConstructorNames()  throws CoreException{
@@ -612,19 +612,19 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= new RefactoringStatus();
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
 		SearchPattern pattern= SearchPattern.createPattern(getNewElementName(),
 				IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE);
-		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm);
+		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm, result);
 		if (cusWithReferencesToConflictingTypes.length == 0)
-			return new RefactoringStatus();
+			return result;
 		ICompilationUnit[] 	cusWithReferencesToRenamedType= getCus(fReferences);
 
 		ICompilationUnit[] intersection= isIntersectionEmpty(cusWithReferencesToRenamedType, cusWithReferencesToConflictingTypes);
 		if (intersection.length == 0)
-			return new RefactoringStatus();
+			return result;
 		
-		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < intersection.length; i++) {
 			RefactoringStatusContext context= JavaStatusContext.create(intersection[i]);
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.another_type", //$NON-NLS-1$

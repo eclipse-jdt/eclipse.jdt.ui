@@ -422,7 +422,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	private RefactoringStatus changeReferences(SubProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		fAffectedCUs= findAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
+		RefactoringStatus result= new RefactoringStatus();
+		fAffectedCUs= findAffectedCompilationUnits(new SubProgressMonitor(pm, 1), result);
 		IMethodBinding method= fMethodDeclaration.resolveBinding();
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", fAffectedCUs.length); //$NON-NLS-1$
@@ -436,7 +437,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			if (sub.isCanceled())
 				throw new OperationCanceledException();
 		}
-		return new RefactoringStatus();
+		return result;
 	}
 	
 	private class ReferenceAnalyzer extends ASTVisitor {
@@ -540,11 +541,11 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return new CompilationUnitRewrite(unit);
 	}
 	
-	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
+	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		IMethod method= (IMethod) fSourceCU.getElementAt(fMethodDeclaration.getName().getStartPosition());
 		ICompilationUnit[] result= RefactoringSearchEngine.findAffectedCompilationUnits(
 			SearchPattern.createPattern(method, IJavaSearchConstants.REFERENCES), RefactoringScopeFactory.create(method),
-			pm);
+			pm, status);
 		return result;
 	}
 	

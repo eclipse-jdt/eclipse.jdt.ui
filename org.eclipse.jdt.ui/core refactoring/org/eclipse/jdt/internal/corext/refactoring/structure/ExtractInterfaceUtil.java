@@ -151,7 +151,7 @@ class ExtractInterfaceUtil {
 
 	private ConstraintVariable[] getUpdatableVariables(ITypeBinding inputTypeBinding, IType theType, IType theSupertype, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		ITypeBinding interfaceBinding= getSuperTypeBinding(inputTypeBinding, theSupertype);
-		ICompilationUnit[] referringCus= getCusToParse(theType, theSupertype, pm);
+		ICompilationUnit[] referringCus= getCusToParse(theType, theSupertype, pm, status);
 		checkCompileErrors(referringCus, status);
 		if (status.hasFatalError())
 			return new ConstraintVariable[0];
@@ -400,7 +400,7 @@ class ExtractInterfaceUtil {
 	 * we need to parse not only the cus that reference the type directly but also those that 
 	 * reference a field or a method that reference the type. this method is used to find these cus.
 	 */
-	private ICompilationUnit[] getCusToParse(IType theType, IType theSupertype, IProgressMonitor pm) throws JavaModelException{
+	private ICompilationUnit[] getCusToParse(IType theType, IType theSupertype, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			SearchPattern pattern= SearchPattern.createPattern(theType, IJavaSearchConstants.REFERENCES);
@@ -408,9 +408,9 @@ class ExtractInterfaceUtil {
 			ICompilationUnit[] workingCopies= getWorkingCopies(theType.getCompilationUnit(), theSupertype.getCompilationUnit());
 			if (workingCopies.length == 0)
 				workingCopies= null;
-			SearchResultGroup[] typeReferences= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), workingCopies);
+			SearchResultGroup[] typeReferences= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), workingCopies, status);
 			ICompilationUnit[] typeReferencingCus= getCus(typeReferences);
-			ICompilationUnit[] fieldAndMethodReferencingCus= fieldAndMethodReferringCus(theType, typeReferences, workingCopies, new SubProgressMonitor(pm, 1));
+			ICompilationUnit[] fieldAndMethodReferencingCus= fieldAndMethodReferringCus(theType, typeReferences, workingCopies, new SubProgressMonitor(pm, 1), status);
 			return merge(fieldAndMethodReferencingCus, typeReferencingCus);
 		} finally{
 			pm.done();
@@ -425,12 +425,12 @@ class ExtractInterfaceUtil {
 		return ASTNodeSearchUtil.getAstNodes(searchResultGroup.getSearchResults(), cuNode);
 	}
 	
-	private ICompilationUnit[] fieldAndMethodReferringCus(IType theType, SearchResultGroup[] typeReferences, ICompilationUnit[] wcs, IProgressMonitor pm) throws JavaModelException {
+	private ICompilationUnit[] fieldAndMethodReferringCus(IType theType, SearchResultGroup[] typeReferences, ICompilationUnit[] wcs, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		SearchPattern pattern= createPatternForReferencingFieldsAndMethods(typeReferences);
 		if (pattern == null)
 			return new ICompilationUnit[0];
 		IJavaSearchScope scope= RefactoringScopeFactory.create(theType);
-		ICompilationUnit[] units= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm);
+		ICompilationUnit[] units= RefactoringSearchEngine.findAffectedCompilationUnits(pattern, scope, pm, status);
 		Set result= new HashSet(units.length);
 		for (int i= 0; i < units.length; i++) {
 			result.add(getUnproceededElement(units[i], wcs));

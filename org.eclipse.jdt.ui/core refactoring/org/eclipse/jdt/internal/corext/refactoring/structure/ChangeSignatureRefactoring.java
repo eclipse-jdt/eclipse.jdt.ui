@@ -549,7 +549,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				return result;
 
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
-			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1));
+			fOccurrences= findOccurrences(new SubProgressMonitor(pm, 1), result);
 			
 			result.merge(checkVisibilityChanges());
 			
@@ -1106,13 +1106,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return RefactoringScopeFactory.create(fMethod);
 	}
 	
-	private SearchResultGroup[] findOccurrences(IProgressMonitor pm) throws JavaModelException{
+	private SearchResultGroup[] findOccurrences(IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		if (fMethod.isConstructor()){
 			// workaround for bug 27236:
-			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm);
+			return ConstructorReferenceFinder.getConstructorOccurrences(fMethod, pm, status);
 		}else{	
 			SearchPattern pattern= RefactoringSearchEngine.createOrPattern(fRippleMethods, IJavaSearchConstants.ALL_OCCURRENCES);
-			return RefactoringSearchEngine.search(pattern, createRefactoringScope(), pm);
+			return RefactoringSearchEngine.search(pattern, createRefactoringScope(), pm, status);
 		}
 	}
 	

@@ -285,9 +285,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
-				fOccurrences= getReferences(new SubProgressMonitor(pm, 4));	
-				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(new SubProgressMonitor(pm, 4));
-				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 4));
+				fOccurrences= getReferences(new SubProgressMonitor(pm, 4), result);	
+				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(new SubProgressMonitor(pm, 4), result);
+				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 4), result);
 				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 				result.merge(analyzeAffectedCompilationUnits());
 				pm.worked(1);
@@ -317,13 +317,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		}	
 	}
 	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
+	private SearchResultGroup[] getReferences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage);
 		SearchPattern pattern= SearchPattern.createPattern(fPackage, IJavaSearchConstants.REFERENCES);
-		return RefactoringSearchEngine.search(pattern, scope, pm);
+		return RefactoringSearchEngine.search(pattern, scope, pm, status);
 	}
 		
-	private List getReferencesToTypesInNamesakes(IProgressMonitor pm) throws CoreException {
+	private List getReferencesToTypesInNamesakes(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		// e.g. renaming B-p.p; project C requires B, X and has ref to B-p.p and X-p.p;
 		// goal: find refs to X-p.p in CUs from fOccurrences
@@ -351,7 +351,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		}
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
 		IJavaSearchScope scope= getPackageAndOccurrencesWithoutNamesakesScope();
-		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), status);
 		pm.done();
 		return new ArrayList(Arrays.asList(results));
 	}
@@ -424,7 +424,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return SearchEngine.createJavaSearchScope((IJavaElement[]) scopeList.toArray(new IJavaElement[scopeList.size()])); 
 	}
 
-	private List getReferencesToTypesInPackage(IProgressMonitor pm) throws CoreException {
+	private List getReferencesToTypesInPackage(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		IJavaSearchScope referencedFromNamesakesScope= RefactoringScopeFactory.create(fPackage);
 		IPackageFragment[] namesakePackages= getNamesakePackages(referencedFromNamesakesScope, new SubProgressMonitor(pm, 1));
@@ -440,7 +440,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			return new ArrayList(0);
 		}
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1));
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pattern, scope, new SubProgressMonitor(pm, 1), status);
 		pm.done();
 		return new ArrayList(Arrays.asList(results));
 	}

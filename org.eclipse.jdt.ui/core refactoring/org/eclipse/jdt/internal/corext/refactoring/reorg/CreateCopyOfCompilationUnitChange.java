@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -116,7 +118,8 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		if (wc.findPrimaryType() == null)
 			return null;
 		SearchPattern pattern= createSearchPattern(wc.findPrimaryType());
-		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, new ICompilationUnit[]{wc});
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, new ICompilationUnit[]{wc},
+				new RefactoringStatus()); //status cannot get an error by construction: search scope is only the CU. 
 		Assert.isTrue(groups.length <= 1); //just 1 file or none
 		if (groups.length == 0)
 			return null;

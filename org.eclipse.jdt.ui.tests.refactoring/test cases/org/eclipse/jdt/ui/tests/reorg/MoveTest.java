@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
+import java.util.Map;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -30,6 +32,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -1053,7 +1056,15 @@ public class MoveTest extends RefactoringTest {
 
 	public void testDestination_yes_cuFromRoot() throws Exception{
 		ParticipantTesting.reset();
+		
 		//import statement with type from default package - only <= java 1.3
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(false);
+		Map newOptions= javaProject.getOptions(false);
+		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.3");
+		newOptions.put(JavaCore.COMPILER_SOURCE, "1.3");
+		javaProject.setOptions(newOptions);
+		
 		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
 		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
 		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
@@ -1092,6 +1103,53 @@ public class MoveTest extends RefactoringTest {
 			newCuD.delete(true, new NullProgressMonitor());
 			orgTest.delete(true, new NullProgressMonitor());
 			org.delete(true, new NullProgressMonitor());
+			if (newOptions != null)
+				javaProject.setOptions(originalOptions);
+		}
+	}
+
+	public void testDestination_no_cuFromRoot() throws Exception{
+		//import statement with type from default package - only <= java 1.3
+		IJavaProject javaProject= getRoot().getJavaProject();
+		Map originalOptions= javaProject.getOptions(false);
+		Map newOptions= javaProject.getOptions(false);
+		newOptions.put(JavaCore.COMPILER_COMPLIANCE, "1.4"); //will cause error (potential match)
+		newOptions.put(JavaCore.COMPILER_SOURCE, "1.4"); //will cause error (potential match)
+		javaProject.setOptions(newOptions);
+		
+		String oldD= "import org.test.Reference;public class Default {Reference ref;}";
+		String oldRef= "package org.test;import Default;public class Reference{Default d;}";
+		String newD= "package org;\nimport org.test.Reference;public class Default {Reference ref;}";
+		String newRef= "package org.test;import org.Default;\npublic class Reference{Default d;}";
+		ICompilationUnit cuD= getRoot().getPackageFragment("").createCompilationUnit("Default.java", oldD, false, new NullProgressMonitor());
+		IPackageFragment orgTest= getRoot().createPackageFragment("org.test", false, new NullProgressMonitor());
+		ICompilationUnit cuRef= orgTest.createCompilationUnit("Reference.java", oldRef, false, new NullProgressMonitor());
+		IPackageFragment org= getRoot().getPackageFragment("org");
+		ICompilationUnit newCuD= org.getCompilationUnit(cuD.getElementName());
+		try{
+			IJavaElement[] javaElements= { cuD };
+			IResource[] resources= {};
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+
+			verifyValidDestination(ref, org);			
+			
+			assertTrue("source file Default.java does not exist before moving", cuD.exists());
+			assertTrue("source file Reference.java does not exist before moving", cuRef.exists());
+			RefactoringStatus status= performRefactoring(ref, false);
+			assertEquals(RefactoringStatus.ERROR, status.getSeverity());
+			assertTrue("source file Default.java exists after moving", ! cuD.exists());
+			assertTrue("new file Default.java does not exist after moving", newCuD.exists());
+			assertTrue("source file Reference.java does not exist after moving", cuRef.exists());
+			assertEqualLines("Default.java differs", newD, newCuD.getSource());
+			assertEqualLines("Reference.java differs", newRef, cuRef.getSource());
+
+		}finally{
+			performDummySearch();
+			newCuD.delete(true, new NullProgressMonitor());
+			orgTest.delete(true, new NullProgressMonitor());
+			org.delete(true, new NullProgressMonitor());
+			if (newOptions != null)
+				javaProject.setOptions(originalOptions);
 		}
 	}
 
