@@ -51,8 +51,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * </p>
  */
 class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider implements ITreeContentProvider, IElementChangedListener {
-	private boolean fProjectViewState= true;
-	
+
+	private boolean fProjectViewState= true;	
+
 	public PackagesViewHierarchicalContentProvider(StructuredViewer viewer){
 		super(viewer);
 	}
@@ -203,10 +204,11 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					LogicalPackage logicalPkg= findLogicalPackage(pkgFragment);
 					if (logicalPkg != null)
 						return logicalPkg;
-					else
+					else 
 						return pkgFragment;
 				} 
 				return parent;
+				
 			} else if(element instanceof LogicalPackage){
 				LogicalPackage el= (LogicalPackage) element;
 				IPackageFragment fragment= el.getFragments()[0];
@@ -229,13 +231,12 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return null;
 	}
 
-
 	private Object getHierarchicalParent(IPackageFragment fragment) throws JavaModelException {
 		IJavaElement parent= fragment.getParent();
 
 		if ((parent instanceof IPackageFragmentRoot) && parent.exists()) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-			if (root.isArchive()) {
+			if (root.isArchive() || !fragment.exists()) {
 				return findNextLevelParentByElementName(fragment, root);
 			} else {
 				IResource resource= fragment.getUnderlyingResource();
@@ -350,15 +351,29 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			} else if (kind == IJavaElementDelta.CHANGED) {
 				//just refresh
 				LogicalPackage logicalPkg= findLogicalPackage(frag);
+				//in case changed object is filtered out
 				if (logicalPkg != null)
-					postRefresh(logicalPkg);
+					postRefresh(findElementToRefresh(logicalPkg));
 				else
-					postRefresh(frag);
+					postRefresh(findElementToRefresh(frag));
 				return;
 			}
 		}
 		
 		processAffectedChildren(delta);
+	}
+	
+	private Object findElementToRefresh(Object object) {
+		Object toBeRefreshed= object;
+		if (fViewer.testFindItem(object) == null) {
+			 Object parent= getParent(object);
+			 if(parent instanceof IPackageFragmentRoot && fProjectViewState)
+			 	parent= ((IPackageFragmentRoot)parent).getJavaProject();
+			 
+			if(parent != null)
+				toBeRefreshed= parent;
+		}
+		return toBeRefreshed;
 	}
 
 
@@ -507,5 +522,4 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			}
 		}
 	}
-	
 }
