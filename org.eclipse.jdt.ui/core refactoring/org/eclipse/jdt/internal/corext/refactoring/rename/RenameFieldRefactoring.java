@@ -22,7 +22,8 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -37,7 +38,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.*;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -58,14 +58,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private boolean fUpdateComments;
 	private boolean fUpdateStrings;
 	
-	private final CodeGenerationSettings fSettings;
 	private final String[] fPrefixes;
 	private final String[] fSuffixes;
 	
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 	
-	public RenameFieldRefactoring(IField field, CodeGenerationSettings settings, String[] prefixes, String[] suffixes){
+	public RenameFieldRefactoring(IField field, String[] prefixes, String[] suffixes){
 		Assert.isTrue(field.exists());
 		fField= field;
 		fNewName= fField.getElementName();
@@ -74,8 +73,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fUpdateComments= false;
 		fUpdateStrings= false;
 		
-		Assert.isNotNull(settings);
-		fSettings= settings;
 		fPrefixes= prefixes;
 		fSuffixes= suffixes;
 		fRenameGetter= false;
@@ -192,19 +189,19 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	public IMethod getGetter() throws JavaModelException{
-		return GetterSetterUtil.getGetter(fField, fSettings, fPrefixes, fSuffixes);
+		return GetterSetterUtil.getGetter(fField, fPrefixes, fSuffixes);
 	}
 	
 	public IMethod getSetter() throws JavaModelException{
-		return GetterSetterUtil.getSetter(fField, fSettings, fPrefixes, fSuffixes);
+		return GetterSetterUtil.getSetter(fField, fPrefixes, fSuffixes);
 	}
 
 	public String getNewGetterName(){
-		return GetterSetterUtil.getGetterName(fNewName, fSettings, fPrefixes, fSuffixes);
+		return new NameProposer(fPrefixes, fSuffixes).proposeGetterName(fNewName);
 	}
 	
 	public String getNewSetterName(){
-		return GetterSetterUtil.getSetterName(fNewName, fSettings, fPrefixes, fSuffixes);
+		return new NameProposer(fPrefixes, fSuffixes).proposeSetterName(fNewName);
 	}
 	
 	//----------
