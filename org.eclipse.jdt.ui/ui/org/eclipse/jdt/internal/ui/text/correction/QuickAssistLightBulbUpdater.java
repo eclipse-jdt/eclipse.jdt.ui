@@ -49,7 +49,6 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
@@ -279,7 +278,7 @@ public class QuickAssistLightBulbUpdater {
 				}
 			}
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
+			// ignore
 		} catch (IndexOutOfBoundsException e) {
 			// concurrent modification - too bad, ignore
 		} catch (ConcurrentModificationException e) {
