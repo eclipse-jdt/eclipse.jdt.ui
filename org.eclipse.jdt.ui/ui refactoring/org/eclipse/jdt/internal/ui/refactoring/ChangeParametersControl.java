@@ -85,6 +85,8 @@ public class ChangeParametersControl extends Composite {
 				return info.getType();
 			if (columnIndex == NEWNAME_PROP)
 				return info.getNewName();
+			if (columnIndex == DEFAULT_PROP)
+				return info.getDefaultValue();
 			Assert.isTrue(false);
 			return ""; //$NON-NLS-1$
 		}
@@ -92,15 +94,21 @@ public class ChangeParametersControl extends Composite {
 
 	private class ReorderParametersCellModifier implements ICellModifier {
 		public boolean canModify(Object element, String property) {
-			return (property.equals(PROPERTIES[NEWNAME_PROP]));
+			if (!(element instanceof ParameterInfo))
+				return false;
+			if (property.equals(PROPERTIES[NEWNAME_PROP]))
+				return true;
+			return (((ParameterInfo)element).isAdded());
 		}
 		public Object getValue(Object element, String property) {
 			if (!(element instanceof ParameterInfo))
 				return null;
 			if (property.equals(PROPERTIES[TYPE_PROP]))
 				return ((ParameterInfo) element).getType();
-			if (property.equals(PROPERTIES[NEWNAME_PROP]))
+			else if (property.equals(PROPERTIES[NEWNAME_PROP]))
 				return ((ParameterInfo) element).getNewName();
+			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
+				return ((ParameterInfo) element).getDefaultValue();
 			Assert.isTrue(false);
 			return null;
 		}
@@ -111,33 +119,44 @@ public class ChangeParametersControl extends Composite {
 			if (!(data instanceof ParameterInfo))
 				return;
 			ParameterInfo parameterInfo= (ParameterInfo) data;
-			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
+			if (property.equals(PROPERTIES[NEWNAME_PROP])) 
 				parameterInfo.setNewName((String) value);
-				fListener.parameterChanged(parameterInfo);
-				fTableViewer.update(parameterInfo, new String[] { property });
-			}
+			else if (property.equals(PROPERTIES[DEFAULT_PROP]))
+				parameterInfo.setDefaultValue((String) value);
+			else if (property.equals(PROPERTIES[TYPE_PROP]))
+				parameterInfo.setType((String) value);
+ 			else 
+ 				Assert.isTrue(false);
+			fListener.parameterChanged(parameterInfo);
+			fTableViewer.update(parameterInfo, new String[] { property });
 		}
 	};
 
-	private static final String[] PROPERTIES= { "type", "new" }; //$NON-NLS-2$ //$NON-NLS-1$
+	private static final String[] PROPERTIES= { "type", "new", "default" }; //$NON-NLS-2$ //$NON-NLS-1$
 	private static final int TYPE_PROP= 0;
 	private static final int NEWNAME_PROP= 1;
+	private static final int DEFAULT_PROP= 2;
 
 	private static final int ROW_COUNT= 10;
 
-	private boolean fEditable;
+	private final boolean fEditable;
+	private final boolean fCanAddParameters;
+	private final ParameterListChangeListener fListener;
+
 	private Button fUpButton;
 	private Button fDownButton;
 	private TableViewer fTableViewer;
 	private Button fEditButton;
+	private Button fAddButton;
+	private Button fRemoveButton;
 	private List fParameterInfos;
-	private ParameterChangeListener fListener;
 
-	public ChangeParametersControl(Composite parent, int style, String label, ParameterChangeListener listener, boolean editable) {
+	public ChangeParametersControl(Composite parent, int style, String label, ParameterListChangeListener listener, boolean editable, boolean canAddParameters) {
 		super(parent, style);
 		Assert.isNotNull(listener);
 		fListener= listener;
 		fEditable= editable;
+		fCanAddParameters= canAddParameters;
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0;
@@ -166,8 +185,7 @@ public class ChangeParametersControl extends Composite {
 
 	private void createParameterList(Composite parent) {
 		TableLayoutComposite layouter= new TableLayoutComposite(parent, SWT.NULL);
-		layouter.addColumnData(new ColumnWeightData(50, true));
-		layouter.addColumnData(new ColumnWeightData(50, true));
+		addColumnLayoutData(layouter);
 		
 		Table table= new Table(layouter, SWT.MULTI | SWT.BORDER | SWT.FULL_SELECTION);
 		table.setHeaderVisible(true);
@@ -180,6 +198,12 @@ public class ChangeParametersControl extends Composite {
 		tc= new TableColumn(table, SWT.NONE, NEWNAME_PROP);
 		tc.setResizable(true);
 		tc.setText(RefactoringMessages.getString("ChangeParametersControl.table.name")); //$NON-NLS-1$
+
+		if (fCanAddParameters){
+			tc= new TableColumn(table, SWT.NONE, DEFAULT_PROP);
+			tc.setResizable(true);
+			tc.setText("Default value");
+		}	
 		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
 		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
@@ -198,6 +222,17 @@ public class ChangeParametersControl extends Composite {
 
 		if (fEditable)
 			addCellEditors();
+	}
+
+	private void addColumnLayoutData(TableLayoutComposite layouter) {
+		if (fCanAddParameters){
+			layouter.addColumnData(new ColumnWeightData(33, true));
+			layouter.addColumnData(new ColumnWeightData(33, true));
+			layouter.addColumnData(new ColumnWeightData(34, true));
+		} else {
+			layouter.addColumnData(new ColumnWeightData(50, true));
+			layouter.addColumnData(new ColumnWeightData(50, true));
+		}	
 	}
 
 	private ParameterInfo[] getSelectedItems() {
@@ -226,6 +261,10 @@ public class ChangeParametersControl extends Composite {
 		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
 		if (fEditable)
 			fEditButton= createEditButton(buttonComposite);
+		if(fCanAddParameters){
+			fAddButton= createAddButton(buttonComposite);	
+			fRemoveButton= createRemoveButton(buttonComposite);
+		}	
 		updateButtonsEnabledState();
 	}
 
@@ -234,7 +273,22 @@ public class ChangeParametersControl extends Composite {
 		fDownButton.setEnabled(canMove(false));
 		if (fEditButton != null)
 			fEditButton.setEnabled(fTableViewer.getTable().getSelectionIndices().length == 1);
+		if (fAddButton != null)
+			fAddButton.setEnabled(true);	
+		if (fRemoveButton != null)
+			fRemoveButton.setEnabled(areAllSelectedNew());
 	}
+
+	private boolean areAllSelectedNew() {
+		ParameterInfo[] selected= getSelectedItems();
+		for (int i = 0; i < selected.length; i++) {
+			if (! selected[i].isAdded())
+				return false;
+				
+		}
+		return true;
+	}
+
 
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
@@ -269,6 +323,45 @@ public class ChangeParametersControl extends Composite {
 		return button;
 	}
 
+	private Button createAddButton(Composite buttonComposite) {
+		Button button= new Button(buttonComposite, SWT.PUSH);
+		button.setText("Add");
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fParameterInfos.add(ParameterInfo.createInfoForAddedParameter());
+				fTableViewer.refresh();
+				fTableViewer.getControl().setFocus();
+				fTableViewer.getTable().setSelection(fParameterInfos.size() - 1);
+				fListener.parameterListChanged();
+				updateButtonsEnabledState();
+			}
+		});	
+		return button;
+	}
+
+	private Button createRemoveButton(Composite buttonComposite) {
+		final Button button= new Button(buttonComposite, SWT.PUSH);
+		button.setText("Remove");
+		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		SWTUtil.setButtonDimensionHint(button);
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Assert.isTrue(areAllSelectedNew());
+				ParameterInfo[] selected= getSelectedItems();
+				for (int i= 0; i < selected.length; i++) {
+					fParameterInfos.remove(selected[i]);
+				}
+				fTableViewer.refresh();
+				fTableViewer.getControl().setFocus();
+				fListener.parameterListChanged();
+				button.setEnabled(false);
+			}
+		});	
+		return button;
+	}
+
 	private Button createButton(Composite buttonComposite, String text, final boolean up) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setText(text);
@@ -291,7 +384,7 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(savedSelection);
-				fListener.parameterReordered();
+				fListener.parameterListChanged();
 			}
 		});
 		return button;
@@ -318,8 +411,6 @@ public class ChangeParametersControl extends Composite {
 		Table table= fTableViewer.getTable();
 		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
 
-		editors[TYPE_PROP]= new TextCellEditor(table);
-
 		class AutoApplyTextCellEditor extends TextCellEditor {
 			public AutoApplyTextCellEditor(Composite parent) {
 				super(parent);
@@ -328,10 +419,24 @@ public class ChangeParametersControl extends Composite {
 				super.fireApplyEditorValue();
 			}
 		};
+
+		editors[TYPE_PROP]= new AutoApplyTextCellEditor(table);
+		editors[TYPE_PROP].getControl().addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				((AutoApplyTextCellEditor) editors[TYPE_PROP]).fireApplyEditorValue();
+			}
+		});
+
 		editors[NEWNAME_PROP]= new AutoApplyTextCellEditor(table);
 		editors[NEWNAME_PROP].getControl().addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 				((AutoApplyTextCellEditor) editors[NEWNAME_PROP]).fireApplyEditorValue();
+			}
+		});
+		editors[DEFAULT_PROP]= new AutoApplyTextCellEditor(table);
+		editors[DEFAULT_PROP].getControl().addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+				((AutoApplyTextCellEditor) editors[DEFAULT_PROP]).fireApplyEditorValue();
 			}
 		});
 
