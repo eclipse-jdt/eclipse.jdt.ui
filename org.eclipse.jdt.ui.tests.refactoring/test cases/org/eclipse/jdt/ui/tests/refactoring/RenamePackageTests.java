@@ -44,7 +44,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenamePackageTests extends RefactoringTest {
 	private static final boolean BUG_6054= true;
-	private static final boolean BUG_54962_71267= true;
+	private static final boolean BUG_54962_71267= false;
 	
 	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
