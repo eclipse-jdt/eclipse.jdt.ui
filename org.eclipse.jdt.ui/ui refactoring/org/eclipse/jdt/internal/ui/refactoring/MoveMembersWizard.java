@@ -147,7 +147,10 @@ public class MoveMembersWizard extends RefactoringWizard {
 						error(status.getMessage());
 					} else {
 						try {
-							IType resolvedType= getMoveProcessor().getDeclaringType().getJavaProject().findType(fDestinationField.getText());
+							final IType declaring= getMoveProcessor().getDeclaringType();
+							IType resolvedType= declaring.getJavaProject().findType(fDestinationField.getText());
+							if (resolvedType == null)
+								resolvedType= declaring.getJavaProject().findType(declaring.getPackageFragment().getElementName(), fDestinationField.getText());
 							IStatus validationStatus= validateDestinationType(resolvedType, fDestinationField.getText());
 							if (validationStatus.isOK()){
 								setErrorMessage(null);

@@ -289,8 +289,11 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return  fMembersToMove[0].getDeclaringType(); //index safe - checked in areAllMoveable()
 	}
 	
-	private IType resolveType(String fullyQualifiedTypeName) throws JavaModelException{
-		return getDeclaringType().getJavaProject().findType(fullyQualifiedTypeName);
+	private IType resolveType(String qualifiedTypeName) throws JavaModelException{
+		IType type= getDeclaringType().getJavaProject().findType(qualifiedTypeName);
+		if (type == null)
+			type= getDeclaringType().getJavaProject().findType(getDeclaringType().getPackageFragment().getElementName(), qualifiedTypeName);
+		return type;
 	}
 	
 	//---- Activation checking ------------------------------------
