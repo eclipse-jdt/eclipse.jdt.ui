@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -230,8 +231,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			newVarDec.setModifiers(oldVarDecl.getModifiers());
 			newStatement= newVarDec;
 		}
-
-		rewrite.markAsInsertInOriginal(statementParent, property, newStatement, insertIndex, null);
+		
+		ListRewriter listRewriter= rewrite.getListRewrite(statementParent, property);
+		listRewriter.insertAt(newStatement, insertIndex, null);
 
 		proposal.ensureNoModifications();
 		resultingCollections.add(proposal);
@@ -396,7 +398,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				Name name= ((SimpleType) type).getName();
 				Name newName= (Name) ASTNode.copySubtree(catchClause.getAST(), name);
 				
-				rewrite.markAsInsertBeforeOriginal(methodDeclaration, ASTNodeConstants.THROWN_EXCEPTIONS, newName, null, null);
+				ListRewriter listRewriter= rewrite.getListRewrite(methodDeclaration, ASTNodeConstants.THROWN_EXCEPTIONS);
+				listRewriter.insertLast(newName, null);
 			}
 		
 			String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description"); //$NON-NLS-1$

@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 
 public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
@@ -76,7 +77,8 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newDecl.setType(evaluateVariableType(ast));
 			newDecl.setName(ast.newSimpleName(node.getIdentifier()));
 			
-			rewrite.markAsInsertBeforeOriginal(decl, ASTNodeConstants.PARAMETERS, newDecl, null, null);
+			ListRewriter listRewriter= rewrite.getListRewrite(decl, ASTNodeConstants.PARAMETERS);
+			listRewriter.insertLast(newDecl, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 			markAsLinked(rewrite, node, true, KEY_NAME);
@@ -280,7 +282,9 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			List decls= isAnonymous ?  ((AnonymousClassDeclaration) newTypeDecl).bodyDeclarations() :  ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 							
 			int insertIndex= findFieldInsertIndex(decls, node.getStartPosition());
-			rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
+			
+			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS);
+			listRewriter.insertAt(newDecl, insertIndex, null);
 			
 			markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 			if (!isInDifferentCU) {

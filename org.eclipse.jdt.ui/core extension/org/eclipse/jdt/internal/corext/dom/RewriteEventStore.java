@@ -80,13 +80,13 @@ public final class RewriteEventStore {
 	private EventHolder fLastEvent;
 	
 	/** Maps events to group descriptions */
-	private HashMap fEventDescriptions;
+	private HashMap fEditGroups;
 	
 	/** Stores which nodes are source of a copy or move */
 	private HashMap fNodeSourceDatas;
 	
 	/** Stores which inserted nodes bound to the previous node. If not, a node is
-	 * alswas bound to the next node */
+	 * always bound to the next node */
 	private HashSet fInsertBoundToPrevious;
 	
 	/** optional mapper to allow fix already modified AST trees */
@@ -97,7 +97,7 @@ public final class RewriteEventStore {
 		fLastEvent= null;
 		
 		fNodeSourceDatas= new HashMap();
-		fEventDescriptions= null; // lazy initialization
+		fEditGroups= null; // lazy initialization
 		fInsertBoundToPrevious= null;
 		
 		fNodePropertyMapper= null;
@@ -117,7 +117,7 @@ public final class RewriteEventStore {
 		fLastEvent= null;
 		
 		fNodeSourceDatas.clear();
-		fEventDescriptions= null; // lazy initialization
+		fEditGroups= null; // lazy initialization
 		fInsertBoundToPrevious= null;
 	}
 	
@@ -264,19 +264,19 @@ public final class RewriteEventStore {
 		return ASTNodeConstants.getNodeChild(parent, childProperty);
 	}	
 	
-	public TextEditGroup getEventDescription(RewriteEvent event) {
-		if (fEventDescriptions == null) {
+	public TextEditGroup getEventEditGroup(RewriteEvent event) {
+		if (fEditGroups == null) {
 			return null;
 		}
-		return (TextEditGroup) fEventDescriptions.get(event);
+		return (TextEditGroup) fEditGroups.get(event);
 	}
 	
-	public void setEventDescription(RewriteEvent event, TextEditGroup desc) {
-		if (desc != null) {
-			if (fEventDescriptions == null) {
-				fEventDescriptions= new HashMap(5);
+	public void setEventEditGroup(RewriteEvent event, TextEditGroup editGroup) {
+		if (editGroup != null) {
+			if (fEditGroups == null) {
+				fEditGroups= new HashMap(5);
 			}	
-			fEventDescriptions.put(event, desc);
+			fEditGroups.put(event, editGroup);
 		}
 	}
 	

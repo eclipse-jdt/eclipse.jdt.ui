@@ -22,6 +22,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -158,26 +159,27 @@ public final class ASTRewrite extends NewASTRewrite {
 		} else {
 			NodeRewriteEvent event= fEventStore.getNodeEvent(parent, childProperty, true);
 			event.setNewValue(newNode);
-			fEventStore.setEventDescription(event, desc);
+			fEventStore.setEventEditGroup(event, desc);
 		}		
 	}
 	
 	
 	private void convertListChange(ListRewriteEvent listEvent, List modifiedList) {
-		int insertIndex= 0;
 		for (int i= 0; i < modifiedList.size(); i++) {
 			ASTNode curr= (ASTNode) modifiedList.get(i);
 			ASTInsert object= getChangeProperty(curr);
 			if (object != null) {
-				RewriteEvent change= listEvent.insertAtOriginalIndex(curr, insertIndex);
-				fEventStore.setEventDescription(change, object.description);
+				RewriteEvent event= listEvent.insert(curr, i);
+				fEventStore.setEventEditGroup(event, object.description);
 				if (object.isBoundToPrevious) {
 					fEventStore.setInsertBoundToPrevious(curr);
 				}
-			} else {
-				insertIndex++;
 			}
 		}
+	}
+	
+	private boolean isInsertBoundToPreviousByDefault(ASTNode node) {
+		return (node instanceof Statement || node instanceof FieldDeclaration);
 	}
 	
 	/**
@@ -201,7 +203,7 @@ public final class ASTRewrite extends NewASTRewrite {
 			
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy})
+	 * create a copy target first and insert this target node. ({@link #createCopy(ASTNode)})
 	 * @param node The node to be marked as inserted.
 	 * @param description Description of the change.
 	 */
@@ -217,7 +219,7 @@ public final class ASTRewrite extends NewASTRewrite {
 
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link #createCopy})
+	 * create a copy target first and insert this target node. ({@link #createCopy(ASTNode)})
 	 * @param node The node to be marked as inserted.
 	 */
 	public final void markAsInserted(ASTNode node) {

@@ -49,6 +49,7 @@ import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -218,7 +219,7 @@ public class JavadocConfigurationBlock {
 			fURLField.setText(initialValue);
 			return;
 		}
-		String prefix= "jar:file:/"; //$NON-NLS-1$
+		String prefix= JavaDocLocations.ARCHIVE_PREFIX;
 		boolean isArchive= initialValue.startsWith(prefix); //$NON-NLS-1$
 		
 		fURLRadioButton.setSelection(!isArchive);

@@ -172,14 +172,14 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		}
 		
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
-		rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
+		rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS).insertAt(newDecl, insertIndex, null);
 
 		ASTNode selectionNode;
 		if (isParamToField) {
 			// assign parameter to field
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
 			int insertIdx=  findAssignmentInsertIndex(body.statements());
-			rewrite.markAsInsertInOriginal(body, ASTNodeConstants.STATEMENTS, statement, insertIdx, null);
+			rewrite.getListRewrite(body, ASTNodeConstants.STATEMENTS).insertAt(statement, insertIdx, null);
 			selectionNode= statement;
 			
 		} else {			

@@ -29,6 +29,7 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 
 public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
@@ -332,7 +333,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(type, ASTNodeConstants.MODIFIERS, new Integer(newModifiers), null);
 				
 			SimpleName newSuperinterface= ast.newSimpleName("Cloneable");
-			rewrite.markAsInsertInOriginal(type, ASTNodeConstants.SUPER_INTERFACES, newSuperinterface, 0, null);
+			
+			rewrite.getListRewrite(type, ASTNodeConstants.SUPER_INTERFACES).insertFirst(newSuperinterface, null);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
@@ -348,30 +350,28 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 			FieldDeclaration newField= createNewField(ast, "fCount");
 			
-			rewrite.markAsInsertInOriginal(innerType, ASTNodeConstants.BODY_DECLARATIONS, newField, 0, null);
+			rewrite.getListRewrite(innerType, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(newField, null);
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
-			rewrite.markAsInsertInOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newMethodDecl, 4, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertAt(newMethodDecl, 4, null);
 		}
 		{ // add exception, add method
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
 			rewrite.markAsInsert(type, ASTNodeConstants.SUPERCLASS, newSuperclass, null);
-			
-			List members= type.bodyDeclarations();
-			
+					
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
-			rewrite.markAsInsertInOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newMethodDecl, members.size(), null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertLast(newMethodDecl, null);
 		}			
 		{ // insert interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
 						
 			SimpleName newInterface= ast.newSimpleName("Runnable");
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.SUPER_INTERFACES, newInterface, null, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.SUPER_INTERFACES).insertLast(newInterface, null);
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", true);
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newMethodDecl, null, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertLast(newMethodDecl,  null);
 		}			
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -437,7 +437,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			FieldDeclaration decl= ast.newFieldDeclaration(frag);
 			decl.setType(ast.newPrimitiveType(PrimitiveType.INT));
 
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, decl, null, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(decl, null);
 			
 		}
 		{ 	
@@ -455,8 +455,9 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			FieldDeclaration decl2= ast.newFieldDeclaration(frag2);
 			decl2.setType(ast.newPrimitiveType(PrimitiveType.INT));			
 						
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, decl1, null, null);
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, decl2, null, null);
+			ListRewriter listRewrite= rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS);
+			listRewrite.insertFirst(decl1, null);
+			listRewrite.insertAfter(decl2, decl1, null);
 		}				
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -548,7 +549,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Number of bodyDeclarations not 0", decls.size() == 0);
 			
 			MethodDeclaration newMethod= createNewMethod(ast, "newMethod", false);
-			rewrite.markAsInsertBeforeOriginal(anonym, ASTNodeConstants.BODY_DECLARATIONS, newMethod, null, null);
+			rewrite.getListRewrite(anonym, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(newMethod, null);
 		}
 		{	// remove body decl in AnonymousClassDeclaration
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
@@ -938,7 +939,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "foo", false);
-			rewrite.markAsInsertBeforeOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newMethodDecl, null, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertLast(newMethodDecl, null);
 			
 		}
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -986,7 +987,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			MethodDeclaration newMethodDecl= createNewMethod(ast, "foo", false);
-			rewrite.markAsInsertInOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newMethodDecl, 0, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(newMethodDecl, null);
 		}
 		
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1039,7 +1040,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			assertTrue("Has declarations", !members.isEmpty());
 			
 			FieldDeclaration newField= createNewField(ast, "fCount");
-			rewrite.markAsInsertInOriginal(type, ASTNodeConstants.BODY_DECLARATIONS, newField, 0, null);
+			rewrite.getListRewrite(type, ASTNodeConstants.BODY_DECLARATIONS).insertFirst(newField, null);
 		}
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);

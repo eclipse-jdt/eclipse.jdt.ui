@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeConstants;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -53,7 +54,8 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			int idx= fInsertIndexes[i];
 			String key= "newarg_" + i; //$NON-NLS-1$
 			Expression newArg= evaluateArgumentExpressions(ast, fParamTypes[idx], key);
-			rewrite.markAsInsertInNew(fCallerNode, ASTNodeConstants.ARGUMENTS, newArg, idx, null);
+			ListRewriter listRewriter= rewrite.getListRewrite(fCallerNode, ASTNodeConstants.ARGUMENTS);
+			listRewriter.insertAt(newArg, idx, null);
 			
 			markAsLinked(rewrite, newArg, i == 0, key); 
 		}

@@ -20,6 +20,10 @@ import org.eclipse.jdt.core.dom.ASTNode;
  */
 public class ListRewriteEvent extends RewriteEvent {
 	
+	public final static int NEW= 1;
+	public final static int OLD= 2;
+	public final static int BOTH= NEW | OLD;
+	
 	/** original list of 'ASTNode' */
 	private List fOriginalNodes;
 
@@ -141,82 +145,27 @@ public class ListRewriteEvent extends RewriteEvent {
 		return null;
 	}
 	
-
-	
-	
-	public RewriteEvent insertBeforeOriginalSibling(ASTNode insertedNode, ASTNode originalListSibling) {
+	public int getIndex(ASTNode node, int kind) {
 		List listEntries= getEntries();
-		if (originalListSibling == null) {
-			return insertAtCombinedIndex(insertedNode, listEntries.size());
-		}
-		
 		for (int i= listEntries.size() - 1; i >= 0; i--) {
 			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
-			if (curr.getOriginalValue() == originalListSibling) {
-				return insertAtCombinedIndex(insertedNode, i);
+			if (((kind & OLD) != 0) && (curr.getOriginalValue() == node)) {
+				return i;
+			}
+			if (((kind & NEW) != 0) && (curr.getNewValue() == node)) {
+				return i;
 			}
 		}
-		return null;
+		return -1;
 	}
-	
-	public RewriteEvent insertBeforeNewSibling(ASTNode insertedNode, ASTNode newListSibling) {
-		List listEntries= getEntries();
-		if (newListSibling == null) {
-			return insertAtCombinedIndex(insertedNode, listEntries.size());
-		}
 		
-		for (int i= listEntries.size() - 1; i >= 0; i--) {
-			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
-			if (curr.getNewValue() == newListSibling) {
-				return insertAtCombinedIndex(insertedNode, i);
-			}
-		}
-		return null;
-	}
-	
-	public RewriteEvent insertAtOriginalIndex(ASTNode insertedNode, int insertIndex) {
-		int currIndex= 0;
-		
-		List listEntries= getEntries();
-		int nEntries= listEntries.size();
-		for (int i= 0; i < nEntries; i++) {
-			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
-			if (curr.getOriginalValue() != null) {
-				if (insertIndex == currIndex) {
-					return insertAtCombinedIndex(insertedNode, i);
-				}
-				currIndex++;
-			}
-		}
-		if (insertIndex == currIndex) {
-			return insertAtCombinedIndex(insertedNode, nEntries);
-		}
-		throw new IndexOutOfBoundsException();
-	}
-	
-	public RewriteEvent insertAtNewIndex(ASTNode insertedNode, int insertIndex) {
-		int currIndex= 0;
-		
-		List listEntries= getEntries();
-		int nEntries= listEntries.size();
-		for (int i= 0; i < nEntries; i++) {
-			RewriteEvent curr= (RewriteEvent) listEntries.get(i);
-			if (curr.getNewValue() != null) {
-				if (insertIndex == currIndex) {
-					return insertAtCombinedIndex(insertedNode, i);
-				}
-				currIndex++;
-			}
-		}
-		if (insertIndex == currIndex) {
-			return insertAtCombinedIndex(insertedNode, nEntries);
-		}
-		throw new IndexOutOfBoundsException();
-	}
-	
-	public RewriteEvent insertAtCombinedIndex(ASTNode insertedNode, int insertIndex) {
+	public RewriteEvent insert(ASTNode insertedNode, int insertIndex) {
 		NodeRewriteEvent change= new NodeRewriteEvent(null, insertedNode);
-		getEntries().add(insertIndex, change);
+		if (insertIndex != -1) {
+			getEntries().add(insertIndex, change);
+		} else {
+			getEntries().add(change);
+		}
 		return change;
 	}
 	
@@ -237,5 +186,7 @@ public class ListRewriteEvent extends RewriteEvent {
 		buf.append("\n]"); //$NON-NLS-1$
 		return buf.toString();
 	}
+
+
 	
 }

@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.ListRewriter;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -86,7 +87,8 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 			} else {
 				insertIndex= members.size();
 			}
-			rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newStub, insertIndex, null);
+			ListRewriter listRewriter= rewrite.getListRewrite(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS);
+			listRewriter.insertAt(newStub, insertIndex, null);
 
 			if (!isInDifferentCU) {
 				Name invocationName= getInvocationName();
