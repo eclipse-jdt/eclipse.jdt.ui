@@ -201,7 +201,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 			
 	// ----------- validation ----------
 			
-	/**
+	/*
 	 * Verifies the input for the package field.
 	 */
 	private IStatus packageChanged() {
@@ -239,7 +239,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 					if (pack.containsJavaResources() || !pack.hasSubpackages()) {
 						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageExists")); //$NON-NLS-1$
 					} else {
-						status.setError(NewWizardMessages.getString("NewPackageWizardPage.warning.PackageNotShown"));  //$NON-NLS-1$
+						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageNotShown"));  //$NON-NLS-1$
+					}
+				} else {
+					IPath location= pack.getResource().getLocation();
+					if (location != null && location.toFile().exists()) {
+						status.setError(NewWizardMessages.getString("NewPackageWizardPage.error.PackageExistsDifferentCase")); //$NON-NLS-1$
 					}
 				}
 			} catch (JavaModelException e) {
