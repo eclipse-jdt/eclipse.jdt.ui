@@ -18,14 +18,13 @@ public class NameMatcher {
 			k++;
 		}
 		
+		int longer= Math.max(name1len, name2len);
 		if (len > 2) {
-			int minMatch= len -1;
+			int minMatch= (longer / 2);
 			if (k >= minMatch  || i >= minMatch) {
 				return true;
 			}
 		}
-		
-		int longer= Math.max(name1len, name2len);
 		
 		return (longer - k) - i <= 2;
 	}

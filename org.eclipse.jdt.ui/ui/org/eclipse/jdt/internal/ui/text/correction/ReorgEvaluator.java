@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MoveCompilationUnitCh
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.ProblemPosition;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class ReorgEvaluator {
 	
@@ -48,24 +49,31 @@ public class ReorgEvaluator {
 		IProblem problem= problemPos.getProblem();
 		String[] args= problem.getArguments();
 		if (args.length == 1) {
-			// rename pack decl
-			String newName= args[0];
-			String label= "Rename to '" + newName + "'";
-			proposals.add(new ReplaceCorrectionProposal(cu, problemPos, label, newName));
-			
+			// correct pack decl
+			proposals.add(new CorrectPackageDeclarationProposal(cu, problemPos));
+
 			// move to pack
+			IPackageFragment currPack= (IPackageFragment) cu.getParent();
+			
 			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
-			String newPack= packDecls.length > 0 ? packDecls[0].getElementName() : "";
-						
+			String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : "";
+				
+			
 			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
-			IPackageFragment pack= root.getPackageFragment(newPack);
+			IPackageFragment newPack= root.getPackageFragment(newPackName);
+
+			String label;
+			if (newPack.isDefaultPackage()) {
+				label= "Move '" + cu.getElementName() + "' to the default package";
+			} else {
+				label= "Move '" + cu.getElementName() + "' to package '" + JavaElementLabels.getElementLabel(newPack, 0) + "'";
+			}
+
 			
-			final CompositeChange composite= new CompositeChange();
-			composite.add(new CreatePackageChange(pack));
-			composite.add(new MoveCompilationUnitChange(cu, pack));
-			
-			label= "Move to package '" + newPack + "'";
-			// rename cu
+			final CompositeChange composite= new CompositeChange(label);
+			composite.add(new CreatePackageChange(newPack));
+			composite.add(new MoveCompilationUnitChange(cu, newPack));
+
 			proposals.add(new ChangeCorrectionProposal(label, problemPos) {
 				protected Change getChange() throws CoreException {
 					return composite;

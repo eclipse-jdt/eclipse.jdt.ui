@@ -104,11 +104,18 @@ public abstract class ChangeCorrectionProposal implements ICompletionProposal {
 		return fProblemPosition;
 	}
 
-
 	/**
 	 * Gets the change element.
 	 * @return Returns a CompilationUnitChange
 	 */
 	protected abstract Change getChange() throws CoreException;
+
+	/**
+	 * Sets the display name.
+	 * @param name The name to set
+	 */
+	public void setDisplayName(String name) {
+		fName= name;
+	}
 
 }

@@ -39,25 +39,26 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		List problemPositions= fCompilationUnitEditor.getProblemPositions();
 		if (problemPositions == null)
 			return null;
-			
-		for (Iterator e = problemPositions.iterator(); e.hasNext();) {
-			ProblemPosition pp = (ProblemPosition) e.next();
-			if (pp.overlapsWith(documentOffset, 1)) {
-				return getCorrections(pp);
-			}
-		}
-
-		// to do
-		return null;
-	}
-	
-	private ICompletionProposal[] getCorrections(ProblemPosition problemPos) {
+		
 
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 		ICompilationUnit cu= manager.getWorkingCopy(fCompilationUnitEditor.getEditorInput());
 
 		ArrayList proposals= new ArrayList();
-					
+			
+		for (Iterator e = problemPositions.iterator(); e.hasNext();) {
+			ProblemPosition pp = (ProblemPosition) e.next();
+			if (pp.overlapsWith(documentOffset, 1)) {
+				collectCorrections(cu, pp, proposals);
+			}
+		}
+		if (proposals.isEmpty()) {
+			return null;
+		}
+		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
+	}
+	
+	private void collectCorrections(ICompilationUnit cu, ProblemPosition problemPos, ArrayList proposals) {
 		try {
 			int id= problemPos.getProblem().getID();
 			switch (id) {
@@ -77,22 +78,24 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					ReorgEvaluator.getWrongPackageDeclNameProposals(cu, problemPos, proposals);
 					break;
 				case IProblem.UndefinedType:
-					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, proposals);
-					break;
-				case IProblem.SuperclassNotFound:
-				case IProblem.InterfaceNotFound:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
+				case IProblem.ReturnTypeNotFound:
+					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.TYPE, proposals);
+					break;
+				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
-				case IProblem.ReturnTypeNotFound:		
+					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.CLASS, proposals);
+					break;				
+				case IProblem.InterfaceNotFound: 
+					UnknownTypeEvaluator.getTypeProposals(cu, problemPos, UnknownTypeEvaluator.INTERFACE, proposals);
+					break;	
 				default:
 					//proposals.add(new NoCorrectionProposal(problemPos));
 			}
 		} catch(CoreException e) {
 			JavaPlugin.log(e);
 		}
-		return (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
-
 	}
 
 	/*

@@ -37,7 +37,7 @@ public class UnknownMethodEvaluator {
 			String methodName= new String(selector);
 			if (!fResult.contains(methodName)) {
 				if (fNumberOfArguments == parameterTypeNames.length 
-					&& NameMatcher.isSimilarName(methodName, fMethodName)) {
+					&& NameMatcher.isSimilarName(fMethodName, methodName)) {
 						fResult.add(methodName);
 				}
 			}
@@ -75,7 +75,7 @@ public class UnknownMethodEvaluator {
 		if (elem instanceof IMember) {
 			IType parentType= (IType) JavaModelUtil.findElementOfKind(elem, IJavaElement.TYPE);
 			if (parentType != null && typeName.equals(JavaModelUtil.getFullyQualifiedName(parentType))) {
-				String label= "Create " + methodName + "(...)";
+				String label= "Create method " + methodName + "(...)";
 				proposals.add(new NewMethodCompletionProposal(parentType, problemPos, label, methodName, arguments));
 			}
 		}

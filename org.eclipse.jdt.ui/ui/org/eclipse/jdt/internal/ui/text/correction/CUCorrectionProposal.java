@@ -57,7 +57,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 		StringBuffer buf= new StringBuffer();
 		
 		try {
-			CompilationUnitChange change= (CompilationUnitChange) getChange();
+			CompilationUnitChange change= getCompilationUnitChange();
 
 			TextBuffer textBuffer= change.getPreviewTextBuffer();
 
@@ -117,5 +117,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal {
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
+
+	/**
+	 * Gets the compilationUnitChange.
+	 * @return Returns a CompilationUnitChange
+	 */
+	public CompilationUnitChange getCompilationUnitChange() throws CoreException {
+		return (CompilationUnitChange) getChange();
+	}
+
 
 }

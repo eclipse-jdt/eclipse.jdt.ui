@@ -43,10 +43,9 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	protected void addEdits(CompilationUnitChange changeElement) throws CoreException {
 		ProblemPosition problemPos= getProblemPosition();
 		
-		ICompilationUnit cu= changeElement.getCompilationUnit();
+		ICompilationUnit cu= getCompilationUnit();
 		
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-		
 		ImportEdit importEdit= new ImportEdit(cu, settings);
 
 		String content= generateStub(importEdit);
