@@ -40,7 +40,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	
 	private boolean fIsActive= false;
 	private boolean fIsPainting= false;
-	private boolean fIsModelChanging= false;
+	private boolean fIsSettingModel= false;
 	
 	private Color fColor;
 	private ITextEditor fTextEditor;
@@ -48,6 +48,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	private StyledText fTextWidget;
 	private IAnnotationModel fModel;
 	private List fProblemPositions= new ArrayList();
+
 	
 	
 	
@@ -79,16 +80,22 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 	}
 	
 	private void setModel(IAnnotationModel model) {
-		
-		
 		if (fModel != model) {
 			if (fModel != null)
 				fModel.removeAnnotationModelListener(this);
 			fModel= model;
-			if (fModel != null)
-				fModel.addAnnotationModelListener(this);
+			if (fModel != null) {
+				try {
+					fIsSettingModel= true;
+					fModel.addAnnotationModelListener(this);
+				} finally {
+					fIsSettingModel= false;
+				}
+			}
 		}
-		
+	}
+	
+	private void catchupWithModel() {	
 		if (fProblemPositions != null) {
 			fProblemPositions.clear();
 			if (fModel != null) {
@@ -105,31 +112,31 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		}
 	}
 	
+	private void updatePainting() {
+		disablePainting(true);
+		catchupWithModel();							
+		enablePainting();
+	}
+	
 	/*
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(final IAnnotationModel model) {
-		if (fTextWidget != null && !fTextWidget.isDisposed() && !fIsModelChanging) {
-			Display d= fTextWidget.getDisplay();
-			if (d != null) {
-				d.asyncExec(new Runnable() {
-					public void run() {
-						if (fTextWidget != null && !fTextWidget.isDisposed()) {
-							
-							disablePainting(true);
-							
-							try {
-								fIsModelChanging= true;
-								setModel(model);
-							} finally {
-								fIsModelChanging= false;
-							}
-							
-							enablePainting();
-						}				
-					}
-				});
-			}	
+		if (fTextWidget != null && !fTextWidget.isDisposed()) {
+			if (fIsSettingModel) {
+				// inside the ui thread -> no need for posting
+				updatePainting();
+			} else {
+				Display d= fTextWidget.getDisplay();
+				if (d != null) {
+					d.asyncExec(new Runnable() {
+						public void run() {
+							if (fTextWidget != null && !fTextWidget.isDisposed())
+								updatePainting();
+						}
+					});
+				}
+			}
 		}
 	}
 	
@@ -229,6 +236,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			fIsActive= false;
 			disablePainting(redraw);
 			setModel(null);
+			catchupWithModel();
 		}
 	}
 	
@@ -240,7 +248,6 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 			fIsActive= true;
 			IDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
 			setModel(provider.getAnnotationModel(fTextEditor.getEditorInput()));
-			enablePainting();
 		}
 	}
 
