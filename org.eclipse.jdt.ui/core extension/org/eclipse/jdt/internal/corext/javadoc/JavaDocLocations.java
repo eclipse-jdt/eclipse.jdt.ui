@@ -22,6 +22,7 @@ import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -321,6 +322,9 @@ public class JavaDocLocations {
 				varElement.setAttribute(NODE_URL, url.toExternalForm());
 				rootElement.appendChild(varElement);
 			}
+			
+			JavaDocVMInstallListener.saveVMInstallJavadocLocations(document, rootElement);
+					
 
 			Transformer transformer=TransformerFactory.newInstance().newTransformer();
 			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
@@ -372,9 +376,23 @@ public class JavaDocLocations {
 				}
 			}
 		}
+		
+		updateVMInstallJavadocLocations(cpElement);
 	}	
 	
-	
+	/**
+	 * Get the javadoc locations from vminstalls and update them if they are different to stored vm installs
+	 * @param cpElement The root node or null
+	 */
+	private static void updateVMInstallJavadocLocations(Element cpElement) {
+		// check for updates in the vm installs
+		ArrayList paths= new ArrayList(), urls= new ArrayList();
+		JavaDocVMInstallListener.collectChangedVMInstallJavadocLocations(cpElement, paths, urls);
+		for (int i= 0; i < paths.size(); i++) {
+			setJavadocBaseLocation(canonicalizedPath((IPath) paths.get(i)), (URL) urls.get(i), false);
+		}
+	}
+
 	public static void shutdownJavadocLocations() {
 		if (fgVMInstallListener == null) {
 			return;
@@ -389,6 +407,7 @@ public class JavaDocLocations {
 			boolean res= loadFromPreferences();
 			if (!res) {
 				loadOldForCompatibility();
+				updateVMInstallJavadocLocations(null); // initialize all javadoc location from VM installs
 			}
 		} finally {
 			fgVMInstallListener= new JavaDocVMInstallListener();
