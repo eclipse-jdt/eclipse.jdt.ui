@@ -59,7 +59,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * It contains UI to configure a the classpath and the output folder.
 	 * 
 	 * <p>
-	 * After constructing, a call to <code>init</code> is required
+	 * After constructing, a call to <code>init</code> is required.
 	 * </p>
 	 */	
 	public JavaCapabilityConfigurationPage() {
@@ -175,8 +175,11 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * Helper method to create and open a IProject . The project location
 	 * is configured. No natures are added.
 	 * 
+	 * @param project The handle of the project to create.
+	 * @param locationPath The location of the project.
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 * progress reporting is not desired
+	 * @throws CoreException
 	 * @since 2.1
 	 */
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
@@ -188,6 +191,8 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * 
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 * progress reporting is not desired
+	 * @throws CoreException Thrown when the configuring the Java project failed.
+	 * @throws InterruptedException Thrown when the operation has been cancelled.
 	 */
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {

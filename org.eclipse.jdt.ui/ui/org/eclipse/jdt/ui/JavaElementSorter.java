@@ -82,7 +82,9 @@ public class JavaElementSorter extends ViewerSorter {
 	
 	private MembersOrderPreferenceCache fMemberOrderCache;
 	
-	
+	/**
+	 * Constructor.
+	 */
 	public JavaElementSorter() {	
 		super(null); // delay initialization of collator
 		fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();

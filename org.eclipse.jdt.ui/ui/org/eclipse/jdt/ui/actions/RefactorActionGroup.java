@@ -52,7 +52,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
- * Action group that adds refactor actions (for example Rename..., Move..., etc)
+ * Action group that adds refactor actions (for example 'Rename', 'Move')
  * to a context menu and the global menu bar.
  * 
  * <p>

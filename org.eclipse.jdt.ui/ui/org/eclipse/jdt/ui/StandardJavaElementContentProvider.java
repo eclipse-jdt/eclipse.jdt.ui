@@ -111,16 +111,15 @@ public class StandardJavaElementContentProvider implements ITreeContentProvider,
 	}
 	
 	/**
-	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java Model
-	 * does not support the 'original' mode anymore. Therefore, this returned state of this method is now equals
-	 * to the result of {@link #getProvideMembers()}.
+	 * @deprecated Since 3.0 compilation unit children are always provided as working copies. The Java model
+	 * does not support the 'original' mode anymore. 
 	 */
 	public boolean getProvideWorkingCopy() {
 		return fProvideWorkingCopy;
 	}
 
 	/**
-	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java Model
+	 * @deprecated Since 3.0 compilation unit children are always provided from the working copy. The Java model
 	 * offers a unified world and does not support the 'original' mode anymore. 
 	 */
 	public void setProvideWorkingCopy(boolean b) {

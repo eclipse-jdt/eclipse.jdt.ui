@@ -104,8 +104,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 			
 	/**
-	 * Initializes the source folder field with a valid package fragement root.
-	 * The package fragement root is computed from the given Java element.
+	 * Initializes the source folder field with a valid package fragment root.
+	 * The package fragment root is computed from the given Java element.
 	 * 
 	 * @param elem the Java element used to compute the initial package
 	 *    fragment root used as the source folder
@@ -199,6 +199,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	/**
 	 * Returns the test selection of the current editor. <code>null</code> is returned
 	 * when the current editor does not have focus or does not return a text selection.
+	 * @return Returns the test selection of the current editor or <code>null</code>.
      *
      * @since 3.0 
 	 */
@@ -401,7 +402,8 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	/**
 	 * Sets the current source folder (model and text field) to the given package
 	 * fragment root.
-	 * 
+
+	 * @param root The new root.
 	 * @param canBeModified if <code>false</code> the source folder field can 
 	 * not be changed by the user. If <code>true</code> the field is editable
 	 */ 

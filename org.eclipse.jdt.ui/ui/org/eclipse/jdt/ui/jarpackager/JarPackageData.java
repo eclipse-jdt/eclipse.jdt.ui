@@ -61,7 +61,7 @@ public class JarPackageData {
 	private boolean fUseSourceFolderHierarchy;
 
 	/*
-	 * Projects of which files are expored will be built if true
+	 * Projects of which files are exported will be built if true
 	 * and autobuild is off.
 	 */
 	private boolean fBuildIfNeeded;
@@ -167,7 +167,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set whether files can be overwritten without warning.
+	 * Sets whether files can be overwritten without warning.
 	 * 
 	 * @param state a boolean indicating the new state
 	 */
@@ -185,7 +185,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set option to export class files and resources.
+	 * Sets option to export class files and resources.
 	 * 
 	 * @param state a boolean indicating the new state
 	 */
@@ -205,7 +205,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set option to export all output folders for the
+	 * Sets option to export all output folders for the
 	 * enclosing projects of the exported elements.
 	 * 
 	 * @param state a boolean indicating the new state
@@ -235,7 +235,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set the option to export Java source and resources.
+	 * Sets the option to export Java source and resources.
 	 * 
 	 * @param state the new state
 	 */
@@ -293,7 +293,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set the JAR file location.
+	 * Sets the JAR file location.
 	 * 
 	 * @param jarLocation a path denoting the location of the JAR file
 	 */
@@ -331,7 +331,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set whether the manifest file must be saved during export
+	 * Sets whether the manifest file must be saved during export
 	 * operation or not.
 	 * 
 	 * @param state the new state
@@ -355,7 +355,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set whether a previously generated manifest should be reused.
+	 * Sets whether a previously generated manifest should be reused.
 	 * 
 	 * @param state the new state
 	 */
@@ -377,7 +377,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set the location of a user-defined manifest file.
+	 * Sets the location of a user-defined manifest file.
 	 * 
 	 * @param manifestLocation the path of the user-define manifest location
 	 */
@@ -410,7 +410,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set the manifest version.
+	 * Sets the manifest version.
 	 * 
 	 * @param manifestVersion the string which contains the manifest version
 	 */
@@ -428,7 +428,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set whether a manifest must be included in the JAR.
+	 * Sets whether a manifest must be included in the JAR.
 	 * 
 	 * @param state the new state
 	 */
@@ -448,7 +448,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set the manifest provider.
+	 * Sets the manifest provider.
 	 * 
 	 * @param manifestProvider the ManifestProvider to set
 	 */
@@ -464,7 +464,7 @@ public class JarPackageData {
 	 * manifest file is generated.
 	 * </p>
 	 * 
-	 * @return <code>true</code> if the JAR must be selead
+	 * @return <code>true</code> if the JAR must be sealed
 	 * @see #isManifestGenerated()
 	 */
 	public boolean isJarSealed() {
@@ -472,7 +472,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set whether the JAR itself is sealed.
+	 * Sets whether the JAR itself is sealed.
 	 * The manifest will contain the following entry:
 	 * Sealed: true
 	 * <p>
@@ -480,7 +480,7 @@ public class JarPackageData {
 	 * manifest file is generated.
 	 * </p>
 	 * 
-	 * @param sealJar <code>true</code> if the JAR must be selead
+	 * @param sealJar <code>true</code> if the JAR must be sealed
 	 * @see #isManifestGenerated()
 	 */
 	public void setSealJar(boolean sealJar) {
@@ -488,7 +488,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set the packages which should be sealed.
+	 * Sets the packages which should be sealed.
 	 * The following entry will be added to the manifest file for each package:
 	 * Name: <name of the package>
 	 * Sealed: true
@@ -694,7 +694,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Set whether errors are logged.
+	 * Sets whether errors are logged.
 	 * <p>
 	 * The export operation decides where and
 	 * how the errors are logged.
@@ -722,7 +722,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set if warnings are logged.
+	 * Sets if warnings are logged.
 	 * <p>
 	 * The export operation decides where and
 	 * how the warnings are logged.
@@ -745,7 +745,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set if compilation units with errors are exported.
+	 * Sets if compilation units with errors are exported.
 	 * 
 	 * @param exportErrors <code>true</code> if CUs with errors should be exported
 	 */
@@ -763,7 +763,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set if compilation units with warnings are exported.
+	 * Sets if compilation units with warnings are exported.
 	 * 
 	 * @param exportWarnings <code>true</code> if CUs with warnings should be exported
 	 */
@@ -782,7 +782,7 @@ public class JarPackageData {
 	}
 	
 	/**
-	 * Set if a build should be performed before exporting files.
+	 * Sets if a build should be performed before exporting files.
 	 * This flag is only considered if auto-build is off.
 	 * 
 	 * @param buildIfNeeded a boolean telling if a build should be performed
@@ -811,7 +811,7 @@ public class JarPackageData {
 	 * 
 	 * @param	javaFile a .java file
 	 * @return	an array with class files or <code>null</code> to used the default strategy
-	 * @throws	CoreException	if find failed, e.g. I/O error or resource out of synch
+	 * @throws	CoreException	if find failed, e.g. I/O error or resource out of sync
 	 * @see	IJarExportRunnable#getStatus()
 	 */
 	public IFile[] findClassfilesFor(IFile javaFile) throws CoreException {
@@ -825,7 +825,6 @@ public class JarPackageData {
 	 *				 	or <code>null</code> if "false/no/cancel" is the answer
 	 * 					and no dialog should be shown
 	 * @return a JarWriter
-	 * @throws CoreException if the {@link JarWriter} could not be created
 	 * @see JarWriter
 	 */
 	public JarWriter createJarWriter(Shell parent) throws CoreException {
@@ -911,7 +910,7 @@ public class JarPackageData {
 
 	/**
 	 * Tells whether the specified manifest main class is valid.
-	 * 
+	 *
 	 * @param context the {@link IRunnableContext}
 	 * @return <code>true</code> if a main class is specified and valid
 	 */

@@ -34,12 +34,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
 public class JavaElementLabelProvider extends LabelProvider {
 	
 	/**
-	 * Flag (bit mask) indicating that methods labels include the method return type. (appended)
+	 * Flag (bit mask) indicating that methods labels include the method return type (appended).
 	 */
 	public final static int SHOW_RETURN_TYPE=				0x001;
 	
 	/**
-	 * Flag (bit mask) indicating that method label include method parameter types.
+	 * Flag (bit mask) indicating that method label include parameter types.
 	 */
 	public final static int SHOW_PARAMETERS=				0x002;
 	
@@ -64,7 +64,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_OVERLAY_ICONS=			0x010;
 
 	/**
-	 * Flag (bit mask) indicating thata field label should include the declared type.
+	 * Flag (bit mask) indicating that a field label should include the declared type.
 	 */
 	public final static int SHOW_TYPE=					0x020;
 
@@ -88,24 +88,24 @@ public class JavaElementLabelProvider extends LabelProvider {
 	public final static int SHOW_SMALL_ICONS= 			0x100;
 	
 	/**
-	 * Flag (bit mask) indicating that the packagefragment roots from variables should
+	 * Flag (bit mask) indicating that the package fragment roots from class path variables should
 	 * be rendered with the variable in the name
 	 */
 	public final static int SHOW_VARIABLE= 			0x200;
 	
 	/**
-	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
+	 * Flag (bit mask) indicating that compilation units, class files, types, declarations and members
 	 * should be rendered qualified.
-	 * Examples: java.lang.String, java.util.Vector.size()
+	 * Examples: <code>java.lang.String</code>, <code>java.util.Vector.size()</code>
 	 * 
 	 * @since 2.0
 	 */
 	public final static int SHOW_QUALIFIED=				0x400;
 
 	/**
-	 * Flag (bit mask) indicating that Complation Units, Class Files, Types, Declarations and Members
-	 * should be rendered qualified. The qualifcation is appended
-	 * Examples: String - java.lang, size() - java.util.Vector
+	 * Flag (bit mask) indicating that compilation units, class files, types, declarations and members
+	 * should be rendered qualified.The qualification is appended.
+	 * Examples: <code>String - java.lang</code>, <code>size() - java.util.Vector</code>
 	 * 
 	 * @since 2.0
 	 */

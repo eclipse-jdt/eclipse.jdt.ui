@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Creates a Java Doc Stubs for the selected members.
+ * Create Javadoc comment stubs for the selected members.
  * <p>
  * Will open the parent compilation unit in a Java editor. The result is 
  * unsaved, so the user can decide if the changes are acceptable.

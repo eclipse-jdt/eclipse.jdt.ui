@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 /**
- * Interface to define the processor ids provided by the JDT refactoring.
+ * Interface to define the processor IDs provided by the JDT refactoring.
  * 
  * @since 3.0
  */
@@ -30,67 +30,67 @@ public interface IRefactoringProcessorIds {
 
 	/**
 	 * Processor ID of the rename Java project processor
-	 * (value <code>"org.eclipse.jdt.ui.renameJavaProjectProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameJavaProjectProcessor"</code>).
 	 */
 	public static String RENAME_JAVA_PROJECT_PROCESSOR= RenameJavaProjectProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename source folder
-	 * (value <code>"org.eclipse.jdt.ui.renameSourceFolderProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameSourceFolderProcessor"</code>).
 	 */
 	public static String RENAME_SOURCE_FOLDER_PROCESSOR= RenameSourceFolderProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename package fragment processor
-	 * (value <code>"org.eclipse.jdt.ui.renamePackageProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renamePackageProcessor"</code>).
 	 */
 	public static String RENAME_PACKAGE_FRAGMENT_PROCESSOR= RenamePackageProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename compilation unit processor
-	 * (value <code>"org.eclipse.jdt.ui.renameCompilationUnitProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameCompilationUnitProcessor"</code>).
 	 */
 	public static String RENAME_COMPILATION_UNIT_PROCESSOR= RenameCompilationUnitProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename type processor
-	 * (value <code>"org.eclipse.jdt.ui.renameTypeProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameTypeProcessor"</code>).
 	 */
 	public static String RENAME_TYPE_PROCESSOR= RenameTypeProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename method processor
-	 * (value <code>"org.eclipse.jdt.ui.renameMethodProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameMethodProcessor"</code>).
 	 */
 	public static String RENAME_METHOD_PROCESSOR= RenameMethodProcessor.IDENTIFIER;
 	
 	/**
-	 * Processor ID of the rename type processor
-	 * (value <code>"org.eclipse.jdt.ui.renameFieldProcessor"</code>)
+	 * Processor ID of the rename field processor
+	 * (value <code>"org.eclipse.jdt.ui.renameFieldProcessor"</code>).
 	 */
 	public static String RENAME_FIELD_PROCESSOR= RenameFieldProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the rename resource processor
-	 * (value <code>"org.eclipse.jdt.ui.renameResourceProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.renameResourceProcessor"</code>).
 	 */
 	public static String RENAME_RESOURCE_PROCESSOR= RenameResourceProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the move resource processor
-	 * (value <code>"org.eclipse.jdt.ui.MoveProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.MoveProcessor"</code>).
 	 */
 	public static String MOVE_PROCESSOR= JavaMoveProcessor.IDENTIFIER;
 	
 	/**
 	 * Processor ID of the move static member processor
-	 * (value <code>"org.eclipse.jdt.ui.MoveStaticMemberProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.MoveStaticMemberProcessor"</code>).
 	 */
 	public static String MOVE_STATIC_MEMBERS_PROCESSOR= "org.eclipse.jdt.ui.MoveStaticMemberProcessor"; //$NON-NLS-1$
 	
 	/**
 	 * Processor ID of the delete resource processor
-	 * (value <code>"org.eclipse.jdt.ui.DeleteProcessor"</code>)
+	 * (value <code>"org.eclipse.jdt.ui.DeleteProcessor"</code>).
 	 */
 	public static String DELETE_PROCESSOR= JavaDeleteProcessor.IDENTIFIER;
 }

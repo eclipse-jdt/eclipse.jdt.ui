@@ -80,7 +80,7 @@ public class PreferenceConstants {
 	/**
 	 * A named preference that defines the pattern used for package name compression.
 	 * <p>
-	 * Value is of type <code>String</code>. For example foe the given package name 'org.eclipse.jdt' pattern
+	 * Value is of type <code>String</code>. For example for the given package name 'org.eclipse.jdt' pattern
 	 * '.' will compress it to '..jdt', '1~' to 'o~.e~.jdt'.
 	 * </p>
 	 */	
@@ -148,7 +148,7 @@ public class PreferenceConstants {
 	public static final String APPEARANCE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.visibility.order"; //$NON-NLS-1$
 	
 	/**
-	 * A named preferences that controls if java elements are also sorted by 
+	 * A named preferences that controls if Java elements are also sorted by 
 	 * visibility.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -268,7 +268,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 * @deprecated New code template story: user can
-	 * specify the new type code template.
+	 * specify the new file code template.
 	 */
 	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 	
@@ -313,7 +313,7 @@ public class PreferenceConstants {
 	public static final String ORGIMPORTS_IGNORELOWERCASE= "org.eclipse.jdt.ui.ignorelowercasenames"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that speficies whether children of a compilation unit are shown in the package explorer.
+	 * A named preference that specifies whether children of a compilation unit are shown in the package explorer.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -409,7 +409,7 @@ public class PreferenceConstants {
 	public static final String SRCBIN_BINNAME= "org.eclipse.jdt.ui.wizards.srcBinFoldersBinName"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. An library 
+	 * A named preference that holds a list of possible JRE libraries used by the New Java Project wizard. A library 
 	 * consists of a description and an arbitrary number of <code>IClasspathEntry</code>s, that will represent the 
 	 * JRE on the new project's class path. 
 	 * <p>
@@ -533,7 +533,7 @@ public class PreferenceConstants {
 	public static final String JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that defines whether hint to make hover sticky should be shown.
+	 * A named preference that defines whether the hint to make hover sticky should be shown.
 	 *
 	 * @see JavaUI
 	 * @since 3.0
@@ -1023,7 +1023,7 @@ public class PreferenceConstants {
 	public final static String EDITOR_SMART_PASTE= "smartPaste"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether 'paste' should update the imports
+	 * A named preference that controls whether 'paste' should update the imports.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1946,7 +1946,7 @@ public class PreferenceConstants {
 	public static final String EDITOR_DISABLE_OVERWRITE_MODE= "disable_overwrite_mode"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls the "smart semicolon" smart typing handler
+	 * A named preference that controls the "smart semicolon" smart typing handler.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -1965,7 +1965,7 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_BACKSPACE= "smart_backspace"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that controls the "smart opening brace" smart typing handler
+	 * A named preference that controls the "smart opening brace" smart typing handler.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2168,7 +2168,7 @@ public class PreferenceConstants {
 	public final static String FORMATTER_COMMENT_SEPARATEROOTTAGS= "comment_separate_root_tags"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that controls whether blank lines are cleared during formatting
+	 * A named preference that controls whether blank lines are cleared during formatting.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -2206,7 +2206,7 @@ public class PreferenceConstants {
 	public final static String CODEASSIST_AUTOACTIVATION= "content_assist_autoactivation"; //$NON-NLS-1$
 
 	/**
-	 * A name preference that holds the auto activation delay time in milli seconds.
+	 * A name preference that holds the auto activation delay time in milliseconds.
 	 * <p>
 	 * Value is of type <code>Integer</code>.
 	 * </p>
@@ -2452,10 +2452,11 @@ public class PreferenceConstants {
 	public static final String REFACTOR_SAVE_ALL_EDITORS= "Refactoring.savealleditors"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that controls a reduced search menu is used in the java editors.
+	 * A named preference that controls a reduced search menu is used in the Java editors.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @since 3.0
 	 */
 	public static final String SEARCH_USE_REDUCED_MENU= "Search.usereducemenu"; //$NON-NLS-1$
 
@@ -2882,7 +2883,7 @@ public class PreferenceConstants {
 	
 	/**
 	 * Decodes an encoded JRE library and returns its description string.
-	 * 
+	 * @param encodedLibrary the encoded library
 	 * @return the description of an encoded JRE library
 	 * 
 	 * @see #encodeJRELibrary(String, IClasspathEntry[])
@@ -2893,9 +2894,9 @@ public class PreferenceConstants {
 	
 	/**
 	 * Decodes an encoded JRE library and returns its class path entries.
+	 * @param encodedLibrary the encoded library
+	 * @return the array of classpath entries of an encoded JRE library.
 	 * 
-	 * @param encodedLibrary the encoded JRE library
-	 * @return the array of class path entries of an encoded JRE library.
 	 * @see #encodeJRELibrary(String, IClasspathEntry[])
 	 */
 	public static IClasspathEntry[] decodeJRELibraryClasspathEntries(String encodedLibrary) {

@@ -32,8 +32,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ExtractConstantRefactori
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
- * Extracts an expression into a new local variable and replaces all occurrences of
- * the expression with the local variable.
+ * Extracts an expression into a constant field and replaces all occurrences of
+ * the expression with the new constant.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

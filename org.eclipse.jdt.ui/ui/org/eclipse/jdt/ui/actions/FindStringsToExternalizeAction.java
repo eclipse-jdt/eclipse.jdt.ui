@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
- * Find all Strings in a package or project that are not externalized yet.
+ * Find all strings in a package or project that are not externalized yet.
  * <p>
  * The action is applicable to selections containing projects or packages.
  * 

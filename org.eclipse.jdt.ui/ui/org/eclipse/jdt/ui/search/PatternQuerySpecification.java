@@ -32,17 +32,17 @@ public class PatternQuerySpecification extends QuerySpecification {
 
 	/**
 	 * @param pattern
-	 *            The string that the query should search for
+	 *            The string that the query should search for.
 	 * @param searchFor
-	 *            What kind of <code>IJavaElement</code> the query should search for
+	 *            What kind of <code>IJavaElement</code> the query should search for.
 	 * @param caseSensitive
-	 *            Whether the query should be case sensitive
+	 *            Whether the query should be case sensitive.
 	 * @param limitTo
-	 *            The kind of occurrence the query should search for
+	 *            The kind of occurrence the query should search for.
 	 * @param scope
-	 *            The scope to search in
+	 *            The scope to search in.
 	 * @param scopeDescription
-	 *            A human readable description of the search scope
+	 *            A human readable description of the search scope.
 	 * 
 	 * @see org.eclipse.jdt.core.search.SearchPattern#createPattern(java.lang.String, int, int, int)
 	 */
@@ -75,7 +75,7 @@ public class PatternQuerySpecification extends QuerySpecification {
 	 * 
 	 * @return The kind of <code>IJavaElement</code> to search for.
 	 * 
-	 *@see org.eclipse.jdt.core.search.IJavaSearchConstants#TYPE, for example
+	 * @see org.eclipse.jdt.core.search.IJavaSearchConstants
 	 */
 	public int getSearchFor() {
 		return fSearchFor;

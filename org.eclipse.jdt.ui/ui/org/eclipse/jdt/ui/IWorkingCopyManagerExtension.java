@@ -16,7 +16,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
- * Extension interface for <code>IWorkingCopyManager</code>.
+ * Extension interface for {@link IWorkingCopyManager}.
  * @since 2.1
  */
 public interface IWorkingCopyManagerExtension {

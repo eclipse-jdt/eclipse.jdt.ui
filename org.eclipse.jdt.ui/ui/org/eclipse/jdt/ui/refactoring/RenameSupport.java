@@ -78,7 +78,7 @@ public class RenameSupport {
 	 * 
 	 * @return the result of the light weight precondition checking.
 	 * 
-	 * @throws if an unexpected exception occurs while performing the checking.
+	 * @throws CoreException if an unexpected exception occurs while performing the checking.
 	 * 
 	 * @see #openDialog(Shell)
 	 * @see #perform(Shell, IRunnableContext)
@@ -118,9 +118,9 @@ public class RenameSupport {
 	 * </p>
 	 * 
 	 * @param parent a shell used as a parent for the error dialog.
-	 * @param context a <tt>IRunnableContext</tt> to execute the operation.
+	 * @param context a {@link IRunnableContext} to execute the operation.
 	 * 
-	 * @throws InterruptedException if the operation has been canceled by the
+	 * @throws InterruptedException if the operation has been cancelled by the
 	 * user.
 	 * @throws InvocationTargetException if an error occurred while executing the
 	 * operation.
@@ -150,7 +150,7 @@ public class RenameSupport {
 	public static final int UPDATE_REFERENCES= 1 << 0;
 	
 	/** 
-     * Flag indicating that Java doc comments are to be updated as well.
+     * Flag indicating that Javadoc comments are to be updated as well.
 	 * @deprecated use UPDATE_REFERENCES or UPDATE_TEXTUAL_MATCHES or both.
      */
 	public static final int UPDATE_JAVADOC_COMMENTS= 1 << 1;
@@ -184,16 +184,16 @@ public class RenameSupport {
 	}
 
 	/**
-	 * Creates a new rename support for the given <tt>IJavaProject</tt>.
+	 * Creates a new rename support for the given {@link IJavaProject}.
 	 * 
-	 * @param project the <tt>IJavaProject</tt> to be renamed.
+	 * @param project the {@link IJavaProject} to be renamed.
 	 * @param newName the project's new name. <code>null</code> is a valid
 	 * value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
 		RenameProcessor processor= new RenameJavaProjectProcessor(project);
@@ -201,14 +201,14 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>IPackageFragmentRoot</tt>.
+	 * Creates a new rename support for the given {@link IPackageFragmentRoot}.
 	 * 
-	 * @param root the <tt>IPackageFragmentRoot</tt> to be renamed.
-	 * @param newName the package fragment roor's new name. <code>null</code> is
+	 * @param root the {@link IPackageFragmentRoot} to be renamed.
+	 * @param newName the package fragment root's new name. <code>null</code> is
 	 * a valid value indicating that no new name is provided.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
 		RenameProcessor processor= new RenameSourceFolderProcessor(root);
@@ -216,17 +216,17 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>IPackageFragment</tt>.
+	 * Creates a new rename support for the given {@link IPackageFragment}.
 	 * 
-	 * @param fragment the <tt>IPackageFragment</tt> to be renamed.
-	 * @param newName the package fragement's new name. <code>null</code> is a
+	 * @param fragment the {@link IPackageFragment} to be renamed.
+	 * @param newName the package fragment's new name. <code>null</code> is a
 	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
 	 * or their bitwise OR, or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IPackageFragment fragment, String newName, int flags) throws CoreException {
 		RenameProcessor processor= new RenamePackageProcessor(fragment);
@@ -234,17 +234,17 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>ICompilationUnit</tt>.
+	 * Creates a new rename support for the given {@link ICompilationUnit}.
 	 * 
-	 * @param unit the <tt>ICompilationUnit</tt> to be renamed.
+	 * @param unit the {@link ICompilationUnit} to be renamed.
 	 * @param newName the compilation unit's new name. <code>null</code> is a
 	 * valid value indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
 	 * or their bitwise OR, or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(ICompilationUnit unit, String newName, int flags) throws CoreException {
 		RenameProcessor processor= new RenameCompilationUnitProcessor(unit);
@@ -252,18 +252,17 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>IType</tt>.
+	 * Creates a new rename support for the given {@link IType}.
 	 * 
-	 * @param type the <tt>IType</tt> to be renamed.
+	 * @param type the {@link IType} to be renamed.
 	 * @param newName the type's new name. <code>null</code> is a valid value
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
-	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, and <code>UPDATE_TEXTUAL_MATCHES</code>,
 	 * or their bitwise OR, or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IType type, String newName, int flags) throws CoreException {
 		RenameProcessor processor= new RenameTypeProcessor(type);
@@ -271,16 +270,16 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>IMethod</tt>.
+	 * Creates a new rename support for the given {@link IMethod}.
 	 * 
-	 * @param method the <tt>IMethod</tt> to be renamed.
+	 * @param method the {@link IMethod} to be renamed.
 	 * @param newName the method's new name. <code>null</code> is a valid value
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IMethod method, String newName, int flags) throws CoreException {
 		RenameProcessor processor;
@@ -293,18 +292,18 @@ public class RenameSupport {
 	}
 	
 	/**
-	 * Creates a new rename support for the given <tt>IField</tt>.
+	 * Creates a new rename support for the given {@link IField}.
 	 * 
-	 * @param method the <tt>IField</tt> to be renamed.
+	 * @param field the {@link IField} to be renamed.
 	 * @param newName the field's new name. <code>null</code> is a valid value
 	 * indicating that no new name is provided.
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code>, <code>UPDATE_TEXTUAL_MATCHES</code>,
 	 * </code>UPDATE_GETTER_METHOD</code>, and </code>UPDATE_SETTER_METHOD</code>,
 	 * or their bitwise OR, or <code>NONE</code>.
-	 * @return the <tt>RenameSupport</tt>.
+	 * @return the {@link RenameSupport}.
 	 * @throws CoreException if an unexpected error occurred while creating
-	 * the <tt>RenameSupport</tt>.
+	 * the {@link RenameSupport}.
 	 */
 	public static RenameSupport create(IField field, String newName, int flags) throws CoreException {
 		RenameFieldProcessor processor= new RenameFieldProcessor(field);

@@ -58,7 +58,7 @@ public class JarWriter {
 	 * @param parent			the shell used to display question dialogs,
 	 *				 			or <code>null</code> if "false/no/cancel" is the answer
 	 * 							and no dialog should be shown
-	 * @throws	CoreException	to signal any other unusal termination.
+	 * @throws	CoreException	to signal any other unusual termination.
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
@@ -86,7 +86,7 @@ public class JarWriter {
 	/**
 	 * Closes the archive and does all required cleanup.
 	 *
-	 * @throws	CoreException	to signal any other unusal termination.
+	 * @throws	CoreException	to signal any other unusual termination.
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */
@@ -105,7 +105,7 @@ public class JarWriter {
 	 *
 	 * @param resource			the file to be written
 	 * @param destinationPath	the path for the file inside the archive
-	 * @throws	CoreException	to signal any other unusal termination.
+	 * @throws	CoreException	to signal any other unusual termination.
 	 * 								This can also be used to return information
 	 * 								in the status object.
 	 */

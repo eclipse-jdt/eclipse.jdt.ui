@@ -75,7 +75,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Fomats all selected compilertion units
+ * Formats the code of the compilation units contained in the selection.
  * <p>
  * The action is applicable to selections containing elements of
  * type <code>ICompilationUnit</code>, <code>IPackage
@@ -274,7 +274,8 @@ public class FormatAllAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Perform format all on the given compilation units
+	 * Perform format all on the given compilation units.
+	 * @param cus The compilation units to format.
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		try {

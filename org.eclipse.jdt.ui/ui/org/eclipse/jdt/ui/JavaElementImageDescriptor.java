@@ -34,38 +34,38 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	
-	/** Flag to render the abstract adornment */
+	/** Flag to render the abstract adornment. */
 	public final static int ABSTRACT= 		0x001;
 	
-	/** Flag to render the final adornment */
+	/** Flag to render the final adornment. */
 	public final static int FINAL=			0x002;
 	
-	/** Flag to render the synchronized adornment */
+	/** Flag to render the synchronized adornment. */
 	public final static int SYNCHRONIZED=	0x004;
 	
-	/** Flag to render the static adornment */
+	/** Flag to render the static adornment. */
 	public final static int STATIC=			0x008;
 	
-	/** Flag to render the runnable adornment */
+	/** Flag to render the runnable adornment. */
 	public final static int RUNNABLE= 		0x010;
 	
-	/** Flag to render the waring adornment */
+	/** Flag to render the warning adornment. */
 	public final static int WARNING=			0x020;
 	
-	/** Flag to render the error adornment */
+	/** Flag to render the error adornment. */
 	public final static int ERROR=			0x040;
 	
-	/** Flag to render the 'override' adornment */
+	/** Flag to render the 'override' adornment. */
 	public final static int OVERRIDES= 		0x080;
 	
-	/** Flag to render the 'implements' adornment */
+	/** Flag to render the 'implements' adornment. */
 	public final static int IMPLEMENTS= 		0x100;
 	
-	/** Flag to render the 'constructor' adornment */
+	/** Flag to render the 'constructor' adornment. */
 	public final static int CONSTRUCTOR= 	0x200;
 	
 	/**
-	 * Flag to render the 'deprecated' adornment
+	 * Flag to render the 'deprecated' adornment.
 	 * @since 3.0
 	 */
 	public final static int DEPRECATED= 	0x400;	
@@ -98,7 +98,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * </code>ERROR<code>, </code>OVERRIDDES<code>, <code>IMPLEMENTS</code>, <code>CONSTRUCTOR</code>,
 	 * <code>DEPRECATED</code>,  or any combination of those.
 	 * 
-	 * @param adornments the image descritpors adornments
+	 * @param adornments the image descriptors adornments
 	 */
 	public void setAdornments(int adornments) {
 		Assert.isTrue(adornments >= 0);

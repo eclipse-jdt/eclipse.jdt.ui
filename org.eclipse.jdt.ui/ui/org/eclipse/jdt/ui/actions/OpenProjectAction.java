@@ -47,7 +47,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * Action to open a closed project. Action either opens the closed projects
- * provided by the strucutured selection or present a dialog from which the
+ * provided by the structured selection or presents a dialog from which the
  * user can select the projects to be opened.
  * 
  * <p>

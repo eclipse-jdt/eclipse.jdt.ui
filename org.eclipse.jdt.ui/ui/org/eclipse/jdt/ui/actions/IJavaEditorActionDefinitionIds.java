@@ -90,7 +90,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 
 	/**
 	 * Action definition ID of the edit -> content assist complete prefix action
-	 * Value: <code>"org.eclipse.jdt.ui.edit.text.java.complete.prefix"</code>).
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.complete.prefix"</code>).
 	 * @since 3.0
 	 */
 	public static final String CONTENT_ASSIST_COMPLETE_PREFIX= "org.eclipse.jdt.ui.edit.text.java.complete.prefix"; //$NON-NLS-1$
@@ -175,8 +175,8 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String FORMAT= "org.eclipse.jdt.ui.edit.text.java.format"; //$NON-NLS-1$
 	
 	/**
-	 * Action definition id of the java quick format action.
-	 * Value: <code>"org.eclipse.jdt.ui.edit.text.java.quick.format"</code>
+	 * Action definition id of the java quick format action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.quick.format"</code>).
 	 * @since 3.0
 	 */
 	public static final String QUICK_FORMAT= "org.eclipse.jdt.ui.edit.text.java.quick.format"; //$NON-NLS-1$
@@ -403,7 +403,7 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String PROMOTE_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.promote.local.variable"; //$NON-NLS-1$
 
 	/**
-	 * Action definition ID of the refactor -> convert anonynous to nested action
+	 * Action definition ID of the refactor -> convert anonymous to nested action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"</code>).
 	 * 
 	 * @since 2.1
@@ -570,14 +570,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	// miscellaneous
 	
 	/**
-	 * Action definition ID of the toggle presentation toolbar button action
+	 * Action definition ID of the toggle presentation tool bar button action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.presentation"</code>).
 	 * @deprecated as of 3.0 replaced by {@link org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds#TOGGLE_SHOW_SELECTED_ELEMENT_ONLY}
 	 */
 	public static final String TOGGLE_PRESENTATION= "org.eclipse.jdt.ui.edit.text.java.toggle.presentation"; //$NON-NLS-1$
 	
 	/**
-	 * Action definition ID of the toggle text hover toolbar button action
+	 * Action definition ID of the toggle text hover tool bar button action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.text.hover"</code>).
 	 */
 	public static final String TOGGLE_TEXT_HOVER= "org.eclipse.jdt.ui.edit.text.java.toggle.text.hover"; //$NON-NLS-1$
@@ -590,8 +590,8 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String REMOVE_OCCURRENCE_ANNOTATIONS= "org.eclipse.jdt.ui.edit.text.remove.occurrence.annotations";  //$NON-NLS-1$
 
 	/**
-	 * Action definition id of toggle mark occurrences action.
-	 * Value: <code>"org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"</code>
+	 * Action definition id of toggle mark occurrences action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"</code>).
 	 * @since 3.0
 	 */
 	public static final String TOGGLE_MARK_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"; //$NON-NLS-1$

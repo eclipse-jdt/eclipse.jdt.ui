@@ -19,7 +19,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
  *
  * Clients may implement this interface.
  * 
- * @see org.eclipse.jdt.ui.jarpackager.JarPackageData#createJarExportRunnable(Shell)
+ * @see org.eclipse.jdt.ui.jarpackager.JarPackageData#createJarExportRunnable(org.eclipse.swt.widgets.Shell)
  * @see org.eclipse.core.resources.IWorkspaceRunnable
  * @since 2.0
  */

@@ -63,7 +63,7 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE= JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
 
 	/**
-	 * Key to access the shared image or image descriptor for a library (class path container)
+	 * Key to access the shared image or image descriptor for a library (class path container).
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_LIBRARY= JavaPluginImages.IMG_OBJS_LIBRARY;
@@ -86,7 +86,7 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_EMPTY_PACKAGE= JavaPluginImages.IMG_OBJS_EMPTY_PACKAGE;
 
 	/**
-	 * Key to access the shared image or image descriptor for an logical package.
+	 * Key to access the shared image or image descriptor for a logical package.
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_LOGICAL_PACKAGE= JavaPluginImages.IMG_OBJS_LOGICAL_PACKAGE;
@@ -103,7 +103,7 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_CLASS= JavaPluginImages.IMG_OBJS_CLASS;
 	
 	/**
-	 * Key to access the shared image or image descriptor for a class in the default package.
+	 * Key to access the shared image or image descriptor for a class with default visibility.
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_CLASS_DEFAULT= JavaPluginImages.IMG_OBJS_CLASS_DEFAULT;
@@ -138,7 +138,7 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_INTERFACE= JavaPluginImages.IMG_OBJS_INTERFACE;
 	
 	/**
-	 * Key to access the shared image or image descriptor for a interface with default visibility.
+	 * Key to access the shared image or image descriptor for an interface with default visibility.
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_INTERFACE_DEFAULT= JavaPluginImages.IMG_OBJS_INTERFACE_DEFAULT;
@@ -150,7 +150,7 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_INNER_INTERFACE_PUBLIC= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_PUBLIC;
 	
 	/**
-	 * Key to access the shared image or image descriptor for a inner interface with default visibility.
+	 * Key to access the shared image or image descriptor for an inner interface with default visibility.
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_INNER_INTERFACE_DEFAULT= JavaPluginImages.IMG_OBJS_INNER_INTERFACE_DEFAULT;

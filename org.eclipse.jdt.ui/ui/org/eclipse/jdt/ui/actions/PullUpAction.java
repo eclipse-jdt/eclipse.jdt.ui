@@ -48,7 +48,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
  * Action to pull up method and fields into a superclass.
  * <p>
  * Action is applicable to selections containing elements of
- * type <code>IField</code> and <code>IMethod</code>
+ * type <code>IField</code> and <code>IMethod</code>.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

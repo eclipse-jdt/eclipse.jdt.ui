@@ -18,8 +18,8 @@ import org.eclipse.ui.PartInitException;
  * This interface serves to display elements that a search participant has contributed to a search
  * result.
  * <p>
- * Each <code>IMatchPresentation</code> is associated with a particular <code>IQueryParticipant</code>. The IMatchPresentation
- * will only be asked to handle elements and matches which its <code>IQueryParticipant</code> contributed to the 
+ * Each {@link IMatchPresentation} is associated with a particular {@link IQueryParticipant}. The {@link IMatchPresentation}
+ * will only be asked to handle elements and matches which its {@link IQueryParticipant} contributed to the 
  * search result. If two search participants report matches against the same element, one of them will
  * be chosen to handle the element.
  * </p>
@@ -35,7 +35,7 @@ public interface IMatchPresentation {
 	 * will call this method when it needs to render elements and will dispose the 
 	 * label providers when it is done with them. This method may therefore be called
 	 * multiple times.
-	 * @return A label provider for elements found by the corresponding query participant
+	 * @return A label provider for elements found by the corresponding query participant.
 	 */
 	ILabelProvider createLabelProvider();
 	/**
@@ -48,15 +48,15 @@ public interface IMatchPresentation {
 	 * should have be activated. Otherwise the focus should not be changed.
 	 * 
 	 * @param match
-	 *            The match to show
+	 *            The match to show.
 	 * @param currentOffset
-	 *            The current start offset of the match
+	 *            The current start offset of the match.
 	 * @param currentLength
-	 *            The current length of the selection
+	 *            The current length of the selection.
 	 * @param activate
-	 * 			  Whether to activate the editor the match is shown in
+	 * 			  Whether to activate the editor the match is shown in.
 	 * @throws PartInitException
-	 *             If an editor can't be opened
+	 *             If an editor can't be opened.
 	 */
 	void showMatch(Match match, int currentOffset, int currentLength, boolean activate) throws PartInitException;
 }

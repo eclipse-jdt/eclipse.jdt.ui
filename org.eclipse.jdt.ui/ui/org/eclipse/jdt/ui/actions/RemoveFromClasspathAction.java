@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 /**
  * Action to remove package fragment roots from the classpath of its parent
  * project. Currently, the action is applicable to selections containing
- * not-external archives (JAR or zip).
+ * non-external archives (JAR or zip).
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

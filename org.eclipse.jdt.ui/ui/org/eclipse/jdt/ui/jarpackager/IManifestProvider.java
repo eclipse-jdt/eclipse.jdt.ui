@@ -28,6 +28,7 @@ public interface IManifestProvider {
 	 * Creates a manifest as defined by the <code>JarPackage</code>.
 	 * 
 	 * @param	jarPackage		the JAR package specification
+	 * @return  the created manifest
 	 * @throws	CoreException	if access to any resource described by the JAR package has failed
 	 */	
 	Manifest create(JarPackageData jarPackage) throws CoreException;
@@ -36,6 +37,7 @@ public interface IManifestProvider {
 	 * Creates a default manifest.
 	 * 
 	 * @param manifestVersion	a string denoting the manifest version
+	 * @return the created manifest
 	 */	
 	Manifest createDefault(String manifestVersion);
 }

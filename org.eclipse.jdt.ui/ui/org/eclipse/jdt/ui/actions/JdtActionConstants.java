@@ -115,7 +115,7 @@ public class JdtActionConstants {
 	public static final String TOGGLE_COMMENT= "org.eclipse.jdt.ui.actions.ToggleComment"; //$NON-NLS-1$
 	
 	/**
-	 * Source menu: name of standard Comment global action
+	 * Source menu: name of standard Block Comment global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.AddBlockComment"</code>).
 	 * 
 	 * @since 3.0
@@ -123,7 +123,7 @@ public class JdtActionConstants {
 	public static final String ADD_BLOCK_COMMENT= "org.eclipse.jdt.ui.actions.AddBlockComment"; //$NON-NLS-1$
 	
 	/**
-	 * Source menu: name of standard Uncomment global action
+	 * Source menu: name of standard Block Uncomment global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.RemoveBlockComment"</code>).
 	 * 
 	 * @since 3.0
@@ -139,7 +139,7 @@ public class JdtActionConstants {
 	public static final String INDENT= "org.eclipse.jdt.ui.actions.Indent"; //$NON-NLS-1$
 	
 	/**
-	 * Source menu: name of standard Shift Rightl action
+	 * Source menu: name of standard Shift Right action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ShiftRight"</code>).
 	 */
 	public static final String SHIFT_RIGHT= "org.eclipse.jdt.ui.actions.ShiftRight"; //$NON-NLS-1$
@@ -201,7 +201,7 @@ public class JdtActionConstants {
 	public static final String GENERATE_GETTER_SETTER= "org.eclipse.jdt.ui.actions.GenerateGetterSetter"; //$NON-NLS-1$
 
 	/**
-	 * Source menu: name of standard delegate methdos global action (value
+	 * Source menu: name of standard delegate methods global action (value
 	 * <code>"org.eclipse.jdt.ui.actions.GenerateDelegateMethods"</code>).
 	 * @since 2.1
 	 */
@@ -250,7 +250,7 @@ public class JdtActionConstants {
 	public static final String CONVERT_LINE_DELIMITERS_TO_UNIX= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToUNIX"; //$NON-NLS-1$
 
 	/**
-	 * Source menu: name of standardConvert Line Delimiters ToMac global action
+	 * Source menu: name of standardConvert Line Delimiters To Mac global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"</code>).
 	 */
 	public static final String CONVERT_LINE_DELIMITERS_TO_MAC= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"; //$NON-NLS-1$
@@ -521,7 +521,7 @@ public class JdtActionConstants {
 	public static final String FIND_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.actions.OccurrencesInFile"; //$NON-NLS-1$
 	
 	/**
-	 * Search menu: name of standard Find exception originators global action (value
+	 * Search menu: name of standard Find exception occurrences global action (value
 	 * <code>"org.eclipse.jdt.ui.actions.ExceptionOccurrences"</code>).
 	 * 
 	 * @since 3.0

@@ -188,7 +188,7 @@ public final class BuildPathDialogAccess {
 	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
 	 * @return Returns the configured classpath container entry or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IClasspathEntry configureContainerEntry(Shell shell, IClasspathEntry initialEntry, IJavaProject project, IClasspathEntry[] currentClasspath) {
 		if (initialEntry == null || currentClasspath == null) {
@@ -219,7 +219,7 @@ public final class BuildPathDialogAccess {
 	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
 	 * @return Returns the selected classpath container entries or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IClasspathEntry[] chooseContainerEntries(Shell shell, IJavaProject project, IClasspathEntry[] currentClasspath) {
 		if (currentClasspath == null) {
@@ -244,7 +244,7 @@ public final class BuildPathDialogAccess {
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath configureJAREntry(Shell shell, IPath initialEntry, IPath[] usedEntries) {
 		if (initialEntry == null || usedEntries == null) {
@@ -294,7 +294,7 @@ public final class BuildPathDialogAccess {
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath[] chooseJAREntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {
@@ -340,9 +340,9 @@ public final class BuildPathDialogAccess {
 	 * been cancelled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
-	 * @param initialEntry The path of the initial archive entry 
+	 * @param initialEntry The path of the initial archive entry.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath configureExternalJAREntry(Shell shell, IPath initialEntry) {
 		if (initialEntry == null) {
@@ -375,7 +375,7 @@ public final class BuildPathDialogAccess {
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath[] chooseExternalJAREntries(Shell shell) {
 		String lastUsedPath= JavaPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
@@ -414,7 +414,7 @@ public final class BuildPathDialogAccess {
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath[] chooseClassFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {
@@ -435,7 +435,7 @@ public final class BuildPathDialogAccess {
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user
+	 * been cancelled by the user.
 	 */
 	public static IPath[] chooseSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {

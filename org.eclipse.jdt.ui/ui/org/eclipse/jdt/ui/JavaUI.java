@@ -167,7 +167,7 @@ public final class JavaUI {
 	public static final String ID_PACKAGES= 			"org.eclipse.jdt.ui.PackageExplorer"; //$NON-NLS-1$
 	
 	/** 
-	 * The view part id of the type hierarchy part.
+	 * The view part id of the type hierarchy part
 	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy"</code>).
 	 * <p>
 	 * When this id is used to access
@@ -183,7 +183,7 @@ public final class JavaUI {
 	public static final String ID_TYPE_HIERARCHY= 		"org.eclipse.jdt.ui.TypeHierarchy"; //$NON-NLS-1$
 
 	/** 
-	 * The view part id of the source (declaration) view.
+	 * The view part id of the source (declaration) view
 	 * (value <code>"org.eclipse.jdt.ui.SourceView"</code>).
 	 *
 	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
@@ -193,7 +193,7 @@ public final class JavaUI {
 	public static final String ID_SOURCE_VIEW=	"org.eclipse.jdt.ui.SourceView"; //$NON-NLS-1$
 	
 	/** 
-	 * The view part id of the Javadoc view.
+	 * The view part id of the Javadoc view
 	 * (value <code>"org.eclipse.jdt.ui.JavadocView"</code>).
 	 *
 	 * @see org.eclipse.ui.IWorkbenchPage#findView(java.lang.String)
@@ -411,6 +411,7 @@ public final class JavaUI {
 	 * all types starting with "abstract". The meta character '?' representing any character and 
 	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
 	 * is required.
+	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 * 
 	 * @since 2.0
@@ -476,7 +477,7 @@ public final class JavaUI {
 	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>,
 	 *   <code>CONSIDER_EXTERNAL_JARS</code>, or their bitwise OR, or <code>0</code>
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
-	 * @param filter the initial pattern to filter the set of types containg a main method. For 
+	 * @param filter the initial pattern to filter the set of types containing a main method. For 
 	 * example "App" shows all types starting with "app". The meta character '?' representing 
 	 * any character and '*' representing any string are supported. Clients can pass an empty 
 	 * string if no filtering is required.
@@ -640,9 +641,9 @@ public final class JavaUI {
 	}
 	
 	/**
-	 * Returns the BufferFactory for the Java UI plug-in.
+	 * Returns the buffer factory for the Java UI plug-in.
 	 *
-	 * @return the BufferFactory for the Java UI plug-in
+	 * @return the buffer factory for the Java UI plug-in
 	 * 
 	 * @see org.eclipse.jdt.core.IBufferFactory
 	 * @since 2.0
@@ -671,7 +672,7 @@ public final class JavaUI {
 	 * 
 	 * @param archivePath the path of the library; this can be an workspace path
 	 * or an external path in case of an external library.
-	 * @param url The Javadoc location to set. This location should contain index.html and
+	 * @param url the Javadoc location to set. This location should contain index.html and
 	 * a file 'package-list'. <code>null</code> clears the current documentation
 	 * location.
 	 * 
@@ -684,11 +685,11 @@ public final class JavaUI {
 	/**
 	 * Sets the Javadoc locations for archives with the given paths. 
 	 * 
-	 * @param archivePaths The paths of the libraries; this can be an workspace path
-	 * or an external path in case of an external library.
-	 * @param urls The Javadoc locations to set corresponsinmg to the archive path of the same index. These locations should contain index.html and
+	 * @param archivePaths the paths of the libraries. can be workspace paths
+	 * or external paths in case of an external library.
+	 * @param urls the Javadoc locations to set. Each location corresponds to the archive path of the same index. A location should contain index.html and
 	 * a file 'package-list'. <code>null</code> is a valid location entry and clears the current documentation
-	 * location. The length of the arry must be equals to the number of archive paths passed.
+	 * location. The length of the location array must be equals to the number of archive paths passed.
 	 * 
 	 * @since 3.0
 	 */
@@ -703,6 +704,7 @@ public final class JavaUI {
 	 * 
 	 * @param archivePath the path of the library. This can be an workspace path
 	 * or an external path in case of an external library.
+	 * @return the Javadoc location for an archive or <code>null</code>.
 	 * 
 	 * @since 2.0
 	 */	
@@ -715,7 +717,7 @@ public final class JavaUI {
 	 * all types located in the project's source folders.
 	 * 
 	 * @param project the project
-	 * @param url The Javadoc location to set. This location should contain index.html and
+	 * @param url the Javadoc location to set. This location should contain index.html and
 	 * a file 'package-list'. <code>null</code> clears the current documentation
 	 * location.
 	 * 
@@ -731,6 +733,7 @@ public final class JavaUI {
 	 * source folders.
 	 * 
 	 * @param project the project
+	 * @return the Javadoc location for a Java project or <code>null</code>
 	 * 
 	 * @since 2.1
 	 */	
@@ -745,7 +748,9 @@ public final class JavaUI {
 	 * element's library or project. Example of a returned URL is <i>http://www.
 	 * junit. org/junit/javadoc</i>.
 	 * 
-	 * @param element The element for which the doc URL is requested.
+	 * @param element the element for which the documentation URL is requested.
+	 * @return the base location
+	 * @throws JavaModelException thrown when the element can not be accessed
 	 * 
 	 * @since 2.0
 	 */		
@@ -760,10 +765,12 @@ public final class JavaUI {
 	 * if no javadoc location has been attached to the element's library or
 	 * project.
 	 * 
-	 * @param element The element for which the doc URL is requested.
+	 * @param element the element for which the documentation URL is requested.
 	 * @param includeAnchor If set, the URL contains an anchor for member references:
 	 * <i>http://www.junit.org/junit/javadoc/junit/extensions/TestSetup.html#run(junit.framework.TestResult)</i>. Note
 	 * that this involves type resolving and is a more expensive call than without anchor.
+	 * @return the Javadoc URL for the element
+	 * @throws JavaModelException thrown when the element can not be accessed
 	 * 
 	 * @since 2.0
 	 */		

@@ -91,8 +91,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.*;
  * is intended to serve as base class of all wizards that create types like applets, servlets, classes, 
  * interfaces, etc.
  * <p>
- * See <code>NewClassWizardPage</code> or <code>NewInterfaceWizardPage</code> for an
- * example usage of <code>NewTypeWizardPage</code>.
+ * See {@link NewClassWizardPage} or {@link NewInterfaceWizardPage} for an
+ * example usage of the <code>NewTypeWizardPage</code>.
  * </p>
  * 
  * @see org.eclipse.jdt.ui.wizards.NewClassWizardPage
@@ -134,13 +134,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 		/**
 		 * Adds a new import declaration that is sorted in the existing imports.
-		 * If an import already exists or the import would conflict with another import
-		 * of an other type with the same simple name  the import is not added.
+		 * If an import already exists or the import would conflict with an import
+		 * of an other type with the same simple name, the import is not added.
 		 * 
 		 * @param qualifiedTypeName The fully qualified name of the type to import
-		 * (dot separated)
+		 * (dot separated).
 		 * @return Returns the simple type name that can be used in the code or the
-		 * fully qualified type name if an import conflict prevented the import
+		 * fully qualified type name if an import conflict prevented the import.
 		 */				
 		public String addImport(String qualifiedTypeName) {
 			fAddedTypes.add(qualifiedTypeName);
@@ -178,21 +178,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
-	/** Field ID of the package input field */
+	/** Field ID of the package input field. */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
-	/** Field ID of the enclosing type input field */
+	/** Field ID of the enclosing type input field. */
 	protected final static String ENCLOSING= PAGE_NAME + ".enclosing"; //$NON-NLS-1$
-	/** Field ID of the enclosing type checkbox */
+	/** Field ID of the enclosing type checkbox. */
 	protected final static String ENCLOSINGSELECTION= ENCLOSING + ".selection"; //$NON-NLS-1$
-	/** Field ID of the type name input field */	
+	/** Field ID of the type name input field. */	
 	protected final static String TYPENAME= PAGE_NAME + ".typename"; //$NON-NLS-1$
-	/** Field ID of the super type input field */
+	/** Field ID of the super type input field. */
 	protected final static String SUPER= PAGE_NAME + ".superclass"; //$NON-NLS-1$
-	/** Field ID of the super interfaces input field */
+	/** Field ID of the super interfaces input field. */
 	protected final static String INTERFACES= PAGE_NAME + ".interfaces"; //$NON-NLS-1$
-	/** Field ID of the modifier check boxes */
+	/** Field ID of the modifier check boxes. */
 	protected final static String MODIFIERS= PAGE_NAME + ".modifiers"; //$NON-NLS-1$
-	/** Field ID of the method stubs check boxes */
+	/** Field ID of the method stubs check boxes. */
 	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
 	private class InterfacesListLabelProvider extends LabelProvider {
@@ -249,7 +249,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private final int ABSTRACT_INDEX= 0, FINAL_INDEX= 1, STATIC_INDEX= 2;
 
 	/**
-	 * Creates a new <code>NewTypeWizardPage</code>
+	 * Creates a new <code>NewTypeWizardPage</code>.
 	 * 
 	 * @param isClass <code>true</code> if a new class is to be created; otherwise
 	 * an interface is to be created
@@ -791,7 +791,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * the model.
 	 * 
 	 * @param name the new type name
-	 * @param canBeModified if <code>true</code> the enclosing type name field is
+	 * @param canBeModified if <code>true</code> the type name field is
 	 * editable; otherwise it is read-only.
 	 */	
 	public void setTypeName(String name, boolean canBeModified) {
@@ -830,8 +830,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Sets the modifiers.
 	 * 
 	 * @param modifiers <code>F_PUBLIC</code>, <code>F_PRIVATE</code>, 
-	 * <code>F_PROTECTED</code>, <code>F_ABSTRACT, F_FINAL</code>
-	 * or <code>F_STATIC</code> or, a valid combination.
+	 * <code>F_PROTECTED</code>, <code>F_ABSTRACT</code>, <code>F_FINAL</code>
+	 * or <code>F_STATIC</code> or a valid combination.
 	 * @param canBeModified if <code>true</code> the modifier fields are
 	 * editable; otherwise they are read-only
 	 * @see Flags 
@@ -1389,6 +1389,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * Creates the new type using the entered field values.
 	 * 
 	 * @param monitor a progress monitor to report progress.
+	 * @throws CoreException Thrown when the creation failed.
+	 * @throws InterruptedException Thrown when the operation was cancelled.
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		if (monitor == null) {
@@ -1731,6 +1733,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * a type comment. This default implementation returns the content of the 
 	 * 'type comment' template.
 	 * 
+	 * @param parentCU the parent compilation unit
+	 * @param lineDelimiter the line delimiter to use
 	 * @return the type comment or <code>null</code> if a type comment 
 	 * is not desired
      *
@@ -1810,6 +1814,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @param doUnimplementedMethods if <code>true</code> unimplemented methods are created
 	 * @param imports an import manager to add all needed import statements
 	 * @param monitor a progress monitor to report progress
+	 * @return the created methods.
+	 * @throws CoreException thrown when the creation fails.
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
