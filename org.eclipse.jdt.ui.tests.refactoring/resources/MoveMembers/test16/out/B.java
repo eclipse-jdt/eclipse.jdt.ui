@@ -8,5 +8,4 @@ class B{
 		A.F= null;
 		A.F= null;
 	}
-
 }

@@ -11,5 +11,4 @@ class B{
 		A.F[][] fff1;
 		p.A.F[ ][ ] fff2;
 	}
-
 }
