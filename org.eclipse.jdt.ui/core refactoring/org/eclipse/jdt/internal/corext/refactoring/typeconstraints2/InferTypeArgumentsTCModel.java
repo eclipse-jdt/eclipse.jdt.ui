@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -98,10 +97,6 @@ public class InferTypeArgumentsTCModel {
 		fNewConstraintVariables= new ArrayList();
 	}
 	
-	private ITypeBinding getTypeBinding(List typeBodyDeclarations, int idx) {
-		return ((FieldDeclaration) typeBodyDeclarations.get(idx)).getType().resolveBinding();
-	}
-
 	/**
 	 * @param typeBinding the type binding to check
 	 * @return whether the constraint variable should <em>not</em> be created
@@ -263,33 +258,6 @@ public class InferTypeArgumentsTCModel {
 			return (ConstraintVariable2) stored;
 		}
 	}
-
-//	private void registerCvWithTc(ConstraintVariable2 storedCv, ConstraintVariable2 cv, ITypeConstraint2 typeConstraint) {
-//		//TODO: special handling for CollectionElementVariable2
-//		if (storedCv == null) {
-//			// new CV -> directly store TC:
-//			fConstraintVariables.put(cv, typeConstraint);
-//			fNewConstraintVariables.add(cv);
-//			registerElementCVWithTC(cv, typeConstraint);
-//		} else {
-//			// existing stored CV:
-//			//TODO: could avoid call to get() if there was a method HashMapEntry getEntry(Object key) 
-//			Object storedTcs= fConstraintVariables.get(storedCv);
-//			ArrayList/*<ITypeConstraint2>*/ typeConstraintList;
-//			if (storedTcs instanceof ITypeConstraint2) {
-//				// CV only used in one TC so far:
-//				typeConstraintList= new ArrayList(2);
-//				typeConstraintList.add(storedTcs);
-//				typeConstraintList.add(typeConstraint);
-//				fConstraintVariables.put(storedCv, typeConstraintList);
-//				registerElementCVWithTC(cv, typeConstraint);
-//			} else {
-//				// CV already used in multiple or zero TCs:
-//				typeConstraintList= (ArrayList) storedTcs;
-//				typeConstraintList.add(typeConstraint);
-//			}
-//		}
-//	}
 	
 	private void registerCvWithTc(ConstraintVariable2 storedCv, ITypeConstraint2 typeConstraint) {
 		//TODO: special handling for CollectionElementVariable2?
@@ -458,22 +426,6 @@ public class InferTypeArgumentsTCModel {
 			fCuScopedConstraintVariables.add(storedCv);
 		return storedCv;
 	}
-	
-//	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IMethodBinding methodBinding) {
-//		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(methodBinding.getDeclaringClass());
-//		return makeDeclaringTypeVariable(declaringTypeHandle, methodBinding);
-//	}
-//	
-//	public DeclaringTypeVariable2 makeDeclaringTypeVariable(IVariableBinding fieldBinding) {
-//		Assert.isTrue(fieldBinding.isField());
-//		TypeHandle declaringTypeHandle= fTypeHandleFactory.getTypeHandle(fieldBinding.getDeclaringClass());
-//		return makeDeclaringTypeVariable(declaringTypeHandle, fieldBinding);
-//	}
-//	
-//	private DeclaringTypeVariable2 makeDeclaringTypeVariable(TypeHandle declaringTypeHandle, IBinding memberBinding) {
-//		DeclaringTypeVariable2 cv= new DeclaringTypeVariable2(declaringTypeHandle, memberBinding);
-//		return cv;
-//	}
 	
 	public PlainTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
 		if (filterConstraintVariableType(typeBinding))
