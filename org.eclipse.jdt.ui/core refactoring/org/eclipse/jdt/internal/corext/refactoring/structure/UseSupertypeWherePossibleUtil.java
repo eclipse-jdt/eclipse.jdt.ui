@@ -448,12 +448,8 @@ class UseSupertypeWherePossibleUtil {
 						return false;
 				}
 			}
-		} else if (parent instanceof MethodInvocation){
-			return isReferenceInInvocationUpdatable(node, nodesToRemove);				
-		} else if (parent instanceof SuperConstructorInvocation){
-			return isReferenceInInvocationUpdatable(node, nodesToRemove);				
-		} else if (parent instanceof ConstructorInvocation){
-			return isReferenceInInvocationUpdatable(node, nodesToRemove);	
+		} else if (isInvocation(parent)) {
+			return isReferenceInInvocationUpdatable(node, nodesToRemove);
 		} else if (parent instanceof ReturnStatement){
 			MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(parent, MethodDeclaration.class);
 			if (nodesToRemove.contains(md.getReturnType()))
@@ -464,9 +460,7 @@ class UseSupertypeWherePossibleUtil {
 	
 	private boolean isReferenceInInvocationUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
 		ASTNode parent= node.getParent();
-		Assert.isTrue(parent instanceof MethodInvocation ||
-		                   parent instanceof ConstructorInvocation ||
-		                   parent instanceof SuperConstructorInvocation);
+		Assert.isTrue(isInvocation(parent));
 		                   
 		int argumentIndex= getArgumentIndexInInvocation(node);
 		if (argumentIndex == -1 )
@@ -494,22 +488,20 @@ class UseSupertypeWherePossibleUtil {
 	
 	private static int getArgumentIndexInInvocation(ASTNode node){
 		ASTNode parent= node.getParent();
-		Assert.isTrue(parent instanceof MethodInvocation ||
-		                   parent instanceof ConstructorInvocation ||
-		                   parent instanceof SuperConstructorInvocation);
+		Assert.isTrue(isInvocation(parent));
 		if (parent instanceof MethodInvocation)
 			return ((MethodInvocation)parent).arguments().indexOf(node);
 		else if (parent instanceof ConstructorInvocation)	
 			return ((ConstructorInvocation)parent).arguments().indexOf(node);
-		else 	
+		else if (parent instanceof ClassInstanceCreation)
+			return ((ClassInstanceCreation)parent).arguments().indexOf(node);
+		else	
 			return ((SuperConstructorInvocation)parent).arguments().indexOf(node);
 	}
 	
 	private static IMethodBinding resolveMethodBindingInInvocation(ASTNode node){
 		ASTNode parent= node.getParent();
-		Assert.isTrue(parent instanceof MethodInvocation ||
-		                   parent instanceof ConstructorInvocation ||
-		                   parent instanceof SuperConstructorInvocation);
+		Assert.isTrue(isInvocation(parent));
 		if (parent instanceof MethodInvocation){
 			IBinding bin= ((MethodInvocation)parent).getName().resolveBinding();
 			if (! (bin instanceof IMethodBinding))
@@ -517,8 +509,18 @@ class UseSupertypeWherePossibleUtil {
 			return (IMethodBinding)bin;
 		} else if (parent instanceof ConstructorInvocation)	
 			return ((ConstructorInvocation)parent).resolveConstructorBinding();
-		else 	
+		else if (parent instanceof ClassInstanceCreation)
+			return ((ClassInstanceCreation)parent).resolveConstructorBinding();
+		else	
 			return ((SuperConstructorInvocation)parent).resolveConstructorBinding();
+	}
+	
+	private static boolean isInvocation(ASTNode node){
+		return
+			node instanceof MethodInvocation ||
+		    node instanceof ConstructorInvocation ||
+		    node instanceof SuperConstructorInvocation ||
+		    node instanceof ClassInstanceCreation;
 	}
 	
 	private static CompilationUnit getCompilationUnitNode(ASTNode node) {

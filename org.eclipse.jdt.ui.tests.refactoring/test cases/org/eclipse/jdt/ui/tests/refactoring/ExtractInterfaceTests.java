@@ -449,6 +449,20 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		validatePassingTest("A", new String[]{"A", "B", "OldInterface"}, "I", names, signatures, true);
 	}
 
+	public void test75() throws Exception{
+//		printTestDisabledMessage("bug 23953");		
+		String[] names= new String[]{"amount"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "B", "C"}, "I", names, signatures, true);
+	}
+
+	public void test76() throws Exception{
+//		printTestDisabledMessage("bug 23953");		
+		String[] names= new String[]{"amount"};
+		String[][] signatures= new String[][]{new String[0]};
+		validatePassingTest("A", new String[]{"A", "B", "C"}, "I", names, signatures, true);
+	}
+
 	public void testFail0() throws Exception{
 		validateFailingTest("A", "I", true, RefactoringStatus.FATAL);
 	}
