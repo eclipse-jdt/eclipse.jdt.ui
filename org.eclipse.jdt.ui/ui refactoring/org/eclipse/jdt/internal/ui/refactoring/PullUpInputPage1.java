@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 class PullUpInputPage1 extends UserInputWizardPage {
 	
@@ -162,15 +164,21 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		}
 		
 		private static void assertAction(IMember member, int action){
-			if (member instanceof IMethod)
+			if (member instanceof IMethod){
+				try {
+					Assert.isTrue(action != DECLARE_ABSTRACT_ACTION || ! JdtFlags.isStatic(member));
+				} catch (JavaModelException e) {
+					JavaPlugin.log(e); //cannot show any ui here
+				}
 				Assert.isTrue(
-			action == NO_ACTION ||
+				action == NO_ACTION ||
 				action == DECLARE_ABSTRACT_ACTION ||
 				action == PULL_UP_ACTION);
-			else
+			} else{
 				Assert.isTrue(
 				action == NO_ACTION ||
 				action == PULL_UP_ACTION);
+			}	
 		}
 		
 		void setAction(int action){
@@ -199,9 +207,17 @@ class PullUpInputPage1 extends UserInputWizardPage {
 		public boolean isEditable() {
 			if (isFieldInfo())
 				return false;
+			if (! isMethodInfo())
+				return false;
 			if (fAction == NO_ACTION)
 				return false;
-			return true;	
+			IMethod method= (IMethod)fMember;
+			try {
+				return ! JdtFlags.isStatic(method);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e); //no ui here
+				return false;
+			}
 		}
 
 		public boolean isNoAction() {
