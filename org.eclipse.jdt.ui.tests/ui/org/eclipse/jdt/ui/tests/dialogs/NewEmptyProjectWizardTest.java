@@ -59,7 +59,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     public void testCreateSourceFolderOnProjectWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         ClasspathModifierQueries.IFolderCreationQuery folderQuery= getSourceFolderCreationQuery();
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, null, outputFolderQuery, null, folderQuery, null);
         
@@ -81,7 +81,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     public void testCreateSourceFolderOnFragRootWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot parentRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(new Path(fNormalFolder)), outputFolderQuery, null, null, null);
         assertTrue(parentRoot != null);
         testProjectIsOnClasspath(true);
@@ -112,7 +112,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     public void testCreateSourceFolderOnFragRoot() throws CoreException, InvocationTargetException, InterruptedException {
         // ... and remove project as root
         // first add a source folder, but keep project as root
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot parentRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(new Path(fNormalFolder)), outputFolderQuery, null, null, null);
         testProjectIsOnClasspath(true);
         
@@ -146,7 +146,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     public void testCreateNormalFolderOnFragRootWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(new Path(fNormalFolder)), outputFolderQuery, null, null, null);
         ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
 
@@ -173,7 +173,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     public void testCreateSourceFolderOnFrag() throws CoreException, InvocationTargetException, InterruptedException {
         // ... and remove project as root
         final IPath srcPath= new Path("src");
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot parentRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(srcPath), outputFolderQuery, null, null, null);
         IFolder fragmentFolder= getFolderHandle(srcPath.append(fNormalFolder));
         assertTrue(fragmentFolder.getParent().equals(parentRoot.getUnderlyingResource()));
@@ -215,7 +215,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     
     public void testCreateNormalFolderOnFragWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
         final IPath srcPath= new Path("src");
-        ClasspathModifierQueries.IOutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
+        ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot parentRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_TO_BP, getFolderHandle(srcPath), outputFolderQuery, null, null, null);
         IFolder fragmentFolder= getFolderHandle(srcPath.append(fNormalFolder));
         assertTrue(fragmentFolder.getParent().equals(parentRoot.getUnderlyingResource()));
@@ -905,8 +905,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                 return null;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) {
-                return new ClasspathModifierQueries.IOutputFolderQuery(null) {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) {
+                return new ClasspathModifierQueries.OutputFolderQuery(null) {
 
                     public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                         return false;
@@ -972,7 +972,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                 return editedOutputPath;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewEmptyProjectWizardTest.this.getOutputFolderQueryInternal(defaultOutputFolder);
             }         
         };
@@ -1007,8 +1007,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                 return editedOutputPath;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) {
-                return new ClasspathModifierQueries.IOutputFolderQuery(null) {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) {
+                return new ClasspathModifierQueries.OutputFolderQuery(null) {
 
                     public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                         // cancel the operation
@@ -1053,7 +1053,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
               return null;
           }
 
-          public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+          public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
               return getOutputFolderQueryInternal(defaultOutputFolder);
           }      
       };
@@ -1077,7 +1077,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                 return path;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
                 return getOutputFolderQueryInternal(defaultOutputFolder);
             }     
         };
@@ -1097,7 +1097,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
                 return null;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path2) throws JavaModelException {
                 return getOutputFolderQueryToKeepProjAsRoot();
             }      
         };
@@ -1390,8 +1390,8 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         return root;
     }
     
-    protected ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQueryToKeepProjAsRoot() throws JavaModelException {
-        return new ClasspathModifierQueries.IOutputFolderQuery(defaultOutputFolder) {
+    protected ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryToKeepProjAsRoot() throws JavaModelException {
+        return new ClasspathModifierQueries.OutputFolderQuery(defaultOutputFolder) {
             public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
             }

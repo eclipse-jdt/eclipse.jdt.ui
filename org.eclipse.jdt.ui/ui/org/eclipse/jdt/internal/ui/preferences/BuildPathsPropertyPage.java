@@ -131,7 +131,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * Content for valid projects.
 	 */
 	private Control createWithJava(Composite parent, IProject project) {
-		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX));
+		fBuildPathsBlock= new BuildPathsBlock(new BusyIndicatorRunnableContext(), this, getSettings().getInt(INDEX), false);
 		fBuildPathsBlock.init(JavaCore.create(project), null, null);
 		return fBuildPathsBlock.createControl(parent);
 	}
@@ -225,7 +225,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
             IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
                 public void run(IProgressMonitor monitor)   throws CoreException, OperationCanceledException {
-                    fBuildPathsBlock.undoAll();
                     fBuildPathsBlock.configureJavaProject(null);
                 }
             };

@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
@@ -1009,8 +1009,8 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 return fProject;
             }
 
-            public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
-                return new ClasspathModifierQueries.IOutputFolderQuery(fProject.getOutputLocation()) {
+            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+                return new ClasspathModifierQueries.OutputFolderQuery(fProject.getOutputLocation()) {
                     public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                         return true;
                     }
@@ -1133,7 +1133,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 return fProject;
             }
 
-            public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
                 return null;
             }
 
@@ -1186,7 +1186,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 return fProject;
             }
 
-            public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+            public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
                 return null;
             }
 
@@ -1313,7 +1313,7 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getOutputFolderQuery()
      */
-    public IOutputFolderQuery getOutputFolderQuery() throws JavaModelException {
+    public OutputFolderQuery getOutputFolderQuery() throws JavaModelException {
         return null;
     }
 

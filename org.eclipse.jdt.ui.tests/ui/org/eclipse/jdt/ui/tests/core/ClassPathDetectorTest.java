@@ -170,7 +170,7 @@ public class ClassPathDetectorTest extends TestCase {
 		
 		clearClasspath();
 		
-		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject(), null);
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
 		assertNotNull("No classpath detected", entries);
@@ -212,7 +212,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		clearClasspath();
 		
-		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject(), null);
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
 		assertNotNull("No classpath detected", entries);
@@ -255,7 +255,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		clearClasspath();
 
-		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject(), null);
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
 		assertNotNull("No classpath detected", entries);
@@ -286,7 +286,7 @@ public class ClassPathDetectorTest extends TestCase {
 	
 		clearClasspath();
 	
-		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject(), null);
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
 		assertNotNull("No classpath detected", entries);
@@ -330,7 +330,7 @@ public class ClassPathDetectorTest extends TestCase {
 
 		clearClasspath();
 		
-		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject());
+		ClassPathDetector detector= new ClassPathDetector(fJProject1.getProject(), null);
 		IPath outputLocation= detector.getOutputLocation();
 		IClasspathEntry[] entries= detector.getClasspath();
 		assertNotNull("No classpath detected", entries);

@@ -721,7 +721,7 @@ public class NewProjectWizardTest extends TestCase {
                 return new Path(path.toString() + "3");
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return getOutputFolderQueryInternal(fProject.getOutputLocation());
             }         
         };
@@ -755,7 +755,7 @@ public class NewProjectWizardTest extends TestCase {
                 return null;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
             }      
         };
@@ -1027,7 +1027,7 @@ public class NewProjectWizardTest extends TestCase {
     }
     
     // Helper methods
-    protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.IOutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.IFolderCreationQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
+    protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.OutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.IFolderCreationQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
         final Object[] returnValue= {null};
         IClasspathInformationProvider provider= new IClasspathInformationProvider() {
 
@@ -1046,7 +1046,7 @@ public class NewProjectWizardTest extends TestCase {
                 return fProject;
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery() {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery() {
                 return outputQuery;
             }
 
@@ -1196,8 +1196,8 @@ public class NewProjectWizardTest extends TestCase {
         return buf;
     }
     
-    public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation) throws JavaModelException{
-        return new ClasspathModifierQueries.IOutputFolderQuery(desiredOutputLocation) {
+    public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQueryInternal(IPath desiredOutputLocation) throws JavaModelException{
+        return new ClasspathModifierQueries.OutputFolderQuery(desiredOutputLocation) {
             public boolean doQuery(boolean b, OutputFolderValidator validator, IJavaProject project) {
                 return true;
             }
@@ -1237,7 +1237,7 @@ public class NewProjectWizardTest extends TestCase {
                 return new Path(oldOutputPath.toString() + "2");
             }
 
-            public ClasspathModifierQueries.IOutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
+            public ClasspathModifierQueries.OutputFolderQuery getOutputFolderQuery(IPath path) throws JavaModelException {
                 return NewProjectWizardTest.this.getOutputFolderQueryInternal(fProject.getOutputLocation());
             }         
         };
