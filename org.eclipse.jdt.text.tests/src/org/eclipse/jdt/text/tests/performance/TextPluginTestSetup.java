@@ -11,14 +11,16 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import java.io.IOException;
+import java.util.zip.ZipException;
+
+import org.eclipse.core.runtime.CoreException;
+
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
 import org.eclipse.ui.IViewReference;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
@@ -45,9 +47,7 @@ public class TextPluginTestSetup extends TestSetup {
 	 * @see junit.extensions.TestSetup#setUp()
 	 */
 	protected void setUp() throws Exception {
-		IWorkbench workbench= PlatformUI.getWorkbench();
-		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
-		IWorkbenchPage activePage= activeWindow.getActivePage();
+		IWorkbenchPage activePage= EditorTestHelper.getActivePage();
 		
 		IViewReference viewReference= activePage.findViewReference(EditorTestHelper.INTRO_VIEW_ID);
 		if (viewReference != null)
@@ -57,9 +57,7 @@ public class TextPluginTestSetup extends TestSetup {
 			fPreviousPerspective= EditorTestHelper.showPerspective(fPerspective);
 		
 		boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
-		if (ResourceTestHelper.projectExists(PROJECT))
-			ResourceTestHelper.getProject(PROJECT).delete(true, true, null);
-		ResourceTestHelper.createProjectFromZip(JdtTextTestPlugin.getDefault(), PROJECT_ZIP, PROJECT);
+		createProjectFromZip();
 		if (wasAutobuilding) {
 			ResourceTestHelper.fullBuild();
 			ResourceTestHelper.enableAutoBuilding();
@@ -68,6 +66,12 @@ public class TextPluginTestSetup extends TestSetup {
 		EditorTestHelper.joinBackgroundActivities();
 	}
 	
+	public static void createProjectFromZip() throws CoreException, IOException, ZipException {
+		if (ResourceTestHelper.projectExists(PROJECT))
+			ResourceTestHelper.getProject(PROJECT).delete(true, true, null);
+		ResourceTestHelper.createProjectFromZip(JdtTextTestPlugin.getDefault(), PROJECT_ZIP, PROJECT);
+	}
+
 	/*
 	 * @see junit.extensions.TestSetup#tearDown()
 	 */

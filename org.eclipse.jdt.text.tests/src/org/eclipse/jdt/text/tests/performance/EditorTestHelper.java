@@ -75,6 +75,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
@@ -414,5 +415,12 @@ public class EditorTestHelper {
 			for (int i= 0; i < resources.length; i++)
 				findFiles(resources[i], files);
 		}
+	}
+
+	public static boolean setDialogEnabled(String id, boolean enabled) {
+		boolean wasEnabled= OptionalMessageDialog.isDialogEnabled(id);
+		if (wasEnabled != enabled)
+			OptionalMessageDialog.setDialogEnabled(id, enabled);
+		return wasEnabled;
 	}
 }
