@@ -88,9 +88,10 @@ public class OpenTypeHierarchyHelper {
 	private void openInViewPart(IWorkbenchWindow window, IType input) {
 		IWorkbenchPage page= window.getActivePage();
 		try {
+			// 1GEUMSG: ITPJUI:WINNT - Class hierarchy not shown when fast view
+			openEditor(input);
 			fTypeHierarchy= (TypeHierarchyViewPart)page.showView(JavaUI.ID_TYPE_HIERARCHY);
 			fTypeHierarchy.setInput(input);
-			openEditor(input);
 		} catch (PartInitException e) {
 			MessageDialog.openError(window.getShell(), 
 				JavaPlugin.getResourceString(ERROR_OPEN_VIEW), e.getMessage());
