@@ -124,6 +124,8 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 
 		GridLayout layout= new GridLayout();
 		layout.numColumns= nColumns;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		
 		Composite composite= pageContent.getBody();
 		composite.setLayout(layout);

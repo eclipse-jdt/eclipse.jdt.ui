@@ -122,6 +122,8 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		
 		GridLayout layout = new GridLayout();
 		layout.numColumns= nColumns;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		outer.setLayout(layout);
 		
 		String label= PreferencesMessages.getString("JavadocProblemsConfigurationBlock.pb_javadoc_support.label"); //$NON-NLS-1$

@@ -19,7 +19,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
 
 /*
@@ -33,7 +32,6 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	private CodeFormatterConfigurationBlock fConfigurationBlock;
 
 	public CodeFormatterPreferencePage() {
-		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setDescription(PreferencesMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically

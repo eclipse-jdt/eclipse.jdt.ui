@@ -140,7 +140,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		
 		Composite composite= sc1.getBody();
-		composite.setLayout(new GridLayout(nColumns, false));
+		GridLayout layout= new GridLayout(nColumns, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		composite.setLayout(layout);
 		
 		Label description= new Label(composite, SWT.LEFT | SWT.WRAP);
 		description.setText(PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.common.description")); //$NON-NLS-1$

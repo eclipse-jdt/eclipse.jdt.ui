@@ -145,8 +145,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 	
 	private Composite createComplianceTabContent(Composite folder) {
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 1;
+
 
 		String[] values345= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
 		String[] values345Labels= new String[] {
@@ -158,6 +157,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		
 		Composite compComposite= sc1.getBody();
+		
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 1;
 		compComposite.setLayout(layout);
 
 		int nColumns= 3;
