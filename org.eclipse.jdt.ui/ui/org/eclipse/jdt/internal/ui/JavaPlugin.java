@@ -6,8 +6,10 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
+import java.util.Set;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -97,10 +99,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Returns an array of all dirty editor parts.
+	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * presented in more than one editor, only one of those editor parts is part of the result.
+	 * 
 	 * @return an array of all dirty editor parts.
 	 */
 	public static IEditorPart[] getDirtyEditors() {
+		Set inputs= new HashSet(7);
 		List result= new ArrayList(0);
 		IWorkbench workbench= getDefault().getWorkbench();
 		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
@@ -110,14 +115,17 @@ public class JavaPlugin extends AbstractUIPlugin {
 				IEditorPart[] editors= pages[x].getEditors();
 				for (int z= 0; z < editors.length; z++) {
 					IEditorPart editor= editors[z];
-					if (editor.isDirty())
+					IEditorInput input= editor.getEditorInput();
+					if (editor.isDirty() && !inputs.contains(input)) {
+						inputs.add(input);
 						result.add(editor);
+					}
 				}
 			}
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
-		
+	
 	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}

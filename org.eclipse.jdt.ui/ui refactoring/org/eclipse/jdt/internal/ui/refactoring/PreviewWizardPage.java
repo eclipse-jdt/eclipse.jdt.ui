@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -42,6 +44,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -127,8 +130,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		} else {
 			input= new DefaultChangeElement(null, new DummyRootNode(fChange));
 		}
-		if (fTreeViewer != null)
+		if (fTreeViewer != null) {
 			fTreeViewer.setInput(input);
+		}
 	}
 	
 	/**
@@ -272,7 +276,14 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	 * Method defined in IWizardPage
 	 */
 	public void createControl(Composite parent) {
-		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);
+		initializeDialogUnits(parent);
+		// The composite is needed to limit the width of the SashForm.
+		Composite result= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0; layout.marginWidth= 0;
+		result.setLayout(layout);
+		
+		SashForm sashForm= new SashForm(result, SWT.VERTICAL);
 		
 		fTreeViewer= createTreeViewer(sashForm);
 		fTreeViewer.setContentProvider(createTreeContentProvider());
@@ -286,8 +297,11 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		fPreviewContainer.showPage(fNullPreviewer.getControl());
 		
 		sashForm.setWeights(new int[]{33, 67});
+		GridData gd= new GridData(GridData.FILL_BOTH);
+		gd.widthHint= convertWidthInCharsToPixels(80);
+		sashForm.setLayoutData(gd);
 		
-		setControl(sashForm);
+		setControl(result);
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.REFACTORING_PREVIEW_WIZARD_PAGE));
 	}
 	
