@@ -60,13 +60,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     private final int fSelectionLength;
     private final ICompilationUnit fCu;
 	
-	public static final int INITIALIZE_IN_FIELD= 1;
-	public static final int INITIALIZE_IN_METHOD= 2;
-	public static final int INITIALIZE_IN_CONSTRUCTOR= 3;
+	public static final int INITIALIZE_IN_FIELD= 0;
+	public static final int INITIALIZE_IN_METHOD= 1;
+	public static final int INITIALIZE_IN_CONSTRUCTOR= 2;
 	
 	//------ settings ---------//
 	private String fFieldName;
-	private int fAccessModifier; 	/*see JdtFlags*/
+	private int fVisibility; 	/*see JdtFlags*/
 	private boolean fDeclareStatic;
 	private boolean fDeclareFinal;
 	private int fInitializeIn; /*see INITIALIZE_IN_* constaints */
@@ -83,13 +83,13 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		fCu= cu;
 		
-		fFieldName= "";
-		fAccessModifier= Modifier.PRIVATE;
-		fDeclareStatic= false;
-		fDeclareFinal= false;
+        fFieldName= "";
+        fVisibility= Modifier.PRIVATE;
+        fDeclareStatic= false;
+        fDeclareFinal= false;
+        fInitializeIn= INITIALIZE_IN_METHOD;
 	}
 	
-
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
      */
@@ -97,8 +97,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         return "Promote Local Variable to Field";
     }
     
-    public int getAccessModifier() {
-        return fAccessModifier;
+    public int[] getAvailableVisibilities(){
+    	return new int[]{Modifier.PUBLIC, Modifier.PROTECTED, Modifier.NONE, Modifier.PRIVATE};
+    }
+    
+    public int getVisibility() {
+        return fVisibility;
     }
 
     public boolean getDeclareFinal() {
@@ -117,12 +121,12 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         return fInitializeIn;
     }
 
-    public void setAccessModifier(int accessModifier) {
+    public void setVisibility(int accessModifier) {
     	Assert.isTrue(accessModifier == Modifier.PRIVATE ||
     					accessModifier == Modifier.NONE ||
     					accessModifier == Modifier.PROTECTED ||
     					accessModifier == Modifier.PUBLIC);
-        fAccessModifier= accessModifier;
+        fVisibility= accessModifier;
     }
 
     public void setDeclareFinal(boolean declareFinal) {
@@ -146,7 +150,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 	
 	public boolean canEnableSettingStatic(){
-		return ! isTempDeclaredInStaticMethod();
+		return fInitializeIn != INITIALIZE_IN_CONSTRUCTOR &&
+				! isTempDeclaredInStaticMethod();
 	}
 	
 	public boolean canEnableSettingFinal(){
@@ -228,12 +233,26 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			if (result.hasFatalError())
 		        return result;
 		     
+		    initializeDefaults();
 	        return result;
 		} catch (CoreException e){	
 			throw new JavaModelException(e);
     	} finally {
     		pm.done();
     	}
+    }
+    
+    private void initializeDefaults() {
+		fFieldName= fTempDeclarationNode.getName().getIdentifier();
+        fVisibility= Modifier.PRIVATE;
+        fDeclareStatic= Modifier.isStatic(getMethodDeclaration().getModifiers());
+        fDeclareFinal= false;
+        if (canEnableSettingDeclareInMethod())
+	        fInitializeIn= INITIALIZE_IN_METHOD;
+	    else if (canEnableSettingDeclareInFieldDeclaration())    
+	        fInitializeIn= INITIALIZE_IN_FIELD;
+	    else if (canEnableSettingDeclareInConstructors())    
+	        fInitializeIn= INITIALIZE_IN_CONSTRUCTOR;
     }
         
     private RefactoringStatus checkTempInitializerForLocalTypeUsage() {
@@ -280,6 +299,10 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 
+	public RefactoringStatus validateInput(){
+		return Checks.checkFieldName(fFieldName);
+	}
+	
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
      */
@@ -489,7 +512,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     	return (MethodDeclaration[]) result.toArray(new MethodDeclaration[result.size()]);
     }
     
-    public IChange createChange(ASTRewrite rewrite) throws CoreException{
+    private IChange createChange(ASTRewrite rewrite) throws CoreException{
         TextChange change= new CompilationUnitChange("", fCu);
         TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
         TextEdit resultingEdits= new MultiTextEdit();
@@ -592,7 +615,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
     
     private int getModifiers() {
-    	int flags= fAccessModifier;
+    	int flags= fVisibility;
     	if (fDeclareFinal)
     		flags |= Modifier.FINAL;
     	if (fDeclareStatic)	
