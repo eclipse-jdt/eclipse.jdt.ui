@@ -9,12 +9,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.core.Assert;
 
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -64,11 +64,11 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 		int offset= fMember.getSourceRange().getOffset();
 		int length= 0;
 		Scanner scanner= new Scanner();
-		scanner.setSourceBuffer(buffer.getContent(offset, fMember.getSourceRange().getLength()).toCharArray());
+		scanner.setSource(buffer.getContent(offset, fMember.getSourceRange().getLength()).toCharArray());
 		int token= 0;
 		try {
-			while((token= scanner.getNextToken()) != TerminalSymbols.TokenNameEOF) {
-				if (token == TerminalSymbols.TokenNamepublic || token == TerminalSymbols.TokenNameprotected || token == TerminalSymbols.TokenNameprivate) {
+			while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
+				if (token == ITerminalSymbols.TokenNamepublic || token == ITerminalSymbols.TokenNameprotected || token == ITerminalSymbols.TokenNameprivate) {
 					offset+= scanner.startPosition;
 					length= scanner.currentPosition - scanner.startPosition;
 					break;
