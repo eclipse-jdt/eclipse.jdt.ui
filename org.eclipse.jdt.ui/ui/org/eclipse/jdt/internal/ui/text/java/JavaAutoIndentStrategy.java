@@ -244,7 +244,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return endOffset;
 	}
 
-	private void smartInsertAfterBracket(IDocument d, DocumentCommand c) {
+	private void smartIndentAfterClosingBracket(IDocument d, DocumentCommand c) {
 		if (c.offset == -1 || d.getLength() == 0)
 			return;
 
@@ -273,6 +273,43 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+	
+	private void smartIndentAfterOpeningBracket(IDocument d, DocumentCommand c) {
+		if (c.offset == -1 || d.getLength() == 0)
+			return;
+
+		int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
+		
+		try {
+			// current line
+			int line= d.getLineOfOffset(p);
+			int lineOffset= d.getLineOffset(line);
+			
+			// line of last javacode
+			int pos= firstNonWhitespaceBackward(d, p, IJavaPartitions.JAVA_PARTITIONING, -1);
+			int lastLine= d.getLineOfOffset(pos);
+			int lastLineOffset= d.getLineOffset(lastLine);
+			
+			// only shift if the last java line is further up and is a braceless block candidate
+			if (lastLine < line) {
+			
+				if (isBracelessBlockStart(d, pos + 1, lastLineOffset)) {
+					// if the last line was a braceless block candidate, we have indented 
+					// after the new line. This has to be undone as we *are* starting a block
+					// on the new line
+					StringBuffer replace= new StringBuffer(getIndentOfLine(d, lastLine));
+					c.length += replace.length();
+					replace.append(c.text);
+					c.offset= lineOffset;
+					c.text= replace.toString();
+				}
+			}
+			
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+		
 	}
 
 	private void smartIndentAfterNewLine(IDocument d, DocumentCommand c) {
@@ -1170,7 +1207,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 	private void smartIndentAfterBlockDelimiter(IDocument document, DocumentCommand command) {
 		if (command.text.charAt(0) == '}')
-			smartInsertAfterBracket(document, command);
+			smartIndentAfterClosingBracket(document, command);
+		else if (command.text.charAt(0) == '{')
+			smartIndentAfterOpeningBracket(document, command);
 	}
 
 	/*
