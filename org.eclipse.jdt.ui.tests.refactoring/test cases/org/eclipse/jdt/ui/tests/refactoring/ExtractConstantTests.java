@@ -77,7 +77,7 @@ public class ExtractConstantTests extends RefactoringTest {
 		JavaCore.setOptions(options);	
 	}
 
-	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception{
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName, String guessedConstantName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength(), 
@@ -89,6 +89,7 @@ public class ExtractConstantTests extends RefactoringTest {
 			assertTrue("The selected expression has been erroneously reported to contain references to non-static or non-final fields.", ref.selectionAllStaticFinal());		
 		
 		ref.setReplaceAllOccurrences(replaceAll);
+		ref.setQualifyReferencesWithDeclaringClassName(qualifyReferencesWithConstantName);
 		ref.setConstantName(constantName);
 
 		assertEquals("constant name incorrectly guessed", guessedConstantName, ref.guessConstantName());
@@ -104,9 +105,17 @@ public class ExtractConstantTests extends RefactoringTest {
 		assertTrue(newCuName + " does not exist", newcu.exists());
 		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
 	}
+
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, String guessedConstantName) throws Exception{	
+		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName, guessedConstantName);
+	}
+	
+	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName) throws Exception{	
+		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, qualifyReferencesWithConstantName, constantName, constantName);
+	}
 	
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception{
-		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, constantName, constantName);
+		helper1(startLine, startColumn, endLine, endColumn, replaceAll, allowLoadtime, false, constantName);
 	}	
 	
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName) throws Exception {
@@ -201,7 +210,11 @@ public class ExtractConstantTests extends RefactoringTest {
 
 	public void test17() throws Exception{
 		helper1(5, 16, 5, 35, true, false, "CONSTANT", "YET_ANOTHER_FRED");
-	}	
+	}
+	
+	public void test18() throws Exception {
+		helper1(5, 16, 5, 17, true, false, true, "CONSTANT");	
+	}
 	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
