@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValida
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
@@ -231,9 +232,11 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			}
 			
 			Button newButton= new Button(firstLine, SWT.PUSH);
-			newButton.setText("&New ...");
-			newButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING));
-			
+			newButton.setText(ReorgMessages.getString("ReorgMoveWizard.new")); //$NON-NLS-1$
+			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+			gd.heightHint = SWTUtil.getButtonHeightHint(newButton);
+			gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
+			newButton.setLayoutData(gd);
 			newButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
 					doNewButtonPressed();
