@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
 public class EventDrivenTestSuite extends TestSuite {
 
 	public static Test suite() {
-		return new EventDrivenTestSuite();
+		return new PerformanceTestSetup(new EventDrivenTestSuite());
 	}
 	
 	public EventDrivenTestSuite() {
