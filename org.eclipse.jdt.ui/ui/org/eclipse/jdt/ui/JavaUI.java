@@ -9,6 +9,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import java.util.Set;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IProject;
@@ -29,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
@@ -163,17 +166,27 @@ public final class JavaUI {
 	 * 
 	 * @param parent the parent shell of the dialog to be created
 	 * @param project the Java project
-	 * @param style flags defining the style of the dialog; the only valid flag is
+	 * @param style flags defining the style of the dialog; the valid flags are:
 	 *   <code>IJavaElementSearchConstants.CONSIDER_BINARIES</code>, indicating that 
 	 *   packages from binary package fragment roots should be included in addition
-	 *   to those from source package fragment roots
+	 *   to those from source package fragment roots;
+	 *   <code>IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS</code>, indicating that
+	 *   packages from required projects should be included as well.
 	 * @param filter the filter
 	 * @return a new selection dialog
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style, String filter) throws JavaModelException {
-		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_BINARIES) == IJavaElementSearchConstants.CONSIDER_BINARIES);
-		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();	
+		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_BINARIES | IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS) ==
+			(IJavaElementSearchConstants.CONSIDER_BINARIES | IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS));
+
+		IPackageFragmentRoot[] roots= null;
+		if ((style & IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS) != 0) {
+		    roots= project.getAllPackageFragmentRoots();
+		} else {	
+			roots= project.getPackageFragmentRoots();	
+		}
+		
 		List consideredRoots= null;
 		if ((style & IJavaElementSearchConstants.CONSIDER_BINARIES) != 0) {
 			consideredRoots= Arrays.asList(roots);
@@ -210,7 +223,6 @@ public final class JavaUI {
 	public static SelectionDialog createPackageDialog(Shell parent, IJavaProject project, int style) throws JavaModelException {
 		return createPackageDialog(parent, project, style, "A"); //$NON-NLS-1$
 	}
-	
 	
 	/**
 	 * Creates a selection dialog that lists all packages under the given package 

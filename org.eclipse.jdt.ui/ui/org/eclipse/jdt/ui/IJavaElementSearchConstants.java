@@ -44,4 +44,11 @@ public interface IJavaElementSearchConstants {
 	 * Used when opening certain kinds of selection dialogs.
 	 */
 	public static final int CONSIDER_EXTERNAL_JARS= 1 << 4;
+
+	/**
+	 * Search scope constant (bit mask) indicating that required projects should be considered.
+	 * Used when opening certain kinds of selection dialogs.
+	 */	
+	public static final int CONSIDER_REQUIRED_PROJECTS= 1 << 5;
+
 }
