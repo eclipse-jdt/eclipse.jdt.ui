@@ -1426,4 +1426,29 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fRememberedElementOffset= -1;
 		}
 	}
+	
+	/*
+	 * @see AbstractTextEditor#canHandleMove(IEditorInput, IEditorInput)
+	 */
+	protected boolean canHandleMove(IEditorInput originalElement, IEditorInput movedElement) {
+		
+		String oldExtension= "";
+		if (originalElement instanceof IFileEditorInput) {
+			IFile file= ((IFileEditorInput) originalElement).getFile();
+			if (file != null) {
+				String ext= file.getFileExtension();
+				if (ext != null)
+					oldExtension= ext;
+			}
+		}
+		
+		String newExtension= "";
+		if (movedElement instanceof IFileEditorInput) {
+			IFile file= ((IFileEditorInput) movedElement).getFile();
+			if (file != null)
+				newExtension= file.getFileExtension();
+		}
+		
+		return oldExtension.equals(newExtension);
+	}
 }
