@@ -139,7 +139,7 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 			pm.subTask(
 				RefactoringCoreMessages.getString("AbstractJavaElementRenameChange.checking_change")  //$NON-NLS-1$
 				+ pack.getElementName());
-			checkIfModifiable(result, units[i]);
+			checkIfModifiable(result, units[i], true);
 			pm.worked(1);
 		}
 		pm.done();

@@ -41,6 +41,10 @@ public abstract class JDTChange extends Change {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return isValid(pm, true);
+	}
+	
+	protected RefactoringStatus isValid(IProgressMonitor pm, boolean checkDirty) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		IResource resource= getResource(getModifiedElement());
@@ -51,30 +55,33 @@ public abstract class JDTChange extends Change {
 					"JDTChange.error.resource_changed",  //$NON-NLS-1$
 					resource.getFullPath().toString()));
 			} else {
-				checkIfModifiable(result, resource);
+				checkIfModifiable(result, resource, checkDirty);
 			}
 		}
 		pm.worked(1);
 		return result;
 	}
 	
-	/* (Non-Javadoc)
-	 * debugging only
-	 */	
-	public String toString(){
+	public String toString() {
 		return getName();
 	}
 	
-	protected static void checkIfModifiable(RefactoringStatus status, Object element) {
+	protected static void checkIfModifiable(RefactoringStatus status, Object element, boolean checkDirty) {
 		IResource resource= getResource(element);
 		if (resource != null)
-			checkIfModifiable(status, resource);
+			checkIfModifiable(status, resource, checkDirty);
 	}
 	
-	protected static void checkIfModifiable(RefactoringStatus status, IResource resource) {
+	protected static void checkIfModifiable(RefactoringStatus status, IResource resource, boolean checkDirty) {
 		if (resource.isReadOnly()) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_read_only", resource.getFullPath().toString())); //$NON-NLS-1$
 		}
+		if (checkDirty) {
+			checkIfDirty(status, resource);
+		}
+	}
+	
+	protected static void checkIfDirty(RefactoringStatus status, IResource resource) {
 		if (resource instanceof IFile) {
 			IFile file= (IFile)resource;
 			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();

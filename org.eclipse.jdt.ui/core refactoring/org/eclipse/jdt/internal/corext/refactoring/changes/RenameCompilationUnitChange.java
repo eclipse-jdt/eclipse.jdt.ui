@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 
@@ -29,6 +30,10 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) throws JavaModelException{
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName);
 		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only"); //$NON-NLS-1$
+	}
+	
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false);
 	}
 	
 	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName){
