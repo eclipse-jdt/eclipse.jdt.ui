@@ -349,6 +349,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
 					setAutoExpandLevel(ALL_LEVELS);
+					setUseHashlookup(true);
 				}
 				
 				/**
