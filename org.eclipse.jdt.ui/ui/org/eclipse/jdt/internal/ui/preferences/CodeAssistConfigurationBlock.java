@@ -328,6 +328,8 @@ class CodeAssistConfigurationBlock extends AbstractConfigurationBlock {
 	
 	private void handleContentAssistColorListSelection() {	
 		int i= fContentAssistColorList.getSelectionIndex();
+		if (i == -1)
+			return;
 		String key= fContentAssistColorListModel[i][1];
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		fContentAssistColorEditor.setColorValue(rgb);

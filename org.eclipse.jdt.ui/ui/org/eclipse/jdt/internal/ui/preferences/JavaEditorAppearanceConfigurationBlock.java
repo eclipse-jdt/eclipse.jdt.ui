@@ -202,6 +202,9 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 				fAppearanceColorEditor.getButton().setEnabled(!systemDefault);
 				
 				int i= fAppearanceColorList.getSelectionIndex();
+				if (i == -1)
+					return;
+
 				String key= fAppearanceColorListModel[i][2];
 				if (key != null)
 					getPreferenceStore().setValue(key, systemDefault);
@@ -232,8 +235,10 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 			}
 			public void widgetSelected(SelectionEvent e) {
 				int i= fAppearanceColorList.getSelectionIndex();
+				if (i == -1)
+					return;
+
 				String key= fAppearanceColorListModel[i][1];
-				
 				PreferenceConverter.setValue(getPreferenceStore(), key, fAppearanceColorEditor.getColorValue());
 			}
 		});
