@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" path="core refactoring/"/>
     <classpathentry kind="src" path="ui/"/>
     <classpathentry kind="src" path="ui refactoring/"/>
+    <classpathentry kind="src" path="core refactoring/"/>
     <classpathentry kind="src" path="core extension/"/>
     <classpathentry kind="src" path="/org.eclipse.ui"/>
     <classpathentry kind="src" path="/org.eclipse.help"/>
