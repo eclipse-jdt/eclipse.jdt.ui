@@ -1351,7 +1351,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				if (buffer != null) {
 					FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(buffer.getDocument());
 					try {
-						region= finder.find(0, nlsKeyStringLiteral.getLiteralValue(), true, true, false, false);
+						region= finder.find(buffer.getDocument().getLength() - 1, nlsKeyStringLiteral.getLiteralValue(), false, true, false, false);
 					} catch (BadLocationException ex) {
 					}
 				}
