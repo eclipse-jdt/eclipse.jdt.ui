@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Point;
@@ -93,6 +94,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
@@ -1873,6 +1875,28 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 */
 	public Object getReconcilerLock() {
 		return fReconcilerLock;
+	}
+	
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#createNavigationActions()
+	 */
+	protected void createNavigationActions() {
+		super.createNavigationActions();
+		
+		final StyledText textWidget= getSourceViewer().getTextWidget();
+
+		IAction action= new DeletePreviousSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.BS, SWT.NULL);
+		markAsStateDependentAction(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, true);
+
+		action= new DeleteNextSubWordAction();
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD);
+		setAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, action);
+		textWidget.setKeyBinding(SWT.CTRL | SWT.DEL, SWT.NULL);
+		markAsStateDependentAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, true);
 	}
 
 }

@@ -1737,7 +1737,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.0
 	 */
-	protected class DeleteNextSubWordAction extends NextSubWordAction {
+	protected class DeleteNextSubWordAction extends NextSubWordAction implements IUpdate {
 
 		/**
 		 * Creates a new delete next sub-word action.
@@ -1750,6 +1750,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.NextSubWordAction#setCaretPosition(int)
 		 */
 		protected void setCaretPosition(final int position) {
+			if (!validateEditorInputState())
+				return;
+			
 			final ISourceViewer viewer= getSourceViewer();
 			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 
@@ -1765,6 +1768,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected int findNextPosition(int position) {
 			return fIterator.following(position);
+		}
+		
+		/*
+		 * @see org.eclipse.ui.texteditor.IUpdate#update()
+		 */
+		public void update() {
+			setEnabled(isEditorInputModifiable());
 		}
 	}
 
@@ -1900,7 +1910,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * 
 	 * @since 3.0
 	 */
-	protected class DeletePreviousSubWordAction extends PreviousSubWordAction {
+	protected class DeletePreviousSubWordAction extends PreviousSubWordAction implements IUpdate {
 
 		/**
 		 * Creates a new delete previous sub-word action.
@@ -1913,6 +1923,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor.PreviousSubWordAction#setCaretPosition(int)
 		 */
 		protected void setCaretPosition(final int position) {
+			if (!validateEditorInputState())
+				return;
+			
 			final ISourceViewer viewer= getSourceViewer();
 			final int caret= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 
@@ -1928,6 +1941,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected int findPreviousPosition(int position) {
 			return fIterator.preceding(position);
+		}
+		
+		/*
+		 * @see org.eclipse.ui.texteditor.IUpdate#update()
+		 */
+		public void update() {
+			setEnabled(isEditorInputModifiable());
 		}
 	}
 
@@ -4219,16 +4239,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setAction(ITextEditorActionDefinitionIds.WORD_NEXT, action);
 		textWidget.setKeyBinding(SWT.CTRL | SWT.ARROW_RIGHT, SWT.NULL);
 							
-		action= new DeletePreviousSubWordAction();
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD);
-		setAction(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, action);
-		textWidget.setKeyBinding(SWT.CTRL | SWT.BS, SWT.NULL);
-
-		action= new DeleteNextSubWordAction();
-		action.setActionDefinitionId(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD);
-		setAction(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, action);
-		textWidget.setKeyBinding(SWT.CTRL | SWT.DEL, SWT.NULL);
-		
 		action= new SelectPreviousSubWordAction();
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS);
 		setAction(ITextEditorActionDefinitionIds.SELECT_WORD_PREVIOUS, action);
