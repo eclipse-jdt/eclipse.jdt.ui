@@ -44,7 +44,7 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	 * the state of the action.
 	 */
 	protected String getToolTipText(boolean on) {
-		return on ? DebugUIUtils.getResourceString(getPrefix() + fgHide) : DebugUIUtils.getResourceString(getPrefix() + fgShow);
+		return on ? DebugUIUtils.getResourceString(getPrefix() + fgShow) : DebugUIUtils.getResourceString(getPrefix() + fgHide);
 	}
 
 	/**
@@ -53,8 +53,6 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 	 */
 	protected void valueChanged(boolean on) {
 		if (on) {
-			fViewer.removeFilter(getViewerFilter());
-		} else {
 			ViewerFilter filter= getViewerFilter();
 			ViewerFilter[] filters= fViewer.getFilters();
 			boolean alreadyAdded= false;
@@ -68,6 +66,9 @@ public abstract class ToggleFilterAction extends Action implements IViewActionDe
 			if (!alreadyAdded) {
 				fViewer.addFilter(filter);
 			}
+			
+		} else {
+			fViewer.removeFilter(getViewerFilter());
 		}
 		setToolTipText(getToolTipText(on));
 	}

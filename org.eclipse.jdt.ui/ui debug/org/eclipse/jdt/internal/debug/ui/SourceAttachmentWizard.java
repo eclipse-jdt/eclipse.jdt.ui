@@ -30,8 +30,7 @@ public class SourceAttachmentWizard extends Wizard {
 	 * @see Wizard#addPages
 	 */
 	public void addPages() {
-		fPage = new SourceAttachmentWizardPage();
-		fPage.setElement(fJar);
+		fPage = new SourceAttachmentWizardPage(fJar);
 		addPage(fPage);
 	}
 
@@ -40,7 +39,7 @@ public class SourceAttachmentWizard extends Wizard {
 			fgNoPrompt.put(fJar, Boolean.FALSE);
 			return true;
 		}
-		return fPage.performOk();
+		return fPage.performFinish();
 
 	}
 

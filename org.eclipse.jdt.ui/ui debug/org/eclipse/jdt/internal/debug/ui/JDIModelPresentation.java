@@ -252,6 +252,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	protected Image getMarkerImage(IMarker breakpoint) {
 		if (JDIDebugModel.isExceptionBreakpoint(breakpoint)) {
 			return getExceptionBreakpointImage(breakpoint);
+		} if (JDIDebugModel.isRunToLineBreakpoint(breakpoint)) {
+			return null;
 		} else {
 			return getBreakpointImage(breakpoint);
 		}
