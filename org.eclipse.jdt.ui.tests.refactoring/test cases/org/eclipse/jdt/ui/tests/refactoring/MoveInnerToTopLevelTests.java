@@ -277,6 +277,15 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 
+	public void test30() throws Exception{
+		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
+	}
+
+	public void test31() throws Exception{
+		printTestDisabledMessage("disabled due to missing support for statically imported methods");
+//		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
+	}
+
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
@@ -428,6 +437,15 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test_nonstatic_40() throws Exception{
 //		printTestDisabledMessage("test for bug 77083");		
 		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
+	}
+
+	public void test_nonstatic_41() throws Exception{
+		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
+	}
+
+	public void test_nonstatic_42() throws Exception{
+		printTestDisabledMessage("disabled due to missing support for statically imported methods");		
+//		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
 	}
 
 	public void testFail_nonstatic_0() throws Exception{
