@@ -87,8 +87,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	
 	private boolean fFirstCheck;
 	private IWorkingSet fWorkingSet;
-	
-	private Map fParents= new HashMap(50);
 
 	/**
 	 * Default constructor.
@@ -149,7 +147,6 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		);
 		fTree.setSorter(new JavaElementSorter());
 		fTree.addFilter(new EmptyInnerPackageFilter());
-//		fTree.addFilter(new StorageFilter());
 		fTree.setUseHashlookup(true);
 		
 		fTree.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
@@ -162,22 +159,12 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 		fTree.addTreeListener(new ITreeViewerListener() {
 			public void treeCollapsed(TreeExpansionEvent event) {
-				// no busy cursor - assumed to be fast
-				Object[] children= fTreeContentProvider.getChildren(event.getElement());
-				for (int i= 0; i < children.length; i++)
-					fParents.remove(children[i]);
 			}
 			public void treeExpanded(TreeExpansionEvent event) {
 				final Object element= event.getElement();
-				Object[] children= fTreeContentProvider.getChildren(element);
-				for (int i= 0; i < children.length; i++)
-					fParents.put(children[i], element);
 				if (fTree.getGrayed(element) == false)
 					BusyIndicator.showWhile(getShell().getDisplay(), new Runnable() {
 					public void run() {
-						Object[] children= fTreeContentProvider.getChildren(element);
-						for (int i= 0; i < children.length; i++)
-							fParents.put(children[i], element);
 						setSubtreeChecked(element, fTree.getChecked(element), false);
 					}
 				});
@@ -289,7 +276,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				IAdaptable element= (IAdaptable)event.getElement();
 				IResource resource= (IResource)element.getAdapter(IResource.class);
 				if (resource != null && !resource.isAccessible()) {
-					MessageDialog.openInformation(getShell(), WorkingSetMessages.getString("WorkingSetDialog.projectClosedDialog.title"), WorkingSetMessages.getString("WorkingSetDialog.projectClosedDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
+					MessageDialog.openInformation(getShell(), WorkingSetMessages.getString("JavaWorkingSetPage.projectClosedDialog.title"), WorkingSetMessages.getString("JavaWorkingSetPage.projectClosedDialog.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					fTree.setChecked(element, false);
 					fTree.setGrayed(element, true);
 					return;
@@ -335,12 +322,8 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				return;
 		}
 		Object parent= fTreeContentProvider.getParent(child);
-		if (parent == null) {
-			// try internal cache
-			parent= fParents.get(child);
-			if (parent == null)
-				return;
-		}
+		if (parent == null)
+			return;
 
 		boolean allSameState= true;
 		Object[] children= null;
