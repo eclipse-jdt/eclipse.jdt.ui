@@ -143,8 +143,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	static final String TAG_HORIZONTAL_POSITION= "horizontalPosition"; //$NON-NLS-1$
 	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
 	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
-	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
-	static final String TAG_SHOWBINARIES = "showBinaries"; //$NON-NLS-1$
 	static final String TAG_LAYOUT= "layout"; //$NON-NLS-1$
 	
 
@@ -217,14 +215,6 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			fIsCurrentLayoutFlat= true;
 	}
 	
-	/** 
-	 * Initializes the default preferences
-	 */
-	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(TAG_SHOWLIBRARIES, true);
-		store.setDefault(TAG_SHOWBINARIES, true);
-	}
-
 	/**
 	 * Returns the package explorer part of the active perspective. If 
 	 * there isn't any package explorer part <code>null</code> is returned.

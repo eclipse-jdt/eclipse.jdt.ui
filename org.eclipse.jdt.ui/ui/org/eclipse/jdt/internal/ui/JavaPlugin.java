@@ -44,28 +44,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocVMInstallListener;
-
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.CompilerPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage;
-import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 
@@ -298,25 +282,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	protected void initializeDefaultPreferences(IPreferenceStore store) {
 		super.initializeDefaultPreferences(store);
 		
-		store.setDefault(PreferenceConstants.EDITOR_SHOW_HOVER, true);
-		store.setDefault(PreferenceConstants.EDITOR_SHOW_SEGMENTS, false);
-		
-		JavaBasePreferencePage.initDefaults(store);
-		AppearancePreferencePage.initDefaults(store);
-		ImportOrganizePreferencePage.initDefaults(store);
-		ClasspathVariablesPreferencePage.initDefaults(store);
-		RefactoringPreferencePage.initDefaults(store);		
-		CodeFormatterPreferencePage.initDefaults(store);
-		CompilerPreferencePage.initDefaults(store);
-		
-		PackageExplorerPart.initDefaults(store);
-		JavaEditorPreferencePage.initDefaults(store);
-	
-		TemplatePreferencePage.initDefaults(store);		
-		CodeGenerationPreferencePage.initDefaults(store);
-		JavadocPreferencePage.initDefaults(store);
-		NewJavaProjectPreferencePage.initDefaults(store);
-		MembersOrderPreferencePage.initDefaults(store);
+		PreferenceConstants.initializeDefaultValues(store);
 	}
 	
 	private ImageDescriptorRegistry internalGetImageDescriptorRegistry() {

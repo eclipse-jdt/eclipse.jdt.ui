@@ -18,7 +18,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaConventions;
 
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -34,15 +34,15 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 public class CodeGenerationPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String PREF_USE_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.enable"; //$NON-NLS-1$
-	public static final String PREF_GETTERSETTER_PREFIX= JavaUI.ID_PLUGIN + ".gettersetter.prefix.list"; //$NON-NLS-1$
+	public static final String PREF_USE_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX;
+	public static final String PREF_GETTERSETTER_PREFIX= PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX;
 
-	public static final String PREF_USE_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.enable"; //$NON-NLS-1$
-	public static final String PREF_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.list"; //$NON-NLS-1$
+	public static final String PREF_USE_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX;
+	public static final String PREF_GETTERSETTER_SUFFIX= PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX;
 
-	public static final String PREF_JAVADOC_STUBS= JavaUI.ID_PLUGIN + ".javadoc"; //$NON-NLS-1$
-	public static final String PREF_NON_JAVADOC_COMMENTS= JavaUI.ID_PLUGIN + ".seecomments"; //$NON-NLS-1$
-	public static final String PREF_FILE_COMMENTS= JavaUI.ID_PLUGIN + ".filecomments"; //$NON-NLS-1$
+	public static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
+	public static final String PREF_NON_JAVADOC_COMMENTS= PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS;
+	public static final String PREF_FILE_COMMENTS= PreferenceConstants.CODEGEN__FILE_COMMENTS;
 
 
 	public static String[] getGetterStetterPrefixes() {
@@ -97,7 +97,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	/**
 	 * Initializes the current options (read from preference store)
 	 */
-	public static void initDefaults(IPreferenceStore prefs) {
+	/*public static void initDefaults(IPreferenceStore prefs) {
 		prefs.setDefault(PREF_USE_GETTERSETTER_PREFIX, false);
 		prefs.setDefault(PREF_USE_GETTERSETTER_SUFFIX, false);
 		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
@@ -105,7 +105,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		prefs.setDefault(PREF_JAVADOC_STUBS, true);
 		prefs.setDefault(PREF_NON_JAVADOC_COMMENTS, false);
 		prefs.setDefault(PREF_FILE_COMMENTS, false);
-	}
+	}*/
 	
 	private SelectionButtonDialogField fUseGetterSetterPrefix;
 	private SelectionButtonDialogField fUseGetterSetterSuffix;

@@ -19,6 +19,9 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 
 /**
@@ -77,9 +80,9 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>: if <code>true</code> empty
 	 * inner packages are folded.
 	 * </p>
+	 * @since 2.1
 	 */
 	public static final String APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= "org.eclipse.jdt.ui.flatPackagesInPackageExplorer";
-
 
 	/**
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
@@ -193,6 +196,16 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor";
+
+	/**
+	 * A named preference that controls whether the browsing view's selection is
+	 * linked to the active editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor";
 
 	/**
 	 * A named preference that controls whether new projects are generated using source and output folder.
@@ -1157,6 +1170,71 @@ public class PreferenceConstants {
 	 */
 	public static final String BROWSING_STACK_VERTICALLY= "org.eclipse.jdt.ui.browsing.stackVertically";
 	
+	
+	/**
+	 * A named preference that controls if templates are formatted when applied.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 2.1
+	 */	
+	public static final String TEMPLATES_USE_CODEFORMATTER= "org.eclipse.jdt.ui.template.format"; //$NON-NLS-1$
+
+	
+	
+	public static void initializeDefaultValues(IPreferenceStore store) {
+		store.setDefault(EDITOR_SHOW_HOVER, true);
+		store.setDefault(EDITOR_SHOW_SEGMENTS, false);
+
+		// JavaBasePreferencePage
+		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
+		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
+		store.setDefault(LINK_BROWSING_VIEW_TO_EDITOR, true);
+		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
+		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
+		store.setDefault(UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);	
+		
+		// AppearancePreferencePage
+		store.setDefault(APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
+		store.setDefault(APPEARANCE_METHOD_RETURNTYPE, false);
+		store.setDefault(APPEARANCE_OVERRIDE_INDICATOR, true);
+		store.setDefault(SHOW_CU_CHILDREN, true);
+		store.setDefault(BROWSING_STACK_VERTICALLY, false);
+		store.setDefault(APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$
+		store.setDefault(APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, true);
+
+		// ImportOrganizePreferencePage
+		store.setDefault(ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
+		store.setDefault(ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
+		store.setDefault(ORGIMPORTS_IGNORELOWERCASE, true);
+
+		// ClasspathVariablesPreferencePage
+		// CodeFormatterPreferencePage
+		// CompilerPreferencePage
+		// no initialization needed
+		
+		// RefactoringPreferencePage
+		store.setDefault(REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, REFACTOR_ERROR_SEVERITY);
+		store.setDefault(REFACTOR_SAVE_ALL_EDITORS, false);		
+
+		// TemplatePreferencePage
+		store.setDefault(TEMPLATES_USE_CODEFORMATTER, true);
+		
+		// CodeGenerationPreferencePage
+		store.setDefault(CODEGEN_USE_GETTERSETTER_PREFIX, false);
+		store.setDefault(CODEGEN_USE_GETTERSETTER_SUFFIX, false);
+		store.setDefault(CODEGEN_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
+		store.setDefault(CODEGEN_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
+		store.setDefault(CODEGEN__JAVADOC_STUBS, true);
+		store.setDefault(CODEGEN__NON_JAVADOC_COMMENTS, false);
+		store.setDefault(CODEGEN__FILE_COMMENTS, false);		
+
+		JavaEditorPreferencePage.initDefaults(store);		
+		JavadocPreferencePage.initDefaults(store);
+		NewJavaProjectPreferencePage.initDefaults(store);
+		MembersOrderPreferencePage.initDefaults(store);		
+	}
 	
 	/**
 	 * Returns the JDT-UI preference store.

@@ -35,18 +35,20 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 	public static final String PREF_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
 	public static final String PREF_SAVE_ALL_EDITORS= PreferenceConstants.REFACTOR_SAVE_ALL_EDITORS;
 
-	public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
+	//public static final String PREF_JAVA_STYLE_GUIDE_CONFORM= "Refactoring.javaStyleGuideConform"; //$NON-NLS-1$
 
 	public RefactoringPreferencePage() {
 		super(GRID);
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 	
+	/*
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(PREF_ERROR_PAGE_SEVERITY_THRESHOLD, ERROR_SEVERITY);
-		store.setDefault(PREF_JAVA_STYLE_GUIDE_CONFORM, true);
+		//store.setDefault(PREF_JAVA_STYLE_GUIDE_CONFORM, true);
 		store.setDefault(PREF_SAVE_ALL_EDITORS, false);
 	}
+	*/
 		
 	public void createControl(Composite parent) {
 		// added for 1GEUGE6: ITPJUI:WIN2000 - Help is the same on all preference pages
@@ -98,10 +100,12 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		return threshold;
 	}
 	
+	/*
 	static public boolean getCodeIsJavaStyleGuideConform() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(PREF_JAVA_STYLE_GUIDE_CONFORM);
 	}
+	*/
 	
 	static public boolean getSaveAllEditors() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();

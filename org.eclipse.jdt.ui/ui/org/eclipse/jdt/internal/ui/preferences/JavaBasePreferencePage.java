@@ -48,7 +48,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static final String OPEN_TYPE_HIERARCHY= PreferenceConstants.OPEN_TYPE_HIERARCHY;
 	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE;
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART;
-	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor";
+	public static final String LINK_BROWSING_VIEW_TO_EDITOR= PreferenceConstants.LINK_BROWSING_VIEW_TO_EDITOR;
 
 	public static final String DOUBLE_CLICK= PreferenceConstants.DOUBLE_CLICK;
 	public static final String DOUBLE_CLICK_GOES_INTO= PreferenceConstants.DOUBLE_CLICK_GOES_INTO;
@@ -128,6 +128,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		};
 	}
 
+	/*
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
@@ -138,6 +139,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
 		store.setDefault(UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);
 	}
+	*/
 
 	/*
 	 * @see IWorkbenchPreferencePage#init(IWorkbench)

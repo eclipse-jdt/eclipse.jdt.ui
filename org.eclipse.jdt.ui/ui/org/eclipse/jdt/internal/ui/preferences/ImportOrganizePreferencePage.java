@@ -110,11 +110,11 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	/**
 	 * Initializes the default values of this page in the preference bundle.
 	 * Will be called on startup of the JavaPlugin
-	 */
 	public static void initDefaults(IPreferenceStore prefs) {
 		prefs.setDefault(PREF_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
 		prefs.setDefault(PREF_ONDEMANDTHRESHOLD, 99);
 	}
+	 */
 	
 	private static class ImportOrganizeLabelProvider extends LabelProvider {
 		

@@ -13,9 +13,11 @@ public class RefactoringPreferences {
 		return RefactoringPreferencePage.getCheckPassedSeverity();
 	}
 	
+	/*
 	static public boolean getCodeIsJavaStyleGuideConform() {
 		return RefactoringPreferencePage.getCodeIsJavaStyleGuideConform();
 	}
+	*/
 	
 	static public boolean getSaveAllEditors() {
 		return RefactoringPreferencePage.getSaveAllEditors();
