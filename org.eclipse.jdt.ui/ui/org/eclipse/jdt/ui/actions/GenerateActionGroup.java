@@ -103,7 +103,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
 		editor.setAction("SortMembers", fSortMembers); //$NON-NLS-1$
 
-	
+
 		fOverrideMethods= new OverrideMethodsAction(editor);
 		fOverrideMethods.setActionDefinitionId(IJavaEditorActionDefinitionIds.OVERRIDE_METHODS);
 		editor.setAction("OverrideMethods", fOverrideMethods); //$NON-NLS-1$
@@ -275,6 +275,7 @@ public class GenerateActionGroup extends ActionGroup {
 		int added= 0;
 		added+= addEditorAction(result, "Comment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "Uncomment"); //$NON-NLS-1$
+		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
 		result.add(new Separator());
 		added+= addAction(result, fOrganizeImports);
 		added+= addAction(result, fAddImport);
@@ -284,12 +285,8 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(result, fAddDelegateMethods);
 		added+= addAction(result, fAddUnimplementedConstructors);
 		added+= addAction(result, fAddJavaDocStub);
-		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
-		added+= addAction(result, fSortMembers);
-		added+= addAction(result, fAddBookmark);
 		result.add(new Separator());		
 		added+= addAction(result, fSurroundWithTryCatch);
-		added+= addAction(result, fExternalizeStrings);
 		if (added == 0)
 			result= null;
 		return result;
