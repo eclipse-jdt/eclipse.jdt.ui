@@ -77,7 +77,10 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * @return the site's selection
 	 */	
 	public ISelection getSelection() {
-		return getSelectionProvider().getSelection();
+		if (getSelectionProvider() != null)
+			return getSelectionProvider().getSelection();
+		else
+			return null;
 	}
 
 	/**
