@@ -285,6 +285,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			if (IJavaPartitions.JAVA_DOC.equals(region.getType()))
 				start= d.getLineInformationOfOffset(region.getOffset()).getOffset();
 				
+			// insert closing brace on new line after an unclosed opening brace
 			if (getBracketCount(d, start, c.offset, true) > 0 && closeBrace() && !isClosed(d, c.offset, c.length)) {
 				c.caretOffset= c.offset + buf.length();
 				c.shiftsCaret= false;
@@ -308,6 +309,26 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 				if (reference != null)
 					buf.append(reference);
 				buf.append('}');
+			}
+			// insert extra line upon new line between two braces
+			else if (c.offset > start && contentStart < lineEnd && d.getChar(contentStart) == '}') {
+				int firstCharPos= scanner.findNonWhitespaceBackward(c.offset - 1, start);
+				if (firstCharPos != JavaHeuristicScanner.NOT_FOUND && d.getChar(firstCharPos) == '{') {
+					c.caretOffset= c.offset + buf.length();
+					c.shiftsCaret= false;
+					
+					StringBuffer reference= null;
+					int nonWS= findEndOfWhiteSpace(d, start, lineEnd);
+					if (nonWS < c.offset && d.getChar(nonWS) == '{')
+						reference= new StringBuffer(d.get(start, nonWS - start));
+					else
+						reference= indenter.getReferenceIndentation(c.offset);
+					
+					buf.append(getLineDelimiter(d));
+					
+					if (reference != null)
+						buf.append(reference);
+				}
 			}
 			c.text= buf.toString();
 
@@ -942,7 +963,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
      * returns either the position of the 
      * @param pos
      * @param token
-     * @return
+     * @return the position after the scope
      */
     private static int skipScope(JavaHeuristicScanner scanner, int pos, int token) {
     	int openToken= token;
@@ -1082,7 +1103,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 	 * @param document
 	 * @param offset
 	 * @param partitioning
-	 * @return
+	 * @return the block balance
 	 */
 	private static int getBlockBalance(IDocument document, int offset, String partitioning) {
 		if (offset < 1)
