@@ -1402,15 +1402,13 @@ public class PackageExplorerPart extends ViewPart
 	 */ 
 	void updateTitle() {		
 		Object input= fViewer.getInput();
-		String viewName= getConfigurationElement().getAttribute("name"); //$NON-NLS-1$
 		if (input == null
 			|| (input instanceof IJavaModel)) {
-			setTitle(viewName);
+			setContentDescription(""); //$NON-NLS-1$
 			setTitleToolTip(""); //$NON-NLS-1$
 		} else {
 			String inputText= JavaElementLabels.getTextLabel(input, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
-			String title= PackagesMessages.getFormattedString("PackageExplorer.argTitle", new String[] { viewName, inputText }); //$NON-NLS-1$
-			setTitle(title);
+			setContentDescription(inputText);
 			setTitleToolTip(getToolTipText(input));
 		} 
 	}
