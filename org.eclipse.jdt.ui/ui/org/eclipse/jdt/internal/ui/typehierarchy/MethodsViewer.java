@@ -5,43 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
-import java.util.ResourceBundle;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Menu;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.action.ToolBarManager;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.ViewerSorter;
-
-import org.eclipse.ui.IWorkbenchPart;
-
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
-import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
-import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.util.ResourceBundle;import org.eclipse.swt.SWT;import org.eclipse.swt.events.ControlAdapter;import org.eclipse.swt.events.ControlEvent;import org.eclipse.swt.events.DisposeEvent;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Menu;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.action.IAction;import org.eclipse.jface.action.IMenuListener;import org.eclipse.jface.action.IMenuManager;import org.eclipse.jface.action.MenuManager;import org.eclipse.jface.action.Separator;import org.eclipse.jface.action.ToolBarManager;import org.eclipse.jface.viewers.DoubleClickEvent;import org.eclipse.jface.viewers.IDoubleClickListener;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.ui.IWorkbenchPart;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.ui.IContextMenuConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;import org.eclipse.jdt.internal.ui.actions.GenerateGroup;import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -141,10 +105,18 @@ public class MethodsViewer extends TableViewer {
 				return true;
 			}
 			public int category(Object element) {
-				if (element instanceof IField) {
-					return 0;
+				if (element instanceof IMethod) {
+					try {
+						if (((IMethod)element).isConstructor()) {
+							return 1;
+						} else {
+							return 2;
+						}
+					} catch (JavaModelException e) {
+						JavaPlugin.log(e.getStatus());
+					}
 				}
-				return 1;
+				return 0;
 			}
 		});
 			

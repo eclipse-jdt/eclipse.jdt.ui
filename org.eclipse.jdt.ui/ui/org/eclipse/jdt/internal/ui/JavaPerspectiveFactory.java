@@ -5,13 +5,7 @@ package org.eclipse.jdt.internal.ui;/*
  */
 
 
-import org.eclipse.ui.IFolderLayout;
-import org.eclipse.ui.IPageLayout;
-import org.eclipse.ui.IPerspectiveFactory;
-
-import org.eclipse.debug.ui.IDebugUIConstants;
-
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.search.ui.SearchUI;import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.ui.IFolderLayout;import org.eclipse.ui.IPageLayout;import org.eclipse.ui.IPerspectiveFactory;import org.eclipse.jdt.ui.JavaUI;
 
 public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		
@@ -37,21 +31,21 @@ public class JavaPerspectiveFactory implements IPerspectiveFactory {
 		layout.addActionSet(JavaUI.ID_ACTION_SET);
 		
 		// views - java
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.PackageExplorer");
-		layout.addShowViewShortcut("org.eclipse.jdt.ui.TypeHierarchy");
-		
-		// views - searching
-		layout.addShowViewShortcut("org.eclipse.search.SearchResultView");
+		layout.addShowViewShortcut(JavaUI.ID_PACKAGES);
+		layout.addShowViewShortcut(JavaUI.ID_TYPE_HIERARCHY);
+
+
+		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging
-		layout.addShowViewShortcut("org.eclipse.dt.ui.ProcessView");
-		layout.addShowViewShortcut("org.eclipse.dt.ui.ConsoleView");
+		layout.addShowViewShortcut(IDebugUIConstants.ID_PROCESS_VIEW);
+		layout.addShowViewShortcut(IDebugUIConstants.ID_CONSOLE_VIEW);
 
 		// views - standard workbench
-		layout.addShowViewShortcut("org.eclipse.ui.views.ContentOutline");
-		layout.addShowViewShortcut("org.eclipse.ui.views.TaskList");
-		layout.addShowViewShortcut("org.eclipse.ui.views.ResourceNavigator");
-		
+		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
+		layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
+		layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+				
 		// new actions - Java project creation wizard
 		layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewProjectCreationWizard");
 	}

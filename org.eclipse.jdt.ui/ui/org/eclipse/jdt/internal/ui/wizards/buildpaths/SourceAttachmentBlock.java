@@ -82,6 +82,8 @@ public class SourceAttachmentBlock {
 	
 	private StatusInfo fNameStatusInfo, fJavaDocStatusInfo;
 	
+	private IPath fJARFileName;
+	
 	private IPath fFileName;
 	private IPath fPrefix;
 	
@@ -93,9 +95,12 @@ public class SourceAttachmentBlock {
 	private Control fSWTWidget;
 	
 	
-	public SourceAttachmentBlock(IProject project, IStatusInfoChangeListener context, IPath filename, IPath prefix, URL jdocLocation) {
+	public SourceAttachmentBlock(IProject project, IStatusInfoChangeListener context, IPath jarFileName, IPath filename, IPath prefix, URL jdocLocation) {
 		fContext= context;
 		fCurrProject= project;
+		
+		fJARFileName= jarFileName;
+		
 		fRoot= fCurrProject.getWorkspace().getRoot();
 		
 		SourceAttachmentAdapter adapter= new SourceAttachmentAdapter();
@@ -224,7 +229,7 @@ public class SourceAttachmentBlock {
 		
 		public void changeControlPressed(DialogField field) {
 			if (field == fFileNameField) {
-				IPath jarFilePath= chooseExtJarFile(fFileNameField.getText());
+				IPath jarFilePath= chooseExtJarFile();
 				if (jarFilePath != null) {
 					fFileName= jarFilePath;
 					fFileNameField.setText(fFileName.toString());
@@ -328,7 +333,13 @@ public class SourceAttachmentBlock {
 	/*
 	 * Open a dialog to choose a jar from the file system
 	 */
-	private IPath chooseExtJarFile(String initPath) {
+	private IPath chooseExtJarFile() {
+		IPath prevPath= new Path(fFileNameField.getText());
+		if (prevPath.isEmpty()) {
+			prevPath= fJARFileName;
+		}
+		String initPath= prevPath.removeLastSegments(1). toOSString();
+		
 		FileDialog dialog= new FileDialog(getShell());
 		dialog.setText(JavaPlugin.getResourceString(DIALOG_EXTJARDIALOG + ".text"));
 		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"});

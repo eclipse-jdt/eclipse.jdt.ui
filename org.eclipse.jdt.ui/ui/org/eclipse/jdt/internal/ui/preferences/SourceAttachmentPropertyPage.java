@@ -70,7 +70,7 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				IPath prefix= fRoot.getSourceAttachmentRootPath();
 				URL jdocLocation= JavaDocAccess.getJavaDocLocation(fRoot);
 				IProject proj= fRoot.getJavaProject().getProject();		
-				fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, path, prefix, jdocLocation);
+				fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, fRoot.getPath(), path, prefix, jdocLocation);
 				return fSourceAttachmentBlock.createControl(composite);				
 			} catch (CoreException e) {
 				ErrorDialog.openError(getShell(), "Error", "", e.getStatus());

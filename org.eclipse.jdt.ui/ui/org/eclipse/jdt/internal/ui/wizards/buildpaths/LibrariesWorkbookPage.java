@@ -430,7 +430,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			setTitle(JavaPlugin.getFormattedString(DIALOG_SOURCE_ANNOT + ".title", jarPath.toString()));
 					
 			IProject proj= fCurrJProject.getProject();
-			fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, sourceFile, prefix, jdocLocation);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, jarPath, sourceFile, prefix, jdocLocation);
 		}
 				
 		protected Control createDialogArea(Composite parent) {
