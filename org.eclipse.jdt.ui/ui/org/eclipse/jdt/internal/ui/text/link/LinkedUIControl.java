@@ -271,7 +271,9 @@ public class LinkedUIControl {
 	public interface IExitPolicy {
 		/**
 		 * Checks whether the linked mode should be left after receiving the
-		 * given <code>VerifyEvent</code> and selection.
+		 * given <code>VerifyEvent</code> and selection. Note that the event
+		 * carries widget coordinates as opposed to <code>offset</code> and 
+		 * <code>length</code> which are document coordinates.
 		 * 
 		 * @param environment the linked environment
 		 * @param event the verify event
@@ -409,8 +411,8 @@ public class LinkedUIControl {
 						next();
 						event.doit= false;
 						break;
-					} else if (!(fExitPosition != null && fExitPosition.includes(offset)) && !fEnvironment.anyPositionContains(offset)) {
-						// outside any edit box -> leave (all? TODO should only leave the affected, level and forward to the next upper)
+					} else if ((fExitPosition != null && fExitPosition.includes(offset)) || !fEnvironment.anyPositionContains(offset)) {
+						// outside any edit box or on exit position -> leave (all? TODO should only leave the affected, level and forward to the next upper)
 						leave(ILinkedListener.EXIT_ALL);
 						break;
 					} else {
@@ -484,6 +486,9 @@ public class LinkedUIControl {
 						if (offset >= 0 && length >= 0) {
 							LinkedPosition find= new LinkedPosition(doc, offset, length, LinkedPositionGroup.NO_STOP);
 							LinkedPosition pos= fEnvironment.findPosition(find);
+							if (pos == null && fExitPosition.includes(find))
+								pos= fExitPosition;
+								
 							if (pos != null)
 								switchPosition(pos, false, false);
 						}
