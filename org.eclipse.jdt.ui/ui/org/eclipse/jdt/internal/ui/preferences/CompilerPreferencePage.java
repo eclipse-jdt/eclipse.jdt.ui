@@ -89,6 +89,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 
 	private static final String PREF_RESOURCE_FILTER= JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER;
 	private static final String PREF_BUILD_INVALID_CLASSPATH= JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH;
+	private static final String PREF_PB_INCOMPLETE_BUILDPATH= JavaCore.CORE_INCOMPLETE_CLASSPATH;
+	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 
 	private static final String INTR_DEFAULT_COMPLIANCE= "internal.default.compliance"; //$NON-NLS-1$
 
@@ -119,7 +121,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			PREF_PB_METHOD_WITH_CONSTRUCTOR_NAME, PREF_PB_DEPRECATION, PREF_PB_HIDDEN_CATCH_BLOCK, PREF_PB_UNUSED_LOCAL,
 			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
-			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER
+			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
+			PREF_PB_CIRCULAR_BUILDPATH
 		};	
 	}
 
@@ -254,6 +257,13 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private Composite createOthersTabContent(TabFolder folder) {
 		String[] abortIgnoreValues= new String[] { ABORT, IGNORE };
 		
+		String[] errorWarning= new String[] { ERROR, WARNING };
+		
+		String[] errorWarningLabels= new String[] {
+			JavaUIMessages.getString("CompilerPreferencePage.error"),  //$NON-NLS-1$
+			JavaUIMessages.getString("CompilerPreferencePage.warning") //$NON-NLS-1$
+		};
+			
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 
@@ -261,20 +271,41 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		othersComposite.setLayout(layout);
 		
 		Label description= new Label(othersComposite, SWT.WRAP);
+		description.setText(JavaUIMessages.getString("CompilerPreferencePage.build_warnings.description")); //$NON-NLS-1$
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		// gd.widthHint= convertWidthInCharsToPixels(50);
+		description.setLayoutData(gd);
+		
+		Composite combos= new Composite(othersComposite, SWT.NULL);
+		gd= new GridData(GridData.FILL | GridData.GRAB_HORIZONTAL);
+		gd.horizontalSpan= 2;
+		combos.setLayoutData(gd);
+		GridLayout cl= new GridLayout();
+		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
+		combos.setLayout(cl);
+		
+		String label= JavaUIMessages.getString("CompilerPreferencePage.pb_incomplete_build_path.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_INCOMPLETE_BUILDPATH, errorWarning, errorWarningLabels, 0);	
+		
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_build_path_cycles.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
+		
+		label= JavaUIMessages.getString("CompilerPreferencePage.build_invalid_classpath.label"); //$NON-NLS-1$
+		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
+		
+		description= new Label(othersComposite, SWT.WRAP);
 		description.setText(JavaUIMessages.getString("CompilerPreferencePage.resource_filter.description")); //$NON-NLS-1$
-		GridData gd= new GridData(GridData.FILL);
+		gd= new GridData(GridData.FILL);
 		gd.horizontalSpan= 2;
 		gd.widthHint= convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
-		String label= JavaUIMessages.getString("CompilerPreferencePage.resource_filter.label"); //$NON-NLS-1$
+		label= JavaUIMessages.getString("CompilerPreferencePage.resource_filter.label"); //$NON-NLS-1$
 		Text text= addTextField(othersComposite, label, PREF_RESOURCE_FILTER);
 		gd= (GridData) text.getLayoutData();
 		gd.grabExcessHorizontalSpace= true;
 		gd.widthHint= convertWidthInCharsToPixels(10);
-		
-		label= JavaUIMessages.getString("CompilerPreferencePage.build_invalid_classpath.label"); //$NON-NLS-1$
-		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
 		
 		return othersComposite;
 
