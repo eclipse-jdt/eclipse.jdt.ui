@@ -17,7 +17,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -30,8 +29,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
- * Finds references to the selected element in the projects of the 
- * selected elements.
+ * Finds references to the selected element in the enclosing project 
+ * of the selected element.
  * The action is applicable to selections representing a Java element.
  * 
  * <p>
@@ -42,14 +41,6 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  */
 public class FindReferencesInProjectAction extends FindReferencesAction {
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.FindAction#canOperateOn(org.eclipse.jdt.core.IJavaElement)
-	 */
-	boolean canOperateOn(IJavaElement element) {
-		// TODO Auto-generated method stub
-		return super.canOperateOn(element);
-	}
-
 	/**
 	 * Creates a new <code>FindReferencesInProjectAction</code>. The action 
 	 * requires that the selection provided by the site's selection provider is of type 
@@ -58,16 +49,16 @@ public class FindReferencesInProjectAction extends FindReferencesAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindReferencesInProjectAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindDeclarationsInProjectsAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectsAction.tooltip")); //$NON-NLS-1$
+		super(site, SearchMessages.getString("Search.FindReferencesInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReferencesInProjectAction.tooltip")); //$NON-NLS-1$
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
 	public FindReferencesInProjectAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindDeclarationsInProjectsAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectsAction.tooltip")); //$NON-NLS-1$
+		super(editor, SearchMessages.getString("Search.FindReferencesInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindReferencesInProjectAction.tooltip")); //$NON-NLS-1$
 	}
 
 	IJavaSearchScope getScope(IType element) throws JavaModelException {

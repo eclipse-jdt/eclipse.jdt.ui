@@ -29,8 +29,8 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
- * Finds declarations of the selected element in the projects of the 
- * selected elements.
+ * Finds declarations of the selected element in the enclosing project 
+ * of the selected element.
  * The action is applicable to selections representing a Java element.
  * 
  * <p>
@@ -39,26 +39,26 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * 
  * @since 3.0
  */
-public class FindDeclarationsInProjectsAction extends FindDeclarationsAction {
+public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 
 	/**
-	 * Creates a new <code>FindDeclarationsInProjectsAction</code>. The action 
+	 * Creates a new <code>FindDeclarationsInProjectAction</code>. The action 
 	 * requires that the selection provided by the site's selection provider is of type 
 	 * <code>IStructuredSelection</code>.
 	 * 
 	 * @param site the site providing context information for this action
 	 */
-	public FindDeclarationsInProjectsAction(IWorkbenchSite site) {
-		super(site, SearchMessages.getString("Search.FindDeclarationsInProjectsAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectsAction.tooltip")); //$NON-NLS-1$
+	public FindDeclarationsInProjectAction(IWorkbenchSite site) {
+		super(site, SearchMessages.getString("Search.FindDeclarationsInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip")); //$NON-NLS-1$
 	}
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
 	 */
-	public FindDeclarationsInProjectsAction(JavaEditor editor) {
-		super(editor, SearchMessages.getString("Search.FindDeclarationsInProjectsAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
-		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectsAction.tooltip")); //$NON-NLS-1$
+	public FindDeclarationsInProjectAction(JavaEditor editor) {
+		super(editor, SearchMessages.getString("Search.FindDeclarationsInProjectAction.label"), new Class[] {IField.class, IMethod.class, IType.class, ICompilationUnit.class, IPackageDeclaration.class, IImportDeclaration.class, IPackageFragment.class}); //$NON-NLS-1$
+		setToolTipText(SearchMessages.getString("Search.FindDeclarationsInProjectAction.tooltip")); //$NON-NLS-1$
 	}
 
 	IJavaSearchScope getScope(IType element) throws JavaModelException {
