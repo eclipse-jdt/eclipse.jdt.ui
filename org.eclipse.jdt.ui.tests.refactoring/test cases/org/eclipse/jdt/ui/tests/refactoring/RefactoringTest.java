@@ -452,7 +452,7 @@ public abstract class RefactoringTest extends TestCase {
 	
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String)
-	 * without considering line delimiters and with useful error message.
+	 * without considering line delimiters.
 	 */
 	public static void assertEqualLines(String expected, String actual) {
 		assertEqualLines("", expected, actual);
@@ -460,33 +460,37 @@ public abstract class RefactoringTest extends TestCase {
 	
 	/**
 	 * Line-based version of junit.framework.Assert.assertEquals(String, String, String)
-	 * without considering line delimiters and with useful error message.
+	 * without considering line delimiters.
 	 */
 	public static void assertEqualLines(String message, String expected, String actual) {
 		String[] expectedLines= Strings.convertIntoLines(expected);
 		String[] actualLines= Strings.convertIntoLines(actual);
+
+		String expected2= (expectedLines == null ? null : Strings.concatenate(expectedLines, "\n"));
+		String actual2= (actualLines == null ? null : Strings.concatenate(actualLines, "\n"));
+		assertEquals(message, expected2, actual2);
 		
-		StringBuffer diffs= new StringBuffer();
-		for (int i= 0; i < Math.max(actualLines.length, expectedLines.length); i++) {
-			String exp= i >= expectedLines.length ? "<no line>" : expectedLines[i];
-			String act= i >= actualLines.length ? "<no line>" : actualLines[i];
-			if (! exp.equals(act)) {
-				diffs.append("\n* " + (i+1) + "* expected: <" + exp + ">"
-				           + "\n_ " + (i+1) + "_ but was:  <" + act + ">");
-			}
-		}
-		
-		boolean hasDiffs= diffs.length() != 0;
-		boolean hasDiffLineCount= expectedLines.length != actualLines.length;
-		if (hasDiffs || hasDiffLineCount) {
-			message= (message == null || message.length() == 0 ? "" : message + ": ");
-			if (hasDiffLineCount) {
-				fail(message + "different number of lines (" + actualLines.length +
-					" not " + expectedLines.length + ")" + diffs);
-			} else {
-				fail(message + "differences in lines: " + diffs);
-			}
-		}
+//		StringBuffer diffs= new StringBuffer();
+//		for (int i= 0; i < Math.max(actualLines.length, expectedLines.length); i++) {
+//			String exp= i >= expectedLines.length ? "<no line>" : expectedLines[i];
+//			String act= i >= actualLines.length ? "<no line>" : actualLines[i];
+//			if (! exp.equals(act)) {
+//				diffs.append("\n* " + (i+1) + "* expected: <" + exp + ">"
+//				           + "\n_ " + (i+1) + "_ but was:  <" + act + ">");
+//			}
+//		}
+//		
+//		boolean hasDiffs= diffs.length() != 0;
+//		boolean hasDiffLineCount= expectedLines.length != actualLines.length;
+//		if (hasDiffs || hasDiffLineCount) {
+//			message= (message == null || message.length() == 0 ? "" : message + ": ");
+//			if (hasDiffLineCount) {
+//				fail(message + "different number of lines (" + actualLines.length +
+//					" not " + expectedLines.length + ")" + diffs);
+//			} else {
+//				fail(message + "differences in lines: " + diffs);
+//			}
+//		}
 	}
 	
 	private static class Requestor implements ITypeNameRequestor{
