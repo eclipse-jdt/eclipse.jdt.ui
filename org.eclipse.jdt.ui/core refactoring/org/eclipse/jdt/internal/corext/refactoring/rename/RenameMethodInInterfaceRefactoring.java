@@ -20,10 +20,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 class RenameMethodInInterfaceRefactoring extends RenameMethodRefactoring {
 
