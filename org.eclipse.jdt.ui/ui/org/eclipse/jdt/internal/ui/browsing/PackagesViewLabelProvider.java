@@ -40,6 +40,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 
 	private ElementImageProvider fElementImageProvider;
 	private ImageDescriptorRegistry fRegistry;
+	private TreeHierarchyLayoutProblemsDecorator fDecorator;
 
 	PackagesViewLabelProvider(int state) {
 		this(state, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
@@ -52,8 +53,9 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		fViewState= state;
 		fElementImageProvider= new ElementImageProvider();
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
-		addLabelDecorator(new TreeHierarchyLayoutProblemsDecorator(isFlatView()));
-
+		
+		fDecorator= new TreeHierarchyLayoutProblemsDecorator(isFlatView());
+		addLabelDecorator(fDecorator);
 	}
 	
 	private boolean isValidState(int state) {
@@ -78,26 +80,20 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		IPackageFragment[] fragments= cp.getFragments();
 		for (int i= 0; i < fragments.length; i++) {
 			IPackageFragment fragment= fragments[i];
-
 			if(!isEmpty(fragment)) {
-				return decorateCompoundElement(fRegistry.get(fElementImageProvider.getCPImageDescriptor(cp, false)), cp.getFragments());
+				return decorateCompoundElement(JavaPluginImages.DESC_OBJS_COMPOUND_PACKAGE, cp);
 			}
 		}
-		return decorateCompoundElement(fRegistry.get(fElementImageProvider.getCPImageDescriptor(cp, true)), cp.getFragments()); 
+		return decorateCompoundElement(JavaPluginImages.DESC_OBJS_COMPOUND_EMPTY_PACKAGE, cp); 
 	}
 	
 	
-	private Image decorateCompoundElement(Image image, IPackageFragment[] fragments) {
-		if (fLabelDecorators == null)
-			return image;
-		
-		for (int i= 0; i < fragments.length; i++) {
-			IPackageFragment fragment= fragments[i];
-			for (int j= 0; j < fLabelDecorators.size(); j++) {
-				ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(j);
-				image= decorator.decorateImage(image, fragment);
-			}
-		}
+	private Image decorateCompoundElement(ImageDescriptor imageDescriptor, LogicalPackage cp) {
+		Image image= fRegistry.get(imageDescriptor);
+		for (int i= 0; i < fLabelDecorators.size(); i++) {
+			ILabelDecorator decorator= (ILabelDecorator) fLabelDecorators.get(i);
+			image= decorator.decorateImage(image, cp);
+		}	
 		return image;
 	}
 	
