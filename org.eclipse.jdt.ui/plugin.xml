@@ -110,6 +110,11 @@
             class="org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionEvaluator"
             id="org.eclipse.jdt.ui.text.javadoc.JavaDocCompletionEvaluator">
       </javadocCompletionProcessor>
+      <javadocCompletionProcessor
+            name="%spellingJavadocCompletionProcessor"
+            class="org.eclipse.jdt.ui.text.spelling.WordCompletionProcessor"
+            id= "org.eclipse.jdt.ui.text.javadoc.spelling.WordCompletionProcessor">
+      </javadocCompletionProcessor>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">
@@ -117,6 +122,11 @@
             name="%defaultQuickFixProcessor"
             class="org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor"
             id="org.eclipse.jdt.ui.text.correction.QuickFixProcessor">
+      </quickFixProcessor>
+      <quickFixProcessor
+            name="%spellingQuickFixProcessor"
+            class="org.eclipse.jdt.ui.text.spelling.WordQuickFixProcessor"
+            id= "org.eclipse.jdt.ui.text.correction.spelling.QuickFixProcessor">
       </quickFixProcessor>
    </extension>
    <extension
@@ -746,6 +756,12 @@
             class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
       </page>
+      <page 
+            name="%spellingPrefName"
+            category= "org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.SpellingPreferencePage"
+            id = "org.eclipse.jdt.ui.preferences.SpellingPreferencePage">
+      </page>	
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">

@@ -20,6 +20,8 @@ import org.eclipse.jface.text.TypedPosition;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.text.javadoc.ICommentTagConstants;
+
 /**
  * Multi-comment region in a source code document.
  * 

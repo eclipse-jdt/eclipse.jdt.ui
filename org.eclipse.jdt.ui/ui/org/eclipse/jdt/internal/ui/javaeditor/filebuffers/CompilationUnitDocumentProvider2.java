@@ -68,6 +68,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -94,6 +95,8 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
+			private static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling";
+			
 			//XXX: To be fully correct these constants should be non-static
 			/** 
 			 * The layer in which task problem annotations are located.
@@ -146,7 +149,10 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				fProblem= problem;
 				fCompilationUnit= cu;
 				
-				if (IProblem.Task == fProblem.getID()) {
+				if (SpellProblem.Spelling == fProblem.getID()) {
+					setType(SPELLING_ANNOTATION_TYPE);
+					fLayer= WARNING_LAYER;
+				} else if (IProblem.Task == fProblem.getID()) {
 					setType(JavaMarkerAnnotation.TASK_ANNOTATION_TYPE);
 					fLayer= TASK_LAYER;
 				} else if (fProblem.isWarning()) {
@@ -233,7 +239,9 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 */
 			public boolean isProblem() {
 				String type= getType();
-				return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type) || JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type);
+				return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)  || 
+							JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type) ||
+							SPELLING_ANNOTATION_TYPE.equals(type);
 			}
 			
 			/*
@@ -456,12 +464,13 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
+				
 				if (!isActive())
 					return;
-					
+				
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 					return;
-					
+				
 				
 				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
@@ -470,7 +479,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					
 					fPreviouslyOverlaid= fCurrentlyOverlaid;
 					fCurrentlyOverlaid= new ArrayList();
-
+					
 					if (fGeneratedAnnotations.size() > 0) {
 						temporaryProblemsChanged= true;	
 						removeAnnotations(fGeneratedAnnotations, false, true);
@@ -478,7 +487,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					}
 					
 					if (fCollectedProblems != null && fCollectedProblems.size() > 0) {
-												
+						
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
 							
@@ -488,7 +497,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 								isCanceled= true;
 								break;
 							}
-								
+							
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								
@@ -497,7 +506,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 									overlayMarkers(position, annotation);								
 									addAnnotation(annotation, position, false);
 									fGeneratedAnnotations.add(annotation);
-								
+									
 									temporaryProblemsChanged= true;
 								} catch (BadLocationException x) {
 									// ignore invalid position
@@ -512,7 +521,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 					fPreviouslyOverlaid.clear();
 					fPreviouslyOverlaid= null;
 				}
-					
+				
 				if (temporaryProblemsChanged)
 					fireModelChanged();
 			}

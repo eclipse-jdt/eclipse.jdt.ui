@@ -233,6 +233,7 @@ public interface IJavaHelpContextIds {
 	public static final String BUILD_PATH_PROPERTY_PAGE= 				PREFIX + "build_path_property_page_context"; //$NON-NLS-1$
 	public static final String CP_VARIABLES_PREFERENCE_PAGE= 		PREFIX + "cp_variables_preference_page_context"; //$NON-NLS-1$
 	public static final String CODEFORMATTER_PREFERENCE_PAGE= 	PREFIX + "codeformatter_preference_page_context"; //$NON-NLS-1$
+	public static final String SPELLING_PREFERENCE_PAGE= 	PREFIX + "spelling_preference_page_context"; //$NON-NLS-1$
 	public static final String SOURCE_ATTACHMENT_PROPERTY_PAGE=	PREFIX + "source_attachment_property_page_context"; //$NON-NLS-1$
 	public static final String COMPILER_PROPERTY_PAGE= PREFIX + "compiler_property_page_context"; //$NON-NLS-1$
 	public static final String TODOTASK_PROPERTY_PAGE= PREFIX + "tasktags_property_page_context"; //$NON-NLS-1$

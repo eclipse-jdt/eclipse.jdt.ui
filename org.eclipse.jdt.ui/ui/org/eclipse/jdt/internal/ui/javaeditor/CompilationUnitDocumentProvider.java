@@ -76,6 +76,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.ui.text.spelling.SpellReconcileStrategy.SpellProblem;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -118,6 +119,8 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 * Annotation representating an <code>IProblem</code>.
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
+			
+			private static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling";
 
 			//XXX: To be fully correct these constants should be non-static
 			/** 
@@ -170,7 +173,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				fProblem= problem;
 				fCompilationUnit= cu;
 				
-				if (IProblem.Task == fProblem.getID()) {
+				if (SpellProblem.Spelling == fProblem.getID()) {
+					setType(SPELLING_ANNOTATION_TYPE);
+					fLayer= WARNING_LAYER;
+				} else if (IProblem.Task == fProblem.getID()) {
 					setType(JavaMarkerAnnotation.TASK_ANNOTATION_TYPE);
 					fLayer= TASK_LAYER;
 				} else if (fProblem.isWarning()) {
@@ -257,7 +263,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 */
 			public boolean isProblem() {
 				String type= getType();
-				return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)  || JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type);
+				return  JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE.equals(type)  || 
+							JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(type) ||
+							SPELLING_ANNOTATION_TYPE.equals(type);
 			}
 			
 			/*
@@ -460,7 +468,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			/*
 			 * @see IProblemRequestor#beginReporting()
 			 */
-			public void beginReporting() {
+			public void beginReporting() {				
 				ICompilationUnit unit= getWorkingCopy(fInput);
 				if (unit != null && unit.getJavaProject().isOnClasspath(unit))
 					fCollectedProblems= new ArrayList();
@@ -480,12 +488,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			 * @see IProblemRequestor#endReporting()
 			 */
 			public void endReporting() {
+				
 				if (!isActive())
 					return;
-					
+				
 				if (fProgressMonitor != null && fProgressMonitor.isCanceled())
 					return;
-					
 				
 				boolean isCanceled= false;
 				boolean temporaryProblemsChanged= false;
@@ -494,9 +502,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					
 					fPreviouslyOverlaid= fCurrentlyOverlaid;
 					fCurrentlyOverlaid= new ArrayList();
-
+					
 					if (fGeneratedAnnotations.size() > 0) {
-						temporaryProblemsChanged= true;	
+						temporaryProblemsChanged= true;
 						removeAnnotations(fGeneratedAnnotations, false, true);
 						fGeneratedAnnotations.clear();
 					}
@@ -507,19 +515,19 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 						Iterator e= fCollectedProblems.iterator();
 						while (e.hasNext()) {
 							
-							IProblem problem= (IProblem) e.next();
+							IProblem problem= (IProblem)e.next();
 							
 							if (fProgressMonitor != null && fProgressMonitor.isCanceled()) {
 								isCanceled= true;
 								break;
 							}
-								
+							
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
 								try {
 									ProblemAnnotation annotation= new ProblemAnnotation(problem, cu);
 									addAnnotation(annotation, position, false);
-									overlayMarkers(position, annotation);								
+									overlayMarkers(position, annotation);
 									fGeneratedAnnotations.add(annotation);
 									
 									temporaryProblemsChanged= true;
@@ -536,7 +544,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 					fPreviouslyOverlaid.clear();
 					fPreviouslyOverlaid= null;
 				}
-					
+				
 				if (temporaryProblemsChanged)
 					fireModelChanged();
 			}

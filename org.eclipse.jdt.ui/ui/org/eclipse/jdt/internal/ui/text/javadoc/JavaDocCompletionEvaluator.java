@@ -46,29 +46,24 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 
-public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
-	
-	protected final static String[] fgTagProposals= {
-		"@author", //$NON-NLS-1$
-		"@deprecated",  "@docRoot", //$NON-NLS-1$ //$NON-NLS-2$
-		"@exception", //$NON-NLS-1$
-		"@inheritDoc", //$NON-NLS-1$
-		"@link", "@linkplain", //$NON-NLS-1$ //$NON-NLS-2$
-		"@param", //$NON-NLS-1$
-		"@return", //$NON-NLS-1$
-		"@see", "@serial", "@serialData", "@serialField", "@since", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
-		"@throws", //$NON-NLS-1$
-		"@value", "@version" //$NON-NLS-1$ //$NON-NLS-2$
-	};
-	
-	protected final static String[] fgHTMLProposals= {
-		"<code>", "</code>", //$NON-NLS-2$ //$NON-NLS-1$
-		"<br>", //$NON-NLS-1$
-		"<b>", "</b>", //$NON-NLS-2$ //$NON-NLS-1$
-		"<i>", "</i>", //$NON-NLS-2$ //$NON-NLS-1$
-		"<pre>", "</pre>" //$NON-NLS-2$ //$NON-NLS-1$
-	};	
-	
+public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, IJavaDocTagConstants, IHtmlTagConstants {
+
+	private static final String[] fgHTMLProposals= new String[HTML_GENERAL_TAGS.length * 2];
+	{
+		String tag= null;
+
+		int index= 0;
+		int offset= 0;
+
+		while (index < fgHTMLProposals.length) {
+
+			tag= HTML_GENERAL_TAGS[offset];
+			fgHTMLProposals[index++]= HTML_TAG_PREFIX + tag + HTML_TAG_POSTFIX;
+			fgHTMLProposals[index++]= HTML_CLOSE_PREFIX + tag + HTML_TAG_POSTFIX;
+			offset++;
+		}
+	}
+
 	private ICompilationUnit fCompilationUnit;
 	private IDocument fDocument;
 	private int fCurrentPos;
@@ -198,7 +193,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 			char firstChar= fDocument.getChar(word1Begin);
 			if (firstChar == '@') {
 				String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
-				addProposals(prefix, fgTagProposals, JavaPluginImages.IMG_OBJS_JAVADOCTAG);
+				addProposals(prefix, JAVADOC_GENERAL_TAGS, JavaPluginImages.IMG_OBJS_JAVADOCTAG);
 				return;
 			} else if (firstChar == '<') {
 				String prefix= fDocument.get(word1Begin, fCurrentPos - word1Begin);
@@ -241,8 +236,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 
 	private void addAllTags(String prefix) {
 		String jdocPrefix= "@" + prefix; //$NON-NLS-1$
-		for (int i= 0; i < fgTagProposals.length; i++) {
-			String curr= fgTagProposals[i];
+		for (int i= 0; i < JAVADOC_GENERAL_TAGS.length; i++) {
+			String curr= JAVADOC_GENERAL_TAGS[i];
 			if (prefixMatches(jdocPrefix, curr)) {
 				fResult.add(createCompletion(curr, prefix, curr, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_JAVADOCTAG), null, 0));
 			}		

@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.text.comment;
 
 import org.eclipse.jface.text.Position;
 
+import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
+
 /**
  * Range in a comment region in comment region coordinates.
  * 

@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
+import org.eclipse.jdt.ui.text.spelling.SpellCheckEngine;
+import org.eclipse.jdt.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -1684,6 +1686,113 @@ public class PreferenceConstants {
 	public static final String EDITOR_SMART_TAB= "smart_tab"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether Java comments should be
+	 * spell-checked.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_CHECK_SPELLING= ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING;
+
+	/**
+	 * A named preference that controls whether words containing digits should
+	 * be skipped during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_IGNORE_DIGITS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_DIGITS;
+
+	/**
+	 * A named preference that controls whether mixed case words should be
+	 * skipped during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_IGNORE_MIXED= ISpellCheckPreferenceKeys.SPELLING_IGNORE_MIXED;
+
+	/**
+	 * A named preference that controls whether sentence capitalization should
+	 * be ignored during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_IGNORE_SENTENCE= ISpellCheckPreferenceKeys.SPELLING_IGNORE_SENTENCE;
+
+	/**
+	 * A named preference that controls whether upper case words should be
+	 * skipped during spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_IGNORE_UPPER= ISpellCheckPreferenceKeys.SPELLING_IGNORE_UPPER;
+
+	/**
+	 * A named preference that controls whether urls should be ignored during
+	 * spell-checking.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_IGNORE_URLS= ISpellCheckPreferenceKeys.SPELLING_IGNORE_URLS;
+
+	/**
+	 * A named preference that controls the locale used for spell-checking.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_LOCALE= ISpellCheckPreferenceKeys.SPELLING_LOCALE;
+
+	/**
+	 * A named preference that controls the number of proposals offered during
+	 * spell-checking.
+	 * <p>
+	 * Value is of type <code>Integer</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_PROPOSAL_THRESHOLD= ISpellCheckPreferenceKeys.SPELLING_PROPOSAL_THRESHOLD;
+
+	/**
+	 * A named preference that specifies the workspace user dictionary.
+	 * <p>
+	 * Value is of type <code>Integer</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_USER_DICTIONARY= ISpellCheckPreferenceKeys.SPELLING_USER_DICTIONARY;
+
+	/**
+	 * A named preference that specifies whether spelling dictionaries are available to content assist.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String SPELLING_ENABLE_CONTENTASSIST= ISpellCheckPreferenceKeys.SPELLING_ENABLE_CONTENTASSIST;
+
+	/**
 	 * A named preference that controls whether code snippets are formatted
 	 * in Javadoc comments.
 	 * <p>
@@ -2305,7 +2414,19 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.DEFAULT_PROFILE);
-
+		
+		// spell checking
+		store.setDefault(PreferenceConstants.SPELLING_CHECK_SPELLING, false);
+		store.setDefault(PreferenceConstants.SPELLING_LOCALE, SpellCheckEngine.getDefaultLocale().toString());
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_DIGITS, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_MIXED, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_SENTENCE, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_UPPER, true);
+		store.setDefault(PreferenceConstants.SPELLING_IGNORE_URLS, true);
+		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
+		store.setDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST, false);
+		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	
 

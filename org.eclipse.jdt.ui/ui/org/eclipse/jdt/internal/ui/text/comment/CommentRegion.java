@@ -33,6 +33,8 @@ import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.text.javadoc.IHtmlTagConstants;
+
 /**
  * Comment region in a source code document.
  * 

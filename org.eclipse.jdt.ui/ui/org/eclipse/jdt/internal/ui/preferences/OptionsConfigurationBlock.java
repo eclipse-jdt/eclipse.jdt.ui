@@ -141,7 +141,7 @@ public abstract class OptionsConfigurationBlock {
 		return false;
 	}	
 		
-	protected final void setOptions(Map map) {
+	protected void setOptions(Map map) {
 		if (fProject != null) {
 			fProject.setOptions(map);
 		} else {
@@ -180,7 +180,7 @@ public abstract class OptionsConfigurationBlock {
 		return checkBox;
 	}
 	
-	protected void addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
+	protected Combo addComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {
 		ControlData data= new ControlData(key, values);
 		
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
@@ -205,6 +205,7 @@ public abstract class OptionsConfigurationBlock {
 		comboBox.select(data.getSelection(currValue));
 		
 		fComboBoxes.add(comboBox);
+		return comboBox;
 	}
 	
 	protected void addInversedComboBox(Composite parent, String label, String key, String[] values, String[] valueLabels, int indent) {

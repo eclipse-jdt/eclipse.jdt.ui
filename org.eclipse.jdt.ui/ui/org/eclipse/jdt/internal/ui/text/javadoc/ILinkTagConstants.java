@@ -9,21 +9,18 @@
  *     IBM Corporation - initial API and implementation
  *****************************************************************************/
 
-package org.eclipse.jdt.internal.ui.text.comment;
+package org.eclipse.jdt.internal.ui.text.javadoc;
 
 /**
- * Html tag constants.
+ * Link tag constants.
  * 
  * @since 3.0
  */
-public interface IHtmlTagConstants {
+public interface ILinkTagConstants {
 
-	/** Html tag close prefix */
-	public static final String HTML_CLOSE_PREFIX= "</"; //$NON-NLS-1$
+	/** Link tag postfix */
+	public static final char LINK_TAG_POSTFIX= '}';
 
-	/** Html tag postfix */
-	public static final char HTML_TAG_POSTFIX= '>';
-
-	/** Html tag prefix */
-	public static final char HTML_TAG_PREFIX= '<';
+	/** Link tag prefix */
+	public static final String LINK_TAG_PREFIX= "{@"; //$NON-NLS-1$
 }

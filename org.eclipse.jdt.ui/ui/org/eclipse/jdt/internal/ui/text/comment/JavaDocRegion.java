@@ -32,6 +32,8 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.text.javadoc.IJavaDocTagConstants;
+
 /**
  * Javadoc region in a source code document.
  * 
