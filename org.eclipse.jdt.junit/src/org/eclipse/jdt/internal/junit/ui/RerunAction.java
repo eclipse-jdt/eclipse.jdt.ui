@@ -4,15 +4,6 @@
  */
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.TextTransfer;
-import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jface.action.Action;

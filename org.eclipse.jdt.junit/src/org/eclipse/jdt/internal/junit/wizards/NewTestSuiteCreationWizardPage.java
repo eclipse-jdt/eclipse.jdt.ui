@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
@@ -295,23 +294,26 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 			try {
 				if (parent instanceof IPackageFragment) {
 					IPackageFragment pack= (IPackageFragment) parent;
-					ICompilationUnit[] cuArray= pack.getCompilationUnits();
-					ArrayList typesArrayList= new ArrayList();
-					for (int i= 0; i < cuArray.length; i++) {
-						ICompilationUnit cu= cuArray[i];
-						IType[] types= cu.getTypes();
-						for (int j= 0; j < types.length; j++) {
-							if (TestSearchEngine.isTestImplementor(types[j]))	
-								typesArrayList.add(types[j]);
+					if (pack.exists()) { 
+						ICompilationUnit[] cuArray= pack.getCompilationUnits();
+						ArrayList typesArrayList= new ArrayList();
+						for (int i= 0; i < cuArray.length; i++) {
+							ICompilationUnit cu= cuArray[i];
+							IType[] types= cu.getTypes();
+							for (int j= 0; j < types.length; j++) {
+								if (TestSearchEngine.isTestImplementor(types[j]))	
+									typesArrayList.add(types[j]);
+							}
 						}
+						return typesArrayList.toArray();
 					}
-					return typesArrayList.toArray();
 				}
 			} catch (JavaModelException e) {
 				JUnitPlugin.log(e);
 			}
 			return new Object[0];
 		}
+		
 		public void dispose() {
 		}
 		

@@ -14,9 +14,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.IProcess;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -168,11 +165,7 @@ public class TestSearchEngine {
 	}
 	
 	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws JavaModelException {	
-		// for backward compatibility with 1.0 
-		// use the deprecated createJavaSearchScope(IResource[] constructor)
-		//IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
-		IResource resource= element.getCorrespondingResource();
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { resource });
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
 		TestSearchEngine searchEngine= new TestSearchEngine(); 
 		return searchEngine.searchMethod(pm, scope);
 	}

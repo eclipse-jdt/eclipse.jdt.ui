@@ -7,8 +7,6 @@ package org.eclipse.jdt.internal.junit.wizards;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -44,7 +42,6 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		fPage= new NewTestCaseCreationWizardPage();
 		fPage2= new NewTestCaseCreationWizardPage2(fPage);
 		addPage(fPage);

@@ -43,7 +43,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
@@ -210,7 +209,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	 */
 	protected void handleSearchButtonSelected() {
 		Shell shell = getShell();
-		IWorkbenchWindow workbenchWindow = JUnitPlugin.getActiveWorkbenchWindow();
 		
 		IJavaProject javaProject = getJavaProject();
 		

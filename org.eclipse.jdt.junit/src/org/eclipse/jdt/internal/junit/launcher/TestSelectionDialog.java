@@ -14,7 +14,6 @@ import org.eclipse.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.junit.util.*;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 import org.eclipse.jdt.core.IJavaProject;

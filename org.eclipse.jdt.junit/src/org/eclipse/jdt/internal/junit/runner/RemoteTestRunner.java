@@ -142,10 +142,7 @@ public class RemoteTestRunner implements TestListener {
 		// hack to pass the AllTests of JUnit
 		// force static initialization of BaseTestRunner 
 		// by creating a junit.textui.TestRunner and free
-		// it immediately.
-		junit.runner.BaseTestRunner runner= new junit.textui.TestRunner();
-		runner= null;
-		
+		// it immediately.		
 		RemoteTestRunner testRunServer= new RemoteTestRunner();
 		testRunServer.init(args);
 		testRunServer.run();

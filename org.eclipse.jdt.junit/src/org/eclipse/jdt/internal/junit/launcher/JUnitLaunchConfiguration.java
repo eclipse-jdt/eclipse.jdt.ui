@@ -19,12 +19,9 @@ import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.launching.ExecutionArguments;
-import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage;
 
 /**
  * Launch configuration delegate for a plain JUnit test.

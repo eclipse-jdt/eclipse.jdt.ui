@@ -125,7 +125,6 @@ class FailureRunView implements ITestRunView, IMenuListener {
 	}
 	
 	public void setSelectedTest(String testName){
-		TestRunInfo testInfo= fRunnerViewPart.getTestInfo(testName);
 		TableItem[] items= fTable.getItems();
 		for (int i= 0; i < items.length; i++) {
 			TableItem tableItem= items[i]; 			

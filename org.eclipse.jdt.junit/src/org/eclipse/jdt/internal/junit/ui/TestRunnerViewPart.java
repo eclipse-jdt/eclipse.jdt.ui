@@ -637,7 +637,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 
 	private CTabFolder createTestRunViews(Composite parent) {
 		CTabFolder tabFolder= new CTabFolder(parent, SWT.TOP);
-		GridData gridData= new GridData();
 		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
 
 		ITestRunView failureRunView= new FailureRunView(tabFolder, this); 
@@ -686,7 +685,6 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener, IP
 		label.setImage(fStackViewIcon);
 		bottom.setTopLeft(label);
 
-		Composite traceView= fFailureView.getComposite();
 		// fill the failure trace viewer toolbar
 		ToolBarManager failureToolBarmanager= new ToolBarManager(failureToolBar);
 		failureToolBarmanager.add(new EnableStackFilterAction(fFailureView));			

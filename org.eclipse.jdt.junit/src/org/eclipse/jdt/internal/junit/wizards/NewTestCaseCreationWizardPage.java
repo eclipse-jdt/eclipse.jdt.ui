@@ -11,13 +11,10 @@ import java.util.ListIterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,13 +25,11 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -48,9 +43,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -147,7 +140,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		if (element != null) {
 			IType classToTest= null;
 			// evaluate the enclosing type
-			IPackageFragment pack= (IPackageFragment) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			IType typeInCompUnit= (IType) element.getAncestor(IJavaElement.TYPE);
 			if (typeInCompUnit != null) {
 				if (typeInCompUnit.getCompilationUnit() != null) {
@@ -430,7 +422,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			genStubSettings.fMethodOverwrites= true;
 			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			StringBuffer field= new StringBuffer();
 			constr += "public "+getTypeName()+"(String name) {\nsuper(name);\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		type.createMethod(constr, null, true, null);	

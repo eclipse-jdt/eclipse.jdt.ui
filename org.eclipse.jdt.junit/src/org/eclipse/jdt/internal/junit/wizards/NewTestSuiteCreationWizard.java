@@ -8,8 +8,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IBuffer;
@@ -45,7 +43,6 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	 */	
 	public void addPages() {
 		super.addPages();
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 		fPage= new NewTestSuiteCreationWizardPage();
 		addPage(fPage);
 		fPage.init(getSelection());
