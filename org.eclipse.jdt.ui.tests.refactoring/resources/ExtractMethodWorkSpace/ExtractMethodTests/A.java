@@ -1,11 +1,10 @@
-public class A {
-	public void foo() {
-		bar(baz(), baz());
+class A {
+	public A() {
+		this(1);
 	}
-	public void bar(int i, int y) {
+	public A(int i) {
 	}
-	public int baz() {
-		return 0;
+	public int getInt() {
+		return 10;
 	}
 }
-
