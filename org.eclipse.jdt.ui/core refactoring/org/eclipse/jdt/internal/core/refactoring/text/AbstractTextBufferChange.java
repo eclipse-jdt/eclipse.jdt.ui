@@ -4,26 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.text;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.base.Change;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
-import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
-import org.eclipse.jdt.internal.core.refactoring.NullChange;
+import java.util.ArrayList;import java.util.Collections;import java.util.Comparator;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.NullChange;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * A default implementation of <code>ITextBufferChange</code> and <code>ITextChange</code>.
@@ -150,24 +131,6 @@ public abstract class AbstractTextBufferChange extends Change implements ITextBu
 	protected abstract IChange createChange(List textChanges, boolean isUndo) throws CoreException;	
 	
 	//---- IChange ----------------------------------------------------------------
-		
-	/* (Non-Javadoc)
-	 * Method declared in IChange.
-	 */
-	public void aboutToPerform() {
-		for (Iterator iter= fTextModifications.iterator(); iter.hasNext(); ) {
-			((IChange)iter.next()).aboutToPerform();
-		}
-	}
-	 
-	/* (Non-Javadoc)
-	 * Method declared in IChange.
-	 */
-	public void performed() {
-		for (Iterator iter= fTextModifications.iterator(); iter.hasNext(); ) {
-			((IChange)iter.next()).performed();
-		}
-	}
 	 
 	/* (Non-Javadoc)
 	 * Method declared in IChange.

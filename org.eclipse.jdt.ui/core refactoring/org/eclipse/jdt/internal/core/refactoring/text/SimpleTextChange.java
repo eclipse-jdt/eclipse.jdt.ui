@@ -4,22 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.text;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.refactoring.base.Change;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ITextChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * A simple text change that operates on an <code>ITextBuffer</code>. A <code>SimpleTextChange
@@ -163,7 +148,23 @@ public abstract class SimpleTextChange extends Change implements ITextChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		Assert.isTrue(false, "SimpleTextChange can only be executed from within a AbstractTextBufferChange");
+		return null;
+	}
+	
+	/* (Non-Javadoc)
+	 * Method declared in IChange.
+	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException {
+		Assert.isTrue(false, "SimpleTextChange can only be executed from within a AbstractTextBufferChange");
+	}
+	
+		
+	/* (Non-Javadoc)
+	 * Method declared in IChange.
+	 */
+	public void performed() {
 		Assert.isTrue(false, "SimpleTextChange can only be executed from within a AbstractTextBufferChange");
 	}
 	

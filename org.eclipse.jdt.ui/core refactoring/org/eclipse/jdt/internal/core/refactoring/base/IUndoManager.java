@@ -67,16 +67,18 @@ public interface IUndoManager {
 	 * 
 	 * @param pm a progress monitor to report progress during performing
 	 *  the undo change. The progress monitor must not be <code>null</code>
+	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public void performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
+	public RefactoringStatus performUndo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
 
 	/**
 	 * Redo the top most redo change.
 	 * 
 	 * @param pm a progress monitor to report progress during performing
 	 *  the redo change. The progress monitor must not be <code>null</code>
+	 * @return a status indicating if the undo preflight produced any error
 	 */	
-	public void performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
+	public RefactoringStatus performRedo(ChangeContext context, IProgressMonitor pm) throws JavaModelException;
 	
 	/**
 	 * Returns <code>true</code> if there is anything to redo, otherwise

@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring;
 
-import java.util.ArrayList;import java.util.Collections;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
+import java.util.ArrayList;import java.util.Collections;import java.util.Iterator;import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.Change;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * Represents a composite change.
@@ -35,12 +35,17 @@ public class CompositeChange extends Change implements ICompositeChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public void aboutToPerform() {
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		RefactoringStatus result= new RefactoringStatus();
+		pm.beginTask("", fChanges.size() + 1);
+		result.merge(super.aboutToPerform(context, new SubProgressMonitor(pm,1)));
 		for (Iterator iter= fChanges.iterator(); iter.hasNext(); ) {
-			((IChange)iter.next()).aboutToPerform();
+			result.merge(((IChange)iter.next()).aboutToPerform(context, new SubProgressMonitor(pm,1)));
 		}
+		return result;
 	}
-	 
+	
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */

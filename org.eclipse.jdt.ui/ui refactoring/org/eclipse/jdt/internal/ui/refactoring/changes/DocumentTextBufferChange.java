@@ -5,20 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.changes;
 
-import java.util.List;
-
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;
-
-import org.eclipse.jdt.internal.ui.util.IDocumentManager;
+import java.util.List;import org.eclipse.jface.text.Document;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.core.refactoring.text.ITextBuffer;import org.eclipse.jdt.internal.ui.util.IDocumentManager;
 
 public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	
@@ -42,14 +29,16 @@ public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	/* (Non-Javadoc)
 	 * Method declared in IChange.
 	 */
-	public void aboutToPerform() {
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		RefactoringStatus result= super.aboutToPerform(context, pm);
 		try {
 			connectTextBuffer();
 		} catch (CoreException e) {
-			return;
+			return result;
 		}
 		fConnected= true;
-		super.aboutToPerform();
+		return result;
 	}
 	 
 	/* (Non-Javadoc)

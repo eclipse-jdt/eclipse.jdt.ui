@@ -135,10 +135,12 @@ public class ExtractMethodTests extends RefactoringTest {
 				assert(!status.isOK());
 				break;
 			case COMPARE_WITH_OUTPUT:
+				assert(!status.hasFatalError());
 				IChange change= refactoring.createChange(pm);
 				assertNotNull(change);
-				change.aboutToPerform();
-				change.perform(new ChangeContext(new TestExceptionHandler()), pm);
+				ChangeContext context= new ChangeContext(new TestExceptionHandler());
+				change.aboutToPerform(context, new NullProgressMonitor());
+				change.perform(context, pm);
 				change.performed();
 				assertNotNull(change.getUndoChange());
 				source= unit.getSource();
@@ -860,6 +862,22 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	public void test453() throws Exception {
+		tryTest();
+	}
+	
+	public void test454() throws Exception {
+		tryTest();
+	}
+	
+	public void test455() throws Exception {
+		tryTest();
+	}
+	
+	public void test456() throws Exception {
+		tryTest();
+	}
+	
+	public void test457() throws Exception {
 		tryTest();
 	}
 	

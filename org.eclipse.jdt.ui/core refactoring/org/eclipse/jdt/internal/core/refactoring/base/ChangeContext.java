@@ -4,12 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.base;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
-
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import java.util.ArrayList;import java.util.List;import org.eclipse.core.resources.IFile;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.text.AbstractTextBufferChange;
 
 /**
  * A change context is used to given an <code>IChange</code> object access to several workspace
@@ -22,6 +17,8 @@ import org.eclipse.jdt.internal.core.refactoring.Assert;
  */ 
 public class ChangeContext {
 
+	private IFile[] fUnsavedFiles;
+	private List fHandledUnsavedFiles;
 	private IChangeExceptionHandler fExceptionHandler;
 	private IChange fFailedChange;
 	private boolean fTryToUndo;
@@ -34,8 +31,47 @@ public class ChangeContext {
 	 *  a change. Must not be <code>null</code>
 	 */
 	public ChangeContext(IChangeExceptionHandler handler) {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		this(handler, new IFile[] {});
+	}
+	
+	/**
+	 * Creates a new change context with the given exception handler.
+	 * 
+	 * @param handler object to handle exceptions caught during performing
+	 *  a change. Must not be <code>null</code>
+	 */
+	public ChangeContext(IChangeExceptionHandler handler, IFile[] unsavedFiles) {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
 		fExceptionHandler= handler;
 		Assert.isNotNull(fExceptionHandler);
+		fUnsavedFiles= unsavedFiles;
+		Assert.isNotNull(fUnsavedFiles);
+		fHandledUnsavedFiles= new ArrayList(fUnsavedFiles.length);
+	}
+	
+	/**
+	 * Returns the list of unsaved resources.
+	 * 
+	 * @return the list of unsaved resources
+	 */
+	public IFile[] getUnsavedFiles() {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		return fUnsavedFiles;
+	}
+	
+	public void checkUnsavedFile(RefactoringStatus status, IFile file) {
+		if (fHandledUnsavedFiles.contains(file))
+			return;
+			
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		for (int i= 0; i < fUnsavedFiles.length; i++) {
+			if (fUnsavedFiles[i].equals(file)) {
+				status.addFatalError(file.getFullPath().toString());
+				fHandledUnsavedFiles.add(file);
+				return;
+			}
+		}
 	}
 		
 	/**

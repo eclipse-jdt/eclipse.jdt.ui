@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.packages;
 
-import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.AbstractRenameChange;import org.eclipse.jdt.internal.core.refactoring.Assert;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 
 /**
  * <p>
@@ -45,4 +45,28 @@ public class RenamePackageChange extends AbstractRenameChange {
 	protected IChange createUndoChange() {
 		return new RenamePackageChange(createNewPath(), getNewName(), getOldName());
 	}
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
+		// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+		RefactoringStatus result= super.aboutToPerform(context, pm);
+		IJavaElement element= getCorrespondingJavaElement();
+		if (element != null && element.exists() && context.getUnsavedFiles().length > 0 && element instanceof IPackageFragment) {
+			IPackageFragment pack= (IPackageFragment)element;
+			try {
+				ICompilationUnit[] units= pack.getCompilationUnits();
+				if (units == null || units.length == 0)
+					return result;
+					
+				pm.beginTask("", units.length);
+				for (int i= 0; i < units.length; i++) {
+					pm.subTask("Checking change for: " + element.getElementName());
+					checkIfResourceIsUnsaved(units[i], result, context);
+					pm.worked(1);
+				}
+				pm.done();
+			} catch (JavaModelException e) {
+				handleJavaModelException(e, result);
+			}
+		}
+		return result;
+	}
 }

@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.util.Assert;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.internal.core.refactoring.base.ChangeAbortException;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.refactoring.changes.ChangeExceptionHandler;
 
 /**
  * Operation that, when performed, performes a change to the workbench.
@@ -120,7 +120,9 @@ public class PerformChangeOperation implements IRunnableWithProgress {
 	private void executeChange(IProgressMonitor pm) throws InterruptedException, InvocationTargetException {
 		Assert.isNotNull(fChangeContext);
 		try {
-			fChange.aboutToPerform();
+			// Since we have done precondition checking this check should be fast. No PM.
+			// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+			fChange.aboutToPerform(fChangeContext, new NullProgressMonitor());
 			(new WorkspaceModifyOperation() {
 				protected void execute(IProgressMonitor pm) throws CoreException, InvocationTargetException {
 					try {

@@ -35,10 +35,10 @@ public interface IChange {
 	 * performed</code> are used as follows:
 	 * <pre>
 	 *	try {
-	 *		change.aboutToPerform();
+	 *		change.aboutToPerform(context);
 	 *		workbench.run(new IWorkspaceRunnable() {
 	 *			public void run(IProgressMonitor pm) throws CoreException {
-	 *				change.perform(pm);
+	 *				change.perform(context, pm);
 	 *			}
 	 *		}, progressMonitor);
 	 *		change.performed();
@@ -47,7 +47,8 @@ public interface IChange {
 	 *	}
 	 * </pre>
 	 */
-	public void aboutToPerform();
+	// PR: 1GEWDUH: ITPJCORE:WINNT - Refactoring - Unable to undo refactor change
+	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm);
 	 
 	/**
 	 * Performs this change. It is <em>critical</em> that you call <code>perform</code> 
