@@ -63,10 +63,11 @@ public class GetterSetterUtil {
 	}	
 
 	public static IMethod getGetter(IField field) throws JavaModelException{
-		IMethod primaryCandidate= JavaModelUtil.findMethod(getGetterName(field, EMPTY, true), new String[0], false, field.getDeclaringType());
+		String getterName= getGetterName(field, EMPTY, true);
+		IMethod primaryCandidate= JavaModelUtil.findMethod(getterName, new String[0], false, field.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(field) || (primaryCandidate != null && primaryCandidate.exists()))
 			return primaryCandidate;
-		//bug 30906 describes why we need to look for other alternatives here
+		//bug 30906 describes why we need to look for other alternatives here (try with get... for booleans)
 		String secondCandidateName= getGetterName(field, EMPTY, false);
 		return JavaModelUtil.findMethod(secondCandidateName, new String[0], false, field.getDeclaringType());
 	}
