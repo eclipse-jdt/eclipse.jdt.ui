@@ -586,7 +586,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @see IInformationControl#isFocusControl()
 	 */
 	public boolean isFocusControl() {
-		return fShell.isFocusControl();
+		return fTreeViewer.getControl().isFocusControl() || fFilterText.isFocusControl();
 	}
 
 	/*
