@@ -19,6 +19,7 @@ import java.util.Map;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Item;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -63,7 +65,36 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	private IJavaElement fInput= null;
 
 	private AppearanceAwareLabelProvider fInnerLabelProvider;
+	protected Color fForegroundColor;
 	
+
+	private class OutlineLabelProvider extends AppearanceAwareLabelProvider {
+
+		private OutlineLabelProvider() {
+			super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public Color getForeground(Object element) {
+			if (fOutlineContentProvider.isShowingInheritedMembers()) {
+				if (element instanceof IJavaElement) {
+					IJavaElement je= (IJavaElement)element;
+					if (fInput.getElementType() == IJavaElement.CLASS_FILE)
+						je= je.getAncestor(IJavaElement.CLASS_FILE);
+					else
+						je= je.getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (fInput.equals(je)) {
+						if (fForegroundColor == null)
+							fForegroundColor= getTreeViewer().getControl().getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
+						return fForegroundColor;
+					}
+				}
+			}
+			return null;
+		}
+	}
 
 	private class OutlineTreeViewer extends TreeViewer {
 		
@@ -73,6 +104,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			super(tree);
 		}
 		
+		/**
+		 * {@inheritDoc}
+		 */
 		protected Object[] getFilteredChildren(Object parent) {
 			Object[] result = getRawChildren(parent);
 			int unfilteredChildren= result.length;
@@ -176,8 +210,32 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			}
 			return th;
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			super.inputChanged(viewer, oldInput, newInput);
+			fTypeHierarchies.clear();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void dispose() {
+			super.dispose();
+			fTypeHierarchies.clear();
+		}
 	}
 
+	/**
+	 * Creates a new Java outline information control.
+	 * 
+	 * @param parent
+	 * @param shellStyle
+	 * @param treeStyle
+	 * @param commandId
+	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, String commandId) {
 		super(parent, shellStyle, treeStyle, commandId, true);
 	}
@@ -191,6 +249,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return text;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	protected TreeViewer createTreeViewer(Composite parent, int style) {
 		Tree tree= new Tree(parent, SWT.SINGLE | (style & ~SWT.MULTI));
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
@@ -212,42 +273,33 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.setSorter(new JavaElementSorter());
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
-		fInnerLabelProvider= new AppearanceAwareLabelProvider(
-					AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
-					AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
-				);
+		fInnerLabelProvider= new OutlineLabelProvider();
+		
 		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fInnerLabelProvider));
 		treeViewer.getTree().addKeyListener(getKeyAdapter());
 		
 		return treeViewer;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	protected String getStatusFieldText() {
-//		String label= "Click here";
-//		
-//		KeySequence[] sequences= getInvokingCommandKeySequences();
-//		if (sequences != null && sequences.length > 0)
-//			label+= " or press " + sequences[0].format();
-//		
-//		if (fOutlineContentProvider.isShowingInheritedMembers())
-//			return label + " to hide inherited members";
-//		else
-//			return label + " to see inherited members";
-
-		
-		
 		KeySequence[] sequences= getInvokingCommandKeySequences();
 		if (sequences == null || sequences.length == 0)
 			return ""; //$NON-NLS-1$
 		
-		String label= "Press '" + sequences[0].format();
+		String keySequence= sequences[0].format();
 		
 		if (fOutlineContentProvider.isShowingInheritedMembers())
-			return label + "' to hide inherited members";
+			return JavaUIMessages.getFormattedString("JavaOutlineControl.statusFieldText.hideInheritedMembers", keySequence); //$NON-NLS-1$
 		else
-			return label + "' to see inherited members";
+			return JavaUIMessages.getFormattedString("JavaOutlineControl.statusFieldText.showInheritedMembers", keySequence); //$NON-NLS-1$
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public void setInput(Object information) {
 		if (information == null || information instanceof String) {
 			inputChanged(null, null);
@@ -285,6 +337,9 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		return fKeyAdapter;		
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 */
 	protected void handleStatusFieldClicked() {
 		toggleShowInheritedMembers();
 	}
@@ -296,5 +351,14 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		fInnerLabelProvider.setTextFlags(flags);	
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {
+		super.dispose();
+		fOutlineContentProvider.dispose();
+		fInnerLabelProvider.dispose();
 	}
 }

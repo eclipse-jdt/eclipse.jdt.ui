@@ -577,15 +577,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		return null;
 	}
 
-	/*
-	 * @see IInformationControl#setInformation(String)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setInformation(String information) {
 		// this method is ignored, see IInformationControlExtension2
 	}
 	
-	/*
-	 * @see IInformationControlExtension2#setInput(Object)
+	/**
+	 * {@inheritDoc}
 	 */
 	public abstract void setInput(Object information);
 	
@@ -597,15 +597,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 	}
 
-	/*
-	 * @see IInformationControl#setVisible(boolean)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setVisible(boolean visible) {
 			fShell.setVisible(visible);
 	}
 
-	/*
-	 * @see IInformationControl#dispose()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void dispose() {
 		if (fShell != null) {
@@ -621,30 +621,30 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			fStatusTextFont.dispose();
 	}
 
-	/* 
-	 * @see org.eclipse.jface.text.IInformationControlExtension#hasContents()
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean hasContents() {
 		return fTreeViewer != null && fTreeViewer.getInput() != null;
 	}
 
-	/* 
-	 * @see org.eclipse.jface.text.IInformationControl#setSizeConstraints(int, int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
 		//fMaxWidth= maxWidth;
 		//fMaxHeight= maxHeight;
 	}
 
-	/* 
-	 * @see org.eclipse.jface.text.IInformationControl#computeSizeHint()
+	/**
+	 * {@inheritDoc}
 	 */
 	public Point computeSizeHint() {
 		return fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 	}
 
-	/*
-	 * @see IInformationControl#setLocation(Point)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setLocation(Point location) {
 		Rectangle trim= fShell.computeTrim(0, 0, 0, 0);
@@ -654,29 +654,29 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fShell.setLocation(location);		
 	}
 
-	/*
-	 * @see IInformationControl#setSize(int, int)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setSize(int width, int height) {
 		fShell.setSize(width, height);
 	}
 
-	/*
-	 * @see IInformationControl#addDisposeListener(DisposeListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addDisposeListener(DisposeListener listener) {
 		fShell.addDisposeListener(listener);
 	}
 
-	/*
-	 * @see IInformationControl#removeDisposeListener(DisposeListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void removeDisposeListener(DisposeListener listener) {
 		fShell.removeDisposeListener(listener);
 	}
 
-	/*
-	 * @see IInformationControl#setForegroundColor(Color)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setForegroundColor(Color foreground) {
 		fTreeViewer.getTree().setForeground(foreground);
@@ -686,8 +686,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			fStatusField.getParent().setForeground(foreground);
 	}
 
-	/*
-	 * @see IInformationControl#setBackgroundColor(Color)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setBackgroundColor(Color background) {
 		fTreeViewer.getTree().setBackground(background);
@@ -699,30 +699,30 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 	}
 
-	/*
-	 * @see IInformationControl#isFocusControl()
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean isFocusControl() {
 		return fTreeViewer.getControl().isFocusControl() || fFilterText.isFocusControl();
 	}
 
-	/*
-	 * @see IInformationControl#setFocus()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void setFocus() {
 		fShell.forceFocus();
 		fFilterText.setFocus();
 	}
 
-	/*
-	 * @see IInformationControl#addFocusListener(FocusListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void addFocusListener(FocusListener listener) {
 		fShell.addFocusListener(listener);
 	}
 
-	/*
-	 * @see IInformationControl#removeFocusListener(FocusListener)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void removeFocusListener(FocusListener listener) {
 		fShell.removeFocusListener(listener);
