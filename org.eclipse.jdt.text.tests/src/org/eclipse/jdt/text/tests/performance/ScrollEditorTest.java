@@ -137,10 +137,14 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 				SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
 			}
 			performanceMeter.stop();
-			EditorTestHelper.runEventQueue(500);
+			long timeout= System.currentTimeMillis() + 5000;
+			while (text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1 && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertTrue("TopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
 			SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO);
-			EditorTestHelper.runEventQueue(500);
+			timeout= System.currentTimeMillis() + 5000;
+			while (text.getTopIndex() != 0 && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertEquals(0, text.getTopIndex());
 		}
 	}
