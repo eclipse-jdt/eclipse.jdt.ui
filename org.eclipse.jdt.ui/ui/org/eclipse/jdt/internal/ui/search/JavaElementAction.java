@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
@@ -30,7 +31,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
