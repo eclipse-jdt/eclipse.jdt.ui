@@ -128,7 +128,7 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 		if (fSmartActionItem == null)
 			return;
 		Control c= getControl();
-		if (c == null && c.isDisposed())
+		if (c == null || c.isDisposed())
 			return;
 			
 		fSmartActionItem.setVisible(visible);
