@@ -157,7 +157,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		int methodStart= curr.getSourceRange().getOffset();
 		for (int i= members.length-1; i >= 0; i--) {
 			IMember member= (IMember) members[i];
-			if (methodStart < member.getSourceRange().getOffset()) {
+			if (methodStart >= member.getSourceRange().getOffset()) {
 				return res;
 			}
 			res= member;
