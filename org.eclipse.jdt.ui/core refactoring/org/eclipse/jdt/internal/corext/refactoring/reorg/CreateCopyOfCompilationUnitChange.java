@@ -96,7 +96,6 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			SearchResult searchResult= results[j];
 			String oldName= wc.findPrimaryType().getElementName();
 			int offset= searchResult.getEnd() - oldName.length();
-			int length= searchResult.getEnd() - searchResult.getStart();
 			manager.get(wc).addTextEdit(name, SimpleTextEdit.createReplace(offset, oldName.length(), newName));
 		}
 		return manager;
