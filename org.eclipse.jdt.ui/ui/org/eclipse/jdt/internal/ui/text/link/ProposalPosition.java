@@ -29,7 +29,9 @@ public class ProposalPosition extends TypedPosition {
 	 */
 	public boolean equals(Object o) {
 		if (o instanceof ProposalPosition) {
-			return Arrays.equals(fChoices, ((ProposalPosition)o).fChoices);
+			if (super.equals(o)) {
+				return Arrays.equals(fChoices, ((ProposalPosition)o).fChoices);
+			}
 		}
 		return false;
 	}
