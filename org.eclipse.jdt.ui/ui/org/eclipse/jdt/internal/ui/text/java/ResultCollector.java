@@ -188,9 +188,13 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
 		char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers,
 		int start, int end, int relevance) {
+			
+		if (completionName == null)
+			return;
 	
 		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
-		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, returnTypeName.length == 0));
+		boolean isConstructor= returnTypeName == null ? true : returnTypeName.length == 0;
+		proposal.setProposalInfo(new ProposalInfo(fJavaProject, declaringTypePackageName, declaringTypeName, name, parameterPackageNames, parameterTypeNames, isConstructor));
 
 		boolean hasOpeningBracket= completionName.length == 0 || (completionName.length > 0 && completionName[completionName.length - 1] == ')');
 	
