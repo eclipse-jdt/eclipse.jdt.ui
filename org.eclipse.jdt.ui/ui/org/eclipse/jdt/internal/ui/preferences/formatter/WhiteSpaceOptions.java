@@ -284,7 +284,7 @@ public final class WhiteSpaceOptions {
         
     private final static PreviewSnippet TYPE_PARAMETER_PREVIEW= new PreviewSnippet(
             CodeFormatter.K_CLASS_BODY_DECLARATIONS,
-            "class MyGenericType<S, T> { }" //$NON-NLS-1$
+            "class MyGenericType<S, T extends Element & List> { }" //$NON-NLS-1$
         );
     
     private final static PreviewSnippet WILDCARD_PREVIEW= new PreviewSnippet(
@@ -320,6 +320,7 @@ public final class WhiteSpaceOptions {
         createBeforeSemicolonTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.semicolon")); //$NON-NLS-1$
         createBeforeQuestionTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.question_mark")); //$NON-NLS-1$
         createBeforeAtTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.at")); //$NON-NLS-1$
+        createBeforeAndTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.and")); //$NON-NLS-1$
         roots.add(before);
 
         final InnerNode after= new InnerNode(null, workingValues, "WhiteSpaceOptions.after"); //$NON-NLS-1$
@@ -336,6 +337,8 @@ public final class WhiteSpaceOptions {
         createAfterSemicolonTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.semicolon")); //$NON-NLS-1$
         createAfterQuestionTree(workingValues, createChild(after, workingValues, "WhiteSpaceOptions.question_mark")); //$NON-NLS-1$
         createAfterAtTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.at")); //$NON-NLS-1$
+        createAfterAndTree(workingValues, createChild(before, workingValues, "WhiteSpaceOptions.and")); //$NON-NLS-1$
+
         roots.add(after);
 
         final InnerNode between= new InnerNode(null, workingValues, "WhiteSpaceOptions.between"); //$NON-NLS-1$
@@ -528,14 +531,16 @@ public final class WhiteSpaceOptions {
         
         parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_at"); //$NON-NLS-1$
         createAfterAtTree(workingValues, parent);      
+
+        //TODO: enable after I20040914
+        /*parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.before_and"); //$NON-NLS-1$
+        createBeforeAndTree(workingValues, parent); 
+        
+        parent= createParentNode(roots, workingValues, "WhiteSpaceOptions.after_and"); //$NON-NLS-1$
+        createAfterAndTree(workingValues, parent);*/      
         
         return roots;
 	}
-    
-    
-    
-    
-    
     
     private static InnerNode createParentNode(List roots, Map workingValues, String text) {
         final InnerNode parent= new InnerNode(null, workingValues, text);
@@ -584,6 +589,7 @@ public final class WhiteSpaceOptions {
 		final InnerNode paramtypes= new InnerNode(null, workingValues, "WhiteSpaceTabPage.paramentrized_types"); //$NON-NLS-1$
 		createParametrizedTypeTree(workingValues, paramtypes);
 		createTypeArgumentTree(workingValues, paramtypes);
+		createTypeParameterTree(workingValues, paramtypes);
 		createWildcardTypeTree(workingValues, paramtypes);
 		
         final ArrayList roots= new ArrayList();
@@ -601,7 +607,12 @@ public final class WhiteSpaceOptions {
 	}
 	
 	private static void createBeforeAtTree(Map workingValues, final InnerNode parent) {
-        createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+		createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
+ 	}
+	
+	private static void createBeforeAndTree(Map workingValues, final InnerNode parent) {
+        //TODO: enable after I20040914
+		//createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
  	}
 
     private static void createBeforeSemicolonTree(Map workingValues, final InnerNode parent) {
@@ -767,9 +778,12 @@ public final class WhiteSpaceOptions {
         createOption(parent, workingValues, "WhiteSpaceOptions.annotation_type", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AT_IN_ANNOTATION_TYPE_DECLARATION, ANNOTATION_DECL_PREVIEW); //$NON-NLS-1$
 	}
 
+	private static void createAfterAndTree(Map workingValues, final InnerNode parent) {
+        //TODO: enable after I20040914
+        //createOption(parent, workingValues, "WhiteSpaceOptions.type_parameters", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+ 	}
 	
     private static void createAfterSemicolonTree(Map workingValues, final InnerNode parent) {
-
         createOption(parent, workingValues, "WhiteSpaceOptions.for", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_SEMICOLON_IN_FOR, FOR_PREVIEW); //$NON-NLS-1$
     }
 
@@ -907,12 +921,6 @@ public final class WhiteSpaceOptions {
         createOption(root, workingValues, "WhiteSpaceTabPage.classes.before_comma_implements", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.classes.after_comma_implements", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_SUPERINTERFACES, CLASS_DECL_PREVIEW); //$NON-NLS-1$
         
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
-        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
         return root;
     }
     
@@ -1194,8 +1202,24 @@ public final class WhiteSpaceOptions {
         createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_ARGUMENTS, TYPE_ARGUMENTS_PREVIEW); //$NON-NLS-1$
         return root;
     }
-
     
+    private static InnerNode createTypeParameterTree(Map workingValues, InnerNode parent) {
+        final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.type_parameters"); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_opening_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_comma_in_params", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.before_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        createOption(root, workingValues, "WhiteSpaceTabPage.after_closing_angle_bracket", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_CLOSING_ANGLE_BRACKET_IN_TYPE_PARAMETERS, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+ 
+        //TODO: enable after I20040914
+        //createOption(root, workingValues, "WhiteSpaceTabPage.before_and_list", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        //createOption(root, workingValues, "WhiteSpaceTabPage.after_and_list", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_AND_IN_TYPE_PARAMETER, TYPE_PARAMETER_PREVIEW); //$NON-NLS-1$
+        
+        
+        return root;
+    }
+
     private static InnerNode createWildcardTypeTree(Map workingValues, InnerNode parent) {
         final InnerNode root= new InnerNode(parent, workingValues, "WhiteSpaceTabPage.wildcardtype"); //$NON-NLS-1$
         createOption(root, workingValues, "WhiteSpaceTabPage.before_question", DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_QUESTION_IN_WILDCARD, WILDCARD_PREVIEW); //$NON-NLS-1$
