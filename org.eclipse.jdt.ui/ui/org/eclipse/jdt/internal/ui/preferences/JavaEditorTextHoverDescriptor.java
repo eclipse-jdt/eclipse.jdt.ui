@@ -18,10 +18,14 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IPluginDescriptor;
+import org.eclipse.core.runtime.IPluginPrerequisite;
 import org.eclipse.core.runtime.IPluginRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
@@ -33,18 +37,19 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  */
 public class JavaEditorTextHoverDescriptor implements Comparable {
 
-	public final static String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
-	public final static String HOVER_TAG= "hover"; //$NON-NLS-1$
-	public final static String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
-	public final static String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
-	public final static String LABEL_ATTRIBUTE= "label"; //$NON-NLS-1$
+	private final static String JAVA_EDITOR_TEXT_HOVER_EXTENSION_POINT= "org.eclipse.jdt.ui.javaEditorTextHovers"; //$NON-NLS-1$
+	private final static String HOVER_TAG= "hover"; //$NON-NLS-1$
+	private final static String ID_ATTRIBUTE= "id"; //$NON-NLS-1$
+	private static String CLASS_ATTRIBUTE= "class"; //$NON-NLS-1$
+	private final static String LABEL_ATTRIBUTE= "label"; //$NON-NLS-1$
 	
 	private IConfigurationElement fElement;
 	
 	/**
 	 * Creates a new Java Editor text hover descriptor from the given configuration element.
 	 */
-	public JavaEditorTextHoverDescriptor(IConfigurationElement element) {
+	private JavaEditorTextHoverDescriptor(IConfigurationElement element) {
+		Assert.isNotNull(element);
 		fElement= element;
 	}
 
@@ -131,5 +136,35 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	 */ 
 	public int compareTo(Object o) {
 		return Collator.getInstance().compare(getLabel(), ((JavaEditorTextHoverDescriptor)o).getLabel());
+	}
+
+	/**
+	 * @param descriptor a JavaEditorTextHoverDescriptor
+	 * @return <code>true</code> if this contributed hover depends on the other one
+	 */
+	public boolean dependsOn(JavaEditorTextHoverDescriptor descriptor) {
+		if (descriptor == null)
+			return false;
+		
+		IPluginDescriptor thisPluginDescriptor= fElement.getDeclaringExtension().getDeclaringPluginDescriptor();
+		IPluginDescriptor otherPluginDescriptor= descriptor.fElement.getDeclaringExtension().getDeclaringPluginDescriptor();
+		return dependsOn(thisPluginDescriptor, otherPluginDescriptor);
+	}
+
+	private boolean dependsOn(IPluginDescriptor descriptor0, IPluginDescriptor descriptor1) {
+
+		IPluginRegistry registry= Platform.getPluginRegistry();
+		IPluginPrerequisite[] prerequisites= descriptor0.getPluginPrerequisites();
+
+		for (int i= 0; i < prerequisites.length; i++) {
+			IPluginPrerequisite prerequisite= prerequisites[i];
+			String id= prerequisite.getUniqueIdentifier();			
+			IPluginDescriptor descriptor= registry.getPluginDescriptor(id);
+			
+			if (descriptor != null && (descriptor.equals(descriptor1) || dependsOn(descriptor, descriptor1)))
+				return true;
+		}
+		
+		return false;
 	}
 }

@@ -31,6 +31,8 @@ import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 
 
 public class JavaProblemHover extends AbstractJavaEditorTextHover {
+
+	private static String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaProblemHover"; //$NON-NLS-1$
 	
 	/*
 	 * Formats a message as HTML text.
@@ -78,5 +80,9 @@ public class JavaProblemHover extends AbstractJavaEditorTextHover {
 			super.setEditor(editor);
 		else
 			super.setEditor(null);
+	}
+
+	static boolean isJavaProblemHover(String id) {
+		return ID.equals(id);
 	}
 }
