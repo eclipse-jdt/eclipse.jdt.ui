@@ -18,6 +18,8 @@ public class ExtractMethodTests extends RefactoringTest {
 	private IPackageFragment fInvalidSelectionPackage;
 	private IPackageFragment fValidSelectionPackage;
 	private IPackageFragment fSemicolonPackage;
+	private IPackageFragment fTryPackage;
+	private IPackageFragment fLocalsPackage;
 	
 	private static final int VALID_SELECTION=     1;
 	private static final int INVALID_SELECTION=   2;
@@ -186,6 +188,28 @@ public class ExtractMethodTests extends RefactoringTest {
 			fSemicolonPackage= getRoot().createPackageFragment("semicolon_in", true, null);
 					
 		return fSemicolonPackage;
+	}
+	
+	protected void tryTest() throws Exception {
+		performTest(getTryPackage(), "A", COMPARE_WITH_OUTPUT, "try_out");
+	}
+	
+	private IPackageFragment getTryPackage() throws JavaModelException {
+		if (fTryPackage == null)
+			fTryPackage= getRoot().createPackageFragment("try_in", true, null);
+					
+		return fTryPackage;
+	}
+	
+	protected void localsTest() throws Exception {
+		performTest(getLocalsPackage(), "A", COMPARE_WITH_OUTPUT, "locals_out");
+	}
+	
+	private IPackageFragment getLocalsPackage() throws JavaModelException {
+		if (fLocalsPackage == null)
+			fLocalsPackage= getRoot().createPackageFragment("locals_in", true, null);
+					
+		return fLocalsPackage;
 	}
 	
 	//=====================================================================================
@@ -477,6 +501,16 @@ public class ExtractMethodTests extends RefactoringTest {
 		invalidSelectionTest();
 	}
 	
+	//---- invalid local type selection
+	
+	public void test130() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	public void test131() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================
@@ -650,8 +684,10 @@ public class ExtractMethodTests extends RefactoringTest {
 	}
 	
 	//====================================================================================
-	// Testing valid selections
+	// Testing Extracted result
 	//====================================================================================
+
+	//---- Test semicolon
 	
 	public void test400() throws Exception {
 		semicolonTest();
@@ -668,4 +704,65 @@ public class ExtractMethodTests extends RefactoringTest {
 	public void test403() throws Exception {
 		semicolonTest();
 	}	
+	
+	public void test404() throws Exception {
+		semicolonTest();
+	}	
+	
+	public void test405() throws Exception {
+		System.out.println("\n405 disabled since it fails. See 1GDGFR8");
+		// semicolonTest();
+	}	
+	
+	//---- Test Try / catch block
+
+	public void test450() throws Exception {
+		tryTest();
+	}
+	
+	public void test451() throws Exception {
+		tryTest();
+	}
+	
+	public void test452() throws Exception {
+		tryTest();
+	}
+	
+	public void test453() throws Exception {
+		tryTest();
+	}
+	
+	//---- Test local vars and types
+	
+	public void test500() throws Exception {
+		localsTest();
+	}
+	
+	public void test501() throws Exception {
+		localsTest();
+	}
+	
+	public void test502() throws Exception {
+		localsTest();
+	}
+	
+	public void test503() throws Exception {
+		localsTest();
+	}
+	
+	public void test504() throws Exception {
+		localsTest();
+	}
+	
+	public void test505() throws Exception {
+		localsTest();
+	}
+	
+	public void test506() throws Exception {
+		localsTest();
+	}
+	
+	public void test507() throws Exception {
+		localsTest();
+	}
 }
