@@ -85,7 +85,7 @@ public class ChkpiiTests extends TestCase {
 		StringBuffer consoleLog= new StringBuffer();
 		try {
 			Process aProcess= aRuntime.exec(chkpiiString);
-			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getErrorStream()));
+			aBufferedReader= new BufferedReader(new InputStreamReader(aProcess.getInputStream()));
 			String line= aBufferedReader.readLine();
 			while (line != null) {
 				consoleLog.append(line);
