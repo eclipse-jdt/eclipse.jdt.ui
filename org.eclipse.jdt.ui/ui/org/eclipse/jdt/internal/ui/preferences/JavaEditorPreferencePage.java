@@ -707,7 +707,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Preferences createTemporaryCorePreferenceStore() {
 		Preferences result= new Preferences();
 		
-		result.setValue(COMPILER_TASK_TAGS, "TASK"); //$NON-NLS-1$
+		result.setValue(COMPILER_TASK_TAGS, "TASK,TODO"); //$NON-NLS-1$
 		
 		return result;
 	}
@@ -1423,10 +1423,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			createHighlightedRange(6, 26, 8, SemanticHighlightings.STATIC_FINAL_FIELD),
 			createHighlightedRange(8, 20, 11, SemanticHighlightings.STATIC_FIELD),
 			createHighlightedRange(10, 16, 5, SemanticHighlightings.FIELD),
-			createHighlightedRange(12, 12, 3, SemanticHighlightings.METHOD_DECLARATION_NAME),
+			createHighlightedRange(12, 12, 3, SemanticHighlightings.METHOD_DECLARATION),
 			createHighlightedRange(12, 20, 9, SemanticHighlightings.PARAMETER_VARIABLE),
 			createHighlightedRange(13, 6, 5, SemanticHighlightings.LOCAL_VARIABLE),
-			createHighlightedRange(13, 16, 9, SemanticHighlightings.PARAMETER_VARIABLE),
+			createHighlightedRange(13, 16, 8, SemanticHighlightings.INHERITED_METHOD_INVOCATION),
+			createHighlightedRange(14, 2, 12, SemanticHighlightings.STATIC_METHOD),
+			createHighlightedRange(17, 20, 12, SemanticHighlightings.STATIC_METHOD_DECLARATION),
 		};
 	}
 

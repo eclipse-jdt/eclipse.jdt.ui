@@ -11,7 +11,11 @@ public class ClassName extends SuperClass {
 	private String field= "zero";
 	// TASK: refactor
 	public int foo(int parameter) {
-		int local= 42*parameter;
+		int local= 42*hashCode();
+		staticMethod();
 		return bar() + 24;
+	}
+	public static void staticMethod() {
+		// TODO: ...
 	}
 }

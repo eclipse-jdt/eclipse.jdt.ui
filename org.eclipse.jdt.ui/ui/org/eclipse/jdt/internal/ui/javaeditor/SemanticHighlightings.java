@@ -18,11 +18,16 @@ import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 
 /**
@@ -48,9 +53,24 @@ public class SemanticHighlightings {
 	public static final String FIELD="field"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference part that controls the highlighting of static final fields.
+	 * A named preference part that controls the highlighting of static method declarations.
 	 */
-	public static final String METHOD_DECLARATION_NAME="methodDeclarationName"; //$NON-NLS-1$
+	public static final String STATIC_METHOD_DECLARATION="staticMethodDeclaration"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of method declarations.
+	 */
+	public static final String METHOD_DECLARATION="methodDeclarationName"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of static methods.
+	 */
+	public static final String STATIC_METHOD="staticMethod"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of inherited method invocations.
+	 */
+	public static final String INHERITED_METHOD_INVOCATION="inheritedMethodInvocation"; //$NON-NLS-1$
 	
 	/**
 	 * A named preference part that controls the highlighting of local variables.
@@ -67,9 +87,6 @@ public class SemanticHighlightings {
 	 */
 	private static SemanticHighlighting[] fgSemanticHighlightings;
 
-	/** Semantic message key prefix */
-	private static final String PREFIX= "SemanticHighlighting."; //$NON-NLS-1$
-	
 	/**
 	 * Semantic highlighting for static final fields.
 	 */
@@ -107,7 +124,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "staticFinalField"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.staticFinalField"); //$NON-NLS-1$
 		}
 
 		/*
@@ -156,7 +173,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "staticField"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.staticField"); //$NON-NLS-1$
 		}
 
 		/*
@@ -205,7 +222,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "field"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.field"); //$NON-NLS-1$
 		}
 
 		/*
@@ -218,15 +235,65 @@ public class SemanticHighlightings {
 	}
 	
 	/**
-	 * Semantic highlighting for method declaration names.
+	 * Semantic highlighting for static method declarations.
 	 */
-	private static class MethodDeclarationNameHighlighting extends SemanticHighlighting {
+	private static class StaticMethodDeclarationHighlighting extends SemanticHighlighting {
 		
 		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
 		 */
 		public String getPreferenceKey() {
-			return METHOD_DECLARATION_NAME;
+			return STATIC_METHOD_DECLARATION;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(192, 0, 192);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.staticMethodDeclaration"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		public boolean consumes(SemanticToken token) {
+			SimpleName node= token.getNode();
+			ASTNode parent= node.getParent();
+			return parent != null && parent.getNodeType() == ASTNode.METHOD_DECLARATION && (((MethodDeclaration)parent).getModifiers() & Modifier.STATIC) == Modifier.STATIC && node.isDeclaration();
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for method declarations.
+	 */
+	private static class MethodDeclarationHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return METHOD_DECLARATION;
 		}
 
 		/*
@@ -254,7 +321,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "methodDeclarationName"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.methodDeclaration"); //$NON-NLS-1$
 		}
 
 		/*
@@ -264,6 +331,116 @@ public class SemanticHighlightings {
 			SimpleName node= token.getNode();
 			ASTNode parent= node.getParent();
 			return parent != null && parent.getNodeType() == ASTNode.METHOD_DECLARATION && node.isDeclaration();
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for static methods.
+	 */
+	private static class StaticMethodHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return STATIC_METHOD;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 0, 0);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.staticMethod"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		public boolean consumes(SemanticToken token) {
+			IBinding binding= token.getBinding();
+			return binding != null && binding.getKind() == IBinding.METHOD && (binding.getModifiers() & Modifier.STATIC) == Modifier.STATIC;
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for inherited method invocations.
+	 */
+	private static class InheritedMethodInvocationHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return INHERITED_METHOD_INVOCATION;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(192, 0, 192);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return true;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.getString("SemanticHighlighting.inheritedMethodInvocation"); //$NON-NLS-1$
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#isMatched(org.eclipse.jdt.core.dom.ASTNode)
+		 */
+		public boolean consumes(SemanticToken token) {
+			SimpleName node= token.getNode();
+			if (node.isDeclaration())
+				return false;
+
+			IBinding binding= token.getBinding();
+			if (binding == null || binding.getKind() != IBinding.METHOD)
+				return false;
+			
+			ITypeBinding currentType= Bindings.getBindingOfParentType(node);
+			ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
+			if (currentType == declaringType)
+				return false;
+			
+			return Bindings.isSuperType(declaringType, currentType);
 		}
 	}
 	
@@ -304,7 +481,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "localVariable"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.localVariable"); //$NON-NLS-1$
 		}
 
 		/*
@@ -357,7 +534,7 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
-			return JavaEditorMessages.getString(PREFIX + "parameterVariable"); //$NON-NLS-1$
+			return JavaEditorMessages.getString("SemanticHighlighting.parameterVariable"); //$NON-NLS-1$
 		}
 
 		/*
@@ -413,7 +590,10 @@ public class SemanticHighlightings {
 				new StaticFinalFieldHighlighting(),
 				new StaticFieldHighlighting(),
 				new FieldHighlighting(),
-				new MethodDeclarationNameHighlighting(),
+				new StaticMethodDeclarationHighlighting(),
+				new MethodDeclarationHighlighting(),
+				new StaticMethodHighlighting(),
+				new InheritedMethodInvocationHighlighting(),
 				new LocalVariableHighlighting(),
 				new ParameterVariableHighlighting(),
 			};
