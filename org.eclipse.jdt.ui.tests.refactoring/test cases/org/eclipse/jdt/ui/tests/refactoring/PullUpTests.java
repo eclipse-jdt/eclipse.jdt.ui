@@ -194,11 +194,11 @@ public class PullUpTests extends RefactoringTest {
 		
 		setTargetClass(ref, targetClassIndex);
 		
-		IMethod[] methodsToPullUp= findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
-		IField[] fieldsToPullUp= findFields(selectedFields, namesOfFieldsToPullUp);
+		IMethod[] methodsToPullUp= TestUtil.findMethods(selectedMethods, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp);
+		IField[] fieldsToPullUp= TestUtil.findFields(selectedFields, namesOfFieldsToPullUp);
 		IMember[] membersToPullUp= TestUtil.merge(methodsToPullUp, fieldsToPullUp);
 		
-		IMethod[] methodsToDeclareAbstract= findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
+		IMethod[] methodsToDeclareAbstract= TestUtil.findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
 		ref.setMembersToPullUp(membersToPullUp);
 		ref.setMethodsToDeclareAbstract(methodsToDeclareAbstract);
 		if (deleteAllPulledUpMethods && methodsToPullUp.length != 0)
@@ -249,47 +249,6 @@ public class PullUpTests extends RefactoringTest {
 			performDummySearch();
 			cu.delete(false, null);
 		}	
-	}
-
-	private IField[] findFields(IField[] fields, String[] namesOfFieldsToPullUp) {
-		List found= new ArrayList(fields.length);
-		for (int i= 0; i < fields.length; i++) {
-			IField field= fields[i];
-			for (int j= 0; j < namesOfFieldsToPullUp.length; j++) {
-				String name= namesOfFieldsToPullUp[j];
-				if (field.getElementName().equals(name))
-					found.add(field);					
-			}
-		}
-		return (IField[]) found.toArray(new IField[found.size()]);
-	}
-
-	private static IMethod[] findMethods(IMethod[] selectedMethods, String[] namesOfMethods, String[][] signaturesOfMethods){
-		List found= new ArrayList(selectedMethods.length);
-		for (int i= 0; i < selectedMethods.length; i++) {
-			IMethod method= selectedMethods[i];
-			String[] paramTypes= method.getParameterTypes();
-			for (int j= 0; j < namesOfMethods.length; j++) {
-				String methodName= namesOfMethods[j];
-				if (! methodName.equals(method.getElementName()))
-					continue;
-				String[] methodSig= signaturesOfMethods[j];
-				if (! areSameSignatures(paramTypes, methodSig))
-					continue;
-				found.add(method);	
-			}
-		}
-		return (IMethod[]) found.toArray(new IMethod[found.size()]);
-	}
-	
-	private static boolean areSameSignatures(String[] s1, String[] s2){
-		if (s1.length != s2.length)
-			return false;
-		for (int i= 0; i < s1.length; i++) {
-			if (! s1[i].equals(s2[i]))
-				return false;
-		}
-		return true;
 	}
 
 	private void helper1(String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex) throws Exception{
