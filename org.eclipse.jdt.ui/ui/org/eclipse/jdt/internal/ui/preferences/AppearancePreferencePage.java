@@ -169,14 +169,17 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		
 		fCompressPackageNames.doFillIntoGrid(composite, nColumns);
 		fPackageNamePattern.doFillIntoGrid(composite, 2);
+		LayoutUtil.setHorizontalGrabbing(fPackageNamePattern.getTextControl(null));
 		LayoutUtil.setWidthHint(fPackageNamePattern.getLabelControl(null), convertWidthInCharsToPixels(80));
+		
 		
 		new Separator().doFillIntoGrid(composite, nColumns);
 		fStackBrowsingViewsVertically.doFillIntoGrid(composite, nColumns);
 		
-		Separator label= new Separator();
-		label.doFillIntoGrid(composite, nColumns, convertHeightInCharsToPixels(1));
-		((Label)label.getSeparator(composite)).setText("Note: This preference will only take effect on new perspectives");
+		
+		DialogField field= new DialogField();
+		field.setLabelText("Note: This preference will only take effect on new perspectives");
+		field.doFillIntoGrid(composite, 2);
 		
 		initFields();
 		
