@@ -23,16 +23,16 @@ import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
  *
  */
 public class NewSearchResultCollector implements IJavaSearchResultCollector {
-	JavaSearchResult fSearch;
-	IProgressMonitor fProgressMonitor;
+	private JavaSearchResult fSearch;
+	private IProgressMonitor fProgressMonitor;
 	private int fMatchCount;
-	/**
-	 * 
-	 */
-	public NewSearchResultCollector(JavaSearchResult search, IProgressMonitor monitor) {
+	private boolean fIgnoreImports;
+
+	public NewSearchResultCollector(JavaSearchResult search, IProgressMonitor monitor, boolean ignoreImports) {
 		super();
 		fSearch= search;
 		fProgressMonitor= monitor;
+		fIgnoreImports= ignoreImports;
 	}
 
 	public void aboutToStart() {
@@ -42,6 +42,8 @@ public class NewSearchResultCollector implements IJavaSearchResultCollector {
 	public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
 		fMatchCount++;
 		if (enclosingElement != null) {
+			if (fIgnoreImports && enclosingElement.getElementType() == IJavaElement.IMPORT_DECLARATION)
+				return;
 			fSearch.addMatch(new Match(enclosingElement, start, end-start));
 		}
 	}

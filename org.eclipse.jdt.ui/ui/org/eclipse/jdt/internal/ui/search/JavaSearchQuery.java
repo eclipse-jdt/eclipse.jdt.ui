@@ -27,9 +27,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 
 /**
  * @author Thomas Mäder
@@ -89,7 +91,9 @@ public class JavaSearchQuery implements ISearchQuery {
 		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
 
 		try {
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, monitor);
+			boolean ignoreImports= (fLimitTo == IJavaSearchConstants.REFERENCES);
+			ignoreImports &= PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_IGNORE_IMPORTS);
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, monitor, ignoreImports);
 			if (fElement != null)
 				engine.search(JavaPlugin.getWorkspace(), fElement, fLimitTo, fScope, collector);
 			else
