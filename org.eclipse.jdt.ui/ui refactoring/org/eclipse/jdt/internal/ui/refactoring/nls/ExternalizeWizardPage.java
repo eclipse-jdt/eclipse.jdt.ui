@@ -419,6 +419,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Composite c= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.numColumns= 2;
+		gl.marginWidth= 0;
 		c.setLayout(gl);
 		c.setLayoutData(new GridData(GridData.FILL_BOTH));
 		
@@ -453,6 +454,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Composite buttonComp= new Composite(parent, SWT.NONE);
 		GridLayout gl= new GridLayout();
 		gl.marginHeight= 0;
+		gl.marginWidth= 0;
 		buttonComp.setLayout(gl);
 		buttonComp.setLayoutData(new GridData(GridData.FILL_VERTICAL));
 		
