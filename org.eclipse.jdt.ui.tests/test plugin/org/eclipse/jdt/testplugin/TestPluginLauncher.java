@@ -20,11 +20,15 @@ public class TestPluginLauncher {
 	public static void run(String application, String location, Class testCase, String[] args) {
 		try {
 			String bootLocation= getBootLocation();
-			String[] newArgs= new String[4];
+			int nArgs= args.length;
+			String[] newArgs= new String[4 + nArgs];
 			newArgs[0]= testCase.getName();
-			newArgs[1]= "-dev";
-			newArgs[2]= "bin";
-			newArgs[3]= "-debug";
+			for (int i= 0; i < nArgs; i++) {
+				newArgs[1 + i]= args[i];
+			}
+			newArgs[1 + nArgs]= "-dev";
+			newArgs[1 + nArgs + 1]= "bin";
+			newArgs[1 + nArgs + 2]= "-debug";
 			NewMain newMain= new NewMain(application, location, null, bootLocation, false);
 			newMain.run(newArgs);
 		} catch (Exception e) {
