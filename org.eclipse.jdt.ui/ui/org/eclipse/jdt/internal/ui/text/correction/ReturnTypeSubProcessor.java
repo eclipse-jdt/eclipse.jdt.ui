@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -66,18 +67,38 @@ public class ReturnTypeSubProcessor {
 				if (binding == null) {
 					binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
+				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;   
+				
 				ASTRewrite rewrite= new ASTRewrite(astRoot);
-				ASTNode oldReturnType= ((MethodDeclaration) decl).getReturnType();
-				ASTNode newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
-				rewrite.markAsReplaced(oldReturnType, newReturnType);
+				Type newReturnType= ASTResolving.getTypeFromTypeBinding(astRoot.getAST(), binding);
+				
+				if (methodDeclaration.isConstructor()) {
+					MethodDeclaration modifiedNode= astRoot.getAST().newMethodDeclaration();
+					modifiedNode.setModifiers(methodDeclaration.getModifiers()); // no changes
+					modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
+					modifiedNode.setConstructor(false);
+					rewrite.markAsModified(methodDeclaration, modifiedNode);
+					methodDeclaration.setReturnType(newReturnType);
+					rewrite.markAsInserted(newReturnType);
+				} else {
+					rewrite.markAsReplaced(methodDeclaration.getReturnType(), newReturnType);
+				}			
 					
 				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.voidmethodreturns.description", binding.getName()); //$NON-NLS-1$	
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
 				proposal.addImport(binding);
-	
+				proposal.calculateEditsAndClearRewrites();
 				proposals.add(proposal);
 			}
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			rewrite.markAsRemoved(returnStatement);
+			
+			String label= CorrectionMessages.getString("ReturnTypeSubProcessor.removereturn.description"); //$NON-NLS-1$	
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
+			proposal.calculateEditsAndClearRewrites();
+			proposals.add(proposal);			
 		}
 	}
 	
@@ -111,39 +132,56 @@ public class ReturnTypeSubProcessor {
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
-		if (selectedNode != null) {
-			BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
-			if (decl instanceof MethodDeclaration) {
-				ReturnTypeEvaluator eval= new ReturnTypeEvaluator();
-				decl.accept(eval);
-
-				ITypeBinding typeBinding= eval.getTypeBinding();
-	
-				ASTRewrite rewrite= new ASTRewrite(astRoot);
-				AST ast= astRoot.getAST();
-	
-				Type type;
-				String typeName;
-				if (typeBinding != null) {
-					type= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
-					typeName= typeBinding.getName();
-				} else {
-					type= ast.newPrimitiveType(PrimitiveType.VOID);
-					typeName= "void";
-				}	
-	
-				String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-				if (typeBinding != null) {
-					proposal.addImport(typeBinding);
-				}
+		if (selectedNode == null) {
+			return;
+		}
+		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl instanceof MethodDeclaration) {
+			MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 			
-				rewrite.markAsInserted(type);
-				((MethodDeclaration) decl).setReturnType(type);
-	
-				proposals.add(proposal);
+			ReturnTypeEvaluator eval= new ReturnTypeEvaluator();
+			decl.accept(eval);
+
+			ITypeBinding typeBinding= eval.getTypeBinding();
+
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			AST ast= astRoot.getAST();
+
+			Type type;
+			String typeName;
+			if (typeBinding != null) {
+				type= ASTResolving.getTypeFromTypeBinding(ast, typeBinding);
+				typeName= typeBinding.getName();
+			} else {
+				type= ast.newPrimitiveType(PrimitiveType.VOID);
+				typeName= "void";
+			}	
+
+			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 2, image);
+			if (typeBinding != null) {
+				proposal.addImport(typeBinding);
 			}
+			rewrite.markAsInserted(type);
+			methodDeclaration.setReturnType(type);
+			
+			MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+			modifiedNode.setModifiers(methodDeclaration.getModifiers()); // no changes
+			modifiedNode.setExtraDimensions(methodDeclaration.getExtraDimensions()); // no changes
+			modifiedNode.setConstructor(false);
+			rewrite.markAsModified(methodDeclaration, modifiedNode);
+			
+			proposals.add(proposal);
+			
+			// change to constructor
+			ASTNode parentType= ASTResolving.findParentType(decl);
+			if (parentType instanceof TypeDeclaration) {
+				String constructorName= ((TypeDeclaration) parentType).getName().getIdentifier();
+				ASTNode nameNode= methodDeclaration.getName();
+				label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.wrongconstructorname.description", constructorName); //$NON-NLS-1$		
+				proposals.add(new ReplaceCorrectionProposal(label, cu, nameNode.getStartPosition(), nameNode.getLength(), constructorName, 1));
+			}			
 		}
 	}
 

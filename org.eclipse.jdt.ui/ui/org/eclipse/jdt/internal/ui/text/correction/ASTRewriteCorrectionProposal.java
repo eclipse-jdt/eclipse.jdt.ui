@@ -76,6 +76,10 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		return fRewrite;
 	}
+	
+	public void calculateEditsAndClearRewrites() throws CoreException {
+		getChange();
+	}
 
 
 }
