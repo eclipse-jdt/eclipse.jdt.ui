@@ -259,6 +259,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 */
 	public static final String USE_SUPERTYPE= "org.eclipse.jdt.ui.edit.text.java.use.supertype"; //$NON-NLS-1$
 
+	/**
+	 * Action definition ID of the refactor -> promote local variable action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.promote.local.variable"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String PROMOTE_LOCAL_VARIABLE= "org.eclipse.jdt.ui.edit.text.java.promote.local.variable"; //$NON-NLS-1$
+
 	// navigate
 	
 	/**

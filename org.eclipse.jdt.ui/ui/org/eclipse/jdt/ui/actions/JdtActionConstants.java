@@ -279,6 +279,14 @@ public class JdtActionConstants {
 	 * @since 2.1
 	 */
 	public static final String USE_SUPERTYPE= "org.eclipse.jdt.ui.actions.UseSupertype"; //$NON-NLS-1$
+
+	/**
+	 * Refactor menu: name of standard Promote Temp global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.PromoteTemp"</code>).
+	 * 
+	 * @since 2.1
+	 */
+	public static final String PROMOTE_TEMP= "org.eclipse.jdt.ui.actions.PromoteTemp"; //$NON-NLS-1$
 	
 	// Search Menu
 	

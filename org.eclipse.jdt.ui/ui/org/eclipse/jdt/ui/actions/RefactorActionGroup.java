@@ -58,6 +58,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fUseSupertypeAction;
 	private SelectionDispatchAction fInlineMethodAction;	
 	private SelectionDispatchAction fExtractConstantAction;
+    private SelectionDispatchAction fPromoteTempAction;
 	
 	/**
 	 * Creates a new <code>RefactorActionGroup</code>. The group requires
@@ -135,6 +136,11 @@ public class RefactorActionGroup extends ActionGroup {
 		fExtractMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.EXTRACT_METHOD);
 		initAction(fExtractMethodAction, provider, selection);
 		editor.setAction("ExtractMethod", fExtractMethodAction); //$NON-NLS-1$
+
+		fPromoteTempAction= new PromoteTempToFieldAction(editor);
+		fPromoteTempAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.PROMOTE_LOCAL_VARIABLE);
+		initAction(fPromoteTempAction, provider, selection);
+		editor.setAction("PromoteTemp", fPromoteTempAction); //$NON-NLS-1$
 
 		fInlineMethodAction= new InlineMethodAction(editor);
 		fInlineMethodAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE_METHOD);
@@ -215,6 +221,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.MOVE_INNER_TO_TOP, fMoveInnerToTopAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.USE_SUPERTYPE, fUseSupertypeAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.PROMOTE_TEMP, fPromoteTempAction);
 	}
 	
 	/* (non-Javadoc)
@@ -243,6 +250,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fMoveInnerToTopAction, provider);
 		disposeAction(fUseSupertypeAction, provider);
+		disposeAction(fPromoteTempAction, provider);
 		super.dispose();
 	}
 	
@@ -267,6 +275,7 @@ public class RefactorActionGroup extends ActionGroup {
 		addAction(refactorSubmenu, fExtractConstantAction);
 		addAction(refactorSubmenu, fInlineMethodAction);
 		addAction(refactorSubmenu, fInlineTempAction);
+		addAction(refactorSubmenu, fPromoteTempAction);
 		addAction(refactorSubmenu, fSelfEncapsulateField);
 		if (!refactorSubmenu.isEmpty())
 			menu.appendToGroup(fGroupName, refactorSubmenu);
