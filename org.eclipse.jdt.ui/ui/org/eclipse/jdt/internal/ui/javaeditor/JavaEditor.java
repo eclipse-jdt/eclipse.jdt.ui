@@ -6,19 +6,24 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 import java.util.Iterator;
-import java.util.ResourceBundle;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -36,16 +41,15 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
 import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
 import org.eclipse.jdt.internal.ui.actions.OpenImportDeclarationAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 
 
@@ -53,7 +57,7 @@ import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
  * Java specific text editor.
  */
 public abstract class JavaEditor extends AbstractTextEditor implements ISelectionChangedListener {
-		
+	
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
 	
@@ -83,6 +87,16 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
+	
+	/**
+	 * @see AbstractTextEditor#createSourceViewer(Composite, IVerticalRuler, int)
+	 */
+	protected ISourceViewer createSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		ISourceViewer viewer= super.createSourceViewer(parent, ruler, styles);
+		StyledText text= viewer.getTextWidget();
+		text.setBidiColoring(true);
+		return viewer;
+	}	
 	
 	/**
 	 * Sets the outliner's context menu ID.
