@@ -1060,7 +1060,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		if (computeStateMask(fOverlayStore.getString(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)) == -1) {
 			// Fix possible illegal modifier string
 			int stateMask= fOverlayStore.getInt(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-			fBrowserLikeLinksKeyModifierText.setText(EditorUtility.getModifierString(stateMask));
+			if (stateMask == -1)
+				fBrowserLikeLinksKeyModifierText.setText(""); //$NON-NLS-1$
+			else
+				fBrowserLikeLinksKeyModifierText.setText(EditorUtility.getModifierString(stateMask));
 		}
 		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
