@@ -28,7 +28,6 @@ public abstract class AbstractTextChange extends Change {
 
 	private String fName;
 	private int fChangeKind;
-	private TextBufferEditor fTextBufferEditor;
 	private IChange fUndoChange;
 
 	protected final static int ORIGINAL_CHANGE=		0;
@@ -47,15 +46,6 @@ public abstract class AbstractTextChange extends Change {
 		Assert.isNotNull(fName);
 		fChangeKind= changeKind;
 		Assert.isTrue(0 <= fChangeKind && fChangeKind <= 2);
-	}
-	
-	/**
-	 * Returns the text buffer editor used to perform this change.
-	 * 
-	 * @return the text buffer editor used to perform this change
-	 */
-	protected TextBufferEditor getTextBufferEditor() {
-		return fTextBufferEditor;
 	}
 	
 	/**
@@ -138,50 +128,21 @@ public abstract class AbstractTextChange extends Change {
 	/* Non-Javadoc
 	 * Method declared in IChange
 	 */
-	public RefactoringStatus aboutToPerform(ChangeContext context, IProgressMonitor pm) {
-		Assert.isTrue(fTextBufferEditor == null);
-		RefactoringStatus result= super.aboutToPerform(context, pm);
-		try {
-			fTextBufferEditor= new TextBufferEditor(acquireTextBuffer());
-			addTextEdits(fTextBufferEditor, false);
-			if (!fTextBufferEditor.canPerformEdits())
-				result.addFatalError("Internal error: cannot execute text changes");
-		} catch (CoreException e) {
-			result.addFatalError("Internal error: cannot acquire text buffer");
-			JavaCore.getJavaCore().getLog().log(
-				new Status(
-					IStatus.ERROR, 
-					JavaCore.getJavaCore().getDescriptor().getUniqueIdentifier(), 
-					IStatus.ERROR, 
-					RefactoringCoreMessages.getString("Change.internal_Error"), e));		 //$NON-NLS-1$			
-		}
-		return result;
-	}
-	 
-	/* Non-Javadoc
-	 * Method declared in IChange
-	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		TextBufferEditor editor= null;
 		try {
 			fUndoChange= null;
-			fUndoChange= createReverseChange(fTextBufferEditor.performEdits(pm), getReverseKind());
+			editor= new TextBufferEditor(acquireTextBuffer());
+			addTextEdits(editor, false);
+			fUndoChange= createReverseChange(editor.performEdits(pm), getReverseKind());
 		} catch (Exception e) {
 			handleException(context, e);
-		}
-	}
-	
-	/* Non-Javadoc
-	 * Method declared in IChange
-	 */
-	public void performed() {
-		try {
-			if (fTextBufferEditor != null) {
-				fTextBufferEditor.clear();
-				releaseTextBuffer(fTextBufferEditor.getTextBuffer());
-			}
 		} finally {
-			fTextBufferEditor= null;
+			if (editor != null) {
+				editor.clear();
+				releaseTextBuffer(editor.getTextBuffer());
+			}
 		}
-	}	 
+	}	
 }
 
