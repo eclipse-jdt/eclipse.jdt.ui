@@ -53,6 +53,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private JavaSearchOperation fOperation;
 	private int fMatchCount= 0;
 	private int fPotentialMatchCount= 0;
+	private long fLastUpdateTime;
 	private Integer[] fMessageFormatArgs= new Integer[1];
 	
 	private class ActionGroupFactory implements IActionGroupFactory {
@@ -73,6 +74,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		fPotentialMatchCount= 0;
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
+		fLastUpdateTime= 0;
 		if (fView != null) {
 			fView.searchStarted(
 				new ActionGroupFactory(),
@@ -121,8 +123,10 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
 		fView.addMatch(enclosingElement.getElementName(), groupKey, resource, marker);
 		fMatchCount++;
-		if (!getProgressMonitor().isCanceled())
+		if (!getProgressMonitor().isCanceled() && System.currentTimeMillis() - fLastUpdateTime > 1000) {
 			getProgressMonitor().subTask(getFormattedMatchesString(fMatchCount));
+			fLastUpdateTime= System.currentTimeMillis();
+		}
 	}
 	
 	/**

@@ -55,6 +55,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	private Properties fProperties;
 	private HashSet fUsedPropertyNames;
 	private int fMatchCount= 0;
+	private long fLastUpdateTime;
 	private Integer[] fMessageFormatArgs= new Integer[1];
 
 	public NLSSearchResultCollector(IFile propertyFile) {
@@ -67,6 +68,7 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 	public void aboutToStart() {
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
+		fLastUpdateTime= 0;
 		if (fView != null)
 			fView.searchStarted(null, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), NLSSearchPage.EXTENSION_POINT_ID, new NLSSearchResultLabelProvider(), new org.eclipse.jdt.internal.ui.search.GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
 		loadProperties(fPropertyFile);
@@ -117,8 +119,10 @@ class NLSSearchResultCollector implements IJavaSearchResultCollector {
 
 		fMatchCount++;
 	
-		if (!getProgressMonitor().isCanceled())
+		if (!getProgressMonitor().isCanceled() && System.currentTimeMillis() - fLastUpdateTime > 1000) {
 			getProgressMonitor().subTask(getFormattedMatchesString(fMatchCount));
+			fLastUpdateTime= System.currentTimeMillis();
+		}
 	}
 
 	/**
