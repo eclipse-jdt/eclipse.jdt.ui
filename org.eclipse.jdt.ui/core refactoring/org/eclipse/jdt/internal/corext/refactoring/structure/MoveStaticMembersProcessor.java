@@ -98,9 +98,9 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private CodeGenerationSettings fPreferences;
 	private CompositeChange fChange;
-	private ASTData fSource;
+	private CompilationUnitRewrite fSource;
 	private ITypeBinding fSourceBinding; 
-	private ASTData fTarget;
+	private CompilationUnitRewrite fTarget;
 	private IBinding[] fMemberBindings;
 	private BodyDeclaration[] fMemberDeclarations;
 
@@ -285,7 +285,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			if (result.hasFatalError())
 				return result;			
 			
-			fSource= new ASTData(fMembersToMove[0].getCompilationUnit());
+			fSource= new CompilationUnitRewrite(fMembersToMove[0].getCompilationUnit());
 			fSourceBinding= getSourceBinding();
 			fMemberBindings= getMemberBindings();
 			if (fSourceBinding == null || hasUnresolvedMemberBinding()) {
@@ -331,7 +331,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			
 			RefactoringStatus result= new RefactoringStatus();	
 			
-			fSource.clearRewriteAndImports();
+			fSource.clearASTAndImportRewrites();
 			
 			result.merge(checkDestinationType());			
 			if (result.hasFatalError())
@@ -755,7 +755,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
-		fTarget= getASTData(fDestinationType.getCompilationUnit());
+		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString(
@@ -778,7 +778,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		sub.beginTask("", affectedCUs.length); //$NON-NLS-1$
 		for (int i= 0; i < affectedCUs.length; i++) {
 			ICompilationUnit unit= affectedCUs[i];
-			ASTData ast= getASTData(unit);
+			CompilationUnitRewrite ast= getCuRewrite(unit);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
 				ast, fMemberBindings, targetBinding, fSourceBinding);
 			ast.getRoot().accept(analyzer);
@@ -804,12 +804,12 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		pm.worked(1);
 	}
 	
-	private ASTData getASTData(ICompilationUnit unit) {
+	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit) {
 		if (fSource.getCu().equals(unit))
 			return fSource;
 		if (fTarget != null && fTarget.getCu().equals(unit))
 			return fTarget;
-		return new ASTData(unit);
+		return new CompilationUnitRewrite(unit);
 	}
 	
 	private boolean isSourceOrTarget(ICompilationUnit unit) {
@@ -850,18 +850,18 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 					if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers)
-						fSource.getRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
+						fSource.getOldRewrite().set(fieldDecl, FieldDeclaration.MODIFIERS_PROPERTY, new Integer(psfModifiers), null);
 				} else if (declaration instanceof TypeDeclaration) {
 					TypeDeclaration typeDecl= (TypeDeclaration) declaration;
 					int psModifiers= Modifier.PUBLIC | Modifier.STATIC;
 					if ((typeDecl.getModifiers() & psModifiers) != psModifiers) {
 						Integer newModifiers= new Integer((typeDecl.getModifiers() | psModifiers));
-						fSource.getRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
+						fSource.getOldRewrite().set(typeDecl, FieldDeclaration.MODIFIERS_PROPERTY, newModifiers, null);
 					}
 				}
 			}
 			TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_declaration")); //$NON-NLS-1$
-			fSource.getRewrite().markAsTracked(declaration, group);
+			fSource.getOldRewrite().markAsTracked(declaration, group);
 			declaration.setProperty("group", group); //$NON-NLS-1$
 			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus()); 
@@ -878,13 +878,13 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		TextBuffer buffer= TextBuffer.create(fSource.getCu().getSource());
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		MultiTextEdit edit= new MultiTextEdit();
-		fSource.getRewrite().rewriteNode(buffer, edit);
+		fSource.getOldRewrite().rewriteNode(buffer, edit);
 		editor.add(edit);
 		editor.performEdits(new NullProgressMonitor());
 		for (int i= 0; i < members.length; i++) {
 			updatedMemberSources[i]= getUpdatedMember(buffer, members[i]);
 		}
-		fSource.clearRewrite();
+		fSource.clearASTRewrite();
 		return updatedMemberSources;		
 	}
 	
@@ -904,9 +904,9 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.getString("MoveMembersRefactoring.addMembers")); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			fSource.getRewrite().remove(declaration, delete);
-			ASTNode node= fTarget.getRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
-			fTarget.getRewrite().markAsInserted(node, add);
+			fSource.getOldRewrite().remove(declaration, delete);
+			ASTNode node= fTarget.getOldRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
+			fTarget.getOldRewrite().markAsInserted(node, add);
 			container.add(ASTNodes.getInsertionIndex((BodyDeclaration)node, container), node);
 		}
 		return result;

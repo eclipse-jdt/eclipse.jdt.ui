@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
@@ -38,31 +39,33 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.TextChange;
 
-public class ASTData {
+public class CompilationUnitRewrite {
 	private ICompilationUnit fCu;
 	private CompilationUnit fRoot;
-	private OldASTRewrite fRewrite;
 	private List/*<TextEditGroup>*/ fTextEditGroups;
+	
+	private OldASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
+	
 //	private List/*<String>*/ fAddedImports;
 //	private List/*<ASTNode>*/ fRemovedNodes;
 	
-	public ASTData(ICompilationUnit cu) {
+	public CompilationUnitRewrite(ICompilationUnit cu) {
 		fCu= cu;
 		fRoot= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
-		fRewrite= new OldASTRewrite(fRoot);
 		fTextEditGroups= new ArrayList();
 //		fAddedImports= new ArrayList();
 //		fRemovedNodes= new ArrayList();
 	}
 	
-	public void clearRewrite() {
-		fRewrite.removeModifications();
+	public void clearASTRewrite() {
+		if (fRewrite != null)
+			fRewrite.removeModifications();
 		fTextEditGroups= new ArrayList();
 	}
 	
-	public void clearRewriteAndImports() {
-		clearRewrite();
+	public void clearASTAndImportRewrites() {
+		clearASTRewrite();
 		fImportRewrite= null;
 //		fAddedImports= new ArrayList();
 //		fRemovedNodes= new ArrayList();
@@ -74,7 +77,17 @@ public class ASTData {
 		return result;
 	}
 	
+	/**
+	 * @return a {@link TextChange}, or <code>null</code> for an empty change
+	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
+	 * @throws IllegalArgumentException when the ast rewrite encounters problems
+	 */
 	public TextChange createChange() throws CoreException {
+		boolean needsAstRewrite= fRewrite != null; //TODO: do we need something like ASTRewrite#hasChanges() here? 
+		boolean needsImportRewrite= fImportRewrite != null && ! fImportRewrite.isEmpty();
+		if (! needsAstRewrite && ! needsImportRewrite)
+			return null;
+			
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
 		TextBuffer buffer= TextBuffer.acquire(getFile(fCu));
 		try {
@@ -82,15 +95,16 @@ public class ASTData {
 			// collected in fAddedImports and fRemovedNodes.
 			MultiTextEdit edit= new MultiTextEdit();
 			cuChange.setEdit(edit);
-			fRewrite.rewriteNode(buffer, edit);
-			if (fImportRewrite != null && ! fImportRewrite.isEmpty()) {
+			if (needsAstRewrite)
+				fRewrite.rewriteNode(buffer, edit);
+			if (needsImportRewrite) {
 				String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
 				TextEdit importsEdit= fImportRewrite.createEdit(buffer.getDocument());
 				edit.addChild(importsEdit);
 				cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
 			}
 			for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-				cuChange.addTextEditGroup((TextEditGroup)iter.next());
+				cuChange.addTextEditGroup((TextEditGroup) iter.next());
 			}
 		} finally {
 			TextBuffer.release(buffer);
@@ -109,9 +123,16 @@ public class ASTData {
 	public CompilationUnit getRoot() {
 		return fRoot;
 	}
-
-	public OldASTRewrite getRewrite() {
+	
+	/** @deprecated use {@link #getASTRewrite()} */
+	public OldASTRewrite getOldRewrite() {
+		if (fRewrite == null)
+			fRewrite= new OldASTRewrite(fRoot);
 		return fRewrite;
+	}
+	
+	public ASTRewrite getASTRewrite() {
+		return getOldRewrite();
 	}
 
 	public ImportRewrite getImportRewrite() {

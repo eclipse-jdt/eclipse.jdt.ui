@@ -42,7 +42,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	protected ITypeBinding fSource;
 	protected ITypeBinding fTarget;
-	protected ASTData fAst;
+	protected CompilationUnitRewrite fCuRewrite;
 	protected IBinding[] fMembers;
 	
 	protected boolean fNeedsImport;
@@ -53,10 +53,10 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 	
 	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.getString("MoveMembersRefactoring.referenceUpdate"); //$NON-NLS-1$
 	
-	public MoveStaticMemberAnalyzer(ASTData ast, IBinding[] members, ITypeBinding source, ITypeBinding target) {
+	public MoveStaticMemberAnalyzer(CompilationUnitRewrite cuRewrite, IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		super(true);
 		fStatus= new RefactoringStatus();
-		fAst= ast;
+		fCuRewrite= cuRewrite;
 		fMembers= members;
 		fSource= source;
 		fTarget= target;
@@ -75,8 +75,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		AST ast= node.getAST();
 		QualifiedName name= ast.newQualifiedName(
 			ast.newSimpleName(type.getName()),
-			(SimpleName)fAst.getRewrite().createCopyTarget(node));
-		fAst.getRewrite().replace(node, name, fAst.createGroupDescription(REFERENCE_UPDATE));
+			(SimpleName)fCuRewrite.getOldRewrite().createCopyTarget(node));
+		fCuRewrite.getOldRewrite().replace(node, name, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		fProcessed.add(node);
 		fNeedsImport= true;
 	}
@@ -90,7 +90,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		Expression exp= node.getExpression();
 		if (exp == null) {
 			exp= node.getAST().newSimpleName(type.getName());
-			fAst.getRewrite().markAsInserted(exp, fAst.createGroupDescription(REFERENCE_UPDATE));
+			fCuRewrite.getOldRewrite().markAsInserted(exp, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			node.setExpression(exp);
 			fNeedsImport= true;
 		} else if (exp instanceof Name) {
@@ -105,7 +105,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		Expression exp= node.getExpression();
 		if (exp == null) {
 			exp= node.getAST().newSimpleName(type.getName());
-			fAst.getRewrite().markAsInserted(exp, fAst.createGroupDescription(REFERENCE_UPDATE));
+			fCuRewrite.getOldRewrite().markAsInserted(exp, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			node.setExpression(exp);
 			fNeedsImport= true;
 		} else if (exp instanceof Name) {
@@ -120,7 +120,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
 			qualifier= node.getAST().newSimpleName(type.getName());
-			fAst.getRewrite().markAsInserted(qualifier, fAst.createGroupDescription(REFERENCE_UPDATE));
+			fCuRewrite.getOldRewrite().markAsInserted(qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			node.setQualifier(qualifier);
 			fNeedsImport= true;
 		} else {
@@ -133,7 +133,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 		Name qualifier= node.getQualifier();
 		if (qualifier == null) {
 			qualifier= node.getAST().newSimpleName(type.getName());
-			fAst.getRewrite().markAsInserted(qualifier, fAst.createGroupDescription(REFERENCE_UPDATE));
+			fCuRewrite.getOldRewrite().markAsInserted(qualifier, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			node.setQualifier(qualifier);
 			fNeedsImport= true;
 		} else {
@@ -151,29 +151,29 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 				fullyQualified= true;
 		}
 		if (fullyQualified) {
-			fAst.getRewrite().replace(
+			fCuRewrite.getOldRewrite().replace(
 				name, 
 				ASTNodeFactory.newName(creator, type.getQualifiedName()),
-				fAst.createGroupDescription(REFERENCE_UPDATE));
+				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		} else {
-			fAst.getRewrite().replace(
+			fCuRewrite.getOldRewrite().replace(
 				name, 
 				creator.newSimpleName(type.getName()),
-				fAst.createGroupDescription(REFERENCE_UPDATE));
+				fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 			fNeedsImport= true;
 		}
 	}
 			
 	private void rewriteExpression(ASTNode node, Expression exp, ITypeBinding type) {
 		SimpleName replace= node.getAST().newSimpleName(type.getName());
-		fAst.getRewrite().replace(exp, replace, fAst.createGroupDescription(REFERENCE_UPDATE));
+		fCuRewrite.getOldRewrite().replace(exp, replace, fCuRewrite.createGroupDescription(REFERENCE_UPDATE));
 		fNeedsImport= true;
 		nonStaticAccess(node);
 	}
 	
 	protected void nonStaticAccess(ASTNode node) {
 		fStatus.addWarning(RefactoringCoreMessages.getString("MoveStaticMemberAnalyzer.nonStatic"),  //$NON-NLS-1$
-			JavaStatusContext.create(fAst.getCu(), node));
+			JavaStatusContext.create(fCuRewrite.getCu(), node));
 	}
 	
 	protected boolean isStaticAccess(Expression exp, ITypeBinding type) {

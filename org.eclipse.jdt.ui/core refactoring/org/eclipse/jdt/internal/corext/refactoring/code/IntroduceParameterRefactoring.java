@@ -62,7 +62,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ASTData;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -78,7 +78,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	private String fParameterName;
 
-	private ASTData fSource;
+	private CompilationUnitRewrite fSource;
 	private Expression fSelectedExpression;
 	private MethodDeclaration fMethodDeclaration;
 	private String[] fExcludedParameterNames;
@@ -122,7 +122,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.syntax_error")); //$NON-NLS-1$
 			pm.worked(1);
 			
-			fSource= new ASTData(fSourceCU);
+			fSource= new CompilationUnitRewrite(fSourceCU);
 			initializeSelectedExpression();
 			pm.worked(1);
 		
@@ -313,7 +313,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		// TODO: check for name clashes in ripple methods, ...
 		
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.introduce_parameter")); //$NON-NLS-1$
-		fSource.clearRewriteAndImports();
+		fSource.clearASTAndImportRewrites();
 		changeSource();
 		pm.worked(1);
 		
@@ -340,16 +340,16 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 		//replace selected expression
 		ASTNode newExpression= ast.newSimpleName(fParameterName);
-		fSource.getRewrite().replace(fSelectedExpression, newExpression,
+		fSource.getOldRewrite().replace(fSelectedExpression, newExpression,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.replace"))); //$NON-NLS-1$
 		
 		//add parameter
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName(fParameterName));
 		String type= fSource.getImportRewrite().addImport(fSelectedExpression.resolveTypeBinding());
-		param.setType((Type) fSource.getRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
+		param.setType((Type) fSource.getOldRewrite().createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
 		fMethodDeclaration.parameters().add(param);
-		fSource.getRewrite().markAsInserted(param,
+		fSource.getOldRewrite().markAsInserted(param,
 				fSource.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"))); //$NON-NLS-1$
 	}
 	
@@ -360,7 +360,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
 		sub.beginTask("", fAffectedCUs.length); //$NON-NLS-1$
 		for (int i= 0; i < fAffectedCUs.length; i++) {
-			ASTData ast= getASTData(fAffectedCUs[i]);
+			CompilationUnitRewrite ast= getCURewrite(fAffectedCUs[i]);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(ast, method, fSelectedExpression);
 			ast.getRoot().accept(analyzer);
 			if (ast != fSource)
@@ -373,31 +373,31 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	private static class ReferenceAnalyzer extends ASTVisitor {
-		private ASTData fAst;
+		private CompilationUnitRewrite fCURewrite;
 		private IMethodBinding fMethodBinding;
 		private Expression fExpression;
 
-		public ReferenceAnalyzer(ASTData astData, IMethodBinding methodBinding, Expression expression) {
+		public ReferenceAnalyzer(CompilationUnitRewrite cuRewrite, IMethodBinding methodBinding, Expression expression) {
 			fExpression= expression;
-			fAst= astData;
+			fCURewrite= cuRewrite;
 			fMethodBinding= methodBinding;
 		}
 		
 		public boolean visit(MethodInvocation node) {
 			if (Bindings.equals(fMethodBinding, node.resolveMethodBinding())) {
-				Expression argument= (Expression) ASTNode.copySubtree(fAst.getRoot().getAST(), fExpression);
+				Expression argument= (Expression) ASTNode.copySubtree(fCURewrite.getRoot().getAST(), fExpression);
 				node.arguments().add(argument);
-				fAst.getRewrite().markAsInserted(argument,
-						fAst.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"))); //$NON-NLS-1$
+				fCURewrite.getOldRewrite().markAsInserted(argument,
+						fCURewrite.createGroupDescription(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_argument"))); //$NON-NLS-1$
 			}
 			return super.visit(node);
 		}
 	}
 	
-	private ASTData getASTData(ICompilationUnit unit) throws CoreException {
+	private CompilationUnitRewrite getCURewrite(ICompilationUnit unit) {
 		if (fSource.getCu().equals(unit))
 			return fSource;
-		return new ASTData(unit);
+		return new CompilationUnitRewrite(unit);
 	}
 	
 	private ICompilationUnit[] findAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
