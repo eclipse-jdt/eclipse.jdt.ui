@@ -77,8 +77,8 @@
             objectClass="org.eclipse.jdt.core.ICompilationUnit"
             id="org.eclipse.jdt.ui.examples.AddTestMarkersAction">
          <action
-               label="AddTestMarkersAction.label"
-               tooltip="AddTestMarkersAction.tooltip"
+               label="%AddTestMarkersAction.label"
+               tooltip="%AddTestMarkersAction.tooltip"
                class="org.eclipse.jdt.ui.examples.AddTestMarkersAction"
                menubarPath="AddTestMarkers"
                enablesFor="1"
