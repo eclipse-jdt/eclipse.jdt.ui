@@ -149,7 +149,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 					// for projects only add the contained source folders
 					IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
 					for (int i= 0; i < roots.length; i++) {
-						if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+						if (!roots[i].isExternal()) {
 							region.add(roots[i]);
 						}
 					}
