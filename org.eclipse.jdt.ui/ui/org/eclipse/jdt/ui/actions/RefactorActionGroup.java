@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParamatersAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.MoveAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.OpenRefactoringWizardAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.PullUpAction;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
 
@@ -48,12 +47,11 @@ public class RefactorActionGroup extends ActionGroup {
 
 	private UnifiedSite fSite;
 
- 	private SelfEncapsulateFieldAction fSelfEncapsulateField;
+ 	private SelectionDispatchAction fSelfEncapsulateField;
  	private SelectionDispatchAction fMoveAction;
 	private SelectionDispatchAction fRenameAction;
-	private OpenRefactoringWizardAction fModifyParametersAction;
-	private OpenRefactoringWizardAction fPullUpAction;
-
+	private SelectionDispatchAction fModifyParametersAction;
+	private SelectionDispatchAction fPullUpAction;
 	private SelectionDispatchAction fInlineTempAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractMethodAction;
