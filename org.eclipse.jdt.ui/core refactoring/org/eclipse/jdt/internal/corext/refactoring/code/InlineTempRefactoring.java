@@ -282,7 +282,10 @@ public class InlineTempRefactoring extends Refactoring {
 			if (prefixExpression.getOperand() == null)
 				return true;
 			if (! (prefixExpression.getOperand() instanceof SimpleName))
-				return true;	
+				return true;
+			if (! prefixExpression.getOperator().equals(PrefixExpression.Operator.DECREMENT) &&
+				! prefixExpression.getOperator().equals(PrefixExpression.Operator.INCREMENT))
+				return true;
 			SimpleName simpleName= (SimpleName)prefixExpression.getOperand();	
 			if (! isNameReferenceToTemp(simpleName))
 				return true;
