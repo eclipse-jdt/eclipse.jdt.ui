@@ -6,11 +6,11 @@ import java.util.Set;
 
 abstract class C extends A{
 
+	public Collection i;
+
 	public List f() {
 		return null;
 	}
-
-	public Collection i;
 
 	public abstract Set m();
 }

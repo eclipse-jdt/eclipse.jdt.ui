@@ -8,11 +8,11 @@ class B extends A{
 
 	public Collection i;
 
-	public List f() {
+	public Set m() {
 		return null;
 	}
 
-	public Set m() {
+	public List f() {
 		return null;
 	}
 }
