@@ -248,9 +248,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		CPListElement[] res= null;
 		
 		switch (elem.getEntryKind()) {
-		case IClasspathEntry.CPE_CONTAINER:
+		case IClasspathEntry.CPE_CONTAINER:	
 			String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.edit.title"); //$NON-NLS-1$
-			res= openContainerDialog(title, new ClasspathContainerWizard(elem.getClasspathEntry()));
+			res= openContainerDialog(title, new ClasspathContainerWizard(elem.getClasspathEntry(), fCurrJProject, getRawClasspath()));
 			break;
 		case IClasspathEntry.CPE_LIBRARY:
 			IResource resource= elem.getResource();
@@ -700,7 +700,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				for (int i = 0; i < fDescriptors.length; i++) {
 					if (fDescriptors[i].getName().equals(selected)) {
 						String title= NewWizardMessages.getString("LibrariesWorkbookPage.ContainerDialog.new.title"); //$NON-NLS-1$
-						fResult= openContainerDialog(title, new ClasspathContainerWizard(fDescriptors[i]));
+						fResult= openContainerDialog(title, new ClasspathContainerWizard(fDescriptors[i], fCurrJProject, getRawClasspath()));
 						fAdvSettings.put(DIALOGSTORE_CONTAINER_IDX, i);
 						break;
 					}
@@ -719,6 +719,14 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	}
 	
+	private IClasspathEntry[] getRawClasspath() {
+		IClasspathEntry[] currEntries= new IClasspathEntry[fClassPathList.getSize()];
+		for (int i= 0; i < currEntries.length; i++) {
+			CPListElement curr= (CPListElement) fClassPathList.getElement(i);
+			currEntries[i]= curr.getClasspathEntry();
+		}
+		return currEntries;
+	}
 		
 					
 	// a dialog to set the source attachment properties

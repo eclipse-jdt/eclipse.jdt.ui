@@ -27,6 +27,9 @@ import org.eclipse.jdt.core.IClasspathEntry;
  * Clients implementing this interface may subclass from 
  * <code>org.eclipse.jface.wizard.WizardPage</code>.
  * </p>
+ * Clients implementing this interface may also implement
+ * <code>IClasspathContainerPageExtension</code> to get additional context
+ * before this page is opened.
  *
  * @since 2.0
  */
