@@ -16,11 +16,15 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.AbstractCUTestCase;
 
 public class ReorderParametersTests extends RefactoringTest {
 	private static final Class clazz= ReorderParametersTests.class;
 	private static final String REFACTORING_PATH= "ReorderParameters/";
 	
+	private static final boolean RUN_CONSTRUCTOR_TEST = false;
 	/**
 	 * Constructor for ReorderParametersTests
 	 */
@@ -60,6 +64,8 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 
 	private static ParameterInfo[] createNewParamInfos(String[] newTypes, String[] newNames, String[] newDefaultValues) {
+		if (newTypes == null)
+			return new ParameterInfo[0];
 		ParameterInfo[] result= new ParameterInfo[newTypes.length];
 		for (int i= 0; i < newDefaultValues.length; i++) {
 			result[i]= ParameterInfo.createInfoForAddedParameter();
@@ -71,6 +77,8 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 
 	private static void addInfos(List list, ParameterInfo[] newParamInfos, int[] newIndices) {
+		if (newParamInfos == null || newIndices == null)
+			return;
 		for (int i= newIndices.length - 1; i >= 0; i--) {
 			list.add(newIndices[i], newParamInfos[i]);
 		}
@@ -90,16 +98,20 @@ public class ReorderParametersTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+//		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
+		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
 	}
 
-	private void helperAddReorderRename(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, int[] permutation)  throws Exception{
+	private void helperDoAll(String methodName, String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, int[] permutation, int newVisibility)  throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
-		IMethod method = classA.getMethod("m", signature);
+		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
 		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(method);
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, permutation);
+		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
+			ref.setVisibility(newVisibility);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -107,7 +119,9 @@ public class ReorderParametersTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+//		assertEquals("invalid renaming", expectedFileContents, actualCode);
+		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
 	}
 
 	private void helper1(String[] newOrder, String[] signature) throws Exception{
@@ -128,7 +142,9 @@ public class ReorderParametersTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+//		assertEquals("invalid renaming", expectedFileContents, newcu.getSource());
+		AbstractCUTestCase.compareSource(newcu.getSource(), expectedFileContents);
 	}
 
 	private void modifyInfos(List infos, ParameterInfo[] newParamInfos, int[] newIndices, String[] oldParamNames, String[] newParamNames, int[] permutation) {
@@ -348,21 +364,100 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 
 //constructor tests
-//	public void test21() throws Exception{
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
-//	}
-//	public void test22() throws Exception{
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
-//	}
-//	public void test23() throws Exception{
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
-//	}
-//	public void test24() throws Exception{
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
-//	}
-//	public void test25() throws Exception{
-//		helper1(new String[]{"b", "a"}, new String[]{"I", "I"});
-//	}
+	public void test21() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
+	public void test22() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
+	public void test23() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
+	public void test24() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		if (true){
+			printTestDisabledMessage("Bug 24230");
+			return;
+		}	
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
+	public void test25() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
+	public void test26() throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+		String[] signature= {"I", "I"};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"a", "b"};
+		String[] newParamNames= {"a", "b"};
+		int[] permutation= {1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}
 
 	public void testRenameReorder26() throws Exception{
 		helper1(new String[]{"a", "y"}, new String[]{"Z", "I"}, new String[]{"y", "a"}, new String[]{"zzz", "bb"});
@@ -443,7 +538,83 @@ public class ReorderParametersTests extends RefactoringTest {
 		String[] oldParamNames= {"iii", "j"};
 		String[] newParamNames= {"i", "jj"};
 		int[] permutation= {2, -1, 0};
-		helperAddReorderRename(signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation);
+		int newVisibility= JdtFlags.VISIBILITY_CODE_INVALID;//retain
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll35()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 1};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll36()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 1};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PRIVATE;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll37()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 1};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PROTECTED;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll38()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= oldParamNames;
+		int[] permutation= {0, 1};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PROTECTED;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
+	}	
+
+	public void testAll39()throws Exception{
+		String[] signature= {"I", "Z"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"Object"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {1};
+		
+		String[] oldParamNames= {"iii", "j"};
+		String[] newParamNames= {"i", "jj"};
+		int[] permutation= {2, -1, 0};
+		int newVisibility= JdtFlags.VISIBILITY_CODE_PUBLIC;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility);
 	}	
 }
 
