@@ -5,6 +5,14 @@ import java.util.HashSet;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -26,12 +34,59 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 public class OverrideMethodQuery implements IOverrideMethodQuery {
+	
+	private static class OverrideTreeSelectionDialog extends CheckedTreeSelectionDialog{
+
+		private OverrideMethodContentProvider fContentProvider;
+
+		public OverrideTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, OverrideMethodContentProvider contentProvider) {
+			super(parent, labelProvider, contentProvider);
+			fContentProvider= contentProvider;
+		}
+
+		/**
+		 * @see SelectionDialog#createMessageArea(Composite)
+		 */
+		protected Label createMessageArea(Composite composite) {
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout layout= new GridLayout();
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			layout.numColumns= 2;
+			inner.setLayout(layout);
+			
+			Label label= super.createMessageArea(inner);
+			label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			Button flatListButton= new Button(inner, SWT.CHECK);
+			flatListButton.setText("Show &types to group methods");
+			flatListButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			
+			flatListButton.addSelectionListener(new SelectionListener() {
+				public void widgetSelected(SelectionEvent e) {
+					boolean isSelected= (((Button) e.widget).getSelection());
+					fContentProvider.setShowTypes(isSelected);
+				}
+
+				public void widgetDefaultSelected(SelectionEvent e) {
+					widgetSelected(e);
+				}
+			});
+			flatListButton.setSelection(fContentProvider.isShowTypes());
+			return label;		
+		}
+	}
+
+
 
 	private static class OverrideMethodContentProvider implements ITreeContentProvider {
 
 		private Object[] fTypes;
 		private IMethod[] fMethods;
 		private final Object[] fEmpty= new Object[0];
+		
+		private boolean fShowTypes;
+		private Viewer fViewer;
 
 		/**
 		 * Constructor for OverrideMethodContentProvider.
@@ -39,6 +94,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		public OverrideMethodContentProvider(IMethod[] methods, Object[] types) {
 			fMethods= methods;
 			fTypes= types;
+			fShowTypes= true;
 		}
 		
 		/*
@@ -78,7 +134,7 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		 * @see IStructuredContentProvider#getElements(Object)
 		 */
 		public Object[] getElements(Object inputElement) {
-			return fTypes;
+			return fShowTypes ? fTypes : fMethods;
 		}
 
 		/*
@@ -91,7 +147,23 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+			fViewer= viewer;
 		}
+		
+		
+		public boolean isShowTypes() {
+			return fShowTypes;
+		}
+
+		public void setShowTypes(boolean showTypes) {
+			if (fShowTypes != showTypes) {
+				fShowTypes= showTypes;
+				if (fViewer != null) {
+					fViewer.refresh();
+				}
+			}
+		}
+
 	}
 	
 	private static class OverrideMethodSorter extends ViewerSorter {
@@ -187,9 +259,9 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		}
 		
 		ILabelProvider lprovider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
-		ITreeContentProvider cprovider= new OverrideMethodContentProvider(methods, typesArrays);
+		OverrideMethodContentProvider contentProvider= new OverrideMethodContentProvider(methods, typesArrays);
 		
-		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(fShell, lprovider, cprovider);
+		OverrideTreeSelectionDialog dialog= new OverrideTreeSelectionDialog(fShell, lprovider, contentProvider);
 		dialog.setValidator(new OverrideMethodValidator());
 		dialog.setTitle(JavaUIMessages.getString("OverrideMethodQuery.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OverrideMethodQuery.dialog.description")); //$NON-NLS-1$
@@ -212,5 +284,6 @@ public class OverrideMethodQuery implements IOverrideMethodQuery {
 		}
 		return null;
 	}
+	
 }
 
