@@ -988,7 +988,7 @@ JavaStructureDiffViewerCreator
       		label="%Refactoring.moveInnerToTopAction.label"
 			definitionId="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
 			retarget="true" />
-
+		
 		<action id="org.eclipse.jdt.ui.actions.UseSupertype"
       		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
       		label="%Refactoring.useSupertypeAction.label"
@@ -1507,9 +1507,13 @@ JavaStructureDiffViewerCreator
 		<accelerator key="Ctrl+1" id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
 		<accelerator key="F2" id="org.eclipse.jdt.ui.edit.text.java.show.javadoc" />
 
-		<!-- override accelerators for Chinese -->
+		<!-- override accelerators for Chinese China -->
 		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_CN" />
 		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_CN" />
+
+		<!-- override accelerators for Chinese Taiwan -->
+		<accelerator key="Alt+/" id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" locale="zh_TW" />
+		<accelerator key="Alt+?" id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" locale="zh_TW" />
 
 		<!-- source -->
 		<accelerator key="Ctrl+/" id="org.eclipse.jdt.ui.edit.text.java.comment" />
@@ -1537,7 +1541,7 @@ JavaStructureDiffViewerCreator
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-					
+			
 		<!-- navigate -->
 		<accelerator key="F3" id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
