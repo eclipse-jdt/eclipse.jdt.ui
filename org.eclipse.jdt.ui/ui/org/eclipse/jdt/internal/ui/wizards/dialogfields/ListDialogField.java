@@ -611,7 +611,7 @@ public class ListDialogField extends DialogField {
 		}
 		fElements.add(index, element);
 		if (isOkToUse(fTableControl)) {
-			fTable.add(element);
+			fTable.refresh();
 			fTable.setSelection(new StructuredSelection(element));
 		}
 		
