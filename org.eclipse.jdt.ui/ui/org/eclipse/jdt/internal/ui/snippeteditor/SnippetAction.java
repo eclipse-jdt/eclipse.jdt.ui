@@ -46,21 +46,9 @@ public abstract class SnippetAction extends Action implements ISnippetStateChang
 		ITextSelection selection= (ITextSelection)fEditor.getSelectionProvider().getSelection();
 		String text= selection.getText();
 		if (text != null) {
-			setEnabled(textHasContent(text));
+			setEnabled(true);
 			return;
 		} 
 		setEnabled(false);
-	}
-	
-	protected boolean textHasContent(String text) {
-		text= text.trim();
-		int length= text.length();
-		for (int i= 0; i < length; i++) {
-			char c= text.charAt(i);
-			if (!Character.isWhitespace(c)) {
-				return true;
-			}
-		}
-		return false;
 	}
 }
