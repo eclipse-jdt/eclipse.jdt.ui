@@ -19,6 +19,7 @@
   <import plugin="org.eclipse.jdt.debug"/>
   <import plugin="org.eclipse.jdt.launching"/>
   <import plugin="org.eclipse.compare"/>
+  <import plugin="org.eclipse.team.core"/>
 </requires>
 
 <runtime>
@@ -2072,7 +2073,7 @@
 		description= "%HideSystemFiles.description"
 		pattern= ".*"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
-		selected = "true">
+		enabled = "true">
 	</filter>
 	<filter
 		name= "%HideInnerClassFiles.label"
@@ -2138,11 +2139,19 @@
 		enabled= "false">
 	</filter>
 	<filter
-		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaProjectFilter"
+		id= "org.eclipse.jdt.ui.PackageExplorer.NonJavaProjectsFilter"
 		name= "%HideNonJavaProjects.label"
 		description= "%HideNonJavaProjects.description"
 		viewId= "org.eclipse.jdt.ui.PackageExplorer"
 		class= "org.eclipse.jdt.internal.ui.filters.NonJavaProjectsFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.PackageExplorer.NonSharedProjectsFilter"
+		name= "%HideNonSharedProjects.label"
+		description= "%HideNonSharedProjects.description"
+		viewId= "org.eclipse.jdt.ui.PackageExplorer"
+		class= "org.eclipse.jdt.internal.ui.filters.NonSharedFilter"
 		enabled= "false">
 	</filter>
 
@@ -2198,6 +2207,14 @@
 		description= "%HideReferencedLibraries.description"
 		viewId= "org.eclipse.jdt.ui.ProjectsView"
 		class= "org.eclipse.jdt.internal.ui.filters.LibraryFilter"
+		enabled= "false">
+	</filter>
+	<filter
+		id= "org.eclipse.jdt.ui.ProjectsView.NonSharedProjectsFilter"
+		name= "%HideNonSharedProjects.label"
+		description= "%HideNonSharedProjects.description"
+		viewId= "org.eclipse.jdt.ui.ProjectsView"
+		class= "org.eclipse.jdt.internal.ui.filters.NonSharedFilter"
 		enabled= "false">
 	</filter>
 
