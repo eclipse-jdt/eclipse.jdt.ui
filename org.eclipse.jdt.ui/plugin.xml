@@ -809,7 +809,7 @@
       <page
             name="%buildPathPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.BuildPathPreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
             id="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage">
       </page>      
       <page
@@ -823,15 +823,7 @@
             category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.UserLibraryPreferencePage"
             id="org.eclipse.jdt.ui.preferences.UserLibraryPreferencePage">
-      </page>
-      <page
-            name="%newJavaProjectreferencePageName"
-            category="org.eclipse.jdt.ui.preferences.BuildPathPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.NewJavaProjectPreferencePage">
-      </page>
-      
-      
+      </page>      
       <page
             name="%editorPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
