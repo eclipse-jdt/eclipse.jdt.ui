@@ -22,6 +22,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
+import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
@@ -444,4 +446,20 @@ public final class JavaUI {
 	public static IWorkingCopyManager getWorkingCopyManager() {
 		return JavaPlugin.getDefault().getWorkingCopyManager();
 	}
+	
+	
+	/**
+	 * Returns the BufferFactory for the Java UI plug-in.
+	 *
+	 * @return the BufferFactory for the Java UI plug-in
+	 * @see org.eclipse.jdt.core.IBufferFactory
+	 */
+	public static IBufferFactory getBufferFactory() {
+		CompilationUnitDocumentProvider provider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		if (provider != null)
+			return provider.getBufferFactory();
+		return null;
+	}
+
+
 }

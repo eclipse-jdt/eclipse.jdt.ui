@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Extends a  TreeViewer to allow more performance when showing error ticks.
@@ -183,7 +184,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		if (cu.isWorkingCopy())
 			convertedJE= cu.getOriginal(je);
 		else {
-			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy();
+			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
 			if (wc != null) {
 				IJavaElement[] matches= wc.findElements(je);
 				if (matches != null && matches.length > 0)

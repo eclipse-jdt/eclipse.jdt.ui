@@ -637,9 +637,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return null;
 	}
 	
-	/*
-	 * @see IWorkingCopyManager#shutdown
+	/**
+	 * Gets the BufferFactory.
 	 */
+	public IBufferFactory getBufferFactory() {
+		return fBufferFactory;
+	}
+	
 	public void shutdown() {
 		
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyListener);

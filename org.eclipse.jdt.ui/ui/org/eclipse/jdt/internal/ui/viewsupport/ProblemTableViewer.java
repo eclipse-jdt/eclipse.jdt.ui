@@ -1,4 +1,4 @@
-/*
+ /*
  * (c) Copyright IBM Corp. 2000, 2002.
  * All Rights Reserved.
  */
@@ -30,9 +30,10 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaCore; 
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Extends a  TableViewer to allow more performance when showing error ticks.
@@ -186,7 +187,7 @@ public class ProblemTableViewer extends TableViewer implements IProblemChangedLi
 		if (cu.isWorkingCopy())
 			convertedJE= cu.getOriginal(je);
 		else {
-			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy();
+			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy(JavaUI.getBufferFactory());
 			if (wc != null) {
 				IJavaElement[] matches= wc.findElements(je);
 				if (matches != null && matches.length > 0)
