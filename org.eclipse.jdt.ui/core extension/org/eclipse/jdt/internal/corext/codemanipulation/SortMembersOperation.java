@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -79,7 +80,11 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 							return getMemberCategory(MembersOrderPreferenceCache.INIT_INDEX);
 					}
 				case ASTNode.TYPE_DECLARATION :
+				case ASTNode.ENUM_DECLARATION :
+				case ASTNode.ANNOTATION_TYPE_DECLARATION :
 					return getMemberCategory(MembersOrderPreferenceCache.TYPE_INDEX);
+				case ASTNode.ENUM_CONSTANT_DECLARATION :
+					return getMemberCategory(MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX);
 			}
 			return 0; // should never happen
 		}
@@ -183,9 +188,11 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						return value1 - value2;
 					}
 				case ASTNode.TYPE_DECLARATION :
+				case ASTNode.ENUM_DECLARATION :
+				case ASTNode.ANNOTATION_TYPE_DECLARATION :
 					{
-						TypeDeclaration type1= (TypeDeclaration) bodyDeclaration1;
-						TypeDeclaration type2= (TypeDeclaration) bodyDeclaration2;
+						AbstractTypeDeclaration type1= (AbstractTypeDeclaration) bodyDeclaration1;
+						AbstractTypeDeclaration type2= (AbstractTypeDeclaration) bodyDeclaration2;
 
 						String name1= type1.getName().getIdentifier();
 						String name2= type2.getName().getIdentifier();
@@ -201,38 +208,30 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
 						return value1 - value2;
 					}
+				case ASTNode.ENUM_CONSTANT_DECLARATION :
+					{
+						EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
+						EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
+						
+						String name1= decl1.getName().getIdentifier();
+						String name2= decl2.getName().getIdentifier();
+						
+						// enum constants declarations are sorted by name
+						int cmp= this.fCollator.compare(name1, name2);
+						if (cmp != 0) {
+							return cmp;
+						}
+						// preserve relative order
+						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+						return value1 - value2;
+					}
 			}
 			return 0;
 		}
 
 		private String buildSignature(Type type) {
-			switch (type.getNodeType()) {
-				case ASTNode.PRIMITIVE_TYPE :
-					PrimitiveType.Code code= ((PrimitiveType) type).getPrimitiveTypeCode();
-					return code.toString();
-				case ASTNode.ARRAY_TYPE :
-					ArrayType arrayType= (ArrayType) type;
-					StringBuffer buffer= new StringBuffer();
-					buffer.append(buildSignature(arrayType.getElementType()));
-					int dimensions= arrayType.getDimensions();
-					for (int j= 0; j < dimensions; j++) {
-						buffer.append("[]"); //$NON-NLS-1$
-					}
-					return buffer.toString();
-				case ASTNode.SIMPLE_TYPE :
-					SimpleType simpleType= (SimpleType) type;
-					return buildSignature(simpleType.getName());
-			}
-			return null; // should never happen
-		}
-
-		private String buildSignature(Name name) {
-			if (name.isSimpleName()) {
-				return ((SimpleName) name).getIdentifier();
-			} else {
-				QualifiedName qualifiedName= (QualifiedName) name;
-				return buildSignature(qualifiedName.getQualifier()) + '.' + buildSignature(qualifiedName.getName());
-			}
+			return ASTNodes.asString(type);
 		}
 	}
 

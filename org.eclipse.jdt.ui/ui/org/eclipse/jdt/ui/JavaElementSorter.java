@@ -126,6 +126,9 @@ public class JavaElementSorter extends ViewerSorter {
 					case IJavaElement.FIELD :
 						{
 							int flags= ((IField) je).getFlags();
+							if (Flags.isEnum(flags)) {
+								return getMemberCategory(MembersOrderPreferenceCache.ENUM_CONSTANTS_INDEX);
+							}
 							if (Flags.isStatic(flags))
 								return getMemberCategory(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX);
 							else

@@ -32,7 +32,8 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	public static final int STATIC_FIELDS_INDEX= 5;
 	public static final int STATIC_INIT_INDEX= 6;
 	public static final int STATIC_METHODS_INDEX= 7;
-	public static final int N_CATEGORIES= STATIC_METHODS_INDEX + 1;
+	public static final int ENUM_CONSTANTS_INDEX= 8;
+	public static final int N_CATEGORIES= ENUM_CONSTANTS_INDEX + 1;
 	
 	private static final int PUBLIC_INDEX= 0;
 	private static final int PRIVATE_INDEX= 1;
@@ -91,6 +92,8 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	private boolean fillCategoryOffsetsFromPreferenceString(String str, int[] offsets) {
 		StringTokenizer tokenizer= new StringTokenizer(str, ","); //$NON-NLS-1$
 		int i= 0;
+		offsets[ENUM_CONSTANTS_INDEX]= i++; // enum constants always on top
+		
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken().trim();
 			if ("T".equals(token)) { //$NON-NLS-1$
