@@ -22,7 +22,7 @@ public class Strings {
 	
 	/**
 	 * Indent char is a space char but not a line delimiters.
-	 * == Character.isWhitespace(ch) && ch != '\n' && ch != '\r'
+	 * <code>== Character.isWhitespace(ch) && ch != '\n' && ch != '\r'</code>
 	 */
 	public static boolean isIndentChar(char ch) {
 		return Character.isWhitespace(ch) && !isLineDelimiterChar(ch);

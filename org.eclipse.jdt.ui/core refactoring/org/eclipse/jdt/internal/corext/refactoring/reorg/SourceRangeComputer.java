@@ -44,7 +44,7 @@ public class SourceRangeComputer {
 	
 	/**
 	 * Returns the computed source of the elements.
-	 * @see SourceReferenceSourceRangeComputer#computeSourceRange(ISourceReference, ICompilationUnit)
+	 * @see SourceRangeComputer#computeSourceRange(ISourceReference, String)
 	 */
 	public static String computeSource(ISourceReference elem) throws JavaModelException{
 		String cuSource= getCuSource(elem);

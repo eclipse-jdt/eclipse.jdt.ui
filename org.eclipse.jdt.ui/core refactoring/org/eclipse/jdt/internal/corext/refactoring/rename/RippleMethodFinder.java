@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
- * This class is used to find methods along the 'ripple' - e.g. when you rename a method that is declared in an interface,
+ * This class is used to find methods along the 'ripple'. When you rename a method that is declared in an interface,
  * you must also rename its implementations. But because of multiple interface inheritance you have to go up and down the hierarchy 
  * to collect all the methods.
  */

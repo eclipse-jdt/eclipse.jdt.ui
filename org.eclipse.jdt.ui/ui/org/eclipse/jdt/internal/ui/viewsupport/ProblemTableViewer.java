@@ -139,8 +139,8 @@ public class ProblemTableViewer extends TableViewer {
 		super.handleLabelProviderChanged(event);
 	}
 
-	/**
-	 * @see StructuredViewer#handleInvalidSelection(ISelection, ISelection)
+	/*
+	 * @see org.eclipse.jface.viewers.StructuredViewer#handleInvalidSelection(org.eclipse.jface.viewers.ISelection, org.eclipse.jface.viewers.ISelection)
 	 */
 	protected void handleInvalidSelection(ISelection invalidSelection, ISelection newSelection) {
 		ISelection validNewSelection= getValidSelection(newSelection);

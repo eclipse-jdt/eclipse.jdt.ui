@@ -571,7 +571,7 @@ public class PackagesView extends JavaBrowsingPart{
 	 * Override the getText and getImage methods for the DecoratingLabelProvider
 	 * to handel the decoration of logical packages.
 	 * 
-	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(org.eclipse.jface.viewers.ILabelDecorator)
+	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#createDecoratingLabelProvider(JavaUILabelProvider)
 	 */
 	protected DecoratingLabelProvider createDecoratingLabelProvider(JavaUILabelProvider provider) {
 		return new DecoratingJavaLabelProvider(provider, false, false) {

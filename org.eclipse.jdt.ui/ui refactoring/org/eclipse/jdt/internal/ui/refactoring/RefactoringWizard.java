@@ -373,7 +373,7 @@ public class RefactoringWizard extends Wizard {
 	 * Checks the condition for the given style.
 	 * @param style the conditions to check.
 	 * @return the result of the condition check.
-	 * @see CheckPreconditionsOperation
+	 * @see CheckConditionsOperation
 	 */
 	protected RefactoringStatus internalCheckCondition(IRunnableContext context, int style) {
 		

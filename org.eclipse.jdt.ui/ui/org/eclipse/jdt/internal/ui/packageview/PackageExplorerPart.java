@@ -1161,8 +1161,8 @@ public class PackageExplorerPart extends ViewPart
 		};
 	}
 
-	/**
-	 * @see IResourceNavigator#setLinkingEnabled(boolean)
+	/*
+	 * @see org.eclipse.ui.views.navigator.IResourceNavigator#setLinkingEnabled(boolean)
 	 * @since 2.1
 	 */
 	public void setLinkingEnabled(boolean enabled) {

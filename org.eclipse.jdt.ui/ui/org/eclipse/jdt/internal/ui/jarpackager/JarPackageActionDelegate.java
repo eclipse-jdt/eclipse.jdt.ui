@@ -28,7 +28,6 @@ import org.eclipse.ui.PlatformUI;
 /**
  * This abstract action delegate offers base functionality used by
  * other JAR Package based action delegates.
- * .
  */
 abstract class JarPackageActionDelegate implements IActionDelegate {
 

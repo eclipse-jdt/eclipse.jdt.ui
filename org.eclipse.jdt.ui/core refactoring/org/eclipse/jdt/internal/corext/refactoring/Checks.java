@@ -164,7 +164,7 @@ public class Checks {
 	}
 
 	/**
-	 * Returns ok status if the new name is ok ie. no other file with that name exists.
+	 * Returns ok status if the new name is ok. This is when no other file with that name exists.
 	 * @param newName 
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{

@@ -340,7 +340,7 @@ public class TextBuffer {
  	 *  buffer  can be committed to the underlying file system. Otherwise it is
  	 *  not commitable
  	 * 
-	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resorces.IFile[], java.lang.Object)
+	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public IStatus makeCommittable(Object context) {
 		return fgFactory.makeCommittable(this, context);

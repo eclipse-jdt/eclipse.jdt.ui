@@ -28,7 +28,7 @@ public final class SearchResult {
 	private int fAccuracy;
 	
 	/**
-	 * @see IJavaSearchResultCollector#accept
+	 * @see org.eclipse.jdt.core.search.IJavaSearchResultCollector#accept(IResource, int, int, IJavaElement, int)
 	 */
 	public SearchResult(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy){
 		fResource= resource;

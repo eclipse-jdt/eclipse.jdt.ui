@@ -74,8 +74,8 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	/**
 	 * Creates and returns the label provider for this part.
 	 * 
-	 * @return	the label provider
-	 * @see	ILabelProvider
+	 * @return the label provider
+	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
 	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(

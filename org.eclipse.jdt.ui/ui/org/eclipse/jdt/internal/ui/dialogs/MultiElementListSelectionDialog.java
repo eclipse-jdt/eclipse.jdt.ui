@@ -107,8 +107,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		return super.open();
 	}
 		 
-	/**
-	 * @see Dialog#createDialogArea(Composite)
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(Composite)
 	 */	
 	protected Control createDialogArea(Composite parent) {
 		Composite contents= (Composite) super.createDialogArea(parent);
@@ -124,8 +124,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		return contents;
 	}
 
-	/**
-	 * @see Dialog#createButtonsForButtonBar(Composite)
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(Composite)
 	 */
 	protected void createButtonsForButtonBar(Composite parent) {
 		fBackButton= createButton(parent, IDialogConstants.BACK_ID, IDialogConstants.BACK_LABEL, false);
@@ -134,8 +134,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 	}
 	
-	/**
-	 * @see SelectionDialog#createMessageArea(Composite)
+	/*
+	 * @see org.eclipse.ui.dialogs.SelectionDialog#createMessageArea(Composite)
 	 */
 	protected Label createMessageArea(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
@@ -162,15 +162,15 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 		return messageLabel;
 	}
 	
-	/**
-	 * @see SelectionStatusDialog#computeResult()
+	/*
+	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
 		setResult(fCurrentPage, getSelectedElements());
 	}
 		
-	/**
-	 * @see Dialog#buttonPressed(int)
+	/*
+	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
 	 */
 	protected void buttonPressed(int buttonId) {
 		if (buttonId == IDialogConstants.BACK_ID) {

@@ -21,7 +21,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
- * Dialog Field containing a single button: e.g. radio or checkbox button.
+ * Dialog Field containing a single button such as a radio or checkbox button.
  */
 public class SelectionButtonDialogField extends DialogField {
 	

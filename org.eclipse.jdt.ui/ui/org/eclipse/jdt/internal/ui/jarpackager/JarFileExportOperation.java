@@ -613,7 +613,6 @@ public class JarFileExportOperation implements IJarExportRunnable {
 	 *
 	 * @param filePath the path of the file resource to create a handle for
 	 * @return the new file resource handle
-	 * @see #createFile
 	 */
 	protected IFile createFileHandle(IPath filePath) {
 		if (filePath.isValidPath(filePath.toString()) && filePath.segmentCount() >= 2)

@@ -87,7 +87,7 @@ public class JavaTextTools {
 	 *			instance installs a listener on the passed preference store to adapt itself to 
 	 *			changes in the preference store. In general <code>PreferenceConstants.
 	 *			getPreferenceStore()</code> should be used to initialize the text tools.
-	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore())
+	 * @see org.eclipse.jdt.ui.PreferenceConstants#getPreferenceStore()
 	 * @since 2.0
 	 */
 	public JavaTextTools(IPreferenceStore store) {

@@ -100,7 +100,7 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	
 	/**
 	 * Returns a name which is presented in the UI.
-	 * @see ITypedInput@getName
+	 * @see ITypedElement#getName()
 	 */
 	public String getName() {
 		
@@ -117,8 +117,8 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 		return getId().substring(1);	// we strip away the type character
 	}
 	
-	/**
-	 * @see ITypedInput@getType
+	/*
+	 * @see ITypedElement#getType()
 	 */
 	public String getType() {
 		return "java2"; //$NON-NLS-1$

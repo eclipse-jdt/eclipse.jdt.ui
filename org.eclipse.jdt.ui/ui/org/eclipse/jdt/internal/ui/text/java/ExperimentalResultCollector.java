@@ -58,7 +58,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 	
 	/**
 	 * Creates a proposal that includes a best guess for each parameter. Best guesses are computed by the 
-	 * {@link ParameterGuessingEngine} when the {@link org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)}
+	 * {@link ParameterGuesser} when the {@link org.eclipse.jface.text.contentassist.ICompletionProposal#apply(org.eclipse.jface.text.IDocument)}
 	 * method is called.
 	 */
 	protected JavaCompletionProposal createMethodCallCompletion(char[] declaringTypeName, char[] name,

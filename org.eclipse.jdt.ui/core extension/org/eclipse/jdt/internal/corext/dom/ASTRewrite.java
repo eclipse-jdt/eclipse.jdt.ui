@@ -137,7 +137,7 @@ public final class ASTRewrite {
 	
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link createCopy})
+	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 * @param node The node to be marked as inserted.
 	 * @param node Description of the change.
 	 */
@@ -150,7 +150,7 @@ public final class ASTRewrite {
 
 	/**
 	 * Marks a node as inserted. The node must not exist. To insert an existing node (move or copy),
-	 * create a copy target first and insert this target node. ({@link createCopy})
+	 * create a copy target first and insert this target node. ({@link #createCopy})
 	 */
 	public final void markAsInserted(ASTNode node) {
 		markAsInserted(node, null);
@@ -183,7 +183,7 @@ public final class ASTRewrite {
 	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
-	 * target node. ({@link createCopy})
+	 * target node. ({@link #createCopy})
 	 * @param node The node to be marked as replaced.
 	 * @param node The node replacing the node.
 	 * @param node Description of the change. 
@@ -202,7 +202,7 @@ public final class ASTRewrite {
 	/**
 	 * Marks an existing node as replace by a new node. The replacing node node must not exist.
 	 * To replace with an existing node (move or copy), create a copy target first and replace with the
-	 * target node. ({@link createCopy})
+	 * target node. ({@link #createCopy})
 	 * @param node The node to be marked as replaced.
 	 * @param node The node replacing the node.
 	 */		

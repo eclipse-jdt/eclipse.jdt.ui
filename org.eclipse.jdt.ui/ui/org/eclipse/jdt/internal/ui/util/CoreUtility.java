@@ -45,7 +45,7 @@ public class CoreUtility {
 	 *
 	 * @param element the config element defining the extension
 	 * @param classAttribute the name of the attribute carrying the class
-	 * @returns the extension object
+	 * @return the extension object
 	 */
 	public static Object createExtension(final IConfigurationElement element, final String classAttribute) throws CoreException {
 		// If plugin has been loaded create extension.

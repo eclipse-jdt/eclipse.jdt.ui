@@ -69,8 +69,8 @@ public class MainTypeSelectionDialog extends TwoPaneElementSelector {
 		fStyle= style;
 	}
 	
-	/**
-	 * @see Windows#configureShell
+	/*
+	 * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);

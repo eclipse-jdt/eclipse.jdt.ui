@@ -115,8 +115,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		}
 	}
 	
-	/**
-	 * @see SubstitutionTextReader#computeSubstitution(char)
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.SubstitutionTextReader#computeSubstitution(int)
 	 */
 	protected String computeSubstitution(int c) throws IOException {
 		

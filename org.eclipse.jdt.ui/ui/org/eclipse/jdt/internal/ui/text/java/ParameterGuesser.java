@@ -202,8 +202,8 @@ public class ParameterGuesser {
 	}
 	
 	/**
-	 * Returns the name of the variable/field that best matches the type and name of the argument.
-	 * .
+	 * Returns the name of the variable or field that best matches the type and name of the argument.
+	 * 
 	 * @param paramPackage - the package of the parameter we are trying to match
 	 * @param paramType - the qualified name of the parameter we are trying to match
 	 * @param paramName - the name of the paramater (used to find similarly named matches)

@@ -84,8 +84,8 @@ public class EditorUtility {
 	}
 	
 	/**
-	 * Opens a Java editor for an element (IJavaElement, IFile, IStorage...)
-	 * The editor is activated by default
+	 * Opens a Java editor for an element such as <code>IJavaElement</code>, <code>IFile</code>, or <code>IStorage</code>.
+	 * The editor is activated by default.
 	 * @return the IEditorPart or null if wrong element type or opening failed
 	 */
 	public static IEditorPart openInEditor(Object inputElement) throws JavaModelException, PartInitException {

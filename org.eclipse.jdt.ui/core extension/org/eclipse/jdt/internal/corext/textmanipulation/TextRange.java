@@ -70,7 +70,7 @@ public final class TextRange {
 	/**
 	 * Creates a new range from the given source range.
 	 * 
-	 * @range the source range denoting offset and length
+	 * @param range the source range denoting offset and length
 	 */
 	public TextRange(ISourceRange range) {
 		this(range.getOffset(), range.getLength());

@@ -21,8 +21,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jdt.core.IJavaProject;
 
 /**
- * Filters non-shared projects and Java projects
- * i. e. those not controlled by a team provider.
+ * Filters non-shared projects and Java projects. Non-shared projects are
+ * projects that are not controlled by a team provider.
  * 
  * @since 2.1
  */

@@ -33,8 +33,8 @@ class Properties extends java.util.Properties {
 		Assert.isNotNull(duplicateKeys);
 		fDuplicateKeys= duplicateKeys;
 	}
-	/**
-	 * @see Map#put(Object, Object)
+	/*
+	 * @see java.util.Map#put(Object, Object)
 	 */
 	public Object put(Object arg0, Object arg1) {
 		if (arg0 != null && containsKey(arg0))

@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-/**
+/*
  * Open items:
  *  - generate import statements for newly generated local variable declarations.
  *  - forbid cases like foo(foo(10)) when inlining foo().

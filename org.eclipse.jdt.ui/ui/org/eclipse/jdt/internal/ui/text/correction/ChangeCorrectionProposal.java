@@ -136,7 +136,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal {
 	
 	/**
 	 * Sets the change element.
-	 * @param 
+	 * @param change the change
 	 */
 	protected void setChange(Change change) throws CoreException {
 		fChange= change;

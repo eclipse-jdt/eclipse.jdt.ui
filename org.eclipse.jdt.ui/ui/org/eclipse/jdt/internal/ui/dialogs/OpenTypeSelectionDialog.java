@@ -51,8 +51,8 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		super(parent, context, elementKinds, scope);
 	}
 	
-	/**
-	 * @see Windows#configureShell(Shell)
+	/*
+	 * @see org.eclipse.jface.window.Window#configureShell(Shell)
 	 */
 	protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
@@ -67,7 +67,7 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 		return super.close();
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.window.Window#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {

@@ -58,10 +58,8 @@ public class SimpleTextEdit extends TextEdit {
 	}
 		
 	/**
-	 * Sets the text edit's text
-	 * <p>
-	 * This method should only be called from within the <code>
-	 * connect</code> method.
+	 * Sets the text edit's text.<p>
+	 * This method should only be called from within the <code>connect</code> method.
 	 * 
 	 * @param text the text edit's text
 	 */	

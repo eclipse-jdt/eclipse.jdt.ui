@@ -35,7 +35,7 @@ public interface ICorrectionContext {
 	int getOffset();
 	
 	/**
-	 * Returns the problem is associated with this context. 0 is returned if no problem exists. 
+	 * Returns the problem that is associated with this context. Returns <code>0</code> if no problem exists. 
 	 * @return int
 	 */
 	int getProblemId();

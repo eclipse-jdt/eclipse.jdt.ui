@@ -76,11 +76,9 @@ public class Resources {
 	 * 
 	 * @param resource the resource to be checked
 	 * @param context the context passed to <code>validateEdit</code> 
-	 * @return IStatus status describing the method's result. If <code>status.
-	 * isOK()</code> returns <code>true</code> then the resource are committable
+	 * @return status describing the method's result. If <code>status.isOK()</code> returns <code>true</code> then the resources are committable.
 	 * 
-	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.
-	 * resources.IFile[], java.lang.Object)
+	 * @see org.eclipse.core.resources.IWorkspace#validateEdit(org.eclipse.core.resources.IFile[], java.lang.Object)
 	 */
 	public static IStatus makeCommittable(IResource resource, Object context) {
 		return makeCommittable(new IResource[] { resource }, context);

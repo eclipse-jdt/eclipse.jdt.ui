@@ -270,7 +270,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * files. The user is then asked to confirm if those resources should be saved or
 	 * not.
 	 * 
-	 * @boolean indicating true if all preconditions are satisfied otherwise false
+	 * @return <code>true</code> if all preconditions are satisfied otherwise false
 	 */
 	private boolean checkPreconditions(IJavaElement[] elements) {
 

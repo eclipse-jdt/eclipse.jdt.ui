@@ -289,7 +289,7 @@ public class StubUtility {
 	}		
 	
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration.getTypeComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String)
 	 */	
 	public static String getCompilationUnitContent(ICompilationUnit cu, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
@@ -317,8 +317,8 @@ public class StubUtility {
 		return content;
 	}		
 
-	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration.getTypeComment
+	/*
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String)
 	 */		
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String lineDelim) throws CoreException {
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.TYPECOMMENT);
@@ -391,7 +391,7 @@ public class StubUtility {
 	}	
 
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
@@ -401,7 +401,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.METHODCOMMENT;
@@ -452,7 +452,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration.getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {

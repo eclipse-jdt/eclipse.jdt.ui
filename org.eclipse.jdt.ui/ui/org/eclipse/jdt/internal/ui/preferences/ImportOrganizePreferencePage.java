@@ -290,9 +290,8 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
 	
 	
 	/** 
-	 * The import order file is a property file with keys
-	 * "0", "1" ... last entry.
-	 * values must be valid package names
+	 * The import order file is a property file. The keys are
+	 * "0", "1" ... last entry. The values must be valid package names.
 	 */
 	private List loadFromProperties(Properties properties) {
 		ArrayList res= new ArrayList();

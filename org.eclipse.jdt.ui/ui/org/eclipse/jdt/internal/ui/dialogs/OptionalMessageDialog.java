@@ -98,7 +98,7 @@ public class OptionalMessageDialog extends MessageDialog {
 	}
 		
 	/**
-	 * Answers whether the optional dialog is enabled i.e. should be shown.
+	 * Answers whether the optional dialog is enabled and should be shown.
 	 */
 	public static boolean isDialogEnabled(String key) {
 		IDialogSettings settings= getDialogSettings();
@@ -106,7 +106,7 @@ public class OptionalMessageDialog extends MessageDialog {
 	}
 	
 	/**
-	 * Sets whether the optional dialog is enabled i.e. should be shown.
+	 * Sets whether the optional dialog is enabled and should be shown.
 	 */
 	public static void setDialogEnabled(String key, boolean isEnabled) {
 		IDialogSettings settings= getDialogSettings();

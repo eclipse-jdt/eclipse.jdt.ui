@@ -170,8 +170,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 		updateEnabledStates();
 	}
 	
-	/**
-	 * @see IDialogPage#createControl(Composite)
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite ancestor) {
 		Composite parent= new Composite(ancestor, SWT.NULL);

@@ -19,8 +19,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
- * Label provider for the SearchUsagesInFile results.
- * @see SearchUsagesInFileAction
+ * Label provider for the <code>FindOccurrencesInFile</code> results.
+ * @see org.eclipse.jdt.ui.actions.FindOccurrencesInFileAction
  */
 class OccurrencesInFileLabelProvider extends JavaSearchResultLabelProvider {
 

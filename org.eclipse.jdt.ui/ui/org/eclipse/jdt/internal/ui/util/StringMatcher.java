@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.util;
 import java.util.*;
 
 /**
- * A string pattern matcher, suppporting * and ? wildcards.
+ * A string pattern matcher. Supports '*' and '?' wildcards.
  */
 public class StringMatcher {
 	protected String fPattern;
@@ -46,7 +46,7 @@ public class StringMatcher {
 	}
 	/**
 	 * StringMatcher constructor takes in a String object that is a simple 
-	 * pattern which may contain ‘*’ for 0 and many characters and
+	 * pattern. The pattern may contain ‘*’ for 0 and many characters and
 	 * ‘?’ for exactly one character.  
 	 *
 	 * Literal '*' and '?' characters must be escaped in the pattern 

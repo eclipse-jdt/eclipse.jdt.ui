@@ -66,7 +66,7 @@ public class TemplateSet {
 	/**
 	 * Convenience method for reading templates from a file.
 	 * 
-	 * @see #addFromStream(InputStream)
+	 * @see #addFromStream(InputStream, boolean)
 	 */
 	public void addFromFile(File file, boolean allowDuplicates) throws CoreException {
 		InputStream stream= null;

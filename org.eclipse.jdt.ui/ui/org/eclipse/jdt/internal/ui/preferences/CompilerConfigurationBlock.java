@@ -154,8 +154,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	}	
 	
 	
-	/**
-	 * @see PreferencePage#createContents(Composite)
+	/*
+	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);

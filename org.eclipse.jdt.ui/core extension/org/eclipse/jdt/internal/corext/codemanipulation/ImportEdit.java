@@ -56,7 +56,7 @@ public final class ImportEdit extends SimpleTextEdit {
 	}
 	
 	/**
-	 * @see ImportsStructure#findAmbiguosImports(boolean)
+	 * @see ImportsStructure#setFindAmbiguousImports(boolean)
 	 */
 	public void setFindAmbiguosImports(boolean findAmbiguosImports) {
 		fImportsStructure.setFindAmbiguousImports(findAmbiguosImports);

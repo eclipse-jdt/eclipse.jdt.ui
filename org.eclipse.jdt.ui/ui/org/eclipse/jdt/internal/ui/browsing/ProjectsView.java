@@ -193,7 +193,7 @@ public class ProjectsView extends JavaBrowsingPart {
 	/**
 	 * Handles selection of LogicalPackage in Packages view.
 	 * 
-	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.uiIWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {

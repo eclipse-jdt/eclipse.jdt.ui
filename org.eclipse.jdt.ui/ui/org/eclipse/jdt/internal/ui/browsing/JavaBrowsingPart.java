@@ -1247,7 +1247,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	/**
-	 * @see JavaEditor#getElementAt(int)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getElementAt(int)
 	 */
 	protected IJavaElement getElementForInputAt(IEditorInput input, int offset) {
 		if (input instanceof IClassFileEditorInput) {

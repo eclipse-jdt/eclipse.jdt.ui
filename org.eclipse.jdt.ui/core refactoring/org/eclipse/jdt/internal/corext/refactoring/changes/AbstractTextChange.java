@@ -95,8 +95,8 @@ public abstract class AbstractTextChange extends Change {
 	protected abstract IChange createReverseChange(UndoMemento edits , int changeKind);
 	
 	/**
-	 * Returns <code>true</code> if this change is a reverse change (e.g. an undo
-	 * or redo change). Returns <code>false</code> if the change is an original 
+	 * Returns <code>true</code> if this change is a reverse change. This is the case for an undo
+	 * or a redo change. Returns <code>false</code> if the change is an original 
 	 * change.
 	 * 
 	 * @return whether or not this change is a reverse change

@@ -222,8 +222,8 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		return super.open();
 	}
 	
-	/**
-	 * @see SelectionStatusDialog#computeResult()
+	/*
+	 * @see org.eclipse.ui.dialogs.SelectionStatusDialog#computeResult()
 	 */
 	protected void computeResult() {
 		TypeInfo ref= (TypeInfo) getLowerSelectedElement();

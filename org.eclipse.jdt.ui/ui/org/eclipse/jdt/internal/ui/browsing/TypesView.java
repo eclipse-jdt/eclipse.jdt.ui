@@ -48,8 +48,8 @@ public class TypesView extends JavaBrowsingPart {
 	/**
 	 * Creates and returns the label provider for this part.
 	 * 
-	 * @return	the label provider
-	 * @see	ILabelProvider
+	 * @return the label provider
+	 * @see org.eclipse.jface.viewers.ILabelProvider
 	 */
 	protected JavaUILabelProvider createLabelProvider() {
 		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
@@ -173,7 +173,7 @@ public class TypesView extends JavaBrowsingPart {
 	/**
 	 * Handles selection of LogicalPackage in Packages view.
 	 * 
-	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.uiIWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+	 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
 	 * @since 2.1
 	 */
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {

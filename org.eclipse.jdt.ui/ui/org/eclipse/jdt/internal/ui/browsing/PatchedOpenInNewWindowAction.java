@@ -22,7 +22,7 @@ import org.eclipse.ui.actions.OpenInNewWindowAction;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 
-/**
+/*
  * XXX: This is a workaround for: http://dev.eclipse.org/bugs/show_bug.cgi?id=13070
  * This class can be removed once the bug is fixed.
  * 

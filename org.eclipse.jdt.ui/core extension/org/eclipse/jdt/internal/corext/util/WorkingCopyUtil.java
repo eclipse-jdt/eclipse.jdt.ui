@@ -53,7 +53,7 @@ public class WorkingCopyUtil {
 
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
-	 * @see IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
 		/*
@@ -65,7 +65,7 @@ public class WorkingCopyUtil {
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
 	 * A cu with the specified name may or may not exist in the package.
-	 * @see IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(IPackageFragment pack, String cuName) throws JavaModelException{
 		return (ICompilationUnit)pack.getCompilationUnit(cuName).getWorkingCopy();
