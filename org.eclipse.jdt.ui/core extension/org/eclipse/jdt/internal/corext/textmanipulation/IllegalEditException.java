@@ -15,9 +15,6 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
  */
 public class IllegalEditException extends IllegalArgumentException {
 	
-	private TextEdit fParent;
-	private TextEdit fChild;
-	
 	/** 
 	 * Constructs a new illegal edit exception with the given detail
 	 * message.
@@ -28,7 +25,5 @@ public class IllegalEditException extends IllegalArgumentException {
 	 */
 	public IllegalEditException(TextEdit parent, TextEdit child, String message) {
 		super(message);
-		fParent= parent;
-		fChild= child;
 	}
 }

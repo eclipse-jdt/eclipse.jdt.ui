@@ -15,9 +15,6 @@ package org.eclipse.jdt.internal.corext.textmanipulation;
  */
 public class PerformEditException extends Exception {
 
-	private TextEdit fEdit;
-	private Throwable fException;
-	
 	/**
 	 * Constructs a new perform edit exception with the given
 	 * edit and detail message.
@@ -29,7 +26,5 @@ public class PerformEditException extends Exception {
 	 */
 	public PerformEditException(TextEdit edit, String message, Throwable exception) {
 		super(message);
-		fEdit= edit;
-		fException= exception;
 	}
 }
