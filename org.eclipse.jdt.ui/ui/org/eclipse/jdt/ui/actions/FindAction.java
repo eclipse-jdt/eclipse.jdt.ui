@@ -95,7 +95,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (fValidTypes == null || fValidTypes.length == 0)
 			return false;
 		
-		if (element != null) {
+		if (element != null && element.exists()) {
 			for (int i= 0; i < fValidTypes.length; i++) {
 				if (fValidTypes[i].isInstance(element)) {
 					if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
