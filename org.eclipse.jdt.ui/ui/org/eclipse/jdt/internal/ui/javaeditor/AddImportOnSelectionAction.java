@@ -75,7 +75,10 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		boolean isEnabled= false;
 		try {
 			ISelection selection= fEditor.getSelectionProvider().getSelection();
-			isEnabled= (selection instanceof ITextSelection && JavaModelUtil.isEditable(getCompilationUnit()));
+			if (selection instanceof ITextSelection) {
+				ICompilationUnit cu= getCompilationUnit();
+				isEnabled= (cu != null) && JavaModelUtil.isEditable(cu);
+			}
 		} catch(JavaModelException e) {
 		}
 		setEnabled(isEnabled);

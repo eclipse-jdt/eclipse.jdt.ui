@@ -111,7 +111,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			if (fEditor != null) {
 				IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 				ICompilationUnit cu= manager.getWorkingCopy(fEditor.getEditorInput());
-				isEnabled= JavaModelUtil.isEditable(cu);
+				
+				isEnabled= (cu != null) && JavaModelUtil.isEditable(cu);
 			}
 		} catch (JavaModelException e) {
 		}
