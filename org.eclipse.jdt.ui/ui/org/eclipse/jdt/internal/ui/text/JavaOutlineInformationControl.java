@@ -59,6 +59,8 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -69,7 +71,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.MemberFilter;
 
@@ -590,6 +591,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		
 		/** 
 		 * Creates the action.
+		 * 
+		 * @param outlineViewer the outline viewer
 		 */
 		private SortByDefiningTypeAction(TreeViewer outlineViewer) {
 			super(TextMessages.getString("JavaOutlineInformationControl.SortByDefiningTypeAction.label")); //$NON-NLS-1$
@@ -670,7 +673,11 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.addFilter(new MemberFilter());
 
 		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_GRAY);
+
 		fInnerLabelProvider= new OutlineLabelProvider();
+		fInnerLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
+		fInnerLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
+		treeViewer.setLabelProvider(fInnerLabelProvider);
 		
 		fLexicalSortingAction= new LexicalSortingAction(treeViewer);
 		fSortByDefiningTypeAction= new SortByDefiningTypeAction(treeViewer);
@@ -683,7 +690,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		treeViewer.setAutoExpandLevel(AbstractTreeViewer.ALL_LEVELS);
 		
 		
-		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fInnerLabelProvider));
 		treeViewer.getTree().addKeyListener(getKeyAdapter());
 		
 		return treeViewer;

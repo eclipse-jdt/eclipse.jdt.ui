@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -51,7 +52,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
 import org.eclipse.jdt.internal.ui.typehierarchy.SuperTypeHierarchyViewer.SuperTypeHierarchyContentProvider;
 import org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -153,7 +153,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		});	
 
 		fLabelProvider.setTextFlags(JavaElementLabels.ALL_DEFAULT | JavaElementLabels.T_POST_QUALIFIED);
-		treeViewer.setLabelProvider(new DecoratingJavaLabelProvider(fLabelProvider, true, false));
+		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
+		treeViewer.setLabelProvider(fLabelProvider);
 		
 		treeViewer.getTree().addKeyListener(getKeyAdapter());	
 		
