@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ReorderRenameParameterWrapperRefactoring;
 
 public class ReorderParametersWizard extends RefactoringWizard {
 
-	public ReorderParametersWizard(ReorderParametersRefactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public ReorderParametersWizard(ReorderRenameParameterWrapperRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
 	}
 
