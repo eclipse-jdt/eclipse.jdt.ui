@@ -17,9 +17,12 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextHover;
+import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -31,7 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
-public class BestMatchHover extends AbstractJavaEditorTextHover {
+public class BestMatchHover extends AbstractJavaEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
 
 	private static class JavaEditorTextHoverDescriptorComparator implements Comparator {
 		
@@ -67,10 +70,9 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 		}
 	}
 	
-	protected String fCurrentPerspectiveId;
-	protected List fTextHoverSpecifications;
-	protected List fInstantiatedTextHovers;
-
+	private List fTextHoverSpecifications;
+	private List fInstantiatedTextHovers;
+	private ITextHover fBestHover;
 
 	public BestMatchHover() {
 		installTextHovers();
@@ -127,17 +129,42 @@ public class BestMatchHover extends AbstractJavaEditorTextHover {
 	public String getHoverInfo(ITextViewer textViewer, IRegion hoverRegion) {
 
 		checkTextHovers();
+		fBestHover= null;
 
 		if (fInstantiatedTextHovers == null)
 			return null;
 
 		for (Iterator iterator= fInstantiatedTextHovers.iterator(); iterator.hasNext(); ) {
-			ITextHover hover= (ITextHover) iterator.next();
+			ITextHover hover= (ITextHover)iterator.next();
 
 			String s= hover.getHoverInfo(textViewer, hoverRegion);
-			if (s != null && s.trim().length() > 0)
+			if (s != null && s.trim().length() > 0) {
+				fBestHover= hover;
 				return s;
+			}
 		}
+
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.ITextHoverExtension#getInformationControlCreator()
+	 * @since 3.0
+	 */
+	public IInformationControlCreator getInformationControlCreator() {
+		if (fBestHover instanceof ITextHoverExtension)
+			return ((ITextHoverExtension)fBestHover).getInformationControlCreator();
+
+		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.information.IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @since 3.0
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		if (fBestHover instanceof IInformationProviderExtension2)
+			return ((IInformationProviderExtension2)fBestHover).getInformationPresenterControlCreator();
 
 		return null;
 	}

@@ -13,75 +13,73 @@ package org.eclipse.jdt.internal.ui.text.java.hover;
 
 import java.io.IOException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
+import org.eclipse.jface.text.IInformationControlCreator;
+import org.eclipse.jface.text.ITextHoverExtension;
+import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
-import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
  * Provides source as hover info for Java elements.
  */
-public class JavaSourceHover extends AbstractJavaEditorTextHover {
-
-	private final int LABEL_FLAGS=  JavaElementLabels.ALL_FULLY_QUALIFIED
-		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS 
-		| JavaElementLabels.F_PRE_TYPE_SIGNATURE;
-
+public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITextHoverExtension, IInformationProviderExtension2 {
 
 	/*
 	 * @see JavaElementHover
 	 */
 	protected String getHoverInfo(IJavaElement[] result) {
 		int nResults= result.length;
-		StringBuffer buffer= new StringBuffer();
 		
-		if (nResults > 1) {
+		if (nResults > 1)
+			return null;			
 			
-			for (int i= 0; i < result.length; i++) {
-				HTMLPrinter.startBulletList(buffer);
-				IJavaElement curr= result[i];
-				if (curr instanceof IMember)
-					HTMLPrinter.addBullet(buffer, getInfoText((IMember) curr));
-				HTMLPrinter.endBulletList(buffer);
-			}
-			
-		} else {
-			
-			IJavaElement curr= result[0];
-			if (curr instanceof IMember && curr instanceof ISourceReference) {
-				HTMLPrinter.addSmallHeader(buffer, getInfoText(((IMember)curr)));
+		IJavaElement curr= result[0];
+		if (curr instanceof IMember && curr instanceof ISourceReference) {
+			try {
+				String source= ((ISourceReference)curr).getSource();
+				source= removeLeadingComments(source);
+				String delim= null;
+
 				try {
-					String source= ((ISourceReference)curr).getSource();
-					source= removeLeadingComments(source);
-					HTMLPrinter.addParagraph(buffer, "<pre>"); //$NON-NLS-1$
-					HTMLPrinter.addParagraph(buffer, source);
-					HTMLPrinter.addParagraph(buffer, "</pre>"); //$NON-NLS-1$
-				} catch (JavaModelException ex) {
-					// only write small header
+					delim= StubUtility.getLineDelimiterUsed(result[0]);
+				} catch (JavaModelException e) {
+					delim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
+
+				String[] sourceLines= Strings.convertIntoLines(source);
+				String firstLine= sourceLines[0];
+				if (!Character.isWhitespace(firstLine.charAt(0)))
+					sourceLines[0]= ""; //$NON-NLS-1$
+				CodeFormatterUtil.removeIndentation(sourceLines);
+
+				if (!Character.isWhitespace(firstLine.charAt(0)))
+					sourceLines[0]= firstLine;
+
+				source= source= Strings.concatenate(sourceLines, delim);
+				
+				return source;
+				
+			} catch (JavaModelException ex) {
 			}
-		}
-		
-		if (buffer.length() > 0) {
-			HTMLPrinter.insertPageProlog(buffer, 0);
-			HTMLPrinter.addPageEpilog(buffer);
-			return buffer.toString();
 		}
 		
 		return null;
-	}
-
-	private String getInfoText(IMember member) {
-		return JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
 	}
 
 	private String removeLeadingComments(String source) {
@@ -110,5 +108,31 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover {
 		if (i < 0)
 			return source;
 		return source.substring(i);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.ITextHoverExtension#getInformationControlCreator()
+	 * @since 3.0
+	 */
+	public IInformationControlCreator getInformationControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				return new SourceViewerInformationControl(parent);
+			}
+		};
+	}
+
+	/*
+	 * @see IInformationProviderExtension2#getInformationPresenterControlCreator()
+	 * @since 3.0
+	 */
+	public IInformationControlCreator getInformationPresenterControlCreator() {
+		return new IInformationControlCreator() {
+			public IInformationControl createInformationControl(Shell parent) {
+				int shellStyle= SWT.RESIZE;
+				int style= SWT.V_SCROLL | SWT.H_SCROLL;				
+				return new SourceViewerInformationControl(parent, shellStyle, style);
+			}
+		};
 	}
 }
