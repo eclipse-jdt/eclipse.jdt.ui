@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPerspectiveFactory;
 import org.eclipse.ui.IPlaceholderFolderLayout;
+import org.eclipse.ui.console.IConsoleConstants;
 
 import org.eclipse.debug.ui.IDebugUIConstants;
 
@@ -66,7 +67,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		layout.addShowViewShortcut(SearchUI.SEARCH_RESULT_VIEW_ID);
 		
 		// views - debugging
-		layout.addShowViewShortcut(IDebugUIConstants.ID_CONSOLE_VIEW);
+		layout.addShowViewShortcut(IConsoleConstants.ID_CONSOLE_VIEW);
 
 		// views - standard workbench
 		layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
@@ -106,7 +107,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
-		placeHolderBottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 	}
 
@@ -137,7 +138,7 @@ public class JavaBrowsingPerspectiveFactory implements IPerspectiveFactory {
 		IPlaceholderFolderLayout placeHolderBottom= layout.createPlaceholderFolder("bottom", IPageLayout.BOTTOM, (float)0.75, IPageLayout.ID_EDITOR_AREA); //$NON-NLS-1$
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_TASK_LIST);
 		placeHolderBottom.addPlaceholder(SearchUI.SEARCH_RESULT_VIEW_ID);
-		placeHolderBottom.addPlaceholder(IDebugUIConstants.ID_CONSOLE_VIEW);
+		placeHolderBottom.addPlaceholder(IConsoleConstants.ID_CONSOLE_VIEW);
 		placeHolderBottom.addPlaceholder(IPageLayout.ID_BOOKMARKS);		
 	}
 	
