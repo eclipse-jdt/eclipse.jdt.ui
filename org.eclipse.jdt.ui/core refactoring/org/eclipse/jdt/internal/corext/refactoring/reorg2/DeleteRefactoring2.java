@@ -183,6 +183,8 @@ public class DeleteRefactoring2 extends Refactoring{
 			if (project == null || ! project.exists())
 				continue;
 			IPackageFragmentRoot root= project.findPackageFragmentRoot(resource.getFullPath());
+			if (root == null)
+				continue;
 			List referencingProjects= new ArrayList(1);
 			referencingProjects.add(root.getJavaProject());
 			referencingProjects.addAll(Arrays.asList(JavaElementUtil.getReferencingProjects(root)));
