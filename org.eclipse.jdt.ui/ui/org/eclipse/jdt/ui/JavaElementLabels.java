@@ -19,6 +19,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -251,7 +252,6 @@ public class JavaElementLabels {
 	 */
 	public final static long PREPEND_ROOT_PATH= 1L << 44;
 
-
 	/**
 	 * Post qualify referenced package fragement roots. For example
 	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
@@ -260,29 +260,37 @@ public class JavaElementLabels {
 	public final static long REFERENCED_ROOT_POST_QUALIFIED= 1L << 45; 
 	
 	/**
+	 * Specified to use the resolved information of a IType, IMethod or IField. See {@link IType#isResolved()}.
+	 * If resolved information is available, types will be rendered with type parameters of the instantiated type.
+	 * Resolved method render with the parameter types of the method instance.
+	 * <code>Vector<String>.get(String)</code>
+	 */
+	public final static long USE_RESOLVED= 1L << 48;
+	
+	/**
 	 * Qualify all elements
 	 */
-	public final static long ALL_FULLY_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED;
+	public final static long ALL_FULLY_QUALIFIED= new Long(F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED).longValue();
 
 	/**
 	 * Post qualify all elements
 	 */
-	public final static long ALL_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED;
+	public final static long ALL_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED | P_POST_QUALIFIED | ROOT_POST_QUALIFIED).longValue();
 
 	/**
 	 *  Default options (M_PARAMETER_TYPES,  M_APP_TYPE_PARAMETERS & T_TYPE_PARAMETERS enabled)
 	 */
-	public final static long ALL_DEFAULT= M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS | T_TYPE_PARAMETERS;
+	public final static long ALL_DEFAULT= new Long(M_PARAMETER_TYPES | M_APP_TYPE_PARAMETERS | T_TYPE_PARAMETERS).longValue();
 
 	/**
 	 *  Default qualify options (All except Root and Package)
 	 */
-	public final static long DEFAULT_QUALIFIED= F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED;
+	public final static long DEFAULT_QUALIFIED= new Long(F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED).longValue();
 
 	/**
 	 *  Default post qualify options (All except Root and Package)
 	 */
-	public final static long DEFAULT_POST_QUALIFIED= F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED;
+	public final static long DEFAULT_POST_QUALIFIED= new Long(F_POST_QUALIFIED | M_POST_QUALIFIED | I_POST_QUALIFIED | T_POST_QUALIFIED | D_POST_QUALIFIED | CF_POST_QUALIFIED | CU_POST_QUALIFIED).longValue();
 
 	/**
 	 * User-readable string for separating post qualified names (e.g. " - ").
@@ -297,9 +305,16 @@ public class JavaElementLabels {
 	 */
 	public final static String DECL_STRING= JavaUIMessages.getString("JavaElementLabels.declseparator_string"); //$NON-NLS-1$
 	/**
+	 * User-readable string for ellipsis ("...").
+	 */
+	public final static String ELLIPSIS_STRING= "..."; //$NON-NLS-1$
+	/**
 	 * User-readable string for the default package name (e.g. "(default package)").
 	 */
 	public final static String DEFAULT_PACKAGE= JavaUIMessages.getString("JavaElementLabels.default_package"); //$NON-NLS-1$
+	
+	
+	private final static long QUALIFIER_FLAGS= P_COMPRESSED | USE_RESOLVED;
 	
 	/*
 	 * Package name compression
@@ -313,7 +328,7 @@ public class JavaElementLabels {
 	private JavaElementLabels() {
 	}
 
-	private static boolean getFlag(long flags, long flag) {
+	private static final boolean getFlag(long flags, long flag) {
 		return (flags & flag) != 0;
 	}
 	
@@ -411,6 +426,8 @@ public class JavaElementLabels {
 		}
 	}
 
+	private static final boolean BUG_85811= true;
+	
 	/**
 	 * Appends the label for a method to a {@link StringBuffer}. Considers the M_* flags.
 	 * 	@param method The element to render.
@@ -419,31 +436,36 @@ public class JavaElementLabels {
 	 */		
 	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 		try {
+			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
+			String resolvedSig= (resolvedKey != null && !BUG_85811) ? resolvedKey.toSignature() : null;
+			
 			// return type
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS) && method.exists()) {
-				ITypeParameter[] typeParameters= method.getTypeParameters();
-				if (typeParameters.length > 0) {
-					buf.append('<');
-					for (int i = 0; i < typeParameters.length; i++) {
-						if (i > 0) {
-							buf.append(COMMA_STRING);
-						}
-						buf.append(typeParameters[i].getElementName());
+				if (resolvedKey != null) {
+					String[] typeArgRefs= resolvedKey.getTypeArguments();
+					if (typeArgRefs.length > 0) {
+						getTypeArgumentSignaturesLabel(typeArgRefs, flags, buf);
+						buf.append(' ');
 					}
-					buf.append('>');
-					buf.append(' ');
-				}						
+				} else {
+					ITypeParameter[] typeParameters= method.getTypeParameters();
+					if (typeParameters.length > 0) {
+						getTypeParametersLabel(typeParameters, flags, buf);
+						buf.append(' ');
+					}
+				}
 			}
 			
 			// return type
 			if (getFlag(flags, M_PRE_RETURNTYPE) && method.exists() && !method.isConstructor()) {
-				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));
+				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
+				getTypeSignatureLabel(returnTypeSig, flags, buf);
 				buf.append(' ');
 			}
 			
 			// qualification
 			if (getFlag(flags, M_FULLY_QUALIFIED)) {
-				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 				
@@ -453,7 +475,14 @@ public class JavaElementLabels {
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
 				
-				String[] types= getFlag(flags, M_PARAMETER_TYPES) ? method.getParameterTypes() : null;
+				String[] types= null;
+				if (getFlag(flags, M_PARAMETER_TYPES)) {
+					if (resolvedKey != null && !BUG_85811) {
+						types= Signature.getParameterTypes(resolvedKey.toSignature());
+					} else {
+						types= method.getParameterTypes();
+					}
+				}
 				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
 				int nParams= types != null ? types.length : names.length;
 				boolean renderVarargs= (types != null) && method.exists() && Flags.isVarargs(method.getFlags());
@@ -466,13 +495,13 @@ public class JavaElementLabels {
 						String paramSig= types[i];
 						if (renderVarargs && (i == nParams - 1)) {
 							int newDim= Signature.getArrayCount(paramSig) - 1;
-							buf.append(Signature.getSimpleName(Signature.toString(Signature.getElementType(paramSig))));
+							getTypeSignatureLabel(Signature.getElementType(paramSig), flags, buf);
 							for (int k= 0; k < newDim; k++) {
-								buf.append("[]"); //$NON-NLS-1$
+								buf.append('[').append(']');
 							}
-							buf.append("..."); //$NON-NLS-1$
+							buf.append(ELLIPSIS_STRING);
 						} else {
-							buf.append(Signature.getSimpleName(Signature.toString(paramSig)));
+							getTypeSignatureLabel(paramSig, flags, buf);
 						}
 					}
 					if (names != null) {
@@ -484,52 +513,67 @@ public class JavaElementLabels {
 				}
 			} else {
 				if (method.getParameterTypes().length > 0) {
-					buf.append("..."); //$NON-NLS-1$
+					buf.append(ELLIPSIS_STRING);
 				}
 			}
 			buf.append(')');
 					
 			if (getFlag(flags, M_EXCEPTIONS) && method.exists()) {
-				String[] types= method.getExceptionTypes();
+				String[] types= resolvedSig != null ? Signature.getThrownExceptionTypes(resolvedSig) : method.getExceptionTypes();
 				if (types.length > 0) {
 					buf.append(" throws "); //$NON-NLS-1$
 					for (int i= 0; i < types.length; i++) {
 						if (i > 0) {
 							buf.append(COMMA_STRING);
 						}
-						buf.append(Signature.getSimpleName(Signature.toString(types[i])));
+						getTypeSignatureLabel(types[i], flags, buf);
 					}
 				}
 			}
 			
 			if (getFlag(flags, M_APP_TYPE_PARAMETERS) && method.exists()) {
-				ITypeParameter[] typeParameters= method.getTypeParameters();
-				if (typeParameters.length > 0) {
-					buf.append(' ');
-					buf.append('<');
-					for (int i = 0; i < typeParameters.length; i++) {
-						if (i > 0) {
-							buf.append(COMMA_STRING);
-						}
-						buf.append(typeParameters[i].getElementName());
+				if (resolvedKey != null) {
+					String[] typeArgRefs= resolvedKey.getTypeArguments();
+					if (typeArgRefs.length > 0) {
+						buf.append(' ');
+						getTypeArgumentSignaturesLabel(typeArgRefs, flags, buf);					
 					}
-					buf.append('>');
-				}						
+				} else {
+					ITypeParameter[] typeParameters= method.getTypeParameters();
+					if (typeParameters.length > 0) {
+						buf.append(' ');
+						getTypeParametersLabel(typeParameters, flags, buf);
+					}
+				}					
 			}
 			
 			if (getFlag(flags, M_APP_RETURNTYPE) && method.exists() && !method.isConstructor()) {
 				buf.append(DECL_STRING);
-				buf.append(Signature.getSimpleName(Signature.toString(method.getReturnType())));	
+				String returnTypeSig= resolvedSig != null ? Signature.getReturnType(resolvedSig) : method.getReturnType();
+				getTypeSignatureLabel(returnTypeSig, flags, buf);
 			}			
 			
 			// post qualification
 			if (getFlag(flags, M_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				getTypeLabel(method.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			}			
 			
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // NotExistsException will not reach this point
+		}
+	}
+
+	private static void getTypeParametersLabel(ITypeParameter[] typeParameters, long flags, StringBuffer buf) {
+		if (typeParameters.length > 0) {
+			buf.append('<');
+			for (int i = 0; i < typeParameters.length; i++) {
+				if (i > 0) {
+					buf.append(COMMA_STRING);
+				}
+				buf.append(typeParameters[i].getElementName());
+			}
+			buf.append('>');
 		}
 	}
 	
@@ -542,26 +586,34 @@ public class JavaElementLabels {
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
-				buf.append(Signature.toString(field.getTypeSignature()));
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_85811) {
+					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
+				} else {
+					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
+				}
 				buf.append(' ');
 			}
 			
 			// qualification
 			if (getFlag(flags, F_FULLY_QUALIFIED)) {
-				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 			buf.append(field.getElementName());
 			
 			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				buf.append(DECL_STRING);
-				buf.append(Signature.toString(field.getTypeSignature()));
+				if (getFlag(flags, USE_RESOLVED) && field.isResolved() && !BUG_85811) {
+					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
+				} else {
+					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
+				}
 			}
 			
 			// post qualification
 			if (getFlag(flags, F_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
-				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				getTypeLabel(field.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			}
 			
 		} catch (JavaModelException e) {
@@ -577,12 +629,12 @@ public class JavaElementLabels {
 	 */	
 	public static void getLocalVariableLabel(ILocalVariable localVariable, long flags, StringBuffer buf) {
 		if (getFlag(flags, F_PRE_TYPE_SIGNATURE)) {
-			buf.append(Signature.toString(localVariable.getTypeSignature()));
+			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, buf);
 			buf.append(' ');
 		}
 		
 		if (getFlag(flags, F_FULLY_QUALIFIED)) {
-			getElementLabel(localVariable.getParent(), M_PARAMETER_TYPES | M_FULLY_QUALIFIED | T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+			getElementLabel(localVariable.getParent(), M_PARAMETER_TYPES | M_FULLY_QUALIFIED | T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			buf.append('.');
 		}
 		
@@ -590,13 +642,13 @@ public class JavaElementLabels {
 		
 		if (getFlag(flags, F_APP_TYPE_SIGNATURE)) {
 			buf.append(DECL_STRING);
-			buf.append(Signature.toString(localVariable.getTypeSignature()));
+			getTypeSignatureLabel(localVariable.getTypeSignature(), flags, buf);
 		}
 		
 		// post qualification
 		if (getFlag(flags, F_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getElementLabel(localVariable.getParent(), M_PARAMETER_TYPES | M_FULLY_QUALIFIED | T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+			getElementLabel(localVariable.getParent(), M_PARAMETER_TYPES | M_FULLY_QUALIFIED | T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 		}
 	}
 	
@@ -609,7 +661,7 @@ public class JavaElementLabels {
 	public static void getInitializerLabel(IInitializer initializer, long flags, StringBuffer buf) {
 		// qualification
 		if (getFlag(flags, I_FULLY_QUALIFIED)) {
-			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 			buf.append('.');
 		}
 		buf.append(JavaUIMessages.getString("JavaElementLabels.initializer")); //$NON-NLS-1$
@@ -617,9 +669,54 @@ public class JavaElementLabels {
 		// post qualification
 		if (getFlag(flags, I_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+			getTypeLabel(initializer.getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 		}
 	}
+	
+	private static void getTypeSignatureLabel(String typeSig, long flags, StringBuffer buf) {
+		int sigKind= Signature.getTypeSignatureKind(typeSig);
+		if (sigKind == Signature.BASE_TYPE_SIGNATURE) {
+			buf.append(Signature.toString(typeSig));
+		} else if (sigKind == Signature.ARRAY_TYPE_SIGNATURE) {
+			getTypeSignatureLabel(Signature.getElementType(typeSig), flags, buf);
+			for (int dim= Signature.getArrayCount(typeSig); dim > 0; dim--) {
+				buf.append('[').append(']');
+			}
+		} else if (sigKind == Signature.CLASS_TYPE_SIGNATURE) {
+			String baseType= Signature.toString(Signature.getTypeErasure(typeSig));
+			buf.append(Signature.getSimpleName(baseType));
+			
+			String[] typeArguments= Signature.getTypeArguments(typeSig);
+			getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
+		} else if (sigKind == Signature.TYPE_VARIABLE_SIGNATURE) {
+			buf.append(Signature.toString(typeSig));
+		}
+	}
+	
+	private static void getTypeArgumentSignaturesLabel(String[] typeArgsSig, long flags, StringBuffer buf) {
+		if (typeArgsSig.length > 0) {
+			buf.append('<');
+			for (int i = 0; i < typeArgsSig.length; i++) {
+				if (i > 0) {
+					buf.append(COMMA_STRING);
+				}
+				String sig= typeArgsSig[i];
+				if (sig.length() > 0) {
+					char ch= sig.charAt(0);
+					if (ch == Signature.C_EXTENDS) {
+						buf.append("? extends "); //$NON-NLS-1$
+						sig= sig.substring(1);
+					} else if (ch == Signature.C_SUPER) {
+						buf.append("? super "); //$NON-NLS-1$
+						sig= sig.substring(1);
+					}
+				}
+				getTypeSignatureLabel(sig, flags, buf);
+			}
+			buf.append('>');
+		}
+	}
+	
 
 	/**
 	 * Appends the label for a type to a {@link StringBuffer}. Considers the T_* flags.
@@ -631,14 +728,14 @@ public class JavaElementLabels {
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
 			if (!pack.isDefaultPackage()) {
-				getPackageFragmentLabel(pack, (flags & P_COMPRESSED), buf);
+				getPackageFragmentLabel(pack, (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 		}
 		if (getFlag(flags, T_FULLY_QUALIFIED | T_CONTAINER_QUALIFIED)) {
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
-				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED, buf);
+				getTypeLabel(declaringType, T_CONTAINER_QUALIFIED & QUALIFIER_FLAGS, buf);
 				buf.append('.');
 			}
 			int parentType= type.getParent().getElementType();
@@ -652,7 +749,7 @@ public class JavaElementLabels {
 		if (typeName.length() == 0) { // anonymous
 			try {
 				if (type.isEnum()) {
-					typeName= "{...}";  //$NON-NLS-1$
+					typeName= '{' + ELLIPSIS_STRING + '}'; 
 				} else {
 					String superclassName= Signature.getSimpleName(type.getSuperclassName());
 					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
@@ -664,19 +761,13 @@ public class JavaElementLabels {
 		}
 		buf.append(typeName);
 		if (getFlag(flags, T_TYPE_PARAMETERS)) {
-			if (type.exists()) {
+			BindingKey key= new BindingKey(type.getKey());
+			if (getFlag(flags, USE_RESOLVED) && type.isResolved() && key.isParameterizedType()) {
+				String[] typeArguments= key.getTypeArguments();
+				getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
+			} else if (type.exists()) {
 				try {
-					ITypeParameter[] typeParameters = type.getTypeParameters();
-					if (typeParameters.length > 0) {
-						buf.append('<');
-						for (int i = 0; i < typeParameters.length; i++) {
-							if (i > 0) {
-								buf.append(COMMA_STRING);
-							}
-							buf.append(typeParameters[i].getElementName());
-						}
-						buf.append('>');
-					}		
+					getTypeParametersLabel(type.getTypeParameters(), flags, buf);
 				} catch (JavaModelException e) {
 					// ignore
 				}
@@ -687,14 +778,14 @@ public class JavaElementLabels {
 			buf.append(CONCAT_STRING);
 			IType declaringType= type.getDeclaringType();
 			if (declaringType != null) {
-				getTypeLabel(declaringType, T_FULLY_QUALIFIED | (flags & P_COMPRESSED), buf);
+				getTypeLabel(declaringType, T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS), buf);
 				int parentType= type.getParent().getElementType();
 				if (parentType == IJavaElement.METHOD || parentType == IJavaElement.FIELD || parentType == IJavaElement.INITIALIZER) { // anonymous or local
 					buf.append('.');
 					getElementLabel(type.getParent(), 0, buf);
 				}
 			} else {
-				getPackageFragmentLabel(type.getPackageFragment(), (flags & P_COMPRESSED), buf);
+				getPackageFragmentLabel(type.getPackageFragment(), flags & QUALIFIER_FLAGS, buf);
 			}
 		}
 	}
@@ -709,7 +800,7 @@ public class JavaElementLabels {
 		if (getFlag(flags, D_QUALIFIED)) {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
-				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED));
+				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED | (flags & QUALIFIER_FLAGS)));
 				buf.append('/');
 			}	
 		}
@@ -723,7 +814,7 @@ public class JavaElementLabels {
 			IJavaElement openable= (IJavaElement) declaration.getOpenable();
 			if (openable != null) {
 				buf.append(CONCAT_STRING);
-				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED));
+				buf.append(getElementLabel(openable, CF_QUALIFIED | CU_QUALIFIED | (flags & QUALIFIER_FLAGS)));
 			}				
 		}
 	}	
@@ -738,7 +829,7 @@ public class JavaElementLabels {
 		if (getFlag(flags, CF_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) classFile.getParent();
 			if (!pack.isDefaultPackage()) {
-				buf.append(pack.getElementName());
+				getPackageFragmentLabel(pack, (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 		}
@@ -746,7 +837,7 @@ public class JavaElementLabels {
 		
 		if (getFlag(flags, CF_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getPackageFragmentLabel((IPackageFragment) classFile.getParent(), 0, buf);
+			getPackageFragmentLabel((IPackageFragment) classFile.getParent(), flags & QUALIFIER_FLAGS, buf);
 		}
 	}
 
@@ -760,7 +851,7 @@ public class JavaElementLabels {
 		if (getFlag(flags, CU_QUALIFIED)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
 			if (!pack.isDefaultPackage()) {
-				buf.append(pack.getElementName());
+				getPackageFragmentLabel(pack, (flags & QUALIFIER_FLAGS), buf);
 				buf.append('.');
 			}
 		}
@@ -768,7 +859,7 @@ public class JavaElementLabels {
 		
 		if (getFlag(flags, CU_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getPackageFragmentLabel((IPackageFragment) cu.getParent(), 0, buf);
+			getPackageFragmentLabel((IPackageFragment) cu.getParent(), flags & QUALIFIER_FLAGS, buf);
 		}		
 	}
 
@@ -914,18 +1005,19 @@ public class JavaElementLabels {
 
 	private static void refreshPackageNamePattern() {
 		String pattern= getPkgNamePatternForPackagesView();
+		final String EMPTY_STRING= ""; //$NON-NLS-1$
 		if (pattern.equals(fgPkgNamePattern))
 			return;
-		else if (pattern.equals("")) { //$NON-NLS-1$
-			fgPkgNamePattern= ""; //$NON-NLS-1$
+		else if (pattern.length() == 0) {
+			fgPkgNamePattern= EMPTY_STRING;
 			fgPkgNameLength= -1;
 			return;
 		}
 		fgPkgNamePattern= pattern;
 		int i= 0;
 		fgPkgNameChars= 0;
-		fgPkgNamePrefix= ""; //$NON-NLS-1$
-		fgPkgNamePostfix= ""; //$NON-NLS-1$
+		fgPkgNamePrefix= EMPTY_STRING;
+		fgPkgNamePostfix= EMPTY_STRING;
 		while (i < pattern.length()) {
 			char ch= pattern.charAt(i);
 			if (Character.isDigit(ch)) {
