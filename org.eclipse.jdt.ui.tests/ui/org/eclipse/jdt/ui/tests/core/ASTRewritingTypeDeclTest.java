@@ -86,7 +86,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    public void foo() {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
-		buf.append("class G {\n");
+		buf.append("interface G {\n");
 		buf.append("}\n");		
 		fCU_E= pack1.createCompilationUnit("E.java", buf.toString(), false, null);			
 	}
@@ -105,16 +105,16 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		return newFieldDecl;
 	}
 	
-	private MethodDeclaration newMethod(AST ast, String name) {
+	private MethodDeclaration newMethod(AST ast, String name, boolean isAbstract) {
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.setName(ast.newSimpleName(name));
 		decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-		decl.setModifiers(Modifier.PRIVATE);
+		decl.setModifiers(isAbstract ? (Modifier.ABSTRACT | Modifier.PRIVATE) : Modifier.PRIVATE);
 		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
 		param.setName(ast.newSimpleName("str"));
 		param.setType(ast.newSimpleType(ast.newSimpleName("String")));
 		decl.parameters().add(param);
-		decl.setBody(ast.newBlock());
+		decl.setBody(isAbstract ? null : ast.newBlock());
 		return decl;
 	}	
 	
@@ -150,16 +150,28 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
 		}
-		{ // replace method in F
+		{ // replace method in F, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
 			
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
-			MethodDeclaration methodDecl= newMethod(ast, "newFoo");
+			MethodDeclaration methodDecl= newMethod(ast, "newFoo", true);
 
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), methodDecl);
-		}	
+		}
+		
+		{ // change to class, add supertype
+			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
+			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
+			
+			SimpleName newSuperclass= ast.newSimpleName("Object");
+			type.setSuperclass(newSuperclass);
+			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
+		}			
+					
 
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -179,12 +191,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    public void hee() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		buf.append("class F implements Runnable {\n");
-		buf.append("    private void newFoo(String str) {\n");
-		buf.append("    }\n");
+		buf.append("interface F extends Runnable {\n");
+		buf.append("    private abstract void newFoo(String str);\n");
 		buf.append("}\n");				
-		buf.append("class G {\n");
-		buf.append("}\n");					
+		buf.append("class G extends Object {\n");
+		buf.append("}\n");			
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
@@ -194,8 +205,10 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
 		AST ast= astRoot.getAST();
-		{ // remove supertype, remove first interface, remove field
+		{ // change to interface, remove supertype, remove first interface, remove field
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(type, 0, true);
 		
 			Name superClass= type.getSuperclass();
 			assertTrue("Has super type", superClass != null);
@@ -215,8 +228,11 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			MethodDeclaration meth= findMethodDeclaration(type, "hee");
 			ASTRewriteAnalyzer.markAsReplaced(meth, null);
 		}
-		{ // remove interface & method
+		{ // remove interface & method, change to interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(type, Modifier.FINAL, true);
+			
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) superInterfaces.get(0), null);
@@ -238,7 +254,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E implements Serializable {\n");
+		buf.append("interface E extends Serializable {\n");
 		buf.append("    public static class EInner {\n");
 		buf.append("        public void xee() {\n");
 		buf.append("        }\n");		
@@ -249,7 +265,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    public void gee() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		buf.append("class F {\n");
+		buf.append("final interface F {\n");
 		buf.append("}\n");				
 		assertEqualString(cu.getSource(), buf.toString());
 	}
@@ -261,6 +277,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		AST ast= astRoot.getAST();
 		{ // add interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(type, Modifier.PUBLIC | Modifier.FINAL, false);
 		
 			List superInterfaces= type.superInterfaces();
 			assertTrue("Has super interfaces", !superInterfaces.isEmpty());
@@ -288,7 +306,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			ASTRewriteAnalyzer.markAsInserted(newField);
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", false);
 			members.add(4, newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
@@ -303,19 +321,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			List members= type.bodyDeclarations();
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", false);
 			members.add(newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);	
 		}			
 		{ // remove interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
-			
-			SimpleName newSuperclass= ast.newSimpleName("Exception");
-			type.setSuperclass(newSuperclass);
-			
-			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
-			
+						
 			SimpleName newInterface= ast.newSimpleName("Runnable");
 			type.superInterfaces().add(newInterface);
 			
@@ -323,7 +336,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			List members= type.bodyDeclarations();
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod");
+			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", true);
 			members.add(newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
@@ -336,7 +349,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E extends Exception implements Cloneable, Runnable, Serializable {\n");
+		buf.append("public final class E extends Exception implements Cloneable, Runnable, Serializable {\n");
 		buf.append("    public static class EInner {\n");
 		buf.append("        private double fCount;\n");	
 		buf.append("        public void xee() {\n");
@@ -359,9 +372,8 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf.append("    private void newMethod(String str) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");				
-		buf.append("class G extends Exception implements Runnable {\n");
-		buf.append("    private void newMethod(String str) {\n");
-		buf.append("    }\n");			
+		buf.append("interface G extends Runnable {\n");
+		buf.append("    private abstract void newMethod(String str);\n");		
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
 	}

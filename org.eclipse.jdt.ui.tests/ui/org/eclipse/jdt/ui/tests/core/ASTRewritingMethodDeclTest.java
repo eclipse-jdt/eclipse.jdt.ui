@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -202,8 +203,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) parameters.get(0), null);
 		}
-		{ // delete second param & remove exception
+		{ // delete second param & remove exception & remove public
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, 0, false);
+			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) parameters.get(1), null);
@@ -275,7 +279,7 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(int p2, int p3) {}\n");
-		buf.append("    public void gee(int p1, int p3) {}\n");
+		buf.append("    void gee(int p1, int p3) {}\n");
 		buf.append("    public void hee(int p1, int p2) throws IllegalArgumentException {}\n");
 		buf.append("    public void iee(int p3) throws IllegalAccessException {}\n");
 		buf.append("    public void jee(int p2) throws IllegalArgumentException {}\n");
@@ -308,8 +312,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			thrownExceptions.add(newThrownException);
 			ASTRewriteAnalyzer.markAsInserted(newThrownException);
 		}
-		{ // insert before second param & insert before first exception
+		{ // insert before second param & insert before first exception & add synchronized
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.SYNCHRONIZED, false);
+			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
@@ -324,8 +331,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 			thrownExceptions.add(0, newThrownException);
 			ASTRewriteAnalyzer.markAsInserted(newThrownException);
 		}		
-		{ // insert after last param & insert after first exception
+		{ // insert after last param & insert after first exception & add synchronized, static
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "hee");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.SYNCHRONIZED | Modifier.STATIC, false);
+			
 			List parameters= methodDecl.parameters();
 			assertTrue("must be 3 parameters", parameters.size() == 3);
 
@@ -435,8 +445,8 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("package test1;\n");
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(float m, int p1, int p2, int p3) throws InterruptedException {}\n");
-		buf.append("    public void gee(int p1, float m, int p2, int p3) throws InterruptedException, IllegalArgumentException {}\n");
-		buf.append("    public void hee(int p1, int p2, int p3, float m) throws IllegalArgumentException, InterruptedException {}\n");
+		buf.append("    public synchronized void gee(int p1, float m, int p2, int p3) throws InterruptedException, IllegalArgumentException {}\n");
+		buf.append("    public static synchronized void hee(int p1, int p2, int p3, float m) throws IllegalArgumentException, InterruptedException {}\n");
 		buf.append("    public void iee(float m1, float m2, int p1, int p2, int p3) throws IllegalArgumentException, InterruptedException, IllegalAccessException {}\n");
 		buf.append("    public void jee(int p1, float m1, float m2, int p2, int p3) throws IllegalArgumentException, ArrayStoreException, InterruptedException {}\n");
 		buf.append("    public abstract void kee(int p1, int p2, int p3, float m1, float m2) throws IllegalArgumentException, IllegalAccessException, InterruptedException;\n");
@@ -565,16 +575,20 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 
 			ASTRewriteAnalyzer.markAsReplaced(body, newBlock);
 		}
-		{ // delete block
+		{ // delete block & set abstract
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "gee");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PUBLIC | Modifier.ABSTRACT, false);
 			
 			Block body= methodDecl.getBody();
 			assertTrue("No body: gee", body != null);
 
 			ASTRewriteAnalyzer.markAsReplaced(body, null);
 		}
-		{ // insert block
+		{ // insert block & set to private
 			MethodDeclaration methodDecl= findMethodDeclaration(type, "kee");
+			
+			ASTRewriteAnalyzer.markFlagsChanged(methodDecl, Modifier.PRIVATE, false);
 			
 			Block body= methodDecl.getBody();
 			assertTrue("Has body", body == null);
@@ -595,11 +609,11 @@ public class ASTRewritingMethodDeclTest extends ASTRewritingTest {
 		buf.append("public abstract class E {\n");
 		buf.append("    public E(int p1, int p2, int p3) {\n");
 		buf.append("    }\n");
-		buf.append("    public void gee(int p1, int p2, int p3) throws IllegalArgumentException ;\n");
+		buf.append("    public abstract void gee(int p1, int p2, int p3) throws IllegalArgumentException ;\n");
 		buf.append("    public void hee(int p1, int p2, int p3) throws IllegalArgumentException {}\n");
 		buf.append("    public void iee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
 		buf.append("    public void jee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException {}\n");
-		buf.append("    public abstract void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException {\n");
+		buf.append("    private void kee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException {\n");
 		buf.append("    }\n");
 		buf.append("    public abstract void lee(int p1, int p2, int p3) throws IllegalArgumentException, IllegalAccessException, SecurityException;\n");
 		buf.append("}\n");	
