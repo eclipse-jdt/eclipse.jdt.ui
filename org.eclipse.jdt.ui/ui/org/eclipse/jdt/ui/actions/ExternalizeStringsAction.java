@@ -88,7 +88,11 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(getCompilationUnit(selection) != null);
+		setEnabled(canEnable(selection));
+	}
+
+	private static boolean canEnable(IStructuredSelection selection) {
+		return NLSRefactoring.isAvailable(getCompilationUnit(selection));
 	}
 	
 	/* (non-Javadoc)
@@ -105,7 +109,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	protected void run(IStructuredSelection selection) {
-		run(getCompilationUnit(selection));
+		if (canEnable(selection)) 
+			run(getCompilationUnit(selection));
 	}	
 	
 	private void run(ICompilationUnit unit) {
@@ -118,8 +123,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private ICompilationUnit getCompilationUnit(IStructuredSelection selection) {
-		if (selection.size() != 1)
+	private static ICompilationUnit getCompilationUnit(IStructuredSelection selection) {
+		if (selection.isEmpty() || selection.size() != 1)
 			return null;
 		Object first= selection.getFirstElement();
 		if (first instanceof ICompilationUnit) 
@@ -133,8 +138,8 @@ public class ExternalizeStringsAction extends SelectionDispatchAction {
 		return NLSRefactoring.create(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
-	/* package */ static void openExternalizeStringsWizard(ICompilationUnit unit) throws JavaModelException {
-		if (unit == null)
+	static void openExternalizeStringsWizard(ICompilationUnit unit) throws JavaModelException {
+		if (! NLSRefactoring.isAvailable(unit))
 			return;
 		
 		Refactoring refactoring= createNewRefactoringInstance(unit);

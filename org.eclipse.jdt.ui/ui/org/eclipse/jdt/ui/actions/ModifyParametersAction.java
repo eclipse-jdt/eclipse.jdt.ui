@@ -83,7 +83,11 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
 	protected void selectionChanged(IStructuredSelection selection) {
-		setEnabled(canEnable(selection));
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);//no ui here - happens on selection changes
+		}
 	}
 
     /*
@@ -97,9 +101,13 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	protected void run(IStructuredSelection selection) {
-		//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
-		if (canEnable(selection)) 
-			startRefactoring(getSingleSelectedElement(selection));
+		try {
+			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
+			if (canEnable(selection)) 
+				startRefactoring(getSingleSelectedMethod(selection));
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
     /*
@@ -109,9 +117,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
-			IJavaElement singleSelectedElement= getSingleSelectedElement(selection);
-			if (canRunOn(singleSelectedElement)){
-				startRefactoring(singleSelectedElement);
+			IMethod singleSelectedMethod= getSingleSelectedMethod(selection);
+			if (canRunOn(singleSelectedMethod)){
+				startRefactoring(singleSelectedMethod);
 			} else {
 				String unavailable= RefactoringMessages.getString("ModifyParametersAction.unavailable"); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
@@ -121,32 +129,32 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		}
 	}
 		
-	private static boolean canEnable(IStructuredSelection selection){
-		try{
-			return canRunOn(getSingleSelectedElement(selection));
-		} catch (JavaModelException e){
-			return false;//no ui here - happens on selection changes
-		}
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		return canRunOn(getSingleSelectedMethod(selection));
 	}
 	
-	private static Object getSingleSelectedElement(IStructuredSelection selection){
+	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
 		if (selection.isEmpty() || selection.size() != 1) 
 			return null;
-	
-		return selection.getFirstElement();
+		if (selection.getFirstElement() instanceof IMethod)
+			return (IMethod)selection.getFirstElement();
+		return null;
 	}
 	
-	private IJavaElement getSingleSelectedElement(ITextSelection selection) throws JavaModelException{
+	private IMethod getSingleSelectedMethod(ITextSelection selection) throws JavaModelException{
 		IJavaElement[] elements= resolveElements();
-		if (elements.length > 1)
+		if (elements.length != 1)
 			return null;
-		if (elements.length == 1)
-			return elements[0];
-		return SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
+		if (elements[0] instanceof IMethod)
+			return (IMethod)elements[0];
+		IJavaElement elementAt= SelectionConverter.getInputAsCompilationUnit(fEditor).getElementAt(selection.getOffset());
+		if (elementAt instanceof IMethod)
+			return (IMethod)elementAt;
+		return null;
 	}
 	
-	private static boolean canRunOn(Object element) throws JavaModelException{
-		return (element instanceof IMethod) && ChangeSignatureRefactoring.isAvailable((IMethod)element);
+	private static boolean canRunOn(IMethod method) throws JavaModelException{
+		return ChangeSignatureRefactoring.isAvailable(method);
 	}
 	
 	private static ChangeSignatureRefactoring createRefactoring(IMethod method) throws JavaModelException{
@@ -163,25 +171,20 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 		return new ChangeSignatureWizard(refactoring, title, helpId);
 	}
 	
-	private void startRefactoring(Object element) {
-		try{
-			Assert.isTrue(element instanceof IMethod); //we're enabled so there's no other way
-			ChangeSignatureRefactoring refactoring= createRefactoring((IMethod) element); 
-			Assert.isNotNull(refactoring);
-			// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-			if (!ActionUtil.isProcessable(getShell(), refactoring.getMethod()))
-				return;
-			Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-			if (newElementToProcess == null)
-				return;
-			IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-			selectionChanged(mockSelection);
-			if (isEnabled())
-				run(mockSelection);
-			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	private void startRefactoring(IMethod method) throws JavaModelException {
+		ChangeSignatureRefactoring refactoring= createRefactoring(method); 
+		Assert.isNotNull(refactoring);
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getMethod()))
+			return;
+		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		if (newElementToProcess == null)
+			return;
+		IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
+		selectionChanged(mockSelection);
+		if (isEnabled())
+			run(mockSelection);
+		else
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), ActionMessages.getString("ModifyParameterAction.problem.title"), ActionMessages.getString("ModifyParameterAction.problem.message"));	 //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }

@@ -17,10 +17,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -31,6 +27,8 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 
 /**
  * Extracts the code selected inside a compilation unit editor into a new method.
@@ -45,8 +43,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  */ 
 public class ExtractMethodAction extends SelectionDispatchAction {
 
-	private CompilationUnitEditor fEditor;
-	private String fDialogMessageTitle;
+	private final CompilationUnitEditor fEditor;
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -55,7 +53,6 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("ExtractMethodAction.label"));//$NON-NLS-1$
 		fEditor= editor;
-		fDialogMessageTitle= RefactoringMessages.getString("ExtractMethodAction.dialog.title");//$NON-NLS-1$
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_METHOD_ACTION);
 	}
@@ -67,12 +64,12 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ExtractMethodRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
 			if (refactoring == null)
 				return;
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
 		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
 	}
 
@@ -83,15 +80,15 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		setEnabled(checkEnabled(selection));
 	}
 	
-	private Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws JavaModelException {
+	private static ExtractMethodRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws JavaModelException {
 		return ExtractMethodRefactoring.create(
 			cunit, 
 			selection.getOffset(), selection.getLength(),
 			JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private RefactoringWizard createWizard(Refactoring refactoring) {
-		return new ExtractMethodWizard((ExtractMethodRefactoring)refactoring);
+	private static RefactoringWizard createWizard(ExtractMethodRefactoring refactoring) {
+		return new ExtractMethodWizard(refactoring);
 	}
 	
 	private boolean checkEnabled(ITextSelection selection) {

@@ -99,7 +99,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		try {
 			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
 			if (canEnable(selection)) 
-				startRefactoring(getSingleSelectedElement(selection));
+				startRefactoring(getSingleSelectedType(selection));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
@@ -112,9 +112,9 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))
 				return;
-			IJavaElement selected= getSingleSelectedElement();
-			if (canRunOn(selected)){
-				startRefactoring(selected);	
+			IType type= getSingleSelectedType();
+			if (canRunOn(type)){
+				startRefactoring(type);	
 			} else {
 				String unavailable= RefactoringMessages.getString("ConvertNestedToTopAction.To_activate"); //$NON-NLS-1$
 				MessageDialog.openInformation(getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.unavailable"), unavailable); //$NON-NLS-1$
@@ -125,10 +125,10 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 	}
 		
 	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return canRunOn(getSingleSelectedElement(selection));
+		return canRunOn(getSingleSelectedType(selection));
 	}
 	
-	private static IJavaElement getSingleSelectedElement(IStructuredSelection selection) throws JavaModelException{
+	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1) 
 			return null;
 			
@@ -140,15 +140,17 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	private IJavaElement getSingleSelectedElement() throws JavaModelException{
+	private IType getSingleSelectedType() throws JavaModelException{
 		IJavaElement[] elements= resolveElements();
 		if (elements.length != 1)
 			return null;
-		return elements[0];
+		if (elements[0] instanceof IType)
+			return (IType)elements[0];
+		return null;
 	}
 
-	private static boolean canRunOn(IJavaElement element) throws JavaModelException{
-		return (element instanceof IType) && MoveInnerToTopRefactoring.isAvailable((IType)element);
+	private static boolean canRunOn(IType type) throws JavaModelException{
+		return MoveInnerToTopRefactoring.isAvailable(type);
 	}
 
 	private IJavaElement[] resolveElements() {
@@ -163,26 +165,20 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 		return MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
-	private void startRefactoring(Object element) {
-		try{
-			Assert.isTrue(element instanceof IType); //we're enabled so there's no other way
-			MoveInnerToTopRefactoring refactoring= createRefactoring((IType) element); 
-
-			Assert.isNotNull(refactoring);
-			// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-			if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
-				return;
-			Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
-			if (newElementToProcess == null)
-				return;
-			IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
-			selectionChanged(mockSelection);
-			if (isEnabled())
-				run(mockSelection);
-			else
-				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("ConvertNestedToTopAction.Refactoring"), RefactoringMessages.getString("ConvertNestedToTopAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+	private void startRefactoring(IType type) throws JavaModelException {
+		MoveInnerToTopRefactoring refactoring= createRefactoring(type); 
+		Assert.isNotNull(refactoring);
+		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
+		if (!ActionUtil.isProcessable(getShell(), refactoring.getInputType()))
+			return;
+		Object newElementToProcess= new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		if (newElementToProcess == null)
+			return;
+		IStructuredSelection mockSelection= new StructuredSelection(newElementToProcess);
+		selectionChanged(mockSelection);
+		if (isEnabled())
+			run(mockSelection);
+		else
+			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), RefactoringMessages.getString("ConvertNestedToTopAction.Refactoring"), RefactoringMessages.getString("ConvertNestedToTopAction.not_possible")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 }
