@@ -33,7 +33,7 @@ import org.eclipse.ui.actions.SelectionProviderAction;
  * Open a resource (ClassFile, CompilationUnit, or ordinary resource) 
  * from the PackageViewer
  */
-class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
+public class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
 	
 	public OpenResourceAction(ISelectionProvider provider) {
 		super(provider, PackagesMessages.getString("OpenResource.action.label")); //$NON-NLS-1$
