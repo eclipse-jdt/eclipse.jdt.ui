@@ -7,6 +7,7 @@ http://www.eclipse.org/legal/cpl-v10.html
 
 Contributors:
     IBM Corporation - Initial implementation
+    Nikolay Metchev - Fixed bug 29909
 **********************************************************************/
 
 package org.eclipse.jdt.internal.ui.text.java;
