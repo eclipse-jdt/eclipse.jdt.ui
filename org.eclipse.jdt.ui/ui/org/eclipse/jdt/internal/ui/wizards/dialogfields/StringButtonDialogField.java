@@ -13,6 +13,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 public class StringButtonDialogField extends StringDialogField {
@@ -49,9 +50,9 @@ public class StringButtonDialogField extends StringDialogField {
 		label.setLayoutData(gridDataForLabel(1));
 		Text text= getTextControl(parent);
 		text.setLayoutData(gridDataForText(nColumns - 2));
-		Control button= getChangeControl(parent);
-		button.setLayoutData(gridDataForControl(1));
-		
+		Button button= getChangeControl(parent);
+		button.setLayoutData(gridDataForButton(button, 1));
+	
 		return new Control[] { label, text, button };
 	}	
 	
@@ -59,17 +60,19 @@ public class StringButtonDialogField extends StringDialogField {
 		return 3;	
 	}
 	
-	protected static MGridData gridDataForControl(int span) {
+	protected static MGridData gridDataForButton(Button button, int span) {
 		MGridData gd= new MGridData();
 		gd.horizontalAlignment= gd.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= span;
+		gd.heightHint = SWTUtil.getButtonHeigthHint(button);
+		gd.widthHint = SWTUtil.getButtonWidthHint(button);		
 		return gd;
 	}		
 	
 	// ------- ui creation	
 	
-	public Control getChangeControl(Composite parent) {
+	public Button getChangeControl(Composite parent) {
 		if (fBrowseButton == null) {
 			assertCompositeNotNull(parent);
 			

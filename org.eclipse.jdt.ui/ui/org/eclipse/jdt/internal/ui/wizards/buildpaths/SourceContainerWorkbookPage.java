@@ -86,16 +86,28 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		fFolderRadioButton.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.rb2.label")); //$NON-NLS-1$
 		
 		String[] buttonLabels;
+		int removeIndex;
 		if (isNewProject) {
-			buttonLabels= new String[] { NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button") }; //$NON-NLS-1$
+			buttonLabels= new String[] { 
+				/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
+				/* 1 */ null,
+				/* 2 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+			};
+			removeIndex= 2;
 		} else {
-			buttonLabels= new String[] { NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button") }; //$NON-NLS-1$ //$NON-NLS-2$
+			buttonLabels= new String[] { 
+				/* 0 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.button"), //$NON-NLS-1$
+				/* 1 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.addnew.addexisting.button"), //$NON-NLS-1$
+				/* 2 */ null,
+				/* 3 */ NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button") //$NON-NLS-1$
+			};
+			removeIndex= 3;
 		}
 		
-		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider(), 0);
+		fFoldersList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fFoldersList.setDialogFieldListener(adapter);
 		fFoldersList.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.label")); //$NON-NLS-1$
-		fFoldersList.setRemoveButtonLabel(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.remove.button")); //$NON-NLS-1$
+		fFoldersList.setRemoveButtonIndex(removeIndex);
 				
 		fFolderRadioButton.attachDialogField(fFoldersList);	
 	}

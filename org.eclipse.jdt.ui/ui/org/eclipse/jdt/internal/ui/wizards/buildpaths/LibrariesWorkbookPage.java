@@ -78,20 +78,25 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 		
 		String[] buttonLabels= new String[] { 
-			NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addnew.button"), NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addexisting.button"), //$NON-NLS-1$ //$NON-NLS-2$
-			NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addjar.button"), NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addextjar.button"), //$NON-NLS-1$ //$NON-NLS-2$
-			NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addvariable.button"), null,  //$NON-NLS-1$
-			NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button") //$NON-NLS-1$
+			/* 0 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addnew.button"),	//$NON-NLS-1$
+			/* 1 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addexisting.button"), //$NON-NLS-1$
+			/* 2 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addjar.button"),	//$NON-NLS-1$
+			/* 3 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addextjar.button"), //$NON-NLS-1$
+			/* 4 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.addvariable.button"), //$NON-NLS-1$
+			/* 5 */ null,  
+			/* 6 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.setsource.button"), //$NON-NLS-1$
+			/* 7 */ null,  
+			/* 8 */ NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button") //$NON-NLS-1$
 		};		
 				
 		LibrariesAdapter adapter= new LibrariesAdapter();
 				
-		fLibrariesList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider(), 0);
+		fLibrariesList= new ListDialogField(adapter, buttonLabels, new CPListLabelProvider());
 		fLibrariesList.setDialogFieldListener(adapter);
 		fLibrariesList.setLabelText(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.label")); //$NON-NLS-1$
-		fLibrariesList.setRemoveButtonLabel(NewWizardMessages.getString("LibrariesWorkbookPage.libraries.remove.button")); //$NON-NLS-1$
+		fLibrariesList.setRemoveButtonIndex(8); //$NON-NLS-1$
 	
-		fLibrariesList.enableCustomButton(6, false);
+		fLibrariesList.enableButton(6, false);
 
 	}
 		
@@ -207,7 +212,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private void libaryPageSelectionChanged(DialogField field) {
 		List selElements= fLibrariesList.getSelectedElements();
-		fLibrariesList.enableCustomButton(6, canDoSourceAttachment(selElements));
+		fLibrariesList.enableButton(6, canDoSourceAttachment(selElements));
 	}
 	
 	private void libaryPageDialogFieldChanged(DialogField field) {

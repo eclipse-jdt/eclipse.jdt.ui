@@ -22,19 +22,18 @@ public class VariableBlock {
 		fSelectionStatus= new StatusInfo();				fShell= JavaPlugin.getActiveWorkbenchShell();
 		
 		String[] buttonLabels= new String[] { 
-			NewWizardMessages.getString("VariableBlock.vars.add.button"), NewWizardMessages.getString("VariableBlock.vars.edit.button") //$NON-NLS-2$ //$NON-NLS-1$
+			/* 0 */ NewWizardMessages.getString("VariableBlock.vars.add.button"), //$NON-NLS-1$			/* 1 */ NewWizardMessages.getString("VariableBlock.vars.edit.button"), //$NON-NLS-1$			/* 2 */ null,			/* 3 */ NewWizardMessages.getString("VariableBlock.vars.remove.button") //$NON-NLS-1$
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
 		
 		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider(useAsSelectionDialog);
 		
-		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider, 0);
+		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(NewWizardMessages.getString("VariableBlock.vars.label")); //$NON-NLS-1$
-		fVariablesList.setRemoveButtonLabel(NewWizardMessages.getString("VariableBlock.vars.remove.button")); //$NON-NLS-1$
-	
-		fVariablesList.enableCustomButton(1, false);
+		fVariablesList.setRemoveButtonIndex(3);		
+		fVariablesList.enableButton(1, false);
 		
 		CPVariableElement initSelectedElement= null;
 		
@@ -108,7 +107,7 @@ public class VariableBlock {
 	}		private boolean containsReserved(List selected) {		for (int i= selected.size()-1; i >= 0; i--) {			if (((CPVariableElement)selected.get(i)).isReserved()) {				return true;			}		}		return false;	}		private static void addAll(Object[] objs, Collection dest) {		for (int i= 0; i < objs.length; i++) {			dest.add(objs[i]);		}	}
 	private void doSelectionChanged(DialogField field) {
 		List selected= fVariablesList.getSelectedElements();
-		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				fVariablesList.enableCustomButton(1, isSingleSelected && !containsReserved);		fVariablesList.enableRemoveButton(!containsReserved);		
+		boolean isSingleSelected= selected.size() == 1;		boolean containsReserved= containsReserved(selected);				// edit		fVariablesList.enableButton(1, isSingleSelected && !containsReserved);		// remove button		fVariablesList.enableButton(3, !containsReserved);		
 		fSelectedVariable= null;
 		if (fUseAsSelectionDialog) {
 			if (isSingleSelected) {

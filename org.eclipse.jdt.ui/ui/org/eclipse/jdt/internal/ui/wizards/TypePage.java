@@ -161,12 +161,16 @@ public abstract class TypePage extends ContainerPage {
 		fSuperClassDialogField.setLabelText(NewWizardMessages.getString("TypePage.superclass.label")); //$NON-NLS-1$
 		fSuperClassDialogField.setButtonLabel(NewWizardMessages.getString("TypePage.superclass.button")); //$NON-NLS-1$
 		
-		String[] addButtons= new String[] { NewWizardMessages.getString("TypePage.interfaces.add") }; //$NON-NLS-1$
-		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider(), 0);
+		String[] addButtons= new String[] {
+			/* 0 */ NewWizardMessages.getString("TypePage.interfaces.add"), //$NON-NLS-1$
+			/* 1 */ null,
+			/* 2 */ NewWizardMessages.getString("TypePage.interfaces.remove") //$NON-NLS-1$
+		}; 
+		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
 		String interfaceLabel= fIsClass ? NewWizardMessages.getString("TypePage.interfaces.class.label") : NewWizardMessages.getString("TypePage.interfaces.ifc.label"); //$NON-NLS-1$ //$NON-NLS-2$
 		fSuperInterfacesDialogField.setLabelText(interfaceLabel);
-		fSuperInterfacesDialogField.setRemoveButtonLabel(NewWizardMessages.getString("TypePage.interfaces.remove")); //$NON-NLS-1$
+		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
 		String[] buttonNames1= new String[] {
 			NewWizardMessages.getString("TypePage.modifiers.public"), NewWizardMessages.getString("TypePage.modifiers.default"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -928,7 +932,7 @@ public abstract class TypePage extends ContainerPage {
 		StatusInfo status= new StatusInfo();
 		
 		IPackageFragmentRoot root= getPackageFragmentRoot();
-		fSuperInterfacesDialogField.enableCustomButton(0, root != null);
+		fSuperInterfacesDialogField.enableButton(0, root != null);
 						
 		if (root != null) {
 			List elements= fSuperInterfacesDialogField.getElements();

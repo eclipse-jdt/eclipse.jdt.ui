@@ -158,6 +158,8 @@ public class JavaApplicationLauncherDelegate implements ILauncherDelegate {
 						} catch (CoreException e) {
 							throw new InvocationTargetException(e);
 						}
+					} else {
+						pm.worked(3);
 					}
 					SubProgressMonitor newMonitor= new SubProgressMonitor(pm, 1);
 					newMonitor.beginTask(LauncherMessages.getString("javaAppLauncher.progress.startVM"), IProgressMonitor.UNKNOWN); //$NON-NLS-1$

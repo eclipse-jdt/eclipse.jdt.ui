@@ -5,13 +5,16 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.dialogs.IDialogConstants;
 
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 public class DialogField {
@@ -152,5 +155,8 @@ public class DialogField {
 	protected final void assertEnoughColumns(int nColumns) {
 		Assert.isTrue(nColumns >= getNumberOfControls(), "given number of columns is too small"); //$NON-NLS-1$
 	}
+	
+	
+
 	
 }

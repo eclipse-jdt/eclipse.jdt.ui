@@ -5,34 +5,28 @@
 package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 
 
-import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
+import java.util.ArrayList;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.events.SelectionListener;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ILabelProviderListener;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITableLabelProvider;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.jface.viewers.TableViewer;import org.eclipse.jface.viewers.Viewer;import org.eclipse.jface.viewers.ViewerSorter;import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
 
 
 public class ListDialogField extends DialogField {
-	
-	public static final int UPDOWN= 1;
 	
 	protected TableViewer fTable;
 	protected WrappedTableLabelProvider fWrappedLabelProvider;
 	protected ListViewerAdapter fListViewerAdapter;
 	protected List fElements;
 
-	private String[] fCustomButtonLabels;
-	private Button[] fCustomButtons;
-	private boolean[] fCustomButtonsEnabled;
+	protected String[] fButtonLabels;
+	private Button[] fButtonControls;
 	
-	private Button fRemoveButton;
-	private Button fUpButton;
-	private Button fDownButton;
-	private Button fCheckAllButton;
-	private Button fUncheckAllButton;	
+	private boolean[] fButtonsEnabled;
 	
-	private String fRemoveButtonLabel, fUpButtonLabel, fDownButtonLabel;
-	private boolean fRemoveButtonEnabled;
+	private int fRemoveButtonIndex;
+	private int fUpButtonIndex;
+	private int fDownButtonIndex;
 	
 	private Label fLastSeparator;
-	
-	private int fConfiguration;
 	
 	private Table fTableControl;
 	private Composite fButtonsControl;
@@ -43,73 +37,74 @@ public class ListDialogField extends DialogField {
 	private IListAdapter fListAdapter;
 	
 	private Object fParentElement;
-	
+
 	/**
-	 * Create a table without custom and remove buttons
-	 */
-	public ListDialogField(ILabelProvider lprovider, int config) {
-		this(null, null, lprovider, config);
-	}
-	
-	/**
-	 * Create a table with custom buttons
+	 * Creates a table with buttons
 	 */	
-	public ListDialogField(IListAdapter adapter, String[] customButtonLabels, ILabelProvider lprovider, int config) {
+	public ListDialogField(IListAdapter adapter, String[] buttonLabels, ILabelProvider lprovider) {
 		super();
 		fListAdapter= adapter;
-		fConfiguration= config;
+
 		fWrappedLabelProvider= new WrappedTableLabelProvider(lprovider);
 		fListViewerAdapter= new ListViewerAdapter();
 		fParentElement= this;
 
 		fElements= new ArrayList(10);
 					
-		fCustomButtonLabels= customButtonLabels;
-		if (fCustomButtonLabels != null) {
-			int nCustomButtons= fCustomButtonLabels.length;
-			fCustomButtonsEnabled= new boolean[nCustomButtons];
-			for (int i= 0; i < nCustomButtons; i++) {
-				fCustomButtonsEnabled[i]= true;
+		fButtonLabels= buttonLabels;
+		if (fButtonLabels != null) {
+			int nButtons= fButtonLabels.length;
+			fButtonsEnabled= new boolean[nButtons];
+			for (int i= 0; i < nButtons; i++) {
+				fButtonsEnabled[i]= true;
 			}
 		}	
-		
-		// default labels
-		fRemoveButtonLabel= "!Remove!"; //$NON-NLS-1$
-		fUpButtonLabel= "!Up!"; //$NON-NLS-1$
-		fDownButtonLabel= "!Down!"; //$NON-NLS-1$
-		
-		fRemoveButtonEnabled= true;
-		
+				
 		fTable= null;
 		fTableControl= null;
 		fButtonsControl= null;
+		
+		fRemoveButtonIndex= -1;
+		fUpButtonIndex= -1;
+		fDownButtonIndex= -1;
 	}
 			
-	public void setRemoveButtonLabel(String removeButtonLabel) {
-		fRemoveButtonLabel= removeButtonLabel;
+	public void setRemoveButtonIndex(int removeButtonIndex) {
+		Assert.isTrue(removeButtonIndex < fButtonLabels.length);
+		fRemoveButtonIndex= removeButtonIndex;
 	}
 	
-	public void setUpButtonLabel(String upButtonLabel) {
-		fUpButtonLabel= upButtonLabel;
+	public void setUpButtonIndex(int upButtonIndex) {
+		Assert.isTrue(upButtonIndex < fButtonLabels.length);
+		fUpButtonIndex= upButtonIndex;
 	}
 	
-	public void setDownButtonLabel(String downButtonLabel) {
-		fDownButtonLabel= downButtonLabel;
+	public void setDownButtonIndex(int downButtonIndex) {
+		Assert.isTrue(downButtonIndex < fButtonLabels.length);
+		fDownButtonIndex= downButtonIndex;
 	}
-	
-		
-	// ------ configuration
-	
-
-	private boolean hasUpDown() {
-		return ((fConfiguration & UPDOWN) != 0);
-	}	
 	
 	// ------ adapter communication
 	
-	protected void customButtonPressed(int index) {
-		fListAdapter.customButtonPressed(this, index);
+	protected void buttonPressed(int index) {
+		if (!extraButtonPressed(index)) {
+			fListAdapter.customButtonPressed(this, index);
+		}
 	}
+	
+	protected boolean extraButtonPressed(int index) {
+		if (index == fRemoveButtonIndex) {
+			remove();
+		} else if (index == fUpButtonIndex) {
+			up();
+		} else if (index == fDownButtonIndex) {
+			down();
+		} else {
+			return false;
+		}
+		return true;
+	}
+	
 
 	// ------ layout helpers
 	
@@ -211,6 +206,7 @@ public class ListDialogField extends DialogField {
 	}	
 	
 	protected Button createButton(Composite parent, String label, SelectionListener listener) {
+
 		Button button= new Button(parent, SWT.PUSH);
 		button.setText(label);
 		button.addSelectionListener(listener);
@@ -218,6 +214,9 @@ public class ListDialogField extends DialogField {
 		gd.horizontalAlignment= gd.FILL;
 		gd.grabExcessHorizontalSpace= true;
 		gd.verticalAlignment= gd.BEGINNING;
+		gd.heightHint = SWTUtil.getButtonHeigthHint(button);
+		gd.widthHint = SWTUtil.getButtonWidthHint(button);
+	
 		button.setLayoutData(gd);
 		return button;
 	}
@@ -252,32 +251,19 @@ public class ListDialogField extends DialogField {
 			layout.marginHeight= 0;
 			contents.setLayout(layout);
 			
-			if (fCustomButtonLabels != null) {
-				fCustomButtons= new Button[fCustomButtonLabels.length];
-				for (int i= 0; i < fCustomButtonLabels.length; i++) {
-					String currLabel= fCustomButtonLabels[i];
+			if (fButtonLabels != null) {
+				fButtonControls= new Button[fButtonLabels.length];
+				for (int i= 0; i < fButtonLabels.length; i++) {
+					String currLabel= fButtonLabels[i];
 					if (currLabel != null) {
-						fCustomButtons[i]= createButton(contents, currLabel, listener);
-						fCustomButtons[i].setEnabled(isEnabled() && fCustomButtonsEnabled[i]);
+						fButtonControls[i]= createButton(contents, currLabel, listener);
+						fButtonControls[i].setEnabled(isEnabled() && fButtonsEnabled[i]);
 					} else {
-						fCustomButtons[i]= null;
+						fButtonControls[i]= null;
 						createSeparator(contents);
 					}
 				}
-				createSeparator(contents);			
-				fRemoveButton= createButton(contents, fRemoveButtonLabel, listener);
-				fRemoveButton.setEnabled(isEnabled() && fRemoveButtonEnabled);
-				
-				createSeparator(contents);
 			}
-			
-			if (hasUpDown()) {
-				fUpButton= createButton(contents, fUpButtonLabel, listener);
-				fDownButton= createButton(contents, fDownButtonLabel, listener);
-				createSeparator(contents);
-			}
-			
-			createExtraButtons(contents);
 						
 			fLastSeparator= createSeparator(contents);	
 	
@@ -288,31 +274,13 @@ public class ListDialogField extends DialogField {
 		return fButtonsControl;
 	}
 	
-	protected void createExtraButtons(Composite parent) {
-	}
-	
-	
 	private void doButtonSelected(SelectionEvent e) {
-		if (fCustomButtonLabels != null) {
-			for (int i= 0; i < fCustomButtons.length; i++) {
-				if (e.widget == fCustomButtons[i]) {
-					customButtonPressed(i);
+		if (fButtonControls != null) {
+			for (int i= 0; i < fButtonControls.length; i++) {
+				if (e.widget == fButtonControls[i]) {
+					buttonPressed(i);
 					return;
 				}
-			}
-			if (e.widget == fRemoveButton) {
-				remove();
-				return;
-			}
-		}
-		if (hasUpDown()) {
-			if (e.widget == fUpButton) {
-				up();
-				return;
-			}
-			if (e.widget == fDownButton) {
-				down();
-				return;
 			}
 		}
 	}	
@@ -327,28 +295,39 @@ public class ListDialogField extends DialogField {
 		updateButtonState();
 	}
 	
-	
+	private Button getButton(int index) {
+		if (fButtonControls != null && index >= 0 && index < fButtonControls.length) {
+			return fButtonControls[index];
+		}
+		return null;
+	}
+
 	/*
-	 * sets the enable state of the remove, up and down buttons
+	 * Update the enable state of the all buttons
 	 */ 
 	protected void updateButtonState() {
-		if (fTable != null) {
+		if (fButtonControls != null) {
 			ISelection sel= fTable.getSelection();
-			boolean enabled= !sel.isEmpty() && isEnabled();
-			if (isOkToUse(fRemoveButton)) {
-				fRemoveButton.setEnabled(enabled && fRemoveButtonEnabled);
-			}
-			
-			if (hasUpDown()) {
-				if (isOkToUse(fUpButton)) {
-					fUpButton.setEnabled(enabled && canMoveUp());
-				}
-				if (isOkToUse(fDownButton)) {
-					fDownButton.setEnabled(enabled && canMoveDown());
-				}
+			for (int i= 0; i < fButtonControls.length; i++) {
+				Button button= fButtonControls[i];
+				if (isOkToUse(button)) {
+					boolean extraState= getExtraButtonState(sel, i);
+					button.setEnabled(isEnabled() && extraState && fButtonsEnabled[i]);
+				}				
 			}
 		}
 	}
+	
+	protected boolean getExtraButtonState(ISelection sel, int index) {
+		if (index == fRemoveButtonIndex) {
+			return !sel.isEmpty();
+		} else if (index == fUpButtonIndex) {
+			return !sel.isEmpty() && canMoveUp();
+		} else if (index == fDownButtonIndex) {
+			return !sel.isEmpty() && canMoveDown();
+		}
+		return true;
+	}		
 	
 	protected void updateEnableState() {
 		super.updateEnableState();
@@ -364,38 +343,19 @@ public class ListDialogField extends DialogField {
 			}
 			fTableControl.setEnabled(enabled);
 		}
-		if (fCustomButtons != null) {
-			for (int i= 0; i < fCustomButtons.length; i++) {
-				Button button= fCustomButtons[i];
-				if (isOkToUse(button)) {
-					button.setEnabled(enabled && fCustomButtonsEnabled[i]);
-				}
-			}
-		}
-	
 		updateButtonState();
 	}
-	
-	public void enableCustomButton(int index, boolean enable) {
-		if (fCustomButtonsEnabled != null && index < fCustomButtonsEnabled.length) {
-			fCustomButtonsEnabled[index]= enable;
-			if (fCustomButtons != null) {
-				Button button= fCustomButtons[index];
-				if (isOkToUse(button)) {
-					button.setEnabled(isEnabled() && enable);
-				}
-			}
+
+	/**
+	 * Sets a button enabled or disabled
+	 */	
+	public void enableButton(int index, boolean enable) {
+		if (fButtonsEnabled != null && index < fButtonsEnabled.length) {
+			fButtonsEnabled[index]= enable;
+			updateButtonState();
 		}
 	}
-	
-	public void enableRemoveButton(boolean enable) {
-		fRemoveButtonEnabled= enable;
-		if (isOkToUse(fRemoveButton)) {
-			fRemoveButton.setEnabled(isEnabled() && enable);
-		}
-	}
-		
-	
+
 	// ------ model access
 	
 	/**

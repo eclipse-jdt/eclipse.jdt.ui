@@ -11,6 +11,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 
 /**
@@ -61,13 +62,18 @@ public class SelectionButtonDialogField extends DialogField {
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
 		assertEnoughColumns(nColumns);
 		
-		Button rbutton= getSelectionButton(parent);
+		Button button= getSelectionButton(parent);
 		MGridData gd= new MGridData();
 		gd.horizontalSpan= nColumns;
-		gd.horizontalAlignment= MGridData.FILL;
-		rbutton.setLayoutData(gd);
+		gd.horizontalAlignment= gd.FILL;
+		if (fButtonStyle == SWT.PUSH) {
+			gd.heightHint = SWTUtil.getButtonHeigthHint(button);
+			gd.widthHint = SWTUtil.getButtonWidthHint(button);
+		}			
 		
-		return new Control[] { rbutton };
+		button.setLayoutData(gd);
+		
+		return new Control[] { button };
 	}	
 	
 	public int getNumberOfControls() {

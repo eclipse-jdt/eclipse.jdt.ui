@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.HashMap;
+import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -57,9 +58,12 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	}
 	
 	private StringButtonDialogField fNameDialogField;
+	private List fExistingEntries;
 		
-	public ImportOrganizeInputDialog(Shell parent) {
+	public ImportOrganizeInputDialog(Shell parent, List existingEntries) {
 		super(parent);
+		
+		fExistingEntries= existingEntries;
 		
 		setTitle(JavaUIMessages.getString("ImportOrganizeInputDialog.title"));
 
@@ -92,6 +96,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	
 	private void doButtonPressed() {
 		HashMap allPackages= new HashMap();
+		// no duplicate entries
 		try {
 			IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 			IJavaProject[] projects= JavaCore.create(root).getJavaProjects();
@@ -108,6 +113,8 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 		}
+		Object initialSelection= allPackages.get(fNameDialogField.getText());
+		
 			
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 		dialog.setIgnoreCase(false);
@@ -115,6 +122,9 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		dialog.setMessage(JavaUIMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(JavaUIMessages.getString("ImportOrganizeInputDialog.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(allPackages.values().toArray());
+		if (initialSelection != null) {
+			dialog.setInitialSelections(new Object[] { initialSelection });
+		}
 		
 		if (dialog.open() == dialog.OK) {
 			IPackageFragment res= (IPackageFragment) dialog.getFirstResult();
@@ -131,6 +141,10 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 			IStatus val= JavaConventions.validatePackageName(newText);
 			if (val.matches(IStatus.ERROR)) {
 				status.setError(JavaUIMessages.getFormattedString("ImportOrganizeInputDialog.error.invalidName", val.getMessage()));
+			} else {
+				if (fExistingEntries.contains(newText)) {
+					status.setError(JavaUIMessages.getString("ImportOrganizeInputDialog.error.entryExists"));
+				}
 			}
 		}
 		updateStatus(status);

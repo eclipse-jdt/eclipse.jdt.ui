@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
@@ -34,6 +35,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
@@ -47,8 +49,7 @@ public class VariableCreationDialog extends StatusDialog {
 	
 	private StringButtonDialogField fPathField;
 	private StatusInfo fPathStatus;
-	private StringButtonDialogField fDirButton;
-	
+	private SelectionButtonDialogField fDirButton;
 		
 	private CPVariableElement fElement;
 	
@@ -79,8 +80,9 @@ public class VariableCreationDialog extends StatusDialog {
 		fPathField.setLabelText(NewWizardMessages.getString("VariableCreationDialog.path.label")); //$NON-NLS-1$
 		fPathField.setButtonLabel(NewWizardMessages.getString("VariableCreationDialog.path.file.button")); //$NON-NLS-1$
 		
-		fDirButton= new StringButtonDialogField(adapter);
-		fDirButton.setButtonLabel(NewWizardMessages.getString("VariableCreationDialog.path.dir.button")); //$NON-NLS-1$
+		fDirButton= new SelectionButtonDialogField(SWT.PUSH);
+		fDirButton.setDialogFieldListener(adapter);
+		fDirButton.setLabelText(NewWizardMessages.getString("VariableCreationDialog.path.dir.button")); //$NON-NLS-1$
 		
 		fExistingNames= existingNames;
 		
@@ -126,8 +128,9 @@ public class VariableCreationDialog extends StatusDialog {
 		DialogField.createEmptySpace(inner, 1);
 		
 		fPathField.doFillIntoGrid(inner, 3);
+		
 		DialogField.createEmptySpace(inner, 2);
-		fDirButton.getChangeControl(inner);
+		fDirButton.doFillIntoGrid(inner, 1);
 		
 		DialogField focusField= (fElement == null) ? fNameField : fPathField;
 		focusField.postSetFocusOnDialogField(parent.getDisplay());
@@ -156,11 +159,6 @@ public class VariableCreationDialog extends StatusDialog {
 			if (path != null) {
 				fPathField.setText(path.toString());
 			}
-		} else if (field == fDirButton) {
-			IPath path= chooseExtDirectory();
-			if (path != null) {
-				fPathField.setText(path.toString());
-			}
 		}
 	}
 	
@@ -169,6 +167,11 @@ public class VariableCreationDialog extends StatusDialog {
 			fNameStatus= nameUpdated();
 		} else if (field == fPathField) {
 			fPathStatus= pathUpdated();
+		} else if (field == fDirButton) {
+			IPath path= chooseExtDirectory();
+			if (path != null) {
+				fPathField.setText(path.toString());
+			}
 		}		
 		updateStatus(StatusUtil.getMoreSevere(fPathStatus, fNameStatus));
 	}		

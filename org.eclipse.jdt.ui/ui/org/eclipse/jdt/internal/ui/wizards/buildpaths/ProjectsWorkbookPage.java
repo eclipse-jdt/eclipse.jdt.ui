@@ -41,11 +41,16 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 				
 		ProjectsListListener listener= new ProjectsListListener();
 		
-		fProjectsList= new CheckedListDialogField(new CPListLabelProvider(), 0);
+		String[] buttonLabels= new String[] {
+			/* 0 */ NewWizardMessages.getString("ProjectsWorkbookPage.projects.checkall.button"), //$NON-NLS-1$
+			/* 1 */ NewWizardMessages.getString("ProjectsWorkbookPage.projects.uncheckall.button") //$NON-NLS-1$
+		};
+		
+		fProjectsList= new CheckedListDialogField(null, buttonLabels, new CPListLabelProvider());
 		fProjectsList.setDialogFieldListener(listener);
 		fProjectsList.setLabelText(NewWizardMessages.getString("ProjectsWorkbookPage.projects.label")); //$NON-NLS-1$
-		fProjectsList.setCheckAllButtonLabel(NewWizardMessages.getString("ProjectsWorkbookPage.projects.checkall.button")); //$NON-NLS-1$
-		fProjectsList.setUncheckAllButtonLabel(NewWizardMessages.getString("ProjectsWorkbookPage.projects.uncheckall.button")); //$NON-NLS-1$
+		fProjectsList.setCheckAllButtonIndex(0);
+		fProjectsList.setUncheckAllButtonIndex(1);
 	}
 	
 	public void init(IJavaProject jproject) {

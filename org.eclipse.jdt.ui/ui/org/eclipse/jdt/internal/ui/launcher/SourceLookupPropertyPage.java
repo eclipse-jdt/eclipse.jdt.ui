@@ -43,10 +43,6 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 	private Button fUseCustomLookup;
 	private boolean fFirst= true;
 	
-	private static final String ADD_PROJECT= LauncherMessages.getString("sourceLookupPropertyPage.addProject"); //$NON-NLS-1$
-	private static final String UP= LauncherMessages.getString("sourceLookupPropertyPage.up"); //$NON-NLS-1$
-	private static final String DOWN= LauncherMessages.getString("sourceLookupPropertyPage.down"); //$NON-NLS-1$
-	private static final String REMOVE= LauncherMessages.getString("sourceLookupPropertyPage.remove"); //$NON-NLS-1$
 	private static final String USE_BUILDPATH= LauncherMessages.getString("sourceLookupPropertyPage.useBuildpath"); //$NON-NLS-1$
 	private static final String USE_CUSTOM= LauncherMessages.getString("sourceLookupPropertyPage.useCustomPath"); //$NON-NLS-1$
 	private static final String ADD_PROJECT_MESSAGE= LauncherMessages.getString("sourceLookupPropertyPage.pickProject"); //$NON-NLS-1$
@@ -63,14 +59,21 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 	}
 
 	public Control createJavaContents(Composite ancestor) {
-		fListField= new ListDialogField(new ListAdapter(),
-				new String[] { ADD_PROJECT },
-				new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS), 
-				ListDialogField.UPDOWN);
+		String[] buttonLabels= new String[] {
+			/* 0 */ LauncherMessages.getString("sourceLookupPropertyPage.addProject"),
+			/* 1 */ null,
+			/* 2 */ LauncherMessages.getString("sourceLookupPropertyPage.up"),
+			/* 3 */ LauncherMessages.getString("sourceLookupPropertyPage.down"),
+			/* 4 */ null,
+			/* 5 */ LauncherMessages.getString("sourceLookupPropertyPage.remove")
+		};
+		
+		fListField= new ListDialogField(new ListAdapter(), buttonLabels,
+				new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS));
 				
-		fListField.setUpButtonLabel(UP);
-		fListField.setDownButtonLabel(DOWN);
-		fListField.setRemoveButtonLabel(REMOVE);
+		fListField.setUpButtonIndex(2);
+		fListField.setDownButtonIndex(3);
+		fListField.setRemoveButtonIndex(5);
 
 		Composite parent= new Composite(ancestor, SWT.NULL);
 		parent.setLayoutData(new GridData());

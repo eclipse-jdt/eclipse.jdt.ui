@@ -112,12 +112,17 @@ public class BuildPathsBlock {
 		fCurrPage= null;
 				
 		BuildPathAdapter adapter= new BuildPathAdapter();			
-
-		fClassPathList= new ListDialogField(new CPListLabelProvider(), ListDialogField.UPDOWN);
+	
+		String[] buttonLabels= new String[] {
+			/* 0 */ NewWizardMessages.getString("BuildPathsBlock.classpath.up.button"), //$NON-NLS-1$
+			/* 1 */ NewWizardMessages.getString("BuildPathsBlock.classpath.down.button") //$NON-NLS-1$
+		};
+		
+		fClassPathList= new ListDialogField(null, buttonLabels, new CPListLabelProvider());
 		fClassPathList.setDialogFieldListener(adapter);
-		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label")); //$NON-NLS-1$
-		fClassPathList.setUpButtonLabel(NewWizardMessages.getString("BuildPathsBlock.classpath.up.button")); //$NON-NLS-1$
-		fClassPathList.setDownButtonLabel(NewWizardMessages.getString("BuildPathsBlock.classpath.down.button")); //$NON-NLS-1$
+		fClassPathList.setLabelText(NewWizardMessages.getString("BuildPathsBlock.classpath.label")); 
+		fClassPathList.setUpButtonIndex(0);
+		fClassPathList.setDownButtonIndex(1);
 			
 		if (isNewProject) {
 			fBuildPathDialogField= new StringDialogField();

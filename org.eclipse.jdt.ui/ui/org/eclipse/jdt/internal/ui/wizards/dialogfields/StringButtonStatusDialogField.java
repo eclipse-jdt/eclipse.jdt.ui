@@ -7,6 +7,7 @@ package org.eclipse.jdt.internal.ui.wizards.dialogfields;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -73,8 +74,8 @@ public class StringButtonStatusDialogField extends StringButtonDialogField {
 		text.setLayoutData(gridDataForText(nColumns - 3));
 		Label status= getStatusLabelControl(parent);
 		status.setLayoutData(gridDataForStatusLabel(parent, 1));
-		Control button= getChangeControl(parent);
-		button.setLayoutData(gridDataForControl(1));
+		Button button= getChangeControl(parent);
+		button.setLayoutData(gridDataForButton(button, 1));
 		
 		return new Control[] { label, text, status, button };
 	}

@@ -321,18 +321,12 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 						int nAffected= delta.getAffectedChildren().length;
 						int nChanged= delta.getChangedChildren().length;
 						if (nAffected - nChanged > 0) {
-							if (fMemberFilter == null) {
-								fViewer.refresh(type);
-							} else {
-								fViewer.refresh();
-							}
+							fViewer.refresh();
 							return false;
 						} else {
 							fViewer.update(type, UNSTRUCTURED);
 						}
 					} 
-				} else if ((flags & IJavaElementDelta.F_SUPER_TYPES) != 0) {
-					//fireStructuralChange?
 				} else {
 					fViewer.update(type, UNSTRUCTURED);
 				}
