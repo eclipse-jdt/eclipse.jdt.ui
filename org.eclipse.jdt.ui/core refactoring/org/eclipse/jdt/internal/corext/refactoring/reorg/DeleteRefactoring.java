@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeletePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class DeleteRefactoring extends Refactoring {
@@ -374,7 +375,7 @@ public class DeleteRefactoring extends Refactoring {
 			return false;
 		}
 		
-		if (isDefaultPackage(o))
+		if (JavaElementUtil.isDefaultPackage(o))
 			return false;
 		
 		if (o instanceof IJavaElement)	
@@ -384,10 +385,6 @@ public class DeleteRefactoring extends Refactoring {
 			return canDelete((IFile)o);
 
 		return (o instanceof IResource);
-	}
-	
-	private static boolean isDefaultPackage(Object o){
-		return (o instanceof IPackageFragment) && ((IPackageFragment)o).isDefaultPackage();
 	}
 	
 	private static boolean canDelete(IJavaElement element){

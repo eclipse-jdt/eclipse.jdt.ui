@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.DeleteRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
 public class DeleteResourcesAction extends SelectionDispatchAction {
@@ -228,7 +229,7 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 	}
 	
 	private static boolean isDefaultPackageWithLinkedFiles(Object firstElement) throws JavaModelException {
-		if (! isDefaultPackage(firstElement))
+		if (! JavaElementUtil.isDefaultPackage(firstElement))
 			return false;
 		IPackageFragment defaultPackage= (IPackageFragment)firstElement;
 		ICompilationUnit[] cus= defaultPackage.getCompilationUnits();
@@ -239,13 +240,9 @@ public class DeleteResourcesAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	private static boolean isDefaultPackage(Object firstElement) {
-		return (firstElement instanceof IPackageFragment && ((IPackageFragment)firstElement).isDefaultPackage());
-	}
-
 	private static String getName(Object element){
 		//need to render 1 case differently
-		if (isDefaultPackage(element))
+		if (JavaElementUtil.isDefaultPackage(element))
 			return ReorgMessages.getString("DeleteResourcesAction.default_package"); //$NON-NLS-1$
 		else
 			return ReorgUtils.getName(element);
