@@ -171,12 +171,10 @@ public class ScopeAnalyzer {
 			addInherited(fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags); //$NON-NLS-1$
 		}
 		
-		if (hasFlag(TYPES | VARIABLES, flags)) {
-			ITypeBinding[] interfaces= binding.getInterfaces();
-			for (int i= 0; i < interfaces.length; i++) {
-				addInherited(interfaces[i], flags & (TYPES | VARIABLES)); // recursive
-			}			
-		}
+		ITypeBinding[] interfaces= binding.getInterfaces(); // includes looking for methods: abstract, unimplemented methods
+		for (int i= 0; i < interfaces.length; i++) {
+			addInherited(interfaces[i], flags); // recursive 
+		}			
 	}
 		
 	

@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
@@ -31,14 +33,19 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 	
 	public TypeChangeCompletionProposal(ICompilationUnit targetCU, IBinding binding, CompilationUnit astRoot, ITypeBinding newType, boolean offerSuperTypeProposals, int relevance) {
 		super("", targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
-		fBinding= binding;
+		
+		Assert.isTrue(binding != null && binding.getKind() == IBinding.METHOD || binding.getKind() == IBinding.VARIABLE);
+		
+		fBinding= binding; // must be generic method or (generic) variable
 		fAstRoot= astRoot;
 		fNewType= newType;
 		fOfferSuperTypeProposals= offerSuperTypeProposals;
 		
 		if (binding.getKind() == IBinding.VARIABLE) {
-			String[] args= { binding.getName(), newType.getName() };
-			if (((IVariableBinding) binding).isField()) {
+			IVariableBinding varBinding= (IVariableBinding) binding;
+			
+			String[] args= { varBinding.getName(), newType.getName() };
+			if (varBinding.isField()) {
 				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.field.name", args)); //$NON-NLS-1$
 			} else if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
 				setDisplayName(CorrectionMessages.getFormattedString("TypeChangeCompletionProposal.param.name", args)); //$NON-NLS-1$

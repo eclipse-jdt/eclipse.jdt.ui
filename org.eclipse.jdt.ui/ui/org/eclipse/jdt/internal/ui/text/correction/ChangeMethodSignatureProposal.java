@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -79,6 +80,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		
 	public ChangeMethodSignatureProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, IMethodBinding binding, ChangeDescription[] paramChanges, ChangeDescription[] exceptionChanges, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
+		
+		Assert.isTrue(binding != null && !binding.isParameterizedMethod() && !binding.isRawMethod());
 		
 		fInvocationNode= invocationNode;
 		fSenderBinding= binding;

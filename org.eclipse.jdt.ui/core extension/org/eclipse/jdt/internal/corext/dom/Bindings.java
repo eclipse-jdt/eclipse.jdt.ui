@@ -1122,4 +1122,22 @@ public class Bindings {
 	}
 	
 
+	/**
+	 * Get generic field. See bug 83100
+	 */
+	public static IBinding getGenericField(IVariableBinding field) {
+		ITypeBinding declaringClass= field.getDeclaringClass();
+		if (!declaringClass.isParameterizedType() && !declaringClass.isRawType()) {
+			return field;
+		}
+		IVariableBinding[] genericFields= declaringClass.getGenericType().getDeclaredFields();
+		String name= field.getName();
+		for (int i= 0; i < genericFields.length; i++) {
+			if (name.equals(genericFields[i].getName())) {
+				return genericFields[i];
+			}
+		}
+		return null;
+	}
+	
 }

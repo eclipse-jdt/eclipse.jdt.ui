@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -40,6 +41,8 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	public AbstractMethodCompletionProposal(String label, ICompilationUnit targetCU, ASTNode invocationNode, ITypeBinding binding, int relevance, Image image) {
 		super(label, targetCU, null, relevance, image);
 		
+		Assert.isTrue(binding != null && !binding.isParameterizedType() && !binding.isRawType());
+		
 		fNode= invocationNode;
 		fSenderBinding= binding;
 	}
@@ -48,17 +51,16 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		return fNode;
 	}
 	
+	/**
+	 * @return The binding of the type declaration (generic type) 
+	 */
 	protected ITypeBinding getSenderBinding() {
 		return fSenderBinding;
 	}
 			
 	protected ASTRewrite getRewrite() throws CoreException {
-		ITypeBinding sender= fSenderBinding;
-		if (sender.isParameterizedType() || sender.isRawType()) {
-			sender= sender.getGenericType();
-		}
 		CompilationUnit astRoot= ASTResolving.findParentCompilationUnit(fNode);
-		ASTNode typeDecl= astRoot.findDeclaringNode(sender);
+		ASTNode typeDecl= astRoot.findDeclaringNode(fSenderBinding);
 		ASTNode newTypeDecl= null;
 		boolean isInDifferentCU;
 		if (typeDecl != null) {
@@ -70,7 +72,7 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			astRoot= (CompilationUnit) astParser.createAST(null);
-			newTypeDecl= astRoot.findDeclaringNode(sender.getKey());
+			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
