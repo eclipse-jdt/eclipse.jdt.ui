@@ -51,6 +51,17 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	 * The run mode used to invoke the launcher.
 	 */
 	private String fRunMode;
+	
+	/** 
+	 * The port we are connecting to
+	 */
+	private int fPort;
+	
+	/** 
+	 * The type to be launched
+	 */
+	private IType fType;
+	
 	/**
 	 * The launcher
 	 */
@@ -90,6 +101,8 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 
 	protected boolean doLaunch(final IType[] testTypes, final String runMode, ILauncher launcher) {
 		final IType testType= testTypes[0];
+		fType= testType;
+		
 		IVMInstall vmInstall;
 		try {
 			vmInstall= JavaRuntime.getVMInstall(testType.getJavaProject());
@@ -109,15 +122,14 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		final VMRunnerResult returnResult[]= new VMRunnerResult[1];
 		VMRunnerResult result;
 		
-		final int port= SocketUtil.findUnusedLocalPort(4000, 5000);  
-
-		IWorkbenchWindow window= JUnitPlugin.getDefault().getWorkbench().getActiveWorkbenchWindow();
-		IWorkbenchPage page= window.getActivePage();
+		fPort= SocketUtil.findUnusedLocalPort(4000, 5000);  
+		final int finalPort= fPort;
+		
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				pm.beginTask("Starting VM ...", IProgressMonitor.UNKNOWN);
 				try {
-					VMRunnerConfiguration vmConfig= configureVM(testTypes, port, runMode);
+					VMRunnerConfiguration vmConfig= configureVM(testTypes, finalPort, runMode);
 					returnResult[0]= vmRunner.run(vmConfig);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
@@ -142,17 +154,7 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 		}
 		fLauncher= launcher;
 		fRunMode= runMode;
-		
-		TestRunnerViewPart testRunner;
-		try {
-			testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-		} catch (PartInitException e) {
-			ErrorDialog.openError(JUnitPlugin.getActiveShell(), 
-				"Could not show JUnit Result View", e.getMessage(), e.getStatus()
-			);
-			return false;
-		}
-		testRunner.startTestRunListening(testType, port, this);	
+		fType= testType;
 		return true;
 	}
 
@@ -177,6 +179,14 @@ public abstract class JUnitBaseLauncherDelegate implements ILauncherDelegate {
 	
 	public String getRunMode() {
 		return fRunMode;
+	}
+	
+	public int getPort() {
+		return fPort;
+	}
+	
+	public IType getLaunchedType() {
+		return fType;
 	}
 	
 	/**

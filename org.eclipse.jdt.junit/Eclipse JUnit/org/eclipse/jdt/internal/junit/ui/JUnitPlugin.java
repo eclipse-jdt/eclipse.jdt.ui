@@ -7,16 +7,26 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchListener;
+
+import org.eclipse.debug.core.ILaunchManager;
+
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
@@ -24,7 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
-public class JUnitPlugin extends AbstractUIPlugin {	
+public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {	
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
@@ -82,6 +92,56 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		if (JUnitPlugin.fgIconBaseURL == null)
 			throw new MalformedURLException();
 		return new URL(JUnitPlugin.fgIconBaseURL, name);
+	}
+
+	/*
+	 * @see ILaunchListener#launchRemoved(ILaunch)
+	 */
+	public void launchRemoved(ILaunch launch) {
+	}
+
+	/*
+	 * @see ILaunchListener#launchAdded(ILaunch)
+	 */
+	public void launchAdded(ILaunch launch) {
+		if (launch.getLauncher().getDelegate() instanceof JUnitBaseLauncherDelegate) {
+			JUnitBaseLauncherDelegate launcher= (JUnitBaseLauncherDelegate)launch.getLauncher().getDelegate();
+			IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
+			IWorkbenchPage page= window.getActivePage();
+			TestRunnerViewPart testRunner= null;
+			try {
+				testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
+			} catch (PartInitException e) {
+				ErrorDialog.openError(getActiveShell(), 
+					"Could not show JUnit Result View", e.getMessage(), e.getStatus()
+				);
+			}
+			if (testRunner != null)
+				testRunner.startTestRunListening(launcher);	
+		}
+	}
+
+	/*
+	 * @see ILaunchListener#launchChanged(ILaunch)
+	 */
+	public void launchChanged(ILaunch launch) {
+	}
+	/*
+	 * @see Plugin#startup()
+	 */
+	public void startup() throws CoreException {
+		super.startup();
+		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
+		launchManager.addLaunchListener(this);	
+	}
+
+	/*
+	 * @see Plugin#shutdown()
+	 */
+	public void shutdown() throws CoreException {
+		super.shutdown();
+		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
+		launchManager.removeLaunchListener(this);
 	}
 
 }

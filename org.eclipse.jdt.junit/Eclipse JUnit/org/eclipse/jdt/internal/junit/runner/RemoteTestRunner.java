@@ -423,16 +423,24 @@ public class RemoteTestRunner implements TestListener {
 	private boolean connect() {
 		if (fDebugMode)
 			System.out.println("RemoteTestRunner: trying to connect" + fHost + ":" + fPort);
-		try{
-			fClientSocket= new Socket(fHost, fPort);
-			fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
-			fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
-			new ReaderThread().start();
-			return true;
-		} catch(IOException e){
-			System.err.println("Could not connect to: " + fHost + ":" + fPort);			
-			e.printStackTrace();
+		Exception exception= null;
+		for (int i= 1; i < 5; i++) {
+			try{
+				fClientSocket= new Socket(fHost, fPort);
+				fWriter= new PrintWriter(fClientSocket.getOutputStream(), false/*true*/);
+				fReader= new BufferedReader(new InputStreamReader(fClientSocket.getInputStream()));
+				new ReaderThread().start();
+				return true;
+			} catch(IOException e){
+				exception= e;
+			}
+			try {
+				Thread.currentThread().sleep(200);
+			} catch(InterruptedException e) {
+			}
 		}
+		System.err.println("Could not connect to: " + fHost + ":" + fPort);			
+		exception.printStackTrace();
 		return false;
 	}
 

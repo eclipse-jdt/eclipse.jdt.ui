@@ -281,8 +281,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		});	
 	}
 
-	public void startTestRunListening(IType type, int port, JUnitBaseLauncherDelegate launcher) {
-		fTestType= type;
+	public void startTestRunListening(JUnitBaseLauncherDelegate launcher) {
+		fTestType= launcher.getLaunchedType();
 		fLauncher= launcher;
 		String msg= "Launching TestRunner";
 		showInformation(msg);
@@ -291,10 +291,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener {
 		if (fTestRunnerClient != null) 
 			stopTest();
 		fTestRunnerClient= new RemoteTestRunnerClient();
-		fTestRunnerClient.startListening(this, port);
+		fTestRunnerClient.startListening(this, launcher.getPort());
 		
-		setTitle("JUnit ("+type.getElementName()+")");
-		setTitleToolTip(type.getFullyQualifiedName());
+		setTitle("JUnit ("+fTestType.getElementName()+")");
+		setTitleToolTip(fTestType.getFullyQualifiedName());
 	}
 	
 	public void rerunTest(String className, String testName) {
