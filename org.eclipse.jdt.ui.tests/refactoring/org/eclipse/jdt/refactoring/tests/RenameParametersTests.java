@@ -52,20 +52,15 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 	}
 	
 	//------------
-//	private RenameParametersRefactoring createRefactoring(IMethod m, String[] newNames){
-//		return new RenameParametersRefactoring(fgChangeCreator, m, newNames);
-//	}
-
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
 	
-	private void helper1(String[] newNames, String[] signature) throws Exception{
+	private void helper1(String[] newNames, String[] signature, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
-		//DebugUtils.dump("cu" + cu.getSource());
 		IType classA= getType(cu, "A");
-		//DebugUtils.dump("classA" + classA);
 		RenameParametersRefactoring ref= new RenameParametersRefactoring(fgChangeCreator, classA.getMethod("m", signature));
+		ref.setUpdateReferences(updateReferences);
 		ref.setNewParameterNames(newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);
@@ -75,7 +70,12 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());		
+		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)).length(), newcu.getSource().length());
+		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
+	}
+	
+	private void helper1(String[] newNames, String[] signature) throws Exception{
+		helper1(newNames, signature, true);
 	}
 	
 	private void helper2(String[] newNames, String[] signature) throws Exception{
@@ -217,6 +217,13 @@ import junit.framework.Test;import junit.framework.TestSuite;import org.eclip
 		helper1(new String[]{"kk", "j"}, new String[]{"I", "I"});
 	}	
 	
+	public void test32() throws Exception{
+		printTestDisabledMessage("needs revisiting");
+	}
+	
+	public void test33() throws Exception{
+		helper1(new String[]{"b"}, new String[]{"QA;"}, false);
+	}
 	// -----
 	
 	public void testFail0() throws Exception{

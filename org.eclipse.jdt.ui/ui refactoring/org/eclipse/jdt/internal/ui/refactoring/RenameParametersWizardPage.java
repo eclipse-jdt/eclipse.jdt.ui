@@ -23,9 +23,12 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -51,11 +54,11 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		return (RenameParametersRefactoring)getRefactoring();
 	}			
 	
-	/**
+	/* non java-doc
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
-		Table table= createTableComposite(parent);
+		Table table= createComposite(parent);
 		
 		fViewer= new TableViewer(table);
 		fViewer.setUseHashlookup(true);
@@ -134,10 +137,12 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		return result;
 	}
 	
-	private Table createTableComposite(Composite parent){
+	private Table createComposite(Composite parent){
 		Composite c= new Composite(parent, SWT.NONE);
 		c.setLayout(new GridLayout());
 		c.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		
+		addCheckBox(c);
 		
 		Table table= new Table(c, SWT.H_SCROLL | SWT.V_SCROLL | SWT.MULTI | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.BORDER);
 		table.setLinesVisible(true);
@@ -147,6 +152,18 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		
 		setControl(c);
 		return table;
+	}
+
+	private void addCheckBox(Composite c) {
+		final Button checkBox= new Button(c, SWT.CHECK);
+		checkBox.setText("Update references to the renamed paremeters");
+		checkBox.setSelection(getRenameParametersRefactoring().getUpdateReferences());
+		checkBox.addSelectionListener(new SelectionAdapter(){
+			public void widgetSelected(SelectionEvent e) {
+				getRenameParametersRefactoring().setUpdateReferences(checkBox.getSelection());
+			}
+		});
+		checkBox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 	
 	private TableLayout createTableLayout(Table table) {
@@ -199,13 +216,12 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	
 	private static class ParameterPairLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
-			if (element instanceof ParameterNamePair) {
-				if (columnIndex == OLDNAME_PROP)
-					return ((ParameterNamePair) element).oldName;
-				else
-					return ((ParameterNamePair) element).newName;
-			}
-			return ""; //$NON-NLS-1$
+			if (! (element instanceof ParameterNamePair)) 
+				return ""; //$NON-NLS-1$
+			if (columnIndex == OLDNAME_PROP)
+				return ((ParameterNamePair) element).oldName;
+			else
+				return ((ParameterNamePair) element).newName;
 		}
 		
 		public Image getColumnImage(Object element, int columnIndex){
@@ -215,62 +231,44 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	
 	private static class ParameterPairContentProvider implements IStructuredContentProvider {
 		
-		/**
-		 * @see IStructuredContentProvider#getElements(Object)
-		 */
 		public Object[] getElements(Object inputElement) {
 			return (Object[])inputElement;
 		}
 
-		/**
-		 * @see IContentProvider#dispose()
-		 */
 		public void dispose() {
 		}
 
-		/**
-		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
-		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
 		}
 	}
 	
 	private class CellModifier implements ICellModifier {
 		
-		/**
-		 * @see ICellModifier#canModify(Object, String)
-		 */
 		public boolean canModify(Object element, String property) {
 			return (property.equals(PROPERTIES[NEWNAME_PROP]));
 		}
 		
-		/**
-		 * @see ICellModifier#getValue(Object, String)
-		 */
 		public Object getValue(Object element, String property) {
-			if (element instanceof ParameterNamePair) {
-				if (property.equals(PROPERTIES[OLDNAME_PROP]))
-					return ((ParameterNamePair) element).oldName;
-				if (property.equals(PROPERTIES[NEWNAME_PROP]))
-					return ((ParameterNamePair) element).newName;
-			}
+			if (! (element instanceof ParameterNamePair))
+				return null;
+			if (property.equals(PROPERTIES[OLDNAME_PROP]))
+				return ((ParameterNamePair) element).oldName;
+			if (property.equals(PROPERTIES[NEWNAME_PROP]))
+				return ((ParameterNamePair) element).newName;
 			return null;
 		}
 		
-		/**
-		 * @see ICellModifier#modify(Object, String, Object)
-		 */
 		public void modify(Object element, String property, Object value) {
-			if (element instanceof TableItem) {
-				Object data= ((TableItem) element).getData();
-				if (data instanceof ParameterNamePair) {
-					ParameterNamePair s= (ParameterNamePair) data;
-					if (property.equals(PROPERTIES[NEWNAME_PROP])) {
-						s.newName= (String) value;
-						tableModified(getNewParameterNames());
-						fViewer.update(s, new String[] { property });
-					}
-				}
+			if (! (element instanceof TableItem)) 
+				return;
+			Object data= ((TableItem) element).getData();
+			if (! (data instanceof ParameterNamePair)) 
+				return;
+			ParameterNamePair s= (ParameterNamePair) data;
+			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
+				s.newName= (String) value;
+				tableModified(getNewParameterNames());
+				fViewer.update(s, new String[] { property });
 			}
 		}
 	};

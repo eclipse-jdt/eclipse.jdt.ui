@@ -16,11 +16,7 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.core.refactoring.AbstractRefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringASTAnalyzer;
 import org.eclipse.jdt.internal.core.refactoring.RefactoringCoreMessages;
-
-/*
- * not api
- */
-class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
+class RenameParameterASTAnalyzer extends AbstractRefactoringASTAnalyzer{
 	
 	private String[] fNewParameterNames;
 	private String[] fSortedNewParameterNames;

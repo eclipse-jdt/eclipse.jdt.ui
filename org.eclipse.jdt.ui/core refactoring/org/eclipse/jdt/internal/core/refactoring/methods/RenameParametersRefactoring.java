@@ -27,12 +27,14 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	private String[] fNewParameterNames;
 	private String[] fOldParameterNames;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
+	private boolean fUpdateReferences;
 	
 	public RenameParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method){
 		super(method);
 		setOldParameterNames();
 		Assert.isNotNull(changeCreator);
 		fTextBufferChangeCreator= changeCreator;
+		fUpdateReferences= true;
 	}
 	
 	/* non java-doc 
@@ -41,6 +43,22 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	public String getName(){
 		return RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_parameters"); //$NON-NLS-1$
 	}
+	
+	/**
+	 * same as IRenameRefactoring#setUpdateReferences
+	 */
+	public void setUpdateReferences(boolean update){
+		fUpdateReferences= update;
+	}
+
+	/**
+	 * same as IRenameRefactoring#getUpdateReferences
+	 */	
+	public boolean getUpdateReferences(){
+		return fUpdateReferences;
+	}
+	
+	//-- preconditions
 	
 	/* non java-doc 
 	 * @see IPreactivatedRefactoring#getPreactivation
@@ -96,7 +114,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 			 * only one resource is affected - no need to check its availability
 			 * (done in MethodRefactoring::checkActivation)
 			 */
-			if (mustAnalyzeAst()) 
+			if (fUpdateReferences && mustAnalyzeAst()) 
 				result.merge(analyzeAst()); 
 			pm.worked(7);
 			return result;
@@ -191,8 +209,7 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 			pm.beginTask(RefactoringCoreMessages.getString("RenameParametersRefactoring.creating_change"), renamed.size()); //$NON-NLS-1$
 			ITextBufferChange builder= fTextBufferChangeCreator.create(RefactoringCoreMessages.getString("RenameParametersRefactoring.rename_method_parameters"), getMethod().getCompilationUnit()); //$NON-NLS-1$
 			for (Iterator iter= renamed.iterator(); iter.hasNext() ;){
-				Integer i= 	(Integer)iter.next();
-				addParameterRenaming(i.intValue(), builder);
+				addParameterRenaming(((Integer)iter.next()).intValue(), builder);
 				pm.worked(1);
 			}
 			return builder;
@@ -211,15 +228,15 @@ public class RenameParametersRefactoring extends MethodRefactoring implements IP
 	}
 	
 	private void addParameterRenaming(int parameterIndex, ITextBufferChange builder) throws JavaModelException{
-		List offsets= findParameterOccurrenceOffsets(parameterIndex);
-		Assert.isTrue(offsets.size() > 0); //at least the method declaration
-		for (Iterator iter= offsets.iterator(); iter.hasNext(); ){
-			addParameterRenameChange(parameterIndex, ((Integer)iter.next()).intValue(), builder);
+		int[] offsets= findParameterOccurrenceOffsets(parameterIndex);
+		Assert.isTrue(offsets.length > 0); //at least the method declaration
+		for (int i= 0; i < offsets.length; i++){
+			addParameterRenameChange(parameterIndex, offsets[i], builder);
 		};
 	}
 	
-	private List findParameterOccurrenceOffsets(int parameterIndex) throws JavaModelException{
-		return new ParameterOffsetFinder(getMethod(), parameterIndex).findOffsets();
+	private int[] findParameterOccurrenceOffsets(int parameterIndex) throws JavaModelException{
+		return new ParameterOffsetFinder(getMethod(), parameterIndex).findOffsets(fUpdateReferences);
 	}
 	
 	private void addParameterRenameChange(int parameterIndex, int occurrenceOffset, ITextBufferChange builder){

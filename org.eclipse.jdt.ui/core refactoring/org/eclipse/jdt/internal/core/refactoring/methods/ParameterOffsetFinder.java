@@ -28,12 +28,11 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	private int fParameterIndex;
 	private char[] fParameterName; 
 	private ISourceRange fMethodSourceRange;
-
+
 	private List fOffsetsFound;
-	//helper
 	private int fMethodSourceRangeEnd;
-	
 	private List fParamBindings;
+	private boolean fIncludeReferences;
 	
 	ParameterOffsetFinder(IMethod method, int parameterIndex) throws JavaModelException{ 
 		fMethod= method;
@@ -41,15 +40,25 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 		fParameterName= method.getParameterNames()[fParameterIndex].toCharArray();
 		fMethodSourceRange= method.getSourceRange();
 		fMethodSourceRangeEnd= fMethodSourceRange.getOffset() + fMethodSourceRange.getLength();
-	}
-
-	/*
-	 * returns List of Integers
+	}
+	/**
+	 * @param includeReferences if it is <code>true</code>, then not only the parameter declaration but also references will be included
+	 * @return indices of offsets of the references to the parameter specified in constructor
 	 */
-	List findOffsets() throws JavaModelException{
+	int[] findOffsets(boolean includeReferences) throws JavaModelException{
+		fIncludeReferences= includeReferences;
 		fOffsetsFound= new ArrayList();
 		((CompilationUnit)fMethod.getCompilationUnit()).accept(this);
-		return fOffsetsFound;
+		return convertFromIntegerList(fOffsetsFound);
+	}
+	
+	private static int[] convertFromIntegerList(List list){
+		int[] result= new int[list.size()];
+		Integer[] integerResult= (Integer[])list.toArray(new Integer[list.size()]);
+		for (int i= 0; i < integerResult.length; i++){
+			result[i]= integerResult[i].intValue();
+		}
+		return result;
 	}
 	
 	private void addNodeOffset(AstNode node){
@@ -74,12 +83,18 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	//-------  visit methods  ---------
 	
 	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){
+		if (! fIncludeReferences)
+			return true;
+		
 		if  (isParameterMatch(singleNameReference, blockScope))
 			addNodeOffset(singleNameReference);
 		return true;
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
+		if (! fIncludeReferences)
+			return true;
+		
 		if (withinMethod(localDeclaration) 
 			&&	fParamBindings.contains(localDeclaration.binding))
 				fOffsetsFound.add(new Integer(localDeclaration.declarationSourceEnd - localDeclaration.name.length));
@@ -107,6 +122,9 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	}
 		
 	public boolean visit(QualifiedNameReference qualifiedNameReference,	BlockScope scope) {
+		if (! fIncludeReferences)
+			return true;
+		
 		if (withinMethod(qualifiedNameReference) 
 			&& CharOperation.equals(qualifiedNameReference.tokens[0], fParameterName)){
 				fOffsetsFound.add(new Integer(qualifiedNameReference.sourceStart));
