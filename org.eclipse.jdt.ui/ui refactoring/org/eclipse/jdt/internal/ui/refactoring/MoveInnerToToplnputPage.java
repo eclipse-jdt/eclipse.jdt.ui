@@ -16,7 +16,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-public class MoveInnerToToplnputPage extends TextInputWizardPage{
+class MoveInnerToToplnputPage extends TextInputWizardPage{
 
 	private final boolean fIsInitialInputValid;
 	private static final String DESCRIPTION = "Specify a name for the field that will be used to access the enclosing instance";

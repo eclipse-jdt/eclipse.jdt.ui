@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactor
 
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-public abstract class RenameInputWizardPage extends TextInputWizardPage {
+abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 	private String fHelpContextID;
 	private QualifiedNameComponent fQualifiedNameComponent;

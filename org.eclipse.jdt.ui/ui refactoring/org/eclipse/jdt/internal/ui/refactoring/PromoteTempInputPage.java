@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-public class PromoteTempInputPage extends UserInputWizardPage {
+class PromoteTempInputPage extends UserInputWizardPage {
 
 	private static final String DESCRIPTION = RefactoringMessages.getString("PromoteTempInputPage.description");//$NON-NLS-1$
 	public static final String PAGE_NAME= "PromoteTempInputPage";//$NON-NLS-1$

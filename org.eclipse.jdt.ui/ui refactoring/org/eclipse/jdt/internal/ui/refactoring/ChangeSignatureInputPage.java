@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class ChangeSignatureInputPage extends UserInputWizardPage {
+class ChangeSignatureInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "ChangeSignatureInputPage"; //$NON-NLS-1$
 	private Label fSignaturePreview;

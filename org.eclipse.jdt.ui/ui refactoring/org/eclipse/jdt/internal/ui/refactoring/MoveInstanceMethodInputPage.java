@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
 
-public class MoveInstanceMethodInputPage extends UserInputWizardPage {
+class MoveInstanceMethodInputPage extends UserInputWizardPage {
 
 	private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE"; 
 	private static final int ROW_COUNT= 7;

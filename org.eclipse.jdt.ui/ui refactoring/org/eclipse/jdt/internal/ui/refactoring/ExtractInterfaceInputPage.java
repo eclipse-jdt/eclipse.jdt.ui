@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
-public class ExtractInterfaceInputPage extends TextInputWizardPage {
+class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	private Button fReplaceAllCheckbox;
 	private CheckboxTableViewer fTableViewer;

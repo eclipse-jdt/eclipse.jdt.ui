@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePo
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class UseSupertypeInputPage extends UserInputWizardPage{
+class UseSupertypeInputPage extends UserInputWizardPage{
 
 	public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
 	private TableViewer fTableViewer; 

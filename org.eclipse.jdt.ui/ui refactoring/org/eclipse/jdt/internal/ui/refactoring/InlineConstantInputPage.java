@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 
-public class InlineConstantInputPage extends UserInputWizardPage {
+class InlineConstantInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "InlineConstantInputPage";//$NON-NLS-1$
 

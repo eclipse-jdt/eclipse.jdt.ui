@@ -27,7 +27,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-public class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
+class ConvertAnonymousToNestedInputPage extends UserInputWizardPage {
 
 	private static final String DESCRIPTION = "Select the name and modifiers for the new nested class";
 	public static final String PAGE_NAME= "ConvertAnonymousToNestedInputPage";//$NON-NLS-1$

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-public class ExtractTempInputPage extends TextInputWizardPage {
+class ExtractTempInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
 	private final boolean fInitialValid;

@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameFieldInputWizardPage extends RenameInputWizardPage {
+class RenameFieldInputWizardPage extends RenameInputWizardPage {
 
 	private Button fRenameGetter;
 	private Button fRenameSetter;

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
-public class MoveMembersInputPage extends UserInputWizardPage {
+class MoveMembersInputPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "MoveMembersInputPage"; //$NON-NLS-1$
 	

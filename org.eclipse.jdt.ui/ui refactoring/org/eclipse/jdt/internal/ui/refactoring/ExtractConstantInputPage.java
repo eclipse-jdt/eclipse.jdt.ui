@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
-public class ExtractConstantInputPage extends TextInputWizardPage {
+class ExtractConstantInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
 	private final boolean fInitialValid;
