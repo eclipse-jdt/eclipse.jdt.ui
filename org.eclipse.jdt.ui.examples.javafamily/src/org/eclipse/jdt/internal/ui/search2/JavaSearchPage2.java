@@ -167,7 +167,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection);
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(fStructuredSelection, true);
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
@@ -175,7 +175,7 @@ public class JavaSearchPage2 extends DialogPage implements ISearchPage, IJavaSea
 				if (workingSets == null || workingSets.length < 1)
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", SearchUtil.toString(workingSets)); //$NON-NLS-1$
-				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets(), true);
 				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}		
 		
