@@ -757,7 +757,7 @@ public class PullUpRefactoring extends Refactoring {
 		return ! (JdtFlags.isPublic(method) || JdtFlags.isProtected(method));
 	}
 	
-	private static String computeNewSource(IMember member) throws JavaModelException {
+	private String computeNewSource(IMember member) throws JavaModelException {
 		String source;
 		
 		if (member.getElementType() == IJavaElement.METHOD)
@@ -773,8 +773,8 @@ public class PullUpRefactoring extends Refactoring {
 		return "protected " + removeLeadingWhiteSpaces(source); //$NON-NLS-1$
 	}
 
-	private static String replaceSuperCalls(IMethod method) throws JavaModelException {
-		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method));
+	private String replaceSuperCalls(IMethod method) throws JavaModelException {
+		ISourceRange[] superRefOffsert= SourceRange.reverseSortByOffset(SuperReferenceFinder.findSuperReferenceRanges(method, getSuperType(new NullProgressMonitor())));
 		
 		StringBuffer source= new StringBuffer(SourceReferenceSourceRangeComputer.computeSource(method));
 		ISourceRange originalMethodRange= SourceReferenceSourceRangeComputer.computeSourceRange(method, method.getCompilationUnit().getSource());

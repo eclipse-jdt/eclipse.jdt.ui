@@ -5,6 +5,7 @@ import java.util.Collection;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -14,23 +15,29 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-public class SuperReferenceFinder {
+class SuperReferenceFinder {
 
 	//no instances
 	private SuperReferenceFinder(){
 	}
 	
-	public static ISourceRange[] findSuperReferenceRanges(IMethod method) throws JavaModelException{
+	public static ISourceRange[] findSuperReferenceRanges(IMethod method, IType superType) throws JavaModelException{
 		Assert.isNotNull(method);
-		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method);
-		AST.parseCompilationUnit(method.getCompilationUnit(), false).accept(visitor);
+		SuperReferenceFinderVisitor visitor= new SuperReferenceFinderVisitor(method, superType);
+		AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
 		return visitor.getSuperReferenceRanges();
 	}
 	
@@ -40,12 +47,14 @@ public class SuperReferenceFinder {
 		private int fMethodSourceStart;
 		private int fMethodSourceEnd;
 		private String fMethodSource;
+		private String fSuperTypeName;
 		
-		SuperReferenceFinderVisitor(IMethod method) throws JavaModelException{
+		SuperReferenceFinderVisitor(IMethod method, IType superType) throws JavaModelException{
 			fFoundRanges= new ArrayList(0);
 			fMethodSourceStart= method.getSourceRange().getOffset();
 			fMethodSourceEnd= method.getSourceRange().getOffset() + method.getSourceRange().getLength();	
 			fMethodSource= method.getSource();
+			fSuperTypeName= JavaModelUtil.getFullyQualifiedName(superType);
 		}
 		
 		ISourceRange[] getSuperReferenceRanges(){
@@ -64,10 +73,8 @@ public class SuperReferenceFinder {
 				while (token != ITerminalSymbols.TokenNameEOF) {
 					switch (token) {
 						case ITerminalSymbols.TokenNamesuper :
-							//int start= scanner.currentPosition - scanner.getCurrentTokenSource().length;
 							int start= scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenSource().length;
 							int end= scanner.getCurrentTokenEndPosition() + 1;
-							//scanner.currentPosition;
 							return new SourceRange(start, end - start);
 					}
 					token = scanner.getNextToken();
@@ -119,8 +126,15 @@ public class SuperReferenceFinder {
 			if (! withinMethod(node))
 				return true;
 			
+			IBinding nameBinding= node.getName().resolveBinding();
+			if (nameBinding != null && nameBinding.getKind() == IBinding.METHOD){
+				ITypeBinding declaringType= ((IMethodBinding)nameBinding).getDeclaringClass();
+				if (declaringType != null && ! fSuperTypeName.equals(Bindings.getFullyQualifiedName(declaringType)))
+					return true;
+			}
 			ISourceRange superRange= getSuperRange(getScanSource(node));
 			fFoundRanges.add(new SourceRange(superRange.getOffset() + getScanSourceOffset(node), superRange.getLength()));
+				
 			return true;
 		}
 		
