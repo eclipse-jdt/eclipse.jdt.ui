@@ -21,6 +21,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellReconcileStrategy;
@@ -58,6 +59,10 @@ public class JavaCompositeReconcilingStrategy  extends CompositeReconcilingStrat
 	 */
 	private IProblemRequestorExtension getProblemRequestorExtension() {
 		IDocumentProvider p= fEditor.getDocumentProvider();
+		if (p == null) {
+			// work around for https://bugs.eclipse.org/bugs/show_bug.cgi?id=51522
+			p= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
+		}
 		IAnnotationModel m= p.getAnnotationModel(fEditor.getEditorInput());
 		if (m instanceof IProblemRequestorExtension)
 			return (IProblemRequestorExtension) m;
