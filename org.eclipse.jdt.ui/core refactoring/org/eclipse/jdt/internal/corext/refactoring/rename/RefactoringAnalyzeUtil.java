@@ -17,17 +17,17 @@ import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-
-import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -79,7 +79,7 @@ public class RefactoringAnalyzeUtil {
 			buff.append('/');	
 		}	
 		
-		TypeDeclaration td= (TypeDeclaration)ASTNodes.getParent(decl, TypeDeclaration.class);
+		AbstractTypeDeclaration td= (AbstractTypeDeclaration)ASTNodes.getParent(decl, AbstractTypeDeclaration.class);
 		if (td != null && td.resolveBinding() != null){
 			if (td.resolveBinding().getKey() != null)
 				buff.append(td.resolveBinding().getKey());

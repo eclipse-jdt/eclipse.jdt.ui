@@ -860,8 +860,8 @@ public class Bindings {
 	 */
 	public static ITypeBinding getBindingOfParentType(ASTNode node) {
 		while (node != null) {
-			if (node instanceof TypeDeclaration) {
-				return ((TypeDeclaration) node).resolveBinding();
+			if (node instanceof AbstractTypeDeclaration) {
+				return ((AbstractTypeDeclaration) node).resolveBinding();
 			} else if (node instanceof AnonymousClassDeclaration) {
 				return ((AnonymousClassDeclaration) node).resolveBinding();
 			}

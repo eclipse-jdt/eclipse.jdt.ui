@@ -15,16 +15,18 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+
+import org.eclipse.text.edits.InsertEdit;
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -49,11 +52,8 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
-
-import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
@@ -527,7 +527,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			if(isOnSameLine(indexToInsertAtOrAfter, nextBodyDecl.getStartPosition()))
 				return true;
 		} else {
-			TypeDeclaration typeDecl= getContainingTypeDeclarationNode();
+			AbstractTypeDeclaration typeDecl= getContainingTypeDeclarationNode();
 			int typeDeclClose= typeDecl.getStartPosition() + typeDecl.getLength() - 1;
 			if(isOnSameLine(indexToInsertAtOrAfter, typeDeclClose))
 				return true;
@@ -817,7 +817,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private static boolean isStaticFieldOrStaticInitializer(BodyDeclaration node) {
-		if(node instanceof MethodDeclaration || node instanceof TypeDeclaration)
+		if(node instanceof MethodDeclaration || node instanceof AbstractTypeDeclaration)
 			return false;
 		
 		int modifiers;
@@ -909,8 +909,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	//returns non-null
-	private TypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
-		TypeDeclaration result= (TypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), TypeDeclaration.class);  
+	private AbstractTypeDeclaration getContainingTypeDeclarationNode() throws JavaModelException {
+		AbstractTypeDeclaration result= (AbstractTypeDeclaration) ASTNodes.getParent(getSelectedExpression().getAssociatedNode(), AbstractTypeDeclaration.class);  
 		Assert.isNotNull(result);
 		return result;
 	}

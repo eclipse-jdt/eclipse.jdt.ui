@@ -20,14 +20,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -36,15 +35,16 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
-import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -60,11 +60,11 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -253,17 +253,7 @@ public class ASTNodes {
 	}
 	
 	public static boolean isStatic(BodyDeclaration declaration) {
-		switch(declaration.getNodeType()) {
-			case ASTNode.FIELD_DECLARATION:
-				return Modifier.isStatic(((FieldDeclaration)declaration).getModifiers());
-			case ASTNode.METHOD_DECLARATION:
-				return Modifier.isStatic(((MethodDeclaration)declaration).getModifiers());
-			case ASTNode.TYPE_DECLARATION:
-				return Modifier.isStatic(((TypeDeclaration)declaration).getModifiers());
-			case ASTNode.INITIALIZER:
-				return Modifier.isStatic(((Initializer)declaration).getModifiers());
-			}
-		return false;
+		return Modifier.isStatic(declaration.getModifiers());
 	}
 	
 	public static List getBodyDeclarations(ASTNode node) {
@@ -500,22 +490,20 @@ public class ASTNodes {
 			return exp.resolveTypeBinding();
 		}
 		else {
-			TypeDeclaration type= (TypeDeclaration)getParent(invocation, ASTNode.TYPE_DECLARATION);
+			AbstractTypeDeclaration type= (AbstractTypeDeclaration)getParent(invocation, AbstractTypeDeclaration.class);
 			if (type != null)
 				return type.resolveBinding();
 		}
 		return result;
 	}
-	
+
 	public static ITypeBinding getDeclaringType(ASTNode declaration) {
 		ASTNode node= declaration;
-		while(node != null) {
-			switch(node.getNodeType()) {
-				case ASTNode.TYPE_DECLARATION:
-					return ((TypeDeclaration)node).resolveBinding();
-				case ASTNode.ANONYMOUS_CLASS_DECLARATION:
-					return ((AnonymousClassDeclaration)node).resolveBinding();
-			}
+		while (node != null) {
+			if (node instanceof AbstractTypeDeclaration)
+				return ((AbstractTypeDeclaration) node).resolveBinding();
+			else if (node instanceof AnonymousClassDeclaration)
+				return ((AnonymousClassDeclaration) node).resolveBinding();
 			node= node.getParent();
 		}
 		return null;
