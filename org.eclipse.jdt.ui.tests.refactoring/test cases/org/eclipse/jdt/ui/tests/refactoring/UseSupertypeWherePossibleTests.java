@@ -37,6 +37,10 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test test) {
+		return new RefactoringTestSetup(test);
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
