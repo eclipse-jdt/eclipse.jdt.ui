@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -153,6 +154,16 @@ public class ModifierCorrectionSubProcessor {
 		ITypeBinding curr= method.getDeclaringClass();
 		IMethodBinding overriddenClass= null;
 		
+		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
+			IMethodBinding defining= Bindings.findMethodDefininition(method, false);
+			if (defining != null) {
+				int excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
+				int includedModifiers= JdtFlags.getVisibilityCode(defining);
+				String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodvisibility.description", new String[] { getVisibilityString(includedModifiers) }); //$NON-NLS-1$
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				proposals.add(new ModifierChangeCompletionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
+			}
+		}
 		
 		if (overriddenClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
@@ -168,7 +179,7 @@ public class ModifierCorrectionSubProcessor {
 				switch (kind) {
 					case TO_VISIBLE:
 						excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
-						includedModifiers= method.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC);
+						includedModifiers= JdtFlags.getVisibilityCode(method);
 						label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changeoverriddenvisibility.description", new String[] { methodName, getVisibilityString(includedModifiers) }); //$NON-NLS-1$
 						break;
 					case TO_NON_FINAL:	
@@ -186,20 +197,9 @@ public class ModifierCorrectionSubProcessor {
 						return;
 				}
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenClass, selectedNode, includedModifiers, excludedModifiers, 9, image));
+				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, overriddenClass, selectedNode, includedModifiers, excludedModifiers, 7, image));
 			}
 		}
-		if (kind == TO_VISIBLE && problem.getProblemId() != IProblem.OverridingNonVisibleMethod) {
-			IMethodBinding defining= Bindings.findMethodDefininition(method, false);
-			if (defining != null) {
-				int excludedModifiers= Modifier.PRIVATE | Modifier.PROTECTED | Modifier.PUBLIC;
-				int includedModifiers= defining.getModifiers() & (Modifier.PROTECTED | Modifier.PUBLIC);
-				String label= CorrectionMessages.getFormattedString("ModifierCorrectionSubProcessor.changemethodvisibility.description", new String[] { getVisibilityString(includedModifiers) }); //$NON-NLS-1$
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				proposals.add(new ModifierChangeCompletionProposal(label, cu, method, selectedNode, includedModifiers, excludedModifiers, 8, image));
-			}
-		}
-		
 	}
 	
 	public static void addNonFinalLocalProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
@@ -297,10 +297,12 @@ public class ModifierCorrectionSubProcessor {
 	private static String getVisibilityString(int code) {
 		if (Modifier.isPublic(code)) {
 			return "public"; //$NON-NLS-1$
-		}else if (Modifier.isProtected(code)) {
+		} else if (Modifier.isProtected(code)) {
 			return "protected"; //$NON-NLS-1$
+		} else if (Modifier.isPrivate(code)) {
+			return "private"; //$NON-NLS-1$
 		}
-		return "default"; //$NON-NLS-1$
+		return CorrectionMessages.getString("ModifierCorrectionSubProcessor.default"); //$NON-NLS-1$
 	}
 	
 	
