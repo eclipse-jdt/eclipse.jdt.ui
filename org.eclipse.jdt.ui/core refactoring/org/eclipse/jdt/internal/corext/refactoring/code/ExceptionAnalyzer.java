@@ -13,6 +13,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -45,6 +46,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	}
 	
 	public boolean visit(MethodInvocation node) {
+		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
+	}
+	
+	public boolean visit(SuperMethodInvocation node) {
 		return handleExceptions((IMethodBinding)node.getName().resolveBinding());
 	}
 	

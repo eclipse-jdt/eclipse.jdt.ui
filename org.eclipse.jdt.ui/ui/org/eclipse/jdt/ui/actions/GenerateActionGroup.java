@@ -256,8 +256,8 @@ public class GenerateActionGroup extends ActionGroup {
 	private IMenuManager createEditorSubMenu(IMenuManager mainMenu) {
 		IMenuManager result= new MenuManager(ActionMessages.getString("SourceMenu.label")); //$NON-NLS-1$
 		int added= 0;
-		added+= addAction(result, fAddImport);
 		added+= addAction(result, fOrganizeImports);
+		added+= addAction(result, fAddImport);
 		result.add(new Separator());
 		added+= addAction(result, fOverrideMethods);
 		added+= addAction(result, fAddGetterSetter);

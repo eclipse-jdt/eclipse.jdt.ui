@@ -1082,17 +1082,16 @@ JavaStructureDiffViewerCreator
       		label="%SurroundWithTryCatchAction.label"
 			retarget="true" />
 			
-		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
-      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
-      		label="%OrganizeImportsAction.label"
-			retarget="true" />
-			
 		<action id="org.eclipse.jdt.ui.actions.AddImport"
       		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
       		label="%AddImportAction.label"
 			retarget="true" />
 			
-			
+		<action id="org.eclipse.jdt.ui.actions.OrganizeImports"
+      		menubarPath="org.eclipse.jdt.ui.source.menu/generateGroup"
+      		label="%OrganizeImportsAction.label"
+			retarget="true" />
+						
 		<!-- edit group -->	
 			
 		<action id="org.eclipse.jdt.ui.actions.Format"

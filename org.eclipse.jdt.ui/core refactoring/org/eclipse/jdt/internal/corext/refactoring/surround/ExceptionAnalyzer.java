@@ -16,6 +16,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -71,6 +72,12 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	}
 	
 	public boolean visit(MethodInvocation node) {
+		if (!isSelected(node))
+			return false;
+		return handleExceptions(ASTNodes.getMethodBinding(node.getName()), node.getAST());
+	}
+	
+	public boolean visit(SuperMethodInvocation node) {
 		if (!isSelected(node))
 			return false;
 		return handleExceptions(ASTNodes.getMethodBinding(node.getName()), node.getAST());
