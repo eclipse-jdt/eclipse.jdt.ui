@@ -15,6 +15,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
@@ -77,7 +78,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  * 
  * @since 2.1
  */
-public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2 {
+public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, DisposeListener {
 
 
 	/**
@@ -317,6 +318,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		
 		setInfoSystemColor();
 		installFilter();
+		
+		addDisposeListener(this);
 	}
 	
 	/**
@@ -403,7 +406,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		fStatusTextFont= new Font(display, fontDatas);
 		fStatusField.setFont(fStatusTextFont);
 
-		// Regarding the color see bug 41128
 		fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
 
 //		fStatusField= new Button(parent, SWT.CENTER | SWT.FLAT);
@@ -607,18 +609,30 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/**
 	 * {@inheritDoc}
 	 */
-	public void dispose() {
-		if (fShell != null) {
-			if (!fShell.isDisposed())
-				fShell.dispose();
-			fShell= null;
-			fTreeViewer= null;
-			fComposite= null;
-			fFilterText= null;
-		}
-
+	public final void dispose() {
+		if (fShell != null && !fShell.isDisposed())
+			fShell.dispose();
+		else
+			widgetDisposed(null);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * @param event can be null
+	 * <p>
+	 * Subclasses may extend.
+	 * </p>
+	 */
+	public void widgetDisposed(DisposeEvent event) {
 		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
 			fStatusTextFont.dispose();
+		
+		fShell= null;
+		fTreeViewer= null;
+		fComposite= null;
+		fFilterText= null;
+		fStatusTextFont= null;
+	
 	}
 
 	/**

@@ -86,8 +86,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 					else
 						je= je.getAncestor(IJavaElement.COMPILATION_UNIT);
 					if (fInput.equals(je)) {
-						if (fForegroundColor == null)
-							fForegroundColor= getTreeViewer().getControl().getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
 						return fForegroundColor;
 					}
 				}
@@ -238,6 +236,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle, String commandId) {
 		super(parent, shellStyle, treeStyle, commandId, true);
+		fForegroundColor= parent.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
 	}
 
 	/**
@@ -351,14 +350,5 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		fInnerLabelProvider.setTextFlags(flags);	
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void dispose() {
-		super.dispose();
-		fOutlineContentProvider.dispose();
-		fInnerLabelProvider.dispose();
 	}
 }
