@@ -105,7 +105,7 @@ public class MainMethodFinder {
 					} else if (openable.getElementType() == IJavaElement.CLASS_FILE) {
 						IType mainType= ((IClassFile)openable).getType();
 						if (JavaModelUtil.hasMainMethod(mainType)) {
-							result.add(parentType);
+							result.add(mainType);
 						}
 						monitor.done();
 						return;	
@@ -129,7 +129,6 @@ public class MainMethodFinder {
 	
 	private static IType[] searchMainMethods(IResource res, IProgressMonitor monitor) throws JavaModelException {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IResource[] { res });
-		scope.setIncludesBinaries(false); // can be removed when fixed 1GKB475: ITPJCORE:WINNT - StringIndexOutOfBoundsException on searchfor methods
 		MainMethodSearchEngine searchEngine= new MainMethodSearchEngine();
 		return searchEngine.searchMainMethods(monitor, scope, IJavaElementSearchConstants.CONSIDER_BINARIES);
 	}
