@@ -35,6 +35,9 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
             this.id = id;
         }
 
+        /*
+         * @see org.eclipse.core.runtime.jobs.ISchedulingRule#isConflicting(org.eclipse.core.runtime.jobs.ISchedulingRule)
+         */
         public boolean isConflicting(ISchedulingRule rule) {
             if (rule instanceof BatchSimilarSchedulingRule) {
                 return ((BatchSimilarSchedulingRule) rule).id.equals(id);
@@ -43,12 +46,10 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
         }
 
         /*
-         * (non-Javadoc)
-         * 
          * @see org.eclipse.core.runtime.jobs.ISchedulingRule#contains(org.eclipse.core.runtime.jobs.ISchedulingRule)
          */
         public boolean contains(ISchedulingRule rule) {
-            return false;
+            return this == rule;
         }
     }
 
