@@ -603,6 +603,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					document.addPosition(CATEGORY, level.fSecondPosition);
 					
 					level.fEditor= new LinkedUIControl(env, sourceViewer);
+					level.fEditor.setSimpleMode(true);
 					level.fEditor.setPositionListener(new EditorHistoryUpdater());
 					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, getEscapeCharacter(closingCharacter), fBracketLevelStack));
 					level.fEditor.setExitPosition(sourceViewer, offset + 2, 0, Integer.MAX_VALUE);
@@ -1411,7 +1412,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		
 		configureToggleCommentAction();
 	}
-	
+
 	/*
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#installOverrideIndicator(org.eclipse.jface.text.source.IAnnotationModel)
 	 * @since 3.0

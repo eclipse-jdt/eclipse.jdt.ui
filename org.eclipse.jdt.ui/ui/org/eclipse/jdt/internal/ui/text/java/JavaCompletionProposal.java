@@ -208,6 +208,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 						env.forceInstall();
 						
 						LinkedUIControl ui= new LinkedUIControl(env, fTextViewer);
+						ui.setSimpleMode(true);
 						ui.setPositionListener(new EditorHistoryUpdater());
 						ui.setExitPolicy(new ExitPolicy(')'));
 						ui.setExitPosition(fTextViewer, newOffset + 1, 0, Integer.MAX_VALUE);
