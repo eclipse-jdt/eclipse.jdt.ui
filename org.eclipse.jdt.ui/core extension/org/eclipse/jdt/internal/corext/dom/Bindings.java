@@ -58,7 +58,9 @@ public class Bindings {
 	public static String getFullyQualifiedImportName(ITypeBinding type) {
 		if (type.isArray())
 			return getFullyQualifiedName(type.getElementType());
-		else	
+		else if (type.isAnonymous())
+			return getFullyQualifiedImportName(type.getSuperclass());
+		else
 			return getFullyQualifiedName(type);
 	}
 	
