@@ -90,7 +90,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public void testFail1() throws Exception{
-		helper2(new String[]{"i", "j"}, new String[]{"I", "I"}, RefactoringStatus.FATAL);
+		helper2(new String[]{"i", "j"}, new String[]{"I", "I"}, RefactoringStatus.ERROR);
 	}
 	
 	//---------

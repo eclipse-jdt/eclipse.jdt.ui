@@ -344,7 +344,8 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 	}
 	
 	public void testFail24() throws Exception{
-		helper2("j");
+		printTestDisabledMessage("compile errors are ok now");
+		//helper2("j");
 	}
 	
 }

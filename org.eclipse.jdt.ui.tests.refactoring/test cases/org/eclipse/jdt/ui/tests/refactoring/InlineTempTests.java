@@ -129,7 +129,8 @@ public class InlineTempTests extends RefactoringTest {
 	}
 
 	public void testFail0() throws Exception{
-		helper2();
+		printTestDisabledMessage("compile errors are ok now");
+//		helper2();
 	}
 
 	public void testFail1() throws Exception{
