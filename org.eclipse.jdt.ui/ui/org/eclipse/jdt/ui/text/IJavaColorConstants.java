@@ -118,4 +118,57 @@ public interface IJavaColorConstants {
 	 * (value <code>"java_doc_default"</code>).
 	 */
 	String JAVADOC_DEFAULT= "java_doc_default"; //$NON-NLS-1$
+	
+	//---------- Properties File Editor ----------
+	
+	/**
+	 * The color key for everything in a properties file which no other color is specified
+	 * (value <code>"properties_file_default"</code>).
+	 * <p>
+	 * DO NOT USE - ONLY RELEASED TEMPORARILY
+	 * </p>
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_KEY= JAVA_DEFAULT; // FIXME "pf_default"; //$NON-NLS-1$
+	
+	/**
+	 * The color key comments in a properties file.
+	 * (value <code>"properties_file_default"</code>).
+	 * <p>
+	 * DO NOT USE - ONLY RELEASED TEMPORARILY
+	 * </p>
+	 * @since 3.1
+	 */
+	
+	String PROPERTIES_FILE_COMMENT= JAVA_MULTI_LINE_COMMENT; // FIXME "pf_comment"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for values in a properties file.
+	 * (value <code>"pf_key"</code>).
+	 * <p>
+	 * DO NOT USE - ONLY RELEASED TEMPORARILY
+	 * </p>
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_VALUE= JAVA_STRING; // FIXME "pf_value"; //$NON-NLS-1$
+	
+	/**
+	 * The color key for assignment in a properties file.
+	 * (value <code>"pf_key"</code>).
+	 * <p>
+	 * DO NOT USE - ONLY RELEASED TEMPORARILY
+	 * </p>
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_ASSIGNMENT= JAVA_KEYWORD_RETURN; // FIXME "pf_assignment"; //$NON-NLS-1$
+
+	/**
+	 * The color key for arguments in values in a properties file.
+	 * (value <code>"pf_key"</code>).
+	 * <p>
+	 * DO NOT USE - ONLY RELEASED TEMPORARILY
+	 * </p>
+	 * @since 3.1
+	 */
+	String PROPERTIES_FILE_ARGUMENT= JAVADOC_LINK; // FIXME "pf_argument"; //$NON-NLS-1$
 }
