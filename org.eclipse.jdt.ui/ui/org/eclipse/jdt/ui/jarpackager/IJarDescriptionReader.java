@@ -30,8 +30,10 @@ public interface IJarDescriptionReader {
 
 	/**
 	 * Reads Jar Package description and fills data into
-     * It is the client's responsibility to close the reader
-	 * the JAR Package data object.
+ 	 * the JAR Package data object.
+	 * <p>
+     * It is the client's responsibility to close this reader.
+	 * </p>
 	 * 
 	 * @param jarPackageData	the object into which data is filled
 	 * @throws CoreException	if read failed, e.g. I/O error during read operation
@@ -40,8 +42,9 @@ public interface IJarDescriptionReader {
 	
 	/**
      * Closes this reader.
-     * It is the client's responsibility to close the reader
-     * after the read operation.
+	 * <p>
+     * It is the client's responsibility to close this reader.
+	 * </p>
      * 
 	 * @throws CoreException	if closing fails, e.g. I/O error during close operation
      */
