@@ -74,7 +74,7 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 	}
 
 	public void testPrevious3() throws Exception{
-		helperPrevious(15, 9, 13, 5);
+		helperPrevious(15, 9, 13, 6);
 	}
 
 	public void testPrevious4() throws Exception{
@@ -100,4 +100,9 @@ public class GoToNextPreviousMemberActionTests extends RefactoringTest{
 	public void testNext2() throws Exception{
 		helperNext(35, 2, 35, 2);
 	}
+
+	public void testNext3() throws Exception{
+		helperNext(19, 1, 20, 13);
+	}
+
 }
