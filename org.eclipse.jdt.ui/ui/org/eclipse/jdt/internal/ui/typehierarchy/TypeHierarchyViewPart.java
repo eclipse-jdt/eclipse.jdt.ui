@@ -1213,6 +1213,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				ITypeHierarchy hierarchy= fHierarchyLifeCycle.getHierarchy();
 				if (hierarchy != null && hierarchy.getSupertypes((IType) fInputElement).length > 1000) {
 					// for startup performance reasons do not try to recover huge hierarchies
+					handleIndentifier= null;
 				}
 			}
 			memento.putString(TAG_INPUT, handleIndentifier);
@@ -1242,9 +1243,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		IJavaElement input= defaultInput;
 		String elementId= memento.getString(TAG_INPUT);
 		if (elementId != null) {
-			// do not restore the input for performance reasons
-			//input= JavaCore.create(elementId);
-			input= null;
+			input= JavaCore.create(elementId);
 			if (input != null && !input.exists()) {
 				input= null;
 			}
