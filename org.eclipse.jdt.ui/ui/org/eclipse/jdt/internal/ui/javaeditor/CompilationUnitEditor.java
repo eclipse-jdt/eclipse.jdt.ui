@@ -633,8 +633,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		setOutlinerContextMenuId("#CompilationUnitOutlinerContext"); //$NON-NLS-1$
 		// don't set help contextId, we install our own help context
 		fSavePolicy= null;
-			
-		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
+		
+		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
 	/*
