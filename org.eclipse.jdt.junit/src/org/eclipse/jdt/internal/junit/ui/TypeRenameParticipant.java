@@ -33,7 +33,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
 public class TypeRenameParticipant extends RenameParticipant {
@@ -100,36 +99,26 @@ public class TypeRenameParticipant extends RenameParticipant {
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.RenameRefactoring, java.lang.Object)
-	 */
-	public void initialize(RefactoringProcessor processor, Object element) {
-		setProcessor(processor);
+	protected boolean initialize(Object element) {
 		fType= (IType)element;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#canParticipate()
-	 */
-	public boolean isApplicable() {
 		try {
 			return TestSearchEngine.isTestOrTestSuite(fType);
 		} catch (JavaModelException e) {
 			return false;
 		}
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#checkActivation()
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) {
-		return new RefactoringStatus();
+	public String getName() {
+		return JUnitMessages.getString("TypeRenameParticipant.name"); //$NON-NLS-1$
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) {
+	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
@@ -151,6 +140,6 @@ public class TypeRenameParticipant extends RenameParticipant {
 				changes.add(new LaunchConfigChange(fType, configs[i], getArguments().getNewName()));
 			}
 		}
-		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.name"), (Change[]) changes.toArray(new Change[changes.size()])); //$NON-NLS-1$
+		return new CompositeChange(JUnitMessages.getString("TypeRenameParticipant.change.name"), (Change[]) changes.toArray(new Change[changes.size()])); //$NON-NLS-1$
 	}
 }

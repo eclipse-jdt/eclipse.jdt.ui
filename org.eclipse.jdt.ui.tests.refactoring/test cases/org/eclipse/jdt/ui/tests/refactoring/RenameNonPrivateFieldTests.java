@@ -18,12 +18,14 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameNonPrivateFieldTests extends RefactoringTest{
@@ -81,15 +83,23 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
+		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
+		IField field= classA.getField(fieldName);
+		String[] handles= ParticipantTesting.createHandles(field);
+		RenameFieldProcessor processor= new RenameFieldProcessor(field);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		processor.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		
+		ParticipantTesting.testRename(
+			handles,
+			new RenameArguments[] {
+				new RenameArguments(newFieldName, updateReferences)});
 		
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());

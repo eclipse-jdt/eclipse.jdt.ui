@@ -33,8 +33,10 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class RenameResourceProcessor extends RenameProcessor implements INameUpdating {
 
@@ -103,19 +105,22 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 		return true;
 	}
 	
-	public RenameParticipant[] loadElementParticipants() throws CoreException {
+	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
 		Object[] elements= getElements();
 		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
+		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
 		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, elements[i], natures, getSharedParticipants())));
+			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, 
+				elements[i], arguments,
+				natures, shared)));
 		}
-		return (RenameParticipant[])result.toArray(new RenameParticipant[result.size()]);
+		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
 	//--- Condition checking --------------------------------------------
 
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
 	

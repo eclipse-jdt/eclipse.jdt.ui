@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter {
 	
@@ -35,7 +34,7 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
 		RenameVirtualMethodProcessor processor= (RenameVirtualMethodProcessor)refactoring.getAdapter(RenameVirtualMethodProcessor.class);
 		if (processor != null) {
-			RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor(), new CheckConditionsContext());
+			RefactoringStatus status= processor.checkInitialConditions(new NullProgressMonitor());
 			if (!status.hasFatalError()) {
 				IMethod method= processor.getMethod();
 				if (!method.equals(processor.getOriginalMethod())) {

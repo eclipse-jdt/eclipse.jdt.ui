@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -18,12 +20,14 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
@@ -92,9 +96,11 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences, boolean updateTextualMatches,
 											boolean renameGetter, boolean renameSetter,
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
+		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
+		IField field= classA.getField(fieldName);
+		RenameFieldProcessor processor= new RenameFieldProcessor(field);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setUpdateTextualMatches(updateTextualMatches);
@@ -103,10 +109,33 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		processor.setRenameGetter(renameGetter);
 		processor.setRenameSetter(renameSetter);
 		processor.setNewElementName(newFieldName);
+		String newGetterName= processor.getNewGetterName();
+		String newSetterName= processor.getNewSetterName();
+
+		int numbers= 1;
+		List elements= new ArrayList();
+		elements.add(field);
+		List args= new ArrayList();
+		args.add(new RenameArguments(newFieldName, updateReferences));
+		if (renameGetter && expectedGetterRenameEnabled) {
+			elements.add(processor.getGetter());
+			args.add(new RenameArguments(newGetterName, updateReferences));
+			numbers++;
+		}
+		if (renameSetter && expectedSetterRenameEnabled) {
+			elements.add(processor.getSetter());
+			args.add(new RenameArguments(newSetterName, updateReferences));
+			numbers++;
+		}
+		String[] renameHandles= ParticipantTesting.createHandles(elements.toArray());
 		
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+
+		ParticipantTesting.testRename(
+			renameHandles, 
+			(RenameArguments[]) args.toArray(new RenameArguments[args.size()]));
 		
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());

@@ -31,6 +31,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -82,6 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MovePackageFragmentRootChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.MoveResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -93,13 +95,17 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory() {
@@ -230,7 +236,7 @@ class ReorgPolicyFactory {
 		}
 		protected abstract RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException;
 		protected abstract RefactoringStatus verifyDestination(IResource destination) throws JavaModelException;
-			
+
 		private void resetDestinations() {
 			fJavaElementDestination= null;
 			fResourceDestination= null;
@@ -419,6 +425,15 @@ class ReorgPolicyFactory {
 				return (IPackageFragment) javaDest;
 			if (javaDest instanceof IPackageFragmentRoot)
 				return ((IPackageFragmentRoot) javaDest).getPackageFragment(""); //$NON-NLS-1$
+			if (javaDest instanceof IJavaProject) {
+				try {
+					IPackageFragmentRoot root= ReorgUtils.getCorrespondingPackageFragmentRoot((IJavaProject)javaDest);
+					if (root != null)
+						return root.getPackageFragment("");  //$NON-NLS-1$
+				} catch (JavaModelException e) {
+					// fall through
+				}
+			}
 			return (IPackageFragment) javaDest.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		}
 				
@@ -883,6 +898,10 @@ class ReorgPolicyFactory {
 			super(javaElements);
 		}
 			
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
+		}
+		
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException {
 			try {					
 				CompilationUnit sourceCuNode= createSourceCuNode();
@@ -935,13 +954,18 @@ class ReorgPolicyFactory {
 			super(files, folders, cus);
 		}
 				
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
+		}
+		
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			IFile[] file= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
 			pm.beginTask("", cus.length + file.length + folders.length); //$NON-NLS-1$
 			NewNameProposer nameProposer= new NewNameProposer();
-			CompositeChange composite= new CompositeChange();
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.copy")); //$NON-NLS-1$
+			composite.markAsSynthetic();
 			for (int i= 0; i < cus.length; i++) {
 				composite.add(createChange(cus[i], nameProposer, copyQueries));
 				pm.worked(1);
@@ -1015,11 +1039,16 @@ class ReorgPolicyFactory {
 			super(roots);
 		}
 		
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
+		}
+		
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange();
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.copy_source_folder")); //$NON-NLS-1$
+			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
 			for (int i= 0; i < roots.length; i++) {
@@ -1050,11 +1079,16 @@ class ReorgPolicyFactory {
 			super(packageFragments);
 		}
 
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
+		}
+		
 		public Change createChange(IProgressMonitor pm, INewNameQueries newNameQueries) throws JavaModelException {
 			NewNameProposer nameProposer= new NewNameProposer();
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange();
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.copy_package")); //$NON-NLS-1$
+			composite.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
 				composite.add(createChange(fragments[i], root, nameProposer, newNameQueries));
@@ -1087,6 +1121,9 @@ class ReorgPolicyFactory {
 	private static class NoCopyPolicy extends ReorgPolicy implements ICopyPolicy{
 		public boolean canEnable() throws JavaModelException {
 			return false;
+		}
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noCopying")); //$NON-NLS-1$
@@ -1193,10 +1230,32 @@ class ReorgPolicyFactory {
 		MovePackageFragmentRootsPolicy(IPackageFragmentRoot[] roots){
 			super(roots);
 		}
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+			List result=new ArrayList();
+			ResourceModifications modifications= new ResourceModifications();
+			IJavaProject destination= getDestinationJavaProject();
+			boolean updateReferences= canUpdateReferences() && getUpdateReferences();
+			if (destination != null) {
+				IPackageFragmentRoot[] roots= getPackageFragmentRoots();
+				for (int i= 0; i < roots.length; i++) {
+					IPackageFragmentRoot root= roots[i];
+					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+						root, new MoveArguments(destination, updateReferences), 
+						natures, shared)));
+					if (root.getResource() != null && destination.getResource() != null)
+						modifications.addMove(root.getResource(), 
+							new MoveArguments(destination.getResource(), updateReferences));
+				}
+			}
+			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+		}
+		
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragmentRoot[] roots= getPackageFragmentRoots();
 			pm.beginTask("", roots.length); //$NON-NLS-1$
-			CompositeChange composite= new CompositeChange();
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move_source_folder")); //$NON-NLS-1$
+			composite.markAsSynthetic();
 			IJavaProject destination= getDestinationJavaProject();
 			Assert.isNotNull(destination);
 			for (int i= 0; i < roots.length; i++) {
@@ -1262,6 +1321,46 @@ class ReorgPolicyFactory {
 		MovePackagesPolicy(IPackageFragment[] packageFragments){
 			super(packageFragments);
 		}
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+			List result= new ArrayList();
+			ResourceModifications modifications= new ResourceModifications();
+			boolean updateReferences= canUpdateReferences() && getUpdateReferences();
+			IPackageFragment[] packages= getPackages();
+			IPackageFragmentRoot javaDestination= getDestinationAsPackageFragmentRoot();
+			for (int i= 0; i < packages.length; i++) {
+				IPackageFragment pack= packages[i];
+				result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+					pack, new MoveArguments(javaDestination, updateReferences), 
+					natures, shared)));
+				IResource resourceDestination= javaDestination.getResource();
+				IContainer container= (IContainer)pack.getResource();
+				if (container == null || resourceDestination == null)
+					continue;
+				IPath path= resourceDestination.getFullPath();
+				path= path.append(pack.getElementName().replace('.', '/'));
+				IResource[] members= container.members();
+				int files= 0;
+				IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
+				if (!target.exists()) {
+					modifications.addCreate(target);
+				}
+				for (int m= 0; m < members.length; m++) {
+					IResource member= members[m];
+					if (member instanceof IFile) {
+						files++;
+						IFile file= (IFile)member;
+						if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
+							continue;
+						modifications.addMove(member, new MoveArguments(target, updateReferences));
+					}
+				}
+				if (files == members.length) {
+					modifications.addDelete(container);
+				}
+			}
+			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(javaElement);
 			if (superStatus.hasFatalError())
@@ -1284,7 +1383,8 @@ class ReorgPolicyFactory {
 		public Change createChange(IProgressMonitor pm) throws JavaModelException {
 			IPackageFragment[] fragments= getPackages();
 			pm.beginTask("", fragments.length); //$NON-NLS-1$
-			CompositeChange result= new CompositeChange();
+			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move_package")); //$NON-NLS-1$
+			result.markAsSynthetic();
 			IPackageFragmentRoot root= getDestinationAsPackageFragmentRoot();
 			for (int i= 0; i < fragments.length; i++) {
 				result.add(createChange(fragments[i], root));
@@ -1332,6 +1432,61 @@ class ReorgPolicyFactory {
 			fUpdateQualifiedNames= false;
 			fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 			fSettings= settings;
+		}
+		
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException {
+			IPackageFragment pack= getDestinationAsPackageFragment();
+			IContainer container= getDestinationAsContainer();
+			List result= new ArrayList();
+			List derived= new ArrayList();
+			ResourceModifications modifications= new ResourceModifications();
+			Object unitDestination= null;
+			if (pack != null)
+				unitDestination= pack;
+			else
+				unitDestination= container;
+			
+			// don't use fUpdateReferences directly since it is only valid if 
+			// canUpdateReferences is true
+			boolean updateReferenes= canUpdateReferences() && getUpdateReferences();
+			if (unitDestination != null) {
+				ICompilationUnit[] units= getCus();
+				for (int i= 0; i < units.length; i++) {
+					ICompilationUnit unit= units[i];
+					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+						unit, new MoveArguments(unitDestination, updateReferenes), 
+						natures, shared)));
+					IType[] types= unit.getTypes();
+					for (int tt= 0; tt < types.length; tt++) {
+						IType type= types[tt];
+						derived.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+							type, new MoveArguments(unitDestination, updateReferenes), 
+							natures, shared)));
+					}
+					if (container != null && unit.getResource() != null) {
+						modifications.addMove(unit.getResource(), new MoveArguments(container, updateReferenes));
+					}
+				}
+			}
+			if (container != null) {
+				IFile[] files= getFiles();
+				for (int i= 0; i < files.length; i++) {
+					IFile file= files[i];
+					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+						file, new MoveArguments(container, updateReferenes), 
+						natures, shared)));
+				}
+				IFolder[] folders= getFolders();
+				for (int i= 0; i < folders.length; i++) {
+					IFolder folder= folders[i];
+					result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(processor, 
+						folder, new MoveArguments(container, updateReferenes), 
+						natures, shared)));
+				}
+			}
+			result.addAll(derived);
+			result.addAll(Arrays.asList(modifications.getParticipants(processor, natures, shared)));
+			return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 		}
 		
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
@@ -1386,7 +1541,8 @@ class ReorgPolicyFactory {
 		private Change createReferenceUpdatingMoveChange(IProgressMonitor pm) throws JavaModelException {
 			pm.beginTask("", 2 + (fUpdateQualifiedNames ? 1 : 0)); //$NON-NLS-1$
 			try{
-				CompositeChange composite= new CompositeChange();
+				CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move")); //$NON-NLS-1$
+				composite.markAsSynthetic();
 				//XX workaround for bug 13558
 				//<workaround>
 				if (fChangeManager == null){
@@ -1453,7 +1609,8 @@ class ReorgPolicyFactory {
 		}
 
 		private Change createSimpleMoveChange(IProgressMonitor pm) {
-			CompositeChange result= new CompositeChange();
+			CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move")); //$NON-NLS-1$
+			result.markAsSynthetic();
 			IFile[] files= getFiles();
 			IFolder[] folders= getFolders();
 			ICompilationUnit[] cus= getCus();
@@ -1612,6 +1769,9 @@ class ReorgPolicyFactory {
 		MoveSubCuElementsPolicy(IJavaElement[] javaElements){
 			super(javaElements);
 		}
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
+		}
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
@@ -1645,10 +1805,13 @@ class ReorgPolicyFactory {
 				if (getSourceCu().equals(destinationCu)){
 					return targetCuChange;
 				} else{
-					CompositeChange result= new CompositeChange();
+					CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("ReorgPolicy.move_members")); //$NON-NLS-1$
+					result.markAsSynthetic();
 					result.add(targetCuChange);
 					if (Arrays.asList(getJavaElements()).containsAll(Arrays.asList(getSourceCu().getTypes())))
-						result.add(DeleteChangeCreator.createDeleteChange(null, new IResource[0], new ICompilationUnit[]{getSourceCu()}));
+						result.add(DeleteChangeCreator.createDeleteChange(null, 
+							new IResource[0], new ICompilationUnit[]{getSourceCu()},
+							RefactoringCoreMessages.getString("ReorgPolicy.move"))); //$NON-NLS-1$);
 					else
 						result.add(addTextEditFromRewrite(getSourceCu(), sourceRewrite));						
 					return result;
@@ -1672,6 +1835,9 @@ class ReorgPolicyFactory {
 	private static class NoMovePolicy extends ReorgPolicy implements IMovePolicy{
 		protected RefactoringStatus verifyDestination(IResource resource) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$
+		}
+		public RefactoringParticipant[] loadParticipants(RefactoringProcessor processor, String[] natures, SharableParticipants shared) {
+			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement javaElement) throws JavaModelException {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.noMoving")); //$NON-NLS-1$

@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
@@ -54,11 +55,12 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.DeleteParticipant;
+import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringStyles;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class JavaDeleteProcessor extends DeleteProcessor {
 	
@@ -174,35 +176,94 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		return fStyle;
 	}
 	
-	public DeleteParticipant[] loadElementParticipants() throws CoreException {
-		Object[] elements= getElements();
+	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
 		String[] natures= getAffectedProjectNatures();
+		ResourceModifications mod= new ResourceModifications();
+		List collected= new ArrayList();
+		for (int i= 0; i < fJavaElements.length; i++) {
+			handleJavaElementDelete(collected, fJavaElements[i], natures, mod, shared);
+		}
+		for (int i= 0; i < fResources.length; i++) {
+			handleResourceDelete(collected, fResources[i], natures, shared);
+		}
 		List result= new ArrayList();
-		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getDeleteParticipants(this, elements[i], natures, getSharedParticipants())));
+		for (Iterator iter= collected.iterator(); iter.hasNext();) {
+			result.addAll(Arrays.asList(ParticipantManager.getDeleteParticipants(this, 
+				iter.next(), new DeleteArguments(), 
+				natures, shared)));
 		}
-		return (DeleteParticipant[])result.toArray(new DeleteParticipant[result.size()]);
-	}
-
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		String[] natures= getAffectedProjectNatures();
-		
-		ResourceModifications modifications= new ResourceModifications();
-		for (int p= 0; p < fJavaElements.length; p++) {
-			IJavaElement element= fJavaElements[p];
-			if (element instanceof IPackageFragment) {
-				ICompilationUnit[] children= ((IPackageFragment)element).getCompilationUnits();
-				for (int c= 0; c < children.length; c++) {
-					IResource resource= children[c].getResource();
-					if (resource != null) {
-						modifications.addDelete(resource);
-					}
-				}
-			}
-		}
-		return modifications.getParticipants(this, natures, getSharedParticipants());
+		result.addAll(Arrays.asList(mod.getParticipants(this, natures, shared)));
+		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
+	private void handleJavaElementDelete(List collected, IJavaElement element, String[] natures, ResourceModifications mod, SharableParticipants shared) throws CoreException {
+		switch(element.getElementType()) {
+			case IJavaElement.JAVA_MODEL:
+				return;
+			case IJavaElement.JAVA_PROJECT:
+				collected.add(element);
+				if (element.getResource() != null)
+					mod.addDelete(element.getResource());
+				return;
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				collected.add(element);
+				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+				if (!root.isArchive() && element.getResource() != null)
+					mod.addDelete(element.getResource());
+				return;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				handlePackageFragmentDelete(collected, (IPackageFragment)element, natures, mod, shared);
+				return;
+			case IJavaElement.COMPILATION_UNIT:
+				collected.add(element);
+				IType[] types= ((ICompilationUnit)element).getTypes();
+				collected.addAll(Arrays.asList(types));
+				if (element.getResource() != null)
+					mod.addDelete(element.getResource());
+				return;
+			case IJavaElement.TYPE:
+				collected.add(element);
+				IType type= (IType)element;
+				ICompilationUnit unit= type.getCompilationUnit();
+				if (type.getDeclaringType() == null && unit.getElementName().endsWith(type.getElementName())) {
+					if (unit.getTypes().length == 1) {
+						collected.add(unit);
+						if (unit.getResource() != null)
+							mod.addDelete(unit.getResource());
+					}
+				}
+				return;
+			default:
+				collected.add(element);
+		}
+	}
+
+	private void handlePackageFragmentDelete(List collected, IPackageFragment pack, String[] natures, ResourceModifications mod, SharableParticipants shared) throws CoreException {
+		collected.add(pack);
+		IContainer container= (IContainer)pack.getResource();
+		if (container == null)
+			return;
+		IResource[] members= container.members();
+		int files= 0;
+		for (int m= 0; m < members.length; m++) {
+			IResource member= members[m];
+			if (member instanceof IFile) {
+				files++;
+				IFile file= (IFile)member;
+				if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
+					continue;
+				mod.addDelete(member);
+			}
+		}
+		if (files == members.length) {
+			mod.addDelete(container);
+		}
+	}
+	
+	private void handleResourceDelete(List collected, IResource element, String[] natures, SharableParticipants shared) throws CoreException {
+		collected.add(element);
+	}
+
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
@@ -272,7 +333,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fDeleteQueries);//must be set before checking activation
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(RefactoringStatus.create(Resources.checkInSync(ReorgUtils.getNotNulls(fResources))));
@@ -300,7 +361,7 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 			recalculateElementsToDelete();
 
 			TextChangeManager manager= new TextChangeManager();
-			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements);
+			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
 			return result;
 		} catch (OperationCanceledException e) {

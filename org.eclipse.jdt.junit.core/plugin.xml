@@ -288,7 +288,8 @@
    </extension>
    <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">
       <renameParticipant
-			id="org.eclipse.jdt.junit.renameTypeParticipant" 
+			id="org.eclipse.jdt.junit.renameTypeParticipant"
+			name="%RenameTypeParticipant.name" 
 			class="org.eclipse.jdt.internal.junit.ui.TypeRenameParticipant">
          <enablement>
            <with variable="affectedNatures">

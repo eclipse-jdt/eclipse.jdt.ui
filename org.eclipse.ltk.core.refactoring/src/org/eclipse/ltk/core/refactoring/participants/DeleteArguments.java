@@ -11,20 +11,16 @@
 package org.eclipse.ltk.core.refactoring.participants;
 
 /**
- * Delete arguments describes the data that a processor provides to its 
- * delete participants.
- * <p>
- * As of version 3.0 there aren't any special arguments passed to a delete 
- * participant. This may change in the future.
- * </p>
+ * Delete arguments describes the data that a processor provides 
+ * to its delete participants.
  *  
  * @since 3.0
  */
-public class DeleteArguments {
+public class DeleteArguments extends RefactoringArguments {
 	
 	/**
-	 * Creates empty create arguments.
+	 * Creates a new delete arguments object.
 	 */
 	public DeleteArguments() {
-	}
+	}	
 }

@@ -15,13 +15,14 @@ import java.io.File;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,14 +31,15 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
+import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
@@ -53,6 +55,10 @@ public class DeleteTest extends RefactoringTest{
 
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
+	}
+
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
 	}
 
 	protected String getRefactoringPath() {
@@ -321,27 +327,35 @@ public class DeleteTest extends RefactoringTest{
 	public void testDeleteWithinCu0() throws Exception{
 //		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
 //		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0);
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu1() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(fCuA, elem0, fCuA.getResource());
 
 		checkDelete(elems, true);
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteWithinCu2() throws Exception{
 		loadFileSetup();
+		ParticipantTesting.reset();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu3() throws Exception{
@@ -350,11 +364,14 @@ public class DeleteTest extends RefactoringTest{
 //		if (true)
 //			return;
 		loadFileSetup();
+		ParticipantTesting.reset();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
 		IJavaElement elem1= fCuA.getType("A").getField("j");
 		IJavaElement[] elems= new IJavaElement[]{elem0, elem1};
+		String[] handles= ParticipantTesting.createHandles(elem0, elem1);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu4() throws Exception{
@@ -362,12 +379,15 @@ public class DeleteTest extends RefactoringTest{
 //		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");		
 //		if (true)
 //			return;
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
 		IJavaElement elem1= fCuA.getType("A").getField("k");
 		IJavaElement[] elems= new IJavaElement[]{elem0, elem1};
+		String[] handles= ParticipantTesting.createHandles(elem0, elem1);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu5() throws Exception{
@@ -376,10 +396,13 @@ public class DeleteTest extends RefactoringTest{
 //		if (true)
 //			return;
 		loadFileSetup();
+		ParticipantTesting.reset();
 		IJavaElement elem0= fCuA.getType("A").getField("j");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);		
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu6() throws Exception{
@@ -387,87 +410,119 @@ public class DeleteTest extends RefactoringTest{
 //		printTestDisabledMessage("test for bug#9382 IField::delete incorrect on multiple field declarations with initializers");		
 //		if (true)
 //			return;
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("j");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0);
+		
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu7() throws Exception{
-		//exposes bug#9381 IPackageDeclaration is not ISourceManipulation 
+		//exposes bug#9381 IPackageDeclaration is not ISourceManipulation
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getPackageDeclaration("p");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteWithinCu8() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getMethod("m", new String[0]);
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu9() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getInitializer(1);
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu10() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getInitializer(1);
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu11() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getImport("java.util.List");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu12() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getType("B");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteWithinCu13() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getType("B");
 		IJavaElement elem1= fCuA.getType("A");
 		IJavaElement[] elems= new IJavaElement[]{elem0, elem1};
-
+		String[] handles= ParticipantTesting.createHandles(fCuA, fCuA.getTypes()[0], fCuA.getResource());
+		
 		checkDelete(elems, true);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu14() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getType("B");
 		IJavaElement elem1= fCuA.getType("A");
 		IJavaElement elem2= fCuA.getPackageDeclaration("p");
 		IJavaElement[] elems= new IJavaElement[]{elem0, elem1, elem2};
-
+		String[] handles= ParticipantTesting.createHandles(fCuA, fCuA.getTypes()[0], fCuA.getResource());
+		
 		checkDelete(elems, true);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu15() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("field");
+		IJavaElement getter= fCuA.getType("A").getMethod("getField", new String[] {});
+		IJavaElement setter= fCuA.getType("A").getMethod("setField", new String[] {"I"});
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0, getter, setter);
+		
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu16() throws Exception{
@@ -475,72 +530,84 @@ public class DeleteTest extends RefactoringTest{
 			printTestDisabledMessage("testDeleteWithinCu16 disabled for bug#55221");		
 			return;
 		}
-		
-		
-//		printTestDisabledMessage("test for bug#15412 deleting type removes too much from editor");		
-//		if (true)
-//			return;
-		
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("Test");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu17() throws Exception{
-//		printTestDisabledMessage("test for bug#15936 delete methods deletes too much (indent messing)");		
-//		if (true)
-//			return;
-		
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getMethod("f", new String[0]);
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu18() throws Exception{
-//		printTestDisabledMessage("test for bug#16314");		
-//		if (true)
-//			return;
-		
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getMethod("fs", new String[0]);
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0);
+		
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteWithinCu19() throws Exception{
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getImportContainer();
 		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
 
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu20() throws Exception{
-//		printTestDisabledMessage("regression test for bug 38480");
-		
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("fEmpty");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0);
+		
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteWithinCu21() throws Exception{
-//		printTestDisabledMessage("regression test for bug 39195");
-		
+		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("var11");
 		IJavaElement[] elems= new IJavaElement[]{elem0};
-
+		String[] handles= ParticipantTesting.createHandles(elem0);
+		
 		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
+	}
+	
+	public void testDeleteWithinCu22() throws Exception{
+		ParticipantTesting.reset();
+		loadFileSetup();
+		IJavaElement elem0= fCuA.getType("B");
+		IJavaElement[] elems= new IJavaElement[]{elem0};
+		String[] handles= ParticipantTesting.createHandles(elem0);
+		
+		checkDelete(elems, false);
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteFile() throws Exception{
+		ParticipantTesting.reset();
 		IFolder folder= (IFolder)getPackageP().getResource();
 		IFile file= folder.getFile("a.txt");
 		file.create(getStream("123"), true, null);
@@ -549,13 +616,17 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(elem);			
 		performDummySearch();			
 		
+		String[] handles= ParticipantTesting.createHandles(file);
+		
 		DeleteRefactoring ref= createRefactoring(elem);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("file not deleted", ! file.exists());
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteFolder() throws Exception{
+		ParticipantTesting.reset();
 		IFolder folder= (IFolder)getPackageP().getResource();
 		IFolder subFolder= folder.getFolder("subFolder");
 		subFolder.create(true, true, null);
@@ -565,13 +636,16 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(elements);			
 		performDummySearch();			
 
+		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
+		ParticipantTesting.testDelete(handles);
 	}
 
 	public void testDeleteNestedFolders() throws Exception{
+		ParticipantTesting.reset();
 		IFolder folder= (IFolder)getPackageP().getResource();
 		IFolder subFolder= folder.getFolder("subFolder");
 		subFolder.create(true, true, null);
@@ -584,32 +658,67 @@ public class DeleteTest extends RefactoringTest{
 		verifyEnabled(elements);			
 		performDummySearch();			
 
+		String[] handles= ParticipantTesting.createHandles(subFolder);
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("folder not deleted", ! subFolder.exists());
 		assertTrue("folder not deleted", ! subsubFolder.exists());
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeletePackage() throws Exception{
+		ParticipantTesting.reset();
 		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
 		assertTrue("package not created", newPackage.exists());
-
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		
 		Object[] elements= {newPackage};
 		verifyEnabled(elements);			
 		performDummySearch();			
+		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, newPackage.getResource(), cu.getResource(), file);
 		
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("package not deleted", ! newPackage.exists());
+		
+		ParticipantTesting.testDelete(deleteHandles);
+	}
+
+	public void testDeletePackage2() throws Exception{
+		ParticipantTesting.reset();
+		IPackageFragment newPackage= getRoot().createPackageFragment("p1", true, new NullProgressMonitor());
+		getRoot().createPackageFragment("p1.p2", true, new NullProgressMonitor());
+		assertTrue("package not created", newPackage.exists());
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		
+		Object[] elements= {newPackage};
+		verifyEnabled(elements);			
+		performDummySearch();			
+		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, cu.getResource(), file);
+		
+		DeleteRefactoring ref= createRefactoring(elements);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+		//Package is not delete since it had sub packages
+		assertTrue("package deleted", newPackage.exists());
+		
+		ParticipantTesting.testDelete(deleteHandles);
 	}
 
 	public void testDeleteCu() throws Exception{
+		ParticipantTesting.reset();
 		ICompilationUnit newCU= getPackageP().createCompilationUnit("X.java", "package p; class X{}", true, new NullProgressMonitor());
 		assertTrue("cu not created", newCU.exists());
 
 		Object[] elements= {newCU};
+		String[] handles= ParticipantTesting.createHandles(newCU, newCU.getTypes()[0], newCU.getResource());
+		
 		verifyEnabled(elements);			
 		performDummySearch();			
 		
@@ -617,35 +726,41 @@ public class DeleteTest extends RefactoringTest{
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("cu not deleted", ! newCU.exists());
+		ParticipantTesting.testDelete(handles);		
 	}
 	
 	public void testDeleteSourceFolder() throws Exception{
+		ParticipantTesting.reset();
 		IPackageFragmentRoot fredRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "fred");
 		assertTrue("not created", fredRoot.exists());
 
 		Object[] elements= {fredRoot};
 		verifyEnabled(elements);			
 		performDummySearch();			
-
+		String[] handles= ParticipantTesting.createHandles(fredRoot, fredRoot.getResource());
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! fredRoot.exists());
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteInternalJAR() throws Exception{
+		ParticipantTesting.reset();
 		File lib= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib does not exist",  lib != null && lib.exists());
 		IPackageFragmentRoot internalJAR= JavaProjectHelper.addLibraryWithImport(MySetup.getProject(), new Path(lib.getPath()), null, null);
 
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);			
-		performDummySearch();			
+		performDummySearch();
+		String[] handles= ParticipantTesting.createHandles(internalJAR);
 
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);
 		assertEquals("expected to pass", null, status);
 		assertTrue("not deleted", ! internalJAR.exists());		
+		ParticipantTesting.testDelete(handles);
 	}
 	
 	public void testDeleteClassFile() throws Exception{

@@ -16,12 +16,14 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenamePrivateMethodTests extends RefactoringTest {
@@ -55,14 +57,22 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
+		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
+		IMethod method= classA.getMethod(methodName, signatures);
+		String[] handles= ParticipantTesting.createHandles(method);
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(method);
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		
+		ParticipantTesting.testRename(
+			handles,
+			new RenameArguments[] {
+				new RenameArguments(newMethodName, updateReferences)});
 		
 		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
 		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());

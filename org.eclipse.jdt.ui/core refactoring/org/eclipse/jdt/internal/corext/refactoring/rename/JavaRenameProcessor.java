@@ -24,38 +24,45 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public abstract class JavaRenameProcessor extends RenameProcessor implements INameUpdating {
 	
 	private String fNewElementName;
 	
-	public RenameParticipant[] loadElementParticipants() throws CoreException {
-		Object[] elements= getElements();
+	public final RefactoringParticipant[] loadParticipants(SharableParticipants sharedParticipants) throws CoreException {
+		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
 		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
-		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, elements[i], natures, getSharedParticipants())));
-		}
-		return (RenameParticipant[])result.toArray(new RenameParticipant[result.size()]);
+		loadElementParticipants(result, arguments, natures, sharedParticipants);
+		loadDerivedParticipants(result, natures, sharedParticipants);
+		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
-	protected RefactoringParticipant[] loadDerivedParticipants(Object[] derivedElements, RenameArguments arguments, ResourceModifications resourceModifications) throws CoreException {
-		String[] natures= getAffectedProjectNatures();
-		
-		List result= new ArrayList();
+	protected void loadElementParticipants(List result, RenameArguments arguments, String[] natures, SharableParticipants shared) throws CoreException {
+		Object[] elements= getElements();
+		for (int i= 0; i < elements.length; i++) {
+			result.addAll(Arrays.asList(ParticipantManager.getRenameParticipants(this, 
+				elements[i],  arguments,
+				natures, shared)));
+		}
+	}
+	
+	protected abstract void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException;
+	
+	protected void loadDerivedParticipants(List result, Object[] derivedElements, RenameArguments arguments, 
+			ResourceModifications resourceModifications, String[] natures, SharableParticipants shared) throws CoreException {
 		if (derivedElements != null) {
 			for (int i= 0; i < derivedElements.length; i++) {
-				RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, derivedElements[i], natures, getSharedParticipants());
-				for (int p= 0; p < participants.length; p++) {
-					participants[p].setArguments(arguments);
-				}
+				RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, 
+					derivedElements[i], arguments, 
+					natures, shared);
 				result.addAll(Arrays.asList(participants));
 			}
 		}
 		if (resourceModifications != null) {
-			result.addAll(Arrays.asList(resourceModifications.getParticipants(this, natures, getSharedParticipants())));
+			result.addAll(Arrays.asList(resourceModifications.getParticipants(this, natures, shared)));
 		}
-		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
 	public void setNewElementName(String newName) {
@@ -67,5 +74,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements INa
 		return fNewElementName;
 	}
 	
-	protected abstract String[] getAffectedProjectNatures() throws CoreException;	
+	protected abstract String[] getAffectedProjectNatures() throws CoreException;
+	
+	public abstract boolean getUpdateReferences();	
 }

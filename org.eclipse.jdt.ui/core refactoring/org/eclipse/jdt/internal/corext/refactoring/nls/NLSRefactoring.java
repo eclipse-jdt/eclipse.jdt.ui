@@ -512,7 +512,7 @@ public class NLSRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
-			final ValidationStateChange result= new ValidationStateChange();
+			final ValidationStateChange result= new ValidationStateChange(getName());
 			
 			if (willModifySource())
 				result.add(createSourceModification());

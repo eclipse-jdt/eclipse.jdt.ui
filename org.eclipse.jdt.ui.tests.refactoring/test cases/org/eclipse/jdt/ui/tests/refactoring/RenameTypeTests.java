@@ -30,6 +30,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameTypeTests extends RefactoringTest {
@@ -43,6 +44,10 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
+	}
+	
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
 	}
 	
 	protected String getRefactoringPath() {
@@ -75,11 +80,17 @@ public class RenameTypeTests extends RefactoringTest {
 		helper1_0("A", "B");
 	}
 		
-	private void helperWithTextual(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
+	private String[] helperWithTextual(String oldCuName, String oldName, String newName, String newCUName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldCuName);
 		IType classA= getType(cu, oldName);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String[] renameHandles= null;
+		if (classA.getDeclaringType() == null && cu.getElementName().startsWith(classA.getElementName())) {
+			renameHandles= ParticipantTesting.createHandles(classA, cu, cu.getResource());
+		} else {
+			renameHandles= ParticipantTesting.createHandles(classA);
+		}
 		RenameRefactoring ref= createRefactoring(classA, newName);
 		RenameTypeProcessor processor= (RenameTypeProcessor)ref.getProcessor();
 		processor.setUpdateReferences(updateReferences);
@@ -87,19 +98,20 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
-		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());	
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
+		return renameHandles;
 	}
 	
-	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
-		helperWithTextual(oldName, oldName, newName, newCUName, updateReferences, false);
+	private String[] helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
+		return helperWithTextual(oldName, oldName, newName, newCUName, updateReferences, false);
 	}
 	
 	private void helper2(String oldName, String newName, boolean updateReferences) throws Exception{
 		helper2_0(oldName, newName, newName, updateReferences);
 	}
 
-	private void helper2(String oldName, String newName) throws Exception{
-		helper2_0(oldName, newName, newName, true);
+	private String[] helper2(String oldName, String newName) throws Exception{
+		return helper2_0(oldName, newName, newName, true);
 	}
 				
 	/****** tests ***********/
@@ -652,7 +664,15 @@ public class RenameTypeTests extends RefactoringTest {
 	/******************/
 	
 	public void test0() throws Exception { 
-		helper2("A", "B");
+		ParticipantTesting.reset();
+		String newName= "B";
+		String[] renameHandles= helper2("A", newName);
+		ParticipantTesting.testRename(
+			renameHandles,
+			new RenameArguments[] {
+				new RenameArguments(newName, true), 
+				new RenameArguments(newName + ".java", true),
+				new RenameArguments(newName + ".java", true)});
 	}
 	
 	public void test1() throws Exception { 
@@ -949,6 +969,15 @@ public class RenameTypeTests extends RefactoringTest {
 	public void test60() throws Exception {
 //		printTestDisabledMessage("test for bug 24740");
 		helperWithTextual("A", "A", "B", "B", true, true);
+	}
+	
+	public void test61() throws Exception {
+		ParticipantTesting.reset();
+		String[] renameHandles= helperWithTextual("A" , "Inner", "InnerB", "A", true, false);
+		ParticipantTesting.testRename(renameHandles,
+			new RenameArguments[] {
+				new RenameArguments("InnerB", true), 
+			});
 	}
 		
 	public void test5() throws Exception { 

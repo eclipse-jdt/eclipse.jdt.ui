@@ -106,7 +106,7 @@ public final class CopyRefactoring extends Refactoring{
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() == null || fCopyPolicy.getResourceDestination() == null);
 		Assert.isTrue(fCopyPolicy.getJavaElementDestination() != null || fCopyPolicy.getResourceDestination() != null);		
 		try {
-			final ValidationStateChange result= new ValidationStateChange() {
+			final ValidationStateChange result= new ValidationStateChange(getName()) {
 				public Change perform(IProgressMonitor pm) throws CoreException {
 					super.perform(pm);
 					return null;

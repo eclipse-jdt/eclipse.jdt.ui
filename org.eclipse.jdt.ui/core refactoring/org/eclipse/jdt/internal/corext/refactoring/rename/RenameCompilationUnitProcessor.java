@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -38,8 +40,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 
 public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
@@ -90,10 +92,12 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		return new Object[] {fCu};
 	}
 
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newTypeName= removeFileNameExtension(getNewElementName());
 		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences());
-		return loadDerivedParticipants(computeDerivedElements(), arguments, computeResourceModifications());
+		loadDerivedParticipants(result, 
+			computeDerivedElements(), arguments, 
+			computeResourceModifications(), natures, shared);
 	}
 	
 	private Object[] computeDerivedElements() {
@@ -107,7 +111,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		if (resource == null)
 			return null;
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(resource, getArguments());
+		result.setRename(resource, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;
 	}
 	
@@ -216,7 +220,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	
 	//--- preconditions ----------------------------------
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fRenameTypeProcessor != null && ! fCu.isStructureKnown()){
 			fRenameTypeProcessor= null;
 			fWillRenameType= false;

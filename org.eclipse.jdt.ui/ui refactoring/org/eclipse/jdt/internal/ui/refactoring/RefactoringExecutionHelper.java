@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the
@@ -94,8 +95,7 @@ public class RefactoringExecutionHelper {
 			Throwable inner= e.getTargetException();
 			PerformChangeOperation pco= op.fPerformChangeOperation;
 			if (pco.changeExecutionFailed()) {
-				org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler handler=
-					new org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler(fParent, fRefactoring);
+				ChangeExceptionHandler handler= new ChangeExceptionHandler(fParent, fRefactoring);
 				if (inner instanceof RuntimeException) {
 					handler.handle(pco.getChange(), (RuntimeException)inner);
 				} else if (inner instanceof CoreException) {

@@ -286,7 +286,8 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 				}
 			}
 			if (input == null) {
-				CompositeChange root= new CompositeChange();
+				// The change will not be shown in the user interface.
+				CompositeChange root= new CompositeChange("Dummy Change"); //$NON-NLS-1$
 				root.add(change);
 				input= new DefaultChangeElement(null, root);
 			}

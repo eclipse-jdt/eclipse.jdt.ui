@@ -73,7 +73,7 @@ public class CreateFileChange extends JDTChange {
 
 			IFile file= getOldFile(new SubProgressMonitor(pm, 1));
 			if (file.exists()){
-				CompositeChange composite= new CompositeChange();
+				CompositeChange composite= new CompositeChange(getName());
 				composite.add(new DeleteFileChange(file));
 				composite.add(new CreateFileChange(fPath, fSource));
 				return composite.perform(pm);

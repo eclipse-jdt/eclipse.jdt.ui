@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -32,7 +34,8 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifica
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 
 public class RenameSourceFolderProcessor extends JavaRenameProcessor {
@@ -87,13 +90,15 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return new Object[] {fSourceFolder};
 	}
 
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		return loadDerivedParticipants(null, null, computeResourceModifications());
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+		loadDerivedParticipants(result, 
+			null, null, 
+			computeResourceModifications(), natures, shared);
 	}
 	
 	private ResourceModifications computeResourceModifications() throws CoreException {
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(fSourceFolder.getResource(), getArguments());
+		result.setRename(fSourceFolder.getResource(), new RenameArguments(getNewElementName(), getUpdateReferences()));
 		return result;		
 	}
 		 
@@ -112,7 +117,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		return fSourceFolder.getElementName();
 	}
 			
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
 

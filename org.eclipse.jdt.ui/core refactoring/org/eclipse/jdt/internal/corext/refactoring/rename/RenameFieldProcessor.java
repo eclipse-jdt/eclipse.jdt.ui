@@ -9,7 +9,6 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -55,9 +54,9 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
 	
@@ -111,30 +110,24 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return new Object[] {fField};
 	}
 	
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		String[] natures= getAffectedProjectNatures();
-		List result= new ArrayList();
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
 			if (getter != null) {
-				addParticipants(result, getter, getNewGetterName(), natures);
+				addParticipants(result, getter, getNewGetterName(), natures, shared);
 			}
 		}
 		if (fRenameSetter) {
 			IMethod setter= getSetter();
 			if (setter != null) {
-				addParticipants(result, setter, getNewSetterName(), natures);
+				addParticipants(result, setter, getNewSetterName(), natures, shared);
 			}
 		}
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 
-	private void addParticipants(List result, IMethod method, String methodName, String[] natures) throws CoreException {
+	private void addParticipants(List result, IMethod method, String methodName, String[] natures, SharableParticipants shared) throws CoreException {
 		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, method, natures, getSharedParticipants());
-		for (int i= 0; i < participants.length; i++) {
-			participants[i].setArguments(args);
-		}
+		RenameParticipant[] participants= ParticipantManager.getRenameParticipants(this, method, args, natures, shared);
 		result.addAll(Arrays.asList(participants));
 	}
 
@@ -264,7 +257,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	// -------------- Preconditions -----------------------
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException{
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException{
 		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.deleted", //$NON-NLS-1$

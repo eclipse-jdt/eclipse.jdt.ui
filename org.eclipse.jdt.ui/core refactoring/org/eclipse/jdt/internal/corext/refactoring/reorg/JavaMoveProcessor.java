@@ -13,26 +13,17 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -41,7 +32,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
@@ -50,11 +40,9 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveParticipant;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating {
 
@@ -100,7 +88,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 			return je;
 		return fMovePolicy.getResourceDestination();
 	}
-
+	
 	public Object[] getElements() {
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(fMovePolicy.getJavaElements()));
@@ -116,73 +104,8 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		return isAvailable(fMovePolicy);
 	}
 	
-	public MoveParticipant[] loadElementParticipants() throws CoreException {
-		Object[] elements= getElements();
-		String[] natures= getAffectedProjectNatures();
-		List result= new ArrayList();
-		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(this, elements[i], natures, getSharedParticipants())));
-		}
-		return (MoveParticipant[])result.toArray(new MoveParticipant[result.size()]);
-	}
-	
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		IJavaElement[] elements= fMovePolicy.getJavaElements();
-		String[] natures= getAffectedProjectNatures();
-		ResourceModifications rm= new ResourceModifications();
-		rm.setMoveArguments(getArguments());
-		List derivedElements= new ArrayList();
-		for (int i= 0; i < elements.length; i++) {
-			IJavaElement element= elements[i];
-			if (element instanceof ICompilationUnit ) {
-				ICompilationUnit unit= (ICompilationUnit)element;
-				IResource resource= element.getResource();
-				if (resource != null) {
-					rm.addMove(resource);
-				}
-				derivedElements.addAll(Arrays.asList(unit.getTypes()));
-			} else if (element instanceof IPackageFragmentRoot) {
-				IResource resource= element.getResource();
-				if (resource != null)
-					rm.addMove(resource);
-			} else if (element instanceof IPackageFragment) {
-				IPackageFragment pack= (IPackageFragment)element;
-				IContainer container= (IContainer)pack.getResource();
-				if (container == null)
-					continue;
-				IJavaElement destination= fMovePolicy.getJavaElementDestination();
-				if (destination.getResource() == null)
-					continue;
-				IPath path= destination.getResource().getFullPath();
-				path= path.append(pack.getElementName().replace('.', '/'));
-				IResource[] members= container.members();
-				int files= 0;
-				for (int m= 0; m < members.length; m++) {
-					IResource member= members[m];
-					if (member instanceof IFile) {
-						files++;
-						IFile file= (IFile)member;
-						if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-							continue;
-						rm.addMove(member);
-					}
-				}
-				IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-				if (!target.exists()) {
-					rm.addCreate(target);
-				}
-				rm.setMoveArguments(new MoveArguments(target, getUpdateReferences()));
-				if (files == members.length) {
-					rm.addDelete(container);
-				}
-			}
-		}
-		List result= new ArrayList();
-		for (Iterator iter= derivedElements.iterator(); iter.hasNext();) {
-			result.addAll(Arrays.asList(ParticipantManager.getMoveParticipants(this, iter.next(), natures, getSharedParticipants())));
-		}
-		result.addAll(Arrays.asList(rm.getParticipants(this, natures, getSharedParticipants())));
-		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+	public RefactoringParticipant[] loadParticipants(SharableParticipants shared) throws CoreException {
+		return fMovePolicy.loadParticipants(this, getAffectedProjectNatures(), shared);
 	}
 
 	private String[] getAffectedProjectNatures() throws CoreException {
@@ -198,7 +121,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		return fWasCanceled;
 	}
 
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			RefactoringStatus result= new RefactoringStatus();
@@ -254,7 +177,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() == null || fMovePolicy.getResourceDestination() == null);
 		Assert.isTrue(fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null);		
 		try {
-			final ValidationStateChange result= new ValidationStateChange(){
+			final ValidationStateChange result= new ValidationStateChange(getProcessorName()){
 				public Change perform(IProgressMonitor pm) throws CoreException {
 					super.perform(pm);
 					return null;

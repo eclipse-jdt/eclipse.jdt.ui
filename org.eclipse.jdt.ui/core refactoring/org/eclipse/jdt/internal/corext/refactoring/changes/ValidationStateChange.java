@@ -145,25 +145,20 @@ public class ValidationStateChange extends CompositeChange {
 	private SaveListener fSaveListener;
 	private UndoManagerListener fUndoManagerListener;
 	
-	public ValidationStateChange() {
-		super();
-		markAsGeneric();
-	}
-	
 	public ValidationStateChange(Change change) {
 		super(change.getName());
 		add(change);
-		markAsGeneric();
+		markAsSynthetic();
 	}
 	
 	public ValidationStateChange(String name) {
 		super(name);
-		markAsGeneric();
+		markAsSynthetic();
 	}
 	
 	public ValidationStateChange(String name, Change[] changes) {
 		super(name, changes);
-		markAsGeneric();
+		markAsSynthetic();
 	}
 	
 	/**
@@ -202,7 +197,7 @@ public class ValidationStateChange extends CompositeChange {
 	 * {@inheritDoc}
 	 */
 	protected Change createUndoChange(Change[] childUndos) {
-		ValidationStateChange result= new ValidationStateChange();
+		ValidationStateChange result= new ValidationStateChange(getName());
 		for (int i= 0; i < childUndos.length; i++) {
 			result.add(childUndos[i]);
 		}

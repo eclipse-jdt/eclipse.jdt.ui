@@ -76,8 +76,8 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
 	
@@ -138,10 +138,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return new Object[] {fType};
 	}
 	
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newCUName= getNewElementName() + ".java"; //$NON-NLS-1$
 		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
-		return loadDerivedParticipants(computeDerivedElements(), arguments, computeResourceModifications());
+		loadDerivedParticipants(result, 
+			computeDerivedElements(), arguments, 
+			computeResourceModifications(), natures, shared);
 	}
 	
 	private Object[] computeDerivedElements() {
@@ -237,7 +239,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	//------------- Conditions -----------------
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.does_not_exist", //$NON-NLS-1$

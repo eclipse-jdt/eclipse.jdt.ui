@@ -64,8 +64,8 @@ class DeleteChangeCreator {
 		//private
 	}
 	
-	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements) throws CoreException {
-		final ValidationStateChange result= new ValidationStateChange() {
+	static Change createDeleteChange(TextChangeManager manager, IResource[] resources, IJavaElement[] javaElements, String changeName) throws CoreException {
+		final ValidationStateChange result= new ValidationStateChange(changeName) {
 			public Change perform(IProgressMonitor pm) throws CoreException {
 				super.perform(pm);
 				return null;

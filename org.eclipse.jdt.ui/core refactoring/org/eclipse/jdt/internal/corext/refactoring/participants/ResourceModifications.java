@@ -46,10 +46,10 @@ public class ResourceModifications {
 	private List fDelete;
 	
 	private List fMove;
-	private MoveArguments fMoveArguments;
+	private List fMoveArguments;
 	
 	private List fCopy;
-	private CopyArguments fCopyArguments;
+	private List fCopyArguments;
 	
 	private IResource fRename;
 	private RenameArguments fRenameArguments;
@@ -84,44 +84,30 @@ public class ResourceModifications {
 	 * 
 	 * @param copy the resource to be copied
 	 */
-	public void addCopy(IResource copy) {
-		if (fCopy == null)
+	public void addCopy(IResource copy, CopyArguments arguments) {
+		if (fCopy == null) {
 			fCopy= new ArrayList(2);
+			fCopyArguments= new ArrayList(2);
+		}
 		fCopy.add(copy);
+		fCopyArguments.add(arguments);
 	}
 
-	/**
-	 * Sets the copy arguments.
-	 * 
-	 * @param arguments the copy arguments
-	 */
-	public void setCopyArguments(CopyArguments arguments) {
-		Assert.isNotNull(arguments);
-		fCopyArguments= arguments;
-	}
-	
 	/**
 	 * Adds the given resource to the list of resources
 	 * to be moved.
 	 * 
 	 * @param move the resource to be moved
 	 */
-	public void addMove(IResource move) {
-		if (fMove == null)
+	public void addMove(IResource move, MoveArguments arguments) {
+		if (fMove == null) {
 			fMove= new ArrayList(2);
+			fMoveArguments= new ArrayList(2);
+		}
 		fMove.add(move);
+		fMoveArguments.add(arguments);
 	}
 
-	/**
-	 * Sets the move arguments.
-	 * 
-	 * @param target the move arguments
-	 */
-	public void setMoveArguments(MoveArguments arguments) {
-		Assert.isNotNull(arguments);
-		fMoveArguments= arguments;
-	}
-	
 	/**
 	 * Sets the resource to be rename together with its
 	 * new arguments.
@@ -144,46 +130,46 @@ public class ResourceModifications {
 		if (fDelete != null) {
 			DeleteArguments arguments= new DeleteArguments();
 			for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
-				DeleteParticipant[] deletes= ParticipantManager.getDeleteParticipants(processor, iter.next(), natures, shared);
-				for (int i= 0; i < deletes.length; i++) {
-					deletes[i].setArguments(arguments);
-				}
+				DeleteParticipant[] deletes= ParticipantManager.getDeleteParticipants(processor, 
+					iter.next(), arguments, 
+					natures, shared);
 				result.addAll(Arrays.asList(deletes));
 			}
 		}
 		if (fCreate != null) {
 			CreateArguments arguments= new CreateArguments();
 			for (Iterator iter= fCreate.iterator(); iter.hasNext();) {
-				CreateParticipant[] creates= ParticipantManager.getCreateParticipants(processor, iter.next(), natures, shared);
-				for (int i= 0; i < creates.length; i++) {
-					creates[i].setArguments(arguments);
-				}
+				CreateParticipant[] creates= ParticipantManager.getCreateParticipants(processor, 
+					iter.next(), arguments, 
+					natures, shared);
 				result.addAll(Arrays.asList(creates));
 			}
 		}
 		if (fMove != null) {
-			for (Iterator iter= fMove.iterator(); iter.hasNext();) {
-				MoveParticipant[] moves= ParticipantManager.getMoveParticipants(processor, iter.next(), natures, shared);
-				for (int i= 0; i < moves.length; i++) {
-					moves[i].setArguments(fMoveArguments);
-				}
+			for (int i= 0; i < fMove.size(); i++) {
+				Object element= fMove.get(i);
+				MoveArguments arguments= (MoveArguments)fMoveArguments.get(i);
+				MoveParticipant[] moves= ParticipantManager.getMoveParticipants(processor, 
+					element, arguments, 
+					natures, shared);
 				result.addAll(Arrays.asList(moves));
+				
 			}
 		}
 		if (fCopy != null) {
-			for (Iterator iter= fCopy.iterator(); iter.hasNext();) {
-				CopyParticipant[] copies= ParticipantManager.getCopyParticipants(processor, iter.next(), natures, shared);
-				for (int i= 0; i < copies.length; i++) {
-					copies[i].setArguments(fCopyArguments);
-				}
+			for (int i= 0; i < fCopy.size(); i++) {
+				Object element= fCopy.get(i);
+				CopyArguments arguments= (CopyArguments)fCopyArguments.get(i);
+				CopyParticipant[] copies= ParticipantManager.getCopyParticipants(processor, 
+					element, arguments, 
+					natures, shared);
 				result.addAll(Arrays.asList(copies));
 			}
 		}
 		if (fRename != null) {
-			RenameParticipant[] renames= ParticipantManager.getRenameParticipants(processor, fRename, natures, shared);
-			for (int i= 0; i < renames.length; i++) {
-				renames[i].setArguments(fRenameArguments);
-			}
+			RenameParticipant[] renames= ParticipantManager.getRenameParticipants(processor, 
+				fRename, fRenameArguments, 
+				natures, shared);
 			result.addAll(Arrays.asList(renames));
 		}
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);

@@ -76,7 +76,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
@@ -145,15 +145,24 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return new Object[] {fPackage};
 	}
 	
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
-		return loadDerivedParticipants(null, null, computeResourceModifications());
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
+		loadDerivedParticipants(result, 
+			null, null, 
+			computeResourceModifications(), natures, shared);
 	}
-
+	
 	private ResourceModifications computeResourceModifications() throws CoreException {
 		ResourceModifications result= new ResourceModifications();
 		IContainer container= (IContainer)fPackage.getResource();
 		if (container == null)
 			return null;
+		IPath path= fPackage.getParent().getPath();
+		path= path.append(getNewElementName().replace('.', '/'));
+		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
+		if (!target.exists()) {
+			result.addCreate(target);
+		}
+		MoveArguments arguments= new MoveArguments(target, getUpdateReferences());
 		IResource[] members= container.members();
 		int files= 0;
 		for (int i= 0; i < members.length; i++) {
@@ -163,16 +172,9 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				IFile file= (IFile)member;
 				if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
 					continue;
-				result.addMove(member);
+				result.addMove(member, arguments);
 			}
 		}
-		IPath path= fPackage.getParent().getPath();
-		path= path.append(getNewElementName().replace('.', '/'));
-		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-		if (!target.exists()) {
-			result.addCreate(target);
-		}
-		result.setMoveArguments(new MoveArguments(target, getUpdateReferences()));
 		if (files == members.length) {
 			result.addDelete(container);
 		}
@@ -254,7 +256,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return root.getPackageFragment(getNewElementName());
 	}
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		return new RefactoringStatus();
 	}
 	

@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameJavaProjectTests extends RefactoringTest {
@@ -38,6 +39,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 		IJavaProject referencing1= null;
 		IJavaProject referencing2= null;
 		try {
+			ParticipantTesting.reset();
 			String newProjectName= "newName";
 			p1= JavaProjectHelper.createJavaProject("p1", "bin");
 			referencing1= JavaProjectHelper.createJavaProject("p2", "bin");
@@ -53,6 +55,8 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			JavaProjectHelper.addRTJar(p1);
 
+			ParticipantTesting.reset();
+			String[] handles= ParticipantTesting.createHandles(p1, p1.getResource());
 			RenameJavaProjectProcessor processor= new RenameJavaProjectProcessor(p1);
 			RenameRefactoring ref= new RenameRefactoring(processor);
 			assertTrue(ref.isAvailable());
@@ -60,6 +64,11 @@ public class RenameJavaProjectTests extends RefactoringTest {
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("not expected to fail", null, result);
 			assertTrue("p1 is gone", !p1.exists());
+			
+			ParticipantTesting.testRename(handles, 
+				new RenameArguments[] {
+					new RenameArguments(newProjectName, true),
+					new RenameArguments(newProjectName, true)});
 			
 			p1= referencing1.getJavaModel().getJavaProject("newName");
 			assertTrue("p1 exists", p1.exists());

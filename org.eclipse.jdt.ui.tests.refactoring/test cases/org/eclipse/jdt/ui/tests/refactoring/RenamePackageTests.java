@@ -10,12 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -30,6 +37,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
@@ -132,6 +141,7 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName, boolean updateReferences) throws Exception{
 		try{
+			ParticipantTesting.reset();
 			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
 			ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
 			for (int i= 0; i < packageNames.length; i++){
@@ -141,11 +151,54 @@ public class RenamePackageTests extends RefactoringTest {
 				}
 			}
 			IPackageFragment thisPackage= packages[0];
+			
+			IPath path= thisPackage.getParent().getPath();
+			path= path.append(newPackageName.replace('.', '/'));
+			IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
+			String[] createHandles= ParticipantTesting.createHandles(target);
+			boolean targetExists= target.exists();
+			
+			IFolder source= (IFolder)thisPackage.getResource();
+			String[] deleteHandles= ParticipantTesting.createHandles(source);
+			IResource members[]= source.members();
+			List movedObjects= new ArrayList();
+			boolean doDelete= true;
+			for (int i= 0; i < members.length; i++) {
+				if (members[i] instanceof IFolder) {
+					doDelete= false;
+				} else {
+					movedObjects.add(members[i]);
+				}
+			}
+			String[] moveHandles= ParticipantTesting.createHandles(movedObjects.toArray());
+			String[] renameHandles= ParticipantTesting.createHandles(thisPackage);
 			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
 			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(updateReferences);
 			((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
+			
+			ParticipantTesting.testRename(renameHandles,
+				new RenameArguments[] {
+					new RenameArguments(newPackageName, updateReferences)});
+			
+			if (!targetExists) {
+				ParticipantTesting.testCreate(createHandles);
+			} else {
+				ParticipantTesting.testCreate(new String[0]);
+			}
+			
+			List args= new ArrayList();
+			for (int i= 0; i < packageFileNames[0].length; i++) {
+				args.add(new MoveArguments(target, updateReferences));
+			}
+			ParticipantTesting.testMove(moveHandles, (MoveArguments[]) args.toArray(new MoveArguments[args.size()]));
+			
+			if (doDelete) {
+				ParticipantTesting.testDelete(deleteHandles);
+			} else {
+				ParticipantTesting.testDelete(new String[0]);
+			}
 			
 			//---
 			

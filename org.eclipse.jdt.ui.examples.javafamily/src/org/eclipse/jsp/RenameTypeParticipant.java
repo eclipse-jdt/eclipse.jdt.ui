@@ -32,7 +32,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 
 
@@ -40,32 +39,19 @@ public class RenameTypeParticipant extends RenameParticipant {
 
 	private IType fType;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant#initialize(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor, java.lang.Object)
-	 */
-	public void initialize(RefactoringProcessor processor, Object element) throws CoreException {
-		setProcessor(processor);
+	protected boolean initialize(Object element) {
 		fType= (IType)element;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#isAvailable()
-	 */
-	public boolean isApplicable() {
 		return true;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#checkActivation()
-	 */
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		return new RefactoringStatus();
+	public String getName() {
+		return "JSP participant";
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant#checkInput(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkConditions(IProgressMonitor pm, CheckConditionsContext context) {
 		return new RefactoringStatus();
 	}
 
@@ -82,7 +68,7 @@ public class RenameTypeParticipant extends RenameParticipant {
 					change= new TextFileChange(resource.getName(), (IFile)resource);
 					changes.put(resource, change);
 				}
-				TextChangeCompatibility.addTextEdit(change, "Update type reference", new ReplaceEdit(start, length, newName));
+				TextChangeCompatibility.addTextEdit(change, "Update type reference", new ReplaceEdit(start, length, newName)); //$NON-NLS-1$
 			}
 		};
 		JspUIPlugin.getDefault().search(new JspTypeQuery(fType), collector, pm);

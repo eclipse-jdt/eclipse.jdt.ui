@@ -54,7 +54,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
@@ -113,9 +113,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return new Object[] {fMethod};
 	}
 
-	public RefactoringParticipant[] loadDerivedParticipants() throws CoreException {
+	protected void loadDerivedParticipants(List result, String[] natures, SharableParticipants shared) throws CoreException {
 		// TODO must caclulate ripple ??
-		return new RefactoringParticipant[0];
 	}
 	
 	//---- IRenameProcessor -------------------------------------
@@ -156,7 +155,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	//----------- preconditions ------------------
 
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		IMethod orig= getOriginalMethod(fMethod);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$

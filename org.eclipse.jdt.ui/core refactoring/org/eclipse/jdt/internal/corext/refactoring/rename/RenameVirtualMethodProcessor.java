@@ -54,8 +54,8 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	//------------ preconditions -------------
 	
-	public RefactoringStatus checkInitialConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
-		RefactoringStatus result= super.checkInitialConditions(pm, context);
+	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
+		RefactoringStatus result= super.checkInitialConditions(pm);
 		if (result.hasFatalError())
 			return result;
 			
