@@ -35,8 +35,6 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequest;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
 import org.eclipse.test.internal.performance.data.DataPoint;
@@ -44,14 +42,13 @@ import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
 import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.jdi.Bootstrap;
-import org.eclipse.jdt.debug.core.IJavaMethodBreakpoint;
 
 /**
  * To use this performance meter add the following VM arguments:
  * 	-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT,suspend=n,server=y -Decilpse.perf.debugPort=PORT
  * where PORT is the port on which the debugger will listen and connect to.
  * This performance meter cannot be debugged, as itself uses the VM's debugging
- * facility. A {@link org.eclipse.test.internal.performance.NullPerformanceMeter}
+ * facility. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
  * could be used while debugging clients.
  * 
  * @since 3.1
@@ -66,13 +63,13 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		
 		/** Event queue */
 		private EventQueue fEventQueue;
-
+		
 		/** Background thread */
 		private Thread fThread;
-
+		
 		/** <code>true</code> if the reader should stop */
 		private boolean fIsStopping= false;
-
+		
 		/**
 		 * Creates a new event reader that will read from the given
 		 * event queue.
@@ -82,7 +79,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		public EventReader(EventQueue queue) {
 			fEventQueue= queue;
 		}
-
+		
 		/**
 		 * Start the thread that reads events.
 		 */
@@ -91,7 +88,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			fThread.setDaemon(true);
 			fThread.start();
 		}
-
+		
 		/**
 		 * Tells the reader loop that it should stop.
 		 */
@@ -100,7 +97,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			if (fThread != null)
 				fThread.interrupt();
 		}
-
+		
 		/**
 		 * Continuously reads and handles events that are coming from
 		 * the event queue.
@@ -122,15 +119,15 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 					eventSet.resume();
 				} catch (InterruptedException e) {
 					if (!fIsStopping)
-						System.out.println("Event reader loop unexpectedly interrupted");
+						System.out.println("Event reader loop unexpectedly interrupted"); //$NON-NLS-1$
 					return;
 				} catch (VMDisconnectedException e) {
-					System.out.println("VM unexpectedly disconnected");
+					System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
 					return;
 				}
 			}
 		}
-
+		
 		/**
 		 * Handles the given breakpoint event.
 		 * 
@@ -141,7 +138,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			try {
 				ObjectReference thisObject= event.thread().frame(0).thisObject();
 				Method method= event.location().method();
-				fResults.update(method.declaringType().name() + "#" + method.name() + method.signature(), thisObject.referenceType().name() + " (id=" + thisObject.uniqueID() + ")");
+				fResults.update(method.declaringType().name() + "#" + method.name() + method.signature(), thisObject.referenceType().name() + " (id=" + thisObject.uniqueID() + ")");  //$NON-NLS-1$ //$NON-NLS-2$//$NON-NLS-3$
 			} catch (Exception x) {
 				x.printStackTrace();
 			}
@@ -152,7 +149,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 * Invocation count results.
 	 */
 	public static class Results {
-
+		
 		/** The result map */
 		private Map fResultsMap= new HashMap();
 		
@@ -193,37 +190,28 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			for (Iterator iter= fResultsMap.keySet().iterator(); iter.hasNext();)
 				print(iter.next());
 		}
-
+		
 		/**
 		 * Prints the results for the given first key.
 		 * 
 		 * @param key1 the first key
 		 */
 		public void print(Object key1) {
-			try {
-				String s;
-				if (key1 instanceof IJavaMethodBreakpoint)
-					s= ((IJavaMethodBreakpoint) key1).getTypeName() + "#" + ((IJavaMethodBreakpoint) key1).getMethodName();
-				else
-					s= key1.toString();
-				System.out.println(s + ":");
-				Map results= ((Map) fResultsMap.get(key1));
-				for (Iterator iter= results.keySet().iterator(); iter.hasNext();) {
-					Object key2= iter.next();
-					System.out.println("\t" + key2 + ": " + ((Integer) results.get(key2)).intValue());
-				}
-			} catch (CoreException x) {
-				x.printStackTrace();
+			System.out.println(key1.toString() + ":"); //$NON-NLS-1$
+			Map results= ((Map) fResultsMap.get(key1));
+			for (Iterator iter= results.keySet().iterator(); iter.hasNext();) {
+				Object key2= iter.next();
+				System.out.println("\t" + key2 + ": " + ((Integer) results.get(key2)).intValue()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 	}
 	
 	/** System property that specifies the debugging port */
-	public static final String DEBUG_PORT_PROPERTY= "eclipse.perf.debugPort";
+	public static final String DEBUG_PORT_PROPERTY= "eclipse.perf.debugPort"; //$NON-NLS-1$
 	
 	/** Default debugging port when the system property cannot be interpreted as an integer */
 	public static final int DEBUG_PORT_DEFAULT= 7777;
-
+	
 	/** Debugging port */
 	private static final int PORT= intValueOf(System.getProperty(DEBUG_PORT_PROPERTY), DEBUG_PORT_DEFAULT);
 	
@@ -238,10 +226,10 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	
 	/** Methods from which to count the invocations */
 	private java.lang.reflect.Method[] fMethods;
-
+	
 	/** Timestamp */
 	private long fStartTime;
-
+	
 	/** Total number of invocations */
 	private long fInvocationCount;
 	
@@ -296,10 +284,10 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void commit() {
 		super.commit();
-        if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
-        	System.out.println("Detailed results:");
-        	fResults.print();
-        }
+		if (!DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null) {
+			System.out.println("Detailed results:"); //$NON-NLS-1$
+			fResults.print();
+		}
 	}
 	
 	/*
@@ -470,7 +458,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			return getName(clazz.getComponentType()) + "[]"; //$NON-NLS-1$
 		return clazz.getName();
 	}
-
+	
 	/**
 	 * Returns the integer value of the given string unless the string
 	 * cannot be interpreted as such, in this case the given default is
