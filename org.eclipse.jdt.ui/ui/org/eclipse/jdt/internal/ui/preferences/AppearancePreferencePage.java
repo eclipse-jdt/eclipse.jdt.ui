@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -21,6 +22,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -179,10 +181,12 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		new Separator().doFillIntoGrid(result, nColumns);
 		fStackBrowsingViewsVertically.doFillIntoGrid(result, nColumns);
 		
-		
-		DialogField field= new DialogField();
-		field.setLabelText(PreferencesMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives")); //$NON-NLS-1$
-		field.doFillIntoGrid(result, 2);
+		String noteTitle= PreferencesMessages.getString("AppearancePreferencePage.note"); //$NON-NLS-1$
+		String noteMessage= PreferencesMessages.getString("AppearancePreferencePage.preferenceOnlyEffectiveForNewPerspectives"); //$NON-NLS-1$
+		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), result, noteTitle, noteMessage);
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		noteControl.setLayoutData(gd);
 		
 		initFields();
 		

@@ -20,13 +20,13 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -54,31 +54,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String UPDATE_JAVA_VIEWS= PreferenceConstants.UPDATE_JAVA_VIEWS;
 	private static final String UPDATE_ON_SAVE= PreferenceConstants.UPDATE_ON_SAVE;
 	private static final String UPDATE_WHILE_EDITING= PreferenceConstants.UPDATE_WHILE_EDITING;
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean openTypeHierarchyInPerspective() {
-		return PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE.equals(
-			PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY));
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean openTypeHierarchInViewPart() {
-		return PreferenceConstants.OPEN_TYPE_HIERARCHY_IN_VIEW_PART.equals(
-			PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.OPEN_TYPE_HIERARCHY));
-	}
-
-	/**
-	 * @deprecated Inline to avoid reference to preference page
-	 */	
-	public static boolean reusePerspectiveForTypeHierarchy() {
-		return false;
-		//return PreferenceConstants.getPreferenceStore().getBoolean(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
-	}
-
 
 	private ArrayList fCheckBoxes;
 	private ArrayList fRadioButtons;
@@ -150,12 +125,12 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		updateGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.updateJavaViews")); //$NON-NLS-1$
 		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.onSave"), UPDATE_JAVA_VIEWS, UPDATE_ON_SAVE); //$NON-NLS-1$
 		addRadioButton(updateGroup, PreferencesMessages.getString("JavaBasePreferencePage.whileEditing"), UPDATE_JAVA_VIEWS, UPDATE_WHILE_EDITING);  //$NON-NLS-1$
-		Label notice= new Label(updateGroup, SWT.WRAP);
-		notice.setText(PreferencesMessages.getString("JavaBasePreferencePage.notice.outliner"));  //$NON-NLS-1$
-		GridData noticeData= new GridData(GridData.FILL_HORIZONTAL);
-		noticeData.grabExcessHorizontalSpace= true;
-		noticeData.widthHint= convertWidthInCharsToPixels(60);
-		notice.setLayoutData(noticeData);
+		
+		String noteTitle= PreferencesMessages.getString("JavaBasePreferencePage.note"); //$NON-NLS-1$
+		String noteMessage= PreferencesMessages.getString("JavaBasePreferencePage.notice.outliner"); //$NON-NLS-1$
+		Composite noteControl= createNoteComposite(JFaceResources.getDialogFont(), updateGroup, noteTitle, noteMessage);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		noteControl.setLayoutData(gd);		
 
 		// new Label(result, SWT.NONE); // spacer
 
