@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
@@ -184,10 +185,8 @@ public class CodeFormatterUtil {
 		if (OLD_FORMATTER) {
 			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
 		} else {
-			// TODO: new API
-		}
-		return null;
-		
+			return new DefaultCodeFormatter(options).format(kind, string, offset, length, indentationLevel, lineSeparator);
+		}	
 	}
 	
 	public static TextEdit format2(int kind, String string, int indentationLevel, String lineSeparator, Map options) {
