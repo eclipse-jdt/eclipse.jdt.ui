@@ -15,6 +15,8 @@ import org.eclipse.jdt.ui.tests.refactoring.ExtractMethodTests;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.*;
+
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.StructureSelectionAction;public class StructureSelectionActionTests extends RefactoringTest{
@@ -61,11 +63,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		return new SourceRange(offset, end - offset);
 	}
 	
-	private ISourceRange getSelection(ICompilationUnit cu, int startLine, int startColumn, int endLine, int endColumn) throws Exception{
-		int offset= getOffset(cu, startLine, startColumn);
-		int end= getOffset(cu, endLine, endColumn);
-		return new SourceRange(offset, end - offset);
-	}
 	
 	private void helper1() throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
@@ -81,7 +78,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
-		ISourceRange selection= getSelection(cu, startLine, startColumn, endLine, endColumn);
+		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
 
 		ISourceRange newRange= new StructureSelectionAction().getNewSelectionRange(selection, cu);
 		
@@ -93,7 +90,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 		
 	private void helperZeroLength(int line, int column) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true);
-		ISourceRange selection= new SourceRange(getOffset(cu, line, column), 1);
+		ISourceRange selection= new SourceRange(TextRangeUtil.getOffset(cu, line, column), 1);
 			
 		//DebugUtils.dump(name() + ":<" + cu.getSource().substring(selection.getOffset()) + "/>");
 		
@@ -108,35 +105,9 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	private void offsetTest(int line, int column, int expected) throws Exception{
 		String filePath= TEST_PATH_PREFIX + getRefactoringPath() + "OffsetTest.java";
 		ICompilationUnit cu= createCU(getPackageP(), "OffsetTest.java", getFileContents(filePath));
-		assertEquals("incorrect offset", expected, getOffset(cu, line, column));
+		assertEquals("incorrect offset", expected, TextRangeUtil.getOffset(cu, line, column));
 	}
 	
-	private static int getOffset(ICompilationUnit cu, int line, int column) throws Exception{
-		//String s= cu.getSource();
-		TextBuffer tb= TextBuffer.create(cu.getSource());
-		int r= tb.getLineInformation(line - 1).getOffset();
-		
-		int lineTabCount= calculateTabCountInLine(tb.getLineContent(line - 1), column);		
-		r += (column - 1) - (lineTabCount * getTabWidth()) + lineTabCount;
-		return r ;
-	}
-	
-	private static final int getTabWidth(){
-		return 4;
-	}
-	
-	private static int calculateTabCountInLine(String lineSource, int lastCharOffset){
-		int acc= 0;
-		int charCount= 0;
-		for(int i= 0; charCount < lastCharOffset - 1; i++){
-			if ('\t' == lineSource.charAt(i)){
-				acc++;
-				charCount += getTabWidth();
-			}	else
-				charCount += 1;
-		}
-		return acc;
-	}
 
 	// ---- tests --- 
 	
@@ -260,22 +231,22 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.structureselection.Struct
 	}	
 	
 	public void testTabCount0(){
-		int t= calculateTabCountInLine("\t\t1", 9);
+		int t= TextRangeUtil.calculateTabCountInLine("\t\t1", 9);
 		assertEquals(2, t);
 	}
 	
 	public void testTabCount1(){
-		int t= calculateTabCountInLine("\t\tint i= 1 + 1;", 20);
+		int t= TextRangeUtil.calculateTabCountInLine("\t\tint i= 1 + 1;", 20);
 		assertEquals(2, t);
 	}
 	
 	public void testTabCount2(){
-		int t= calculateTabCountInLine("\t\t\treturn;", 13);
+		int t= TextRangeUtil.calculateTabCountInLine("\t\t\treturn;", 13);
 		assertEquals(3, t);
 	}
 	
 	public void testTabCount3(){
-		int t= calculateTabCountInLine("\tvoid m(){m();", 18);
+		int t= TextRangeUtil.calculateTabCountInLine("\tvoid m(){m();", 18);
 		assertEquals(1, t);
 	}
 	
