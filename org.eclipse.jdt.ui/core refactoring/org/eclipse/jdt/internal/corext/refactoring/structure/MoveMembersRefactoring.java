@@ -669,8 +669,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	}
 	
 	private void addImportTo(IType type, ICompilationUnit cu){
-		//getImportEdit(cu).addImport(JavaModelUtil.getFullyQualifiedName(type));
-		getImportEdit(cu).addImport(type.getFullyQualifiedName());
+		getImportEdit(cu).addImport(JavaModelUtil.getFullyQualifiedName(type));
 	}
 
 	private static void putAllToMap(Map result, String newSource, ISourceRange[] ranges) {
