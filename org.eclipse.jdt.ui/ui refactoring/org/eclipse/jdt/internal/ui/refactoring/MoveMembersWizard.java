@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
@@ -41,6 +43,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -73,6 +76,9 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ComboContentAssistSubjectAdapter;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -186,7 +192,9 @@ public class MoveMembersWizard extends RefactoringWizard {
 			} else {
 				setPageComplete(false);
 			}
-			fContentAssistant= createContentAssistant(fDestinationField);
+			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(getMoveRefactoring().getDeclaringType());
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(root);
+			fContentAssistant= ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor, this);
 			
 			Button button= new Button(composite, SWT.PUSH);
 			button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
@@ -199,70 +207,6 @@ public class MoveMembersWizard extends RefactoringWizard {
 			});
 		}
 			
-		private ContentAssistant createContentAssistant(final Combo combo) {
-			final ContentAssistant contentAssistant= new ContentAssistant();
-						
-			IType declaringType= getMoveRefactoring().getDeclaringType();
-			IContentAssistProcessor processor= new TypeContentAssistProcessor(declaringType);
-			contentAssistant.setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
-			
-			ContentAssistPreference.configure(contentAssistant, JavaPlugin.getDefault().getJavaTextTools().getPreferenceStore());
-			contentAssistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
-			contentAssistant.setInformationControlCreator(new IInformationControlCreator() {
-				public IInformationControl createInformationControl(Shell parent) {
-					return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true));
-				}
-			});
-
-			combo.addKeyListener(getContentAssistKeyAdapter(contentAssistant));
-			contentAssistant.install(new ComboContentAssistSubjectAdapter(combo));
-			return contentAssistant;
-		}
-
-		private KeyAdapter getContentAssistKeyAdapter(final ContentAssistant contentAssistant) {
-			return new KeyAdapter() {
-				KeySequence[] fKeySequences;
-				
-				private KeySequence[] getKeySequences() {
-					if (fKeySequences == null) {
-						ICommandManager cm = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-						ICommand command= cm.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-						if (command.isDefined()) {
-							List list= command.getKeySequenceBindings();
-							if (!list.isEmpty()) {
-								fKeySequences= new KeySequence[list.size()];
-								for (int i= 0; i < fKeySequences.length; i++) {
-									fKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-								}
-								return fKeySequences;
-							}		
-						}
-						// default is Ctrl+Space
-						fKeySequences= new KeySequence[] { 
-								KeySequence.getInstance(KeyStroke.getInstance(ModifierKey.CTRL, CharacterKey.SPACE))
-						};
-					}
-					return fKeySequences;
-				}
-				
-				public void keyPressed(KeyEvent e) {
-					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
-					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
-					KeySequence[] sequences= getKeySequences();
-					
-					for (int i= 0; i < sequences.length; i++) {
-						// only works for single strokes (would need to hold KeyBindingState for multiple):
-						if (sequences[i].equals(keySequence)) {
-							e.doit= false;
-							String errorMessage= contentAssistant.showPossibleCompletions();
-							if (errorMessage != null)
-								setErrorMessage(errorMessage);
-							return;
-						}
-					}
-				}};
-		}
-
 		public void dispose() {
 			if (fContentAssistant != null) {
 				fContentAssistant.uninstall();
