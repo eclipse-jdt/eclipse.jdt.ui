@@ -113,15 +113,18 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		IFile			propertyFile;
 		String			wrapperClassName;
 		IJavaElement	wrapperClass;
-		int				scope;
-		IWorkingSet[]		workingSets;
+		int			scope;
+		IWorkingSet[]	workingSets;
 
 		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p) {
 			this(wrapperClassName, wrapperClass, p, ISearchPageContainer.WORKSPACE_SCOPE, null);
 		}
 
 		public SearchPatternData(String wrapperClassName, IJavaElement wrapperClass, String p, int scope , IWorkingSet[] workingSets) {
-			this.wrapperClassName= wrapperClassName;
+			if (wrapperClassName == null)
+				this.wrapperClassName= "";  //$NON-NLS-1$
+			else
+				this.wrapperClassName= wrapperClassName;
 			this.wrapperClass= wrapperClass;
 			this.scope= scope;
 			this.workingSets= workingSets;
