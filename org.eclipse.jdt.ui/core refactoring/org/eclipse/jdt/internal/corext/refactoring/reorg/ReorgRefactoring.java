@@ -75,31 +75,37 @@ public abstract class ReorgRefactoring extends Refactoring {
 		fUnsavedFiles= unsavedFiles;
 	}
 	
+	final boolean canActivate() throws JavaModelException{
+		if (getElements().isEmpty())
+			return false;
+			
+		if (hasParentCollision(getElements()))
+			return false;
+			
+		if (hasNonCusOrFiles() && (hasCus() || hasFiles()))
+			return false;
+			
+		if (hasPackages() && hasNonPackages())
+			return false;
+			
+		if (hasSourceFolders() && hasNonSourceFolders())	
+			return false;
+				
+		if (! canReorgAll())
+			return false;
+						
+		return true;
+	}
+	
 	/* non java-doc
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			if (getElements().isEmpty())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (hasParentCollision(getElements()))
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (hasNonCusOrFiles() && (hasCus() || hasFiles()))
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (hasPackages() && hasNonPackages())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-			
-			if (hasSourceFolders() && hasNonSourceFolders())	
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-				
-			if (! canReorgAll())
-				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
-						
-			return new RefactoringStatus();
+			if (canActivate())
+				return new RefactoringStatus();
+			return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	

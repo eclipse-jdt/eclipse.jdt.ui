@@ -72,7 +72,7 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 	private final CodeGenerationSettings fSettings;
 	private final IPackageFragmentRootManipulationQuery fUpdateClasspathQuery;
 	
-	public MoveRefactoring(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery) {
+	private MoveRefactoring(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery) {
 		super(elements);
 		Assert.isNotNull(settings);
 		fSettings= settings;
@@ -80,7 +80,14 @@ public class MoveRefactoring extends ReorgRefactoring implements IQualifiedNameU
 		fQualifiedNameSearchResult= new QualifiedNameSearchResult();
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
-		
+	
+	public static MoveRefactoring create(List elements, CodeGenerationSettings settings, IPackageFragmentRootManipulationQuery updateClasspathQuery) throws JavaModelException {
+		MoveRefactoring ref= new MoveRefactoring(elements, settings, updateClasspathQuery);
+		if (! ref.canActivate())
+			return null;
+		return ref;
+	}
+	
 	/* non java-doc
 	 * Method declared in IQualifiedNameUpdatingRefactoring
 	 */	
