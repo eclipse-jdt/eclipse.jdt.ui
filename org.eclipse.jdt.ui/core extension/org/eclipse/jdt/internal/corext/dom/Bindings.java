@@ -688,7 +688,7 @@ public class Bindings {
 		if (methodParameters.length != parameters.length)
 			return false;
 		for (int i= 0; i < parameters.length; i++) {
-			if (parameters[i].getGenericType() != methodParameters[i].getGenericType())
+			if (parameters[i].getTypeDeclaration() != methodParameters[i].getTypeDeclaration())
 				return false;
 		}
 		return true;
@@ -708,7 +708,7 @@ public class Bindings {
 			index= first.indexOf('<');
 			if (index > 0)
 				first= first.substring(0, index);
-			second= methodParameters[i].getGenericType().getQualifiedName();
+			second= methodParameters[i].getTypeDeclaration().getQualifiedName();
 			index= second.indexOf('<');
 			if (index > 0)
 				second= second.substring(0, index);
@@ -845,7 +845,7 @@ public class Bindings {
 			typeBinding= typeBinding.getDeclaringClass();
 		}
 		if (typeBinding != null) {
-			typeBinding= typeBinding.getGenericType();
+			typeBinding= typeBinding.getTypeDeclaration();
 			IPackageBinding pack= typeBinding.getPackage();
 			String packageName= pack.isUnnamed() ? "" : pack.getName(); //$NON-NLS-1$
 			IType type= project.findType(packageName, typeBinding.getName());
@@ -982,7 +982,7 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
-		method= method.getGenericMethod();
+		method= method.getMethodDeclaration();
 		
 		IMethod[] candidates= type.getMethods();
 		for (int i= 0; i < candidates.length; i++) {
@@ -1050,7 +1050,7 @@ public class Bindings {
 		} else {
 			// normalize (quick hack until binding.getJavaElement works)
 			candidate= Signature.getTypeErasure(candidate);
-			type= type.getGenericType();
+			type= type.getTypeDeclaration();
 			
 			if (isResolvedType(candidate)) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
@@ -1222,10 +1222,10 @@ public class Bindings {
 	 */
 	public static IBinding getFieldDeclaration(IVariableBinding field) {
 		ITypeBinding declaringClass= field.getDeclaringClass();
-		if (declaringClass.getGenericType() == declaringClass) { // test if type is already declaration
+		if (declaringClass.getTypeDeclaration() == declaringClass) { // test if type is already declaration
 			return field;
 		}
-		IVariableBinding[] genericFields= declaringClass.getGenericType().getDeclaredFields();
+		IVariableBinding[] genericFields= declaringClass.getTypeDeclaration().getDeclaredFields();
 		String name= field.getName();
 		for (int i= 0; i < genericFields.length; i++) {
 			if (name.equals(genericFields[i].getName())) {
@@ -1242,12 +1242,12 @@ public class Bindings {
 	public static boolean isDeclarationBinding(IBinding binding) {
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				return ((ITypeBinding) binding).getGenericType() == binding;
+				return ((ITypeBinding) binding).getTypeDeclaration() == binding;
 			case IBinding.VARIABLE:
 				IVariableBinding var= (IVariableBinding) binding;
 				return !var.isField() || isDeclarationBinding(var.getDeclaringClass());
 			case IBinding.METHOD:
-				return ((IMethodBinding) binding).getGenericMethod() == binding;
+				return ((IMethodBinding) binding).getMethodDeclaration() == binding;
 		}
 		return true;
 	}
@@ -1297,14 +1297,14 @@ public class Bindings {
 		if (overriddenReturn == null || overridableReturn == null)
 			return false;
 		
-		if (!overriddenReturn.getGenericType().isSubTypeCompatible(overridableReturn.getGenericType()))
+		if (!overriddenReturn.getTypeDeclaration().isSubTypeCompatible(overridableReturn.getTypeDeclaration()))
 			return false;
 		
 		ITypeBinding[] overriddenTypes= overridden.getParameterTypes();
 		ITypeBinding[] overridableTypes= overridable.getParameterTypes();
 		Assert.isTrue(overriddenTypes.length == overridableTypes.length);
 		for (int index= 0; index < overriddenTypes.length; index++) {
-			if (!overridableTypes[index].getGenericType().isSubTypeCompatible(overriddenTypes[index].getGenericType()))
+			if (!overridableTypes[index].getTypeDeclaration().isSubTypeCompatible(overriddenTypes[index].getTypeDeclaration()))
 				return false;
 		}
 		ITypeBinding[] overriddenExceptions= overridden.getExceptionTypes();

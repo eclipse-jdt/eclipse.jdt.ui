@@ -449,7 +449,7 @@ public class StubUtility {
 			if (typeBindings[i].isTypeVariable())
 				result[i]= typeBindings[i].getName();
 			else
-				result[i]= typeBindings[i].getGenericType().getQualifiedName();
+				result[i]= typeBindings[i].getTypeDeclaration().getQualifiedName();
 		}
 		return result;
 	}
@@ -704,7 +704,7 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
-			overridden= overridden.getGenericMethod();
+			overridden= overridden.getMethodDeclaration();
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
 			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
 			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
