@@ -41,7 +41,7 @@ public class ResultCollector implements ICompletionRequestor {
 	private final static char[] GENERAL_TRIGGERS= new char[] { ';', ',', '.', '\t', '(', '{', '[' };
 	
 	private ArrayList fFields= new ArrayList(), fKeywords= new ArrayList(), 
-						fLabels= new ArrayList(), fMethods= new ArrayList(), 
+						fLabels= new ArrayList(), fMethods= new ArrayList(),
 						fModifiers= new ArrayList(), fPackages= new ArrayList(),
 						fTypes= new ArrayList(), fVariables= new ArrayList();
 
@@ -198,7 +198,7 @@ public class ResultCollector implements ICompletionRequestor {
 		
 		if (returnTypeName.length == 0 && fCompilationUnit != null) {
 			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
-			fMethods.add(proposal);
+			fTypes.add(proposal);
 		}		
 	}
 
