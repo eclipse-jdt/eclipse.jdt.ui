@@ -244,8 +244,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 	public final static Prefix VAR_INITIALIZER= new FormattingPrefix("A a={};", "a={" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static Prefix METHOD_BODY= new FormattingPrefix("void a() {}", ") {" , CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static Prefix FINALLY_BLOCK= new FormattingPrefix("try {} finally {}", "} finally {", CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
-
+	public final static Prefix CATCH_BLOCK= new FormattingPrefix("try {} catch(Exception e) {}", "} c" , CodeFormatterUtil.K_STATEMENTS); //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static BlockContext IF_BLOCK_WITH_ELSE= new BlockFormattingPrefix("if (true)", "else{}", 8); //$NON-NLS-1$ //$NON-NLS-2$
 	public final static BlockContext IF_BLOCK_NO_ELSE= new BlockFormattingPrefix("if (true)", "", 8); //$NON-NLS-1$ //$NON-NLS-2$
