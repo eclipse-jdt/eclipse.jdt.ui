@@ -178,8 +178,11 @@ public class AugmentRawContClConstraintsSolver {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 			if (cv instanceof CollectionElementVariable2) {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
-				//TODO: should calculate only once per EquivalenceRepresentative
-				ITypeBinding typeBinding= elementCv.getRepresentative().getTypeEstimate().chooseSingleType();
+				EquivalenceRepresentative representative= elementCv.getRepresentative();
+				if (representative == null)
+					continue; //TODO: should not happen iff all unused constraint variables got pruned
+				//TODO: should calculate only once per EquivalenceRepresentative; can throw away estimate TypeSet afterwards
+				ITypeBinding typeBinding= representative.getTypeEstimate().chooseSingleType(); //TODO: is null for Universe TypeSet
 				setChosenType(elementCv, typeBinding);
 				ICompilationUnit cu= elementCv.getCompilationUnit();
 				if (cu != null) //TODO: shouldn't be the case

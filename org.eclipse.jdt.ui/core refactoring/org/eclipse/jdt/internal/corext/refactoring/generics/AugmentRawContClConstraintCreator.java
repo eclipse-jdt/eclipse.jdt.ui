@@ -166,24 +166,6 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		return true;
 	}
 	
-	public void endVisit(ClassInstanceCreation node) {
-		//TODO: arguments, class body
-		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(node.getType());
-		setConstraintVariable(node, typeCv);
-		
-//		PlainTypeVariable2 cv= fTCFactory.makePlainTypeVariable(node.resolveTypeBinding());
-//		setConstraintVariable(node, cv);
-		
-		
-//		TypeHandle cicTypeHandle= fTCFactory.getTypeHandleFactory().getTypeHandle(node.resolveTypeBinding());
-//		TypeHandle collectionTypeHandle= fTCFactory.getCollectionTypeHandle();
-//		if (cicTypeHandle.canAssignTo(collectionTypeHandle)) {
-//			fTCFactory.makeElementVariable();
-//		}
-//		
-//		return true;
-	}
-	
 	public void endVisit(StringLiteral node) {
 		ITypeBinding typeBinding= node.resolveTypeBinding();
 		PlainTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
@@ -243,17 +225,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		} else {
 			ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
 			List arguments= node.arguments();
-			for (int i= 0; i < parameterTypes.length; i++) {
-				ITypeBinding parameterTypeBinding= parameterTypes[i];
-				if (! fTCModel.isACollectionType(parameterTypeBinding))
-					continue;
-				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
-				ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
-				CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
-				CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv);
-				// Elem[param] =^= Elem[arg]
-				fTCModel.createEqualsConstraint(parameterElementCv, argumentElementCv);
-			}
+			doVisitMethodInvocationArguments(methodBinding, parameterTypes, arguments);
 			
 			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
 			if (returnTypeCv == null)
@@ -262,6 +234,31 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 			CollectionElementVariable2 returnTypeElementCv= fTCModel.makeElementVariable(returnTypeCv);
 			setConstraintVariable(node, returnTypeCv);
 		}
+	}
+	
+	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, ITypeBinding[] parameterTypes, List arguments) {
+		for (int i= 0; i < parameterTypes.length; i++) {
+			ITypeBinding parameterTypeBinding= parameterTypes[i];
+			if (! fTCModel.isACollectionType(parameterTypeBinding))
+				continue;
+			ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
+			ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
+			CollectionElementVariable2 parameterElementCv= fTCModel.makeElementVariable(parameterTypeCv);
+			CollectionElementVariable2 argumentElementCv= fTCModel.getElementVariable(argumentCv);
+			// Elem[param] =^= Elem[arg]
+			fTCModel.createEqualsConstraint(parameterElementCv, argumentElementCv);
+		}
+	}
+
+	public void endVisit(ClassInstanceCreation node) {
+		TypeVariable2 typeCv= (TypeVariable2) getConstraintVariable(node.getType());
+		setConstraintVariable(node, typeCv);
+		
+		IMethodBinding methodBinding= node.resolveConstructorBinding();
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+		List arguments= node.arguments();
+		doVisitMethodInvocationArguments(methodBinding, parameterTypes, arguments);
+		//TODO: return type?
 	}
 	
 	public void endVisit(ReturnStatement node) {

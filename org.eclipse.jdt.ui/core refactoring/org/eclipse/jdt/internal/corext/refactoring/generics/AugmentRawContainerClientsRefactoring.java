@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -169,13 +171,14 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
 			Map.Entry entry= (Map.Entry) iter.next();
 			ICompilationUnit cu= (ICompilationUnit) entry.getKey();
-			CompilationUnit compilationUnit= parser.parse(cu, true);
+			CompilationUnit compilationUnit= parser.parse(cu, false);
 			AST ast= compilationUnit.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
+			ImportRewrite importRewrite= new ImportRewrite(cu);
 			List cvs= (List) entry.getValue();
 			for (Iterator cvIter= cvs.iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-				rewriteConstraintVariable(compilationUnit, ast, rewrite, cv);
+				rewriteConstraintVariable(compilationUnit, ast, rewrite, importRewrite, cv);
 			}
 			
 			//TODO: create AugmentRawContainerClientsUpdate which is a mapping from CU to {declarationsToUpdate, castsToRemove, ...}
@@ -185,16 +188,20 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 					CastVariable2 castCv= (CastVariable2) castsIter.next();
 					CastExpression castExpression= (CastExpression) castCv.getRange().getNode(compilationUnit);
 					Expression newExpression= (Expression) rewrite.createMoveTarget(castExpression.getExpression());
-					rewrite.replace(castExpression, newExpression, null);
+					rewrite.replace(castExpression, newExpression, null); //TODO: use ImportRemover
 				}
 			}
 			
 			TextBuffer buffer= null;
 			try {
 				buffer= TextBuffer.acquire((IFile) cu.getResource());
+				MultiTextEdit multiEdit= new MultiTextEdit();
 				TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), null);
+				TextEdit edit2= importRewrite.createEdit(buffer.getDocument());
+				multiEdit.addChild(edit);
+				multiEdit.addChild(edit2);
 				CompilationUnitChange change= new CompilationUnitChange(cu.getElementName(), cu);
-				change.setEdit(edit);
+				change.setEdit(multiEdit);
 				fChangeManager.manage(cu, change);
 			} finally {
 				TextBuffer.release(buffer);
@@ -204,7 +211,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 		
 	}
 
-	private void rewriteConstraintVariable(CompilationUnit compilationUnit, AST ast, ASTRewrite rewrite, ConstraintVariable2 cv) {
+	private void rewriteConstraintVariable(CompilationUnit compilationUnit, AST ast, ASTRewrite rewrite, ImportRewrite importRewrite, ConstraintVariable2 cv) {
 		//TODO: make this clean
 		if (cv instanceof CollectionElementVariable2) {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
@@ -232,11 +239,9 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 					if (chosenType == null)
 						return; // couldn't infer an element type
 					Type originalType= (Type) ((SimpleName) node).getParent();
-					//TODO: C&P'd
 					Type movingType= (Type) rewrite.createMoveTarget(originalType);
 					ParameterizedType newType= ast.newParameterizedType(movingType);
-					String typeName= chosenType.getName(); // TODO: use ImportRewrite
-					newType.typeArguments().add(rewrite.createStringPlaceholder(typeName, ASTNode.SIMPLE_TYPE));
+					newType.typeArguments().add(importRewrite.addImport(chosenType, ast));
 					rewrite.replace(originalType, newType, null);
 				} //TODO: other node types?
 			}
