@@ -1,0 +1,223 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.viewsupport;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.ISelectionService;
+import org.eclipse.ui.IWorkbenchPart;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
+/**
+ *
+ */
+public class SelectionListenerWithASTManager {
+	
+	private static SelectionListenerWithASTManager fgDefault;
+	
+	/**
+	 * @return Returns the default manager instance.
+	 */
+	public static SelectionListenerWithASTManager getDefault() {
+		if (fgDefault == null) {
+			fgDefault= new SelectionListenerWithASTManager();
+		}
+		return fgDefault;
+	}
+	
+	
+	private static class PartListenerGroup {
+		private IEditorPart fPart;
+		private Job fCurrentJob;
+		private ListenerList fAstListeners;
+		
+		public PartListenerGroup(IEditorPart part) {
+			fPart= part;
+			fCurrentJob= null;
+			fAstListeners= new ListenerList();
+		}
+
+		public boolean isEmpty() {
+			return fAstListeners.isEmpty();
+		}
+
+		public void install(ISelectionListenerWithAST listener) {
+			fAstListeners.add(listener);
+		}
+		
+		public void uninstall(ISelectionListenerWithAST listener) {
+			fAstListeners.remove(listener);
+		}
+		
+		public void fireSelectionChanged(final ITextSelection selection) {
+			if (fCurrentJob != null) {
+				fCurrentJob.cancel();
+				fCurrentJob= null;
+			}
+			
+			fCurrentJob= new Job(JavaUIMessages.getString("QuickAssistLightBulbUpdater.job.title")) { //$NON-NLS-1$
+				public IStatus run(IProgressMonitor monitor) {
+					synchronized (PartListenerGroup.this) {
+						if (this != fCurrentJob) {
+							return Status.OK_STATUS;
+						}
+						calculateASTandInform(selection);
+						return Status.OK_STATUS;
+					}
+				}
+			};
+			fCurrentJob.setPriority(Job.DECORATE);
+			fCurrentJob.schedule();
+		}
+		
+		private CompilationUnit computeAST() {
+			IEditorInput editorInput= fPart.getEditorInput();
+			if (editorInput != null) {
+				IJavaElement element= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
+				if (element instanceof ICompilationUnit) {
+					return AST.parseCompilationUnit((ICompilationUnit) element, true);
+				}
+				if (element instanceof IClassFile) {
+					return AST.parseCompilationUnit((IClassFile) element, true);
+				}				
+			}
+			return null;
+		}
+		
+
+		protected void calculateASTandInform(ITextSelection selection) {
+			CompilationUnit astRoot= computeAST();
+			if (astRoot != null) {
+				Object[] listeners= fAstListeners.getListeners();
+				for (int i= 0; i < listeners.length; i++) {
+					((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
+				}
+			}
+		}
+		
+	}
+	
+	
+	private class WorkbenchWindowListener implements ISelectionListener {
+		private ISelectionService fSelectionService;
+		private Map fPartListeners; // key: IEditorPart, value: PartListenerGroup
+		
+		public WorkbenchWindowListener(ISelectionService service) {
+			fSelectionService= service;
+			fPartListeners= new HashMap();
+		}
+		
+		public boolean isEmpty() {
+			return fPartListeners.isEmpty();
+		}
+		
+		
+		public void install(IEditorPart part, ISelectionListenerWithAST listener) {
+			if (fPartListeners.isEmpty()) {
+				fSelectionService.addPostSelectionListener(this);
+			}
+			
+			PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
+			if (listenerGroup == null) {
+				listenerGroup= new PartListenerGroup(part);
+				fPartListeners.put(part, listenerGroup);
+			}
+			listenerGroup.install(listener);
+		}
+		
+		public void uninstall(IEditorPart part, ISelectionListenerWithAST listener) {
+			PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
+			if (listenerGroup == null) {
+				return;
+			}
+			listenerGroup.uninstall(listener);
+			if (listenerGroup.isEmpty()) {
+				fPartListeners.remove(part);
+				if (fPartListeners.isEmpty()) {
+					fSelectionService.removePostSelectionListener(this);
+				}
+			}
+		}		
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.ui.ISelectionListener#selectionChanged(org.eclipse.ui.IWorkbenchPart, org.eclipse.jface.viewers.ISelection)
+		 */
+		public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+			if (part instanceof IEditorPart && selection instanceof ITextSelection) { // only editor parts are interesting
+				PartListenerGroup listenerGroup= (PartListenerGroup) fPartListeners.get(part);
+				if (listenerGroup != null) {
+					listenerGroup.fireSelectionChanged((ITextSelection) selection);
+				}
+			}
+		}
+		
+	}
+	
+
+	
+	private Map fListenerGroups;
+	
+	private SelectionListenerWithASTManager() {
+		fListenerGroups= new HashMap();
+	}
+	
+	/**
+	 * Registers a selection listener for the given editor part. 
+	 * @param part The editor part to listen to.
+	 * @param listener The listener to register.
+	 */
+	public void addListener(IEditorPart part, ISelectionListenerWithAST listener) {
+		ISelectionService service= part.getSite().getWorkbenchWindow().getSelectionService();
+		WorkbenchWindowListener windowListener= (WorkbenchWindowListener) fListenerGroups.get(service);
+		if (windowListener == null) {
+			windowListener= new WorkbenchWindowListener(service);
+			fListenerGroups.put(service, windowListener);
+		}
+		windowListener.install(part, listener);
+	}
+
+	/**
+	 * Unregisters a selection listener.
+	 * @param part The editor part the listener was registered.
+	 * @param listener The listener to unregister.
+	 */
+	public void removeListener(IEditorPart part, ISelectionListenerWithAST listener) {
+		ISelectionService service= part.getSite().getWorkbenchWindow().getSelectionService();
+		WorkbenchWindowListener windowListener= (WorkbenchWindowListener) fListenerGroups.get(service);
+		if (windowListener != null) {
+			windowListener.uninstall(part, listener);
+			if (windowListener.isEmpty()) {
+				fListenerGroups.remove(service);
+			}
+		}
+	}
+	
+}

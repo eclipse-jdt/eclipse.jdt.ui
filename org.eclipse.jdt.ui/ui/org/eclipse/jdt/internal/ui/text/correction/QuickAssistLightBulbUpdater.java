@@ -12,12 +12,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -25,39 +19,35 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.DefaultAnnotation;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
+import org.eclipse.jdt.internal.ui.viewsupport.ISelectionListenerWithAST;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 /**
  *
@@ -93,9 +83,7 @@ public class QuickAssistLightBulbUpdater {
 	private IEditorPart fEditor;
 	private ITextViewer fViewer;
 	
-	private Job fCurrentJob;
-	
-	private ISelectionChangedListener fListener;
+	private ISelectionListenerWithAST fListener;
 	private IPropertyChangeListener fPropertyChangeListener;
 	
 	public QuickAssistLightBulbUpdater(IEditorPart part, ITextViewer viewer) {
@@ -104,8 +92,6 @@ public class QuickAssistLightBulbUpdater {
 		fAnnotation= new AssistAnnotation();
 		fIsAnnotationShown= false;
 		fPropertyChangeListener= null;
-		
-		fCurrentJob= null;
 	}
 	
 	public boolean isSetInPreferences() {
@@ -113,23 +99,21 @@ public class QuickAssistLightBulbUpdater {
 	}
 	
 	private void installSelectionListener() {
-		ISelectionProvider provider= fViewer.getSelectionProvider();
-		if (provider instanceof IPostSelectionProvider) {
-			fListener= new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					doSelectionChanged();
-				}
-			};
-			((IPostSelectionProvider) provider).addPostSelectionChangedListener(fListener);
-		}		
+		fListener= new ISelectionListenerWithAST() {
+			public void selectionChanged(IEditorPart part, ITextSelection selection, CompilationUnit astRoot) {
+				doSelectionChanged(selection.getOffset(), selection.getLength(), astRoot);
+			}
+		};
+		SelectionListenerWithASTManager.getDefault().addListener(fEditor, fListener);
 	}
 	
 	private void uninstallSelectionListener() {
-		IAnnotationModel model= getAnnotationModel();
-		if (fListener != null && model != null) {
-			IPostSelectionProvider provider= (IPostSelectionProvider) fViewer.getSelectionProvider();
-			provider.removePostSelectionChangedListener(fListener);
+		if (fListener != null) {
+			SelectionListenerWithASTManager.getDefault().removeListener(fEditor, fListener);
 			fListener= null;
+		}
+		IAnnotationModel model= getAnnotationModel();
+		if (model != null) {
 			removeLightBulb(model);
 		}
 	}	
@@ -159,21 +143,24 @@ public class QuickAssistLightBulbUpdater {
 	protected void doPropertyChanged(String property) {
 		if (property.equals(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB)) {
 			if (isSetInPreferences()) {
-				installSelectionListener();
-				doSelectionChanged();
+				ICompilationUnit cu= getCompilationUnit();
+				if (cu != null) {
+					installSelectionListener();
+					Point point= fViewer.getSelectedRange();
+					CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+					doSelectionChanged(point.x, point.y, astRoot);
+				}
 			} else {
 				uninstallSelectionListener();
 			}			
 		}
 	}	
 	
-	private ICompilationUnit getCompilationUnit(IEditorInput input) {
-		if (input instanceof IFileEditorInput) {
-			IFile file= ((IFileEditorInput) input).getFile();
-			IJavaElement element= JavaCore.create(file);
-			if (element instanceof ICompilationUnit) {
-				return JavaModelUtil.toWorkingCopy((ICompilationUnit) element);
-			}
+	private ICompilationUnit getCompilationUnit() {
+		IEditorInput input= fEditor.getEditorInput();
+		Object elem= input.getAdapter(IJavaElement.class);
+		if (elem instanceof ICompilationUnit) {
+			return (ICompilationUnit) elem;
 		}
 		return null;
 	}
@@ -187,21 +174,16 @@ public class QuickAssistLightBulbUpdater {
 	}
 	
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
-	 */
-	private void doSelectionChanged() {
+	private void doSelectionChanged(int offset, int length, CompilationUnit astRoot) {
 		
 		final IAnnotationModel model= getAnnotationModel();
-		final ICompilationUnit cu= getCompilationUnit(fEditor.getEditorInput());
+		final ICompilationUnit cu= getCompilationUnit();
 		if (model == null || cu == null) {
 			return;
 		}
 		
-		Point point= fViewer.getSelectedRange();
-		int offset= point.x;
-		int length= point.y;
-		final IInvocationContext context= new AssistContext(cu, offset, length);
+		final AssistContext context= new AssistContext(cu, offset, length);
+		context.setASTRoot(astRoot);
 		
 		boolean hasQuickFix= hasQuickFixLightBulb(model, context.getSelectionOffset());
 		if (hasQuickFix) {
@@ -209,24 +191,7 @@ public class QuickAssistLightBulbUpdater {
 			return; // there is already a quick fix light bulb at the new location
 		}
 		
-		if (fCurrentJob != null) {
-			fCurrentJob.cancel();
-			fCurrentJob= null;
-		}
-				
-		fCurrentJob= new Job(CorrectionMessages.getString("QuickAssistLightBulbUpdater.job.title")) { //$NON-NLS-1$
-			public IStatus run(IProgressMonitor monitor) {
-				synchronized (QuickAssistLightBulbUpdater.this) {
-					if (this != fCurrentJob) {
-						return Status.OK_STATUS;
-					}
-					calculateLightBulb(model, context);
-					return Status.OK_STATUS;
-				}
-			}
-		};
-		fCurrentJob.setPriority(Job.DECORATE);
-		fCurrentJob.schedule();
+		calculateLightBulb(model, context);
 	}
 	
 	/*
