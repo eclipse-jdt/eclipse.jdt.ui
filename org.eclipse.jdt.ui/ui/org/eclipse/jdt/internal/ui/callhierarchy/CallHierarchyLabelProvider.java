@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import java.util.Collection;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.jface.viewers.ILabelDecorator;
 
@@ -44,6 +45,8 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
             if (methodWrapper.getMember() != null) {
                 result= fDecorator.decorateImage(super.getImage(methodWrapper.getMember()), methodWrapper);
             }
+        } else if (isPendingUpdate(element)) {
+            return null;
         } else {
             result= super.getImage(element);
         }
@@ -65,11 +68,16 @@ class CallHierarchyLabelProvider extends AppearanceAwareLabelProvider {
             }
         } else if (element == TreeTermination.SEARCH_CANCELED) {
             return CallHierarchyMessages.getString("CallHierarchyLabelProvider.searchCanceled"); //$NON-NLS-1$
+        } else if (isPendingUpdate(element)) {
+            return CallHierarchyMessages.getString("CallHierarchyLabelProvider.updatePending");
         }
 
         return CallHierarchyMessages.getString("CallHierarchyLabelProvider.noMethodSelected"); //$NON-NLS-1$
     }
 
+    private boolean isPendingUpdate(Object element) {
+        return element instanceof IWorkbenchAdapter;
+    }
     private String getElementLabel(MethodWrapper methodWrapper) {
         String label = super.getText(methodWrapper.getMember());
 

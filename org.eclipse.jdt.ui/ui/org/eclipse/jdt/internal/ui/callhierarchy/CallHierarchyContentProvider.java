@@ -16,6 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
@@ -24,10 +25,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.ui.progress.DeferredTreeContentManager;
 
 public class CallHierarchyContentProvider implements ITreeContentProvider {
     private final static Object[] EMPTY_ARRAY = new Object[0];
 
+    private DeferredTreeContentManager manager;
+    
     private class MethodWrapperRunnable implements IRunnableWithProgress {
         private MethodWrapper fMethodWrapper;
         private MethodWrapper[] fCalls= null;
@@ -66,22 +70,31 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
             if (shouldStopTraversion(methodWrapper)) {
                 return EMPTY_ARRAY;
             } else {
-                IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
-                MethodWrapperRunnable runnable= new MethodWrapperRunnable(methodWrapper);
-                try {
-                    context.run(true, true, runnable);
-                } catch (InvocationTargetException e) {
-                    ExceptionHandler.handle(e, CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.title"), CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.message"));  //$NON-NLS-1$ //$NON-NLS-2$
-                    return EMPTY_ARRAY;
-                } catch (InterruptedException e) {
-                    return new Object[] { TreeTermination.SEARCH_CANCELED };
+                if (manager != null) {
+                    Object[] children = manager.getChildren(new DeferredMethodWrapper(this, methodWrapper));
+                    if (children != null)
+                        return children;
                 }
-
-                return runnable.getCalls();
+                return fetchChildren(methodWrapper);            
             }
         }
 
         return EMPTY_ARRAY;
+    }
+
+    protected Object[] fetchChildren(MethodWrapper methodWrapper) {
+        IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+        MethodWrapperRunnable runnable= new MethodWrapperRunnable(methodWrapper);
+        try {
+            context.run(true, true, runnable);
+        } catch (InvocationTargetException e) {
+            ExceptionHandler.handle(e, CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.title"), CallHierarchyMessages.getString("CallHierarchyContentProvider.searchError.message"));  //$NON-NLS-1$ //$NON-NLS-2$
+            return EMPTY_ARRAY;
+        } catch (InterruptedException e) {
+            return new Object[] { TreeTermination.SEARCH_CANCELED };
+        }
+        
+        return runnable.getCalls();
     }
 
     private boolean shouldStopTraversion(MethodWrapper methodWrapper) {
@@ -120,6 +133,12 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
         if (element == TreeRoot.EMPTY_ROOT || element == TreeTermination.SEARCH_CANCELED) {
             return false;
         }
+
+        if (manager != null) {
+            if (manager.isDeferredAdapter(element))
+                return manager.mayHaveChildren(element);
+        }
+
         // Only methods can have subelements, so there's no need to fool the user into believing that there is more
         if (element instanceof MethodWrapper) {
             MethodWrapper methodWrapper= (MethodWrapper) element;
@@ -138,6 +157,8 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-        // Do nothing
+        if (viewer instanceof AbstractTreeViewer) {
+            manager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer);
+        }
     }
 }
