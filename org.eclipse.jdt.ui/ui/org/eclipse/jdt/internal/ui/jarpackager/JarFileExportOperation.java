@@ -45,10 +45,9 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.javaPackageNotDeterminable", resource.getFullPath()), ex); //$NON-NLS-1$						return;					}
 				}			}						if (pkgRoot != null) {				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();				if (fJarPackage.useSourceFolderHierarchy()&& !pkgRoot.getElementName().equals(pkgRoot.DEFAULT_PACKAGEROOT_PATH))					leadSegmentsToRemove--;			}			
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
-			progressMonitor.subTask(destinationPath.toString());
 						boolean isInOutputFolder= false;			if (isInJavaProject) {				try {					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());				} catch (JavaModelException ex) {					isInOutputFolder= false;				}			}			
 			exportClassFiles(progressMonitor, pkgRoot, resource, jProject, destinationPath);
-			exportResourceFiles(pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
+			exportResourceFiles(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
 		} else			exportContainer(progressMonitor, resource);
@@ -66,7 +65,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			exportElement(children[i], progressMonitor);
 	}
 
-	private void exportResourceFiles(IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
+	private void exportResourceFiles(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
 		boolean isNonJavaResource= !isInJavaProject || (pkgRoot == null && !isInOutputFolder);
 		boolean isInClassFolder= false;
 		try {
@@ -78,7 +77,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 					((isNonJavaResource || (pkgRoot != null && !isJavaFile(resource) && !isClassFile(resource)))
 					|| isInClassFolder && isClassFile(resource)))
 			|| (fJarPackage.areJavaFilesExported() && (isNonJavaResource || (pkgRoot != null && !isClassFile(resource))))) {
-			try {
+			try {				progressMonitor.subTask(destinationPath.toString());
 				fJarWriter.write((IFile) resource, destinationPath);
 			} catch (IOException ex) {
 				String message= ex.getMessage();
@@ -103,9 +102,8 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
 					if (!resource.isLocal(IResource.DEPTH_ZERO))						
-						file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);
-					fJarWriter.write(file, baseDestinationPath.append(file.getName()));
-				}
+						file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);					IPath classFilePath= baseDestinationPath.append(file.getName());
+					progressMonitor.subTask(classFilePath.toString());					fJarWriter.write(file, classFilePath);				}
 			} catch (IOException ex) {
 				String message= ex.getMessage();
 				if (message == null)
