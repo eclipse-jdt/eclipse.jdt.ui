@@ -15,11 +15,15 @@ public class JavaElementUtil {
 	private JavaElementUtil(){
 	}
 	
-	public static String createMethodSignature(IMethod method) throws JavaModelException {
-		return Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, true);
+	public static String createMethodSignature(IMethod method){
+		try {
+			return Signature.toString(method.getSignature(), method.getElementName(), method.getParameterNames(), false, true);
+		} catch(JavaModelException e) {
+			return method.getElementName(); //fallback
+		}
 	}
 	
-	public static String createFieldSignature(IField field) throws JavaModelException {
+	public static String createFieldSignature(IField field){
 		return field.getDeclaringType().getFullyQualifiedName() + "." + field.getElementName();
 	}
 	
