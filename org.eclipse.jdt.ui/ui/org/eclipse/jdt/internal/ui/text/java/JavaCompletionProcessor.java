@@ -59,6 +59,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	
 	private char[] fProposalAutoActivationSet;
 	private Comparator fComparator;
+	private boolean fAllowAddImports;
 	
 	private TemplateEngine fTemplateEngine;
 	private ExperimentalResultCollector fExperimentalCollector;	
@@ -70,6 +71,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
 		fTemplateEngine= new TemplateEngine(TemplateContext.JAVA);
 		fExperimentalCollector= new ExperimentalResultCollector();
+		fAllowAddImports= true;
 	}
 	
 	/**
@@ -118,6 +120,16 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 	public void restrictProposalsToMatchingCases(boolean restrict) {
 		// not yet supported
 	}
+	
+	/**
+	 * Tells this processor to add import statement for proposals that have
+	 * a fully qualified type name
+	 * 
+	 * @param restrict <code>true</code> if import can be added
+	 */
+	public void allowAddingImports(boolean allowAddingImports) {
+		fAllowAddImports= allowAddingImports;
+	}	
 		
 	/**
 	 * @see IContentAssistProcessor#getErrorMessage()
@@ -170,7 +182,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			try {
 				if (unit != null) {
 	
-					fExperimentalCollector.reset(viewer, offset, unit.getJavaProject(), unit);
+					fExperimentalCollector.reset(viewer, offset, unit.getJavaProject(), fAllowAddImports ? unit : null);
 					Point selection= viewer.getSelectedRange();
 					if (selection.y > 0)
 						fExperimentalCollector.setReplacementLength(selection.y);
@@ -189,7 +201,7 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 			try {
 				if (unit != null) {
 	
-					fCollector.reset(offset, unit.getJavaProject(), unit);
+					fCollector.reset(offset, unit.getJavaProject(), fAllowAddImports ? unit : null);
 					Point selection= viewer.getSelectedRange();
 					if (selection.y > 0)
 						fCollector.setReplacementLength(selection.y);

@@ -115,7 +115,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.SHOW_VISIBLE_PROPOSALS),
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ORDER_PROPOSALS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.CASE_SENSITIVITY),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, ContentAssistPreference.ADD_IMPORT)
 		
 	};
 	
@@ -232,6 +233,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		PreferenceConverter.setDefault(store, ContentAssistPreference.PARAMETERS_FOREGROUND, new RGB(0, 0, 0));
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVA, ".,");
 		store.setDefault(ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, "@");
+		store.setDefault(ContentAssistPreference.SHOW_VISIBLE_PROPOSALS, false);
+		store.setDefault(ContentAssistPreference.CASE_SENSITIVITY, false);
+		store.setDefault(ContentAssistPreference.ORDER_PROPOSALS, false);
+		store.setDefault(ContentAssistPreference.ADD_IMPORT, true);				
+
 	}
 
 	/*
@@ -419,6 +425,9 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= "&Enable auto activation";
 		addCheckBox(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION, 0);
+
+		label= "Automatically add &import instead of qualified name";
+		addCheckBox(contentAssistComposite, label, ContentAssistPreference.ADD_IMPORT, 0);
 		
 		label= "Auto activation &delay:";
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_DELAY, 4, 0);

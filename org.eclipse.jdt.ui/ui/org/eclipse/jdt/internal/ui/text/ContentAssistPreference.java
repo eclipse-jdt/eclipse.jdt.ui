@@ -50,7 +50,8 @@ public class ContentAssistPreference {
 	public final static String ORDER_PROPOSALS= "content_assist_order_proposals";
 	/** Preference key for case sensitivity of propsals */
 	public final static String CASE_SENSITIVITY= "content_assist_case_sensitivity";
-	
+	/** Preference key for adding imports on code assist */
+	public final static String ADD_IMPORT= "content_assist_add_import";	
 	
 	private static Color getColor(IPreferenceStore store, String key, IColorManager manager) {
 		RGB rgb= PreferenceConverter.getColor(store, key);
@@ -93,6 +94,9 @@ public class ContentAssistPreference {
 		
 		enabled= store.getBoolean(ORDER_PROPOSALS);
 		jcp.orderProposalsAlphabetically(enabled);
+		
+		enabled= store.getBoolean(ADD_IMPORT);
+		jcp.allowAddingImports(enabled);		
 	}
 	
 	private static void configureJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store) {
@@ -164,6 +168,9 @@ public class ContentAssistPreference {
 		} else if (ORDER_PROPOSALS.equals(key)) {
 			boolean enable= store.getBoolean(ORDER_PROPOSALS);
 			jcp.orderProposalsAlphabetically(enable);
+		} else if (ADD_IMPORT.equals(key)) {
+			boolean enabled= store.getBoolean(ADD_IMPORT);
+			jcp.allowAddingImports(enabled);
 		}
 	}
 	
