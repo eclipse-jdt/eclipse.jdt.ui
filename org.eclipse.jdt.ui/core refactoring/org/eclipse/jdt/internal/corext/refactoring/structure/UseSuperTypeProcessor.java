@@ -251,15 +251,15 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor#rewriteTypeOccurrences(org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager, org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit, java.util.Set)
 	 */
-	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite subRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
+	protected final void rewriteTypeOccurrences(final TextChangeManager manager, final CompilationUnitRewrite sourceRewrite, final ICompilationUnit unit, final CompilationUnit node, final Set replacements) throws CoreException {
 		final Collection collection= (Collection) fTypeOccurrences.get(unit);
 		if (collection != null && !collection.isEmpty()) {
 			TType type= null;
 			ISourceConstraintVariable variable= null;
 			CompilationUnitRewrite rewrite= null;
-			final ICompilationUnit sub= subRewrite.getCu();
-			if (sub.equals(unit))
-				rewrite= subRewrite;
+			final ICompilationUnit sourceUnit= sourceRewrite.getCu();
+			if (sourceUnit.equals(unit))
+				rewrite= sourceRewrite;
 			else
 				rewrite= new CompilationUnitRewrite(unit, node);
 			for (final Iterator iterator= collection.iterator(); iterator.hasNext();) {
@@ -267,7 +267,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				type= (TType) variable.getData(SuperTypeConstraintsSolver.DATA_TYPE_ESTIMATE);
 				if (type != null && variable instanceof ITypeConstraintVariable) {
 					rewriteTypeOccurrence(((ITypeConstraintVariable) variable).getRange(), rewrite, node, rewrite.createGroupDescription(RefactoringCoreMessages.getString("SuperTypeRefactoringProcessor.update_type_occurrence"))); //$NON-NLS-1$
-					if (!sub.equals(unit)) {
+					if (!sourceUnit.equals(unit)) {
 						final TextChange change= rewrite.createChange();
 						if (change != null)
 							manager.manage(unit, change);
