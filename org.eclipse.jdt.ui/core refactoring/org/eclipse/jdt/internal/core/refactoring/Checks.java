@@ -330,28 +330,34 @@ public class Checks {
 	/**
 	 * From the List of Lists of SearchResults passed as the parameter
 	 * this method removes all those that correspond to a non-parsable ICompilationUnit
+	 * Also it removes all those that are not saved - passed as a parameter.
 	 * Returns the status describing the result of this check.
-	 * Note: it modifies the parameter.
+	 * Note: it modifies the first parameter.
 	 * 
 	 * @see ICompilationUnit::isStructureKnown
 	 */
-	public static RefactoringStatus excludeBrokenCompilationUnits(List grouped) throws JavaModelException{
+	public static RefactoringStatus excludeCompilationUnits(List grouped, List unsavedFiles) throws JavaModelException{
+		Assert.isNotNull(unsavedFiles);
 		RefactoringStatus result= new RefactoringStatus();	
-		
 		boolean wasEmpty= grouped.isEmpty();
-		
 		for (Iterator iter= grouped.iterator(); iter.hasNext(); ){	
 			List searchResults= (List)iter.next();
-			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(((SearchResult)searchResults.get(0)).getResource());
+			IResource resource= ((SearchResult)searchResults.get(0)).getResource();
+			if (unsavedFiles.contains(resource)){
+				result.addError("\"" + resource.getFullPath() + "\" should be modified but it is not saved. Content of that file will not be updated.");
+				iter.remove();
+				continue; //removed, go to the next one
+			}
+			ICompilationUnit cu= (ICompilationUnit)JavaCore.create(resource);
 			if (! cu.isStructureKnown()){
 				String path= AbstractRefactoringASTAnalyzer.getFullPath(cu);
-				result.addError("\"" + path + "\" cannot be correctly parsed and will be excluded from refactoring if you proceed");
+				result.addError("\"" + path + "\" cannot be correctly parsed. Content of that file will not be updated.");
 				iter.remove();
 			}	
 		}
 		
 		if ((!wasEmpty) && grouped.isEmpty())
-			result.addFatalError("No resources left to refactor. Cannot proceed");
+			result.addFatalError("All resources have been excluded from refactoring. Cannot proceed");
 		return result;	
 	}
 	

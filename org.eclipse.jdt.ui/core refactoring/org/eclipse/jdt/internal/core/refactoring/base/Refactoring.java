@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.base;
 
-import org.eclipse.core.resources.IResource;
+import java.util.List;import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -27,12 +27,11 @@ import org.eclipse.jdt.internal.core.refactoring.UndoManager;
  * code that uses this API will almost certainly be broken (repeatedly) as the API evolves.</p>
  */
 public abstract class Refactoring implements IRefactoring {
-
-	private static IUndoManager fgUndoManager= new UndoManager();
-
+	private static IUndoManager fgUndoManager= new UndoManager();
 	private static final IJavaSearchScope DEFAULT_SCOPE= SearchEngine.createWorkspaceScope();
 	
 	private IJavaSearchScope fScope= DEFAULT_SCOPE;
+	private List fUnsavedFileList; //list of IFiles
 		
 	public Refactoring(){
 	}
@@ -53,6 +52,14 @@ public abstract class Refactoring implements IRefactoring {
 	public final void setScope(IJavaSearchScope scope){
 		Assert.isNotNull(scope);
 		fScope= scope;
+	}
+	
+	public void setUnsavedFileList(List list){
+		fUnsavedFileList= list;
+	}
+	
+	protected List getUnsavedFileList(){
+		return fUnsavedFileList;
 	}
 	
 	/* non java-doc

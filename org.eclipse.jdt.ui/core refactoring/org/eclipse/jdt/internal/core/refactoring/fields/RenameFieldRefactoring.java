@@ -198,7 +198,7 @@ public class RenameFieldRefactoring extends FieldRefactoring implements IRenameR
 	 * Analyzes all compilation units in which type is referenced
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
-		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(fOccurrences);
+		RefactoringStatus result= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFileList());
 		if (result.hasFatalError())
 			return result;
 			

@@ -5,7 +5,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
+import java.lang.reflect.InvocationTargetException;import java.util.ArrayList;import java.util.Arrays;import java.util.Iterator;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.operation.IRunnableWithProgress;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.IStructuredContentProvider;import org.eclipse.jface.viewers.LabelProvider;import org.eclipse.jface.wizard.IWizardPage;import org.eclipse.core.resources.IFile;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IFileEditorInput;import org.eclipse.ui.dialogs.ListSelectionDialog;import org.eclipse.jdt.internal.core.refactoring.DebugUtils;import org.eclipse.jdt.internal.core.refactoring.base.IChange;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
  * An abstract wizard page that can be used to implement user input pages for 
@@ -135,7 +135,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	/**
 	 * Creates a runnable to be used inside an operation to save all editors.
 	 */
-	private IRunnableWithProgress createRunnable(final List editorsToSave) {
+	private static IRunnableWithProgress createRunnable(final List editorsToSave) {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) {
 				Iterator iter= editorsToSave.iterator();
@@ -145,7 +145,7 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 		};
 	}
 		
-	private ILabelProvider createLabelProvider() {
+	private static ILabelProvider createLabelProvider() {
 		return new LabelProvider() {
 			public Image getImage(Object element) {
 				return ((IEditorPart) element).getTitleImage();
@@ -160,33 +160,54 @@ public abstract class UserInputWizardPage extends RefactoringWizardPage {
 	 * @return null on cancel and a list of selected elements otherwise
 	 * returns an empty array if there were no editors to save.
 	 */
-	private List getEditorsToSave(){
-		Object[] unsavedEditors= JavaPlugin.getDirtyEditors();
-		List unsavedEditorsList= Arrays.asList(unsavedEditors);
+	private static List getEditorsToSave(List unsavedEditors){
 		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
-			return unsavedEditorsList;
-		if (unsavedEditorsList == null || unsavedEditorsList.isEmpty())
+			return unsavedEditors;
+		if (unsavedEditors == null || unsavedEditors.isEmpty())
 			return new ArrayList(0); //as promised in the contract
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		String message= RefactoringResources.getResourceString("SaveEditorsDialog.message");
 		String title= RefactoringResources.getResourceString("SaveEditorsDialog.title");
-		SaveDialog dialog= new SaveDialog(parent, unsavedEditorsList, new ListContentProvider(),	createLabelProvider(), message);
+		SaveDialog dialog= new SaveDialog(parent, unsavedEditors, new ListContentProvider(), createLabelProvider(), message);
 		dialog.setTitle(title);
 		dialog.setBlockOnOpen(true);
-		dialog.setInitialSelections(unsavedEditors);	
-		boolean cancel= dialog.open() == ListSelectionDialog.CANCEL;
-		if (cancel)
+		dialog.setInitialSelections(unsavedEditors.toArray());	
+		if (dialog.open() == ListSelectionDialog.CANCEL)
 			return null;
 		else
 			return Arrays.asList(dialog.getResult());
 	}
-
+	
+	//a-b
+	private static List createDifference(List a, List b){
+		List temp= new ArrayList(a); //make sure you can remove
+		if (b == null)
+			return temp;
+		temp.removeAll(b);
+		return temp;
+	}
+	
+	private static List getFiles(List editorParts){
+		List result= new ArrayList(editorParts.size());
+		for (Iterator iter= editorParts.iterator(); iter.hasNext(); ){
+			IEditorPart each= (IEditorPart)iter.next();
+			IEditorInput input= each.getEditorInput();
+			if (input instanceof IFileEditorInput)
+				result.add(((IFileEditorInput)input).getFile());
+		}
+		return result;
+	}
+		
 	/**
 	 * Save open editors to make sure the java search and AST is working correctly.
 	 * Returns <code>true</code> if saving was successful. Otherwise <code>false</code> is returned.
 	 */
 	private boolean saveOpenEditors() {
-		List editorsToSave= getEditorsToSave();
+		List unsavedEditorsList= Arrays.asList(JavaPlugin.getDirtyEditors());
+		List editorsToSave= getEditorsToSave(unsavedEditorsList);
+		List unsavedFiles= getFiles(createDifference(unsavedEditorsList, editorsToSave));
+		//XXX no the nicest place to do this
+		getRefactoring().setUnsavedFileList(unsavedFiles);
 		if (editorsToSave == null) //saving canceled, so unsuccesful
 			return false;
 		if (editorsToSave.isEmpty()) //nothing to do

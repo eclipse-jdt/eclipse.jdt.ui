@@ -4,7 +4,7 @@
  */
 package org.eclipse.jdt.internal.core.refactoring.cus;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import java.util.List;import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
@@ -42,7 +42,16 @@ public class RenameCompilationUnitRefactoring extends CompilationUnitRefactoring
 			fRenameTypeRefactoring= null;
 		fWillRenameType= (fRenameTypeRefactoring != null);	
 	}
-
+
+	/* non javadoc
+	 * see Refactoring#setUnsavedFileList
+	 */
+	public void setUnsavedFileList(List list){
+		super.setUnsavedFileList(list);
+		if (fRenameTypeRefactoring != null)
+			fRenameTypeRefactoring.setUnsavedFileList(list);
+	}
+		
 	/**
 	 * @see IRenameRefactoring#setNewName(String)
 	 * @param newName 'java' must be included

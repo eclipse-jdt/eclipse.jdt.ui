@@ -92,7 +92,7 @@ public class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		if (grouped.isEmpty())
 			return null;
 			
-		RefactoringStatus result= Checks.excludeBrokenCompilationUnits(grouped);
+		RefactoringStatus result= Checks.excludeCompilationUnits(grouped, getUnsavedFileList());
 		if (result.hasFatalError())
 			return result;
 			
