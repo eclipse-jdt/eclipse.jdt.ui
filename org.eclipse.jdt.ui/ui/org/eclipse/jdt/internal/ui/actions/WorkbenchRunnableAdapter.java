@@ -46,7 +46,7 @@ public class WorkbenchRunnableAdapter implements IRunnableWithProgress {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		try {
-			if (fRule == null) {
+			if (fRule == null || true) { // wait for answer of bug 53905
 				JavaCore.run(fWorkspaceRunnable, monitor);
 			} else {
 				JavaCore.run(fWorkspaceRunnable, fRule, monitor);
