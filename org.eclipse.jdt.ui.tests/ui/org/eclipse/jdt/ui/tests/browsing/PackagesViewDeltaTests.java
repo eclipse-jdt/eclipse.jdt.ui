@@ -22,6 +22,8 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.swt.widgets.Control;
+
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.IViewPart;
@@ -112,63 +114,70 @@ public class PackagesViewDeltaTests extends TestCase {
 	
 	//-----------------Remove delta test cases------------------
 	
-	public void testRemoveTopLevelFragmentNotCompound() throws Exception {
+	public void testRemoveTopLevelFragmentNotLogicalPackage() throws Exception {
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
 		fProvider.getChildren(cp3);
+
+		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack12);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		pushDisplay();
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
 	}
 
-	public void testRemoveBottomLevelFragmentNotCompound() throws Exception {
+	public void testRemoveBottomLevelFragmentNotLogicalPackage() throws Exception {
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
+
+		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack42);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("No remove happened, in Logical Package", !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 	}
 
 	//This is a bogus test because this situation could never occure
 	//while fPack42 exists you cannot remove fPack32 still it tests 
 	//correct delta handeling.
-	public void testRemoveFragmentInMultiFragmentCompoundElement() throws Exception {
+	public void testRemoveFragmentInMultiFragmentLogicalPackage() throws Exception {
 
 		//initialise the map
+		fMyPart.fViewer.setInput(fJProject);
 		Object[] children= fProvider.getChildren(fJProject);
 		for (int i= 0; i < children.length; i++) {
 			Object object= children[i];
 			fProvider.getChildren(object);
 		}
 
-		//create a compound element child of cp
+		//create a logical package with name "pack3"
 		LogicalPackage expectedParent= new LogicalPackage(fPack31);
 		expectedParent.add(fInternalPack3);
 
-		//create a compound element child of cp
+		//create a logical package with name "pack3.pack4"
 		LogicalPackage ChildCp1= new LogicalPackage(fPack41);
 		ChildCp1.add(fPack42);
 		ChildCp1.add(fInternalPack4);
+
+		fMyPart.clear();
 
 		//delete a fragment
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
@@ -176,37 +185,37 @@ public class PackagesViewDeltaTests extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		//assert remove happened
 		assertTrue("Refresh happened", !fMyPart.hasRemoveHappened() && !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 
-		//test life cycle of CompoundElement
+		//test life cycle of Logical Package
 		Object parent= fProvider.getParent(ChildCp1);
 		if (!(parent instanceof LogicalPackage)) {
-			assertTrue("wrong parent found for compound after remove", false); //$NON-NLS-1$
+			assertTrue("wrong parent found for logical package after remove", false); //$NON-NLS-1$
 		}
 
-		LogicalPackage element= (LogicalPackage) parent;
-		assertTrue("PackageFragment removed from CompoundElement", canFindEqualCompoundElement(element, new Object[] { expectedParent })); //$NON-NLS-1$
+		LogicalPackage lp= (LogicalPackage) parent;
+		assertTrue("PackageFragment removed from logical package", lp.equals(expectedParent)); //$NON-NLS-1$
 
 	}
 
-	public void testRemoveBottomLevelFragmentInMultiFragmentCompoundElement() throws Exception {
+	public void testRemoveBottomLevelFragmentInMultiFragmentLogicalPackage() throws Exception {
 
 		//delete a fragment
 		fPack62.delete(true, null);
 
-		//create a compound element child of cp with name "pack6"
+		//create a logical package child of cp with name "pack3.pack5.pack6"
 		LogicalPackage expectedChild= new LogicalPackage(fPack61);
 		expectedChild.add(fInternalPack6);
 
-		//create a compound element child of cp with name "pack5"
+		//create a logical package child of cp with name "pack3.pack5"
 		LogicalPackage ParentCp5= new LogicalPackage(fPack51);
 		ParentCp5.add(fPack52);
 		ParentCp5.add(fInternalPack5);
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
@@ -216,36 +225,38 @@ public class PackagesViewDeltaTests extends TestCase {
 		fProvider.getChildren(cp3);
 		fProvider.getChildren(ParentCp5);
 
+		fMyPart.clear();
+
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack62);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		//assert delta correct (no remove or refresh, only change to logicalpackage)
 		assertTrue("Refresh happened", !fMyPart.hasRefreshHappened() && !fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 
-		//test life cycle of CompoundElement
+		//test life cycle of LogicalPackage
 		Object[] child= fProvider.getChildren(ParentCp5);
 		
 		if ((child.length != 1) || (!(child[0] instanceof LogicalPackage))) {
-			assertTrue("wrong parent found for compound after remove", false); //$NON-NLS-1$
+			assertTrue("wrong parent found for logical package after remove", false); //$NON-NLS-1$
 		}
 
-		LogicalPackage element= (LogicalPackage) child[0];
-		assertTrue("PackageFragment removed from CompoundElement", canFindEqualCompoundElement(element, new Object[] { expectedChild })); //$NON-NLS-1$
+		LogicalPackage lp= (LogicalPackage) child[0];
+		assertTrue("PackageFragment removed from logical package", lp.equals(expectedChild)); //$NON-NLS-1$
 	}
 
-	public void testRemoveFragmentInTwoFragmentCompound() throws Exception {
+	public void testRemoveFragmentInTwoFragmentLogicalPackage() throws Exception {
 
-		//create a compound element child of cp
+		//create a logical package child of cp
 		LogicalPackage ParentCp4= new LogicalPackage(fPack41);
 		ParentCp4.add(fPack42);
 		ParentCp4.add(fInternalPack4);
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
@@ -255,38 +266,40 @@ public class PackagesViewDeltaTests extends TestCase {
 		fProvider.getChildren(cp3);
 		fProvider.getChildren(ParentCp4);
 
-		//create CompoundElement containning
+		//create logical package with name "pack3.pack4.pack10"
 		LogicalPackage cp10= new LogicalPackage(fInternalPack10);
-		//cp10.add(fInternalPack10);
 
 		//delete fragment
 		fPack102.delete(true, null);
+
+		fMyPart.clear();
 
 		//send a delta indicating fragment deleted
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack102);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		pushDisplay();
+
 		//assert remove happened (delta worked)
 		assertTrue("Refresh happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
 		Object addedObject= fMyPart.getAddedObject().get(0);
 		Object removedObject= fMyPart.getRemovedObject().get(0);
-		assertTrue("Correct guy removed", canFindEqualCompoundElement(cp10, new Object[] { removedObject })); //$NON-NLS-1$
+		assertTrue("Correct guy removed", cp10.equals(removedObject)); //$NON-NLS-1$
 		assertTrue("Correct guy added", fInternalPack10.equals(addedObject)); //$NON-NLS-1$
-
-		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
 
 		//assert correct children gotten
 		Object[] children= fProvider.getChildren(ParentCp4);
-		assertTrue("PackageFragment removed from CompoundElement", compareArrays(children, new Object[] { fPack91, fInternalPack10 })); //$NON-NLS-1$
+		assertTrue("PackageFragment removed from logial package", compareArrays(children, new Object[] { fPack91, fInternalPack10 })); //$NON-NLS-1$
 	}
 
 	//-----------------------Add delta test cases----------------------------------
-	public void testAddTopLevelFragmentNotCompound() throws Exception {
+	public void testAddTopLevelFragmentNotLogicalPackage() throws Exception {
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
+
+		fMyPart.clear();
 
 		IPackageFragment test= fRoot1.createPackageFragment("pack3.test", true, null); //$NON-NLS-1$
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
@@ -294,50 +307,100 @@ public class PackagesViewDeltaTests extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
+	
+	public void testAddFragmentToLogicalPackage() throws Exception {
 
-	public void testAddCUFromFragmentNotCompound() throws Exception {
+		//create a logical package with name "pack3.pack4"
+		LogicalPackage cp4= new LogicalPackage(fPack41);
+		cp4.add(fPack42);
+		cp4.add(fInternalPack4);
+		  
+		//initialise Map  
+		fProvider.getChildren(cp4);
 
-		//create a compound element for packages with name "pack3"
+		//send delta
+		IPackageFragment pack101= fRoot1.createPackageFragment("pack3.pack4.pack10", true, null); //$NON-NLS-1$
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.ADDED, pack101);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+		
+		//force events from display
+		pushDisplay();
+		
+		//make sure no refresh happened
+		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+	}
+
+	public void testAddCUFromFragmentNotLogicalPackageVisible() throws Exception {
+
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
 
-		//initialise Map
-		fProvider.getChildren(fJProject);
-		fProvider.getChildren(cp3);
-
 		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
 
-		//make sure parent is visible
+		//initialise Map
 		fMyPart.fViewer.setInput(fJProject);
+		fProvider.getChildren(cp3);
+
 		fMyPart.fViewer.reveal(fPack81);
+
+		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.ADDED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 	
-	public void testRemoveCUFromFragmentNotCompound() throws Exception {
+	public void testAddCUFromFragmentNotLogicalPackageNotVisible() throws Exception {
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
+		LogicalPackage cp3= new LogicalPackage(fPack31);
+		cp3.add(fPack32);
+		cp3.add(fInternalPack3);
+
+		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+
+		//initialise Map
+		fMyPart.fViewer.setInput(fJProject);
+		fProvider.getChildren(cp3);
+
+		fMyPart.clear();
+
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.ADDED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
+		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+	public void testRemoveCUFromFragmentNotLogicalPackage() throws Exception {
+
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
 		fProvider.getChildren(cp3);
 
 		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
@@ -345,54 +408,60 @@ public class PackagesViewDeltaTests extends TestCase {
 		//make sure parent is visible
 		fMyPart.fViewer.setInput(fJProject);
 		fMyPart.fViewer.reveal(fPack81);		
+		
+		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 	
-	public void testRemoveCUFromFragmentNotCompoundParentNotVisible() throws Exception {
+	public void testRemoveCUFromFragmentNotLogicalPackageWithParentNotVisible() throws Exception {
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
 		fProvider.getChildren(cp3);
 
 		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+
+		fMyPart.clear();
 
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(cp3)); //$NON-NLS-1$
 		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 	
-	public void testAddBottomLevelFragmentNotCompound() throws Exception {
+	public void testAddBottomLevelFragmentNotLogicalPackage() throws Exception {
 
-		//create a compound element for packages with name "pack3"
+		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
 		cp3.add(fInternalPack3);
 
 		//initialise Map
-		fProvider.getChildren(fJProject);
+		fMyPart.fViewer.setInput(fJProject);
 		fProvider.getChildren(cp3);
+
+		fMyPart.clear();
 
 		IPackageFragment test= fRoot1.createPackageFragment("pack3.pack5.test", true, null); //$NON-NLS-1$
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
@@ -400,8 +469,8 @@ public class PackagesViewDeltaTests extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
-
+		pushDisplay();
+		
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Corrent package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
 	}
@@ -536,25 +605,11 @@ public class PackagesViewDeltaTests extends TestCase {
 					return false;
 				}
 			} else if (child instanceof LogicalPackage) {
-				if (!canFindEqualCompoundElement((LogicalPackage) child, expectedChildren))
+				if (!contains((LogicalPackage) child, expectedChildren))
 					return false;
 			}
 		}
 		return true;
-	}
-
-	private boolean canFindEqualCompoundElement(LogicalPackage compoundElement, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
-			if (object instanceof LogicalPackage) {
-				LogicalPackage el= (LogicalPackage) object;
-				if (el.getElementName().equals(compoundElement.getElementName()) && (el.getJavaProject().equals(compoundElement.getJavaProject()))) {
-					if (compareArrays(el.getFragments(), compoundElement.getFragments()))
-						return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	private boolean contains(IResource res, Object[] expectedChildren) {
@@ -579,5 +634,23 @@ public class PackagesViewDeltaTests extends TestCase {
 			}
 		}
 		return false;
+	}
+	
+	private boolean contains(LogicalPackage lp, Object[] expectedChildren) {
+		for (int i= 0; i < expectedChildren.length; i++) {
+			Object object= expectedChildren[i];
+			if (object instanceof LogicalPackage) {
+				LogicalPackage explp= (LogicalPackage) object;
+				if (explp.equals(lp))
+					return true;
+			}
+		}
+		return false;
+	}
+	
+	private void pushDisplay() {
+		Control ctrl= fMyPart.getTreeViewer().getControl();
+		while (ctrl != null && !ctrl.isDisposed() && fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch())
+			ctrl= fMyPart.getTreeViewer().getControl();
 	}
 }

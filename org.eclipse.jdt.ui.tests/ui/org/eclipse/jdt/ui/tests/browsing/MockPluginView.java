@@ -48,7 +48,6 @@ public class MockPluginView extends PackagesView {
 		fAddedObject= new ArrayList();
 		fRemovedObject= new ArrayList();
 		fAddedParentObject= new ArrayList();
-		fListState= false;
 	}
 
 	/*
@@ -58,11 +57,11 @@ public class MockPluginView extends PackagesView {
 
 		//create viewer
 		//super.createViewer(parent);
-		this.fViewer= createViewer(parent);
+		fViewer= createViewer(parent);
 
 		//create my contentProvider
 		fContentProvider= super.createContentProvider();
-		fContentProvider.inputChanged(this.fViewer, null, null);
+		fContentProvider.inputChanged(fViewer, null, null);
 
 		//set content provider
 		fViewer.setContentProvider(fContentProvider);
@@ -77,6 +76,22 @@ public class MockPluginView extends PackagesView {
 	protected boolean isInListState(){
 		return fListState;	
 	}
+	
+	/**
+	 * Set the view is in flat or hierarchical state.
+	 * @param state
+	 */
+	void setListState(boolean state){
+		fListState= state;	
+	}
+	
+	public void clear() {
+		fAddedObject.clear();
+		fRefreshedObject.clear();
+		fAddedParentObject.clear();
+		fRemovedObject.clear();
+	}
+
 	
 	protected StructuredViewer createViewer(Composite parent){
 		if(isInListState())
@@ -127,42 +142,68 @@ public class MockPluginView extends PackagesView {
 	}
 	
 	
+	/**
+	 * Returns a list of objects refreshed in the viewer.
+	 * @return List
+	 */
 	public List getRefreshedObject() {
 		return fRefreshedObject;
 	}
 
+	/**
+	 * Returns true if a refresh action happened
+	 * @return boolean
+	 */
 	public boolean hasRefreshHappened() {
 		return fRefreshHappened;
 	}
 
+	/**
+	 * Returns a list of the parents of added objects
+	 * @return List
+	 */
 	public List getAddedParentObject() {
 		return fAddedParentObject;
 	}
 
-	public boolean hasAddHappened() {
-		return fAddHappened;
-	}
-
+	/**
+	 * Returns a list of objects removed from the viewer
+	 * @return List
+	 */
 	public List getRemovedObject() {
 		return fRemovedObject;
 	}
 
+	/**
+	 * Returns true if a remove action happened
+     * @return boolean
+	 */
 	public boolean hasRemoveHappened() {
 		return fRemoveHappened;
 	}
 	
 	/**
 	 * Returns the object added to the viewer
-	 * @return Object
+	 * @return List
 	 */
 	public List getAddedObject() {
 		return fAddedObject;
 	}
+	
+	/**
+	 * Returns true if an add action happened on the viewer
+	 * @return boolean
+	 */
+	public boolean hasAddHappened() {
+		return fAddHappened;
+	}
+
 
 	private class TestProblemTreeViewer extends ProblemTreeViewer {
 
 		public TestProblemTreeViewer(Composite parent, int flag) {
 			super(parent, flag);
+			super.setUseHashlookup(true);
 		}
 
 		public void refresh(Object object) {
@@ -187,22 +228,25 @@ public class MockPluginView extends PackagesView {
 
 		public TestProblemTableViewer(Composite parent, int flag) {
 			super(parent, flag);
+			super.setUseHashlookup(true);
 		}
 
 		public void refresh(Object object) {
 			fRefreshHappened= true;
 			fRefreshedObject.add(object);
+			super.refresh(object);
 		}
 
 		public void remove(Object object) {
 			fRemoveHappened= true;
 			fRemovedObject.add(object);
+			super.remove(object);
 		}
 
 		public void add(Object object) {
 			fAddHappened= true;
 			fAddedObject.add(object);
+			super.add(object);
 		}
-
 	}
 }

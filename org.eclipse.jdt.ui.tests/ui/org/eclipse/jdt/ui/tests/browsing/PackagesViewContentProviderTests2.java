@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.tests.browsing;
 
 
-import java.io.File;
 import java.util.zip.ZipFile;
 
 import junit.framework.Test;
@@ -25,18 +24,24 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.viewers.IStructuredContentProvider;
 
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -44,12 +49,12 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 
 
-public class PackagesViewContentProviderTests extends TestCase {
+public class PackagesViewContentProviderTests2 extends TestCase {
 
 	public static Test suite() {
-		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewContentProviderTests"); //$NON-NLS-1$
+		TestSuite suite= new TestSuite("org.eclipse.jdt.ui.tests.PackagesViewContentProviderTests2"); //$NON-NLS-1$
 		//$JUnit-BEGIN$
-		suite.addTestSuite(PackagesViewContentProviderTests.class);
+		suite.addTestSuite(PackagesViewContentProviderTests2.class);
 		//$JUnit-END$
 		return suite;
 	}
@@ -62,7 +67,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private IWorkbench fWorkbench;
 	private MockPluginView fMyPart;
 	
-	private ITreeContentProvider fProvider;
+	private IStructuredContentProvider fProvider;
 	private IPackageFragmentRoot fArchiveFragmentRoot;
 	private IPackageFragment fPackJunit;
 	private IPackageFragment fPackJunitSamples;
@@ -78,7 +83,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private ICompilationUnit fCU1;
 	private ICompilationUnit fCU2;
 	
-	private IWorkbenchPage page;
+	private IWorkbenchPage fPage;
 	private IPackageFragmentRoot fRoot2;
 	private IPackageFragment fPack12;
 	private IPackageFragment fPack22;
@@ -109,262 +114,227 @@ public class PackagesViewContentProviderTests extends TestCase {
 	private IPackageFragment fInternalPack6;
 	private IPackageFragment fInternalPackMetaInf;
 	private boolean fEnableAutoBuildAfterTesting;
+	private IPackageFragment fPack102;
 	
-	public PackagesViewContentProviderTests(String name) {
+	public PackagesViewContentProviderTests2(String name) {
 		super(name);
 	}
 	
-	//---------Test for getChildren-------------------
+	//----------- getElement in flat view ------------------------------
 
-	public void testGetChildrenProjectWithSourceFolders() throws Exception{
-		
-		//create a logical package for packages with name "pack3"
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);	
-	
-		//create a logical package for default package
-		LogicalPackage defaultCp= new LogicalPackage(fPackDefault1);
-		defaultCp.add(fPackDefault2);
-		defaultCp.add(fInternalPackDefault);
-		
-		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp, fInternalPackMetaInf};
-		Object[] children= fProvider.getChildren(fJProject2);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+	public void testGetElementsPackageFragmentRoot() throws Exception {
+		Object[] children= fProvider.getElements(fRoot1);
+		Object[] expectedChildren= new Object[] { fPack21, fPack31, fPack41, fPack51, fPack61, fPack81, fPack91, fPackDefault1 };
+		assertTrue("Wrong children found for PackageFragment", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
-	
-	
-	public void testGetChildrentMidLevelFragmentNotLogicalPackage() throws Exception{
-		//initialise map
-		fProvider.getChildren(fJProject2);
-		
-		Object[] expectedChildren= new Object[]{fPack17};
-		Object[] children= fProvider.getChildren(fPack12);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
-	}
-	
-	public void testGetChildrenBottomLevelFragment() throws Exception{
-		Object[] expectedChildren= new Object[]{};
-		Object[] children= fProvider.getChildren(fPack21);
-		assertTrue("Wrong children found for PackageFragment",compareArrays(children, expectedChildren));//$NON-NLS-1$
-	}
-	
-	public void testGetChildrenLogicalPackage() throws Exception{
-		
-		//create a logical package for packages with name "pack3"
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);
-		
-		//create a logical package for packages with name "pack3.pack4"
-		LogicalPackage ChildCp1= new LogicalPackage(fPack41);
-		ChildCp1.add(fPack42);
-		ChildCp1.add(fInternalPack4);
-		
-		//create a logical package for packages with name "pack3.pack5"
-		LogicalPackage ChildCp2= new LogicalPackage(fPack51);
-		ChildCp2.add(fPack52);
-		ChildCp2.add(fInternalPack5);
 
-		//initialize Map
-		fProvider.getChildren(fJProject2);	
-		
-		Object[] expectedChildren= new Object[]{fPack81, ChildCp1, ChildCp2};
-		Object[] children= fProvider.getChildren(cp);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren)); //$NON-NLS-1$  
+	public void testGetElementsProject() throws Exception {
 
-	}
-	
-	public void testGetChildrenLogicalPackage2() throws Exception{
-		
-		//create a logical package for packages with name "pack3.pack4"
-		LogicalPackage cp= new LogicalPackage(fPack41);
-		cp.add(fPack42);
-		cp.add(fInternalPack4);
-		
-		//create a logical package for packages with name "pack3"
 		LogicalPackage cp3= new LogicalPackage(fPack31);
 		cp3.add(fPack32);
-		cp3.add(fInternalPack3);		
-		
-		fProvider.getChildren(fJProject2);
-		fProvider.getChildren(cp3);
-	
-		Object[] expectedChildren= new Object[]{fPack91, fInternalPack10};
-		Object[] children= fProvider.getChildren(cp);
-		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
-	}
-	
-	
+		cp3.add(fInternalPack3);
 
-	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
-		//initialise map
-		fProvider.getChildren(fArchiveFragmentRoot);
-		fProvider.getChildren(fPackJunit);
-		
-		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney};
-		Object[] children= fProvider.getChildren(fPackJunitSamples);
-		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(children, expectedChildren));//$NON-NLS-1$
-	}
-
-	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
-		Object[] expectedChildren= new Object[]{};
-		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
-		assertTrue("wrong children found for a bottom PackageFragment in PackageFragmentRoot Archive", compareArrays(children, expectedChildren));	//$NON-NLS-1$
-	}
-	
-	public void testGetChildrenSourceFolder() throws Exception {
-		Object[] expectedChildren = new Object[] {fPack21, fPack31, fPackDefault1};
-		Object[] children = fProvider.getChildren(fRoot1);
-		assertTrue("Wrong children found for PackageFragmentRoot", compareArrays(children, expectedChildren));//$NON-NLS-1$
-	}
-	
-	public void testGetChildrenArchive(){
-		Object[] expectedChildren= new Object[]{fPackJunit, fArchiveFragmentRoot.getPackageFragment("")};//$NON-NLS-1$
-		Object[] children= fProvider.getChildren(fArchiveFragmentRoot);
-		assertTrue("Wrong child found for PackageFragmentRoot Archive", compareArrays(children,expectedChildren));//$NON-NLS-1$
-	}
-	
-	//---------------Get Parent Tests-----------------------------
-	
-	public void testGetParentArchive() throws Exception{
-		Object parent= fProvider.getParent(fArchiveFragmentRoot);
-		assertTrue("Wrong parent found for PackageFragmentRoot Archive", parent==null);//$NON-NLS-1$
-	}
-
-	public void testGetParentMidLevelFragmentInArchive() throws Exception{
-		
-		//initialise Map
-		fProvider.getChildren(fArchiveFragmentRoot);
-		fProvider.getChildren(fPackJunit);
-		fProvider.getChildren(fPackJunitSamples);
-		
-		Object expectedParent= fPackJunitSamples;
-		Object parent= fProvider.getParent(fPackJunitSamplesMoney);
-		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive", expectedParent.equals(parent));//$NON-NLS-1$
-	}	
-	
-	public void testGetParentTopLevelFragmentInArchive() throws Exception{
-		Object expectedParent= fPackJunit;
-		Object parent= fProvider.getParent(fPackJunitSamples);
-		assertTrue("Wrong parent found for a top level PackageFragment in an Archive", expectedParent.equals(parent));	//$NON-NLS-1$
-	}
-
-	public void testGetParentTopLevelLogicalPackage() throws Exception{
-	
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);
-		
-		Object parent= fProvider.getParent(cp);
-		assertTrue("Wrong parent found for a top level LogicalPackage", fJProject2.equals(parent));//$NON-NLS-1$
-	}
-	
-	public void testGetParentPackageFragmentWithLogicalPackageParent() throws Exception{
-		
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);
-		
-		//initialize map
-		fProvider.getChildren(fJProject2);
-		
-		Object parent= fProvider.getParent(fPack81);
-		assertTrue("Wrong parent found for a top level LogicalPackage", cp.equals(parent));//$NON-NLS-1$
-	}
-	
-	public void testGetParentOfLogicalPackagetWithLogicalPackageParent() throws Exception{
-		
-		LogicalPackage cp= new LogicalPackage(fPack41);
-		cp.add(fPack42);
-		cp.add(fInternalPack4);
-		
-		LogicalPackage parentCp= new LogicalPackage(fPack31);
-		parentCp.add(fPack32);
-		parentCp.add(fInternalPack3);
-		
-		//initialize map
-		fProvider.getChildren(fJProject2);
-		
-		Object parent= fProvider.getParent(cp);
-		assertTrue("Wrong parent found for a top level LogicalPackage", parentCp.equals(parent));//$NON-NLS-1$
-	}
-	
-	public void testGetParentWithPFRootFocus(){
-		//set up map
-		Object[] children= fProvider.getChildren(fRoot1);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
-			fProvider.getChildren(object);
-		}
-		
-		Object parent= fProvider.getParent(fPack41);	
-		Object expectedParent= fPack31;
-		assertTrue("Wrong parent found for a mid level Fragment with Root Focus", expectedParent.equals(parent));		//$NON-NLS-1$
-	}
-	
-	public void testGetParentPFwithProjectFocus(){
-		Object[] children= fProvider.getChildren(fJProject2);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
-			fProvider.getChildren(object);
-		}
-		
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);	
-		
-		Object parent= fProvider.getParent(fPack41);	
-		assertTrue("Wrong parent found for a mid level Fragment with Root Focus", cp.equals(parent));		//$NON-NLS-1$
-	}
-	
-	public void testGetParentWithRootFocusAfterProjectFocus(){
-		//set up map with project focus
-		Object[] children= fProvider.getChildren(fJProject2);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
-			fProvider.getChildren(object);
-		}
-		
-		LogicalPackage cp= new LogicalPackage(fPack31);
-		cp.add(fPack32);
-		cp.add(fInternalPack3);	
-	
-		//create a logical package for default package
 		LogicalPackage defaultCp= new LogicalPackage(fPackDefault1);
 		defaultCp.add(fPackDefault2);
 		defaultCp.add(fInternalPackDefault);
+
+		LogicalPackage cp4= new LogicalPackage(fPack41);
+		cp4.add(fPack42);
+		cp4.add(fInternalPack4);
+
+		LogicalPackage cp5= new LogicalPackage(fPack51);
+		cp5.add(fPack52);
+		cp5.add(fInternalPack5);
+
+		LogicalPackage cp6= new LogicalPackage(fPack61);
+		cp6.add(fPack62);
+		cp6.add(fInternalPack6);
 		
-		Object[] expectedChildren= new Object[]{fPack21, fPack12, cp, defaultCp, fInternalPackMetaInf};
-		
-		assertTrue("expected children of project with focus", compareArrays(children, expectedChildren));//$NON-NLS-1$
-		
-		//set up map with root focus
-		children= fProvider.getChildren(fRoot1);
-		for (int i= 0; i < children.length; i++) {
-			Object object= children[i];
-			fProvider.getChildren(object);
-		}
-		
-		Object parent= fProvider.getParent(fPack41);
-		Object expectedParent= fPack31;	
-		assertTrue("Wrong parent found for a mid level Fragment with Project Focus", expectedParent.equals(parent));//$NON-NLS-1$
+		LogicalPackage cp10= new LogicalPackage(fPack102);
+		cp10.add(fInternalPack10);
+
+		Object[] children= fProvider.getElements(fJProject2);
+		Object[] expectedChildren= new Object[] { defaultCp, cp3, cp4, cp5, cp6, cp10, fInternalPackMetaInf, fPack21, fPack12, fPack91, fPack81, fPack17 };
+		assertTrue("Wrong children founf for PackageFragment", compareArrays(children, expectedChildren)); //$NON-NLS-1$
 	}
 
-	public void testGetParentTopLevelFragment() throws Exception{
-		Object parent= fProvider.getParent(fPack21);
-		Object expectedParent= fRoot1;
-		assertTrue("Wrong parent found for a top level PackageFragment", expectedParent.equals(parent)); //$NON-NLS-1$  
+	//---------------Delta Tests-----------------------------
+	public void testRemovePackageNotLogicalPackage() throws Exception {
+		//initialise Map
+		fProvider.getElements(fJProject2);
 
+		fMyPart.clear();
+
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack12);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
 	}
 	
-	public void testGetParentMidLevelFragment() throws Exception{
-		Object expectedParent= fPack12;
-		Object parent= fProvider.getParent(fPack17);
-		assertTrue("Wrong parent found for a NON top level PackageFragment", expectedParent.equals(parent)); //$NON-NLS-1$  
+	public void testRemovePackageInTwoPackageLogicalPackage() throws Exception {
 
+		//initialise map
+		fProvider.getElements(fJProject2);
+
+		//create CompoundElement containning
+		LogicalPackage cp10= new LogicalPackage(fInternalPack10);
+
+		fMyPart.clear();
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack102);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		//assert remove happened (delta worked)
+		assertTrue("Refresh happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
+		Object addedObject= fMyPart.getAddedObject().get(0);
+		Object removedObject= fMyPart.getRemovedObject().get(0);
+		assertTrue("Correct guy removed", canFindEqualCompoundElement(cp10, new Object[] { removedObject })); //$NON-NLS-1$
+		assertTrue("Correct guy added", fInternalPack10.equals(addedObject)); //$NON-NLS-1$
 	}
 	
+	public void testRemovePackageFromLogicalPackage() throws Exception {
+
+		//initialise map
+		fProvider.getElements(fJProject2);
+
+		fMyPart.clear();
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.REMOVED, fPack62);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		//assert remove happened (delta worked)
+		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+	}
+	
+	public void testRemoveCUFromPackageNotLogicalPackage() throws Exception {
+
+		//initialise Map
+		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+
+		//make sure parent is visible
+		fMyPart.fViewer.setInput(fJProject2);
+	
+		fMyPart.clear();
+
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
+		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+	public void testAddCUFromPackageNotLogicalPackage() throws Exception {
+
+		ICompilationUnit cu= fPack81.createCompilationUnit("Object.java", "", true, null); //$NON-NLS-1$//$NON-NLS-2$
+
+		//initialise Map
+		fMyPart.fViewer.setInput(fJProject2);
+
+		fMyPart.clear();
+
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack81, IJavaElementDelta.ADDED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
+		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+
+	public void testAddFragmentToLogicalPackage() throws Exception {
+	
+		//create package fragment to be added
+		IPackageFragment pack101= fRoot1.createPackageFragment("pack3.pack4.pack10", true, null);//$NON-NLS-1$
+	
+		//initialise map
+		fProvider.getElements(fJProject2);
+		
+		fMyPart.clear();
+	
+		//send delta
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.ADDED, pack101);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		//make sure no refresh happened
+		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+	}
+
+	public void testAddPackageNotLogicalPackage() throws Exception {
+
+		//initialise Map
+		fProvider.getElements(fJProject2);
+
+		fMyPart.clear();
+
+		IPackageFragment test= fRoot1.createPackageFragment("pack3.test", true, null); //$NON-NLS-1$
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.ADDED, test);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
+		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
+	}
+
+	public void testAddPackageToCreateLogicalPackage() throws Exception {
+		//initialise map
+		fProvider.getElements(fJProject2);
+		
+		//create new package
+    	IPackageFragment pack11= fRoot1.createPackageFragment("pack1", true, null);//$NON-NLS-1$
+
+		//create a logical package for testing
+		LogicalPackage lp1= new LogicalPackage(fPack12);
+		lp1.add(pack11);
+
+		fMyPart.clear();
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= new TestDelta(IJavaElementDelta.ADDED, pack11);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		pushDisplay();
+		
+		//assert remove and add happened (delta worked)
+		assertTrue("Remove and add happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
+		Object addedObject= fMyPart.getAddedObject().get(0);
+		Object removedObject= fMyPart.getRemovedObject().get(0);
+		assertTrue("Correct guy removed", fPack12.equals(removedObject)); //$NON-NLS-1$
+		assertTrue("Correct guy added", lp1.equals(addedObject) ); //$NON-NLS-1$
+	}
+	
+
 
 	/*
 	 * @see TestCase#setUp()
@@ -419,10 +389,10 @@ public class PackagesViewContentProviderTests extends TestCase {
 		//JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
 
 		//----------------Set up internal jar----------------------------
-		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
-		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
+		//File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
+		//assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
 		
-		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, new Path(myInternalJar.getPath()), null, null); //$NON-NLS-1$
+		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, new Path("testresources/compoundtest.jar"), null, null); //$NON-NLS-1$
 		
 		fInternalPackDefault= fInternalJarRoot.getPackageFragment("");//$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3");//$NON-NLS-1$
@@ -442,6 +412,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		fPack42= fRoot2.createPackageFragment("pack3.pack4", true,null);//$NON-NLS-1$
 		fPack52= fRoot2.createPackageFragment("pack3.pack5",true,null);//$NON-NLS-1$
 		fPack62= fRoot2.createPackageFragment("pack3.pack5.pack6", true, null);//$NON-NLS-1$
+		fPack102=fRoot2.createPackageFragment("pack3.pack4.pack10", true, null);//$NON-NLS-1$
 		
 		fCU12= fPack12.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		fCU22= fPack62.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
@@ -475,21 +446,22 @@ public class PackagesViewContentProviderTests extends TestCase {
 		fWorkbench= PlatformUI.getWorkbench();
 		assertNotNull(fWorkbench);
 		
-		page= fWorkbench.getActiveWorkbenchWindow().getActivePage();
-		assertNotNull(page);
+		fPage= fWorkbench.getActiveWorkbenchWindow().getActivePage();
+		assertNotNull(fPage);
 		
 		//just testing to make sure my part can be created
 		IViewPart myPart= new MockPluginView();
-		((MockPluginView)myPart).setListState(false);
-		assertNotNull(myPart);
-		
-		myPart= page.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView");//$NON-NLS-1$
+		((MockPluginView)myPart).setListState(true);
+
+		myPart= fPage.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView");//$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
-			fProvider= (ITreeContentProvider)fMyPart.getTreeViewer().getContentProvider();
+			
+			fProvider= (IStructuredContentProvider)fMyPart.getTreeViewer().getContentProvider();
 			//create map and set listener	
 			fProvider.inputChanged(null,null,fJProject2);
-		}else assertTrue("Unable to get view",false);//$NON-NLS-1$
+			JavaCore.removeElementChangedListener((IElementChangedListener) fProvider);
+		} else assertTrue("Unable to get view",false);//$NON-NLS-1$
 	
 		assertNotNull(fProvider);		
 	}
@@ -502,7 +474,7 @@ public class PackagesViewContentProviderTests extends TestCase {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
 		fProvider.inputChanged(null, null, null);
-		page.hideView(fMyPart);
+		fPage.hideView(fMyPart);
 		fMyPart.dispose();
 		
 		if (fEnableAutoBuildAfterTesting)
@@ -527,11 +499,25 @@ public class PackagesViewContentProviderTests extends TestCase {
 					return false;	
 				}
 			} else if (child instanceof LogicalPackage){
-				if(!contains((LogicalPackage)child, expectedChildren))
+				if(!canFindEqualCompoundElement((LogicalPackage)child, expectedChildren))
 					return false;	
 			}
 		}
 		return true;
+	}
+	
+	private boolean canFindEqualCompoundElement(LogicalPackage compoundElement, Object[] expectedChildren) {
+		for (int i= 0; i < expectedChildren.length; i++) {
+			Object object= expectedChildren[i];
+			if(object instanceof LogicalPackage){
+				LogicalPackage el= (LogicalPackage) object;
+				if(el.getElementName().equals(compoundElement.getElementName()) && (el.getJavaProject().equals(compoundElement.getJavaProject()))){
+					if(compareArrays(el.getFragments(), compoundElement.getFragments()))
+						return true;	
+				}
+			}
+		}
+		return false;
 	}
 	
 	private boolean contains(IResource res, Object[] expectedChildren) {
@@ -557,17 +543,15 @@ public class PackagesViewContentProviderTests extends TestCase {
 		}
 		return false;
 	}
-	
-	private boolean contains(LogicalPackage lp, Object[] expectedChildren) {
-		for (int i= 0; i < expectedChildren.length; i++) {
-			Object object= expectedChildren[i];
-			if (object instanceof LogicalPackage) {
-				LogicalPackage explp= (LogicalPackage) object;
-				if (explp.equals(lp))
-					return true;
-			}
-		}
-		return false;
-	}
 
+	private void pushDisplay() {
+		boolean moreToDispatch= true;
+		while (moreToDispatch) {
+			Control ctrl= fMyPart.getTreeViewer().getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				moreToDispatch= fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch();
+			} else
+				moreToDispatch= false;
+		}
+	}
 }
