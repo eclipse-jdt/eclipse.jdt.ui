@@ -261,7 +261,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @param style the additional styles for the tree widget
 	 */
 	public JavaOutlineInformationControl(Shell parent, int style) {
-		this(parent, SWT.NO_TRIM, style);
+		this(parent, SWT.RESIZE, style);
 	}
 
 	/**
@@ -283,7 +283,7 @@ public class JavaOutlineInformationControl implements IInformationControl, IInfo
 	 * @param treeStyle the additional styles for the tree widget
 	 */
 	public JavaOutlineInformationControl(Shell parent, int shellStyle, int treeStyle) {
-		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.NO_TRIM | shellStyle);
+		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.RESIZE | shellStyle);
 		Display display= fShell.getDisplay();
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 
