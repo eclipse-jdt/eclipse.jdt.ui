@@ -292,6 +292,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				result.merge(analyzeAffectedCompilationUnits());
 				pm.worked(1);
 			} else {
+				fOccurrences= new SearchResultGroup[0];
 				pm.worked(13);
 			}
 			result.merge(checkPackageName(getNewElementName()));

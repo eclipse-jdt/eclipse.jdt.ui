@@ -226,9 +226,13 @@ public class RenamePackageTests extends RefactoringTest {
 			}
 		} finally{
 			performDummySearch();
-			getRoot().getPackageFragment(newPackageName).delete(true, null);
-			for (int i= 1; i < packageNames.length; i++){
-				getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+			try {
+				getRoot().getPackageFragment(newPackageName).delete(true, null);
+				for (int i= 1; i < packageNames.length; i++) {
+					getRoot().getPackageFragment(packageNames[i]).delete(true, null);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}	
 		}	
 	}
@@ -416,6 +420,11 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void test5() throws Exception{
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
+	}
+	
+	public void test6() throws Exception{ //bug 66250
+		fUpdateTextualMatches= true;
 		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
 	}
 	

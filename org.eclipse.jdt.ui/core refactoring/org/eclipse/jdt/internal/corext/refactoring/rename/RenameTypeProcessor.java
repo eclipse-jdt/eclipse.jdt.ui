@@ -316,11 +316,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (result.hasFatalError())
 				return result;
 			
-			fReferences= null;
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
 				fReferences= getReferences(new SubProgressMonitor(pm, 35), result);
 			} else
+				fReferences= new SearchResultGroup[0];
 				pm.worked(35);
 	
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$

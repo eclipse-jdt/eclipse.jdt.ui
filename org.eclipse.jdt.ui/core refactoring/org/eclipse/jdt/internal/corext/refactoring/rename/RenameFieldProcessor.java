@@ -286,12 +286,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			result.merge(checkNestedHierarchy(fField.getDeclaringType()));
 			pm.worked(1);
 			
-			fReferences= null;
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
 				fReferences= getReferences(new SubProgressMonitor(pm, 3), result);
 				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 			} else {
+				fReferences= new SearchResultGroup[0];
 				pm.worked(3);
 			}	
 			

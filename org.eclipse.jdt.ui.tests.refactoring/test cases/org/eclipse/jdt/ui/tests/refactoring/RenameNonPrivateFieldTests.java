@@ -82,7 +82,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper1_0("f", "g");
 	}
 	
-	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences, boolean updateTextualMatches) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -92,6 +92,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		processor.setUpdateReferences(updateReferences);
+		processor.setUpdateTextualMatches(updateTextualMatches);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
@@ -115,7 +116,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	private void helper2(String fieldName, String newFieldName) throws Exception{
-		helper2(fieldName, newFieldName, true);
+		helper2(fieldName, newFieldName, true, false);
 	}
 	
 	private void helper2() throws Exception{
@@ -123,7 +124,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2("f", "g", updateReferences);
+		helper2("f", "g", updateReferences, false);
 	}
 
 	//--------- tests ----------	
@@ -262,6 +263,11 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	public void test16() throws Exception{
 //		printTestDisabledMessage("text for bug 20693");
 		helper2();
+	}
+	
+	public void test17() throws Exception{
+//		printTestDisabledMessage("text for bug 66250 ");
+		helper2("f", "g", false, true);
 	}
 	
 	public void testBug5821() throws Exception{

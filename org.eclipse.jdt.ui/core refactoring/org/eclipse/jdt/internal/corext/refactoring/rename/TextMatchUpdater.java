@@ -37,12 +37,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 class TextMatchUpdater {
 	
@@ -57,6 +57,9 @@ class TextMatchUpdater {
 	private int fCurrentNameLength;
 	
 	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, ITextUpdating processor, SearchResultGroup[] references){
+		Assert.isNotNull(manager);
+		Assert.isNotNull(scope);
+		Assert.isNotNull(references);
 		fManager= manager;
 		fScope= scope;
 		fReferences= references;
@@ -159,7 +162,7 @@ class TextMatchUpdater {
 		SearchMatch[] searchResults= group.getSearchResults();
 		for (int r= 0; r < searchResults.length; r++) {
 			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
-			int unqualifiedStart= SearchUtils.getEnd(searchResults[r]) - fCurrentNameLength;
+			int unqualifiedStart= searchResults[r].getOffset() + searchResults[r].getLength() - fCurrentNameLength;
 			matches.remove(new Integer(unqualifiedStart));
 		}
 	}

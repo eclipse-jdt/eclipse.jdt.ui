@@ -979,6 +979,11 @@ public class RenameTypeTests extends RefactoringTest {
 				new RenameArguments("InnerB", true), 
 			});
 	}
+	
+	public void test62() throws Exception {
+//		printTestDisabledMessage("test for bug 66250");
+		helperWithTextual("A", "A", "B", "B", false, true);
+	}
 		
 	public void test5() throws Exception { 
 		helper2("A", "B");		
