@@ -122,7 +122,11 @@ public class CallHierarchyUI {
         }
     }
 
-    public static void openInEditor(Object element, Shell shell, String title) {
+    /**
+     * @return <code>true</code> iff no error occurred while trying to
+     *  open the editor, <code>false</code> iff an error dialog was raised.
+     */
+    public static boolean openInEditor(Object element, Shell shell, String title) {
         CallLocation callLocation= CallHierarchy.getCallLocation(element);
         
         try {
@@ -140,11 +144,11 @@ public class CallHierarchyUI {
 	        	if (selectionRange == null)
 	        		selectionRange= enclosingMember.getSourceRange();
 	        	if (selectionRange == null)
-	        		return;
+	        		return true;
 	        	selectionStart= selectionRange.getOffset();
 	        	selectionLength= selectionRange.getLength();
 	        } else {
-	            return;
+	            return true;
 	        }
 	
             boolean activateOnOpen = OpenStrategy.activateOnOpen();
@@ -155,6 +159,7 @@ public class CallHierarchyUI {
                 ITextEditor editor = (ITextEditor) methodEditor;
 				editor.selectAndReveal(selectionStart, selectionLength);
             }
+            return true;
         } catch (JavaModelException e) {
             JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
                     IJavaStatusConstants.INTERNAL_ERROR,
@@ -165,6 +170,7 @@ public class CallHierarchyUI {
                 CallHierarchyMessages.getString(
                     "CallHierarchyUI.open_in_editor.error.message"), //$NON-NLS-1$
                 e.getStatus());
+            return false;
         } catch (PartInitException x) {
             String name;
         	if (callLocation != null)
@@ -177,6 +183,7 @@ public class CallHierarchyUI {
                 CallHierarchyMessages.getFormattedString(
                     "CallHierarchyUI.open_in_editor.error.messageArgs", //$NON-NLS-1$
                     new String[] { name, x.getMessage() }));
+            return false;
         }
     }
 

@@ -43,7 +43,7 @@ class CallHierarchyViewer extends TreeViewer {
      * @param parent
      */
     CallHierarchyViewer(Composite parent, CallHierarchyViewPart part) {
-        super(new Tree(parent, SWT.SINGLE));
+        super(new Tree(parent, SWT.MULTI));
 
         fPart = part;
 

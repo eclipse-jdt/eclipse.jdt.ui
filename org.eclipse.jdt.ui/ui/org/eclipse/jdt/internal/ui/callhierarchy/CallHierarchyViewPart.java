@@ -552,7 +552,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param selection
      */
     private void methodSelectionChanged(ISelection selection) {
-        if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
+        if (selection instanceof IStructuredSelection && ((IStructuredSelection) selection).size() == 1) {
             Object selectedElement = ((IStructuredSelection) selection).getFirstElement();
 
             if (selectedElement instanceof MethodWrapper) {
@@ -563,6 +563,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             } else {
                 updateLocationsView(null);
             }
+        } else {
+        	updateLocationsView(null);
         }
     }
 
@@ -727,7 +729,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fFocusOnSelectionAction.canActionBeAdded()) {
             menu.appendToGroup(GROUP_FOCUS, fFocusOnSelectionAction);
         }
-        menu.appendToGroup(GROUP_FOCUS, fCopyAction);
+        if (fCopyAction.canActionBeAdded()) {
+        	menu.appendToGroup(GROUP_FOCUS, fCopyAction);
+        }
 
         fActionGroups.setContext(new ActionContext(getSelection()));
         fActionGroups.fillContextMenu(menu);

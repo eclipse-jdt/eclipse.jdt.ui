@@ -67,12 +67,11 @@ class OpenLocationAction extends SelectionDispatchAction {
         if (!checkEnabled(selection)) {
             return;
         }
-
-        run(selection.getFirstElement());
-    }
-
-    public void run(Object element) {
-        CallHierarchyUI.openInEditor(element, getShell(), getDialogTitle());
+        for (Iterator iter= selection.iterator(); iter.hasNext();) {
+	        boolean noError= CallHierarchyUI.openInEditor(iter.next(), getShell(), getDialogTitle());
+	        if (! noError)
+	        	return;
+		}
     }
 
     private String getDialogTitle() {

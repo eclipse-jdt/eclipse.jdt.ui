@@ -27,10 +27,13 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CopyCallHierarchyAction extends Action {
     private static final char INDENTATION= '\t';  //$NON-NLS-1$
@@ -49,6 +52,21 @@ class CopyCallHierarchyAction extends Action {
         fViewer= viewer;
 	}
 
+    public boolean canActionBeAdded() {
+        Object element = SelectionUtil.getSingleElement(getSelection());
+        return element != null;
+    }
+    
+    private ISelection getSelection() {
+        ISelectionProvider provider = fView.getSite().getSelectionProvider();
+
+        if (provider != null) {
+            return provider.getSelection();
+        }
+
+        return null;
+    }
+    
 	/*
 	 * @see IAction#run()
 	 */
