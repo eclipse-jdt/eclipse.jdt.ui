@@ -380,7 +380,8 @@ public class CompletionEvaluator {
 			return null;
 		}
 		int startpos= ((ISourceReference)elem).getSourceRange().getOffset();
-		char[] content= fCompilationUnit.getBuffer().getCharacters();
+		// 1GEYJ5Z: ITPJUI:WINNT - smoke120: code assist in @see tag can result data loss
+		char[] content= (char[]) fCompilationUnit.getBuffer().getCharacters().clone();
 		if (wordStart < content.length) {
 			for (int i= startpos; i < wordStart; i++) {
 				content[i]= ' ';
