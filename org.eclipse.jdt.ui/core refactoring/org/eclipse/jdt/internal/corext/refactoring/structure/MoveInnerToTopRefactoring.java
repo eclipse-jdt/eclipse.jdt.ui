@@ -407,9 +407,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				else
 					modifyConstructors(declaration, rewrite);
 				addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
+				addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 				addEnclosingInstanceDeclaration(declaration, rewrite);
 			}
-			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, status);
 			final ITypeBinding binding= declaration.resolveBinding();
 			if (binding != null) {
@@ -872,13 +872,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			constructor.parameters().add(variable);
 			final Block body= ast.newBlock();
 			final Assignment assignment= ast.newAssignment();
-			if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-				final FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-				assignment.setLeftHandSide(access);
-			} else
-				assignment.setLeftHandSide(ast.newSimpleName(fEnclosingInstanceFieldName));
+			final FieldAccess access= ast.newFieldAccess();
+			access.setExpression(ast.newThisExpression());
+			access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+			assignment.setLeftHandSide(access);
 			assignment.setRightHandSide(ast.newSimpleName(name));
 			final Statement statement= ast.newExpressionStatement(assignment);
 			body.statements().add(statement);
@@ -1148,13 +1145,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		else if (isInsideSubclassOfDeclaringType(node))
 			return ast.newThisExpression();
 		else if (isInsideInputType(node)) {
-			if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-				final FieldAccess access= ast.newFieldAccess();
-				access.setExpression(ast.newThisExpression());
-				access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-				return access;
-			} else
-				return ast.newSimpleName(fEnclosingInstanceFieldName);
+			final FieldAccess access= ast.newFieldAccess();
+			access.setExpression(ast.newThisExpression());
+			access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+			return access;
 		} else if (isInsideTypeNestedInDeclaringType(node)) {
 			final ThisExpression qualified= ast.newThisExpression();
 			qualified.setQualifier(ast.newSimpleName(fType.getDeclaringType().getElementName()));
@@ -1219,13 +1213,10 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private Expression createReadAccessExpressionForEnclosingInstance(AST ast) {
-		if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-			FieldAccess fa= ast.newFieldAccess();
-			fa.setExpression(ast.newThisExpression());
-			fa.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-			return fa;
-		}
-		return ast.newSimpleName(fEnclosingInstanceFieldName);
+		FieldAccess fa= ast.newFieldAccess();
+		fa.setExpression(ast.newThisExpression());
+		fa.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
+		return fa;
 	}
 
 	private String getNameForEnclosingInstanceConstructorParameter() throws JavaModelException {
@@ -1336,17 +1327,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				final ITypeBinding binding= type.resolveBinding();
 				if (binding != null && binding.getDeclaringClass() != null && !Bindings.equals(binding, fTypeBinding) && fSourceRewrite.getRoot().findDeclaringNode(binding) != null) {
 					if (!Modifier.isStatic(binding.getModifiers())) {
-						Expression expression= null;
-						if (fCodeGenerationSettings.useKeywordThis || fEnclosingInstanceFieldName.equals(fNameForEnclosingInstanceConstructorParameter)) {
-							final FieldAccess access= ast.newFieldAccess();
-							access.setExpression(ast.newThisExpression());
-							access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
-							expression= access;
-						} else
-							expression= ast.newSimpleName(fEnclosingInstanceFieldName);
+						final FieldAccess access= ast.newFieldAccess();
+						access.setExpression(ast.newThisExpression());
+						access.setName(ast.newSimpleName(fEnclosingInstanceFieldName));
 						if (node.getExpression() != null)
 							fSourceRewrite.getImportRemover().registerRemovedNode(node.getExpression());
-						fSourceRewrite.getASTRewrite().set(node, ClassInstanceCreation.EXPRESSION_PROPERTY, expression, fGroup);
+						fSourceRewrite.getASTRewrite().set(node, ClassInstanceCreation.EXPRESSION_PROPERTY, access, fGroup);
 					} else
 						addTypeQualification(type, fSourceRewrite, fGroup);
 				}
