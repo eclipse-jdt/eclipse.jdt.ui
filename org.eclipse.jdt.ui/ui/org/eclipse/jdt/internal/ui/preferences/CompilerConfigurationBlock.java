@@ -688,9 +688,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
 			fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_1);
 		} else if (VERSION_1_4.equals(complianceLevel)) {
-			fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR);
-			fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, VERSION_1_4);
-			fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4);
+			fWorkingValues.put(PREF_PB_ASSERT_AS_IDENTIFIER, WARNING);
+			fWorkingValues.put(PREF_SOURCE_COMPATIBILITY, VERSION_1_3);
+			fWorkingValues.put(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_2);
 		}
 		updateControls();
 	}
@@ -705,9 +705,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
 				&& VERSION_1_1.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))
 			|| (VERSION_1_4.equals(complianceLevel)
-				&& ERROR.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
-				&& VERSION_1_4.equals(map.get(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_4.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& WARNING.equals(map.get(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& VERSION_1_3.equals(map.get(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_2.equals(map.get(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT;
 		}
 		return USER;
