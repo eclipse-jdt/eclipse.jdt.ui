@@ -631,7 +631,9 @@ public class ListDialogField extends DialogField {
 	 * Refreshes the table.
 	 */
 	public void refresh() {
-		fTable.refresh();
+		if (fTable != null) {
+			fTable.refresh();
+		}
 	}
 	
 	// ------- list maintenance
