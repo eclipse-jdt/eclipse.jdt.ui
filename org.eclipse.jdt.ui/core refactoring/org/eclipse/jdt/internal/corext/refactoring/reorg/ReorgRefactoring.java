@@ -689,6 +689,8 @@ public abstract class ReorgRefactoring extends Refactoring {
 	
 	private static boolean hasParentCollision(List elements) {
 		int size= elements.size();
+		if (size < 2)
+			return false;
 		List paths= new ArrayList(size);
 		for (int i= 0; i < size; i++) {
 			paths.add(getPath(elements.get(i)));
