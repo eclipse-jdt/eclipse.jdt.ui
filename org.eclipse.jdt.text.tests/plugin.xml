@@ -30,6 +30,7 @@
       <import plugin="org.eclipse.text.tests"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.jdt.debug"/>
+      <import plugin="org.eclipse.pde"/>
    </requires>
 
 

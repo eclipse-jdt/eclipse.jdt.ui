@@ -51,36 +51,39 @@ public class OpenPreferencePageTest extends TestCase {
 	public void testOpenPreferencePage() {
 		Display display= EditorTestHelper.getActiveDisplay();
 		
-		PreferenceManager pm = WorkbenchPlugin.getDefault().getPreferenceManager();
+		PreferenceManager pm= WorkbenchPlugin.getDefault().getPreferenceManager();
 		assertNotNull(pm);
 		
-		PreferenceDialog d = new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
+		PreferenceDialog d= new WorkbenchPreferenceDialog(display.getActiveShell(), pm);
 		d.create();
 		WorkbenchHelp.setHelp(d.getShell(), IHelpContextIds.PREFERENCE_DIALOG);
 		// HACK to get control back instantly
 		d.setBlockOnOpen(false);
 		d.open();
-		
 		EditorTestHelper.runEventQueue();
 		
 		Control control= display.getFocusControl();
 		assertTrue(control instanceof Tree);
 		Tree tree= (Tree) control;
-		TreeItem item= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
-		assertTrue(item != null);
-		tree.setSelection(new TreeItem[] {item});
+		TreeItem javaNode= findTreeItem(tree.getItems(), "Java"); //$NON-NLS-1$
+		assertTrue(javaNode != null);
+		tree.setSelection(new TreeItem[] {javaNode});
 		EditorTestHelper.runEventQueue();
 		
 		// setExpanded does not work - use keyboard events
 		// item.setExpanded(true);
 		SWTEventHelper.pressKeyCode(display, SWT.KEYPAD_ADD);
-		EditorTestHelper.runEventQueue(200);
-
-		item= findTreeItem(item.getItems(), "Editor");
-		assertNotNull(item);
+		long timeout= System.currentTimeMillis() + 5000;
+		TreeItem editorNode= null;
+		while (editorNode == null && System.currentTimeMillis() < timeout) {
+			EditorTestHelper.runEventQueue();
+			editorNode= findTreeItem(javaNode.getItems(), "Editor");
+		}
+		assertNotNull(editorNode);
+		
 		EditorTestHelper.runEventQueue();
 		
-		Rectangle bounds= item.getBounds();
+		Rectangle bounds= editorNode.getBounds();
 		Point p= new Point(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
 		p= tree.toDisplay(p);
 		Event event= new Event();

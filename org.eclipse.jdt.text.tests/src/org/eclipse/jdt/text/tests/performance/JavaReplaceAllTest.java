@@ -89,6 +89,9 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
 			performanceMeter.stop();
 			SWTEventHelper.pressKeyChar(display, SWT.ESC);
+			long timeout= System.currentTimeMillis() + 1000;
+			while (!fEditor.isDirty() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertTrue(fEditor.isDirty());
 			EditorTestHelper.revertEditor(fEditor, true);
 			EditorTestHelper.joinBackgroundActivities(fEditor);

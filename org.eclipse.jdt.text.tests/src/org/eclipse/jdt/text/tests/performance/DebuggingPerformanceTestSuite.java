@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
 public class DebuggingPerformanceTestSuite extends TestSuite {
 
 	public static Test suite() {
-		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new DebuggingPerformanceTestSuite()));
+		return new PerformanceTestSetup(new DebuggingPerformanceTestSuite());
 	}
 	
 	public DebuggingPerformanceTestSuite() {

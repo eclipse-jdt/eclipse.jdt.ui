@@ -39,13 +39,13 @@ public class OpenQuickOutlineTest extends OpenQuickControlTest {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		fWasOutlineViewShown= EditorTestHelper.hideView(EditorTestHelper.OUTLINE_VIEW_ID);
+		fWasOutlineViewShown= EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, false);
 	}
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		if (fWasOutlineViewShown)
-			EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID);
+			EditorTestHelper.showView(EditorTestHelper.OUTLINE_VIEW_ID, true);
 	}
 
 	protected IAction setUpMeasurement(AbstractTextEditor editor) throws Exception {

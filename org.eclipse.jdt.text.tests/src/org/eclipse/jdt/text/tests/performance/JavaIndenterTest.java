@@ -26,13 +26,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-
 public class JavaIndenterTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= JavaIndenterTest.class;
 
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT/win32/org/eclipse/swt/graphics/TextLayout.java";
+	private static final String FILE= PerformanceTestSetup.TEXT_LAYOUT;
 
 	private static final int WARM_UP_RUNS= 2;
 
@@ -74,30 +72,28 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	private void measureJavaIndenter(PerformanceMeter performanceMeter, int runs) {
-		IDocument document= ((JavaEditor) fEditor).getViewer().getDocument();
+		IDocument document= EditorTestHelper.getDocument(fEditor);
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
 		int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < runs; i++) {
 			performanceMeter.start();
-			SWTEventHelper.pressKeyCode(display, SWT.CR);
+			SWTEventHelper.pressKeyCode(display, SWT.CR, false);
+			long timeout= System.currentTimeMillis() + 5000;			
+			while (originalNumberOfLines + 1 != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			performanceMeter.stop();
 			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
 			runAction(undo);
+			timeout= System.currentTimeMillis() + 1000;
+			while (originalNumberOfLines != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
+				EditorTestHelper.runEventQueue();
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
-			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
 	}
 
 	private void runAction(IAction action) {
 		action.run();
 		EditorTestHelper.runEventQueue();
-	}
-
-	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
 	}
 }

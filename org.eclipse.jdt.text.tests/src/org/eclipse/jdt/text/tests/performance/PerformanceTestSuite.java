@@ -20,7 +20,7 @@ import junit.framework.TestSuite;
 public class PerformanceTestSuite extends TestSuite {
 
 	public static Test suite() {
-		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new PerformanceTestSuite()));
+		return new PerformanceTestSetup(new PerformanceTestSuite());
 	}
 	
 	public PerformanceTestSuite() {
@@ -40,7 +40,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(JavaFormatterTest.suite());
 		addTest(JavaExpandSelectionTest.suite());
 		addTest(JavaFormatterProjectTest.suite());
-		addTest(EventDrivenTestSuite.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
 }

@@ -31,6 +31,7 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -87,12 +88,11 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 				fJavaProject= JavaCore.create(ResourceTestHelper.getProject(PROJECT));
 			
 			fWasSearchViewShown= EditorTestHelper.isViewShown(SEARCH_VIEW);
-			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
+			ITextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
 			FindAction action= new FindReferencesAction(editor.getSite());
 			ICompilationUnit unit= JavaCore.createCompilationUnitFrom(ResourceTestHelper.findFile(getFile()));
 			IMethod method= unit.getType("Test").getMethod("test", new String[] { });
 			action.run(method);
-			EditorTestHelper.joinBackgroundActivities(editor);
 			EditorTestHelper.closeAllEditors();
 			
 			super.setUp();
@@ -228,14 +228,15 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 		InvocationCountPerformanceMeter performanceMeter= createInvocationCountPerformanceMeter(new Method[] {
 				AnnotationPainter.class.getMethod("paintControl", new Class[] { PaintEvent.class }),
 		});
+		performanceMeter.setTimeout(30000);
 		int offset= EditorTestHelper.getDocument(fEditor).getLineOffset(line) + column;
 		fEditor.selectAndReveal(offset, 0);
 		Display display= EditorTestHelper.getActiveDisplay();
-		EditorTestHelper.runEventQueue(100);
+		EditorTestHelper.runEventQueue(200);
 		performanceMeter.start();
 		SWTEventHelper.pressKeyChar(display, ch);
 		EditorTestHelper.joinBackgroundActivities(fEditor);
-		EditorTestHelper.runEventQueue(100);
+		EditorTestHelper.runEventQueue(200);
 		performanceMeter.stop();
 		performanceMeter.commit();
 	}
