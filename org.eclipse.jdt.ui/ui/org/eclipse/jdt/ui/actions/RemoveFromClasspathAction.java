@@ -27,9 +27,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -117,7 +120,18 @@ public class RemoveFromClasspathAction extends SelectionDispatchAction {
 	}	
 
 	private static boolean canRemove(Object element){
-		return element instanceof IPackageFragmentRoot;
+		if (! (element instanceof IPackageFragmentRoot))
+			return false;
+		IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+		try {
+			IClasspathEntry cpe= root.getRawClasspathEntry();
+			if (cpe.getEntryKind() == IClasspathEntry.CPE_CONTAINER)
+				return false; // don't want to remove the container if only a child is selected
+			return true;
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
 	}	
 }
 
