@@ -63,7 +63,10 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	private static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 	private static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	private static final String OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE="org.eclipse.jdt.ui.typeHierarchy.reusePerspective"; //$NON-NLS-1$
+	
+	private static final String DOUBLE_CLICK= "packageview.doubleclick"; //$NON-NLS-1$
 	private static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
+	private static final String DOUBLE_CLICK_EXPANDS= "packageview.doubleclick.expands"; //$NON-NLS-1$
 	private static final String RECONCILE_JAVA_VIEWS= "JavaUI.reconcile"; //$NON-NLS-1$
 
 	public static boolean useSrcAndBinFolders() {
@@ -111,8 +114,8 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	}
 	
 	public static boolean doubleClickGoesInto() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(DOUBLE_CLICK_GOES_INTO);
+		return DOUBLE_CLICK_GOES_INTO.equals(
+			JavaPlugin.getDefault().getPreferenceStore().getString(DOUBLE_CLICK));
 	}
 
 	public static boolean reconcileJavaViews() {
@@ -167,7 +170,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		store.setDefault(SRCBIN_SRCNAME, "src"); //$NON-NLS-1$
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 
-		store.setDefault(DOUBLE_CLICK_GOES_INTO, false);		
+		store.setDefault(DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS);
 		store.setDefault(RECONCILE_JAVA_VIEWS, true);
 	}
 	
@@ -242,7 +245,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		composite.setLayout(layout);
 
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
-		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.dblClick"), DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.cuChildren"), SHOW_CU_CHILDREN); //$NON-NLS-1$
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.reconcileJavaViews"), RECONCILE_JAVA_VIEWS); //$NON-NLS-1$
 		
@@ -279,6 +281,16 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
 		addRadioButton(radioGroup, JavaUIMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
+
+		Label doubleClickLabel= new Label(composite, SWT.NONE);
+		doubleClickLabel.setText(JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.action"));  //$NON-NLS-1$
+
+		Composite doubleClickRadioGroup= new Composite(composite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		doubleClickRadioGroup.setLayout(layout);		
+		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.gointo"), DOUBLE_CLICK, DOUBLE_CLICK_GOES_INTO); //$NON-NLS-1$
+		addRadioButton(doubleClickRadioGroup, JavaUIMessages.getString("JavaBasePreferencePage.doubleclick.expand"), DOUBLE_CLICK, DOUBLE_CLICK_EXPANDS); //$NON-NLS-1$
 	
 		/* Need support from workbench for this. See http://dev.eclipse.org/bugs/show_bug.cgi?id=3962
 		final Button reuse= addCheckBox(composite, "&Reuse Type Hierarchy perspective in same window", OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE);
