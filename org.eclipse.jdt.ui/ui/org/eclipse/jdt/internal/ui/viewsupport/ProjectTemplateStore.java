@@ -39,23 +39,47 @@ public final class ProjectTemplateStore {
 	private final TemplateStore fParent;
 	private final IEclipsePreferences fPreferences;
 	private static final String fKey= "org.eclipse.jdt.ui.text.custom_code_templates"; //$NON-NLS-1$
+	
+	private static final class InheritedTemplatePersistenceData extends TemplatePersistenceData {
+
+		public InheritedTemplatePersistenceData(Template template, boolean enabled, String id) {
+			super(template, enabled, id);
+		}
+	}
 
 	public ProjectTemplateStore(IProject project) {
 		fParent= JavaPlugin.getDefault().getCodeTemplateStore();
 		fPreferences= new ProjectScope(project).getNode(JavaUI.ID_PLUGIN);
 	}
 	
+	/**
+	 * Returns the set of project specific or inherited templates. Inherited
+	 * ones are copied if <code>inherit</code> is <code>true</code>.
+	 * 
+	 * @param includeDeleted
+	 * @param inherit
+	 * @return the set of project specific or inherited templates
+	 */
 	public TemplatePersistenceData[] getTemplateData(boolean includeDeleted, boolean inherit) {
-		TemplatePersistenceData[] templateData= fParent.getTemplateData(false);
-		if (fPreferences == null)
-			return templateData;
-		
-		Map datas= new HashMap();
-		for (int i= 0; i < templateData.length; i++) {
-			final String id= templateData[i].getId();
-			if (id != null)
-				datas.put(id, templateData[i]);
+		Map datas= null;
+		if (inherit) {
+			TemplatePersistenceData[] templateData= fParent.getTemplateData(false);
+			if (fPreferences == null)
+				return templateData;
+			
+			datas= new HashMap();
+			for (int i= 0; i < templateData.length; i++) {
+				final TemplatePersistenceData original= templateData[i];
+				final String id= original.getId();
+				if (id != null) {
+					TemplatePersistenceData copy= new InheritedTemplatePersistenceData(original.getTemplate(), original.isEnabled(), id);
+					datas.put(id, copy);
+				}
+			}
 		}
+		
+		if (datas == null)
+			datas= new HashMap();
 		
 		String pref= fPreferences.get(fKey, null);
 		if (pref != null && pref.trim().length() > 0) {
@@ -75,6 +99,10 @@ public final class ProjectTemplateStore {
 		}
 		
 		return (TemplatePersistenceData[]) datas.values().toArray(new TemplatePersistenceData[datas.values().size()]);
+	}
+	
+	public boolean isInherited(TemplatePersistenceData data) {
+		return data instanceof InheritedTemplatePersistenceData;
 	}
 	
 	public Template findTemplateById(String id) {
@@ -117,4 +145,22 @@ public final class ProjectTemplateStore {
 		fPreferences.put(fKey, output.toString());
 	}
 
+	/**
+	 * @throws IOException
+	 */
+	public void load() throws IOException {
+		fParent.load();
+	}
+	/**
+	 * 
+	 */
+	public void restoreDefaults() {
+		fParent.restoreDefaults();
+	}
+	/**
+	 * @throws IOException
+	 */
+	public void save() throws IOException {
+		fParent.save();
+	}
 }
