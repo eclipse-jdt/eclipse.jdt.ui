@@ -1227,7 +1227,7 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("\n");
 		buf.append("import java.util.HashMap;\n");
 		buf.append("\n");		
-		buf.append("public class A s{\n");
+		buf.append("public class A {\n");
 		buf.append("    public Object foo() {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
