@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeBlock;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTWithExistingFlattener;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -613,7 +614,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return updatedTypeSourceBuffer.toString();
 	}
 	
-	private static String allignSourceBlock(String typeCodeBlock){
+	private String allignSourceBlock(String typeCodeBlock){
 		CodeBlock cb= new CodeBlock(typeCodeBlock);
 		StringBuffer buffer= new StringBuffer();
 		cb.fill(buffer, "", getLineSeperator()); //$NON-NLS-1$
@@ -661,8 +662,12 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return fType.getElementName() + ".java";
 	}
 
-	private static String getLineSeperator() {
-		return System.getProperty("line.separator", "\n");//$NON-NLS-1$ //$NON-NLS-2$
+	private String getLineSeperator() {
+		try {
+			return StubUtility.getLineDelimiterUsed(fType);
+		} catch (JavaModelException e) {
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	private IFile[] getAllFilesToModify() throws CoreException{
@@ -982,7 +987,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return null;
 	}
 	
-	private static String format(String src, int indentationLevel){
+	private String format(String src, int indentationLevel){
 		return ToolFactory.createCodeFormatter().format(src, indentationLevel, null, getLineSeperator());
 	}
 	

@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -848,8 +849,12 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		return fInputClass.getPackageFragment();
 	}
 
-	private static String getLineSeperator() {
-		return System.getProperty("line.separator", "\n");//$NON-NLS-1$ //$NON-NLS-2$
+	private String getLineSeperator() {
+		try {
+			return StubUtility.getLineDelimiterUsed(fInputClass);
+		} catch (JavaModelException e) {
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	private boolean inputClassHasDirectSuperinterfaces() throws JavaModelException {
