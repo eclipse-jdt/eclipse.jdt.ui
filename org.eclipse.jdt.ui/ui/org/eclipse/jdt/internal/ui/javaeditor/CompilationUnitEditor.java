@@ -7,7 +7,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.swt.custom.LineBackgroundEvent;
 import org.eclipse.swt.custom.LineBackgroundListener;
@@ -38,6 +40,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -48,6 +51,7 @@ import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
+import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -111,7 +115,14 @@ import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 public class CompilationUnitEditor extends JavaEditor {
 	
 	
+	interface ITextConverter {
+		void customizeDocumentCommand(IDocument document, DocumentCommand command);
+	}
+	
+	
 	class InternalSourceViewer extends SourceViewer {
+		
+		private List fTextConverters;
 		
 		public InternalSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
 			super(parent, ruler, styles);
@@ -138,6 +149,69 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			super.doOperation(operation);
 		}
+		
+		public void insertTextConverter(ITextConverter textConverter, int index) {
+			throw new UnsupportedOperationException();
+		}
+		
+		public void addTextConverter(ITextConverter textConverter) {
+			if (fTextConverters == null) {
+				fTextConverters= new ArrayList(1);
+				fTextConverters.add(textConverter);
+			} else if (!fTextConverters.contains(textConverter))
+				fTextConverters.add(textConverter);
+		}
+		
+		public void removeTextConverter(ITextConverter textConverter) {
+			if (fTextConverters != null) {
+				fTextConverters.remove(textConverter);
+				if (fTextConverters.size() == 0)
+					fTextConverters= null;
+			}
+		}
+		
+		/*
+		 * @see TextViewer#customizeDocumentCommand(DocumentCommand)
+		 */
+		protected void customizeDocumentCommand(DocumentCommand command) {
+			super.customizeDocumentCommand(command);
+			if (fTextConverters != null) {
+				for (Iterator e = fTextConverters.iterator(); e.hasNext();)
+					((ITextConverter) e.next()).customizeDocumentCommand(getDocument(), command);
+			}
+		}
+	};
+	
+	static class TabConverter implements ITextConverter {
+		
+		private String fTabString= "";
+		
+		public void setNumberOfSpacesPerTab(int ratio) {
+			StringBuffer buffer= new StringBuffer();
+			for (int i= 0; i < ratio; i++)
+				buffer.append(' ');
+			fTabString= buffer.toString();
+		}		
+		
+		public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+			String text= command.text;
+			if (text != null) {
+				int index= text.indexOf('\t');
+				if (index > -1) {
+					int length= text.length();
+					StringBuffer buffer= new StringBuffer();
+					buffer.append(text.substring(0, index));
+					for (int i= index; i < length; i++) {
+						char c= text.charAt(i);
+						if (c == '\t')
+							buffer.append(fTabString);
+						else
+							buffer.append(c);
+					}
+					command.text= buffer.toString();
+				}
+			}
+		}
 	};
 	
 	
@@ -160,6 +234,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	public final static String PRINT_MARGIN_COLOR= "printMarginColor";
 	/** Preference key for print margin ruler column */
 	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn";
+	/** Preference key for inserting spaces rather than tabs */
+	public final static String SPACES_FOR_TABS= "spacesForTabs";
 	
 	
 	
@@ -177,6 +253,8 @@ public class CompilationUnitEditor extends JavaEditor {
 	private LinePainter fLinePainter;
 	/** The editor's print margin ruler painter */
 	private PrintMarginPainter fPrintMarginPainter;
+	/** The editor's tab converter */
+	private TabConverter fTabConverter;
 	
 	
 	/**
@@ -195,6 +273,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);
 	}
 	
+	
 	/**
 	 * @see AbstractTextEditor#createActions()
 	 */
@@ -211,7 +290,7 @@ public class CompilationUnitEditor extends JavaEditor {
 		setAction("Comment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Comment.", this, ITextOperationTarget.PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Uncomment", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Uncomment.", this, ITextOperationTarget.STRIP_PREFIX)); //$NON-NLS-1$ //$NON-NLS-2$
 		setAction("Format", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "Format.", this, ISourceViewer.FORMAT)); //$NON-NLS-1$ //$NON-NLS-2$
-		
+				
 		setAction("ManageBreakpoints", new BreakpointRulerAction(getVerticalRuler(), this)); //$NON-NLS-1$
 		setAction("SurroundWithTryCatch", new SurroundWithTryCatchAction(this)); //$NON-NLS-1$
 		
@@ -740,6 +819,28 @@ public class CompilationUnitEditor extends JavaEditor {
 		return store.getBoolean(PRINT_MARGIN);
 	}
 	
+	private void startTabConversion() {
+		if (fTabConverter == null) {
+			fTabConverter= new TabConverter();
+			fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
+			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
+			isv.addTextConverter(fTabConverter);
+		}
+	}
+	
+	private void stopTabConversion() {
+		if (fTabConverter != null) {
+			InternalSourceViewer isv= (InternalSourceViewer) getSourceViewer();
+			isv.removeTextConverter(fTabConverter);
+			fTabConverter= null;
+		}
+	}
+	
+	private boolean isTabConversionEnabled() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(SPACES_FOR_TABS);
+	}
+	
 	private Color getColor(String key) {
 		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
 		return getColor(rgb);
@@ -782,6 +883,8 @@ public class CompilationUnitEditor extends JavaEditor {
 			startLineHighlighting();
 		if (isShowingPrintMarginEnabled())
 			startShowingPrintMargin();
+		if (isTabConversionEnabled())
+			startTabConversion();
 	}
 	
 	/**
@@ -802,6 +905,17 @@ public class CompilationUnitEditor extends JavaEditor {
 					String[] types= configuration.getConfiguredContentTypes(isv);					
 					for (int i= 0; i < types.length; i++)
 					    isv.setIndentPrefixes(configuration.getIndentPrefixes(isv, types[i]), types[i]);
+					    
+					if (fTabConverter != null)
+						fTabConverter.setNumberOfSpacesPerTab(getPreferenceStore().getInt(CODE_FORMATTER_TAB_SIZE));
+				}
+				
+				if (SPACES_FOR_TABS.equals(p)) {
+					if (isTabConversionEnabled())
+						startTabConversion();
+					else
+						stopTabConversion();
+					return;
 				}
 				
 				if (MATCHING_BRACKETS.equals(p)) {
