@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-class RefactoringScopeFactory {
+public class RefactoringScopeFactory {
 	private static IJavaSearchScope create(IJavaProject javaProject) {
 		List projects= new  ArrayList();
 		projects.add(javaProject);
@@ -40,7 +40,7 @@ class RefactoringScopeFactory {
 		return result;
 	}
 	
-	static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
+	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement instanceof IMember) {
 			IMember member= (IMember)javaElement;
 			if (Flags.isPrivate(member.getFlags())) {
