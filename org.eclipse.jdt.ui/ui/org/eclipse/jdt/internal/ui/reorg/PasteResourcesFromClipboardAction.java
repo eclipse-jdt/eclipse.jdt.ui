@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootMan
 
 public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
-	private Clipboard fClipboard;
+	private final Clipboard fClipboard;
 
 	protected PasteResourcesFromClipboardAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
