@@ -15,6 +15,10 @@
 		<mkdir dir="${destdir}" />
 		<delete dir="${dest}" />
 		<mkdir dir="${dest}" />
+		<jar 
+			jarfile="${dest}/jdtvcm.jar"
+			basedir="bin"
+		/>
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 	</target>
