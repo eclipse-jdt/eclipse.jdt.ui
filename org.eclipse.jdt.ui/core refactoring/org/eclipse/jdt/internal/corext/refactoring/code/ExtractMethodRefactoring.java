@@ -383,7 +383,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		int offset= buffer.getLineInformationOfOffset(fSelectionStart).getOffset();
 		if (offset < fSelectionStart) {
 			String tmp= buffer.getContent(offset, fSelectionStart - offset);
-			if (CodeFormatterUtil.containsOnlyWhiteSpaces(tmp)) {
+			if (Strings.containsOnlyWhitespaces(tmp)) {
 				prefix= tmp;
 			} else {
 				prefix= CodeFormatterUtil.createIndentString(CodeFormatterUtil.getIndent(tmp));

@@ -113,19 +113,38 @@ public class CodeFormatterUtil {
 			return line.substring(start);
 	}
 
+	public static void removeIndentation(String[] lines) {
+		removeIndentation(lines, getTabWidth());
+	}
+	
 	public static void removeIndentation(String[] lines, int tabWidth) {
+		String[] toDo= new String[lines.length];
 		// find indentation common to all lines
 		int minIndent= Integer.MAX_VALUE; // very large
 		for (int i= 0; i < lines.length; i++) {
 			String line= lines[i];
 			int indent= getIndent(line, tabWidth);
-			if (indent < minIndent)
-				minIndent= indent;
+			if (indent >= minIndent) {
+				toDo[i]= line;
+			} else {
+				if (!Strings.containsOnlyWhitespaces(line)) {
+					minIndent= indent;
+					toDo[i]= line;
+				}
+				// else keep the null value in toDo[i]
+			}
 		}
-		if (minIndent > 0)
+		
+		if (minIndent > 0) {
 			// remove this indent from all lines
-			for (int i= 0; i < lines.length; i++)
-				lines[i]= removeIndent(lines[i], minIndent, tabWidth);
+			for (int i= 0; i < toDo.length; i++) {
+				String s= toDo[i];
+				if (s != null)
+					lines[i]= removeIndent(s, minIndent, tabWidth);
+				else
+					lines[i]= removeLeadingIndents(lines[i], tabWidth);
+			}
+		}
 	}
 	
 	/**
@@ -170,21 +189,6 @@ public class CodeFormatterUtil {
 			}
 		}
 		return line.substring(start);
-	}
-	
-	/**
-	 * Returns <code>true</code> if the given string consists only of
-	 * white spaces (e.g. space and '\t'). If the string is empty,
-	 * <code>true</code> is returned.
-	 */
-	public static boolean containsOnlyWhiteSpaces(String line) {
-		int size= line.length();
-		for (int i= 0; i < size; i++) {
-			char c= line.charAt(i);
-			if (c != '\t' && c != ' ')
-				return false;
-		}
-		return true;
 	}
 	
 	public static int getTabWidth() {
@@ -232,7 +236,7 @@ public class CodeFormatterUtil {
 			while (lineNumber > 0) {
 				lineNumber--;
 				String line= buffer.getLineContent(lineNumber);
-				if (containsOnlyWhiteSpaces(line)) {
+				if (Strings.containsOnlyWhitespaces(line)) {
 					result++;
 				} else {
 					return result;

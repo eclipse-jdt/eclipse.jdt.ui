@@ -52,6 +52,23 @@ public class Strings {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Returns <code>true</code> if the given string only consists of
+	 * white spaces according to Java. If the string is empty, <code>true
+	 * </code> is returned.
+	 * 
+	 * @return <code>true</code> if the string only consists of white
+	 * 	spaces; otherwise <code>false</code> is returned
+	 * @see Character#isWhitespace(char)
+	 */
+	public static boolean containsOnlyWhitespaces(String s) {
+		int size= s.length();
+		for (int i= 0; i < size; i++) {
+			if (!Character.isWhitespace(s.charAt(i)))
+				return false;
+		}
+		return true;
+	}
 }
 
