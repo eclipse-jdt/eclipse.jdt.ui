@@ -52,12 +52,14 @@ public class StorageLabelProvider extends LabelProvider {
 	 * @see IBaseLabelProvider#dispose
 	 */
 	public void dispose() {
-		Iterator each= fJarImageMap.values().iterator();
-		while (each.hasNext()) {
-			Image image= (Image)each.next();
-			image.dispose();
+		if (fJarImageMap != null) {
+			Iterator each= fJarImageMap.values().iterator();
+			while (each.hasNext()) {
+				Image image= (Image)each.next();
+				image.dispose();
+			}
+			fJarImageMap= null;
 		}
-		fJarImageMap= null;
 	}
 	
 	/*
@@ -65,6 +67,9 @@ public class StorageLabelProvider extends LabelProvider {
 	 * The image for a JarEntryFile is retrieved from the EditorRegistry.
 	 */ 
 	private Image getImageForJarEntry(IStorage element) {
+		if (fJarImageMap == null)
+			return null;
+		
 		String extension= element.getFullPath().getFileExtension();
 		Image image= (Image)fJarImageMap.get(extension);
 		if (image != null) 
