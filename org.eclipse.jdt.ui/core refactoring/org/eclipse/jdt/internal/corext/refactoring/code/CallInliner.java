@@ -317,8 +317,14 @@ public class CallInliner {
 	}
 
 	private boolean canInline(Expression actualParameter, ParameterData formalParameter) {
-		if (canInline(actualParameter))
-			return true;
+		switch (canInline(actualParameter)){
+			case 0:
+				return false;
+			case 1:
+				return true;
+			case 2:
+				// fall through
+		}
 		if (ASTNodes.isLiteral(actualParameter) && formalParameter.isReadOnly())
 			return true;
 		if (formalParameter.isWrite())
@@ -326,16 +332,22 @@ public class CallInliner {
 		return !formalParameter.needsEvaluation();
 	}
 	
-	private boolean canInline(Expression expression) {
+	/*
+	 * Return 0 if the expression can't be inlined, 1 if it can be inlined and 2 if further
+	 * investigation is needed.
+	 */
+	private int canInline(Expression expression) {
 		if (expression instanceof Name) {
 			IBinding binding= ((Name)expression).resolveBinding();
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding vb= (IVariableBinding)binding;
 				if (!vb.isField()) {
-					return fFlowInfo.hasAccessMode(fFlowContext, vb, FlowInfo.UNUSED | FlowInfo.WRITE);
+					return fFlowInfo.hasAccessMode(fFlowContext, vb, FlowInfo.UNUSED | FlowInfo.WRITE) ? 1 : 0;
 				}
 			}
-			return true;
+			// For other elements we don't have a flow analysis.
+			// To be on the safe side answer no.
+			return 0;
 		} else if (expression instanceof FieldAccess) {
 			return canInline(((FieldAccess)expression).getExpression());
 		} else if (expression instanceof ThisExpression) {
@@ -343,7 +355,7 @@ public class CallInliner {
 		} else if (expression instanceof SuperFieldAccess) {
 			return canInline(((SuperFieldAccess)expression).getQualifier());
 		}
-		return false;
+		return 2;
 	}
 	
 	private void initializeInsertionPoint(int nos) {
