@@ -25,12 +25,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
+import org.eclipse.jdt.internal.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -105,7 +107,7 @@ public class FindDeclarationsAction extends FindAction {
 				searchFor= IJavaSearchConstants.CONSTRUCTOR;
 			IType type= getType(element);
 			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
-			return new JavaSearchQuery(searchFor, getLimitTo(), pattern, true, getScope(type), getScopeDescription(type));
+			return new JavaSearchQuery(new PatternQuerySpecification(pattern, searchFor, true, getLimitTo(), getScope(type), getScopeDescription(type)));
 		}
 		else
 			return super.createJob(element);

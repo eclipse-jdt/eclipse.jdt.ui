@@ -53,6 +53,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
+import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
@@ -331,7 +332,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
-		return new JavaSearchQuery(element, getLimitTo(), getScope(element), getScopeDescription(element));
+		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(element), getScopeDescription(element)));
 	}
 
 	protected Object createSearchDescription(IJavaElement element) {

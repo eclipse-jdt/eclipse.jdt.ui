@@ -18,11 +18,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
+import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchOperation;
+import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -133,7 +135,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 				return null;
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
-		return new JavaSearchQuery(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets));
+		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets)));
 	}
 
 	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {

@@ -22,6 +22,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.ui.search.*;
+
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
 public class PostfixLabelProvider extends LabelProvider {
@@ -46,7 +48,13 @@ public class PostfixLabelProvider extends LabelProvider {
 	}
 
 	public Image getImage(Object element) {
-		return fLabelProvider.getImage(element);
+		Image image= fLabelProvider.getImage(element);
+		if (image != null)
+			return image;
+		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		if (participant != null)
+			return participant.getImage(element);
+		return null;
 	}
 	
 	public String getText(Object element) {
@@ -58,18 +66,28 @@ public class PostfixLabelProvider extends LabelProvider {
 		while (realParent != null && !(realParent instanceof IJavaModel) && !realParent.equals(visibleParent)) {
 			if (!isSameInformation(realParent, lastElement))  {
 				postfix.append(" - "); //$NON-NLS-1$
-				postfix.append(fLabelProvider.getText(realParent));
+				postfix.append(internalGetText(realParent));
 			}
 			lastElement= realParent;
 			realParent= fContentProvider.getParent(realParent);
 		}
 		int matchCount= fPage.getInput().getMatchCount(element);
-		String text=fLabelProvider.getText(element);
+		String text=internalGetText(element);
 		if (matchCount == 0)
 			return text+postfix;
 		if (matchCount == 1)
-			return text+ " (" + 1 + " match)"+postfix; //$NON-NLS-1$ //$NON-NLS-2$
+			return text+ " (1 match)"+postfix; //$NON-NLS-1$ //$NON-NLS-2$
 		return text + " (" + matchCount + " matches)"+postfix; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private String internalGetText(Object element) {
+		String text= fLabelProvider.getText(element);
+		if (text != null && !"".equals(text)) //$NON-NLS-1$
+			return text;
+		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		if (participant != null)
+			return participant.getText(element);
+		return null;
 	}
 
 	private boolean isSameInformation(Object realParent, Object lastElement) {

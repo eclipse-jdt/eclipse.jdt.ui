@@ -10,24 +10,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResult;
+import org.eclipse.search.ui.text.Match;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.search.*;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -38,71 +42,75 @@ import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
  *
  */
 public class JavaSearchQuery implements ISearchQuery {
-	private IJavaSearchScope fScope;
-	private String fScopeDescription;
-	private String fName;
-	private int fLimitTo;
-	private IJavaElement fElement;
-	private String fPattern;
-	private boolean fIsCaseSensitive;
-	private int fSearchFor;
 	private ISearchResult fResult;
+	private QuerySpecification fPatternData;
+	private IQueryParticipant[] fParticipants;
 	
-	private JavaSearchQuery(IJavaSearchScope scope, String scopeDescription) {
-		fName= "Java Search Job";
-		fScope= scope;
-		fScopeDescription= scopeDescription;
+	public JavaSearchQuery(QuerySpecification data) {
+		this(data, getParticipants());
 	}
-
-	public JavaSearchQuery(SearchPatternData data, IJavaSearchScope scope, String scopeDescription) {
-			
-		this(scope, scopeDescription);
-		fLimitTo= data.getLimitTo();
-		fSearchFor= data.getSearchFor();
-		fElement= data.getJavaElement();
-		fPattern= data.getPattern();
-		fIsCaseSensitive= data.isCaseSensitive();
-	}
-
 	
-	public JavaSearchQuery(
-			int searchFor,
-			int limitTo,
-			String pattern,
-			boolean isCaseSensitive,
-			IJavaSearchScope scope, String scopeDescription) {
-				
-		this(scope, scopeDescription);
-			fLimitTo= limitTo;
-			fSearchFor= searchFor;
-			fPattern= pattern;
-			fIsCaseSensitive= isCaseSensitive;
+	private static IQueryParticipant[] getParticipants() {
+		return new IQueryParticipant[0];
+	}
+	
+	private static class SearchRequestor implements ISearchRequestor {
+		private IQueryParticipant fParticipant;
+		private JavaSearchResult fSearchResult;
+		public void reportMatch(Match match) {
+			ISearchUIParticipant participant= fParticipant.getUIParticipant();
+			if (participant == null || match.getElement() instanceof IJavaElement || match.getElement() instanceof IResource) {
+				fSearchResult.addMatch(match);
+			} else {
+				fSearchResult.addMatch(match, participant);
+			}
 		}
+		
+		protected SearchRequestor(IQueryParticipant participant, JavaSearchResult result) {
+			super();
+			fParticipant= participant;
+			fSearchResult= result;
+		}
+	}
 
-	public JavaSearchQuery(IJavaElement element, int limitTo, IJavaSearchScope scope, String scopeDescription) {
-		this(scope, scopeDescription);
-		fElement= element;
-		fLimitTo= limitTo;
+	public JavaSearchQuery(QuerySpecification data, IQueryParticipant[] participants) {
+		fPatternData= data;
+		fParticipants= participants;
 	}
 
 	public IStatus run(IProgressMonitor monitor) {
-		JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
+		final JavaSearchResult textResult= (JavaSearchResult) getSearchResult();
 		textResult.removeAll();
 		// Also search working copies
 		SearchEngine engine= new SearchEngine(JavaUI.getSharedWorkingCopiesOnClasspath());
 
 		try {
-			boolean ignoreImports= (fLimitTo == IJavaSearchConstants.REFERENCES);
+
+			int totalTicks= 1000;
+			for (int i= 0; i < fParticipants.length; i++) {
+				totalTicks+= fParticipants[i].estimateTicks(fPatternData);
+			}
+			monitor.beginTask("Searching", totalTicks);
+			IProgressMonitor mainSearchPM= new SubProgressMonitor(monitor, 1000);
+
+			boolean ignoreImports= (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES);
 			ignoreImports &= PreferenceConstants.getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_SEARCH_IGNORE_IMPORTS);
-			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, monitor, ignoreImports);
-			if (fElement != null)
-				engine.search(JavaPlugin.getWorkspace(), fElement, fLimitTo, fScope, collector);
-			else
-				engine.search(
-					JavaPlugin.getWorkspace(),
-					SearchEngine.createSearchPattern(fPattern, fSearchFor, fLimitTo, fIsCaseSensitive),
-					fScope,
-					collector);
+			NewSearchResultCollector collector= new NewSearchResultCollector(textResult, mainSearchPM, ignoreImports);
+			
+			ISearchPattern pattern;
+			if (fPatternData instanceof ElementQuerySpecification)
+				pattern= SearchEngine.createSearchPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo());
+			else {
+				PatternQuerySpecification patternSpec= (PatternQuerySpecification)fPatternData;
+				pattern= SearchEngine.createSearchPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), patternSpec.isCaseSensitive());
+			}
+			
+			engine.search(JavaPlugin.getWorkspace(), pattern, fPatternData.getScope(), collector);
+			for (int i= 0; i < fParticipants.length; i++) {
+				ISearchRequestor requestor= new SearchRequestor(fParticipants[i], textResult);
+				IProgressMonitor participantPM= new SubProgressMonitor(monitor, fParticipants[i].estimateTicks(fPatternData));
+				fParticipants[i].search(requestor, fPatternData, participantPM);
+			}
 			
 		} catch (CoreException e) {
 			return e.getStatus();
@@ -112,26 +120,37 @@ public class JavaSearchQuery implements ISearchQuery {
 
 
 	public String getLabel() {
-		return fName;
+		if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES)
+			return "Search for References";
+		else if (fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
+			return "Search for Declarations";
+		else if (fPatternData.getLimitTo() == IJavaSearchConstants.READ_ACCESSES)
+			return "Search for Read Accesses";
+		else if (fPatternData.getLimitTo() == IJavaSearchConstants.WRITE_ACCESSES)
+			return "Search for Write Accesses";
+		else if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS)
+			return "Search for Implementors";
+		return "Search";
 	}
 
 	String getSingularLabel() {
 		String desc= null;
-		if (fElement != null) {
-			if (fLimitTo == IJavaSearchConstants.REFERENCES
-			&& fElement.getElementType() == IJavaElement.METHOD)
-				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElement);
+		if (fPatternData instanceof ElementQuerySpecification) {
+			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
+			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
+			&& element.getElementType() == IJavaElement.METHOD)
+				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
 			else
-				desc= fElement.getElementName();
-			if ("".equals(desc) && fElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
+				desc= element.getElementName();
+			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
 				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
+		} else {
+			desc= ((PatternQuerySpecification)fPatternData).getPattern();
 		}
-		else
-			desc= fPattern;
 
-		desc= "\""+desc+"\"";
-		String[] args= new String[] {desc, fScopeDescription}; //$NON-NLS-1$
-		switch (fLimitTo) {
+		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] args= new String[] {desc, fPatternData.getScopeDescription()}; //$NON-NLS-1$
+		switch (fPatternData.getLimitTo()) {
 			case IJavaSearchConstants.IMPLEMENTORS:
 				return SearchMessages.getFormattedString("JavaSearchOperation.singularImplementorsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.DECLARATIONS:
@@ -151,21 +170,23 @@ public class JavaSearchQuery implements ISearchQuery {
 
 	String getPluralLabelPattern() {
 		String desc= null;
-		if (fElement != null) {
-			if (fLimitTo == IJavaSearchConstants.REFERENCES
-			&& fElement.getElementType() == IJavaElement.METHOD)
-				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)fElement);
+		if (fPatternData instanceof ElementQuerySpecification) {
+			IJavaElement element= ((ElementQuerySpecification)fPatternData).getElement();
+			if (fPatternData.getLimitTo() == IJavaSearchConstants.REFERENCES
+			&& element.getElementType() == IJavaElement.METHOD)
+				desc= PrettySignature.getUnqualifiedMethodSignature((IMethod)element);
 			else
-				desc= fElement.getElementName();
-			if ("".equals(desc) && fElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
+				desc= element.getElementName();
+			if ("".equals(desc) && element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) //$NON-NLS-1$
 				desc= SearchMessages.getString("JavaSearchOperation.default_package"); //$NON-NLS-1$
 		}
-		else
-			desc= fPattern;
+		else {
+			desc= ((PatternQuerySpecification)fPatternData).getPattern();
+		}
 
-		desc= "\""+desc+"\"";
-		String[] args= new String[] {desc, "{0}", fScopeDescription}; //$NON-NLS-1$
-		switch (fLimitTo) {
+		desc= "\""+desc+"\""; //$NON-NLS-1$ //$NON-NLS-2$
+		String[] args= new String[] {desc, "{0}", fPatternData.getScopeDescription()}; //$NON-NLS-1$
+		switch (fPatternData.getLimitTo()) {
 			case IJavaSearchConstants.IMPLEMENTORS:
 				return SearchMessages.getFormattedString("JavaSearchOperation.pluralImplementorsPostfix", args); //$NON-NLS-1$
 			case IJavaSearchConstants.DECLARATIONS:
@@ -184,7 +205,7 @@ public class JavaSearchQuery implements ISearchQuery {
 	}
 
 	ImageDescriptor getImageDescriptor() {
-		if (fLimitTo == IJavaSearchConstants.IMPLEMENTORS || fLimitTo == IJavaSearchConstants.DECLARATIONS)
+		if (fPatternData.getLimitTo() == IJavaSearchConstants.IMPLEMENTORS || fPatternData.getLimitTo() == IJavaSearchConstants.DECLARATIONS)
 			return JavaPluginImages.DESC_OBJS_SEARCH_DECL;
 		else
 			return JavaPluginImages.DESC_OBJS_SEARCH_REF;

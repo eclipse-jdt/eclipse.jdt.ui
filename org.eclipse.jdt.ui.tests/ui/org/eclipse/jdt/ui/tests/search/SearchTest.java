@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+
+import org.eclipse.jdt.internal.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchResult;
 import org.eclipse.jdt.internal.ui.search.ReferenceScopeFactory;
@@ -30,6 +32,7 @@ public class SearchTest {
 		TestSuite suite= new TestSuite("Java Search Tests"); //$NON-NLS-1$
 		//suite.addTestSuite(WorkspaceScopeTest.class);
 		suite.addTest(WorkspaceReferenceTest.allTests());
+		suite.addTest(TreeContentProviderTest.allTests());
 		return suite;
 	}
 
@@ -40,12 +43,22 @@ public class SearchTest {
 	}
 
 	static JavaSearchQuery runMethodRefQuery(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
-		IJavaProject p= JUnitSourceSetup.getProject();
-		IType type= p.findType(TypeName);
-		IMethod method= type.getMethod(methodName, parameterTypes);
+		IMethod method= getMethod(TypeName, methodName, parameterTypes);
 		NewSearchUI.activateSearchResultView();
-		JavaSearchQuery query= new JavaSearchQuery(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.create(method), "workspace scope");
+		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, ReferenceScopeFactory.create(method), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
+	}
+
+	static IMethod getMethod(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
+		IType type= getType(TypeName);
+		IMethod method= type.getMethod(methodName, parameterTypes);
+		return method;
+	}
+
+	static IType getType(String TypeName) throws JavaModelException {
+		IJavaProject p= JUnitSourceSetup.getProject();
+		IType type= p.findType(TypeName);
+		return type;
 	}
 }

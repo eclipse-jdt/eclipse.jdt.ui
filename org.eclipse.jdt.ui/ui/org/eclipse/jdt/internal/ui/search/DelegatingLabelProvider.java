@@ -10,19 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
-import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
+import org.eclipse.jdt.core.IJavaElement;
+
 
 public class DelegatingLabelProvider extends LabelProvider {
 
 	private ILabelProvider fLabelProvider;
-	private AbstractTextSearchViewPage fPage;
+	private JavaSearchResultPage fPage;
 
-	public DelegatingLabelProvider(AbstractTextSearchViewPage page, ILabelProvider inner) {
+	public DelegatingLabelProvider(JavaSearchResultPage page, ILabelProvider inner) {
 		fPage= page;
 		fLabelProvider= inner;
 	}
@@ -32,17 +35,35 @@ public class DelegatingLabelProvider extends LabelProvider {
 	}
 
 	public Image getImage(Object element) {
-		return fLabelProvider.getImage(element);
+		Image image= null;
+		if (element instanceof IJavaElement || element instanceof IResource)
+			image= fLabelProvider.getImage(element);
+		if (image != null)
+			return image;
+		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		if (participant != null)
+			return participant.getImage(element);
+		return null;
 	}
-
+	
 	public String getText(Object element) {
 		int matchCount= fPage.getInput().getMatchCount(element);
-		String text= fLabelProvider.getText(element);
+		String text= internalGetText(element);
 		if (matchCount == 0)
 			return text;
 		if (matchCount == 1)
-			return fLabelProvider.getText(element)+ " (" + 1 + " match)"; //$NON-NLS-1$ //$NON-NLS-2$
+			return internalGetText(element)+ " (" + 1 + " match)"; //$NON-NLS-1$ //$NON-NLS-2$
 		return text + " (" + matchCount + " matches)"; //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	private String internalGetText(Object element) {
+		String text= fLabelProvider.getText(element);
+		if (text != null)
+			return text;
+		ISearchUIParticipant participant= ((JavaSearchResult)fPage.getInput()).getSearchParticpant(element);
+		if (participant != null)
+			return participant.getText(element);
+		return null;
 	}
 
 	public void dispose() {

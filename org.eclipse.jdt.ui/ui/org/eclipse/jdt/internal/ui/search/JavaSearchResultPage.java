@@ -41,6 +41,7 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -105,14 +106,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		} else if (element instanceof IFile) {
 			editor= IDE.openEditor(JavaPlugin.getActivePage(), (IFile) element, false);
 		}
-		if (!(editor instanceof ITextEditor)) {
+		if (editor instanceof ITextEditor) {
+			ITextEditor textEditor= (ITextEditor) editor;
+			textEditor.selectAndReveal(offset, length);
+		} else if (editor != null){
 			if (element instanceof IFile) {
 				IFile file= (IFile) element;
 				showWithMarker(editor, file, offset, length);
 			}
 		} else {
-			ITextEditor textEditor= (ITextEditor) editor;
-			textEditor.selectAndReveal(offset, length);
+			JavaSearchResult result= (JavaSearchResult) getInput();
+			ISearchUIParticipant participant= result.getSearchParticpant(element);
+			if (participant != null)
+				participant.showMatch(match, offset, length);
 		}
 	}
 	

@@ -11,10 +11,14 @@
 package org.eclipse.jdt.internal.ui.search;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -31,6 +35,10 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.search.*;
+
+import org.eclipse.jdt.internal.ui.IUIConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 /**
@@ -38,10 +46,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
  *
  */
 public class JavaSearchResult extends AbstractTextSearchResult {
-	JavaSearchQuery fQuery;
+	private JavaSearchQuery fQuery;
+	private Map fElementsToParticipants;
 	
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
+		fElementsToParticipants= new HashMap();
 	}
 
 	public ImageDescriptor getImageDescriptor() {
@@ -150,4 +160,36 @@ public class JavaSearchResult extends AbstractTextSearchResult {
 	public ISearchQuery getQuery() {
 		return fQuery;
 	}
+	
+	synchronized ISearchUIParticipant getSearchParticpant(Object element) {
+		return (ISearchUIParticipant) fElementsToParticipants.get(element);
+	}
+
+	boolean addMatch(Match match, ISearchUIParticipant participant) {
+		Object element= match.getElement();
+		if (fElementsToParticipants.get(element) != null) {
+			// TODO must access the participant id / label to properly report the error.
+			JavaPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, "A second search participant was found for an element", null));
+			return false;
+		}
+		fElementsToParticipants.put(element, participant);
+		addMatch(match);
+		return true;
+	}
+	
+	public void removeAll() {
+		synchronized(this) {
+			fElementsToParticipants.clear();
+		}
+		super.removeAll();
+	}
+	
+	public void removeMatch(Match match) {
+		synchronized(this) {
+			if (getMatchCount(match.getElement()) == 1)
+				fElementsToParticipants.remove(match.getElement());
+		}
+		super.removeMatch(match);
+	}
+
 }

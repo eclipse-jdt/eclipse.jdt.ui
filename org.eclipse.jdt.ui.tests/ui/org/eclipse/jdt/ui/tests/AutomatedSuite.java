@@ -60,8 +60,7 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(CallHierarchyContentProviderTest.suite());
 		
-		System.out.println("! Java Search Tests disabled !");
-		if (false) addTest(SearchTest.suite()); //TODO: fix
+		addTest(SearchTest.suite()); 
 	}
 	
 }
