@@ -8,6 +8,7 @@ import org.eclipse.ui.ISelectionService;
 import org.eclipse.ui.IWorkbenchWindow;
 
 import org.eclipse.jdt.internal.ui.reorg.RenameAction;
+import org.eclipse.jdt.internal.ui.actions.*;
 
 public class SelfEncapsulateFieldActionDelegate extends RefactoringActionDelegate {
 

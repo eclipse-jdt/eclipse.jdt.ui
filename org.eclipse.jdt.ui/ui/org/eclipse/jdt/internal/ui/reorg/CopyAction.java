@@ -8,7 +8,7 @@ import java.util.List;
 
 import org.eclipse.jdt.internal.core.refactoring.reorg.CopyRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.reorg.ReorgRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.actions.StructuredSelectionProvider;
+import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 
 public class CopyAction extends ReorgDestinationAction {
 	

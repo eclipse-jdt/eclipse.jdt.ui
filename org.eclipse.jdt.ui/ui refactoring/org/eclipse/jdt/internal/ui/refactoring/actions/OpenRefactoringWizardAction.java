@@ -17,6 +17,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.actions.*;
 
 public abstract class OpenRefactoringWizardAction extends RefactoringAction {
 	

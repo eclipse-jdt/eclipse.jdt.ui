@@ -17,6 +17,7 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jdt.internal.ui.actions.*;
 
 public abstract class RefactoringAction extends Action {
 

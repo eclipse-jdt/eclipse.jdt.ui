@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.jdt.internal.ui.actions.*;
 
 public class RenameParametersActionDelegate extends RefactoringActionDelegate {
 
