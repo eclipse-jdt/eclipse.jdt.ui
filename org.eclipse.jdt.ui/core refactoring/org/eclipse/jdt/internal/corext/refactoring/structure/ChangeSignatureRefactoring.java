@@ -541,6 +541,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 8); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			clearManagers();
+			fBaseCuRewrite.clearASTAndImportRewrites();
 
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
