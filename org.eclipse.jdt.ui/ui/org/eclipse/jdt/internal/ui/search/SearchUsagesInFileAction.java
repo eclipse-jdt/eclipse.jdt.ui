@@ -259,7 +259,7 @@ public class SearchUsagesInFileAction extends Action {
 	
 	private void showMessage(String msg) {
 		IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
+		if (statusLine != null) 
 			statusLine.setMessage(true, msg, null); 
 
 	}
