@@ -28,12 +28,15 @@ import org.eclipse.jface.text.formatter.FormattingContextProperties;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 
 /**
  * Formatting strategy for general source code comments.
@@ -45,18 +48,14 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/**
 	 * Returns the indentation of the line at the specified offset.
 	 * 
-	 * @param document
-	 *                  Document which owns the line
-	 * @param region
-	 *                  Comment region which owns the line
-	 * @param offset
-	 *                   Offset where to determine the indentation
-	 * @param tabs
-	 *                   <code>true</code> iff the indentation should use tabs
+	 * @param document	the document which owns the line
+	 * @param region	the comment region which owns the line
+	 * @param offset	the offset where to determine the indentation
+	 * @param useTab		<code>true</code> iff the indentation should use tabs
 	 *                   instead of spaces, <code>false</code> otherwise
 	 * @return The indentation of the line
 	 */
-	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset, final boolean tabs) {
+	public static String getLineIndentation(final IDocument document, final CommentRegion region, final int offset, final boolean useTab) {
 
 		String result= ""; //$NON-NLS-1$
 
@@ -67,7 +66,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			final int begin= line.getOffset();
 			final int end= Math.min(offset, line.getOffset() + line.getLength());
 
-			result= region.stringToIndent(document.get(begin, end - begin), tabs);
+			result= region.stringToIndent(document.get(begin, end - begin), useTab);
 
 		} catch (BadLocationException exception) {
 			// Ignore and return empty
@@ -83,6 +82,18 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 	/** Text measurement, can be <code>null</code> */
 	private ITextMeasurement fTextMeasurement;
+
+	/**
+	 * The last formatted document.
+	 * @since 3.0
+	 */
+	private IDocument fLastDocument;
+	/**
+	 * The end of the header in the last document.
+	 * @since 3.0
+	 */
+	private int fLastDocumentsHeaderEnd;
+
 
 	/**
 	 * Creates a new comment formatting strategy.
@@ -112,15 +123,19 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
 		
 		if (document != null && position != null) {
-			final boolean format= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(IPreferenceStore.TRUE);
-			final boolean header= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
-			final boolean tabs= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
+			final boolean isFormmatingComments= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(IPreferenceStore.TRUE);
+			final boolean isFormattingHeader= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
+			final boolean useTab= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
 			
-			final int offset= position.getOffset();
-			if (format && (header || offset != 0 || !position.getType().equals(IJavaPartitions.JAVA_DOC))) {
+			if (fLastDocument != document) {
+				fLastDocumentsHeaderEnd= computeHeaderEnd(document);
+				fLastDocument= document;
+			}
+			
+			if (isFormmatingComments && (isFormattingHeader || position.offset >= fLastDocumentsHeaderEnd)) {
 				
 				final CommentRegion region= CommentObjectFactory.createRegion(document, position, TextUtilities.getDefaultLineDelimiter(document), getPreferences(), fTextMeasurement);
-				final TextEdit edit= region.format(getLineIndentation(document, region, offset, tabs));
+				final TextEdit edit= region.format(getLineIndentation(document, region, position.getOffset(), useTab));
 				try {
 					
 					if (edit != null)
@@ -136,7 +151,47 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Returns the end offset for the document's header.
+	 * 
+	 * @param document the document
+	 * @return the header's end offset
+	 * @since 3.0
+	 */
+	private int computeHeaderEnd(IDocument document) {
+		if (document == null)
+			return -1;
+		
+		IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+		scanner.setSource(document.get().toCharArray());
+
+		try {
+			int offset= -1;
+			
+			int terminal= scanner.getNextToken();
+			while (terminal != ITerminalSymbols.TokenNameEOF && !(terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface)) {
+				
+				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC)
+					offset= scanner.getCurrentTokenStartPosition();
+				
+				terminal= scanner.getNextToken();
+			}
+			
+			if ((terminal == ITerminalSymbols.TokenNameclass || terminal == ITerminalSymbols.TokenNameinterface) && offset == -1)
+				offset= scanner.getCurrentTokenStartPosition();
+			
+			if (terminal != ITerminalSymbols.TokenNameEOF && offset != -1)
+				return offset;
+			
+		} catch (InvalidInputException ex) {
+			// enable formatting
+			return -1;
+		}
+		// enable formatting
+		return -1;
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#formatterStarts(org.eclipse.jface.text.formatter.IFormattingContext)
 	 */
 	public void formatterStarts(IFormattingContext context) {
 		super.formatterStarts(context);
@@ -153,5 +208,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 
 		fPartitions.clear();
 		fDocuments.clear();
+		
+		fLastDocument= null;
+		fLastDocumentsHeaderEnd= -1;
 	}
 }
