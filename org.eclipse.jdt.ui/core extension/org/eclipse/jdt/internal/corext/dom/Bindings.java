@@ -71,6 +71,11 @@ public class Bindings {
 		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
 		CHECK_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
+	private static final boolean USE_CORE_BINDING_GET_JAVA_ELEMENT;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/useCoreBindingGetJavaElement"); //$NON-NLS-1$
+		USE_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
 	
 	/**
 	 * Checks if the two bindings are equals. First an identity check is
@@ -1038,24 +1043,27 @@ public class Bindings {
 	 * @throws JavaModelException if an error occurs in the Java model
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
-		//TODO: could not convert due to JDT/core bugs 88769, 88765
-//		IMethod iMethod= (IMethod) method.getJavaElement();
-//		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-//			IMethod originalFindMethod= originalFindMethod(method, scope);
-//			if (iMethod != null && ! iMethod.equals(originalFindMethod)
-//					|| iMethod == null && originalFindMethod != null) {
-//				JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-//						"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-//						+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
-//			}
-//		}
-//		return iMethod;
+		//TODO: could not convert due to JDT/core bugs. See bug 88860.
+		if (USE_CORE_BINDING_GET_JAVA_ELEMENT) {
+			IMethod iMethod= (IMethod) method.getJavaElement();
+			if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
+				IMethod originalFindMethod= originalFindMethod(method, scope);
+				if (iMethod != null && ! iMethod.equals(originalFindMethod)
+						|| iMethod == null && originalFindMethod != null) {
+					JavaPlugin.logRepeatedMessage("IMethodBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
+							"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
+							+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
+				}
+			}
+			return iMethod;
+		}
+		
 		IMethod originalFindMethod= originalFindMethod(method, scope);
 		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
 			IMethod iMethod= (IMethod) method.getJavaElement();
 			if (iMethod != null && ! iMethod.equals(originalFindMethod)
 					|| iMethod == null && originalFindMethod != null) {
-				JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element", //$NON-NLS-1$
+				JavaPlugin.logRepeatedMessage("IMethodBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
 						"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
 						+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
 			}
