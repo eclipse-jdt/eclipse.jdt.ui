@@ -13,24 +13,11 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -50,12 +37,21 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -64,8 +60,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
@@ -222,23 +216,8 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	/**
 	 * Finds a type by the simple name.
 	 */
-	private static TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) throws CoreException {
-		SearchEngine searchEngine= new SearchEngine();
-		
-		ArrayList typeRefsFound= new ArrayList(10);
-		ITypeNameRequestor requestor= new TypeInfoRequestor(typeRefsFound);
-
-		searchEngine.searchAllTypeNames(
-			null, 
-			simpleTypeName.toCharArray(), 
-			SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, 
-			IJavaSearchConstants.TYPE, 
-			searchScope, 
-			requestor, 
-			IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, 
-			monitor);
-			
-		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
+	private static TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) {
+		return AllTypesCache.getTypesForName(simpleTypeName, searchScope, monitor);
 	}
 	
 	private Shell getShell() {
