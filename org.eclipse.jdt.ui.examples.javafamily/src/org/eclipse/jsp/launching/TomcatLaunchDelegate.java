@@ -17,10 +17,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.core.variables.IValueVariable;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.internal.core.stringsubstitution.IValueVariable;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate;
 import org.eclipse.jsp.JspUIPlugin;
@@ -80,7 +80,7 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 	 * @exception CoreException if the variable or value is undefined
 	 */
 	public static String getCatalinaHome() throws CoreException {
-		IValueVariable variable = DebugPlugin.getDefault().getStringVariableManager().getValueVariable("catalina_home"); //$NON-NLS-1$
+		IValueVariable variable = VariablesPlugin.getDefault().getStringVariableManager().getValueVariable("catalina_home"); //$NON-NLS-1$
 		IStatus err = null;
 		if (variable == null) {
 			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.9"), null); //$NON-NLS-1$

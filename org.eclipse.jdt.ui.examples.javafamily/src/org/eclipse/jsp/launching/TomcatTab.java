@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.variables.VariablesPlugin;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -231,7 +232,7 @@ public class TomcatTab extends AbstractLaunchConfigurationTab {
 		// resolve variables (if any)
 		String expansion;
 		try {
-			expansion = DebugPlugin.getDefault().getStringVariableManager().performStringSubstitution(workingDirPath);
+			expansion = VariablesPlugin.getDefault().getStringVariableManager().performStringSubstitution(workingDirPath);
 		} catch (CoreException e) {
 			setErrorMessage(e.getMessage());
 			return false;

@@ -13,6 +13,7 @@
       
 	<requires>
 		<import plugin="org.eclipse.core.resources"/>
+		<import plugin="org.eclipse.core.variables"/>
 		<import plugin="org.eclipse.jface"/>
 		<import plugin="org.eclipse.ui"/>
 		<import plugin="org.eclipse.search"/>
@@ -133,7 +134,7 @@
       </launchConfigurationTypeImage>
    </extension>
    <extension
-         point="org.eclipse.debug.core.valueVariables">
+         point="org.eclipse.core.variables.valueVariables">
       <variable
             name="catalina_home"
             description="%catalinaHomeDescription">
