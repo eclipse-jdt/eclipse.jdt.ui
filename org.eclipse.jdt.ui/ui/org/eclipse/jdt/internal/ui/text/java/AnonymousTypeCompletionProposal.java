@@ -114,6 +114,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			return true;
 		}
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
+		settings.createComments= false;
 
 		ITypeHierarchy hierarchy= fDeclaringType.newSupertypeHierarchy(null);
 		OverrideMethodQuery selectionQuery= fDeclaringType.isClass() ? new OverrideMethodQuery(JavaPlugin.getActiveWorkbenchShell(), true) : null;
