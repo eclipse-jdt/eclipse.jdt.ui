@@ -61,15 +61,10 @@ public class PullUpTreeViewer extends CheckboxTreeViewer {
 				IJavaElement parent= getParent(element);
 				if (parent == null)	
 					return;
-				if (checked) {
-					while(parent != null) {
-						setChecked(parent, checked);
-						boolean grayed= isPartlyActive(parent);
-						setGrayed(parent, grayed);
-						parent= getParent(parent);
-					}
-				} else {
-					setParentsGrayed(parent, true);
+				while(parent != null) {
+					setChecked(parent, checked);
+					setGrayed(parent, isPartlyActive(parent));
+					parent= getParent(parent);
 				}
 			}
 		};
