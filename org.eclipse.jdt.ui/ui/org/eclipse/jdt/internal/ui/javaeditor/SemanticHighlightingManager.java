@@ -213,7 +213,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		private String fKey;
 		
 		/**
-		 * Initalize with the given offset, length and highlighting key.
+		 * Initialize with the given offset, length and highlighting key.
 		 * 
 		 * @param offset
 		 * @param length
@@ -269,7 +269,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	/** The presentation reconciler */
 	private JavaPresentationReconciler fPresentationReconciler;
 	
-	/** The hardcoded ranges */
+	/** The hard-coded ranges */
 	private HighlightedRange[][] fHardcodedRanges;
 	
 	/**
@@ -279,7 +279,6 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @param sourceViewer The source viewer 
 	 * @param colorManager The color manager
 	 * @param preferenceStore The preference store
-	 * @param backgroundPresentationReconciler the background presentation reconciler
 	 */
 	public void install(JavaEditor editor, JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore) {
 		fEditor= editor;
@@ -306,7 +305,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	 * @param sourceViewer the source viewer 
 	 * @param colorManager the color manager
 	 * @param preferenceStore the preference store
-	 * @param hardcodedRanges the hardcoded ranges to be highlighted
+	 * @param hardcodedRanges the hard-coded ranges to be highlighted
 	 */
 	public void install(JavaSourceViewer sourceViewer, IColorManager colorManager, IPreferenceStore preferenceStore, HighlightedRange[][] hardcodedRanges) {
 		fHardcodedRanges= hardcodedRanges;
@@ -331,9 +330,9 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 	
 	/**
-	 * Computes the hardcoded postions from the hardcoded ranges
+	 * Computes the hard-coded positions from the hard-coded ranges
 	 * 
-	 * @return the hardcoded positions
+	 * @return the hard-coded positions
 	 */
 	private HighlightedPosition[] createHardcodedPositions() {
 		List positions= new ArrayList();
@@ -355,7 +354,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 	}
 
 	/**
-	 * Returns the higlighting corresponding to the given key.
+	 * Returns the highlighting corresponding to the given key.
 	 * 
 	 * @param key the highlighting key as returned by {@link SemanticHighlighting#getPreferenceKey()}
 	 * @return the corresponding highlighting
