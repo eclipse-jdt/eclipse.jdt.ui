@@ -1,7 +1,7 @@
 package p;
 //final
 class A{
-	private final i;
+	private final int i;
 	A(){
 		i= 0;
 	}

@@ -1,11 +1,13 @@
 package p;
-//initialize in constructors
 class A{
 	private int i;
-	A() {
+	A(){
+		this(5);
+	}
+	A(int u){
+		super();
 		i= 0;
 	}
 	void f(){
-		i++;
 	}
 }
