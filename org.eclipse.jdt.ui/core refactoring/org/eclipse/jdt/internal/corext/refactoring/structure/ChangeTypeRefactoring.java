@@ -343,7 +343,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			if (fMethodBinding != null) {
 				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, fCu.getJavaProject());
 				if (selectedMethod == null){
-					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeAction.exception")); //$NON-NLS-1$
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.insideLocalTypesNotSupported")); //$NON-NLS-1$
 				}
 			}
 
@@ -366,7 +366,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 			
 			if (fFieldBinding != null && fFieldBinding.getDeclaringClass().isLocal()){
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.localTypesNotSupported")); //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeTypeRefactoring.insideLocalTypesNotSupported")); //$NON-NLS-1$
 			}
 			
 			fOriginalTypeOfSelection= Bindings.findType(fSelectionTypeBinding, fCu.getJavaProject());
