@@ -21,25 +21,21 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.viewers.ITreeContentProvider;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -92,6 +88,8 @@ public class ContentProviderTests1 extends TestCase {
 	private ICompilationUnit fCUAllTests;
 	private ICompilationUnit fCUVectorTest;
 	private ICompilationUnit fCUSimpleTest;
+	private ZipFile zipfile;
+	private boolean fState;
 	
 	public ContentProviderTests1(String name) {
 		super(name);
@@ -207,6 +205,12 @@ public class ContentProviderTests1 extends TestCase {
 		super.setUp();
 		
 		fWorkspace= ResourcesPlugin.getWorkspace();
+		assertNotNull(fWorkspace);
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		fState= workspaceDesc.isAutoBuilding();
+		workspaceDesc.setAutoBuilding(false);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		assertNotNull(fWorkspace);	
 		
 		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
@@ -236,10 +240,10 @@ public class ContentProviderTests1 extends TestCase {
 		assertTrue("jdk not found", jdk != null);
 
 		java.io.File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
-		
 		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
-		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		zipfile = new ZipFile(junitSrcArchive);
 		fArchiveFragmentRoot= JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+		assertTrue("Unable to create zipfile archive",fArchiveFragmentRoot.exists());
 		
 		fPackJunit= fArchiveFragmentRoot.getPackageFragment("junit");
 		fPackJunitSamples= fArchiveFragmentRoot.getPackageFragment("junit.samples");
@@ -257,11 +261,6 @@ public class ContentProviderTests1 extends TestCase {
 		fCUAllTests= fPackJunitSamples.getCompilationUnit("AllTests.java");
 		fCUVectorTest= fPackJunitSamples.getCompilationUnit("VectorTest.java");
 		fCUSimpleTest= fPackJunitSamples.getCompilationUnit("SimpleTest.java");
-		
-		java.io.File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
-		assertTrue("lib not found", mylibJar != null && mylibJar.exists());
-		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
-
 		//set up project #2: file system structure with in a source folder
 
 	//	JavaProjectHelper.addVariableEntry(fJProject2, new Path("JRE_LIB_TEST"), null, null);
@@ -307,11 +306,18 @@ public class ContentProviderTests1 extends TestCase {
 	 * @see TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		fArchiveFragmentRoot.close();		
+		fArchiveFragmentRoot.close();
+			
+		zipfile.close();
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
 		page.hideView(fMyPart);
 		fMyPart.dispose();
+		
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		workspaceDesc.setAutoBuilding(fState);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		super.tearDown();
 	}
 	

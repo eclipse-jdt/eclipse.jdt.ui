@@ -20,27 +20,23 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.viewers.ITreeContentProvider;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -103,6 +99,8 @@ public class ContentProviderTests4 extends TestCase{
 	
 	private IWorkbenchPage page;
 	private ICompilationUnit fCUinDefault;
+	private File myInternalLibJar;
+	private boolean fState;
 	
 	public ContentProviderTests4(String name) {
 		super(name);
@@ -223,6 +221,13 @@ public class ContentProviderTests4 extends TestCase{
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+		fWorkspace= ResourcesPlugin.getWorkspace();
+		assertNotNull(fWorkspace);
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		fState= workspaceDesc.isAutoBuilding();
+		workspaceDesc.setAutoBuilding(false);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		//create project
 		fJProject3 = JavaProjectHelper.createJavaProject("TestProject3", "bin");
 		assertNotNull("project3 null", fJProject3);
@@ -254,7 +259,7 @@ public class ContentProviderTests4 extends TestCase{
 		
 		//set up project #3: file system structure with project as source folder
 		//add an internal jar
-		File myInternalLibJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar"));
+		myInternalLibJar = JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/myinternallib.jar"));
 		assertTrue("lib not found", myInternalLibJar != null && myInternalLibJar.exists());
 		fInternalRoot1= JavaProjectHelper.addLibraryWithImport(fJProject3, new Path(myInternalLibJar.getPath()), null, null);
 	
@@ -285,8 +290,8 @@ public class ContentProviderTests4 extends TestCase{
 	}
 	
 	public void setUpMockView() throws Exception {
-		fWorkspace = ResourcesPlugin.getWorkspace();
-		assertNotNull(fWorkspace);
+//		fWorkspace = ResourcesPlugin.getWorkspace();
+//		assertNotNull(fWorkspace);
 
 		fWorkbench = PlatformUI.getWorkbench();
 		assertNotNull(fWorkbench);
@@ -314,10 +319,16 @@ public class ContentProviderTests4 extends TestCase{
 	 * @see TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
+	   
 		fInternalRoot1.close();
 		JavaProjectHelper.delete(fJProject3);
 		page.hideView(fMyPart);
 		fMyPart.dispose();
+		
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		workspaceDesc.setAutoBuilding(fState);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		
 		super.tearDown();
 	}

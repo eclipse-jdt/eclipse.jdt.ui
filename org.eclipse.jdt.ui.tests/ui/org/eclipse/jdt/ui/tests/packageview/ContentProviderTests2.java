@@ -20,27 +20,23 @@ import junit.framework.TestSuite;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
-
-import org.eclipse.jface.viewers.ITreeContentProvider;
-
-import org.eclipse.ui.IViewPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -100,6 +96,7 @@ public class ContentProviderTests2 extends TestCase{
 	private IClassFile fYClassFile;
 	
 	private IWorkbenchPage page;
+	private boolean fState;
 	
 	public ContentProviderTests2(String name) {
 		super(name);
@@ -213,6 +210,14 @@ public class ContentProviderTests2 extends TestCase{
 	protected void setUp() throws Exception {
 		super.setUp();
 		
+			
+		fWorkspace= ResourcesPlugin.getWorkspace();
+		assertNotNull(fWorkspace);
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		fState= workspaceDesc.isAutoBuilding();
+		workspaceDesc.setAutoBuilding(false);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		//create project
 		fJProject3= JavaProjectHelper.createJavaProject("TestProject3", "bin");
 		assertNotNull("project3 null", fJProject3);
@@ -271,8 +276,8 @@ public class ContentProviderTests2 extends TestCase{
 	}
 	
 	public void setUpMockView() throws Exception {
-		fWorkspace = ResourcesPlugin.getWorkspace();
-		assertNotNull(fWorkspace);
+//		fWorkspace = ResourcesPlugin.getWorkspace();
+//		assertNotNull(fWorkspace);
 
 		fWorkbench = PlatformUI.getWorkbench();
 		assertNotNull(fWorkbench);
@@ -299,14 +304,15 @@ public class ContentProviderTests2 extends TestCase{
 	 * @see TestCase#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		try {
-			fInternalRoot1.close();
-			JavaProjectHelper.delete(fJProject3);
-			page.hideView(fMyPart);
-			fMyPart.dispose();
-		} catch (Exception ex) {
-			ex.printStackTrace();
-		}
+		fInternalRoot1.close();
+		JavaProjectHelper.delete(fJProject3);
+		page.hideView(fMyPart);
+		fMyPart.dispose();
+		
+		IWorkspaceDescription workspaceDesc= fWorkspace.getDescription();
+		workspaceDesc.setAutoBuilding(fState);
+		fWorkspace.setDescription(workspaceDesc);
+		
 		super.tearDown();
 	}
 	
