@@ -28,8 +28,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 
 /**
- * A special select marker ruler action which activates quick fix if clicked on a quick fixable
- * probelm.
+ * A special select marker ruler action which activates quick fix if clicked on a quick fixable problem.
  */
 public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 
@@ -59,7 +58,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	
 	public void update() {
 		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		if (!(fMyTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension)fMyTextEditor).isEditorInputReadOnly()) {
+		if (!(fMyTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fMyTextEditor).isEditorInputReadOnly()) {
 			fPosition= null;
 			super.update();
 			return;
@@ -79,10 +78,10 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 			return null;
 		Iterator iter= model.getAnnotationIterator();
 		while (iter.hasNext()) {
-			Annotation annotation= (Annotation)iter.next();
+			Annotation annotation= (Annotation) iter.next();
 			if (annotation instanceof IProblemAnnotation) {
 				Position position= model.getPosition(annotation);
-				if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(((IProblemAnnotation)annotation).getId()))
+				if (includesRulerLine(position, document) && JavaCorrectionProcessor.hasCorrections(((IProblemAnnotation) annotation).getId()))
 					return position;
 			}
 		}

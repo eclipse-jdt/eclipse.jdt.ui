@@ -56,9 +56,13 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.texteditor.AddTaskAction;
 import org.eclipse.ui.texteditor.DefaultRangeIndicator;
+import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.StatusTextEditor;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
@@ -574,16 +578,21 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected void createActions() {
 		super.createActions();
 		
+		ResourceAction action= new AddTaskAction(JavaEditorMessages.getResourceBundle(), "AddTask.", this); //$NON-NLS-1$
+		action.setHelpContextId(IAbstractTextEditorHelpContextIds.ADD_TASK_ACTION);
+		action.setActionDefinitionId(ITextEditorActionDefinitionIds.ADD_TASK);
+		setAction(ITextEditorActionConstants.ADD_TASK, action);
+
 		ActionGroup oeg, ovg, sg, jsg;
-		fActionGroups= new CompositeActionGroup(
-			new ActionGroup[] {
-				oeg= new OpenEditorActionGroup(this),
-				ovg= new OpenViewActionGroup(this),
-				sg= new ShowActionGroup(this),
-				jsg= new JavaSearchActionGroup(this)});
+		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
+			oeg= new OpenEditorActionGroup(this),
+			ovg= new OpenViewActionGroup(this),
+			sg= new ShowActionGroup(this),
+			jsg= new JavaSearchActionGroup(this)
+		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		Action action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
+		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		setAction("ShowJavaDoc", action); //$NON-NLS-1$
 	
