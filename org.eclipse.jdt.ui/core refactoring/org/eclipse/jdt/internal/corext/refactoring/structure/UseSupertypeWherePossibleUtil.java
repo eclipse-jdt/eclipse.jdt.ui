@@ -27,6 +27,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
@@ -429,6 +433,16 @@ class UseSupertypeWherePossibleUtil {
 		
 	private boolean isReferenceUpdatable(ASTNode node, Collection nodesToRemove) throws JavaModelException{
 		ASTNode parent= node.getParent();
+		if (node instanceof SimpleName && parent instanceof ArrayInitializer){
+			//there are only 2 places where ArrayInitializers can be used
+			ArrayInitializer initializer= (ArrayInitializer)parent;
+			if (initializer.getParent() instanceof VariableDeclarationFragment)
+				return isReferenceUpdatable(initializer, nodesToRemove);
+			if (initializer.getParent() instanceof ArrayCreation){
+				ArrayCreation arrayCreation= (ArrayCreation)initializer.getParent();
+				return ! nodesToRemove.contains(arrayCreation.getType().getComponentType());
+			}	
+		}
 		if (parent instanceof VariableDeclarationFragment){
 			VariableDeclarationFragment r1= (VariableDeclarationFragment)parent;
 			if (node == r1.getInitializer()){
@@ -560,7 +574,11 @@ class UseSupertypeWherePossibleUtil {
 			if (parentNode instanceof ClassInstanceCreation){
 				if (node == ((ClassInstanceCreation)parentNode).getName())
 					return true;
-			}	
+			}
+			if (parentNode instanceof ArrayType && parentNode.getParent() instanceof ArrayCreation){
+				if (parentNode == ((ArrayCreation)parentNode.getParent()).getType())
+					return true;
+			}
 				
 			if (parentNode instanceof MethodDeclaration){
 				MethodDeclaration md= (MethodDeclaration)parentNode;
@@ -594,6 +612,8 @@ class UseSupertypeWherePossibleUtil {
 					return true;						
 				}
 			}
+			if (parentNode instanceof ArrayType && parentNode.getParent() instanceof VariableDeclarationStatement)
+				return hasDirectProblems(parentNode, pm);
 			if (parentNode instanceof VariableDeclarationStatement){
 				VariableDeclarationStatement vds= (VariableDeclarationStatement)parentNode;
 				if (vds.getType() == node && ! canReplaceTypeInVariableDeclarationStatement(vds, new SubProgressMonitor(pm, 1))){
@@ -751,6 +771,13 @@ class UseSupertypeWherePossibleUtil {
 	//XXX needs better name
 	private boolean isNotUpdatableReference(ASTNode parentNode, IProgressMonitor pm) throws JavaModelException{
 		ASTNode unparenthesizedParent= getUnparenthesizedParent(parentNode);
+		if (unparenthesizedParent instanceof ArrayAccess){
+			ArrayAccess arrayAccess= (ArrayAccess)unparenthesizedParent;
+			if (parentNode.equals(arrayAccess.getArray()))
+				return isNotUpdatableReference(arrayAccess, pm);
+			if (ASTNodes.isParent(parentNode, arrayAccess.getArray()))
+				return isNotUpdatableReference(arrayAccess, pm);
+		}
 		if (unparenthesizedParent instanceof FieldAccess){
 			if (fSuperTypeToUse == null)
 				return true;
