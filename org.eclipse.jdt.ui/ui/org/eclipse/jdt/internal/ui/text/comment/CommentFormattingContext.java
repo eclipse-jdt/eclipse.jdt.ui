@@ -81,12 +81,18 @@ public class CommentFormattingContext extends FormattingContext {
 	}
 
 	/**
-	 * Copy UI's comment formatter preferences
+	 * Map from JDT/Text preference keys to JDT/Core preference keys.
+	 * <p>
+	 * TODO: remove after migrating comment formatter preferences to
+	 * JDT/Core
+	 * </p>
 	 * 
-	 * @param preferences the preferences
+	 * @param preferences the JDT/Text preferences
+	 * @return the JDT/Core preferences
 	 * @since 3.1
 	 */
-	public static void mapOptions(Map preferences) {
+	public static Map mapOptions(Map preferences) {
+		// TODO: stop modifying the original map
 		String[] keys= PREFERENCE_KEYS;
 		int n= keys.length;
 		Object[] values= new Object[n];
@@ -95,5 +101,6 @@ public class CommentFormattingContext extends FormattingContext {
 		String[] remapedKeys= MAPPED_PREFERENCE_KEYS;
 		for (int i= 0; i < n; i++)
 			preferences.put(remapedKeys[i], values[i]);
+		return preferences;
 	}
 }
