@@ -109,10 +109,10 @@ public class TabExample {
 		}		
 				
 		// -------- IListAdapter
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 		}
 		
-		public void selectionChanged(DialogField field) {
+		public void selectionChanged(ListDialogField field) {
 		}
 		
 		// -------- IDialogFieldListener

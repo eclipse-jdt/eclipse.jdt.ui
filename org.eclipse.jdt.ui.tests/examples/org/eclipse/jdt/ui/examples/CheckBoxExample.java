@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 
 public class CheckBoxExample {
@@ -80,7 +81,7 @@ public class CheckBoxExample {
 		}		
 				
 		// -------- IListAdapter
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 			if (field instanceof CheckedListDialogField) {
 				CheckedListDialogField list= (CheckedListDialogField)field;
 				if (index == 0) {
@@ -97,7 +98,7 @@ public class CheckBoxExample {
 			}
 		}
 		
-		public void selectionChanged(DialogField field) {}
+		public void selectionChanged(ListDialogField field) {}
 		
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {

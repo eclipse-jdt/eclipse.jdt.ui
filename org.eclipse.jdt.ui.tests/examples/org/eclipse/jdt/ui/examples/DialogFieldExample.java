@@ -8,12 +8,15 @@ package org.eclipse.jdt.ui.examples;
 import java.util.Random;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -39,6 +42,26 @@ public class DialogFieldExample {
 		fShell= null;
 		return this;
 	}
+	
+	private class MylabelProvider extends LabelProvider implements ITableLabelProvider {
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
+		 */
+		public Image getColumnImage(Object element, int columnIndex) {
+			return null;
+		}
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
+		 */
+		public String getColumnText(Object element, int columnIndex) {
+			if (columnIndex == 0) {
+				return element.toString();
+			} else {
+				return "" + columnIndex;
+			}
+		}
+	}
+	
 	
 	public DialogFieldExample open () {
 		fShell= new Shell ();
@@ -66,11 +89,16 @@ public class DialogFieldExample {
 			/* 5 */ null,
 			/* 6 */ "Remove"
 		};
-		ListDialogField list= new ListDialogField(adapter, addButtons, new LabelProvider());
+		String[] columnHeaders= new String[] { "Name", "Number" };
+		
+		
+		ListDialogField list= new ListDialogField(adapter, addButtons, new MylabelProvider());
 		list.setUpButtonIndex(3);
 		list.setDownButtonIndex(4);
 		list.setRemoveButtonIndex(6);
 		list.setLabelText("List: ");
+		
+		list.setTableColumns(new ListDialogField.ColumnsDescription(columnHeaders, true));
 		
 		for (int i= 0; i < 30; i++) {
 				list.addElement(i + "firstxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
@@ -106,14 +134,14 @@ public class DialogFieldExample {
 		}		
 				
 		// -------- IListAdapter
-		public void customButtonPressed(DialogField field, int index) {
+		public void customButtonPressed(ListDialogField field, int index) {
 			if (field instanceof ListDialogField) {
 				ListDialogField list= (ListDialogField)field;
 				list.addElement("elementxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx-" + fgRandom.nextInt());
 			}
 		}
 		
-		public void selectionChanged(DialogField field) {}
+		public void selectionChanged(ListDialogField field) {}
 		
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
