@@ -54,6 +54,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -348,6 +349,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 */
 				private Item fReusedExpandedItem;
 				private boolean fReorderedMembers;
+				private boolean fForceFireSelectionChanged;
 				
 				public JavaOutlineViewer(Tree tree) {
 					super(tree);
@@ -361,6 +363,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				 */
 				public void reconcile(IJavaElementDelta delta) {
 					fReorderedMembers= false;
+					fForceFireSelectionChanged= false;
 					if (getSorter() == null) {
 						if (fTopLevelTypeOnly
 							&& delta.getElement() instanceof IType
@@ -372,6 +375,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							Widget w= findItem(fInput);
 							if (w != null && !w.isDisposed())
 								update(w, delta);
+							if (fForceFireSelectionChanged)
+								fireSelectionChanged(new SelectionChangedEvent(getSite().getSelectionProvider(), this.getSelection()));
 							if (fReorderedMembers) {
 								refresh(false);
 								fReorderedMembers= false;
@@ -423,6 +428,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					internalExpandToLevel(item, ALL_LEVELS);
 					
 					fReusedExpandedItem= null;
+					fForceFireSelectionChanged= true;
 				}
 				
 				protected boolean mustUpdateParent(IJavaElementDelta delta, IJavaElement element) {
