@@ -241,7 +241,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 				RefactoringStatus result1= new RefactoringStatus();
 				
 				RefactoringStatus result2= new RefactoringStatus();
-				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewCuName()));
+				result2.merge(Checks.checkCompilationUnitNewName(fCu, fNewName));
 				if (result2.hasFatalError())
 					result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed_1", fCu.getElementName())); //$NON-NLS-1$
 				else 
