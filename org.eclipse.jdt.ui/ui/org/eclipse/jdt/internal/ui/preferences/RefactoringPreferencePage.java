@@ -117,4 +117,12 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		store.setValue(PREF_SAVE_ALL_EDITORS, value);
 	}	
 	
+	/*
+	 * @see IPreferencePage#performOk()
+	 */
+	public boolean performOk() {
+		JavaPlugin.getDefault().savePluginPreferences();
+		return super.performOk();
+	}
+
 }

@@ -159,6 +159,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 			MessageDialog dialog= new MessageDialog(getShell(), title, null, message, MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.CANCEL_LABEL }, 2);
 			int res= dialog.open();
 			if (res != 0 && res != 1) {
+				JavaPlugin.getDefault().savePluginPreferences();
 				return false;
 			}
 			
@@ -167,6 +168,7 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 				doFullBuild();
 			}
 		}
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
 

@@ -149,6 +149,7 @@ public class JavadocPreferencePage extends PreferencePage implements IWorkbenchP
 	public boolean performOk() {
 		IPreferenceStore prefs= getPreferenceStore();
 		prefs.setValue(PREF_JAVADOC_COMMAND, fJavadocSelection.getText());
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
 

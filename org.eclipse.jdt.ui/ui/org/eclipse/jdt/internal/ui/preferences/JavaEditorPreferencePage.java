@@ -859,6 +859,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	public boolean performOk() {
 		fFontEditor.store();
 		fOverlayStore.propagate();
+		JavaPlugin.getDefault().savePluginPreferences();
 		return true;
 	}
 	

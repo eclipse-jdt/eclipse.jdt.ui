@@ -411,6 +411,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 			actualOptions.put(key, val);
 		}
 		JavaCore.setOptions(actualOptions);
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
 	

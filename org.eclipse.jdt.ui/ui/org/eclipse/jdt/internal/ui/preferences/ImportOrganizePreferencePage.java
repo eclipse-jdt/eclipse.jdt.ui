@@ -403,6 +403,7 @@ public class ImportOrganizePreferencePage extends PreferencePage implements IWor
   		prefs.setValue(PREF_IMPORTORDER, packOrderList(fOrderListField.getElements()));
   		prefs.setValue(PREF_ONDEMANDTHRESHOLD, fThresholdField.getText());
   		prefs.setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
+  		JavaPlugin.getDefault().savePluginPreferences();
         return true;
     }
 

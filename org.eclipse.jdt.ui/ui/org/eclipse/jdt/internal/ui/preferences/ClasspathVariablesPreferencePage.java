@@ -38,7 +38,7 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 	/**
 	 * @see PreferencePage#performOk()
 	 */
-	public boolean performOk() {
+	public boolean performOk() {		JavaPlugin.getDefault().savePluginPreferences();
 		return fVariableBlock.performOk();
 	}
 	

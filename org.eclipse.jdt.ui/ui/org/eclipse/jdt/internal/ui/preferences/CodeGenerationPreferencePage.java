@@ -300,6 +300,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		prefs.setValue(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
 		prefs.setValue(PREF_NON_JAVADOC_COMMENTS, fCreateNonJavadocComments.isSelected());
 		prefs.setValue(PREF_FILE_COMMENTS, fCreateFileComments.isSelected());
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
 	

@@ -411,6 +411,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 			store.setValue(key, text.getText());
 		}			
 		
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}
 

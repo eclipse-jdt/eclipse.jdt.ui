@@ -546,6 +546,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 			openWriteErrorDialog(e);
 		}
 		
+		JavaPlugin.getDefault().savePluginPreferences();
 		return super.performOk();
 	}	
 	

@@ -76,6 +76,15 @@ public class WorkInProgressPreferencePage extends FieldEditorPreferencePage impl
 	public static boolean showTempProblems() {
 		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREF_SHOW_TEMP_PROBLEMS);
 	}
+	
+	/*
+	 * @see IPreferencePage#performOk()
+	 */
+	public boolean performOk() {
+		JavaPlugin.getDefault().savePluginPreferences();
+		return super.performOk();
+	}
+
 }
 
 

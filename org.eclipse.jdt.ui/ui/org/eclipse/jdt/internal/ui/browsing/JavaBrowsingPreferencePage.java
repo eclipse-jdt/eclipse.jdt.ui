@@ -86,4 +86,13 @@ public class JavaBrowsingPreferencePage extends FieldEditorPreferencePage implem
 	 */
 	public void init(IWorkbench workbench) {
 	}
+	
+	/*
+	 * @see IPreferencePage#performOk()
+	 */
+	public boolean performOk() {
+		JavaPlugin.getDefault().savePluginPreferences();
+		return super.performOk();
+	}
+
 }
