@@ -36,7 +36,8 @@
 			icon="icons/smalllogo.gif"
 			category="org.eclipse.jdt.ui.java"
 			class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
-			id="org.eclipse.jdt.junit.viewpart">
+			id="org.eclipse.jdt.junit.viewpart"
+			fastViewWidthRatio="0.40">	
 		</view>
 	</extension>
    	
