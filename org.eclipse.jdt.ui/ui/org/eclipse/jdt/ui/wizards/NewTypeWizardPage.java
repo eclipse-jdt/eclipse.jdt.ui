@@ -82,6 +82,7 @@ import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
+import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -434,8 +435,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */	
 	protected void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns);
-		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());	
-		LayoutUtil.setHorizontalGrabbing(fPackageDialogField.getTextControl(null));
+		Text text= fPackageDialogField.getTextControl(null);
+		LayoutUtil.setWidthHint(text, getMaxFieldWidth());	
+		LayoutUtil.setHorizontalGrabbing(text);
+		JavaPackageCompletionProcessor processor= new JavaPackageCompletionProcessor(getPackageFragmentRoot()); //$NON-NLS-1$
+		ControlContentAssistHelper.createTextContentAssistant(text, processor);
 	}
 
 	/**
