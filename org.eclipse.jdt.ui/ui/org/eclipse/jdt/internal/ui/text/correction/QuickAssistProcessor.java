@@ -292,7 +292,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			
 			VariableDeclarationStatement newVarDec= ast.newVariableDeclarationStatement(newFrag);
 			newVarDec.setType((Type) ASTNode.copySubtree(ast, oldVarDecl.getType()));
-			newVarDec.setModifiers(oldVarDecl.getModifiers() & ~Modifier.FINAL);
+			ASTNodeFactory.addModifiers(ast, oldVarDecl.getModifiers() & ~Modifier.FINAL, newVarDec.modifiers());
 			newStatement= newVarDec;
 		}
 		
