@@ -68,8 +68,12 @@ public class CPListElement {
 				return JavaCore.newLibraryEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix, fIsExported);
 			case IClasspathEntry.CPE_PROJECT:
 				return JavaCore.newProjectEntry(fPath, fIsExported);
-			default: // IClasspathEntry.CPE_VARIABLE:
+			case IClasspathEntry.CPE_CONTAINER:
+				return JavaCore.newContainerEntry(fPath, fIsExported);
+			case IClasspathEntry.CPE_VARIABLE:
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix, fIsExported);
+			default:
+				return null;
 		}
 	}
 	
