@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -158,14 +159,23 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		if (element == null)
 			return null;
 		if (element instanceof IMember) {
-			element= ((IMember)element).getCompilationUnit();
+			IOpenable openable= ((IMember)element).getOpenable();
+			if (openable instanceof IJavaElement)
+				element= (IJavaElement)openable;
+			else
+				element= null;
 		}
 		if (element instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit)element;
 			if (unit.isWorkingCopy())
 				element= unit.getOriginalElement();
 		}
-		return element.getCorrespondingResource();
+		if (element == null)
+			return null;
+		IResource result= element.getCorrespondingResource();
+		if (result == null)
+			result= element.getUnderlyingResource();
+		return result;
 	}
 	
 	private static String getDialogTitle() {
