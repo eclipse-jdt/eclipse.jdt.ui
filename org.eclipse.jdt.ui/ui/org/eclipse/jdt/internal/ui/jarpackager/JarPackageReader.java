@@ -56,7 +56,7 @@ public class JarPackageReader extends Object {
 		Element xmlJarDesc= null;
 		JarPackage jarPackage= new JarPackage();
 	  	DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-    	factory.setValidating(true);
+    	factory.setValidating(false);
 		DocumentBuilder parser= null;
 		try {
 			parser= factory.newDocumentBuilder();
