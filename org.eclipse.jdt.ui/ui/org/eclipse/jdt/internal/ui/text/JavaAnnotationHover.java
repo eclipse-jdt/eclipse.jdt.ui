@@ -26,9 +26,10 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.ISourceViewerExtension2;
+import org.eclipse.jface.text.source.projection.AnnotationBag;
 
 import org.eclipse.ui.editors.text.EditorsUI;
-
 import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -49,7 +50,6 @@ public class JavaAnnotationHover implements IAnnotationHover {
 	public static final JavaAnnotationHoverType VERTICAL_RULER_HOVER= new JavaAnnotationHoverType();
 	
 	private IPreferenceStore fStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
-	
 	private JavaAnnotationHoverType fType;
 	
 	public JavaAnnotationHover(JavaAnnotationHoverType type) {
@@ -57,100 +57,24 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		fType= type;
 	}
 	
-	/**
-	 * Returns the distance to the ruler line. 
-	 */
-	protected int compareRulerLine(Position position, IDocument document, int line) {
-		
+	private boolean isRulerLine(Position position, IDocument document, int line) {
 		if (position.getOffset() > -1 && position.getLength() > -1) {
 			try {
-				int javaAnnotationLine= document.getLineOfOffset(position.getOffset());
-				if (line == javaAnnotationLine)
-					return 1;
-				if (javaAnnotationLine <= line && line <= document.getLineOfOffset(position.getOffset() + position.getLength()))
-					return 2;
+				return line == document.getLineOfOffset(position.getOffset());
 			} catch (BadLocationException x) {
 			}
 		}
-		
-		return 0;
+		return false;
 	}
-	
-	/**
-	 * Selects a set of markers from the two lists. By default, it just returns
-	 * the set of exact matches.
-	 */
-	protected List select(List exactMatch, List including) {
-		return exactMatch;
-	}
-	
-	/**
-	 * Returns one marker which includes the ruler's line of activity.
-	 */
-	protected List getJavaAnnotationsForLine(ISourceViewer viewer, int line) {
-		
-		IDocument document= viewer.getDocument();
-		IAnnotationModel model= viewer.getAnnotationModel();
-		
-		if (model == null)
-			return null;
 			
-		List exact= new ArrayList();
-		List including= new ArrayList();
-		
-		Iterator e= model.getAnnotationIterator();
-		HashMap messagesAtPosition= new HashMap();
-		while (e.hasNext()) {
-			Annotation annotation= (Annotation) e.next();
-
-			if (annotation.getText() == null)
-				continue;
-			
-			Position position= model.getPosition(annotation);
-			if (position == null)
-				continue;
-			
-			AnnotationPreference preference= getAnnotationPreference(annotation);
-			if (preference == null)
-				continue;
-			
-			if (OVERVIEW_RULER_HOVER.equals(fType)) {				
-				String key= preference.getOverviewRulerPreferenceKey();
-				if (key == null || !fStore.getBoolean(key))
-					continue;
-			} else if (TEXT_RULER_HOVER.equals(fType)) {
-				String key= preference.getTextPreferenceKey();
-				if (key != null) {
-					if (!fStore.getBoolean(key))
-						continue;
-				} else {
-					key= preference.getHighlightPreferenceKey();
-					if (key == null || !fStore.getBoolean(key))
-						continue;
-				}
-			} else if (VERTICAL_RULER_HOVER.equals(fType)) {
-				String key= preference.getVerticalRulerPreferenceKey();
-				// backward compatibility
-				if (key != null && !fStore.getBoolean(key))
-					continue;
-			}
-			
-			if (isDuplicateJavaAnnotation(messagesAtPosition, position, annotation.getText()))
-				continue;
-			
-			switch (compareRulerLine(position, document, line)) {
-			case 1:
-				exact.add(annotation);
-				break;
-			case 2:
-				including.add(annotation);
-				break;
-			}
+	private IAnnotationModel getAnnotationModel(ISourceViewer viewer) {
+		if (viewer instanceof ISourceViewerExtension2) {
+			ISourceViewerExtension2 extension= (ISourceViewerExtension2) viewer;
+			return extension.getVisualAnnotationModel();
 		}
-		
-		return select(exact, including);
+		return viewer.getAnnotationModel();
 	}
-
+	
 	private boolean isDuplicateJavaAnnotation(Map messagesAtPosition, Position position, String message) {
 		if (messagesAtPosition.containsKey(position)) {
 			Object value= messagesAtPosition.get(position);
@@ -172,6 +96,75 @@ public class JavaAnnotationHover implements IAnnotationHover {
 		} else
 			messagesAtPosition.put(position, message);
 		return false;
+	}
+	
+	private boolean includeAnnotation(Annotation annotation, Position position, HashMap messagesAtPosition) {
+		AnnotationPreference preference= getAnnotationPreference(annotation);
+		if (preference == null)
+			return false;
+		
+		if (OVERVIEW_RULER_HOVER.equals(fType)) {				
+			String key= preference.getOverviewRulerPreferenceKey();
+			if (key == null || !fStore.getBoolean(key))
+				return false;
+		} else if (TEXT_RULER_HOVER.equals(fType)) {
+			String key= preference.getTextPreferenceKey();
+			if (key != null) {
+				if (!fStore.getBoolean(key))
+					return false;
+			} else {
+				key= preference.getHighlightPreferenceKey();
+				if (key == null || !fStore.getBoolean(key))
+					return false;
+			}
+		} else if (VERTICAL_RULER_HOVER.equals(fType)) {
+			String key= preference.getVerticalRulerPreferenceKey();
+			// backward compatibility
+			if (key != null && !fStore.getBoolean(key))
+				return false;
+		}
+		
+		String text= annotation.getText();
+		return (text != null && !isDuplicateJavaAnnotation(messagesAtPosition, position, text));
+	}
+	
+	private List getJavaAnnotationsForLine(ISourceViewer viewer, int line) {
+		IAnnotationModel model= getAnnotationModel(viewer);
+		if (model == null)
+			return null;
+			
+		IDocument document= viewer.getDocument();
+		List javaAnnotations= new ArrayList();
+		HashMap messagesAtPosition= new HashMap();
+		Iterator iterator= model.getAnnotationIterator();
+		
+		while (iterator.hasNext()) {
+			Annotation annotation= (Annotation) iterator.next();
+						
+			Position position= model.getPosition(annotation);
+			if (position == null)
+				continue;
+			
+			if (!isRulerLine(position, document, line))
+				continue;
+			
+			if (annotation instanceof AnnotationBag) {
+				AnnotationBag bag= (AnnotationBag) annotation;
+				Iterator e= bag.iterator();
+				while (e.hasNext()) {
+					annotation= (Annotation) e.next();
+					position= model.getPosition(annotation);
+					if (position != null && includeAnnotation(annotation, position, messagesAtPosition))
+						javaAnnotations.add(annotation);
+				}
+				continue;
+			} 
+			
+			if (includeAnnotation(annotation, position, messagesAtPosition))
+				javaAnnotations.add(annotation);
+		}
+		
+		return javaAnnotations;
 	}
 		
 	/*
@@ -208,10 +201,9 @@ public class JavaAnnotationHover implements IAnnotationHover {
 					return formatMultipleMessages(messages);
 			}
 		}
-		
 		return null;
 	}
-	
+		
 	/*
 	 * Formats a message as HTML text.
 	 */
