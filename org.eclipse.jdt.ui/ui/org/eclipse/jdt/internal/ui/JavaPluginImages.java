@@ -81,8 +81,8 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_PINTERFACE= NAME_PREFIX + "intp_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_CUNIT= NAME_PREFIX + "jcu_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_CFILE= NAME_PREFIX + "classf_obj.gif";  //$NON-NLS-1$
-	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "classfc_obj.gif";  //$NON-NLS-1$
-	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "classfi_obj.gif";  //$NON-NLS-1$
+	public static final String IMG_OBJS_CFILECLASS= NAME_PREFIX + "class_obj.gif";  //$NON-NLS-1$
+	public static final String IMG_OBJS_CFILEINT= NAME_PREFIX + "int_obj.gif";  //$NON-NLS-1$
 	public static final String IMG_OBJS_PACKAGE= NAME_PREFIX + "package_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_nonexist_obj.gif"; //$NON-NLS-1$
@@ -104,7 +104,7 @@ public class JavaPluginImages {
 	
 	public static final String IMG_OBJS_BREAKPOINT_INSTALLED= NAME_PREFIX + "brkpi_obj.gif"; //$NON-NLS-1$
 
-	public static final String IMG_OBJS_SNIPPET_EVALUATING= NAME_PREFIX + "jsbook_eval_obj.gif"; //$NON-NLS-1$
+	public static final String IMG_OBJS_SNIPPET_EVALUATING= NAME_PREFIX + "jsbook_run_obj.gif"; //$NON-NLS-1$
 
 	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
