@@ -16,11 +16,11 @@ import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
-import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.JavaElementPatternFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
 public class PackagesView extends JavaBrowsingPart {
