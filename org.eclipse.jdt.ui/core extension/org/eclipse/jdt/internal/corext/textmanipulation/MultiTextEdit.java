@@ -22,7 +22,7 @@ public class MultiTextEdit {
 		fChildren= new ArrayList(3);
 	}
 
-	private MultiTextEdit(List children) {
+	private MultiTextEdit(List children) throws CoreException {
 		fChildren= new ArrayList(children.size());
 		for (Iterator iter= children.iterator(); iter.hasNext();) {
 			fChildren.add(((TextEdit)iter.next()).copy());
@@ -65,7 +65,7 @@ public class MultiTextEdit {
      * 
      * @return a copy of this object.
      */
-	public MultiTextEdit copy() {
+	public MultiTextEdit copy() throws CoreException {
 		return new MultiTextEdit(fChildren);
 	}
 	

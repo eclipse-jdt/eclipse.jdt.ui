@@ -19,7 +19,7 @@ public class InlineTempWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addPreviewPage
 	 */ 
 	protected void addPreviewPage() {
-		addPage(new NewPreviewWizardPage());
+		addPage(new PreviewWizardPage());
 	}
 
 }

@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -59,8 +60,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
 	private LocalVariableBinding[] fCallerLocals;
 	private LocalVariableBinding fReturnLocal;
 
-	public ExtractMethodAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment) {
-		super(buffer, start, length, asymetricAssignment);
+	public ExtractMethodAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment, ImportEdit edit) {
+		super(buffer, start, length, asymetricAssignment, edit);
 	}
 	
 	public int getReturnKind() {

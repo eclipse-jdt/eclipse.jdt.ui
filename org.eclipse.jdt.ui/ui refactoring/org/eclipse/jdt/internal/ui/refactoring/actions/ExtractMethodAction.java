@@ -13,6 +13,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.ExtractMethodWizard;
@@ -49,7 +50,8 @@ public class ExtractMethodAction extends TextSelectionBasedRefactoringAction {
 			cunit, 
 			selection.getOffset(), selection.getLength(),
 			CodeFormatterPreferencePage.isCompactingAssignment(),
-			CodeFormatterPreferencePage.getTabSize());
+			CodeFormatterPreferencePage.getTabSize(),
+			JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	/*

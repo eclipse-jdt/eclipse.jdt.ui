@@ -46,7 +46,7 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addPreviewPage
 	 */ 
 	protected void addPreviewPage() {
-		addPage(new NewPreviewWizardPage());
+		addPage(new PreviewWizardPage());
 	}
 	
 	private IRenameRefactoring getRenameRefactoring(){

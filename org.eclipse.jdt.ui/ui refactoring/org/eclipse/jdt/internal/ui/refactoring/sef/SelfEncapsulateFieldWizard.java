@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.ui.refactoring.sef;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.refactoring.NewPreviewWizardPage;
+import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	
@@ -20,7 +20,7 @@ public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	}
 
 	protected void addPreviewPage() {
-		NewPreviewWizardPage page= new NewPreviewWizardPage();
+		PreviewWizardPage page= new PreviewWizardPage();
 		addPage(page);
 	}
 }

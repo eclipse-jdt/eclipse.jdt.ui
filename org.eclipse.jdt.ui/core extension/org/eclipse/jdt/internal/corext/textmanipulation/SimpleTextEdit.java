@@ -38,12 +38,15 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	protected SimpleTextEdit() {
+		this(new TextRange(0,0), "");
 	}
 	
 	protected SimpleTextEdit(int offset, int length, String text) {
 		this(new TextRange(offset, length), text);
 	}
 	protected SimpleTextEdit(TextRange range, String text) {
+		Assert.isNotNull(range);
+		Assert.isNotNull(text);
 		fRange= range;
 		fText= text;
 	}

@@ -86,7 +86,7 @@ public abstract class TextEdit {
      * 
      * @return a copy of this object.
      */
-	public abstract TextEdit copy();	
+	public abstract TextEdit copy() throws CoreException;	
 	
 	/**
 	 * Returns the element modified by this text edit. The method

@@ -2,16 +2,52 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import java.util.ArrayList;import java.util.List;import org.eclipse.swt.SWT;import org.eclipse.swt.custom.SashForm;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.compare.CompareConfiguration;import org.eclipse.compare.CompareViewerSwitchingPane;
-import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.jface.viewers.CheckStateChangedEvent;import org.eclipse.jface.viewers.CheckboxTreeViewer;import org.eclipse.jface.viewers.ICheckStateListener;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.jface.viewers.ISelectionChangedListener;import org.eclipse.jface.viewers.IStructuredSelection;import org.eclipse.jface.viewers.ITreeContentProvider;import org.eclipse.jface.viewers.ITreeViewerListener;import org.eclipse.jface.viewers.SelectionChangedEvent;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.jface.viewers.TreeExpansionEvent;import org.eclipse.jface.viewers.Viewer;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.internal.corext.refactoring.base.Change;import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.corext.refactoring.base.IChange;import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;import org.eclipse.jdt.internal.corext.refactoring.text.AbstractTextBufferChange;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.compare.JavaMergeViewer;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
+
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.ICheckStateListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.part.PageBook;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceReference;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Change;
+import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * Presents the changes made by the refactoring.
- * Consists of a tree of changes and a compare viewer that shows the differences.
- * @deprecated Use NewPreviewWizardPage 
+ * Consists of a tree of changes and a compare viewer that shows the differences. 
  */
 public class PreviewWizardPage extends RefactoringWizardPage implements IPreviewWizardPage {
 
@@ -37,69 +73,32 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		public void perform(ChangeContext context, IProgressMonitor pm) {
 		}
 	}
-
-	// Content provider for the tree viewer.
-	private static class ChangeTreeContentProvider implements ITreeContentProvider {
-		public Object[] getChildren(Object element){
-			if (element instanceof ICompositeChange)
-				return ((ICompositeChange)element).getChildren();
-			return null;	
+	
+	private static class NullPreviewer implements IPreviewViewer {
+		private Label fLabel;
+		public NullPreviewer(Composite parent) {
+			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
+			fLabel.setText("No preview available");
 		}
-		public Object getParent(Object element){
-			return null;
+		public void setInput(Object input) {
+			// do nothing
 		}
-		public boolean hasChildren(Object element){
-			Object[] children= getChildren(element);
-			return children != null && children.length > 0;
+		public void refresh() {
+			// do nothing
 		}
-		public void dispose(){
-		}
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput){
-		}
-		public boolean isDeleted(Object element){
-			return false;
-		}
-		public Object[] getElements(Object element){
-			return getChildren(element);
+		public Control getControl() {
+			return fLabel;
 		}
 	}
-	
-	// Label provider for the tree viewer.
-	private static class ChangeTreeLabelProvider extends JavaElementLabelProvider {
-	
-		public ChangeTreeLabelProvider() {
-			super(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
-		}
-			
-		public final Image getImage(Object element) {
-			IChange change= (IChange)element;
-			Object me= change.getModifiedLanguageElement();
-			if (me == null)
-				return null;
-			return super.getImage(me);
-		}
-		
-		public final String getText(Object element) {
-			StringBuffer result= new StringBuffer();
-			IChange change= (IChange)element;
-			Object me= change.getModifiedLanguageElement();
-			if (me instanceof IJavaElement) {
-				result.append(super.getText(me));
-			}
-			String name= change.getName();
-			if (name != null) {
-				result.append(" : "); //$NON-NLS-1$
-				result.append(name);
-			}
-			return result.toString();
-		}
-	}
-	
 	
 	private IChange fChange;		
-	private CompareViewerSwitchingPane fSwitchingPane;
-	private CheckboxTreeViewer fTreeViewer;
 	private boolean fExpandFirstNode;
+	private ChangeElement fCurrentSelection;
+	private CheckboxTreeViewer fTreeViewer;
+	private PageBook fPreviewContainer;
+	private IPreviewViewer fCurrentPreviewViewer;
+	private IPreviewViewer fNullPreviewer;
+	private ComparePreviewer fComparePreview;
 	
 	/**
 	 * Creates a new proposed changes wizard page.
@@ -119,20 +118,17 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 			return;
 		
 		fChange= change;	
-		IChange treeViewerInput;
+		ChangeElement input;
 		
 		if (fChange == null) {
-			treeViewerInput= null;
-		} else if (fChange instanceof ICompositeChange && !(fChange instanceof AbstractTextBufferChange)) {
-			treeViewerInput= fChange;
+			input= null;
+		} else if (fChange instanceof ICompositeChange && !(fChange instanceof TextChange)) {
+			input= new DefaultChangeElement(null, fChange);
 		} else {
-			treeViewerInput= new DummyRootNode(fChange);
+			input= new DefaultChangeElement(null, new DummyRootNode(fChange));
 		}
 		if (fTreeViewer != null)
-			fTreeViewer.setInput(treeViewerInput);
-			
-		if (treeViewerInput != null)
-			checkAllActiveNodes(treeViewerInput);
+			fTreeViewer.setInput(input);
 	}
 	
 	/**
@@ -146,25 +142,116 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	}
 	
 	/**
+	 * Creates the tree viewer to present the hierarchy of changes. Subclasses may override
+	 * to create their own custom tree viewer.
+	 * 
+	 * @return the tree viewer to present the hierarchy of changes
+	 */
+	protected CheckboxTreeViewer createTreeViewer(Composite parent){
+		return new ChangeElementTreeViewer(parent);
+	}
+	
+	/**
 	 * Creates the content provider used to fill the tree of changes. Subclasses may override
 	 * to create their own custom tree content provider.
 	 *
-	 * @return the tree content provider used to fill the tree of changes. Must not return <code>
-	 *  null</code>.
+	 * @return the tree content provider used to fill the tree of changes
 	 */
 	protected ITreeContentProvider createTreeContentProvider() {
-		return new ChangeTreeContentProvider();
+		return new ChangeElementContentProvider();
 	}
 	
 	/**
 	 * Creates the label provider used to render the tree of changes. Subclasses may override
 	 * to create their own custom label provider.
 	 *
-	 * @return the label provider used to render the tree of changes. Must not return <code>
-	 *  null</code>.
+	 * @return the label provider used to render the tree of changes
 	 */
 	protected ILabelProvider createTreeLabelProvider() {
-		return new ChangeTreeLabelProvider();
+		return new ChangeElementLabelProvider();
+	}
+	
+	/**
+	 * Returns the <code>CompareInput</code> element, if the preview for the given 
+	 * <code>ChangeElement</code> can be presented in a compare viewer. The method
+	 * may return <code>null</code> indicating that the preview cannot be displayed using
+	 * a compare viewer.
+	 * <p>
+	 * Subclasses may override to provide their own input element.
+	 * 
+	 * @return the compare input if the preview for the given change element can be
+	 * 	presented using a compare viewer; otherwise <code>null</code>.
+	 */
+	protected CompareInput getCompareInput(ChangeElement element) {
+		try {
+			if (element instanceof DefaultChangeElement) {
+				IChange change= ((DefaultChangeElement)element).getChange();
+				if (change instanceof TextChange) {
+					TextChange cuc= (TextChange)change;
+					String type= ComparePreviewer.TEXT_TYPE;
+					if (change instanceof CompilationUnitChange)
+						type= ComparePreviewer.JAVA_TYPE;
+					return new CompareInput(
+						cuc.getCurrentContent(),
+						cuc.getPreviewContent(),
+						type);
+				}
+			} else if (element instanceof TextEditChangeElement) {
+				EditChange tec= ((TextEditChangeElement)element).getTextEditChange();
+				TextChange change= tec.getTextChange();
+				if (change instanceof CompilationUnitChange) {
+					ISourceReference sourceReference= findSourceReference(element);
+					if (sourceReference != null) {
+						CompilationUnitChange cuc= (CompilationUnitChange)change;
+						return new CompareInput(
+							cuc.getCurrentContent(sourceReference),
+							cuc.getPreviewContent(sourceReference, new EditChange[] {tec}),
+							ComparePreviewer.JAVA_TYPE);
+					}
+				}
+				return new CompareInput(
+					change.getCurrentContent(tec, 2),
+					change.getPreviewContent(tec, 2),
+					ComparePreviewer.TEXT_TYPE);
+			} else if (element instanceof PseudoJavaChangeElement) {
+				PseudoJavaChangeElement pjce= (PseudoJavaChangeElement)element;
+				List l= collectTextEditChanges(pjce);
+				if (l.size() > 0) {
+					EditChange[] changes= (EditChange[]) l.toArray(new EditChange[l.size()]);
+					CompilationUnitChange change= (CompilationUnitChange)changes[0].getTextChange();
+					ISourceReference sourceReference= (ISourceReference)pjce.getJavaElement();
+					return new CompareInput(
+						change.getCurrentContent(sourceReference),
+						change.getPreviewContent(sourceReference, changes),
+						ComparePreviewer.JAVA_TYPE);
+				}
+			}
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, getShell(), "Showing preview", "Unexpected exception while computing input for compare preview");
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns a viewer used to show a preview for the given change element. The returned viewer
+	 * is kept referenced until the wizard page gets disposed. So it is up to the implementor of this
+	 * method to reuse existing viewers over different change elements. The method may return
+	 * <code>nulll</code> indicating that no preview is available for the given change element.
+	 * <p>
+	 * Subclasses may override to provide their own preview.
+	 * 
+	 * @param element the change element for which a preview control is requested
+	 * @param currentViewer the currently used preview viewer
+	 * @param parent the parent to be used if a new preview viewer must be created
+	 * @return the viewer to show a preview for the given change element
+	 */
+	protected IPreviewViewer getPreviewer(ChangeElement element, IPreviewViewer currentViewer, Composite parent) {
+		CompareInput input= getCompareInput(element);
+		if (input != null) {
+			fComparePreview.setInput(input);
+			return fComparePreview;
+		}
+		return null;
 	}
 	
 	/* (non-JavaDoc)
@@ -187,8 +274,17 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	public void createControl(Composite parent) {
 		SashForm sashForm= new SashForm(parent, SWT.VERTICAL);
 		
-		createTreeViewer(sashForm);
-		createCompareViewer(sashForm);
+		fTreeViewer= createTreeViewer(sashForm);
+		fTreeViewer.setContentProvider(createTreeContentProvider());
+		fTreeViewer.setLabelProvider(createTreeLabelProvider());
+		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
+		fTreeViewer.addCheckStateListener(createCheckStateListener());
+		
+		fPreviewContainer= new PageBook(sashForm, SWT.NONE);
+		fComparePreview= new ComparePreviewer(fPreviewContainer);
+		fNullPreviewer= new NullPreviewer(fPreviewContainer);
+		fPreviewContainer.showPage(fNullPreviewer.getControl());
+		
 		sashForm.setWeights(new int[]{33, 67});
 		
 		setControl(sashForm);
@@ -198,8 +294,9 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 	/* (Non-JavaDoc)
 	 * Method defined in IWizardPage
 	 */
-	public void setVisible(boolean visible){
-		IChange treeViewerInput= (IChange)fTreeViewer.getInput();
+	public void setVisible(boolean visible) {
+		fCurrentSelection= null;
+		ChangeElement treeViewerInput= (ChangeElement)fTreeViewer.getInput();
 		if (visible && treeViewerInput != null) {
 			IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
 			if (selection.isEmpty()) {
@@ -211,8 +308,6 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 						Object[] subElements= provider.getElements(element);
 						if (subElements != null && subElements.length > 0) {
 							fTreeViewer.expandToLevel(element, 1);
-							checkAllActiveNodes((IChange)element);
-							element= subElements[0];
 						}
 					}
 					fTreeViewer.setSelection(new StructuredSelection(element));
@@ -222,100 +317,78 @@ public class PreviewWizardPage extends RefactoringWizardPage implements IPreview
 		super.setVisible(visible);
 	}
 	
-	private List getActiveNodes(IChange root){
-		if (!root.isActive()) //assumes that no subelements can be active here
-			return new ArrayList(0);
-			
-		List active= null;
-		if (root instanceof ICompositeChange) {
-			IChange[] children= ((ICompositeChange)root).getChildren();
-			active= new ArrayList(children.length + 1);
-			active.add(root);
-			for (int i= 0; i < children.length; i++) {
-				active.addAll(getActiveNodes(children[i]));
-			}
-		} else {
-			active= new ArrayList(1);
-			active.add(root);
-		}
-		return active;
-	}
-	
-	private void checkAllActiveNodes(IChange element){
-		//XXX: should not go all the way to the bottom of the tree
-		fTreeViewer.setCheckedElements(getActiveNodes(element).toArray());
-	}
-	
-	private void createCompareViewer(final Composite parent){
-		fSwitchingPane= new CompareViewerSwitchingPane(parent, SWT.BORDER, true){
-			protected Viewer getViewer(Viewer oldViewer, Object input){
-				JavaMergeViewer mergeViewer= new JavaMergeViewer(oldViewer.getControl().getParent(), SWT.NONE, new CompareConfiguration());
-				mergeViewer.setContentProvider(new MergeTextViewerContentProvider());
-				mergeViewer.setInput(new Object());
-				return mergeViewer;
-			}
-		};
-	}
-	
-	private void createTreeViewer(Composite parent){
-		fTreeViewer= new CheckboxTreeViewer(parent);
-		fTreeViewer.setContentProvider(createTreeContentProvider());
-		fTreeViewer.setLabelProvider(createTreeLabelProvider());
-		fTreeViewer.addSelectionChangedListener(createSelectionChangedListener());
-		fTreeViewer.addCheckStateListener(createCheckStateListener());
-		fTreeViewer.addTreeListener(createTreeViewerListener());
-	}
-	
-	private ITreeViewerListener createTreeViewerListener(){
-		return new ITreeViewerListener(){
-			public void treeCollapsed(TreeExpansionEvent event){	
-			}
-			
-			public void treeExpanded(TreeExpansionEvent event){
-				IChange change= (IChange)event.getElement();
-				if (change instanceof ICompositeChange) {
-					IChange[] children= ((ICompositeChange)change).getChildren();
-					if (children != null) {
-						for (int i= 0; i < children.length; i++) {
-							IChange child= children[i];
-							fTreeViewer.setChecked(child, child.isActive());
-						}
-					}
+	private ICheckStateListener createCheckStateListener() {
+		return new ICheckStateListener() {
+			public void checkStateChanged(CheckStateChangedEvent event){
+				ChangeElement element= (ChangeElement)event.getElement();
+				if (isChild(fCurrentSelection, element) || isChild(element, fCurrentSelection)) {
+					showPreview(fCurrentSelection);
 				}
 			}
-		};
-	}
-	
-	private ICheckStateListener createCheckStateListener(){
-		return new ICheckStateListener(){
-			public void checkStateChanged(CheckStateChangedEvent event){
-				IChange change= (IChange)event.getElement();
-				change.setActive(event.getChecked());
-				fTreeViewer.setSubtreeChecked(change, event.getChecked());
-				IStructuredSelection selection= (IStructuredSelection)fTreeViewer.getSelection();
-				if (selection.size() == 1) 
-					setViewerInput(selection.getFirstElement());
+			private boolean isChild(ChangeElement element, ChangeElement child) {
+				while (child != null) {
+					if (child == element)
+						return true;
+					child= child.getParent();
+				}
+				return false;
 			}
 		};
 	}
 		
-	private ISelectionChangedListener createSelectionChangedListener(){
+	private ISelectionChangedListener createSelectionChangedListener() {
 		return new ISelectionChangedListener(){
-			public void selectionChanged(SelectionChangedEvent event){
+			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection sel= (IStructuredSelection) event.getSelection();
 				if (sel.size() == 1) {
-					Object currentInput= fSwitchingPane.getInput();
-					Object newInput= sel.getFirstElement();
-					if (currentInput != newInput)
-						setViewerInput(newInput);
+					ChangeElement newSelection= (ChangeElement)sel.getFirstElement();
+					if (newSelection != fCurrentSelection) {
+						fCurrentSelection= newSelection;
+						showPreview(newSelection);
+					}
 				} else {
-					setViewerInput(new Object());
+					showPreview(null);
 				}
 			}
 		};
 	}	
+
+	private void showPreview(ChangeElement element) {
+		if (element != null)
+			fCurrentPreviewViewer= getPreviewer(element, fCurrentPreviewViewer, fPreviewContainer);
+		else
+			fCurrentPreviewViewer= null;
+			
+		if (fCurrentPreviewViewer == null)
+			fCurrentPreviewViewer= fNullPreviewer;
+		fPreviewContainer.showPage(fCurrentPreviewViewer.getControl());
+	}
 	
-	private void setViewerInput(Object input){
-		fSwitchingPane.setInput(input);
+	private ISourceReference findSourceReference(ChangeElement element) {
+		if (element == null) {
+			return null;
+		} else if (element instanceof PseudoJavaChangeElement) {
+			return (ISourceReference)((PseudoJavaChangeElement)element).getJavaElement();
+		} else if (element instanceof DefaultChangeElement) {
+			IChange change= ((DefaultChangeElement)element).getChange();
+			if (change instanceof CompilationUnitChange) {
+				return ((CompilationUnitChange)change).getCompilationUnit();
+			}
+		}
+		return findSourceReference(element.getParent());
+	}
+	
+	private List collectTextEditChanges(PseudoJavaChangeElement element) {
+		List result= new ArrayList(10);
+		ChangeElement[] children= element.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			ChangeElement child= children[i];
+			if (child instanceof TextEditChangeElement) {
+				result.add(((TextEditChangeElement)child).getTextEditChange());
+			} else if (child instanceof PseudoJavaChangeElement) {
+				result.addAll(collectTextEditChanges((PseudoJavaChangeElement)child));
+			}
+		}
+		return result;
 	}
 }

@@ -64,7 +64,10 @@ public class TextBufferEditor {
 	}
 	
 	/**
-	 * Adds a <code>TextEdit</code> to this text editor.
+	 * Adds a <code>TextEdit</code> to this text editor. Adding a <code>TextEdit</code>
+	 * to a <code>TextBufferEditor</code> transfers ownership of the edit to the editor. So
+	 * after a edit has been added to a editor the creator of that edit <b>must</b> not continue
+	 * modifing it.
 	 * 
 	 * @param edit the text edit to be added
 	 * @exception CoreException if the text edit can not be added
@@ -77,7 +80,10 @@ public class TextBufferEditor {
 	}
 		
 	/**
-	 * Adds a <code>MultiTextEdit</code> to this text editor.
+	 * Adds a <code>MultiTextEdit</code> to this text editor. Adding a <code>MultiTextEdit</code>
+	 * to a <code>TextBufferEditor</code> transfers ownership of the edit to the editor. So
+	 * after a edit has been added to a editor the creator of that edit <b>must</b> not continue
+	 * modifing it.
 	 * 
 	 * @param edit the multi text edit to be added
 	 * @exception CoreException if the multi text edit can not be added
@@ -93,7 +99,10 @@ public class TextBufferEditor {
 	}
 
 	/**
-	 * Adds a <code>UndoMemento</code> to this text editor.
+	 * Adds a <code>UndoMemento</code> to this text editor. Adding a <code>UndoMemento</code>
+	 * to a <code>TextBufferEditor</code> transfers ownership of the memento to the editor. So
+	 * after a memento has been added to a editor the creator of that memento <b>must</b> not continue
+	 * modifing it.
 	 * 
 	 * @param undo the undo memento to be added
 	 * @exception CoreException if the undo memento can not be added

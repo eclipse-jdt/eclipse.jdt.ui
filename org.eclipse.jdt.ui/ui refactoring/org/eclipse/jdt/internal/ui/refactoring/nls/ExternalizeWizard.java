@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.refactoring.nls;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.NewPreviewWizardPage;
+import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 
 class ExternalizeWizard extends RefactoringWizard {
@@ -37,7 +37,7 @@ class ExternalizeWizard extends RefactoringWizard {
 	 * @see RefactoringWizard#addPreviewPage
 	 */ 
 	protected void addPreviewPage(){
-		addPage(new NewPreviewWizardPage());
+		addPage(new PreviewWizardPage());
 	}
 
 	/* non java-doc

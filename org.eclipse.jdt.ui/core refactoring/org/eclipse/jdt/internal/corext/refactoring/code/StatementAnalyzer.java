@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.problem.ProblemHandler;
 import org.eclipse.jdt.internal.compiler.util.CharOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AstNodeData;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
@@ -95,12 +96,12 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	private static final int BREAK_LENGTH= "break".length(); //$NON-NLS-1$
 	private static final int CONTINUE_LENGTH= "continue".length(); //$NON-NLS-1$
 	 
-	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment) {
+	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment, ImportEdit edit) {
 		fBuffer= buffer;
 		Assert.isTrue(fBuffer != null);
 		fSelection= Selection.createFromStartLength(start, length);
 		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
-		fExceptionAnalyzer= new ExceptionAnalyzer(this);
+		fExceptionAnalyzer= new ExceptionAnalyzer(this, edit);
 	}
 
 

@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExtendedBuffer;
@@ -47,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ASTParentTrackingAdapter
 public class ExtractMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
+	private ImportEdit fImportEdit;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
@@ -112,9 +115,12 @@ public class ExtractMethodRefactoring extends Refactoring {
 	 * @param cu the compilation unit which is going to be modified.
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
-	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth) {
+	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth,
+			CodeGenerationSettings settings) {
+		Assert.isNotNull(cu);
+		Assert.isNotNull(settings);
 		fCUnit= cu;
-		Assert.isNotNull(fCUnit);
+		fImportEdit= new ImportEdit(cu, settings);
 		fVisibility= "protected"; //$NON-NLS-1$
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
@@ -170,7 +176,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 
 
 	private IAbstractSyntaxTreeVisitor createVisitor() {
-		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, fSelectionStart, fSelectionLength, true);
+		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, fSelectionStart, fSelectionLength, true, fImportEdit);
 		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fAnalyzer);
 		fAnalyzer.setParentTracker(result);
 		return result;
@@ -254,6 +260,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
+		
+		if (!fImportEdit.isEmpty())
+			result.addTextEdit("Organize Imports", fImportEdit);
 		
 		final int methodStart= method.declarationSourceStart;
 		final int methodEnd= method.declarationSourceEnd;			

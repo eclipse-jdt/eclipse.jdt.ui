@@ -42,6 +42,17 @@ public class Bindings {
 		return null;
 	}
 	
+	public static String makeFullyQualifiedName(char[] packageName, char[] qualifiedTypeName) {
+		if (packageName == null || packageName.length == 0)
+			return new String(qualifiedTypeName);
+		StringBuffer buffer= new StringBuffer();
+		buffer.append(packageName);
+		buffer.append('.'); //$NON-NLS-1$
+		buffer.append(qualifiedTypeName);
+		return buffer.toString();
+	}
+	
+	
 	private static boolean isEqualMethod(MethodBinding method, char[] methodName, TypeBinding[] parameters) {
 		if (!CharOperation.equals(methodName, method.selector))
 			return false;

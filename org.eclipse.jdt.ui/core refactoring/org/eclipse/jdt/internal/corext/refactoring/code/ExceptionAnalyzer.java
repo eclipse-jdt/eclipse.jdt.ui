@@ -25,21 +25,24 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.util.Bindings;
 
 /* package */ class ExceptionAnalyzer {
-
 
 	private List fCurrentExceptions;	// Elements in this list are of type TypeBinding
 	private Stack fTryStack;
 	private HashMap fTypeNames;
 	private StatementAnalyzer fStatementAnalyzer;
+	private ImportEdit fImportEdit;
 	
-	public ExceptionAnalyzer(StatementAnalyzer statementAnalyzer) {
+	public ExceptionAnalyzer(StatementAnalyzer statementAnalyzer, ImportEdit edit) {
 		fTryStack= new Stack();
 		fCurrentExceptions= new ArrayList(1);
 		fTryStack.push(fCurrentExceptions);
 		fTypeNames= new HashMap(10);
 		fStatementAnalyzer= statementAnalyzer;
+		fImportEdit= edit;
 	}
 
 	public String getThrowSignature() {
@@ -54,9 +57,9 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 				result.append(", "); //$NON-NLS-1$
 			TypeReference reference= (TypeReference)fTypeNames.get(typeBinding);
 			if (reference == null) {
-				result.append(typeBinding.qualifiedPackageName());
-				result.append("."); //$NON-NLS-1$
-				result.append(typeBinding.qualifiedSourceName());
+				StringBuffer buffer= new StringBuffer();
+				fImportEdit.addImport(Bindings.makeFullyQualifiedName(typeBinding.qualifiedPackageName(), typeBinding.qualifiedSourceName()));
+				result.append(typeBinding.sourceName());
 			} else {
 				result.append(reference.toStringExpression(0));
 			}
