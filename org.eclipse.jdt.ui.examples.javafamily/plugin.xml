@@ -175,8 +175,8 @@
    </extension>
    
    	<extension 
-		point="org.eclipse.ui.markerImageProviders">
-		<imageprovider 
+		point="org.eclipse.ui.ide.markerImageProviders">
+		<imageprovider
 			id="org.eclipse.jsp.breakpointMarkerProvider"
 			markertype="org.eclipse.jdt.debug.javaStratumLineBreakpointMarker"
 			icon="icons/full/obj16/brkp_obj.gif">
