@@ -64,12 +64,26 @@ public class CCPActionGroup extends ActionGroup {
 		fSite= site;
 		fClipboard= new Clipboard(site.getShell().getDisplay());
 		fActions= new SelectionDispatchAction[] {	
-			fCutAction= ReorgActionFactory.createCutAction(fSite, fSite.getSelectionProvider(), fClipboard),
-			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fSite.getSelectionProvider(), fClipboard),
-			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fSite.getSelectionProvider(), fClipboard),
-			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite, fSite.getSelectionProvider()),
+			fCutAction= ReorgActionFactory.createCutAction(fSite, fClipboard),
+			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fClipboard),
+			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fClipboard),
+			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite),
 		};
+		registerActionsAsSelectionChangeListeners();
 	}
+
+	private void registerActionsAsSelectionChangeListeners() {
+		for (int i= 0; i < fActions.length; i++) {
+			fSite.getSelectionProvider().addSelectionChangedListener(fActions[i]);
+		}
+	}
+	
+	private void deregisterActionsAsSelectionChangeListeners() {
+		for (int i= 0; i < fActions.length; i++) {
+			fSite.getSelectionProvider().removeSelectionChangedListener(fActions[i]);
+		}
+	}
+	
 	
 	/**
 	 * Returns the delete action managed by this action
@@ -113,6 +127,7 @@ public class CCPActionGroup extends ActionGroup {
 			fClipboard.dispose();
 			fClipboard= null;
 		}
+		deregisterActionsAsSelectionChangeListeners();
 	}
 
 }
