@@ -4,6 +4,6 @@ class B{
 	}
 
 	public static void m(){
-		B.n();
+		n();
 	}
 }

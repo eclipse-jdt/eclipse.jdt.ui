@@ -1,4 +1,4 @@
 package p;
 public class A{
-	public static class F{};
+	public static class F{}
 }

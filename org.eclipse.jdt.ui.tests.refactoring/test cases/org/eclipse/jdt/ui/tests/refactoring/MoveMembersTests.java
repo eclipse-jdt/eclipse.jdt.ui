@@ -70,8 +70,8 @@ public class MoveMembersTests extends RefactoringTest {
 			IType destinationType= typeB;
 			ref.setDestinationTypeFullyQualifiedName(destinationType.getFullyQualifiedName());
 		
-			RefactoringStatus result= performRefactoring(ref);
-			assertEquals("precondition was supposed to pass", null, result);
+			RefactoringStatus result= performRefactoringWithStatus(ref);
+			assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);
 		
 			String expected;
 			String actual;
@@ -263,6 +263,22 @@ public class MoveMembersTests extends RefactoringTest {
 			if (packageForB != null)
 				packageForB.delete(true, null);
 		}	
+	}
+	
+	public void test27() throws Exception{
+		IPackageFragment packageForB= null;
+		try{
+			packageForB= getRoot().createPackageFragment("r", false, null);
+			fieldMethodHelper_passingTest(new String[0], new String[]{"n"}, new String[][]{new String[0]}, getPackageP(), packageForB);
+		} finally{
+			performDummySearch();
+			if (packageForB != null)
+				packageForB.delete(true, null);
+		}	
+	}
+	
+	public void test28() throws Exception{
+		fieldMethodHelper_passingTest(new String[0], new String[]{"m", "n"}, new String[][]{new String[0], new String[0]});
 	}
 	
 	//---

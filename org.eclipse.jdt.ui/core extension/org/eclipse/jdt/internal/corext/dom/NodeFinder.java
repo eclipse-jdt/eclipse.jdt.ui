@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -46,6 +47,10 @@ public class NodeFinder extends GenericVisitor {
 			return finder.getCoveringNode();
 		}
 		return result;
+	}
+	
+	public static ASTNode perform(ASTNode root, ISourceRange range) {
+		return perform(root, range.getOffset(), range.getLength());
 	}
 	
 	/**

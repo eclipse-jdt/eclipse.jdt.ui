@@ -31,11 +31,36 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class RefactoringScopeFactory {
 
 	private RefactoringScopeFactory() {
+	}
+
+	public static IJavaSearchScope create(IMember[] members) throws JavaModelException {
+		Assert.isTrue(members != null && members.length > 0);
+		IMember candidate= members[0];
+		int visibility= getVisibility(candidate); 
+		for (int i= 1; i < members.length; i++) {
+			int mv= getVisibility(members[i]);
+			if (mv > visibility) {
+				visibility= mv;
+				candidate= members[i];
+			}
+		}
+		return create(candidate);
+	}
+	
+	private static int getVisibility(IMember member) throws JavaModelException {
+		if (JdtFlags.isPrivate(member))
+			return 0;
+		if (JdtFlags.isPackageVisible(member))
+			return 1;
+		if (JdtFlags.isProtected(member))
+			return 2;
+		return 4;
 	}
 
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {

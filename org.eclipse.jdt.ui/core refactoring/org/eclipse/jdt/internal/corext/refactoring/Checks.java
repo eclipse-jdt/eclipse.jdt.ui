@@ -547,6 +547,20 @@ public class Checks {
 			result.merge(RefactoringStatus.create(status));
 		return result;
 	}
+	
+	public static RefactoringStatus validateEdit(ICompilationUnit unit) {
+		IResource resource= JavaModelUtil.toOriginal(unit).getResource();
+		RefactoringStatus result= new RefactoringStatus();
+		if (resource == null)
+			return result;
+		IStatus status= Resources.checkInSync(resource);
+		if (!status.isOK())
+			result.merge(RefactoringStatus.create(status));
+		status= Resources.makeCommittable(resource, null);
+		if (!status.isOK())
+			result.merge(RefactoringStatus.create(status));
+		return result;
+	}	
 
 	/**
 	 * Checks whether it is possible to modify the given <code>IJavaElement</code>.

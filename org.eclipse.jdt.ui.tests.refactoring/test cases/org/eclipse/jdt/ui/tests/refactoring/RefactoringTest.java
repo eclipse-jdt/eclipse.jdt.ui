@@ -141,6 +141,20 @@ public abstract class RefactoringTest extends TestCase {
 		return null;
 	}
 	
+	protected final RefactoringStatus performRefactoringWithStatus(IRefactoring ref) throws JavaModelException {
+		RefactoringStatus status= ref.checkPreconditions(new NullProgressMonitor());
+		if (status.hasFatalError())
+			return status;
+
+		IChange change= ref.createChange(new NullProgressMonitor());
+		performChange(change);
+		
+		// XXX: this should be done by someone else
+		Refactoring.getUndoManager().addUndo(ref.getName(), change.getUndoChange());
+
+		return status;
+	}
+	
 	protected void performChange(IChange change) throws JavaModelException{
 		change.aboutToPerform(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
 		try {
@@ -335,11 +349,12 @@ public abstract class RefactoringTest extends TestCase {
 	public static IMethod[] getMethods(IType type, String[] names, String[][] signatures) throws JavaModelException{
 		if (names == null || signatures == null)
 			return new IMethod[0];
-		Set methods= new HashSet();
+		List methods= new ArrayList(names.length);
 		for (int i = 0; i < names.length; i++) {
 			IMethod method= type.getMethod(names[i], signatures[i]);
 			Assert.isTrue(method.exists(), "method " + method.getElementName() + " does not exist");
-			methods.add(method);
+			if (!methods.contains(method))
+				methods.add(method);
 		}
 		return (IMethod[]) methods.toArray(new IMethod[methods.size()]);	
 	}

@@ -14,10 +14,13 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -349,6 +352,21 @@ public class ASTNodes {
 		return null;			
 	}
 	
+	public static int getRewriteNodeType(IMember member) {
+		switch(member.getElementType()) {
+			case IJavaElement.TYPE:
+				return ASTRewrite.TYPE_DECLARATION;
+			case IJavaElement.METHOD:
+				return ASTRewrite.METHOD_DECLARATION;
+			case IJavaElement.FIELD:
+				return ASTRewrite.FIELD_DECLARATION;
+			case IJavaElement.INITIALIZER:
+				return ASTRewrite.INITIALIZER;
+		}
+		Assert.isTrue(false, "Cannot happen"); //$NON-NLS-1$
+		return -1;
+	}
+	
 	public static boolean needsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
@@ -602,4 +620,63 @@ public class ASTNodes {
 		}
 	}		
 	
+	public static int getInsertionIndex(BodyDeclaration member, List container) {
+		int memberType= member.getNodeType();
+		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER)
+			return 0;
+		int defaultIndex= container.size();
+		if (memberType == ASTNode.FIELD_DECLARATION) {
+			int first= -1;
+			int last= -1;
+			int i= 0;
+			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+				switch (nodeType) {
+					case ASTNode.FIELD_DECLARATION:
+						last= i;
+						break;
+					case ASTNode.METHOD_DECLARATION:
+						if (first == -1)
+							first= i;
+						break;
+				}
+			}
+			if (last != -1)
+				return ++last;
+			if (first != -1)
+				return first;
+			return defaultIndex;
+		}
+		if (memberType == ASTNode.METHOD_DECLARATION) {
+			int last= -1;
+			int i= 0;
+			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
+				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+				switch (nodeType) {
+					case ASTNode.METHOD_DECLARATION:
+						last= i;
+				}
+			}
+			if (last != -1)
+				return ++last;
+			return defaultIndex;
+		}
+		return defaultIndex;
+	}
+	
+	public static SimpleName getLeftMostSimpleName(QualifiedName name) {
+		final SimpleName[] result= new SimpleName[1];
+		ASTVisitor visitor= new ASTVisitor() {
+			public boolean visit(QualifiedName name) {
+				Name left= name.getQualifier();
+				if (left instanceof SimpleName)
+					result[0]= (SimpleName)left;
+				else
+					left.accept(this);
+				return false;
+			}
+		};
+		name.accept(visitor);
+		return result[0];
+	}	
 }

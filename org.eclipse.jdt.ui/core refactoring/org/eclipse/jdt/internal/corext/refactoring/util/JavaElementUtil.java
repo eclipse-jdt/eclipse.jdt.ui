@@ -149,10 +149,19 @@ public class JavaElementUtil {
 		return (IJavaProject[]) result.toArray(new IJavaProject[result.size()]);
 	}	
 	
-	public static IMember[] merge(IMember[] a1, IMember[] a2){
-		Set result= new HashSet(a1.length + a2.length);
-		result.addAll(Arrays.asList(a1));
-		result.addAll(Arrays.asList(a2));
+	public static IMember[] merge(IMember[] a1, IMember[] a2) {
+		// Don't use hash sets since ordering is important for some refactorings.
+		List result= new ArrayList(a1.length + a2.length);
+		for (int i= 0; i < a1.length; i++) {
+			IMember member= a1[i];
+			if (!result.contains(member))
+				result.add(member);
+		}
+		for (int i= 0; i < a2.length; i++) {
+			IMember member= a2[i];
+			if (!result.contains(member))
+				result.add(member);
+		}
 		return (IMember[]) result.toArray(new IMember[result.size()]);
 	}
 

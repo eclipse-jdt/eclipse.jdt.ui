@@ -40,9 +40,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DefaultLineTracker;
+import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.core.BufferFactoryWrapper;
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
@@ -784,4 +791,32 @@ public class JavaModelUtil {
 		return false;
 	}	
 	
+	public static String getUnindentedSource(IMember member, int tabWidth) throws JavaModelException {
+		String source= member.getSource();
+		try {
+			ILineTracker tracker= new DefaultLineTracker();
+			tracker.set(source);
+			int size= tracker.getNumberOfLines();
+			if (size == 1)
+				return source;
+			String lines[]= new String[size];
+			for (int i= 0; i < size; i++) {
+				IRegion region= tracker.getLineInformation(i);
+				int offset= region.getOffset();
+				lines[i]= source.substring(offset, offset + region.getLength());
+			}
+			Strings.trimIndentation(lines, tabWidth, false);
+			StringBuffer result= new StringBuffer();
+			int last= size - 1;
+			for (int i= 0; i < size; i++) {
+				result.append(lines[i]);
+				if (i < last)
+					result.append(tracker.getLineDelimiter(i));
+			}
+			return result.toString();
+		} catch (BadLocationException e) {
+			Assert.isTrue(false,"Can not happend"); //$NON-NLS-1$
+			return null;
+		}
+	}
 }
