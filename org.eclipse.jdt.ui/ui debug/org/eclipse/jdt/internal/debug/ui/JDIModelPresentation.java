@@ -51,6 +51,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	private static final String STEPPING_USR= LABEL + "stepping_usr";
 	private static final String EXCEPTION_SYS= LABEL + "exception_sys";
 	private static final String EXCEPTION_USR= LABEL + "exception_usr";
+	private static final String METHOD_ENTRY_SYS= LABEL + "methodentry_sys";
+	private static final String METHOD_ENTRY_USR= LABEL + "methodentry_usr";
 	private static final String BREAKPOINT_SYS= LABEL + "breakpoint_sys";
 	private static final String BREAKPOINT_USR= LABEL + "breakpoint_usr";
 	private static final String ACCESS_SYS= LABEL + "access_sys";
@@ -185,6 +187,19 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 					} else {
 						return getFormattedString(MODIFICATION_USR, new String[] {thread.getName(), fieldName, typeName});
 					}
+				}
+			}
+			if (breakpoint instanceof IJavaMethodEntryBreakpoint) {
+				IJavaMethodEntryBreakpoint me= (IJavaMethodEntryBreakpoint)breakpoint;
+				IMethod method= me.getMethod();
+				String methodName= "";
+				if (method != null) {
+					methodName= method.getElementName();
+				}
+				if (thread.isSystemThread()) {
+					return getFormattedString(METHOD_ENTRY_SYS, new String[] {thread.getName(), methodName, typeName});
+				} else {
+					return getFormattedString(METHOD_ENTRY_USR, new String[] {thread.getName(), methodName, typeName});
 				}
 			}
 			if (breakpoint instanceof IJavaLineBreakpoint) {
