@@ -175,4 +175,12 @@ public class JdtFlags {
 				return false;	
 		}
 	}
+
+	public static int clearAccessModifiers(int flags) {
+		return clearFlag(Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE, flags);
+	}
+
+	public static int clearFlag(int flag, int flags){
+		return flags & ~ flag;
+	}
 }

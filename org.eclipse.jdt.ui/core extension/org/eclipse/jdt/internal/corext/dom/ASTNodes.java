@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -479,17 +478,6 @@ public class ASTNodes {
 		}
 		Assert.isTrue(false);
 		return ""; //$NON-NLS-1$
-	}
-	
-	/**
-	 * @deprecated Use flags & ~ (Modifier.PROTECTED | Modifier.PUBLIC | Modifier.PRIVATE)
-	 */
-	public static int clearAccessModifiers(int flags) {
-		return clearFlag(Modifier.PROTECTED, clearFlag(Modifier.PUBLIC, clearFlag(Modifier.PRIVATE, flags)));
-	}
-	
-	public static int clearFlag(int flag, int flags){
-		return flags & ~ flag;
 	}
 	
 	/**

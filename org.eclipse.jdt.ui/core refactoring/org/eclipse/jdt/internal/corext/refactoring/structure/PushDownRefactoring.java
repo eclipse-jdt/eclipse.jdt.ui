@@ -166,7 +166,7 @@ public class PushDownRefactoring extends Refactoring {
 			int modifiers= oldModifiers;	
 			if (isNewMethodToBeDeclaredAbstract()){
 				if (! JdtFlags.isPublic(fMember))
-					modifiers= Modifier.PROTECTED | ASTNodes.clearAccessModifiers(modifiers);
+					modifiers= Modifier.PROTECTED | JdtFlags.clearAccessModifiers(modifiers);
 			}
 			return modifiers;
 		}
@@ -178,11 +178,11 @@ public class PushDownRefactoring extends Refactoring {
 				return oldModifiers;
 			int modifiers= oldModifiers;	
 			if (isNewMethodToBeDeclaredAbstract()){
-				modifiers= ASTNodes.clearFlag(Modifier.FINAL, ASTNodes.clearFlag(Modifier.NATIVE, oldModifiers));
+				modifiers= JdtFlags.clearFlag(Modifier.FINAL, JdtFlags.clearFlag(Modifier.NATIVE, oldModifiers));
 				modifiers |= Modifier.ABSTRACT;
 
 				if (! JdtFlags.isPublic(fMember))
-					modifiers= Modifier.PROTECTED | ASTNodes.clearAccessModifiers(modifiers);
+					modifiers= Modifier.PROTECTED | JdtFlags.clearAccessModifiers(modifiers);
 			}
 			return modifiers;
 		}

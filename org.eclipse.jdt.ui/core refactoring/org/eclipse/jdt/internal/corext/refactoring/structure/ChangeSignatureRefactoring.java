@@ -1133,7 +1133,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	}
 
 	private int getNewModifiers(MethodDeclaration md) {
-		return ASTNodes.clearAccessModifiers(md.getModifiers()) | fVisibility;
+		return JdtFlags.clearAccessModifiers(md.getModifiers()) | fVisibility;
 	}
 	
 	private IMethod getMethod(MethodDeclaration methodDeclaration) throws JavaModelException{

@@ -1271,13 +1271,13 @@ public class PullUpRefactoring extends Refactoring {
 
 	private int createModifiersForAbstractDeclaration(IMethod method) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
-		int modifiers= Modifier.ABSTRACT | ASTNodes.clearFlag(Modifier.NATIVE, ASTNodes.clearFlag(Modifier.FINAL, methodDeclaration.getModifiers()));
+		int modifiers= Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE, JdtFlags.clearFlag(Modifier.FINAL, methodDeclaration.getModifiers()));
 		return getModifiersWithUpdatedVisibility(method, modifiers);
 	}
 	
 	private int getModifiersWithUpdatedVisibility(IMember member, int modifiers) throws JavaModelException{
 		if (needsToChangeVisibility(member))
-			return ASTNodes.clearAccessModifiers(modifiers) | Modifier.PROTECTED;
+			return JdtFlags.clearAccessModifiers(modifiers) | Modifier.PROTECTED;
 		else
 			return modifiers;	
 	}
@@ -1360,7 +1360,7 @@ public class PullUpRefactoring extends Refactoring {
 
 	private int createModifiersForMethodStubs(IMethod method) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(method);
-		int modifiers= ASTNodes.clearFlag(Modifier.NATIVE, ASTNodes.clearFlag(Modifier.ABSTRACT, methodDeclaration.getModifiers()));
+		int modifiers= JdtFlags.clearFlag(Modifier.NATIVE, JdtFlags.clearFlag(Modifier.ABSTRACT, methodDeclaration.getModifiers()));
 		return getModifiersWithUpdatedVisibility(method, modifiers);
 	}
 
