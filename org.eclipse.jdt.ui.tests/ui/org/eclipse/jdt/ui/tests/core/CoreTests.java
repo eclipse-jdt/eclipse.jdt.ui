@@ -67,14 +67,14 @@ public class CoreTests extends TestCase {
 		return diffPos;
 	}
 
-	public static void assertEqualString(String str1, String str2) {	
-		int diffPos= getDiffPos(str1, str2);
+	public static void assertEqualString(String current, String expected) {	
+		int diffPos= getDiffPos(current, expected);
 		if (diffPos != -1) {
 			int diffAhead= Math.max(0, diffPos - printRange);
-			int diffAfter= Math.min(str1.length(), diffPos + printRange);
+			int diffAfter= Math.min(current.length(), diffPos + printRange);
 			
-			String diffStr= str1.substring(diffAhead, diffPos) + '^' + str1.substring(diffPos, diffAfter);
-			assertTrue("Content not as expected: is\n" + str1 + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + str2, false);
+			String diffStr= current.substring(diffAhead, diffPos) + '^' + current.substring(diffPos, diffAfter);
+			assertTrue("Content not as expected: is\n" + current + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + expected, false);
 		}
 	}
 	
