@@ -549,7 +549,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					BracketLevel level= new BracketLevel();
 					fBracketLevelStack.push(level);
 					
-					level.fManager= new LinkedPositionManager(document, fBracketLevelStack.size() > 1);
+					level.fManager= new LinkedPositionManager(document, true); // bracket managers can always coexist
 					level.fManager.addPosition(offset + 1, 0);
 
 					level.fOffset= offset;
