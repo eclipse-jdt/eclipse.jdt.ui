@@ -77,14 +77,15 @@ public final class ASTRewrite {
 	public static final int STATEMENT= 4;
 	public static final int SINGLEVAR_DECLARATION= 5;
 	public static final int TYPE= 6;
-	public static final int JAVADOC= 7;
-	public static final int VAR_DECLARATION_FRAGMENT= 8;
-	public static final int TYPE_DECLARATION= 9;
-	public static final int FIELD_DECLARATION= 10;
-	public static final int METHOD_DECLARATION= 11;
-	public static final int INITIALIZER= 12;
-	public static final int PACKAGE_DECLARATION= 13;
-	public static final int IMPORT_DECLARATION= 14;
+	public static final int NAME= 7;
+	public static final int JAVADOC= 8;
+	public static final int VAR_DECLARATION_FRAGMENT= 9;
+	public static final int TYPE_DECLARATION= 10;
+	public static final int FIELD_DECLARATION= 11;
+	public static final int METHOD_DECLARATION= 12;
+	public static final int INITIALIZER= 13;
+	public static final int PACKAGE_DECLARATION= 14;
+	public static final int IMPORT_DECLARATION= 15;
 	
 	/** Constant used to describe the kind of the change */
 	public static final int INSERTED= 1;
@@ -482,7 +483,7 @@ public final class ASTRewrite {
 	 * <code>FIELD_DECLARATION</code>, <code>INITIALIZER</code>,
 	 * <code>TYPE_DECLARATION</code>, <code>BLOCK</code>, <code>STATEMENT</code>,
 	 *  <code>SINGLEVAR_DECLARATION</code>,<code> VAR_DECLARATION_FRAGMENT</code>,
-	 * <code>TYPE</code>, <code>EXPRESSION</code>, 
+	 * <code>TYPE</code>, <code>EXPRESSION</code>, <code>NAME</code>
 	 * <code>PACKAGE_DECLARATION</code>, <code>IMPORT_DECLARATION</code> and <code>JAVADOC</code>.
 	 * @return the place holder node
 	 */
@@ -496,9 +497,14 @@ public final class ASTRewrite {
 		AST ast= fRootNode.getAST();
 		ASTNode placeHolder;
 		switch (nodeType) {
-			case ASTRewrite.EXPRESSION:
+			case ASTRewrite.NAME:
 				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
 				break;
+			case ASTRewrite.EXPRESSION:
+				MethodInvocation expression = ast.newMethodInvocation(); 
+				expression.setName(ast.newSimpleName("z")); //$NON-NLS-1$
+				placeHolder = expression;
+				break;			
 			case ASTRewrite.TYPE:
 				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
 				break;				
@@ -550,37 +556,43 @@ public final class ASTRewrite {
 	 * @return the node type of a potential place holder
 	 */
 	public static int getPlaceholderType(ASTNode existingNode) {
-		if (existingNode instanceof Expression) {
-			return EXPRESSION;
-		} else if (existingNode instanceof Statement) {
-			if (existingNode.getNodeType() == ASTNode.BLOCK) {
+		switch (existingNode.getNodeType()) {
+			case ASTNode.SIMPLE_NAME:
+			case ASTNode.QUALIFIED_NAME:
+				return NAME;
+			case ASTNode.SIMPLE_TYPE:
+			case ASTNode.PRIMITIVE_TYPE:
+			case ASTNode.ARRAY_TYPE:
+				return TYPE;				
+			case ASTNode.BLOCK:
 				return BLOCK;
-			} else {
-				return STATEMENT;
-			}
-		} else if (existingNode instanceof TypeDeclaration) {
-			return TYPE_DECLARATION;
-		} else if (existingNode instanceof MethodDeclaration) {
-			return METHOD_DECLARATION;
-		} else if (existingNode instanceof FieldDeclaration) {
-			return FIELD_DECLARATION;
-		} else if (existingNode instanceof Initializer) {
-			return INITIALIZER;					
-		} else if (existingNode instanceof SingleVariableDeclaration) {
-			return SINGLEVAR_DECLARATION;
-		} else if (existingNode instanceof VariableDeclarationFragment) {
-			return VAR_DECLARATION_FRAGMENT;
-		} else if (existingNode instanceof Type) {
-			return TYPE;
-		} else if (existingNode instanceof Javadoc) {
-			return JAVADOC;				
-		} else if (existingNode instanceof PackageDeclaration) {
-			return PACKAGE_DECLARATION;				
-		} else if (existingNode instanceof ImportDeclaration) {
-			return IMPORT_DECLARATION;				
-		} else {
-			return UNKNOWN;
+			case ASTNode.TYPE_DECLARATION:
+				return TYPE_DECLARATION;
+			case ASTNode.METHOD_DECLARATION:
+				return METHOD_DECLARATION;
+			case ASTNode.FIELD_DECLARATION:
+				return FIELD_DECLARATION;
+			case ASTNode.INITIALIZER:
+				return INITIALIZER;
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				return SINGLEVAR_DECLARATION;			
+			case ASTNode.VARIABLE_DECLARATION_FRAGMENT:
+				return VAR_DECLARATION_FRAGMENT;
+			case ASTNode.JAVADOC:
+				return JAVADOC;
+			case ASTNode.PACKAGE_DECLARATION:
+				return PACKAGE_DECLARATION;
+			case ASTNode.IMPORT_DECLARATION:
+				return IMPORT_DECLARATION;
+			default:
+				if (existingNode instanceof Expression) {
+					return EXPRESSION;
+				} else if (existingNode instanceof Statement) {
+					// is not Block: special case statement for block
+					return STATEMENT;
+				}
 		}
+		return UNKNOWN;
 	}
 	
 	// to be removed

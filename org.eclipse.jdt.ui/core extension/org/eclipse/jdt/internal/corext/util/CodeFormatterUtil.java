@@ -174,8 +174,15 @@ public class CodeFormatterUtil {
 			code= CodeFormatterUtil.K_COMPILATION_UNIT;
 		} else if (node instanceof BodyDeclaration) {
 			code= CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS;
+		} else if (node instanceof SwitchCase) {
+			prefix = "switch(1) {"; //$NON-NLS-1$
+			suffix = "}"; //$NON-NLS-1$
+			code= CodeFormatterUtil.K_STATEMENTS;
 		} else if (node instanceof Statement) {
 			code= CodeFormatterUtil.K_STATEMENTS;
+		} else if (node instanceof VariableDeclarationExpression) {
+			code = CodeFormatterUtil.K_STATEMENTS;
+			suffix = ";"; //$NON-NLS-1$
 		} else if (node instanceof Expression) {
 			code= CodeFormatterUtil.K_EXPRESSION;
 		} else if (node instanceof Type) {
@@ -200,6 +207,7 @@ public class CodeFormatterUtil {
 		} else if (node instanceof AnonymousClassDeclaration) {
 			prefix= "new A()"; //$NON-NLS-1$
 			code= CodeFormatterUtil.K_STATEMENTS;
+			suffix= ";"; //$NON-NLS-1$
 		} else {
 			Assert.isTrue(false, "Node type not covered: " + node.getClass().getName()); //$NON-NLS-1$
 			return null;
