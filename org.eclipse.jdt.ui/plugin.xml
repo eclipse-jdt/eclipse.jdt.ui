@@ -955,19 +955,6 @@
 	</filter>
 </extension>
 
-<extension id="snippetSupportLineBreakpointMarker" point="org.eclipse.core.resources.markers">
-	<super type="org.eclipse.jdt.debug.javaLineBreakpointMarker"/>
-	<persistent value="false"/>
-</extension>	
-
-<extension point="org.eclipse.debug.core.breakpoints">
-	<breakpoint
-		id="snippetSupportLineBreakpoint"
-		markerType="org.eclipse.jdt.debug.snippetSupportLineBreakpointMarker"
-		class="org.eclipse.jdt.internal.debug.core.SnippetSupportLineBreakpoint">
-	</breakpoint>
-</extension>	
-
 <!-- =========================================================================== -->
 <!-- JAR Packager                                                                -->
 <!-- =========================================================================== -->
