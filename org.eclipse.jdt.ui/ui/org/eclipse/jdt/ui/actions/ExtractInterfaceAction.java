@@ -29,6 +29,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+/** 
+ * @since 2.1
+ */
 public class ExtractInterfaceAction extends SelectionDispatchAction {
 
 	private ExtractInterfaceRefactoring fRefactoring;
@@ -52,7 +55,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	 */
 	public ExtractInterfaceAction(IWorkbenchSite site) {
 		super(site);
-		setText("Extract Interface...");
+		setText("Ex&tract Interface...");
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_INTERFACE_ACTION);
 	}
 	
