@@ -101,15 +101,6 @@ public class EditorUtility {
 		IEditorInput input= getEditorInput(inputElement);
 		return openInEditor(input, getEditorID(input, inputElement), activate);
 	}
-				
-	/** 
-	 * Selects a Java Element in an editor
-	 */	
-	public static void _revealInEditor(IEditorPart part, ISourceReference element) {
-		if (element != null && part instanceof JavaEditor) {
-			((JavaEditor) part)._setSelection(element);
-		}
-	}
 	
 	/** 
 	 * Selects a Java Element in an editor

@@ -353,7 +353,32 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					}
 					return false;
 				}
+				
+				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
+					if (element instanceof IMember)
+						return ((IMember) element).getNameRange();
+					if (element instanceof ISourceReference)
+						return ((ISourceReference) element).getSourceRange();
+					return null;
+				}
+				
+				protected boolean overlaps(ISourceRange range, int start, int end) {
+					return start <= (range.getOffset() + range.getLength() - 1) && range.getOffset() <= end;
+				}
+				
+				protected boolean filtered(IJavaElement parent, IJavaElement child) {
 					
+					Object[] result= new Object[] { child };
+					ViewerFilter[] filters= getFilters();
+					for (int i= 0; i < filters.length; i++) {
+						result= filters[i].filter(this, parent, result);
+						if (result.length == 0)
+							return true;
+					}
+					
+					return false;
+				}
+				
 				protected void update(Widget w, IJavaElementDelta delta) {
 					
 					Item item;
@@ -435,9 +460,8 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							if (filtered(parent, e))
 								continue go2;
 								
-							ISourceReference r= (ISourceReference) e ;
 							doUpdateParent= doUpdateParent || mustUpdateParent(add[i], e);
-							ISourceRange rng= r.getSourceRange();
+							ISourceRange rng= getSourceRange(e);
 							int start= rng.getOffset();
 							int end= start + rng.getLength() - 1;
 							
@@ -447,30 +471,32 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							
 							for (int j= 0; j < children.length; j++) {
 								item= children[j];
-								r= (ISourceReference) item.getData();
+								IJavaElement r= (IJavaElement) item.getData();
 								
 								if (r == null) {
 									// parent node collapsed and not be opened before -> do nothing
 									continue go2;
 								}
+								
 									
 								try {
-									if (overlaps(r, start, end)) {
+									rng= getSourceRange(r);
+									if (overlaps(rng, start, end)) {
 										
 										// be tolerant if the delta is not correct, or if 
 										// the tree has been updated other than by a delta
-										reuseTreeItem(item, (Object) add[i].getElement());
+										reuseTreeItem(item, e);
 										continue go2;
 										
-									} else if (r.getSourceRange().getOffset() > start) {
+									} else if (rng.getOffset() > start) {
 										
 										if (last != null && deletions.contains(last)) {
 											// reuse item
 											deletions.removeElement(last);
-											reuseTreeItem(last, (Object) add[i].getElement());
+											reuseTreeItem(last, (Object) e);
 										} else {
 											// nothing to reuse
-											createTreeItem(w, (Object) add[i].getElement(), j);
+											createTreeItem(w, (Object) e, j);
 										}
 										continue go2;
 									}
@@ -486,10 +512,10 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 							if (last != null && deletions.contains(last)) {
 								// reuse item
 								deletions.removeElement(last);
-								reuseTreeItem(last, (Object) add[i].getElement());
+								reuseTreeItem(last, e);
 							} else {
 								// nothing to reuse
-								createTreeItem(w, (Object) add[i].getElement(), -1);
+								createTreeItem(w, e, -1);
 							}
 						
 						} catch (JavaModelException x) {
@@ -508,31 +534,7 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 					
 					if (doUpdateParent)
 						updateItem(w, delta.getElement());
-				}
-				
-				protected boolean overlaps(ISourceReference reference, int start, int end) {
-					try {
-						
-						ISourceRange rng= reference.getSourceRange();
-						return start <= (rng.getOffset() + rng.getLength() - 1) && rng.getOffset() <= end;
-					
-					} catch (JavaModelException x) {
-						return false;
-					}
-				}
-				
-				protected boolean filtered(IJavaElement parent, IJavaElement child) {
-					
-					Object[] result= new Object[] { child };
-					ViewerFilter[] filters= getFilters();
-					for (int i= 0; i < filters.length; i++) {
-						result= filters[i].filter(this, parent, result);
-						if (result.length == 0)
-							return true;
-					}
-					
-					return false;
-				}							
+				}					
 			};
 				
 			class LexicalSortingAction extends Action {

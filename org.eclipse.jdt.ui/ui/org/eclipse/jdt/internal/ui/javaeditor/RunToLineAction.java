@@ -58,7 +58,7 @@ public class RunToLineAction extends Action implements IUpdate {
 			}
 			ITextSelection ts= (ITextSelection) sp.getSelection();
 			int lineNumber= ts.getStartLine() + 1;
-			IJavaElement je= (IJavaElement) fEditor.getJavaSourceReferenceAt(ts.getOffset());
+			IJavaElement je= (IJavaElement) fEditor.getElementAt(ts.getOffset());
 			IType type= null;
 			if (je instanceof IType) {
 				type= (IType) je;

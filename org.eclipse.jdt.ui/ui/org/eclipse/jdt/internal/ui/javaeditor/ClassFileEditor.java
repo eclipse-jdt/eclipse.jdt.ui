@@ -76,16 +76,6 @@ public class ClassFileEditor extends JavaEditor {
 	}
 	
 	/*
-	 * @see JavaEditor#getJavaSourceReferenceAt
-	 */
-	protected ISourceReference getJavaSourceReferenceAt(int offset) {
-		IJavaElement element= getElementAt(offset);
-		if (element instanceof ISourceReference)
-			return (ISourceReference) element;
-		return null;
-	}
-	
-	/*
 	 * @see JavaEditor#getElementAt
 	 */
 	protected IJavaElement getElementAt(int offset) {

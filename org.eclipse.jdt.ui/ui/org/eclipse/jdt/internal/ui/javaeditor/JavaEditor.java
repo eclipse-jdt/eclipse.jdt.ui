@@ -69,12 +69,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 	
 	/** Outliner context menu Id */
 	protected String fOutlinerContextMenuId;	
-	
-	/**
-	 * Returns the smallest ISourceReference also implementing IJavaElement containing the given position.
-	 */
-	abstract protected ISourceReference getJavaSourceReferenceAt(int offset);
-	
+		
 	/**
 	 * Returns the most narrow java element including the given offset
 	 */
@@ -220,16 +215,19 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 				int offset= range.getOffset();
 				int length= range.getLength();
 				
-				setHighlightRange(offset, length, moveCursor);
+				if (offset > -1 && length >= 0) {
 				
-				if (moveCursor && (reference instanceof IMember)) {
-					range= ((IMember) reference).getNameRange();
-					offset= range.getOffset();
-					length= range.getLength();
-					if (range != null && offset > -1 && length > 0) {
-						if (getSourceViewer() != null) {
-							getSourceViewer().revealRange(offset, length);
-							getSourceViewer().setSelectedRange(offset, length);
+					setHighlightRange(offset, length, moveCursor);
+					
+					if (moveCursor && (reference instanceof IMember)) {
+						range= ((IMember) reference).getNameRange();
+						offset= range.getOffset();
+						length= range.getLength();
+						if (range != null && offset > -1 && length > 0) {
+							if (getSourceViewer() != null) {
+								getSourceViewer().revealRange(offset, length);
+								getSourceViewer().setSelectedRange(offset, length);
+							}
 						}
 					}
 				}
@@ -245,42 +243,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			resetHighlightRange();
 	}
 		
-	public void _setSelection(ISourceReference reference) {
-		
-		if (reference == null || reference instanceof ICompilationUnit) {
-			/*
-			 * If the reference is an ICompilationUnit this unit is either the input
-			 * of this editor or not being displayed. In both cases, nothing should
-			 * happend. (http://dev.eclipse.org/bugs/show_bug.cgi?id=5128)
-			 */
-			return;
-		}
-		
-		try {
-			ISourceRange range= reference.getSourceRange();
-			if (range == null) {
-				return;
-			}
-			// find this source reference in this editor's working copy
-			reference= getJavaSourceReferenceAt(range.getOffset());
-		} catch (JavaModelException x) {
-			// be tolerant, just go with what is there
-		}
-		
-		if (reference == null)
-			return;
-			
-		// set hightlight range
-		setSelection(reference, true);
-		
-		// set outliner selection
-		if (fOutlinePage != null) {
-			fOutlinePage.removeSelectionChangedListener(this);
-			fOutlinePage.select(reference);
-			fOutlinePage.addSelectionChangedListener(this);
-		}
-	}
-	
 	public void setSelection(IJavaElement element) {
 		
 		if (element == null || element instanceof ICompilationUnit) {
@@ -323,7 +285,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			JavaPlugin.getActivePage().bringToTop(this);
 		setSelection(reference, !isActivePart());
 	}
-			
+	
 	/**
 	 * @see AbstractTextEditor#adjustHighlightRange(int, int)
 	 */
@@ -331,23 +293,19 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		try {
 			
-			ISourceReference reference= getJavaSourceReferenceAt(offset);
-			while (reference != null) {
-				ISourceRange range= reference.getSourceRange();
+			IJavaElement element= getElementAt(offset);
+			while (element instanceof ISourceReference) {
+				ISourceRange range= ((ISourceReference) element).getSourceRange();
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
 						fOutlinePage.removeSelectionChangedListener(this);
-						fOutlinePage.select(reference);
+						fOutlinePage.select((ISourceReference) element);
 						fOutlinePage.addSelectionChangedListener(this);
 					}
 					return;
 				}
-				IJavaElement parent= ((IJavaElement) reference).getParent();
-				if (parent instanceof ISourceReference)
-					reference= (ISourceReference) parent;
-				else
-					reference= null;
+				element= element.getParent();
 			}
 			
 		} catch (JavaModelException x) {
