@@ -84,9 +84,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 					}
 					
 					try {
+						boolean isASTNeeded= JavaPlugin.getDefault().getASTProvider().isActive(unit);
 						// reconcile
 						synchronized (unit) {
-							if (fIsJavaReconcilingListener) {
+							if (fIsJavaReconcilingListener && isASTNeeded) {
 								ast= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
 								if (ast != null) {
 									// mark as unmodifiable

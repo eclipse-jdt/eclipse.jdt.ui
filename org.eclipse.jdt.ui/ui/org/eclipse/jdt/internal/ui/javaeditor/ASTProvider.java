@@ -297,10 +297,22 @@ public final class ASTProvider {
 	 * cached by this AST provided.
 	 * 
 	 * @param ast the compilation unit AST
-	 * @return <code>true</code if the given AST is the cached one
+	 * @return <code>true</code> if the given AST is the cached one
 	 */
 	public boolean isCached(CompilationUnit ast) {
 		return ast != null && fAST == ast; 
+	}
+	
+	/**
+	 * Returns whether this AST provider is active on the given
+	 * compilation unit.
+	 * 
+	 * @param cu the compilation unit
+	 * @return <code>true</code> if the given compilation unit is the active one
+	 * @since 3.1
+	 */
+	public boolean isActive(ICompilationUnit cu) {
+		return cu != null && cu.equals(fActiveJavaElement); 
 	}
 
 	/**
@@ -426,7 +438,7 @@ public final class ASTProvider {
 					return fAST;
 			}
 		}
-		if (isReconciling(je)) {
+		if (isActiveElement && isReconciling(je)) {
 			try {
 				final IJavaElement activeElement= fReconcilingJavaElement;
 				
