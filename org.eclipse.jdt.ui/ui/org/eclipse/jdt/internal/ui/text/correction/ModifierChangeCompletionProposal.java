@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -97,6 +98,14 @@ public class ModifierChangeCompletionProposal extends ASTRewriteCorrectionPropos
 					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
 					
 					VariableDeclarationStatement modifiedNode= ast.newVariableDeclarationStatement(ast.newVariableDeclarationFragment());
+					modifiedNode.setModifiers(newModifiers);
+					
+					rewrite.markAsModified(varDecl, modifiedNode);
+				} else if (parent instanceof VariableDeclarationExpression) {
+					VariableDeclarationExpression varDecl= (VariableDeclarationExpression) parent;
+					int newModifiers= (varDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers;
+					
+					VariableDeclarationExpression modifiedNode= ast.newVariableDeclarationExpression(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(newModifiers);
 					
 					rewrite.markAsModified(varDecl, modifiedNode);					
