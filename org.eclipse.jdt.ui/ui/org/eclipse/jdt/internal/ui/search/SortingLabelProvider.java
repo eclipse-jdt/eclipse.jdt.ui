@@ -28,6 +28,10 @@ public class SortingLabelProvider extends SearchLabelProvider implements IColorP
 	public SortingLabelProvider(JavaSearchResultPage page) {
 		super(page, new AppearanceAwareLabelProvider());
 	}	
+	
+	public void addDecorators() {
+		
+	}
 
 	public Image getImage(Object element) {
 		Image image= null;

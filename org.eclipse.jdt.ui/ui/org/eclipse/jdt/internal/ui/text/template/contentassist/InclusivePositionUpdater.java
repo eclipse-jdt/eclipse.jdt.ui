@@ -63,10 +63,11 @@ class InclusivePositionUpdater implements IPositionUpdater {
 					// position comes way
 					// after change - shift
 					position.setOffset(offset + deltaLength);
-				else if (end < eventOffset) {
+				else if (end < eventOffset) 
 					// position comes way before change -
 					// leave alone
-				} else if (offset <= eventOffset && end >= eventOffset + eventOldLength) {
+					;
+				else if (offset <= eventOffset && end >= eventOffset + eventOldLength) {
 					// event completely internal to the position - adjust length
 					position.setLength(length + deltaLength);
 				} else if (offset < eventOffset) {

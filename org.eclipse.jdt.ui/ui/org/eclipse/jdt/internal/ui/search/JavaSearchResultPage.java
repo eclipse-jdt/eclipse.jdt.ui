@@ -31,7 +31,6 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
-import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -296,16 +295,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	protected TableViewer createTableViewer(Composite parent) {
-		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL) {
-			protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-				getTable().setRedraw(false);
-				try {
-					super.handleLabelProviderChanged(event);
-				} finally {
-					getTable().setRedraw(true);
-				}
-			}
-		};
+		return new ProblemTableViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 	}
 	
 	void setSortOrder(int order) {

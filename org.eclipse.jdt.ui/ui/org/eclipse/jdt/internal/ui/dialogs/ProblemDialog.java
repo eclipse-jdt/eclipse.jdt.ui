@@ -38,8 +38,8 @@ public class ProblemDialog extends ErrorDialog {
 	/**
 	 * Creates a problem dialog.
 	 *
-	 * @param parent the shell under which to create this dialog
-	 * @param title the title to use for this dialog,
+	 * @param parentShell the shell under which to create this dialog
+	 * @param dialogTitle the title to use for this dialog,
 	 *   or <code>null</code> to indicate that the default title should be used
 	 * @param message the message to show in this dialog, 
 	 *   or <code>null</code> to indicate that the error's message should be shown

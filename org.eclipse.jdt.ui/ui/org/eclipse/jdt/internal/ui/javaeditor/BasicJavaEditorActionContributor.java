@@ -166,6 +166,22 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			structureSelection.add(fStructureSelectHistoryAction);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, structureSelection);
 
+//			final MenuManager folding= new MenuManager(JavaEditorMessages.getString("FoldingMenu.label"), "folding"); //$NON-NLS-1$ //$NON-NLS-2$
+//			folding.setRemoveAllWhenShown(true);
+//			folding.add(new Action("dummy") {}); //$NON-NLS-1$
+//			folding.addMenuListener(new IMenuListener() {
+//				public void menuAboutToShow(IMenuManager manager) {
+//					IEditorPart part= getActiveEditorPart();
+//					if (part instanceof JavaEditor) {
+//						JavaEditor javaEditor= (JavaEditor)part;
+//						FoldingActionGroup foldingActions= javaEditor.getFoldingActionGroup();
+//						if (foldingActions != null)
+//							foldingActions.fillMenu(manager);
+//					}
+//				}
+//			});
+//			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, folding);
+			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetShowJavaDoc);
 		}
 
