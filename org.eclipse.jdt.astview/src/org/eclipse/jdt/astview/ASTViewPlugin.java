@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPluginDescriptor;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
@@ -25,7 +24,7 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 
 	private static ASTViewPlugin fDefault;
 
-	public ASTViewPlugin(IPluginDescriptor desc) {
+	public ASTViewPlugin() {
 		fDefault = this;
 	}
 	

@@ -18,10 +18,17 @@ public class GenericVisitor extends ASTVisitor {
 		super();
 	}
 
+	/**
+	 * @param visitJavadocTags <code>true</code> if doc comment tags are
+	 * to be visited by default, and <code>false</code> otherwise
+	 * @see Javadoc#tags()
+	 * @see #visit(Javadoc)
+	 * @since 3.0
+	 */
 	public GenericVisitor(boolean visitJavadocTags) {
 		super(visitJavadocTags);
 	}
-
+	
 	//---- Hooks for subclasses -------------------------------------------------
 
 	protected boolean visitNode(ASTNode node) {
@@ -29,6 +36,7 @@ public class GenericVisitor extends ASTVisitor {
 	}
 	
 	protected void endVisitNode(ASTNode node) {
+		// do nothing
 	}
 
 	public boolean visit(AnonymousClassDeclaration node) {
@@ -119,11 +127,10 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 	public boolean visit(Javadoc node) {
-		//	do not visit Javadoc tags by default. Use constructor with boolean to enable.
-		if (super.visit(node)) { 
+		if (super.visit(node))
 			return visitNode(node);
-		}
-		return false;
+		else
+			return false;
 	}
 	public boolean visit(LabeledStatement node) {
 		return visitNode(node);
@@ -222,29 +229,133 @@ public class GenericVisitor extends ASTVisitor {
 		return visitNode(node);
 	}
 
-	/* since 3.0 */
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnnotationTypeDeclaration)
+	 */
+	public boolean visit(AnnotationTypeDeclaration node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration)
+	 */
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.BlockComment)
+	 */
 	public boolean visit(BlockComment node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EnhancedForStatement)
+	 */
+	public boolean visit(EnhancedForStatement node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EnumConstantDeclaration)
+	 */
+	public boolean visit(EnumConstantDeclaration node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.EnumDeclaration)
+	 */
+	public boolean visit(EnumDeclaration node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.LineComment)
+	 */
 	public boolean visit(LineComment node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MarkerAnnotation)
+	 */
+	public boolean visit(MarkerAnnotation node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberRef)
+	 */
 	public boolean visit(MemberRef node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MemberValuePair)
+	 */
+	public boolean visit(MemberValuePair node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRef)
+	 */
 	public boolean visit(MethodRef node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.MethodRefParameter)
+	 */
 	public boolean visit(MethodRefParameter node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.Modifier)
+	 */
+	public boolean visit(Modifier node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.NormalAnnotation)
+	 */
+	public boolean visit(NormalAnnotation node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.ParameterizedType)
+	 */
+	public boolean visit(ParameterizedType node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.QualifiedType)
+	 */
+	public boolean visit(QualifiedType node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.SingleMemberAnnotation)
+	 */
+	public boolean visit(SingleMemberAnnotation node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TagElement)
+	 */
 	public boolean visit(TagElement node) {
 		return visitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TextElement)
+	 */
 	public boolean visit(TextElement node) {
 		return visitNode(node);
 	}
-
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.TypeParameter)
+	 */
+	public boolean visit(TypeParameter node) {
+		return visitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.WildcardType)
+	 */
+	public boolean visit(WildcardType node) {
+		return visitNode(node);
+	}
+	
 	public void endVisit(AnonymousClassDeclaration node) {
 		endVisitNode(node);
 	}
@@ -431,27 +542,132 @@ public class GenericVisitor extends ASTVisitor {
 	public void endVisit(WhileStatement node) {
 		endVisitNode(node);
 	}
+
 	
-	/* since 3.0 */
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.AnnotationTypeDeclaration)
+	 */
+	public void endVisit(AnnotationTypeDeclaration node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration)
+	 */
+	public void endVisit(AnnotationTypeMemberDeclaration node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.BlockComment)
+	 */
 	public void endVisit(BlockComment node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.EnhancedForStatement)
+	 */
+	public void endVisit(EnhancedForStatement node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.EnumConstantDeclaration)
+	 */
+	public void endVisit(EnumConstantDeclaration node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.EnumDeclaration)
+	 */
+	public void endVisit(EnumDeclaration node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.LineComment)
+	 */
 	public void endVisit(LineComment node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.MarkerAnnotation)
+	 */
+	public void endVisit(MarkerAnnotation node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.MemberRef)
+	 */
 	public void endVisit(MemberRef node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.MemberValuePair)
+	 */
+	public void endVisit(MemberValuePair node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodRef)
+	 */
 	public void endVisit(MethodRef node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.MethodRefParameter)
+	 */
 	public void endVisit(MethodRefParameter node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.Modifier)
+	 */
+	public void endVisit(Modifier node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.NormalAnnotation)
+	 */
+	public void endVisit(NormalAnnotation node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.ParameterizedType)
+	 */
+	public void endVisit(ParameterizedType node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.QualifiedType)
+	 */
+	public void endVisit(QualifiedType node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.SingleMemberAnnotation)
+	 */
+	public void endVisit(SingleMemberAnnotation node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.TagElement)
+	 */
 	public void endVisit(TagElement node) {
 		endVisitNode(node);
 	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.TextElement)
+	 */
 	public void endVisit(TextElement node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.TypeParameter)
+	 */
+	public void endVisit(TypeParameter node) {
+		endVisitNode(node);
+	}
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.dom.ASTVisitor#endVisit(org.eclipse.jdt.core.dom.WildcardType)
+	 */
+	public void endVisit(WildcardType node) {
 		endVisitNode(node);
 	}
 
