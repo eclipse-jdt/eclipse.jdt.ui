@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.infra.MockClipboard;
 import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.refactoring.reorg.CopyToClipboardAction;
@@ -81,7 +82,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 
 	protected void setUp() throws Exception {
 		super.setUp();
-		fClipboard= new Clipboard(Display.getDefault());
+		fClipboard= new MockClipboard(Display.getDefault());
 		fDefaultPackage= MySetup.getDefaultSourceFolder().createPackageFragment("", true, null);
 		
 		fCuA= createCU(getPackageP(), CU_A_NAME + ".java", 
