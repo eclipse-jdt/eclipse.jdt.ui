@@ -383,6 +383,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				
 				if (fSize == fStack.size() && !isMasked(offset)) {
 					BracketLevel level= (BracketLevel) fStack.peek();
+					if (level.fFirstPosition.offset > offset || level.fSecondPosition.offset < offset)
+						return null;
 					if (level.fSecondPosition.offset == offset && length == 0)
 						// don't enter the character if if its the closing peer
 						return new ExitFlags(ILinkedListener.UPDATE_CARET, false);
@@ -390,9 +392,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 						return new ExitFlags(ILinkedListener.UPDATE_CARET, true);
 				}
 			}
-			
-					return null;
-			}
+			return null;
+		}
 			
 		private boolean isMasked(int offset) {
 			IDocument document= getSourceViewer().getDocument();
@@ -597,7 +598,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return;
 
 			// remove brackets
-				final ISourceViewer sourceViewer= getSourceViewer();
+			final ISourceViewer sourceViewer= getSourceViewer();
 			final IDocument document= sourceViewer.getDocument();
 			if (document instanceof IDocumentExtension) {
 				IDocumentExtension extension= (IDocumentExtension) document;
@@ -607,16 +608,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 						if ((level.fFirstPosition.isDeleted || level.fFirstPosition.length == 0) && !level.fSecondPosition.isDeleted && level.fSecondPosition.offset == level.fFirstPosition.offset) {
 							try {
 								document.replace(level.fSecondPosition.offset, level.fSecondPosition.length, null);
-			} catch (BadLocationException e) {
-			}
-		}
+							} catch (BadLocationException e) {
+							}
+						}
 						
 						if (fBracketLevelStack.size() == 0) {
 							document.removePositionUpdater(fUpdater);
 							try {
 								document.removePositionCategory(CATEGORY);
 							} catch (BadPositionCategoryException e) {
-	}
+							}
 						}
 					}
 	
