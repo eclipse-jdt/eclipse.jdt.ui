@@ -7,7 +7,7 @@ class B extends A{
 	B(){
 		this(3);
 	}
-	B(int y){
+	B(int i){
 		super(1);
 	}
 }
