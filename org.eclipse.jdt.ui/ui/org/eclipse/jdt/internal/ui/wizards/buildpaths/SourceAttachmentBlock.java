@@ -713,9 +713,9 @@ public class SourceAttachmentBlock {
 				try {
 					IClasspathEntry newEntry;
 					if (fIsVariableEntry) {
-						newEntry= JavaCore.newVariableEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath());
+						newEntry= JavaCore.newVariableEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), false);
 					} else {
-						newEntry= JavaCore.newLibraryEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath());
+						newEntry= JavaCore.newLibraryEntry(fJARPath, getSourceAttachmentPath(), getSourceAttachmentRootPath(), false);
 					}
 					IClasspathEntry[] entries= modifyClasspath(jproject, newEntry, shell);		
 					if (entries != null) {

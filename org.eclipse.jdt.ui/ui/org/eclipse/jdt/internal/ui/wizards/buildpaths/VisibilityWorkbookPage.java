@@ -50,21 +50,21 @@ public class VisibilityWorkbookPage extends BuildPathBasePage {
 	
 	public void update() {
 		List cpelements= fClassPathList.getElements();
-		List libelements= new ArrayList(cpelements.size());
+		List exportableElements= new ArrayList(cpelements.size());
 		List checkedElements= new ArrayList(cpelements.size());
 		
 		int nElements= cpelements.size();
 		for (int i= 0; i < nElements; i++) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
 			int kind= cpe.getEntryKind();
-			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE) {
-				libelements.add(cpe);
+			if (kind == IClasspathEntry.CPE_LIBRARY || kind == IClasspathEntry.CPE_VARIABLE || kind == IClasspathEntry.CPE_PROJECT) {
+				exportableElements.add(cpe);
 				if (cpe.isExported()) {
 					checkedElements.add(cpe);
 				}
 			}
 		}
-		fExportList.setElements(libelements);
+		fExportList.setElements(exportableElements);
 		fExportList.setCheckedElements(checkedElements);
 	}		
 		
@@ -113,7 +113,7 @@ public class VisibilityWorkbookPage extends BuildPathBasePage {
 		for (int i= selElements.size()-1; i >= 0; i--) {
 			CPListElement curr= (CPListElement) selElements.get(i);
 			int kind= curr.getEntryKind();
-			if (kind != IClasspathEntry.CPE_LIBRARY && kind != IClasspathEntry.CPE_VARIABLE) {
+			if (kind == IClasspathEntry.CPE_SOURCE) {
 				selElements.remove(i);
 			}
 		}
