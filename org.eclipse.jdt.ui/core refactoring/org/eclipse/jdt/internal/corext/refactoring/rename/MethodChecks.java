@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -46,7 +48,19 @@ public class MethodChecks {
 			return false;
 		return true;	
 	}	
-		
+	
+	public static boolean isVirtual(IMethodBinding methodBinding){
+		if (methodBinding.isConstructor())
+			return false;
+		if (methodBinding.getDeclaringClass().isInterface())
+			return false;
+		if (Modifier.isPrivate(methodBinding.getModifiers()))	//TODO is this enough?
+			return false;
+		if (Modifier.isStatic(methodBinding.getModifiers()))	//TODO is this enough?
+			return false;
+		return true;	
+	}
+	
 	public static RefactoringStatus checkIfOverridesAnother(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		IMethod overrides= MethodChecks.overridesAnotherMethod(method, pm);
 		if (overrides == null)
