@@ -25,6 +25,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 
 	private Class[] fActivatedOnTypes;
 	private boolean fAcceptEmptySelection;
+	private boolean fNoChecking;
 	
 	/**
 	 * Creates a AbstractOpenWizardAction.
@@ -55,6 +56,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	protected AbstractOpenWizardAction() {
 		fActivatedOnTypes= null;
 		fAcceptEmptySelection= true;
+		fNoChecking= true;
 	}
 	
 	protected IWorkbench getWorkbench() {
@@ -116,7 +118,7 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	 * The user has invoked this action.
 	 */
 	public void run() {
-		if (!canActionBeAdded()) {
+		if (!fNoChecking && !canActionBeAdded()) {
 			return;
 		}
 		
