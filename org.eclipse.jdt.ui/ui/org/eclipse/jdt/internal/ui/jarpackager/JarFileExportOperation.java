@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -716,6 +717,11 @@ public class JarFileExportOperation implements IJarExportRunnable {
 		}
 		if (fJarPackage.getJarLocation() == null) {
 			addError(JarPackagerMessages.getString("JarFileExportOperation.invalidJarLocation"), null); //$NON-NLS-1$
+			return false;
+		}
+		File targetFile= fJarPackage.getJarLocation().toFile();
+		if (targetFile.exists() && !targetFile.canWrite()) {
+			addError(JarPackagerMessages.getString("JarFileExportOperation.jarFileExistsAndNotWritable"), null); //$NON-NLS-1$
 			return false;
 		}
 		if (!fJarPackage.isManifestAccessible()) {
