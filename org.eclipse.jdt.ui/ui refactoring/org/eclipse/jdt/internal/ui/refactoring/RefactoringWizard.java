@@ -393,7 +393,7 @@ public class RefactoringWizard extends Wizard {
 	protected void initializeDefaultPageImageDescriptor() {
 		try {
 			URL installURL= Platform.getPlugin(PlatformUI.PLUGIN_ID).getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/basic/wizban/new_wiz.gif");
+			URL url= new URL(installURL, "icons/basic/wizban/refactor_wiz.gif");
 			ImageDescriptor desc= ImageDescriptor.createFromURL(url);
 			setDefaultPageImageDescriptor(desc);
 		} catch (MalformedURLException e) {
