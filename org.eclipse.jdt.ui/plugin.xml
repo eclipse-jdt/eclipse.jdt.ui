@@ -646,14 +646,6 @@
 			state="true"
 			class="org.eclipse.jdt.internal.debug.ui.ShowStaticFieldsAction">
 		</action>
-		<action id="org.eclipse.jdt.ui.actions.HexValues"
-			label="%hexValueAction.label"
-			toolbarPath="javaVariableFilters"
-			icon="icons/full/elcl16/hexad_co.gif"
-			tooltip="%hexValueAction.tooltip"
-			state="false"
-			class="org.eclipse.jdt.internal.debug.ui.HexValuesAction">
-		</action>
 	</viewContribution>
 	<viewContribution
 		id="org.eclipse.jdt.ui.BreakpointViewActions"
