@@ -143,13 +143,17 @@ class MoveCuUpdateCreator {
 				}	
 				if (results[j].getEnclosingElement().getElementType() == IJavaElement.IMPORT_DECLARATION){
 					ImportEdit importEdit= getImportEdit(referencingCu);
-					IType primaryType= movedUnit.findPrimaryType();
-					importEdit.removeImport(JavaModelUtil.getFullyQualifiedName(primaryType));
-					importEdit.addImport(fDestination.getElementName() + "." + primaryType.getElementName()); //$NON-NLS-1$
+					IImportDeclaration importDecl= (IImportDeclaration)results[j].getEnclosingElement();
+					importEdit.removeImport(importDecl.getElementName());
+                    importEdit.addImport(createStringForNewImport(movedUnit, importDecl));
 				}	
 			}
 		}
 	}
+
+    private String createStringForNewImport(ICompilationUnit movedUnit, IImportDeclaration importDecl) {
+        return new StringBuffer(importDecl.getElementName()).replace(0, movedUnit.getParent().getElementName().length(), fDestination.getElementName()).toString();
+    }
 	
 	private void removedImportsToDestinationPackageTypes(ICompilationUnit movedUnit) throws JavaModelException{
 		ImportEdit importEdit= getImportEdit(movedUnit);
