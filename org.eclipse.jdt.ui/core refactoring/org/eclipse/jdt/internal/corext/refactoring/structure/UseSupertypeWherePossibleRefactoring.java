@@ -109,7 +109,9 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		try{
 			RefactoringStatus result= new RefactoringStatus();		
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			if (result.hasFatalError())
+				return result;
 			result.merge(validateModifiesFiles());
 			return result;
 		} catch (JavaModelException e){
@@ -148,22 +150,22 @@ public class UseSupertypeWherePossibleRefactoring extends Refactoring{
 		return RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.name"); //$NON-NLS-1$
 	}
 
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		try{
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("UseSupertypeWherePossibleRefactoring.analyzing...")); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
-			updateReferences(manager, new SubProgressMonitor(pm, 1));
+			updateReferences(manager, new SubProgressMonitor(pm, 1), status);
 			return manager;
 		} finally{
 			pm.done();
 		}	
 	}
 
-	private void updateReferences(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException, CoreException {
+	private void updateReferences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1));
+			ExtractInterfaceUtil.updateReferences(manager, fInputType, fSuperTypeToUse, new RefactoringWorkingCopyOwner(), true, new SubProgressMonitor(pm, 1), status);
 		} finally {
 			pm.done();
 		}

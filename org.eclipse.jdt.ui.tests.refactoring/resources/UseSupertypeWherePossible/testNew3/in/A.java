@@ -4,7 +4,7 @@ class A{
 	public void foo(){};
 }
 class Test{
-	void test() {
+	void test() throws InterruptedException{
 		A a= new A();
 		a.getClass();
 		a.equals(null);

@@ -187,7 +187,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			result.merge(checkNewInterfaceName(fNewInterfaceName));
 			if (result.hasFatalError())
 				return result;
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			if (result.hasFatalError())
+				return result;
 			result.merge(validateModifiesFiles());
 			return result;
 		} catch (JavaModelException e){
@@ -257,7 +259,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		}
 	}
 
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		ICompilationUnit newCuWC= null, typeCu= null;
 		try{
 			pm.beginTask("", 10); //$NON-NLS-1$
@@ -282,7 +284,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 			setContent(newCuWC, formatSource(createExtractedInterfaceCUSource(newCuWC, new SubProgressMonitor(pm, 1))));
 			IType theInterface= newCuWC.getType(fNewInterfaceName);
 			
-			CompilationUnitRange[] updatedRanges= ExtractInterfaceUtil.updateReferences(manager, theType, theInterface, fWorkingCopyOwner, false, new SubProgressMonitor(pm, 9));
+			CompilationUnitRange[] updatedRanges= ExtractInterfaceUtil.updateReferences(manager, theType, theInterface, fWorkingCopyOwner, false, new SubProgressMonitor(pm, 9), status);
+			if (status.hasFatalError())
+				return manager;
 			TextEdit[] edits= description.getTextEdits();
 			
 			for (int i= 0; i < updatedRanges.length; i++) {
