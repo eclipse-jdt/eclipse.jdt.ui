@@ -525,7 +525,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				result.add(newLibrary);
 				
 				NodeList archiveList= libElement.getElementsByTagName(TAG_ARCHIVE);
-				for (int k= 0; k < length; k++) {
+				for (int k= 0; k < archiveList.getLength(); k++) {
 					Node archiveNode= archiveList.item(k);
 					if (!(archiveNode instanceof Element)) {
 						continue;
