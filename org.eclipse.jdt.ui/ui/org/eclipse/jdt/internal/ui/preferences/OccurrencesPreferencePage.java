@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,12 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
 /**
- * Annotations preference page.
+ * Occurrences preference page.
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
@@ -29,7 +30,7 @@ public class OccurrencesPreferencePage extends AbstractConfigurationBlockPrefere
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
 	protected String getHelpId() {
-		return null; // FIXME: Needs help context ID
+		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
 
 	/*

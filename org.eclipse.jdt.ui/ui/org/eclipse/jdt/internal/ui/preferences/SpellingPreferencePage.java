@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,8 +64,7 @@ public class SpellingPreferencePage extends PreferencePage implements IWorkbench
 	 */
 	public void createControl(final Composite parent) {
 		super.createControl(parent);
-
-		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SPELLING_PREFERENCE_PAGE);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE);
 	}
 
 	/*

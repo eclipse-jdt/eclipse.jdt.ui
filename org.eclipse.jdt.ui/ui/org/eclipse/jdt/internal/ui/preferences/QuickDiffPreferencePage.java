@@ -11,12 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 
 /**
- * Annotations preference page.
+ * Quick Diff preference page.
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>
@@ -29,7 +30,7 @@ public class QuickDiffPreferencePage extends AbstractConfigurationBlockPreferenc
 	 * @see org.eclipse.jdt.internal.ui.preferences.AbstractConfigureationBlockPreferencePage#getHelpId()
 	 */
 	protected String getHelpId() {
-		return null; // FIXME: Needs help context ID
+		return IJavaHelpContextIds.JAVA_EDITOR_PREFERENCE_PAGE;
 	}
 
 	/*
