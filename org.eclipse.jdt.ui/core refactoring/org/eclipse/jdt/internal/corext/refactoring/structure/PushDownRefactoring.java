@@ -208,8 +208,8 @@ public class PushDownRefactoring extends Refactoring {
 			return result;
 		}
 
-		public boolean isNoAction() {
-			return getAction() == NO_ACTION;
+		public boolean isActive() {
+			return getAction() != NO_ACTION;
 		}
 
 	}

@@ -56,7 +56,7 @@ class PullPushCheckboxTableViewer extends CheckboxTableViewer{
 	}
 
 	private static boolean getCheckState(IMemberActionInfo info) {
-		return ! info.isNoAction();
+		return info.isActive();
 	}		
 	
 	/*
