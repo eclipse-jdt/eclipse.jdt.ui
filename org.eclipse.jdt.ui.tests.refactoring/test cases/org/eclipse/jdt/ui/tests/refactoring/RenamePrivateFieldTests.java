@@ -192,6 +192,11 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		//regression test for 9895 - opposite case
 		helper2("fMe", "fYou", true, false, false, false, false, true, false, true);
 	}		
+
+	public void test7() throws Exception{
+		//regression test for 21292 
+		helper2("fBig", "fSmall", true, false, false, false, true, true, true, true);
+	}		
 	
 	
 }
