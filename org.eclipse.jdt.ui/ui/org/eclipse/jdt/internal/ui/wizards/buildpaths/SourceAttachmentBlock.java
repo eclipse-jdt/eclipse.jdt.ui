@@ -305,18 +305,18 @@ public class SourceAttachmentBlock {
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 		
-//		if (!fIsVariableEntry) {
-			DialogField.createEmptySpace(composite, 1);
-			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-			gd.widthHint= widthHint;
-			gd.horizontalSpan= 2;
-			desc= new Label(composite, SWT.LEFT + SWT.WRAP);
-			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description")); //$NON-NLS-1$
-			desc.setLayoutData(gd);
-			DialogField.createEmptySpace(composite, 1);		
-
-			fJavaDocField.doFillIntoGrid(composite, 4);
-//		}
+////		if (!fIsVariableEntry) {
+//			DialogField.createEmptySpace(composite, 1);
+//			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+//			gd.widthHint= widthHint;
+//			gd.horizontalSpan= 2;
+//			desc= new Label(composite, SWT.LEFT + SWT.WRAP);
+//			desc.setText(NewWizardMessages.getString("SourceAttachmentBlock.javadoc.description")); //$NON-NLS-1$
+//			desc.setLayoutData(gd);
+//			DialogField.createEmptySpace(composite, 1);		
+//
+//			fJavaDocField.doFillIntoGrid(composite, 4);
+////		}
 		
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_BLOCK);
 		return composite;
@@ -756,9 +756,9 @@ public class SourceAttachmentBlock {
 					if (path != null && fIsVariableEntry) {
 						path= getResolvedPath(path);
 					}
-					if (path != null) {
-						JavaDocLocations.setLibraryJavadocLocation(path, getJavadocLocation());
-					}
+					//if (path != null) {
+					//	JavaDocLocations.setLibraryJavadocLocation(path, getJavadocLocation());
+					//}
 				} catch (JavaModelException e) {
 					throw new InvocationTargetException(e);
 				}

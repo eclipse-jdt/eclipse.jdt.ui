@@ -80,6 +80,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		Composite topComp= new Composite(parent, SWT.NONE);
 		GridLayout topLayout= new GridLayout();
 		topLayout.numColumns= 3;
+		topLayout.marginWidth= 0;
 		topComp.setLayout(topLayout);
 
 		IJavaElement elem= getJavaElement();
@@ -101,7 +102,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
 
 		setValues();
-
+		
 		return topComp;
 	}
 
@@ -258,6 +259,16 @@ public class JavadocConfigurationPropertyPage extends PropertyPage {
 		public void dialogFieldChanged(DialogField field) {
 			jdocDialogFieldChanged(field);
 		}
+	}
+
+	/* (non-Javadoc)
+	 * @see IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			fJavaDocField.postSetFocusOnDialogField(getShell().getDisplay());
+		}
+		super.setVisible(visible);
 	}
 
 }
