@@ -80,7 +80,7 @@ public class ASTNodeFactory {
 		StringBuffer buffer= new StringBuffer(TYPE_HEADER);
 		buffer.append(content);
 		buffer.append(TYPE_FOOTER);
-		ASTParser p= ASTParser.newParser(AST.JLS2);
+		ASTParser p= ASTParser.newParser(AST.JLS3);
 		p.setSource(buffer.toString().toCharArray());
 		CompilationUnit root= (CompilationUnit) p.createAST(null);
 		List list= root.types();

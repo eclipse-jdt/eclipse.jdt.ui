@@ -184,7 +184,7 @@ public class ASTResolving {
 			break;
 		case ASTNode.RETURN_STATEMENT:
 			MethodDeclaration decl= findParentMethodDeclaration(parent);
-			if (decl != null) {
+			if (decl != null && !decl.isConstructor()) {
 				return decl.getReturnType().resolveBinding();
 			}
 			break;

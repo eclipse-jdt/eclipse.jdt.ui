@@ -46,7 +46,7 @@ class PackagesViewLabelProvider extends AppearanceAwareLabelProvider {
 		this(state, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
 	}
 
-	PackagesViewLabelProvider(int state, int textFlags, int imageFlags) {
+	PackagesViewLabelProvider(int state, long textFlags, int imageFlags) {
 		super(textFlags, imageFlags);
 		
 		Assert.isTrue(isValidState(state));
