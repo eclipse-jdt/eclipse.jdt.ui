@@ -377,6 +377,9 @@ public class SemanticHighlightings {
 			
 			if (thisType.isArray())
 				thisType= thisType.getElementType();
+			if (thisType == null)
+				return false;
+			
 			if (!Bindings.canAutoUnBox(thisType))
 				return false;
 			
