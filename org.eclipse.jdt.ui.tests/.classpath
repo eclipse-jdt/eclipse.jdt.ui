@@ -15,6 +15,5 @@
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.debug.ui"/>
     <classpathentry kind="src" path="/org.eclipse.update.core"/>
-    <classpathentry kind="src" path="/org.eclipse.update.core.win32"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
