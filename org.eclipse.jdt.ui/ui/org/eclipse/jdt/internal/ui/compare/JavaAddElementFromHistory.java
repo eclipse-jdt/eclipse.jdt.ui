@@ -25,7 +25,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -141,8 +140,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			// build the TextEdit that inserts the text into the buffer
 			MemberEdit edit= null;
 			if (input != null)
-				edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines,
-										CodeFormatterPreferencePage.getTabSize());
+				edit= new MemberEdit(input, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
 			else
 				edit= createEdit(lines, parent);
 			if (edit == null) {
@@ -201,6 +199,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			children= container.getChildren();
 		} catch(JavaModelException ex) {
 		}
+		
 		if (children != null) {
 			IJavaElement candidate= null;
 			for (int i= 0; i < children.length; i++) {
@@ -213,19 +212,16 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 					candidate= chld;
 					continue;
 				default:
-					return new MemberEdit(chld, MemberEdit.INSERT_BEFORE, lines,
-											CodeFormatterPreferencePage.getTabSize());
+					return new MemberEdit(chld, MemberEdit.INSERT_BEFORE, lines, JavaCompareUtilities.getTabSize());
 				}
 			}
 			if (candidate != null)
-				return new MemberEdit(candidate, MemberEdit.INSERT_AFTER, lines,
-											CodeFormatterPreferencePage.getTabSize());
+				return new MemberEdit(candidate, MemberEdit.INSERT_AFTER, lines, JavaCompareUtilities.getTabSize());
 		}
 		
 		// no children: insert at end (but before closing bracket)
 		if (container instanceof IJavaElement)
-			return new MemberEdit((IJavaElement)container, MemberEdit.ADD_AT_END, lines,
-											CodeFormatterPreferencePage.getTabSize());
+			return new MemberEdit((IJavaElement)container, MemberEdit.ADD_AT_END, lines, JavaCompareUtilities.getTabSize());
 											
 		return null;
 	}

@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -122,8 +121,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 					return;
 				}
 				
-				MemberEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines,
-										CodeFormatterPreferencePage.getTabSize());
+				MemberEdit edit= new MemberEdit(input, MemberEdit.REPLACE, lines, JavaCompareUtilities.getTabSize());
 				edit.setAddLineSeparators(false);
 										
 				IProgressMonitor nullProgressMonitor= new NullProgressMonitor();

@@ -27,6 +27,18 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 class JavaCompareUtilities {
 	
+	static int getTabSize() {
+		String string= (String) JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE);
+		try {
+			int i= Integer.parseInt(string);
+			if (i >= 0) {
+				return i;
+			}
+		} catch (NumberFormatException e) {
+		}
+		return 4;
+	}
+		
 	static String getString(ResourceBundle bundle, String key, String dfltValue) {
 		
 		if (bundle != null) {
