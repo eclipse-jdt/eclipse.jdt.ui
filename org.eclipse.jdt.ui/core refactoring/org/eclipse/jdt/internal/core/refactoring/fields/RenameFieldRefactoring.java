@@ -216,6 +216,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
 		if (result.hasFatalError())
 			return result;
+		
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
 			
 		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
 		RenameFieldASTAnalyzer analyzer= new RenameFieldASTAnalyzer(fNewName, fField);

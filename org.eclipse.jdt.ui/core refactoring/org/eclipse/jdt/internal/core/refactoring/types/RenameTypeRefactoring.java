@@ -448,6 +448,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, getUnsavedFiles(), result);
 		if (result.hasFatalError())
 			return result;
+			
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
 		
 		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
 		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, fType);

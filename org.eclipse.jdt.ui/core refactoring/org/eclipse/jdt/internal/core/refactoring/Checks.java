@@ -6,11 +6,11 @@ package org.eclipse.jdt.internal.core.refactoring;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -432,6 +433,30 @@ public class Checks {
 			status.addFatalError(RefactoringCoreMessages.getString("Checks.all_excluded")); //$NON-NLS-1$
 		
 		return (SearchResultGroup[])result.toArray(new SearchResultGroup[result.size()]);
+	}
+	
+	public static RefactoringStatus checkCompileErrorsInAffectedFiles(SearchResultGroup[] grouped) throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < grouped.length; i++){
+			IResource resource= grouped[i].getResource();
+			if (hasCompileErrors(resource))
+				result.addWarning("Affected resource:" + resource.getFullPath() + " has compile errors, which can affect accuracy of the code modification..");
+		}
+		return result;
+	}
+	
+	private static boolean hasCompileErrors(IResource resource) throws JavaModelException {
+		try {
+			IMarker[] problemMarkers= resource.findMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE);
+			for (int i= 0; i < problemMarkers.length; i++) {
+				if (problemMarkers[i].getAttribute(IMarker.SEVERITY, -1) == IMarker.SEVERITY_ERROR)
+					return true;
+			}
+			return false;
+		
+		} catch (CoreException e){
+			throw new JavaModelException(e);
+		}
 	}
 	
 	//------

@@ -242,6 +242,8 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		if (result.hasFatalError())
 			return result;
 		
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
+		
 		pm.beginTask("", fOccurrences.length);	 //$NON-NLS-1$
 		RenamePackageASTAnalyzer analyzer= new RenamePackageASTAnalyzer(fNewName);
 		for (int i= 0; i < fOccurrences.length; i++){
