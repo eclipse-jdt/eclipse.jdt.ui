@@ -206,16 +206,17 @@ public class OpenTypeHierarchyHelper {
 	
 	private IType selectType(IType[] types, Shell shell) {		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
-		ElementListSelectionDialog d= new ElementListSelectionDialog(
-			shell, 
-			JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.title"),  //$NON-NLS-1$
-			null, new JavaElementLabelProvider(flags), true, false);
-		d.setMessage(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.message")); //$NON-NLS-1$
-		if (d.open(types, null) == d.OK) {
-			Object[] elements= d.getResult();
-			if (elements != null && elements.length == 1) {
-				return ((IType)elements[0]);
-			}
+
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell,			
+			new JavaElementLabelProvider(flags), true, false);
+		dialog.setTitle(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.title"));  //$NON-NLS-1$
+		dialog.setMessage(JavaUIMessages.getString("OpenTypeHierarchyHelper.selectionDialog.message")); //$NON-NLS-1$
+		dialog.setElements(types);
+
+		if (dialog.open() == dialog.OK) {
+			Object[] elements= dialog.getResult();
+			if ((elements != null) && (elements.length == 1))
+				return (IType) elements[0];
 		}
 		return null;
 	}

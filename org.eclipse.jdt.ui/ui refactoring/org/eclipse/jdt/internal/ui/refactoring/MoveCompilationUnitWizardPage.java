@@ -80,7 +80,10 @@ class MoveCompilationUnitWizardPage extends TextInputWizardPage{
 	private void handleButtonSelection(SelectionEvent e){
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), getLabelProvider(), false, false);
 		dialog.setTitle(RefactoringMessages.getString("MoveCompilationUnitWizardPage.choose_a_package")); //$NON-NLS-1$
-		if (dialog.open(getValidPackages(), getText()) == ElementListSelectionDialog.OK){
+		dialog.setElements(getValidPackages());
+		dialog.setInitialSelection(getText());
+
+		if (dialog.open() == dialog.OK) {
 			IPackageFragment selectedPackage= (IPackageFragment)dialog.getSelectedElement();
 			setText(selectedPackage.getElementName());						
 		}

@@ -70,7 +70,9 @@ public class ShowTypeHierarchyAction extends Action implements IUpdate {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), true, false);
 		dialog.setMessage(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.message")); //$NON-NLS-1$
 		dialog.setTitle(JavaUIMessages.getString("ShowTypeHierarchyAction.selectiondialog.title")); //$NON-NLS-1$
-		if (dialog.open(types, null) == dialog.OK) {
+		dialog.setElements(types);
+		
+		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length == 1) {
 				return ((IType)elements[0]);

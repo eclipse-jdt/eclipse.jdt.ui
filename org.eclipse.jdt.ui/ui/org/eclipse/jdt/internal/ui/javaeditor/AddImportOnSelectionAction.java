@@ -175,12 +175,14 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			}
 		}		
 		int flags= (JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(flags), true, false);
-		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(),
+			new JavaElementLabelProvider(flags), true, false);
+		dialog.setTitle(			JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
-		if (dialog.open(results) == dialog.OK) {
-			return (IType) dialog.getSelectedElement();
-		}
-		return null;
+		dialog.setElements(results);
+
+		return (dialog.open() == dialog.OK)
+			? (IType) dialog.getSelectedElement()
+			: null;
 	}
 }

@@ -225,11 +225,13 @@ public class CUSavePolicy implements ISavePolicy {
 		int flags= JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_CONTAINER
 					| JavaElementLabelProvider.SHOW_ROOT;
 		ILabelProvider renderer= new JavaElementLabelProvider(flags);
-		String title= ReorgMessages.getString("cuSavePolicy.save.title"); //$NON-NLS-1$
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, title, null, renderer, true, false);
-		dialog.setMessage(ReorgMessages.getString("cuSavePolicy.pickPkg.message")); //$NON-NLS-1$
-		 
-		dialog.open(packages);
+		
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, renderer, true, false);
+		dialog.setTitle(ReorgMessages.getString("cuSavePolicy.save.title")); //$NON-NLS-1$
+		dialog.setMessage(ReorgMessages.getString("cuSavePolicy.pickPkg.message")); //$NON-NLS-1$		 
+		dialog.setElements(packages);
+		dialog.open();
+
 		Object[] selection= dialog.getSelectedElements();
 		if (selection != null && selection.length == 1) {
 			return (IPackageFragment)selection[0];

@@ -164,12 +164,15 @@ public abstract class JavaElementAction extends Action {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(
 			  JavaElementLabelProvider.SHOW_DEFAULT 
 			| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION);
+
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(JavaPlugin.getActiveWorkbenchShell(), labelProvider, true, false);
 		dialog.setTitle(SearchMessages.getString("SearchElementSelectionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(SearchMessages.getString("SearchElementSelectionDialog.message")); //$NON-NLS-1$
-		if (dialog.open(openChoices) == dialog.OK)
-			return (IJavaElement)Arrays.asList(dialog.getResult()).get(0);
-		return null;
+		dialog.setElements(openChoices);
+
+		return (dialog.open() == dialog.OK)
+			? (IJavaElement) Arrays.asList(dialog.getResult()).get(0)
+			: null;
 	}
 	/**
 	 * Answers if a dialog should prompt the user for a unique Java element
@@ -222,13 +225,16 @@ public abstract class JavaElementAction extends Action {
 			String message = SearchMessages.getString("ShowTypeHierarchyAction.selectionDialog.message"); //$NON-NLS-1$
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			int flags= (JavaElementLabelProvider.SHOW_DEFAULT);						
-			ElementListSelectionDialog d= new ElementListSelectionDialog(parent, title, null, new JavaElementLabelProvider(flags), true, false);
-			d.setMessage(message);
-			if (d.open(types, null) == d.OK) {
-				Object[] elements= d.getResult();
-				if (elements != null && elements.length == 1) {
-					return ((IType)elements[0]);
-				}
+
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags), true, false);
+			dialog.setTitle(title);
+			dialog.setMessage(message);
+			dialog.setElements(types);
+			
+			if (dialog.open() == dialog.OK) {
+				Object[] elements= dialog.getResult();
+				if (elements != null && elements.length == 1)
+					return ((IType) elements[0]);
 			}
 			else
 				return RETURN_WITHOUT_BEEP;

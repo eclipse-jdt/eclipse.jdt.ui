@@ -26,7 +26,6 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	
 	private String fPageInfoMessage;
 	
-	
 	/**
 	 * Constructs a list selection dialog.
 	 * @param renderer The label renderer used
@@ -34,17 +33,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @param multipleSelection Allow multiple selection	 
 	 */
 	public MultiElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection);	 //$NON-NLS-1$
-	}
-
-	/**
-	 * Constructs a list selection dialog.
-	 * @param renderer The label renderer used
-	 * @param ignoreCase Decides if the match string ignores lower/upppr case
-	 * @param multipleSelection Allow multiple selection	 
-	 */
-	public MultiElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		super(parent, title, image, renderer, ignoreCase, multipleSelection);
+		super(parent, renderer, ignoreCase, multipleSelection);
 		fPageInfoMessage= JavaUIMessages.getString("MultiElementListSelectionDialog.pageInfoMessage"); //$NON-NLS-1$
 	}
 	
@@ -132,21 +121,24 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @param initialSelection The initial content of the match text box.
 	 * @return Returns OK or CANCEL
 	 */
+/*	
 	public int open(Object[][] elements, String[] initialSelections) {
 		setElements(elements);
 		Assert.isTrue(fNumberOfPages > 0 && initialSelections.length == fNumberOfPages);				
 		setInitialSelections(initialSelections);
 		return super.open();
 	}
-	
+*/	
 	/**
 	 * Open the dialog.
 	 * @param elements The elements to show in the list
 	 * @return Returns OK or CANCEL
 	 */	
+/*	
 	public int open(Object[][] elements) {
 		return open(elements, new String[elements.length]);
 	}
+*/
 
 	//---- Widget creation -----------------------------------------------------------------
 
@@ -156,7 +148,7 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	protected Control createDialogArea(Composite parent) {
 		Control result= super.createDialogArea(parent);
 		fCurrentPage= 0;
-		setPageData();      				
+		setPageData();		
 		return result;
 	}
 
@@ -174,21 +166,21 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 * @private
 	 */
 	protected Label createMessage(Composite parent) {
-		Composite comp= new Composite(parent, SWT.NONE);
+		Composite composite= new Composite(parent, SWT.NONE);
+
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		layout.horizontalSpacing= 5;
 		layout.numColumns= 2;
+		composite.setLayout(layout);
 		
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		composite.setLayoutData(data);
 		
-		comp.setLayout(layout);
-		comp.setLayoutData(data);
+		Label messageLabel= super.createMessage(composite);
 		
-		Label messageLabel= super.createMessage(comp);
-		
-		fPageInfoLabel= new Label(comp, SWT.NULL);
+		fPageInfoLabel= new Label(composite, SWT.NULL);
 		fPageInfoLabel.setText(getPageInfoMessage());
 		
 		data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
@@ -272,9 +264,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			}
 		}
 		
-		if (fPageInfoLabel != null && !fPageInfoLabel.isDisposed()) {
+		if (fPageInfoLabel != null && !fPageInfoLabel.isDisposed())
 			fPageInfoLabel.setText(getPageInfoMessage());
-		}
 		
 		setPageData();		
 		
@@ -293,24 +284,24 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 			refilter();
 			
 		int[] selectedIndex= fSelectedIndices[fCurrentPage];
-		if (selectedIndex != null) {
+		if (selectedIndex != null)
 			setSelection(selectedIndex);
-		}
 	}
 	
 	private String getPageInfoMessage() {
-		if (fPageInfoMessage != null) {
-			String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };	
-			return MessageFormat.format(fPageInfoMessage, args);
-		}
-		return ""; //$NON-NLS-1$
+		if (fPageInfoMessage == null)
+			return ""; //$NON-NLS-1$
+			
+		String[] args= new String[] { Integer.toString(fCurrentPage + 1), Integer.toString(fNumberOfPages) };	
+		return MessageFormat.format(fPageInfoMessage, args);
 	}
 		
 	private void initializeResult(int length) {
 		List result= new ArrayList(length);
-		for (int i= 0; i < length; i++) {
+		for (int i= 0; i != length; i++)
 			result.add(null);
-		}
+
 		setResult(result);
-	}	
+	}
+	
 }

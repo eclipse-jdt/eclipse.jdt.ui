@@ -34,21 +34,14 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private Label fMessage;
 	private ISelectionValidator fValidator;	
 	
-	private String fMessageText;
-	private String fEmptyListMessage;
-	private String fNothingSelectedMessage;
+	private String fMessageText= ""; //$NON-NLS-1$
+	private String fEmptyListMessage= ""; //$NON-NLS-1$
+	private String fNothingSelectedMessage= ""; //$NON-NLS-1$
 	
-	private StatusInfo fCurrStatus;
+	private StatusInfo fCurrStatus= new StatusInfo();
 	
-	/**
-	 * Constructs a list selection dialog.
-	 * @param renderer The label renderer used
-	 * @param ignoreCase Decides if the match string ignores lower/upppr case
-	 * @param multipleSelection Allow multiple selection	 
-	 */
-	protected AbstractElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection); //$NON-NLS-1$
-	}
+	private int fWidth= 60;
+	private int fHeight= 18;
 
 	/**
 	 * Constructs a list selection dialog.
@@ -56,25 +49,18 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * @param ignoreCase Decides if the match string ignores lower/upppr case
 	 * @param multipleSelection Allow multiple selection	 
 	 */
-	protected AbstractElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
+	protected AbstractElementListSelectionDialog(Shell parent,
+		ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection)
+	{
 		super(parent);
-		setTitle(title);
-		setImage(image);
+		
 		fRenderer= renderer;
 		fIgnoreCase= ignoreCase;
-		fIsMultipleSelection= multipleSelection;
-		
-		fMessageText= ""; //$NON-NLS-1$
-		
-		fCurrStatus= new StatusInfo();
-		
-		fValidator= null;
-		fEmptyListMessage= ""; //$NON-NLS-1$
-		fNothingSelectedMessage= ""; //$NON-NLS-1$
+		fIsMultipleSelection= multipleSelection;		
 	}
 
 	/**
-	 * An element as been selected in the list by double clicking on it.
+	 * An element has been selected in the list by double clicking on it.
 	 * Emulate a OK button pressed to close the dialog.
 	 */	
 	protected abstract void handleDoubleClick();
@@ -119,18 +105,18 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	}
 
 	/**
-	 * Returns the currently used filter text.
-	 */
-	protected String getFilter() {
-		return fSelectionList.getFilter();
-	}
-	
-	/**
 	 * Sets the filter text to the given value.
 	 */
 	protected void setFilter(String text, boolean refilter) {
 		fSelectionList.setFilter(text, refilter);
 	} 
+	
+	/**
+	 * Returns the currently used filter text.
+	 */
+	protected String getFilter() {
+		return fSelectionList.getFilter();
+	}
 	
 	/**
 	 * Refilters the current list according to the filter entered into the
@@ -189,23 +175,54 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 */
 	protected Label createMessage(Composite parent) {
 		Label text= new Label(parent, SWT.NULL);
+
 		text.setText(fMessageText);
-		GridData spec= new GridData();
-		spec.grabExcessVerticalSpace= false;
-		spec.grabExcessHorizontalSpace= true;
-		spec.horizontalAlignment= spec.FILL;
-		spec.verticalAlignment= spec.BEGINNING;
-		text.setLayoutData(spec);
+		
+		GridData data= new GridData();
+		data.grabExcessVerticalSpace= false;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.BEGINNING;
+		text.setLayoutData(data);
+		
 		return text;
 	}
+	
+	/**
+	 * Creates the selection list.
+	 */
+	private SelectionList createSelectionList(Composite parent) {		
+		int flags= SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL |
+			(fIsMultipleSelection ? SWT.MULTI : SWT.SINGLE);
+			
+		SelectionList list= new SelectionList(parent, flags, fRenderer, fIgnoreCase);		
+		list.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				handleDoubleClick();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				verifyCurrentSelection();
+			}
+		});
+
+		GridData data= new GridData();
+		data.widthHint= convertWidthInCharsToPixels(fWidth);
+		data.heightHint= convertHeightInCharsToPixels(fHeight);
+		data.grabExcessVerticalSpace= true;
+		data.grabExcessHorizontalSpace= true;
+		data.horizontalAlignment= GridData.FILL;
+		data.verticalAlignment= GridData.FILL;
+		list.setLayoutData(data);
+
+		return list;
+	}			
 		
 	/**
-	 * Checks whether the list of elements is empty or not.
+	 * Returns <code>true</code> if the list of elements is empty,
+	 * <code>false</code> otherwise.
 	 */
 	protected boolean isEmptyList() {
-		if (fSelectionList == null)
-			return true;
-		return fSelectionList.isEmptyList();
+		return (fSelectionList == null) || fSelectionList.isEmptyList();
 	}
 	
 	/**
@@ -246,38 +263,12 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 * @see Window#createDialogArea(Composite)
 	 */
 	protected Control createDialogArea(Composite parent) {
-		Composite contents= (Composite)super.createDialogArea(parent);
+		Composite contents= (Composite) super.createDialogArea(parent);
 		
 		fMessage= createMessage(contents);
+		fSelectionList= createSelectionList(contents);
 		
-		int flags= fIsMultipleSelection ? SWT.MULTI : SWT.SINGLE;			
-		fSelectionList= new SelectionList(contents, flags | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL,
-			fRenderer, fIgnoreCase);
-		
-		fSelectionList.addSelectionListener(new SelectionListener() {
-			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDoubleClick();
-			}
-			public void widgetSelected(SelectionEvent e) {
-				verifyCurrentSelection();
-			}
-		});
-
-		GridData spec= new GridData();
-		Point initialSize= computeInitialSize();
-		spec.widthHint= initialSize.x;
-		spec.heightHint= initialSize.y;
-		spec.grabExcessVerticalSpace= true;
-		spec.grabExcessHorizontalSpace= true;
-		spec.horizontalAlignment= spec.FILL;
-		spec.verticalAlignment= spec.FILL;
-		fSelectionList.setLayoutData(spec);
-				
 		return contents;
-	}
-	
-	protected Point computeInitialSize() {
-		return new Point(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(18));
 	}
 
 	/*
@@ -286,13 +277,29 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	 */
 	public void create() {
 		super.create();
-	     if (isEmptyList()) {
-	     	fMessage.setEnabled(false);
-	     	fSelectionList.setEnabled(false);
-	     } else {
-		    verifyCurrentSelection();		
+
+    	if (isEmptyList()) {
+     		fMessage.setEnabled(false);
+     		fSelectionList.setEnabled(false);
+     	} else {
+	     	verifyCurrentSelection();		
 			fSelectionList.selectFilterText();
 			fSelectionList.setFocus();
-	     }	
-	}	
+     	}	
+	}
+	
+	/**
+	 * Sets the size in unit of characters.
+	 */
+	public void setSize(int width, int height) {
+		fWidth= width;
+		fHeight= height;
+	}
+	
+	/**
+	 * Returns the size in unit of characters.
+	 */
+	public int[] getSize() {
+		return new int[] {fWidth, fHeight};
+	}
 }

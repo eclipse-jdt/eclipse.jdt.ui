@@ -993,10 +993,11 @@ public abstract class TypePage extends ContainerPage {
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
-		if (dialog.open(packages) == dialog.OK) {;
-			return (IPackageFragment) dialog.getPrimaryResult();
-		}
-		return null;
+		dialog.setElements(packages);
+
+		return (dialog.open() == dialog.OK)
+			? (IPackageFragment) dialog.getPrimaryResult()
+			: null;
 	}
 	
 	private IType chooseEnclosingType() {

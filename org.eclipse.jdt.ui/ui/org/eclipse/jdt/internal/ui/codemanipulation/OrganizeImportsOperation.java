@@ -148,8 +148,9 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
 		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
+		dialog.setElements(openChoices);
 		
-		if (dialog.open(openChoices) == dialog.OK) {
+		if (dialog.open() == dialog.OK) {
 			Object[] result= dialog.getResult();
 			for (int i= 0; i < result.length; i++) {
 				List types= (List) result[i];

@@ -27,19 +27,11 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	 * @param renderer The label renderer used
 	 * @param ignoreCase Decides if the match string ignores lower/upppr case
 	 * @param multipleSelection Allow multiple selection	 
-	 */
-	public ElementListSelectionDialog(Shell parent, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		this(parent, "", null, renderer, ignoreCase, multipleSelection); //$NON-NLS-1$
-	}
-
-	/**
-	 * Constructs a list selection dialog.
-	 * @param renderer The label renderer used
-	 * @param ignoreCase Decides if the match string ignores lower/upper case
-	 * @param multipleSelection Allow multiple selection	 
-	 */
-	public ElementListSelectionDialog(Shell parent, String title, Image image, ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection) {
-		super (parent, title, image, renderer, ignoreCase, multipleSelection);
+	 */	
+	public ElementListSelectionDialog(Shell parent,
+		ILabelProvider renderer, boolean ignoreCase, boolean multipleSelection)
+	{
+		super(parent, renderer, ignoreCase, multipleSelection);
 	}
 
 	/**
@@ -48,36 +40,21 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
 	public void setElements(List elements) {
 		fElements= elements;	
 	}
-	 
+
 	/**
-	 * Open the dialog.
-	 * @param elements The elements to show in the list
-	 * @param initialSelection The initial content of the match text box.
-	 * @return Returns OK or CANCEL
+	 * Sets the elements presented by this dialog.
+	 * Convenience method.
 	 */
-	public int open(List elements, String initialSelection) {
-		setElements(elements);
-		setInitialSelection(initialSelection);
-		return open();
+	public void setElements(Object[] elements) {
+		fElements= Arrays.asList(elements);
 	}
 	
-	/**
-	 * Open the dialog.
-	 * @param elements The elements to show in the list
-	 * @return Returns OK or CANCEL
-	 */	
-	public int open(List elements) {
-		setElements(elements);
-		return open();
-	}
-
 	/*
 	 * @private
 	 */	
 	protected void handleDoubleClick() {
-		if (verifyCurrentSelection()) {
+		if (verifyCurrentSelection())
 			buttonPressed(IDialogConstants.OK_ID);
-		}
 	}
 	
 	/*
@@ -104,14 +81,6 @@ public class ElementListSelectionDialog extends AbstractElementListSelectionDial
       		refilter();
       				
 		return result;
-	}
-	
-	public int open(Object[] elements, String initialSelection) {
-		return open(Arrays.asList(elements), initialSelection);
-	}
-	
-	public int open(Object[] elements) {
-		return open(Arrays.asList(elements));
 	}
 	
 	public Object[] getSelectedElements() {

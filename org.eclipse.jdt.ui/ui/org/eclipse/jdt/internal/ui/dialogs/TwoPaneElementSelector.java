@@ -34,7 +34,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private ILabelProvider fElementRenderer;
 	private ILabelProvider fQualifierRenderer;
 	private Object[] fElements;
-	private boolean fIgnoreCase;
+	private final boolean fIgnoreCase;
 	private boolean fMatchEmtpyString;
 
 	private String fUpperListLabel;
@@ -49,6 +49,8 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 	private int[] fElementMap;
 	private Integer[] fQualifierMap;
 	
+	private final TwoArrayQuickSorter fSorter;
+	
 
 	public TwoPaneElementSelector(Shell parent, String title, Image image, ILabelProvider elementRenderer, 
 			ILabelProvider qualifierRenderer, boolean ignoreCase, boolean matchEmtpyString) {
@@ -59,6 +61,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		fElementRenderer= elementRenderer;
 		fQualifierRenderer= qualifierRenderer;
 		fIgnoreCase= ignoreCase;
+		fSorter= new TwoArrayQuickSorter(ignoreCase);
 		fMatchEmtpyString= matchEmtpyString;
 	}			
 
@@ -232,7 +235,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 		for (int i= 0; i < size; i++) {
 			strings[i]= fElementRenderer.getText(p[i]);
 		}
-		TwoArrayQuickSort.sort(strings, p, fIgnoreCase);
+		fSorter.sort(strings, p);
 		return strings;
 	}
 	
@@ -385,7 +388,7 @@ public class TwoPaneElementSelector extends SelectionStatusDialog {
 			qualifiers[i-from]= fQualifierRenderer.getText(fElements[i]);
 			fQualifierMap[i-from]= new Integer(i);
 		}
-		TwoArrayQuickSort.sort(qualifiers, fQualifierMap, fIgnoreCase);
+		fSorter.sort(qualifiers, fQualifierMap);
 		
 		for (int i= 0; i < to-from; i++) {
 			TableItem ti= new TableItem(fLowerList, i);

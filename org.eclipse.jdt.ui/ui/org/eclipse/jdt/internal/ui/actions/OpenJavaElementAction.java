@@ -76,9 +76,12 @@ public abstract class OpenJavaElementAction extends Action {
 						| JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION
 							| JavaElementLabelProvider.SHOW_ROOT;
 						
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, title, null, new JavaElementLabelProvider(flags), true, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags), true, false);
+		dialog.setTitle(title);
 		dialog.setMessage(message);
-		if (dialog.open(sourceReferences, null) == dialog.OK) {
+		dialog.setElements(sourceReferences);
+		
+		if (dialog.open() == dialog.OK) {
 			Object[] elements= dialog.getResult();
 			if (elements != null && elements.length > 0) {
 				nResults= elements.length;

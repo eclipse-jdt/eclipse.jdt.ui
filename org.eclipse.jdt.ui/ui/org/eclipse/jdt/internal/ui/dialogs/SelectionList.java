@@ -37,7 +37,7 @@ public class SelectionList extends Composite {
 	// State
 	private Object[] fElements;
 	private ILabelProvider fRenderer;
-	private boolean fIgnoreCase;
+	private final boolean fIgnoreCase;
 	
 	// Implementation details
 	private String[] fRenderedStrings;
@@ -47,6 +47,8 @@ public class SelectionList extends Composite {
 	// SWT widgets
 	private Table fList;
 	private Text fText;
+
+	private final TwoArrayQuickSorter fSorter;
 	
 	/**
 	 * Creates new instance of the widget.
@@ -54,7 +56,9 @@ public class SelectionList extends Composite {
 	public SelectionList(Composite parent, int style, ILabelProvider renderer, boolean ignoreCase) {
 		super(parent, SWT.NONE);
 		fRenderer= renderer;
-		fIgnoreCase= ignoreCase;
+		fIgnoreCase= ignoreCase;		
+		fSorter= new TwoArrayQuickSorter(ignoreCase);
+
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0; layout.marginWidth= 0;
 		//XXX: 1G9V58A: ITPUI:WIN2000 - Dialog.convert* methods should be static
@@ -229,7 +233,7 @@ public class SelectionList extends Composite {
 		for (int i= 0; i < strings.length; i++) {
 			strings[i]= fRenderer.getText(fElements[i]);
 		}
-		TwoArrayQuickSort.sort(strings, fElements, fIgnoreCase);
+		fSorter.sort(strings, fElements);
 		return strings;
 	}	
 	
