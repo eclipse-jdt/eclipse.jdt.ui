@@ -199,14 +199,14 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		updateBuiltInFilters();
 	}
 
-	private void updateViewerFilters(boolean refreshViewer) {
-			String[] patterns= getUserAndBuiltInPatterns();
-			fPatternFilter.setPatterns(patterns);
-			fViewer.getControl().setRedraw(false);
-			updateBuiltInFilters();
-			if (refreshViewer)
-				fViewer.refresh();
-			fViewer.getControl().setRedraw(true);
+	private void updateViewerFilters(boolean refresh) {
+		String[] patterns= getUserAndBuiltInPatterns();
+		fPatternFilter.setPatterns(patterns);
+		fViewer.getControl().setRedraw(false);
+		updateBuiltInFilters();
+		if (refresh)
+			fViewer.refresh();
+		fViewer.getControl().setRedraw(true);
 	}
 	
 	private void updateBuiltInFilters() {
@@ -341,10 +341,13 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	/**
 	 * Restores the state of the filter actions from a memento.
+	 * <p>
+	 * Note: This method does not refresh the viewer.
+	 * </p>
+	 * 
 	 * @param memento
-	 * @param refreshViewer Indicates if the viewer should be refreshed.
 	 */	
-	public void restoreState(IMemento memento, boolean refreshViewer) {
+	public void restoreState(IMemento memento) {
 		if (memento == null)
 			return;
 		IMemento customFilters= memento.getChild(TAG_CUSTOM_FILTERS);
@@ -358,17 +361,9 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		restoreUserDefinedPatterns(customFilters);
 		restoreXmlDefinedFilters(customFilters);
 		
-		updateViewerFilters(refreshViewer);
+		updateViewerFilters(false);
 	}
 
-	/**
-	 * Restores the state of the filter actions from a memento.
-	 * @deprecated use restoreState(IMemento, boolean)
-	 */		
-	public void restoreState(IMemento memento) {
-		restoreState(memento, true);
-	}
-	
 	private void restoreUserDefinedPatterns(IMemento memento) {
 		IMemento userDefinedPatterns= memento.getChild(TAG_USER_DEFINED_PATTERNS);
 		if(userDefinedPatterns != null) {	

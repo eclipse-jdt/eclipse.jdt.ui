@@ -186,9 +186,15 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected void restoreState(IMemento memento) {
 		if (fHasWorkingSetFilter)
-			fWorkingSetFilterActionGroup.restoreState(memento, true);
+			fWorkingSetFilterActionGroup.restoreState(memento);
 		if (fHasCustomFilter)
-			fCustomFiltersActionGroup.restoreState(memento, true);
+			fCustomFiltersActionGroup.restoreState(memento);
+			
+		if (fHasCustomFilter || fHasWorkingSetFilter) {
+			fViewer.getControl().setRedraw(false);
+			fViewer.refresh();
+			fViewer.getControl().setRedraw(true);
+		}
 	}	
 
 	/**

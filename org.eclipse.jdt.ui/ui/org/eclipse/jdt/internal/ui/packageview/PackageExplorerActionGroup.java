@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
-public class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
+class PackageExplorerActionGroup extends CompositeActionGroup implements ISelectionChangedListener {
 
 	private PackageExplorerPart fPart;
 
@@ -175,10 +175,13 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 
 	//---- Persistent state -----------------------------------------------------------------------
 
-	/* package */ void restoreState(IMemento memento, boolean refreshViewer) {
-		fMemberFilterActionGroup.restoreState(memento, refreshViewer);
-		fWorkingSetFilterActionGroup.restoreState(memento, refreshViewer);
-		fCustomFiltersActionGroup.restoreState(memento, refreshViewer);
+	/* package */ void restoreState(IMemento memento) {
+		fMemberFilterActionGroup.restoreState(memento);
+		fWorkingSetFilterActionGroup.restoreState(memento);
+		fCustomFiltersActionGroup.restoreState(memento);
+		fPart.getViewer().getControl().setRedraw(false);
+		fPart.getViewer().refresh();
+		fPart.getViewer().getControl().setRedraw(true);
 	}
 	
 	/* package */ void saveState(IMemento memento) {

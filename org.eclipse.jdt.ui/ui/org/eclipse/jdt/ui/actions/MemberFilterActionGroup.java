@@ -6,6 +6,7 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -105,39 +106,43 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Set the current filter.
+	 * 
 	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
 	 * action group
 	 * @param set The new value. If true, the elements of the given types are filtered.
-	 * @deprecated use setMemberFilter(int, boolean, boolean)
 	 */	
 	public void setMemberFilter(int filterProperty, boolean set) {
-		setMemberFilter(filterProperty, set, true);
+		setMemberFilters(new int[] {filterProperty}, new boolean[] {set}, true);
 	}
 
-	/**
-	 * Set the current filter.
-	 * @param filterProperty Constants FILTER_FIELDS, FILTER_PUBLIC & FILTER_PRIVATE as defined by this
-	 * action group
-	 * @param set The new value. If true, the elements of the given types are filtered.
-	 * @param refreshViewer Indicates if the viewer should be refreshed.
-	 */	
-	public void setMemberFilter(int filterProperty, boolean set, boolean refreshViewer) {
-		if (set) {
-			fFilter.addFilter(filterProperty);
-		} else {
-			fFilter.removeFilter(filterProperty);
-		}
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+	private void setMemberFilters(int[] propertyKeys, boolean[] propertyValues, boolean refresh) {
+		if (propertyKeys.length == 0)
+			return;
+		Assert.isTrue(propertyKeys.length == propertyValues.length);
 		
-		for (int i= 0; i < fFilterActions.length; i++) {
-			int currProperty= fFilterActions[i].getFilterProperty();
-			if (currProperty == filterProperty) {
-				fFilterActions[i].setChecked(set);
+		for (int i= 0; i < propertyKeys.length; i++) {
+			int filterProperty= propertyKeys[i];
+			boolean set= propertyValues[i];
+			if (set) {
+				fFilter.addFilter(filterProperty);
+			} else {
+				fFilter.removeFilter(filterProperty);
 			}
-			store.setValue(getPreferenceKey(currProperty), hasMemberFilter(currProperty));
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			
+			for (int j= 0; j < fFilterActions.length; j++) {
+				int currProperty= fFilterActions[j].getFilterProperty();
+				if (currProperty == filterProperty) {
+					fFilterActions[j].setChecked(set);
+				}
+				store.setValue(getPreferenceKey(currProperty), hasMemberFilter(currProperty));
+			}
 		}
-		if (refreshViewer)
+		if (refresh) {
+			fViewer.getControl().setRedraw(false);
 			fViewer.refresh();
+			fViewer.getControl().setRedraw(true);
+		}
 	}
 
 	/**
@@ -160,26 +165,21 @@ public class MemberFilterActionGroup extends ActionGroup {
 	
 	/**
 	 * Restores the state of the filter actions from a memento.
+	 * <p>
+	 * Note: This method does not refresh the viewer.
+	 * </p>
 	 * @param memento
-	 * @param refreshViewer Indicates if the viewer should be refreshed.
-	 */	
-	public void restoreState(IMemento memento, boolean refreshViewer) {
-		boolean set= Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue();
-		setMemberFilter(FILTER_FIELDS, set, refreshViewer);
-		set= Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue();
-		setMemberFilter(FILTER_STATIC, set, refreshViewer);
-		set= Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue();
-		setMemberFilter(FILTER_NONPUBLIC, set, refreshViewer);		
-	}
-	
-	/**
-	 * Restores the state of the filter actions from a memento.
-	 * @deprecated use restoreState(IMemento, boolean)
 	 */	
 	public void restoreState(IMemento memento) {
-		restoreState(memento, true);
+		setMemberFilters(
+			new int[] {FILTER_FIELDS, FILTER_STATIC, FILTER_NONPUBLIC},
+			new boolean[] {
+				Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue(),
+				Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue(),
+				Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue()
+			}, false);
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see ActionGroup#fillActionBars(IActionBars)
 	 */

@@ -146,7 +146,10 @@ public class MethodsViewer extends ProblemTableViewer {
 	 * Restores the state of the filter actions
 	 */	
 	public void restoreState(IMemento memento) {
-		fMemberFilterActionGroup.restoreState(memento, true);
+		fMemberFilterActionGroup.restoreState(memento);
+		getControl().setRedraw(false);
+		refresh();
+		getControl().setRedraw(true);
 		
 		boolean set= Boolean.valueOf(memento.getString(TAG_SHOWINHERITED)).booleanValue();
 		showInheritedMethods(set);
