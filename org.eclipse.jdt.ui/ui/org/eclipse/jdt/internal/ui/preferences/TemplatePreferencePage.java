@@ -170,7 +170,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
         gd.horizontalSpan= 2;
         innerParent.setLayoutData(gd);
 
-		Table table= new Table(innerParent, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
+		Table table= new Table(innerParent, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION);
 		
 		GridData data= new GridData(GridData.FILL_BOTH);
 		data.widthHint= convertWidthInCharsToPixels(3);
