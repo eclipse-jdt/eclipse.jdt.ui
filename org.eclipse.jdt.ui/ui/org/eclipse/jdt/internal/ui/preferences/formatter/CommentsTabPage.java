@@ -64,7 +64,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 	
 	
 	private final static String PREVIEW=
-		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possiblilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
+		createPreviewHeader("An example for comment formatting. This example is meant to illustrate the various possibilities offered by <i>Eclipse</i> in order to format comments.") +	//$NON-NLS-1$
 		"package mypackage;\n" + //$NON-NLS-1$
 		"/**\n" + //$NON-NLS-1$
 		" * This is the comment for the example interface.\n" + //$NON-NLS-1$
@@ -79,6 +79,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		" /**\n" + //$NON-NLS-1$
 		" * The following is some sample code which illustrates source formatting within javadoc comments:\n" + //$NON-NLS-1$
 		" * <pre>public class Example {final int a= 1;final boolean b= true;}</pre>\n" + //$NON-NLS-1$ 
+		" * Descriptions of parameters and return values are best appended at end of the javadoc comment.\n" + //$NON-NLS-1$
 		" * @param a The first parameter. For an optimum result, this should be an odd number\n" + //$NON-NLS-1$
 		" * between 0 and 100.\n" + //$NON-NLS-1$
 		" * @param b The second parameter.\n" + //$NON-NLS-1$
