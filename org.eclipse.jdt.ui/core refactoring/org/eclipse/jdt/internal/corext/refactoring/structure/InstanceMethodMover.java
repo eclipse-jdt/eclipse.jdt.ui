@@ -237,7 +237,7 @@ class InstanceMethodMover {
 			
 			methodEditSession.classQualifyNonInstanceMemberReferences();
 			
-			if(method.hasSelfReferences()) {
+			if(method.hasSelfReferences(this)) {
 				methodEditSession.addNewFirstParameter(method.getDeclaringClass(), originalReceiverParameterName);
 				methodEditSession.replaceSelfReferencesWithReferencesToName(originalReceiverParameterName);				
 			}
@@ -258,7 +258,7 @@ class InstanceMethodMover {
 			Assert.isNotNull(originalReceiverParameterName);
 			
 			IParameter[] originalMethodParams= originalMethod.getParameters();
-			if(!originalMethod.hasSelfReferences())
+			if(!originalMethod.hasSelfReferences(this))
 				return originalMethodParams;
 			else {
 				IParameter[] result= new IParameter[1 + originalMethodParams.length];
@@ -327,6 +327,8 @@ class InstanceMethodMover {
 		private static IFile getFile(ICompilationUnit cunit) throws JavaModelException {
 			return ResourceUtil.getFile(cunit);
 		}
+
+		public abstract boolean hasFieldsAccessesOtherThanToMe(SimpleName[] fieldAccesses);
 	}
 
 	private static abstract class VariableNewReceiver extends NewReceiver {
@@ -406,7 +408,7 @@ class InstanceMethodMover {
 			Method.Delegation delegation= originalMethod.getPotentialDelegationTo(this);
 			delegation.setCalledMethodName(newMethodName);
 
-			boolean hasSelfReferences= originalMethod.hasSelfReferences();
+			boolean hasSelfReferences= originalMethod.hasSelfReferences(this);
 
 			if(hasSelfReferences)
 				delegation.passThisAsArgument(0);
@@ -421,6 +423,10 @@ class InstanceMethodMover {
 			}
 
 			return delegation;
+		}
+
+		public boolean hasFieldsAccessesOtherThanToMe(SimpleName[] fieldAccesses) {
+			return fieldAccesses.length != 0;
 		}
 	}
 	
@@ -473,7 +479,7 @@ class InstanceMethodMover {
 			Method.Delegation delegation= originalMethod.getPotentialDelegationTo(this);
 			delegation.setCalledMethodName(newMethodName);
 
-			boolean hasSelfReferences= originalMethod.hasSelfReferences();
+			boolean hasSelfReferences= originalMethod.hasSelfReferences(this);
 
 			if(hasSelfReferences)
 				delegation.passThisAsArgument(0);
@@ -487,6 +493,17 @@ class InstanceMethodMover {
 				);
 
 			return delegation;
+		}
+
+		public boolean hasFieldsAccessesOtherThanToMe(SimpleName[] fieldAccesses) {
+			//Fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=38310
+			for (int i = 0; i < fieldAccesses.length; i++) {
+				SimpleName access = fieldAccesses[i];
+				if (access.resolveBinding() != getField()) {
+					return true;
+				}
+			}
+			return false;
 		}
 	}
 	
@@ -511,14 +528,14 @@ class InstanceMethodMover {
 				Assert.isNotNull(called);
 				fCalledMethodName= called;
 			}
-
+	
 			public void passThisAsArgument(int argumentIndex) {
 				Assert.isTrue(argumentIndex >= 0);
 				notifyOfNewArgument(argumentIndex);
 				fArgumentToPassThisAs= argumentIndex;
 				fPassThis= true;
 			}
-
+	
 			private void notifyOfNewArgument(int argumentIndex) {
 				if(argumentIndex + 1> fArgumentToParameterMap.size())
 					fArgumentToParameterMap.setSize(argumentIndex + 1);	
@@ -527,7 +544,7 @@ class InstanceMethodMover {
 			private int getNumberOfArguments() {
 				return fArgumentToParameterMap.size();	
 			}
-
+	
 			public void mapParameterToArgument(int parameterIndex, int argumentIndex) {
 				Assert.isTrue(parameterIndex >= 0);
 				Assert.isTrue(parameterIndex < fDelegatingMethod.getParameters().length);
@@ -562,7 +579,7 @@ class InstanceMethodMover {
 				
 				return invocation;
 			}			
-
+	
 			private boolean isComplete() {
 				return   fCalledMethodName != null
 				       && hasAllArguments();
@@ -602,14 +619,14 @@ class InstanceMethodMover {
 				replaceImplicitThisInFieldAccessesWith(name);
 				replaceImplicitThisInMethodInvocationsWith(name);
 			}
-
+	
 			private boolean replaceExplicitThisReferencesWith(String name) {
 				ThisExpression[] thisReferences= fMethod.getExplicitThisReferences();
 				for(int i= 0; i < thisReferences.length; i++)
 					fRewrite.markAsReplaced(thisReferences[i], thisReferences[i].getAST().newSimpleName(name));
 				return thisReferences.length != 0;
 			}
-
+	
 			private boolean replaceImplicitThisInFieldAccessesWith(String name) {
 				SimpleName[] fieldReferences= fMethod.getImplicitThisFieldAccesses();
 				for(int i= 0; i < fieldReferences.length; i++) {
@@ -621,7 +638,7 @@ class InstanceMethodMover {
 				}
 				return fieldReferences.length != 0;
 			}
-
+	
 			private boolean replaceImplicitThisInMethodInvocationsWith(String name) {
 				MethodInvocation[] methodInvocations= fMethod.getImplicitThisMethodInvocations();
 				for(int i= 0; i < methodInvocations.length; i++) {
@@ -639,7 +656,7 @@ class InstanceMethodMover {
 				for(int i= 0; i < newReceiverReferences.length; i++)
 					replaceExpressionWithSelfReference(newReceiverReferences[i]);
 			}
-
+	
 			private void replaceExpressionWithSelfReference(Expression expression) {
 				Assert.isNotNull(expression);
 				
@@ -670,7 +687,7 @@ class InstanceMethodMover {
 				
 				fRewrite.markAsReplaced(invocation, replacement);
 			}
-
+	
 			private void replaceReceiverWithImplicitThis(FieldAccess fieldAccess) {
 				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));			
 			}
@@ -682,11 +699,11 @@ class InstanceMethodMover {
 				Assert.isTrue(isFieldAccess(fieldAccess));
 				fRewrite.markAsReplaced(fieldAccess, fRewrite.createCopy(fieldAccess.getName()));
 			}
-
+	
 			private void replaceExpressionWithExplicitThis(Expression expression) {
 				fRewrite.markAsReplaced(expression, expression.getAST().newThisExpression());
 			}
-
+	
 			private static boolean isQualifiedNameUsedAsFieldAccessOnObject(QualifiedName fieldAccess, Expression object) {
 				return object.equals(fieldAccess.getQualifier()) && isFieldAccess(fieldAccess);	
 			}
@@ -706,7 +723,7 @@ class InstanceMethodMover {
 						classQualify(leftMost);
 				}
 			}
-
+	
 			private boolean isNonInstanceMemberReference(SimpleName name) {
 				if (name.getParent() instanceof ClassInstanceCreation)
 					return false;
@@ -726,7 +743,7 @@ class InstanceMethodMover {
 				ITypeBinding declaring= getDeclaringClassIfMember(nameBinding);
 				if(declaring == null)
 					return;
-
+	
 				fRewrite.markAsReplaced(
 					name,
 					name.getAST().newQualifiedName(
@@ -741,13 +758,13 @@ class InstanceMethodMover {
 			private static ITypeBinding getDeclaringClassIfMember(IBinding binding) {
 				if(binding instanceof IMethodBinding)
 					return ((IMethodBinding) binding).getDeclaringClass();
-
+	
 				if(binding instanceof IVariableBinding)
 					return ((IVariableBinding) binding).getDeclaringClass();
-
+	
 				if(binding instanceof ITypeBinding)
 					return ((ITypeBinding) binding).getDeclaringClass();
-
+	
 				return null;
 			}	
 			
@@ -826,7 +843,7 @@ class InstanceMethodMover {
 						createReturnStatement(delegatingInvocation);
 				statements.add(delegatingStatement);
 			}
-
+	
 			private Statement createReturnStatement(Expression expression) {
 				ReturnStatement returnStatement= expression.getAST().newReturnStatement();
 				returnStatement.setExpression(expression);
@@ -952,14 +969,14 @@ class InstanceMethodMover {
 			private Integer getValueFor(ITypeBinding binding) {
 				return (Integer) fTypeKeysToUsageCounts.get(binding.getKey());
 			}
-
+	
 			public boolean visit(Name name) {
 				SimpleName leftmost= getLeftmost(name);
-
+	
 				IBinding binding= leftmost.resolveBinding();
 				if(binding instanceof ITypeBinding)
 					registerReference((ITypeBinding) binding);
-
+	
 				return false;
 			}
 		}		
@@ -984,7 +1001,7 @@ class InstanceMethodMover {
 			Assert.isNotNull(declaration);
 			Assert.isNotNull(codeGenSettings);
 			Assert.isNotNull(declaringClass);
-
+	
 			fDeclaringCU= declaringCU;
 			fMethodNode= declaration;
 			
@@ -996,13 +1013,13 @@ class InstanceMethodMover {
 			Assert.isTrue(field.isField());
 			//TODO: Assert.isTrue(isAncestor(field.getDeclaringClass(), getDeclaringClass()))
 			//TODO: Assert field not shadowed by field
-
+	
 			if(parameterShadows(field))
 				return createThisFieldAccess(field);
-
+	
 			return createFieldName(field);
 		}
-
+	
 		private boolean parameterShadows(IVariableBinding field) {
 			Parameter[] params= getParameters();
 			for(int i= 0; i < params.length; i++)
@@ -1010,7 +1027,7 @@ class InstanceMethodMover {
 					return true;
 			return false;
 		}
-
+	
 		private Expression createThisFieldAccess(IVariableBinding field) {
 			FieldAccess access= fMethodNode.getAST().newFieldAccess();
 			access.setExpression(fMethodNode.getAST().newThisExpression());
@@ -1031,7 +1048,7 @@ class InstanceMethodMover {
 		MethodDeclaration getMethodDeclaration(){
 			return fMethodNode;
 		}
-
+	
 		public SingleVariableDeclaration addNewFirstParameter(ITypeBinding parameterType, String parameterName) {
 			Assert.isNotNull(parameterType);
 			Assert.isNotNull(parameterName);
@@ -1054,7 +1071,7 @@ class InstanceMethodMover {
 		private SimpleName getNameNode() {
 			return fMethodNode.getName();
 		}
-
+	
 		/**
 		 * <code>variable</code> must be a binding from the same AST that this
 		 * Method is based on.
@@ -1110,20 +1127,20 @@ class InstanceMethodMover {
 			);
 			return (Name[]) result.toArray(new Name[result.size()]);
 		}
-
+	
 		private static ITypeBinding getDeclaringClassBinding(MethodDeclaration decl) {
 			Assert.isNotNull(decl);
-
+	
 			IMethodBinding binding= decl.resolveBinding();
 			if (binding == null)
 				return null;
 			return binding.getDeclaringClass();
 		}
-
+	
 		public String getName() {
 			return fMethodNode.getName().getIdentifier();	
 		}
-
+	
 		private ITypeBinding[] getParameterTypes() {
 			Parameter[] params= getParameters();
 			
@@ -1132,19 +1149,19 @@ class InstanceMethodMover {
 				types[i]= params[i].getType();
 			return types;	
 		}
-
+	
 		public Parameter[] getParameters() {
 			List parameters= new ArrayList();
 			for(Iterator it= fMethodNode.parameters().iterator(); it.hasNext();) {
 				IVariableBinding paramBinding= ((SingleVariableDeclaration) it.next()).resolveBinding();
 				if (paramBinding == null)
 					return new Parameter[0]; //null bindings are not good
-
+	
 				parameters.add(new Parameter(this, paramBinding));
 			}
 			return (Parameter[]) parameters.toArray(new Parameter[parameters.size()]);
 		}
-
+	
 		public ITypeBinding getDeclaringClass() {
 			return fDeclaringClass;
 		}
@@ -1152,7 +1169,7 @@ class InstanceMethodMover {
 		public ICompilationUnit getDeclaringCU() {
 			return fDeclaringCU;
 		}
-
+	
 		private IJavaProject getProject() {
 			return getDeclaringCU().getJavaProject();
 		}
@@ -1179,20 +1196,20 @@ class InstanceMethodMover {
 				return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("InstanceMethodMover.cannot_be_moved"), null, null, RefactoringStatusCodes.NO_NEW_RECEIVERS); //$NON-NLS-1$
 			return new RefactoringStatus();
 		}
-
+	
 		private boolean hasSuperReferences() {
 			class SuperReferenceChecker extends ASTVisitor {
 				private boolean fSuperReferencesFound= false;
-
+	
 				public boolean superReferencesFound() {
 					return fSuperReferencesFound;
 				}
-
+	
 				public boolean visit(SuperFieldAccess node) {
 					fSuperReferencesFound= true;
 					return false;
 				}
-
+	
 				public boolean visit(SuperMethodInvocation node) {
 					fSuperReferencesFound= true;
 					return false;
@@ -1203,7 +1220,7 @@ class InstanceMethodMover {
 			fMethodNode.accept(checker);
 			return checker.superReferencesFound();
 		}
-
+	
 		private boolean isStatic() {
 			return Modifier.isStatic(getModifiers());
 		}
@@ -1230,11 +1247,11 @@ class InstanceMethodMover {
 		private boolean refersToEnclosingInstances() {
 			class EnclosingInstanceReferenceChecker extends ASTVisitor {
 				private boolean fEnclosingInstanceReferencesFound= false;
-
+	
 				public boolean enclosingInstanceReferencesFound() {
 					return fEnclosingInstanceReferencesFound;
 				}
-
+	
 				public boolean visit(ThisExpression node) {
 					if(node.getQualifier() != null)
 						fEnclosingInstanceReferencesFound= true;
@@ -1298,7 +1315,7 @@ class InstanceMethodMover {
 				private boolean isSelfSend(MethodInvocation invocation) {
 					if(isStatic(invocation))
 						return false;
-
+	
 					Expression receiver= invocation.getExpression();
 					return    receiver == null
 							|| receiver instanceof ThisExpression;
@@ -1322,7 +1339,7 @@ class InstanceMethodMover {
 				fPossibleNewReceivers= findPossibleNewReceivers();
 			return fPossibleNewReceivers;
 		}
-
+	
 		private NewReceiver[] findPossibleNewReceivers() {
 			List newReceivers= new ArrayList();
 		
@@ -1331,21 +1348,21 @@ class InstanceMethodMover {
 		
 			return (NewReceiver[]) newReceivers.toArray(new NewReceiver[newReceivers.size()]);
 		}
-
+	
 		private static boolean canAddAsPossibleNewReceiver(ITypeBinding type){
 			return type.isClass() && type.isFromSource();
 		}
 		
 		private void addPossibleParameterNewReceivers(List target) {
 			Assert.isNotNull(target);
-
+	
 			Parameter[] parameters= getParameters();
 			for(int i= 0; i < parameters.length; i++) {
 				if(canAddAsPossibleNewReceiver(parameters[i].getType()))
 					target.add(new ParameterNewReceiver(parameters[i], getProject(), fCodeGenSettings));
 			}
 		}
-
+	
 		private void addPossibleFieldNewReceivers(List target) {
 			Assert.isNotNull(target);
 			IVariableBinding[] fields= findFieldsOfSelfReadButNotWritten();
@@ -1354,12 +1371,12 @@ class InstanceMethodMover {
 					target.add(new FieldNewReceiver(fields[i], getProject(), fCodeGenSettings));	
 			}
 		}
-
+	
 		private IVariableBinding[] findFieldsOfSelfReadButNotWritten() {
 			Collection result= keepFieldsNotWritten(findReferencedFieldsOfSelf());
 			return (IVariableBinding[]) result.toArray(new IVariableBinding[result.size()]);
 		}
-
+	
 		/**
 		 * @return Set of keys obtained by calling <code>a.getKey()</code> on a
 		 * VariableBinding instance <code>a</code>
@@ -1373,24 +1390,24 @@ class InstanceMethodMover {
 						reportExpressionModified(assignment.getLeftHandSide());
 						return true;
 					}
-
+	
 					public boolean visit(PostfixExpression node) {
 						reportExpressionModified(node.getOperand());
 						return true;
 					}
-
+	
 					public boolean visit(PrefixExpression node) {
 						reportExpressionModified(node.getOperand());
 						return false;
 					}
-
+	
 					private void reportExpressionModified(Expression exp) {
 						IVariableBinding field
 							= getFieldBindingIfField(exp);
 						if(field != null)
 							reportFieldWritten(field);
 					}
-
+	
 					private void reportFieldWritten(IVariableBinding field) {
 						Assert.isTrue(field.isField());
 						writtenFieldKeys.add(field.getKey());
@@ -1413,7 +1430,7 @@ class InstanceMethodMover {
 			);
 			return writtenFieldKeys;			
 		}
-
+	
 		private Collection keepFieldsNotWritten(Collection fields) {
 			Set writtenFieldKeys= getKeysOfAllWrittenFields();
 			
@@ -1441,7 +1458,7 @@ class InstanceMethodMover {
 						}
 						return true;
 					}
-
+	
 					public boolean visit(SimpleName name) {
 						IBinding binding= name.resolveBinding();
 						if(binding != null)
@@ -1515,7 +1532,7 @@ class InstanceMethodMover {
 			);
 			return (MethodInvocation[]) result.toArray(new MethodInvocation[result.size()]);
 		}
-
+	
 		private SimpleName[] getImplicitThisFieldAccesses() {
 			final List result= new ArrayList();
 			fMethodNode.accept(
@@ -1530,10 +1547,10 @@ class InstanceMethodMover {
 			return (SimpleName[]) result.toArray(new SimpleName[result.size()]);
 		}			
 	
-		public boolean hasSelfReferences() {
+		public boolean hasSelfReferences(NewReceiver newReceiver) {
 			return   getExplicitThisReferences().length != 0
 			       || getImplicitThisMethodInvocations().length != 0
-			       || getImplicitThisFieldAccesses().length != 0;
+			       || newReceiver.hasFieldsAccessesOtherThanToMe(getImplicitThisFieldAccesses());
 		}		
 		
 		private MethodDeclaration getDeclaration() {
@@ -1557,7 +1574,7 @@ class InstanceMethodMover {
 				return false;
 			return PrimitiveType.VOID.equals(((PrimitiveType) returnType).getPrimitiveTypeCode());
 		}
-
+	
 		public SimpleName createParameterReference(Parameter parameter) {
 			Assert.isTrue(parameter.getMethod() == this);
 			return fMethodNode.getAST().newSimpleName(parameter.getName());
@@ -1566,8 +1583,8 @@ class InstanceMethodMover {
 		private AST getAST() {
 			return fMethodNode.getAST();
 		}
-
-
+	
+	
 		private SingleVariableDeclaration getParameterDeclaration(Parameter parameter) {
 			for(Iterator decls= fMethodNode.parameters().iterator(); decls.hasNext();) {
 				SingleVariableDeclaration parameterDeclaration= (SingleVariableDeclaration) decls.next();
@@ -1577,7 +1594,7 @@ class InstanceMethodMover {
 			Assert.isTrue(false, "Parameter must be a parameter to this method."); //$NON-NLS-1$
 			return null;
 		}
-
+	
 		private TypeReferences getTypeReferences() {
 			TypeReferences result= new TypeReferences();
 			result.addAllReferences(fMethodNode);
@@ -1611,14 +1628,14 @@ class InstanceMethodMover {
 		private static SimpleName getLeftmost(Name name) {
 			if(name instanceof SimpleName)
 				return (SimpleName) name;
-
+	
 			return getLeftmost(((QualifiedName) name).getQualifier());
 		}
 		
 		private static boolean isImplicitThisFieldAccess(SimpleName name) {
 			return isInstanceFieldAccess(name) && !isRightDotOperand(name);
 		}
-
+	
 		/**
 		 * Is the name preceded by a dot?
 		 */
@@ -1640,18 +1657,18 @@ class InstanceMethodMover {
 			
 			return false;
 		}
-
+	
 		private static boolean isInstanceFieldAccess(SimpleName name) {
 			IBinding binding= name.resolveBinding();
 			// TODO: null bindings assumed OK
-
+	
 			if(!(binding instanceof IVariableBinding))
 				return false;
-
+	
 			IVariableBinding variableBinding= (IVariableBinding) binding;
 			if(!variableBinding.isField())
 				return false;
-
+	
 			return !Modifier.isStatic(variableBinding.getModifiers());
 		}		
 	}
