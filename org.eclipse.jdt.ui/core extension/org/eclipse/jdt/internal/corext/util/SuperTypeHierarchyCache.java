@@ -46,7 +46,7 @@ public class SuperTypeHierarchyCache {
 	}
 	
 
-	private static final int CACHE_SIZE= 5;
+	private static final int CACHE_SIZE= 8;
 
 	private static ArrayList fgHierarchyCache= new ArrayList(CACHE_SIZE);
 	private static int fgCacheHits= 0;
@@ -56,6 +56,9 @@ public class SuperTypeHierarchyCache {
 	
 	/**
 	 * Get a hierarchy for the given type
+	 * @param type
+	 * @return
+	 * @throws JavaModelException
 	 */
 	public static ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
 		synchronized (fgHierarchyCache) {
@@ -85,6 +88,8 @@ public class SuperTypeHierarchyCache {
 
 	/**
 	 * Check if the given type is in the hierarchy
+	 * @param type
+	 * @return Return <code>true</code> if a hierarchy for the given type is cached.
 	 */	
 	public static boolean hasInCache(IType type) {
 		return findTypeHierarchyInCache(type) != null;

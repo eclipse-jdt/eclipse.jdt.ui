@@ -65,6 +65,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 */	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param registry The registry to use.
 	 */
 	public OverrideIndicatorLabelDecorator(ImageDescriptorRegistry registry) {
 		fRegistry= registry;
@@ -100,6 +101,9 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param element The element to decorate
+	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
+	 * and JavaElementImageDescriptor.OVERRIDES)
 	 */
 	public int computeAdornmentFlags(Object element) {
 		if (element instanceof IMethod) {
@@ -112,7 +116,6 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 				if (!method.getJavaProject().isOnClasspath(method)) {
 					return 0;
 				}
-				
 				int flags= method.getFlags();
 				if (method.getDeclaringType().isClass() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
 					return getOverrideIndicators(method);
@@ -128,9 +131,24 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param method The element to decorate
+	 * @return Resulting decorations (combination of JavaElementImageDescriptor.IMPLEMENTS
+	 * and JavaElementImageDescriptor.OVERRIDES)
+	 * @throws JavaModelException
 	 */
 	protected int getOverrideIndicators(IMethod method) throws JavaModelException {
 		IType type= method.getDeclaringType();
+		
+		if (type.isAnonymous() && !SuperTypeHierarchyCache.hasInCache(type)) {
+			int flags= method.getFlags();
+			// for performance reasons: cheat
+			if (Flags.isPublic(flags) && !type.getSuperclassName().endsWith("Adapter")) { //$NON-NLS-1$
+				return JavaElementImageDescriptor.IMPLEMENTS;
+			} else if (Flags.isProtected(flags)) {
+				return JavaElementImageDescriptor.OVERRIDES;
+			}
+		}
+		
 		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
 		if (hierarchy != null) {
 			return findInHierarchy(type, hierarchy, method.getElementName(), method.getParameterTypes());
@@ -140,6 +158,12 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	
 	/**
 	 * Note: This method is for internal use only. Clients should not call this method.
+	 * @param type The declaring type of the method to decorate.
+	 * @param hierarchy The type hierarchy of the declaring type.
+	 * @param name The name of the method to find.
+	 * @param paramTypes The parameter types of the method to find.
+	 * @return The resulting decoration.
+	 * @throws JavaModelException
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
 		IMethod impl= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, name, paramTypes, false);
