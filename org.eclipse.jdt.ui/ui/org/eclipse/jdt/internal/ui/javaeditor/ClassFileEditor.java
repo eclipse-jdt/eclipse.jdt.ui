@@ -498,6 +498,17 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (!(input instanceof IClassFileEditorInput))
 			throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"))); //$NON-NLS-1$
 
+		JavaModelException e= probeInputForSource(input);
+		if (e != null) {
+			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
+			IClassFile file= classFileEditorInput.getClassFile();
+			if (!file.getJavaProject().isOnClasspath(file)) {
+				throw new CoreException(new JavaModelStatus(IJavaModelStatusConstants.INVALID_RESOURCE, JavaEditorMessages.getString("ClassFileEditor.error.classfile_not_on_classpath"))); //$NON-NLS-1$
+			} else {
+				throw e;
+			}
+		}
+
 		IDocumentProvider documentProvider= getDocumentProvider();
 		if (documentProvider instanceof ClassFileDocumentProvider)
 			((ClassFileDocumentProvider) documentProvider).removeInputChangeListener(this);
@@ -547,6 +558,22 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			element= element.getParent();
 
 		return (IPackageFragmentRoot) element;		
+	}
+
+	private JavaModelException probeInputForSource(IEditorInput input) {
+		if (input == null)
+			return null;
+
+		IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) input;
+		IClassFile file= classFileEditorInput.getClassFile();
+			
+		try {
+			file.getSourceRange();
+		} catch (JavaModelException e) {
+			return e;			
+		}
+
+		return null;
 	}
 
 	/**
