@@ -90,7 +90,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 								if (ast != null)
 									markAsUnmodifiable(ast);
 							} else
-								unit.reconcile(0, true, null, fProgressMonitor);
+								unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 						}
 					} catch (OperationCanceledException ex) {
 						Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());

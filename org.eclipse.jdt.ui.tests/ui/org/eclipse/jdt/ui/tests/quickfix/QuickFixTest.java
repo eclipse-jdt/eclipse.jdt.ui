@@ -189,7 +189,7 @@ public class QuickFixTest extends TestCase {
 		
 		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
 		try {
-			wc.reconcile(0, true, wc.getOwner(), null);
+			wc.reconcile(ICompilationUnit.NO_AST, true, wc.getOwner(), null);
 		} finally {
 			wc.discardWorkingCopy();
 		}

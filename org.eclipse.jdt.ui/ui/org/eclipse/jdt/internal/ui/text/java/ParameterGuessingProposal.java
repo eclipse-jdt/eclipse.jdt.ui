@@ -224,7 +224,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		} else {
 			
 			synchronized (fCompilationUnit) {
-				fCompilationUnit.reconcile(0, false, null, null);
+				fCompilationUnit.reconcile(ICompilationUnit.NO_AST, false, null, null);
 			}
 			
 			ParameterGuesser guesser= new ParameterGuesser(fCodeAssistOffset, fCompilationUnit);
