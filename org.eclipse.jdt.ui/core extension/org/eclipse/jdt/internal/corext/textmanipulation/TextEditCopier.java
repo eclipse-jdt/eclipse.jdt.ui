@@ -78,7 +78,7 @@ public class TextEditCopier {
 	//---- helper methods --------------------------------------------
 		
 	private TextEdit doCopy(TextEdit edit) {
-		TextEdit result= edit.copy0();
+		TextEdit result= edit.doCopy();
 		List children= edit.internalGetChildren();
 		if (children != null) {
 			List newChildren= new ArrayList(children.size());

@@ -38,12 +38,6 @@ public final class UndoMemento {
 		}
 	}
 	
-	/* package */ void executed() {
-		for (int i= fEdits.size() - 1; i >= 0; i--) {
-			((TextEdit)fEdits.get(i)).performed();
-		}
-	}
-	
 	/* package */ boolean canPerform(int bufferLength) {
 		for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
 			TextEdit edit= (TextEdit)iter.next();

@@ -37,8 +37,12 @@ public class Regions {
 		if (thisRegion.getLength() == 0) {	// an insertion point can't cover anything
 			return false;
 		} else {
-			return thisRegion.getOffset() <= otherRegion.getOffset() && otherRegion.getExclusiveEnd() <= thisRegion.getExclusiveEnd();
+			return thisRegion.getOffset() <= otherRegion.getOffset() && getExclusiveEnd(otherRegion) <= getExclusiveEnd(thisRegion);
 		}		
+	}
+	
+	public static int getExclusiveEnd(TextRange region) {
+		return region.getOffset() + region.getLength();
 	}
 	
 	public static TextRange intersect(TextRange op1, TextRange op2) {

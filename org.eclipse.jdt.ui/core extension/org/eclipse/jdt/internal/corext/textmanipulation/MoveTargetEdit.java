@@ -44,14 +44,20 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		if (fSource != edit) {
 			fSource= edit;
 			fSource.setTargetEdit(this);
+			TextEdit parent= getParent();
+			while (parent != null) {
+				if (parent == fSource)
+					throw new MalformedTreeException(parent, this, "Source edit must not be the parent of the target.");
+				parent= parent.getParent();
+			}
 		}
 	}
 	
-	protected void connect(IDocument buffer) {
+	protected void checkIntegrity() {
 		if (fSource == null)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.no_source")); //$NON-NLS-1$
 		if (fSource.getTargetEdit() != this)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
@@ -72,26 +78,10 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		return fSource.getContent();
 	}	
 
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof MoveTargetEdit))
-			return false;
-		MoveTargetEdit other= (MoveTargetEdit)obj;
-		if (!fRange.equals(other.fRange))
-			return false;
-		if (fSource != null)
-			return fSource.matches(other.fSource);
-		if (other.fSource != null)
-			return false;
-		return true;
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#copy0
 	 */	
-	public TextEdit copy0() {
+	public TextEdit doCopy() {
 		return new MoveTargetEdit(this);
 	}
 	
@@ -104,15 +94,13 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void updateTextRange(int delta, List executedEdits) {
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
 		if (fMode == INSERT) {
 			// we have to substract the delta since <code>super.updateTextRange</code>
 			// add the delta to the move source's children.
-			int moveDelta= getTextRange().getOffset() - fSource.getContentRange().getOffset() - delta;
+			int moveDelta= getOffset() - fSource.getContentOffset();
 			
-			markChildrenAsDeleted();
-
-			super.updateTextRange(delta, executedEdits);			
+			super.update(event, info);			
 
 			List sourceChildren= fSource.getContentChildren();
 			move(sourceChildren, moveDelta); 
@@ -121,13 +109,25 @@ public final class MoveTargetEdit extends AbstractTransferEdit {
 		} else {
 			Assert.isTrue(false);
 		}
+		
 	}
 	
-	/* package */ void checkRange(DocumentEvent event) {
-		if (fMode == DELETE) {
-			fSource.checkRange(event);
-		} else {
-			super.checkRange(event);
-		}
-	}	
+//	protected void updateTextRange(int delta, List executedEdits) {
+//		if (fMode == INSERT) {
+//			// we have to substract the delta since <code>super.updateTextRange</code>
+//			// add the delta to the move source's children.
+//			int moveDelta= getTextRange().getOffset() - fSource.getContentRange().getOffset() - delta;
+//			
+//			markChildrenAsDeleted();
+//
+//			super.updateTextRange(delta, executedEdits);			
+//
+//			List sourceChildren= fSource.getContentChildren();
+//			move(sourceChildren, moveDelta); 
+//			internalSetChildren(sourceChildren);
+//			
+//		} else {
+//			Assert.isTrue(false);
+//		}
+//	}	
 }

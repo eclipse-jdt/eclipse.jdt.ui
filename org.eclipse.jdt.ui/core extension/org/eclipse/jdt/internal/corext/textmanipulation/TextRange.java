@@ -19,10 +19,6 @@ public final class TextRange {
 	private int fOffset;
 	private int fLength;
 
-	private static final int DELETED_VALUE= -2;
-	
-	public static final TextRange DELETED= new TextRange(null, DELETED_VALUE);
-
 	/**
 	 * Creates a insert position with the given offset.
 	 *
@@ -51,14 +47,6 @@ public final class TextRange {
 	public TextRange(TextRange other) {
 		fOffset= other.fOffset;
 		fLength= other.fLength;
-	}
-	
-	/**
-	 * Constructor for the undefined text range.
-	 */
-	private TextRange(TextRange dummy, int value) {
-		fOffset= value;
-		fLength= value;
 	}
 	
 	public static TextRange createFromStartAndLength(int start, int length) {
@@ -100,65 +88,10 @@ public final class TextRange {
 		return fLength;
 	}
 	
-	/**
-	 * Returns the inclusive end position of this range. That means that the end position
-	 * denotes the last character of this range.
-	 * 
-	 * @return the inclusive end position
-	 */
-	public int getInclusiveEnd() {
-		return fOffset + fLength - 1;
-	}
-	
-	/**
-	 * Returns the exclusive end position of this range. That means that the end position
-	 * denotes the first character after this range.
-	 * 
-	 * @return the exclusive end position
-	 */
-	public int getExclusiveEnd() {
-		return fOffset + fLength;
-	}
-	
-	/**
-	 * Creates a copy of this <code>TextRange</code>.
-	 * 
-	 * @return a copy of this <code>TextRange</code>
-	 */
-	public TextRange copy() {
-		if (isDeleted())
-			return new TextRange(null, DELETED_VALUE);
-		return new TextRange(fOffset, fLength);
-	}
-	
-	/**
-	 * Returns <code>true</code> if the text represented by this <code>TextRange</code>
-	 * got deleted. Otherwise <code>false</code> is returned.
-	 */
-	public boolean isDeleted() {
-		return fOffset == DELETED_VALUE && fLength == DELETED_VALUE;
-	}
-	
-	/**
-	 * Checks if this <code>TextRange</code> is valid. For valid text range the following
-	 * expression evaluates to <code>true</code>:
-	 * <pre>
-	 * 	getOffset() >= 0 && getLength() >= 0
-	 * </pre>
-	 * 
-	 * @return <code>true</code> if this text range is a valid range. Otherwise <code>
-	 * 	false</code>
-	 */
-	public boolean isValid() {
-		return fOffset >= 0 && fLength >= 0;
-	}
-	
 	/* non Java-doc
 	 * @see Object#toString()
 	 */
 	public String toString() {
-		if (isDeleted())
-			return "[deleted]"; //$NON-NLS-1$
 		StringBuffer buffer= new StringBuffer();
 		buffer.append("["); //$NON-NLS-1$
 		buffer.append(fOffset);
@@ -185,61 +118,8 @@ public final class TextRange {
 		return fOffset * fLength;
 	}
 	
-	/* package */ boolean isInsertionPoint() {
-		return fLength == 0;
-	}
-	
 	/* package */ boolean equals(TextRange range) {
 		return fOffset == range.fOffset && fLength == range.fLength;
-	}
-
-	/* package */ boolean isEqualInsertionPoint(TextRange range)	{
-		return fLength == 0 && range.fLength == 0 && fOffset == range.fOffset;
-	}
-
-	public boolean liesBehind(TextRange range) {
-		return fOffset >= range.fOffset + range.fLength;
-	}
-
-	/* package */ boolean isInsertionPointAt(int o) {
-		return fOffset == o && fLength == 0;
-	}
-	
-	public boolean covers(int point) {
-		if (fLength == 0)
-			return false;
-		return fOffset <= point && point < fOffset + fLength;	
-	}
-	
-	public boolean covers(TextRange other) {
-		if (fLength == 0) {	// an insertion point can't cover anything
-			return false;
-		} else if (other.fLength == 0) {
-			int otherOffset= other.fOffset;
-			return fOffset < otherOffset && otherOffset < fOffset + fLength;
-		} else {
-			int otherOffset= other.fOffset;
-			return fOffset <= otherOffset && otherOffset + other.fLength <= fOffset + fLength;
-		}
-	}
-	
-	/* package */ void markAsDeleted() {
-		fOffset= DELETED_VALUE;
-		fLength= DELETED_VALUE;
-	}
-	
-	/* package */ void addToOffset(int delta) {
-		if (isDeleted())
-			return;
-		fOffset+= delta;
-		Assert.isTrue(fOffset >= 0);
-	}
-	
-	/* package */ void addToLength(int delta) {
-		if (isDeleted())
-			return;
-		fLength+= delta;
-		Assert.isTrue(fLength >= 0);
 	}
 }
 

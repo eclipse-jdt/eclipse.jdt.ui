@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.Regions;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -315,7 +316,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					continue;
 				TextRange oldRange= getOldRange(edits, new TextRange(cuRange.getSourceRange()), change);
 				String typeName= fInputType.getElementName();
-				int offset= oldRange.getExclusiveEnd() - typeName.length();
+				int offset= Regions.getExclusiveEnd(oldRange) - typeName.length();
 				TextEdit edit= SimpleTextEdit.createReplace(offset, typeName.length(), fNewInterfaceName);
 				ExtractInterfaceUtil.getTextChange(manager, cu).addTextEdit(RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update"), edit); //$NON-NLS-1$
 			}

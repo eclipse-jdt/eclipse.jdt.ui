@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class MoveCuUpdateCreator {
@@ -354,7 +354,7 @@ public class MoveCuUpdateCreator {
 			if (fQualified) {
 				change.addTextEdit(
 				RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_references"), //$NON-NLS-1$
-				new SimpleTextEdit(getStart(), getEnd() - getStart(), text));
+				new ReplaceEdit(getStart(), getEnd() - getStart(), text));
 			}
 		}
 		public boolean isQualified() {

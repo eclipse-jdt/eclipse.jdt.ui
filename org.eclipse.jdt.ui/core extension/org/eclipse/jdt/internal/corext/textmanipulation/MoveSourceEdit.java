@@ -28,7 +28,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	private ISourceModifier fModifier;
 	
 	private String fContent;
-	private TextRange fContentRange;
+	private int fContentOffset;
 	private List fContentChildren;
 	
 	public MoveSourceEdit(int offset, int length) {
@@ -72,11 +72,11 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		return fModifier;
 	}
 	
-	protected void connect(IDocument buffer) throws IllegalEditException {
+	protected void checkIntegrity() throws MalformedTreeException {
 		if (fTarget == null)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("MoveSourceEdit.different_source"));  //$NON-NLS-1$
 	}
 	
 	/* non Java-doc
@@ -90,24 +90,25 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 			// only deletes the content.
 			case 1:
 				fContent= getContent(document);
-				fContentRange= getTextRange().copy();
+				fContentOffset= getOffset();
 				fContentChildren= internalGetChildren();
 				fMode= DELETE;
-				performReplace(document, fContentRange, ""); //$NON-NLS-1$
+				performReplace(document, ""); //$NON-NLS-1$
 				// do this after executing the replace to be able to
 				// compute the number of children.
 				internalSetChildren(null);
 				break;
+				
 			// Position of move source < position of move target.
 			// Hence move source handles the delete and the 
 			// insert at the target position.	
 			case 2:
 				fContent= getContent(document);
 				fMode= DELETE;
-				performReplace(document, getTextRange(), ""); //$NON-NLS-1$
-				TextRange targetRange= fTarget.getTextRange();
-				if (!targetRange.isDeleted()) {
+				performReplace(document, ""); //$NON-NLS-1$
+				if (!fTarget.isDeleted()) {
 					// Insert target
+					TextRange targetRange= fTarget.getTextRange();
 					fMode= INSERT;
 					performReplace(document, targetRange, fContent);
 				}
@@ -119,34 +120,9 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	}
 
 	/* non Java-doc
-	 * @see TextEdit#adjustOffset
-	 */	
-	public void adjustOffset(int delta) {
-		if (fContentRange != null)
-			fContentRange.addToOffset(delta);
-		super.adjustOffset(delta);
-	}
-	
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof MoveSourceEdit))
-			return false;
-		MoveSourceEdit other= (MoveSourceEdit)obj;
-		if (!fRange.equals(other.fRange))
-			return false;
-		if (fTarget != null)
-			return fTarget.matches(other.fTarget);
-		if (other.fTarget != null)
-			return false;
-		return true;
-	}
-	
-	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new MoveSourceEdit(this);
 	}
 
@@ -167,57 +143,66 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		return fContentChildren;
 	}
 	
-	/* package */ TextRange getContentRange() {
-		return fContentRange;
+	/* package */ int getContentOffset() {
+		return fContentOffset;
 	}
 	
 	/* package */ void clearContent() {
 		fContent= null;
 		fContentChildren= null;
-		fContentRange= null;
+		fContentOffset= -1;
 	}
 	
-	protected void updateTextRange(int delta, List executedEdits) {
-		if (fMode == DELETE) {
-			adjustLength(delta);
-			updateParents(delta);
-			if (fCounter == 1) {
-				predecessorExecuted(executedEdits, getNumberOfChildren(), delta);
-			} else {
-				// only update the edits which are executed between the move source
-				// and the move target. For all other edits nothing will change.
-				// The children of the move source will be updte when moving them 
-				// under the target edit
-				for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
-					TextEdit edit= (TextEdit)executedEdits.get(i);
-					edit.predecessorExecuted(delta);
-					if (edit == fTarget)
-						break;
-				}
-			}
-		} else if (fMode == INSERT) {
-			fTarget.adjustLength(delta);
-			fTarget.updateParents(delta);
-			
-			fTarget.markChildrenAsDeleted();
-			
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		if (fMode == DELETE) {			// source got deleted
+			super.update(event, info); 
+		} else if (fMode == INSERT) {	// text got inserted at target position
+			fTarget.update(event);
 			List children= internalGetChildren();
-			internalSetChildren(null);
-			int moveDelta= fTarget.getTextRange().getOffset() - getTextRange().getOffset();
-			move(children, moveDelta);
+			if (children != null) {
+				internalSetChildren(null);
+				int moveDelta= fTarget.getOffset() - getOffset();
+				move(children, moveDelta);
+			}
 			fTarget.internalSetChildren(children);
 		} else {
 			Assert.isTrue(false);
 		}
 	}
 	
-	/* package */ void checkRange(DocumentEvent event) {
-		if (fMode == INSERT) {
-			fTarget.checkRange(event);
-		} else  {
-			super.checkRange(event);
-		}
-	}
+//	protected void updateTextRange(int delta, List executedEdits) {
+//		if (fMode == DELETE) {
+//			adjustLength(delta);
+//			updateParents(delta);
+//			if (fCounter == 1) {
+//				predecessorExecuted(executedEdits, getNumberOfChildren(), delta);
+//			} else {
+//				// only update the edits which are executed between the move source
+//				// and the move target. For all other edits nothing will change.
+//				// The children of the move source will be updte when moving them 
+//				// under the target edit
+//				for (int i= executedEdits.size() - 1 - getNumberOfChildren(); i >= 0; i--) {
+//					TextEdit edit= (TextEdit)executedEdits.get(i);
+//					edit.predecessorExecuted(delta);
+//					if (edit == fTarget)
+//						break;
+//				}
+//			}
+//		} else if (fMode == INSERT) {
+//			fTarget.adjustLength(delta);
+//			fTarget.updateParents(delta);
+//			
+//			fTarget.markChildrenAsDeleted();
+//			
+//			List children= internalGetChildren();
+//			internalSetChildren(null);
+//			int moveDelta= fTarget.getTextRange().getOffset() - getTextRange().getOffset();
+//			move(children, moveDelta);
+//			fTarget.internalSetChildren(children);
+//		} else {
+//			Assert.isTrue(false);
+//		}
+//	}
 	
 	//---- content management ------------------------------------------
 	
@@ -237,7 +222,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 				result= newDocument.get();
 			}
 			return result;
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			throw new PerformEditException(this, e.getMessage(), e);
 		} catch (BadLocationException e) {
 			throw new PerformEditException(this, e.getMessage(), e);
@@ -245,9 +230,8 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	}
 	
 	private TextEdit createEdit(Map editMap) {
-		TextRange range= getTextRange();
-		int delta= range.getOffset();
-		MultiTextEdit result= new MultiTextEdit(0, range.getLength());
+		int delta= getOffset();
+		MultiTextEdit result= new MultiTextEdit(0, getLength());
 		// don't but the root edit into the edit map. The sourc edit
 		// will be updated by the perform method.
 		createEdit(this, result, editMap, delta);
@@ -258,8 +242,7 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		TextEdit[] children= source.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			TextEdit child= children[i];
-			TextRange range= child.getTextRange();
-			RangeMarker marker= new RangeMarker(range.getOffset() - delta, range.getLength());
+			RangeMarker marker= new RangeMarker(child.getOffset() - delta, child.getLength());
 			target.add(marker);
 			editMap.put(marker, child);
 			createEdit(child, marker, editMap, delta);
@@ -270,13 +253,11 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 		for (Iterator iter= editMap.keySet().iterator(); iter.hasNext();) {
 			TextEdit marker= (TextEdit)iter.next();
 			TextEdit edit= (TextEdit)editMap.get(marker);
-			TextRange markerRange= marker.getTextRange();
-			TextRange editRange= edit.getTextRange();
-			if (markerRange.isDeleted()) {
-				editRange.markAsDeleted();
+			if (marker.isDeleted()) {
+				edit.markAsDeleted();
 			} else {
-				edit.adjustOffset(markerRange.getOffset() - editRange.getOffset() + delta);
-				edit.adjustLength(markerRange.getLength() - editRange.getLength());
+				edit.adjustOffset(marker.getOffset() - edit.getOffset() + delta);
+				edit.adjustLength(marker.getLength() - edit.getLength());
 			}
 		}
 	}		

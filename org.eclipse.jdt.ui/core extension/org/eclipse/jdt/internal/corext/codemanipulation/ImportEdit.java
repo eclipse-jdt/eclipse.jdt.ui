@@ -16,11 +16,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.MalformedTreeException;
 import org.eclipse.jdt.internal.corext.textmanipulation.PerformEditException;
+import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -32,15 +33,15 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 public final class ImportEdit extends TextEdit {
 	
 	private ImportsStructure fImportsStructure;
-	private TextRange fRange;
 	
 	public ImportEdit(ICompilationUnit cunit, CodeGenerationSettings settings) throws JavaModelException {
+		super(0, 0);
 		Assert.isNotNull(cunit);
 		Assert.isNotNull(settings);
 		TextBuffer buffer= TextBuffer.create(cunit.getBuffer().getContents());
 		try {
 			fImportsStructure= new ImportsStructure(cunit, settings.importOrder, settings.importThreshold, true, buffer);
-			fRange= fImportsStructure.getReplaceRange(buffer).copy();
+			setRegion(fImportsStructure.getReplaceRange(buffer));
 		} catch (JavaModelException e) {
 			throw e;
 		} catch (CoreException e) {
@@ -48,6 +49,13 @@ public final class ImportEdit extends TextEdit {
 		}
 	}
 	
+	public final void rewrite(TextBuffer buffer, TextEdit rootEdit) throws MalformedTreeException, CoreException {
+		TextRange region= fImportsStructure.getReplaceRange(buffer);
+		String text= fImportsStructure.getReplaceString(buffer, region);
+		if (text != null) {
+			rootEdit.add(new ReplaceEdit(region.getOffset(), region.getLength(), text));
+		}
+	}
 	
 	/**
 	 * Copy constrcutor
@@ -55,14 +63,6 @@ public final class ImportEdit extends TextEdit {
 	private ImportEdit(ImportEdit other) {
 		super(other);
 		fImportsStructure= other.fImportsStructure;
-		fRange= new TextRange(other.fRange);
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#getTextRange
-	 */
-	public TextRange getTextRange() {
-		return fRange;
 	}
 	
 	/* non Java-doc
@@ -70,13 +70,12 @@ public final class ImportEdit extends TextEdit {
 	 */
 	public void perform(IDocument document) throws PerformEditException {
 		try {
+			TextRange range= getTextRange();
 			String text= fImportsStructure.getReplaceString(
-				new TextBuffer(document), fRange);
+				new TextBuffer(document), range);
 			if (text != null)
-				document.replace(fRange.getOffset(), fRange.getLength(), text);
+				performReplace(document, text);
 		} catch (JavaModelException e) {
-			throw new PerformEditException(this, e.getMessage(), e);
-		} catch (BadLocationException e) {
 			throw new PerformEditException(this, e.getMessage(), e);
 		}
 	}
@@ -150,22 +149,10 @@ public final class ImportEdit extends TextEdit {
 		return !fImportsStructure.hasChanges();
 	}
 	
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof ImportEdit))
-			return false;
-		ImportEdit other= (ImportEdit)obj;
-		if (!fRange.equals(other.fRange))
-			return false;
-		return true;
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new ImportEdit(this);
 	}	
 }

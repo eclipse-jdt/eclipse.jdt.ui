@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
  * has the best match.
  */
 public class ImportsStructure implements IImportsStructure {
-		
 	
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;

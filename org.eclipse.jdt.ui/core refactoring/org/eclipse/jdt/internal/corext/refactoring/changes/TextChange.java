@@ -67,11 +67,11 @@ public abstract class TextChange extends AbstractTextChange {
 			int sEnd= sOffset + sLength - 1;
 			TextEdit[] edits= fDescription.getTextEdits();
 			for (int i= 0; i < edits.length; i++) {
-				TextRange range= edits[i].getTextRange();
-				if (range.isDeleted())
+				TextEdit edit= edits[i];
+				if (edit.isDeleted())
 					return false;
-				int rOffset= range.getOffset();
-				int rLength= range.getLength();
+				int rOffset= edit.getOffset();
+				int rLength= edit.getLength();
 				int rEnd= rOffset + rLength - 1;
 			    if (rLength == 0) {
 					if (!(sOffset < rOffset && rOffset <= sEnd))
@@ -400,7 +400,7 @@ public abstract class TextChange extends AbstractTextChange {
 		TextEdit result= getExecutedTextEdit(edit);
 		if (result == null)
 			return null;
-		return result.getTextRange().copy();
+		return result.getTextRange();
 	}
 	
 	/**
@@ -518,7 +518,7 @@ public abstract class TextChange extends AbstractTextChange {
 		}
 		int startLine= Math.max(buffer.getLineOfOffset(range.getOffset()) - surroundingLines, 0);
 		int endLine= Math.min(
-			buffer.getLineOfOffset(range.getInclusiveEnd()) + surroundingLines,
+			buffer.getLineOfOffset(range.getOffset() + range.getLength() - 1) + surroundingLines,
 			buffer.getNumberOfLines() - 1);
 		int offset= buffer.getLineInformation(startLine).getOffset();
 		TextRegion region= buffer.getLineInformation(endLine);
@@ -535,7 +535,7 @@ public abstract class TextChange extends AbstractTextChange {
 		// First dive down to find the right parent.
 		for (int i= 0; i < children.length; i++) {
 			TextEdit child= children[i];
-			if (child.getTextRange().covers(edit.getTextRange())) {
+			if (covers(child, edit)) {
 				insert(child, edit);
 				return;
 			}
@@ -544,12 +544,28 @@ public abstract class TextChange extends AbstractTextChange {
 		// be moved under the new edit since it is covering it.
 		for (int i= children.length - 1; i >= 0; i--) {
 			TextEdit child= children[i];
-			if (edit.getTextRange().covers(child.getTextRange())) {
+			if (covers(edit, child)) {
 				parent.remove(i);
 				edit.add(child);
 			}
 		}
 		parent.add(edit);
-	}	
+	}
+	
+	private static boolean covers(TextEdit thisEdit, TextEdit otherEdit) {
+		if (thisEdit.getLength() == 0)	// an insertion point can't cover anything
+			return false;
+		
+		int thisOffset= thisEdit.getOffset();
+		int thisEnd= thisEdit.getExclusiveEnd();	
+		if (otherEdit.getLength() == 0) {
+			int otherOffset= otherEdit.getOffset();
+			return thisOffset < otherOffset && otherOffset < thisEnd;
+		} else {
+			int otherOffset= otherEdit.getOffset();
+			int otherEnd= otherEdit.getExclusiveEnd();
+			return thisOffset <= otherOffset && otherEnd <= thisEnd;
+		}
+	}		
 }
 

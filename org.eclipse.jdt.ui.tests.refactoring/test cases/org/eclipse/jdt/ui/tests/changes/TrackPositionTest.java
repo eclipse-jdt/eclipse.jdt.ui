@@ -76,7 +76,7 @@ public class TrackPositionTest extends TestCase {
 		}
 	}
 	
-	private void assertEquals(TextRange r, int offset, int length) {
+	private static void assertEquals(TextRange r, int offset, int length) {
 		assertEquals("Offset", offset, r.getOffset());
 		assertEquals("Length", length, r.getLength());	
 	}	

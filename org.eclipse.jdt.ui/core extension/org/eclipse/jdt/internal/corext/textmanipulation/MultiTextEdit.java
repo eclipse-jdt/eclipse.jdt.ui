@@ -15,9 +15,7 @@ import org.eclipse.jface.text.IDocument;
 
 public final class MultiTextEdit extends TextEdit {
 
-	private TextRange fRange;
-	
-	private static final TextRange MAX_RANGE= new TextRange(0, Integer.MAX_VALUE);
+	private boolean fDefined;
 
 	/**
 	 * Creates a new <code>MultiTextEdit</code>. The range
@@ -29,6 +27,8 @@ public final class MultiTextEdit extends TextEdit {
 	 * and its length is set to 0.
 	 */
 	public MultiTextEdit() {
+		super(0, Integer.MAX_VALUE);
+		fDefined= false;
 	}
 	
 	/**
@@ -41,7 +41,8 @@ public final class MultiTextEdit extends TextEdit {
 	 * @see TextEdit#add(TextEdit)
 	 */
 	public MultiTextEdit(int offset, int length) {
-		fRange= new TextRange(offset, length);
+		super(offset, length);
+		fDefined= true;
 	}
 	
 	/**
@@ -49,40 +50,8 @@ public final class MultiTextEdit extends TextEdit {
 	 */
 	private MultiTextEdit(MultiTextEdit other) {
 		super(other);
-		if (other.fRange != null) {
-			fRange= new TextRange(other.fRange);
-		}
 	}
 
-	/* non Java-doc
-	 * @see TextEdit#getTextRange
-	 */	
-	public final TextRange getTextRange() {
-		if (fRange != null)
-			return fRange;
-		if (getParent() == null) // not added yet
-			return MAX_RANGE;
-		if (hasChildren())
-			return getChildrenTextRange();
-		else
-			return new TextRange(getParent().getTextRange().getOffset(), 0);
-	}
-
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof MultiTextEdit))
-			return false;
-		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement matches"); //$NON-NLS-1$
-		MultiTextEdit other= (MultiTextEdit)obj;
-		if (fRange != null)
-			return fRange.equals(other.fRange);
-		if (other.fRange != null)
-			return false;
-		return true;
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
@@ -93,42 +62,21 @@ public final class MultiTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		Assert.isTrue(MultiTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
 		return new MultiTextEdit(this);
 	}
-
-	/* non Java-doc
-	 * @see TextEdit#createPlaceholder
-	 */	
-	protected TextEdit createPlaceholder() {
-		if (fRange == null)
-			return new MultiTextEdit();
-		return new MultiTextEdit(fRange.getOffset(), fRange.getLength());
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#adjustOffset
-	 */	
-	public void adjustOffset(int delta) {
-		if (fRange != null)
-			fRange.addToOffset(delta);
-	}
-	
-	/* non Java-doc
-	 * @see TextEdit#adjustLength
-	 */	
-	public void adjustLength(int delta) {
-		if (fRange != null)
-			fRange.addToLength(delta);
-	}
 	
 	/* package */ void aboutToBeAdded(TextEdit parent) {
-		if (fRange == null) {
-			if (hasChildren())
-				fRange= getChildrenTextRange();
-			else
-				fRange= new TextRange(parent.getTextRange().getOffset(), 0);
+		if (!fDefined) {
+			if (hasChildren()) {
+				TextRange region= getTextRange(getChildren());
+				setOffset(region.getOffset());
+				setLength(region.getLength());
+			} else {
+				setOffset(parent.getOffset());
+				setLength(0);
+			}
 		}
 	}	
 }

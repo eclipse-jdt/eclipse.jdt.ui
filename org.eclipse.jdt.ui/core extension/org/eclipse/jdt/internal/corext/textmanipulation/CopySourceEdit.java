@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import java.util.Iterator;
-import java.util.List;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.DocumentEvent;
@@ -20,7 +17,7 @@ import org.eclipse.jface.text.IDocument;
 
 public final class CopySourceEdit extends AbstractTransferEdit {
 
-	private String fContent;
+	private String fContent= ""; //$NON-NLS-1$
 	private CopyTargetEdit fTarget;
 	/* package */ int fCounter;
 	private ISourceModifier fModifier;
@@ -59,30 +56,10 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		return fModifier;
 	}
 	
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof CopySourceEdit))
-			return false;
-		CopySourceEdit other= (CopySourceEdit)obj;
-		if (!internalMatches(other))
-			return false;
-		if (fTarget != null)
-			return fTarget.internalMatches(other.fTarget);
-		if (other.fTarget != null)
-			return false;
-		return true;
-	}
-	
-	/* package */ boolean internalMatches(CopySourceEdit other) {
-		return fRange.equals(other.fRange);
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new CopySourceEdit(this);
 	}
 
@@ -95,19 +72,18 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void connect(IDocument buffer) throws IllegalEditException {
+	protected void checkIntegrity() throws MalformedTreeException {
 		if (fTarget == null)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.no_target")); //$NON-NLS-1$
 		if (fTarget.getSourceEdit() != this)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopySourceEdit.different_source")); //$NON-NLS-1$
 	}
 	
 	public void perform(IDocument document) throws PerformEditException {
 		fContent= getContent(document);
-		TextRange targetRange= fTarget.getTextRange();
-		if (++fCounter == 2 && !targetRange.isDeleted()) {
+		if (++fCounter == 2 && !fTarget.isDeleted()) {
 			try {
-				performReplace(document, targetRange, fContent);
+				performReplace(document, fTarget.getTextRange(), fContent);
 			} finally {
 				clearContent();
 			}
@@ -128,26 +104,20 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 				result= newDocument.get();
 			}
 			return result;
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			throw new PerformEditException(this, e.getMessage(), e);
 		} catch (BadLocationException e) {
 			throw new PerformEditException(this, e.getMessage(), e);
 		}
 	}
 	
-	protected void updateTextRange(int delta, List executedEdits) {
-		boolean doIt= true;
-		for (Iterator iter= executedEdits.iterator(); iter.hasNext() && doIt;) {
-			TextEdit edit= (TextEdit)iter.next();
-			if (edit == fTarget)
-				doIt= false;
-			if (doIt)
-				edit.adjustOffset(delta);
-		}
-		fTarget.adjustLength(delta);
-		fTarget.updateParents(delta);
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		// Executing the copy source edit means inserting the text
+		// at target position. So we have to update the edits around
+		// the target.
+		fTarget.update(event);
 	}
-		
+	
 	/* package */ String getContent() {
 		return fContent;
 	}
@@ -155,8 +125,4 @@ public final class CopySourceEdit extends AbstractTransferEdit {
 	/* package */ void clearContent() {
 		fContent= null;
 	}
-	
-	/* package */ void checkRange(DocumentEvent event) {
-		fTarget.checkRange(event);
-	}	
 }

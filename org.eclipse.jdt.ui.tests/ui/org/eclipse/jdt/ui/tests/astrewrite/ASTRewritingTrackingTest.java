@@ -142,7 +142,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -217,7 +217,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -299,7 +299,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -376,7 +376,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -450,7 +450,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -512,7 +512,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);
@@ -578,7 +578,7 @@ public class ASTRewritingTrackingTest extends ASTRewritingTest {
 		for (int i= 0; i < descriptions.length; i++) {
 			String name= descriptions[i].getName();
 			TextRange range= change.getNewTextRange(descriptions[i].getTextEdits());
-			String string= expected.substring(range.getOffset(), range.getExclusiveEnd());
+			String string= expected.substring(range.getOffset(), range.getOffset() + range.getLength());
 			assertEqualString(string, name);
 		}
 		clearRewrite(rewrite);

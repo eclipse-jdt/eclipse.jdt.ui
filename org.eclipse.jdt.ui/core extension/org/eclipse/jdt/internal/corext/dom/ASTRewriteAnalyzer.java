@@ -19,7 +19,75 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.AssertStatement;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BooleanLiteral;
+import org.eclipse.jdt.core.dom.BreakStatement;
+import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.CharacterLiteral;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.ContinueStatement;
+import org.eclipse.jdt.core.dom.DoStatement;
+import org.eclipse.jdt.core.dom.EmptyStatement;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.LabeledStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.PostfixExpression;
+import org.eclipse.jdt.core.dom.PrefixExpression;
+import org.eclipse.jdt.core.dom.PrimitiveType;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StringLiteral;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.TypeLiteral;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite.CopyPlaceholderData;
@@ -34,14 +102,13 @@ import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -57,8 +124,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ASTRewriteAnalyzer extends ASTVisitor {
 	
-	private static final boolean DEBUG= true;
-
 	private TextEdit fCurrentEdit;
 	private TokenScanner fTokenScanner; // shared scanner
 	private HashMap fNodeRanges;
@@ -205,23 +270,6 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 	
 	private final void addEdit(TextEdit edit) {
-		if (DEBUG) {
-			TextRange editRange= edit.getTextRange();
-			if (!(fCurrentEdit instanceof MultiTextEdit)) {
-				TextRange parentRange= fCurrentEdit.getTextRange();
-				if (parentRange.getOffset() > editRange.getOffset() || editRange.getExclusiveEnd() > parentRange.getExclusiveEnd()) {
-					Assert.isTrue(false, "Parent range must surround edit range:" + parentRange.toString() + ", " + editRange.toString()); //$NON-NLS-1$ //$NON-NLS-2$
-				}
-			}
-			Iterator iter= fCurrentEdit.iterator();
-			while (iter.hasNext()) {
-				TextEdit curr= (TextEdit) iter.next();
-				TextRange range= curr.getTextRange();
-				if (range.getOffset() < editRange.getExclusiveEnd() && editRange.getOffset() < range.getExclusiveEnd()) {
-					Assert.isTrue(false, "Sibling range must not overlap:" + range.toString() + ", " + editRange.toString()); //$NON-NLS-1$ //$NON-NLS-2$
-				}				
-			}
-		}
 		fCurrentEdit.add(edit);
 	}
 	

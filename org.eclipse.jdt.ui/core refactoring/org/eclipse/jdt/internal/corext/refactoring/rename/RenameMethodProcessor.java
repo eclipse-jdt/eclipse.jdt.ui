@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -468,6 +469,6 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {
-		return new SimpleTextEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
+		return new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName);
 	}
 }	

@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.ReplaceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -583,7 +584,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
 				ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-				TextEdit edit= new SimpleTextEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName);
+				TextEdit edit= new ReplaceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), newAccessorName);
 				manager.get(wc).addTextEdit(editName, edit);
 			}
 		}

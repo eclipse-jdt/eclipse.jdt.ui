@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.RangeMarker;
+import org.eclipse.jdt.internal.corext.textmanipulation.Regions;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -224,7 +225,7 @@ public class SourceProvider {
 		for (int i= 0; i < markers.length; i++) {
 			markers[i]= new RangeMarker((TextRange)ranges.get(i));
 		}
-		int split= size <= 1 ? Integer.MAX_VALUE : ((TextRange)ranges.get(0)).getExclusiveEnd();
+		int split= size <= 1 ? Integer.MAX_VALUE : Regions.getExclusiveEnd((TextRange)ranges.get(0));
 		TextEdit[] edits= dummy.removeAll();
 		for (int i= 0; i < edits.length; i++) {
 			TextEdit edit= edits[i];

@@ -18,8 +18,6 @@ import org.eclipse.jface.text.IDocument;
  */
 public final class RangeMarker extends TextEdit {
 	
-	private TextRange fRange;
-	
 	/**
 	 * Creates a new <tt>RangeMarker</tt> for the given
 	 * offset and length.
@@ -28,7 +26,7 @@ public final class RangeMarker extends TextEdit {
 	 * @param length the length this text edit is "working on"
 	 */
 	public RangeMarker(int offset, int length) {
-		fRange= new TextRange(offset, length);
+		super(offset, length);
 	}
 	
 	/**
@@ -37,7 +35,7 @@ public final class RangeMarker extends TextEdit {
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
 	public RangeMarker(TextRange range) {
-		fRange= new TextRange(range);
+		super(range.getOffset(), range.getLength());
 	}
 	
 	/**
@@ -45,26 +43,8 @@ public final class RangeMarker extends TextEdit {
 	 */
 	private RangeMarker(RangeMarker other) {
 		super(other);
-		fRange= new TextRange(other.fRange);
 	}
 
-	/* non Java-doc
-	 * @see TextEdit#getTextRange
-	 */	
-	public final TextRange getTextRange() {
-		return fRange;
-	}
-
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof RangeMarker))
-			return false;
-		RangeMarker other= (RangeMarker)obj;
-		return fRange.equals(other.getTextRange());
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
@@ -74,7 +54,7 @@ public final class RangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new RangeMarker(this);
 	}	
 }

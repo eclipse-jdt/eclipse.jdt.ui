@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.Iterator;
-import java.util.List;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
@@ -57,7 +56,7 @@ public class EditProcessor {
 	 * @exception EditException if the text edit can not be added
 	 * 	to this edit processor.
 	 */
-	public void add(TextEdit edit) throws IllegalEditException {
+	public void add(TextEdit edit) throws MalformedTreeException {
 		Assert.isTrue(fUndoMemento == null);
 		executeConnect(edit, fDocument);
 		if (fRoot == null) {
@@ -76,7 +75,7 @@ public class EditProcessor {
 	 * @exception EditException if the undo memento can not be added
 	 * 	to this processor
 	 */
-	public void add(UndoMemento undo) throws IllegalEditException {
+	public void add(UndoMemento undo) throws MalformedTreeException {
 		Assert.isTrue(fRoot == null);
 		fUndoMemento= undo;
 	}
@@ -132,8 +131,7 @@ public class EditProcessor {
 	//---- Helper methods ------------------------------------------------------------------------
 		
 	private static boolean checkBufferLength(TextEdit root, int bufferLength) {
-		TextRange range= root.getTextRange();
-		if (range.getExclusiveEnd() > bufferLength)
+		if (root.getExclusiveEnd() > bufferLength)
 			return false;
 		for (Iterator iter= root.iterator(); iter.hasNext();) {
 			TextEdit edit= (TextEdit)iter.next();
@@ -144,11 +142,11 @@ public class EditProcessor {
 	}
 	
 	private static void executeConnect(TextEdit root, IDocument document) {
-		TextRange oldRange= root.getTextRange();
-		root.connect(document);
-		TextRange newRange= root.getTextRange();
-		if (oldRange.getOffset() != newRange.getOffset() || oldRange.getLength() != newRange.getLength())
-			throw new IllegalEditException(root.getParent(), root, "Text edit changed during connect method");
+		int oldOffset= root.getOffset();
+		int oldLength= root.getLength();
+		root.checkIntegrity();
+		if (oldOffset != root.getOffset() || oldLength != root.getLength())
+			throw new MalformedTreeException(root.getParent(), root, "Text edit changed during connect method");
 		for (Iterator iter= root.iterator(); iter.hasNext();) {
 			TextEdit edit= (TextEdit)iter.next();
 			executeConnect(edit, document);
@@ -156,15 +154,13 @@ public class EditProcessor {
 	}
 	
 	private UndoMemento executeDo() throws PerformEditException {
-		Updater updater= null;
+		Updater.DoUpdater updater= null;
 		try {
 			updater= Updater.createDoUpdater();
 			fDocument.addDocumentListener(updater);
+			updater.push(new TextEdit[] { fRoot });
+			updater.setIndex(0);
 			execute(fRoot, updater);
-			List executed= updater.getProcessedEdits();
-			for (int i= executed.size() - 1; i >= 0; i--) {
-				((TextEdit)executed.get(i)).performed();
-			}
 			return updater.undo;
 		} finally {
 			if (updater != null)
@@ -172,18 +168,19 @@ public class EditProcessor {
 		}
 	}
 	
-	private void execute(TextEdit edit, Updater updater) throws PerformEditException {
-		TextEdit[] children= edit.getChildren();
-		for (int i= children.length - 1; i >= 0; i--) {
-			execute(children[i], updater);
+	private void execute(TextEdit edit, Updater.DoUpdater updater) throws PerformEditException {
+		if (edit.hasChildren()) {
+			TextEdit[] children= edit.getChildren();
+			updater.push(children);
+			for (int i= children.length - 1; i >= 0; i--) {
+				updater.setIndex(i);
+				execute(children[i], updater);
+			}
+			updater.pop();
 		}
 		if (considerEdit(edit)) {
-			try {
-				updater.setActiveNode(edit);
-				edit.perform(fDocument);
-			} finally {
-				updater.setActiveNode(null);
-			}
+			updater.setActiveEdit(edit);
+			edit.perform(fDocument);
 		}
 	}
 	
@@ -197,7 +194,6 @@ public class EditProcessor {
 			updater= Updater.createUndoUpdater();
 			fDocument.addDocumentListener(updater);
 			fUndoMemento.execute(fDocument);
-			fUndoMemento.executed();
 			return updater.undo;
 		} finally {
 			if (updater != null)

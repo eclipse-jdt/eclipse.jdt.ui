@@ -252,7 +252,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			GroupDescription curr= linked[i];
 			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
 			TextRange range= change.getNewTextRange(curr.getTextEdits());
-			if (range != null && range.isValid() && name != null) {
+			if (range != null && name != null) {
 				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
 				if (linkedModeProposals != null && linkedModeProposals.length > 1) {
 					manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
@@ -267,7 +267,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			
 		if (selection != null) {
 			TextRange range= change.getNewTextRange(selection.getTextEdits());
-			if (range != null && range.isValid()) {
+			if (range != null) {
 				editor.setFinalCaretOffset(range.getOffset() + range.getLength());
 			}					
 		} else {

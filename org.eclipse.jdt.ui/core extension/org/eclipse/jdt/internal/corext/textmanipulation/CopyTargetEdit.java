@@ -37,33 +37,19 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 		if (fSource != edit) {
 			fSource= edit;
 			fSource.setTargetEdit(this);
+			TextEdit parent= getParent();
+			while (parent != null) {
+				if (parent == fSource)
+					throw new MalformedTreeException(parent, this, "Source edit must not be the parent of the target.");
+				parent= parent.getParent();
+			}
 		}
-	}
-	
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof CopyTargetEdit))
-			return false;
-		CopyTargetEdit other= (CopyTargetEdit)obj;
-		if (!internalMatches(other))
-			return false;
-		if (fSource != null)
-			return fSource.internalMatches(other.fSource);
-		if (other.fSource != null)
-			return false;
-		return true;
-	}
-	
-	/* package */ boolean internalMatches(CopyTargetEdit other) {
-		return fRange.equals(other.fRange);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new CopyTargetEdit(this);
 	}
 
@@ -76,27 +62,20 @@ public final class CopyTargetEdit extends AbstractTransferEdit {
 		}
 	}
 	
-	protected void connect(IDocument buffer) throws IllegalEditException {
+	protected void checkIntegrity() throws MalformedTreeException {
 		if (fSource == null)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.no_source")); //$NON-NLS-1$
 		if (fSource.getTargetEdit() != this)
-			throw new IllegalEditException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
+			throw new MalformedTreeException(getParent(), this, TextManipulationMessages.getString("CopyTargetEdit.different_target")); //$NON-NLS-1$
 	}
 	
 	public void perform(IDocument document) throws PerformEditException {
-		if (++fSource.fCounter == 2 && !getTextRange().isDeleted()) {
+		if (++fSource.fCounter == 2 && !isDeleted()) {
 			try {
-				performReplace(document, getTextRange(), getSourceContent());
+				performReplace(document, getTextRange(), fSource.getContent());
 			} finally {
 				fSource.clearContent();
 			}
 		}
 	}
-	
-	/**
-	 * Gets the content from the source edit.
-	 */
-	protected String getSourceContent() {
-		return fSource.getContent();
-	}		
 }

@@ -32,17 +32,18 @@ public final class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	}
 	
 	private DeleteSourceReferenceEdit(ISourceReference sr, ICompilationUnit unit, int offset, int length) {
-		super(offset, length, ""); //$NON-NLS-1$
+		super(offset, length);
 		Assert.isNotNull(sr);
 		fSourceReference= sr;
 		Assert.isNotNull(unit);
 		fCu= unit;
 	}
+	
+	public String getText() {
+		return ""; //$NON-NLS-1$
+	}
 
-	/*
-	 * @see TextEdit#copy0()
-	 */
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		TextRange range= getTextRange();
 		return new DeleteSourceReferenceEdit(fSourceReference, fCu, range.getOffset(), range.getLength());
 	}

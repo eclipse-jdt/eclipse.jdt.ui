@@ -20,7 +20,6 @@ import org.eclipse.jface.text.IDocument;
  */
 public final class CopyRangeMarker extends TextEdit {
 	
-	private TextRange fRange;
 	private String fText;
 	
 	/**
@@ -31,7 +30,7 @@ public final class CopyRangeMarker extends TextEdit {
 	 * @param length the length this text edit is "working on"
 	 */
 	public CopyRangeMarker(int offset, int length) {
-		fRange= new TextRange(offset, length);
+		super(offset, length);
 	}
 	
 	/**
@@ -40,7 +39,7 @@ public final class CopyRangeMarker extends TextEdit {
 	 * @param range the <code>TextRange</code> this text edit is "working on"
 	 */
 	public CopyRangeMarker(TextRange range) {
-		fRange= new TextRange(range);
+		super(range.getOffset(), range.getLength());
 	}
 	
 	/**
@@ -48,39 +47,15 @@ public final class CopyRangeMarker extends TextEdit {
 	 */
 	private CopyRangeMarker(CopyRangeMarker other) {
 		super(other);
-		fRange= new TextRange(other.fRange);
 		fText= other.fText;
 	}
 
-	/* non Java-doc
-	 * @see TextEdit#getTextRange
-	 */	
-	public final TextRange getTextRange() {
-		return fRange;
-	}
-
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof CopyRangeMarker))
-			return false;
-		CopyRangeMarker other= (CopyRangeMarker)obj;
-		if (!fRange.equals(other.getTextRange()))
-			return false;
-		if (fText != null)
-			return fText.equals(other.fText);
-		if (other.fText != null)
-			return false;
-		return true;
-	}
-	
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
 	public final void perform(IDocument document) throws PerformEditException {
 		try {
-			fText= document.get(fRange.getOffset(), fRange.getLength());
+			fText= document.get(getOffset(), getLength());
 		} catch (BadLocationException e) {
 			new PerformEditException(this, e.getMessage(), e);
 		}
@@ -89,7 +64,7 @@ public final class CopyRangeMarker extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() {
+	protected TextEdit doCopy() {
 		return new CopyRangeMarker(this);
 	}	
 }

@@ -25,7 +25,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopyTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.EditProcessor;
-import org.eclipse.jdt.internal.corext.textmanipulation.IllegalEditException;
+import org.eclipse.jdt.internal.corext.textmanipulation.MalformedTreeException;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
@@ -81,7 +81,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createReplace(1, 2, "12"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -93,7 +93,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createReplace(0, 1, "0"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -105,7 +105,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -117,7 +117,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createReplace(1, 1, "1"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -129,7 +129,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createInsert(1, "xx"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -141,7 +141,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(SimpleTextEdit.createInsert(2, "xx"));
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -154,7 +154,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(target);
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -167,7 +167,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(target);
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -184,7 +184,7 @@ public class TextBufferTest extends TestCase {
 		try {
 			fProcessor.add(s2);
 			fProcessor.add(t2);
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -195,7 +195,7 @@ public class TextBufferTest extends TestCase {
 		boolean exception= false;
 		try {
 			fProcessor.add(s1);
-		} catch (IllegalEditException e) {
+		} catch (MalformedTreeException e) {
 			exception= true;
 		}
 		assertTrue(exception);
@@ -399,9 +399,9 @@ public class TextBufferTest extends TestCase {
 		assertTrue(fProcessor.canPerformEdits());
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0189", fDocument.get());
-		assertTrue(e2.getTextRange().isDeleted());
-		assertTrue(e3.getTextRange().isDeleted());
-		assertTrue(e4.getTextRange().isDeleted());
+		assertTrue(e2.isDeleted());
+		assertTrue(e3.isDeleted());
+		assertTrue(e4.isDeleted());
 		doUndoRedo(undo, "0189");
 	}
 	
@@ -602,7 +602,7 @@ public class TextBufferTest extends TestCase {
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "01589", fDocument.get());
 		assertEquals(s1.getTextRange(), 2, 0);
-		assertTrue(t1.getTextRange().isDeleted());
+		assertTrue(t1.isDeleted());
 		assertEquals(e2.getTextRange(), 3, 0);
 		doUndoRedo(undo, "01589");
 	}
@@ -625,7 +625,7 @@ public class TextBufferTest extends TestCase {
 		assertEquals("Buffer content", "0156234789", fDocument.get());
 		assertEquals(t1.getTextRange(), 2, 2);
 		assertEquals(marker.getTextRange(), 2, 2);
-		assertTrue(s1.getTextRange().isDeleted());
+		assertTrue(s1.isDeleted());
 		assertEquals(d1.getTextRange(), 7, 0);
 		doUndoRedo(undo, "0156234789");
 	}		
@@ -697,7 +697,7 @@ public class TextBufferTest extends TestCase {
 		UndoMemento undo= fProcessor.performEdits();
 		assertEquals("Buffer content", "0145623789", fDocument.get());
 		assertEquals(d1.getTextRange(), 2, 0);
-		assertTrue(s1.getTextRange().isDeleted());
+		assertTrue(s1.isDeleted());
 		assertEquals(t1.getTextRange(), 5, 2);
 		assertEquals(m1.getTextRange(), 5, 2);
 		doUndoRedo(undo, "0145623789");

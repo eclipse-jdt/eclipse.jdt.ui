@@ -10,32 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
-import java.util.List;
-
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
-public class SimpleTextEdit extends TextEdit {
-
-	private TextRange fRange;
-	private String fText;
+public abstract class SimpleTextEdit extends TextEdit {
 
 	public static SimpleTextEdit createReplace(int offset, int length, String text) {
-		return new SimpleTextEdit(offset, length, text);
+		return new ReplaceEdit(offset, length, text);
 	}
 
 	public static SimpleTextEdit createInsert(int offset, String text) {
-		return new SimpleTextEdit(offset, 0, text);
+		return new InsertEdit(offset, text);
 	}
 	
 	public static SimpleTextEdit createDelete(int offset, int length) {
-		return new SimpleTextEdit(offset, length, ""); //$NON-NLS-1$
+		return new DeleteEdit(offset, length);
 	}
 	
-	public SimpleTextEdit(int offset, int length, String text) {
-		fRange= new TextRange(offset, length);
-		fText= text;
+	public SimpleTextEdit(int offset, int length) {
+		super(offset, length);
 	}
 	
 	/**
@@ -43,58 +36,39 @@ public class SimpleTextEdit extends TextEdit {
 	 */
 	protected SimpleTextEdit(SimpleTextEdit other) {
 		super(other);
-		fText= other.fText;
-		fRange= new TextRange(other.fRange);
 	}
 	
 	/**
-	 * Returns the text edit's text
+	 * Returns the new text inserted at the range denoted
+	 * by this edit. 
 	 * 
-	 * @return the text edit's text
+	 * @return the edit's text.
 	 */
-	public String getText() {
-		return fText;
-	}
+	public abstract String getText();
 	
-	/* (non-Javadoc)
-	 * @see TextEdit#matches(java.lang.Object)
-	 */
-	public boolean matches(Object obj) {
-		if (!(obj instanceof SimpleTextEdit))
-			return false;
-		SimpleTextEdit other= (SimpleTextEdit)obj;
-		return fText.equals(other.getText()) && fRange.equals(other.getTextRange());
-	}
-		
-	/* non Java-doc
-	 * @see TextEdit#getTextRange
-	 */
-	public final TextRange getTextRange() {
-		return fRange;
-	}
 	
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public void perform(IDocument document) throws PerformEditException {
-		performReplace(document, fRange, fText);
+	protected void perform(IDocument document) throws PerformEditException {
+		String text= getText(); 		
+		if (text != null)
+			performReplace(document, text);
 	}
 	
 	/* non Java-doc
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return super.toString() + " <<" + fText; //$NON-NLS-1$
+		String text= getText();
+		if (text == null)
+			return super.toString() +" NOP"; //$NON-NLS-1$
+		return super.toString() + " <<" + text; //$NON-NLS-1$
 	}
 	
-	protected TextEdit copy0() {
-		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0"); //$NON-NLS-1$
-		return new SimpleTextEdit(this);
-	}		
-	
-	protected void updateTextRange(int delta, List executedEdits) {
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
 		markChildrenAsDeleted();
-		super.updateTextRange(delta, executedEdits);
+		super.update(event, info);
 	}	
 }
 

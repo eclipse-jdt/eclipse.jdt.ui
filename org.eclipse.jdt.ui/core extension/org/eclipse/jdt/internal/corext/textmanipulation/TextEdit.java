@@ -15,30 +15,47 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.textmanipulation.TreeIterationInfo.Visitor;
 
 /**
- * A text edit describes an elementary text manipulation operation. Text edits
- * are executed by adding them to a <code>TextBufferEditor</code> and then
- * calling <code>perform</code> on the <code>TextBufferEditor</code>.
+ * A text edit describes an elementary text manipulation operation. Edits are
+ * executed by applying them to a document (e.g. an instance of <code>IDocument
+ * </code>). 
  * <p>
- * After a <code>TextEdit</code> has been added to a <code>TextBufferEditor</code>
- * the method <code>connect</code> is sent to the text edit. A <code>TextEdit</code>
- * is allowed to do some adjustments of the text range it is going to manipulate while inside
- * the hook <code>connect</code>.
+ * Text edits form a tree. Clients can navigate the tree upwards, from child to 
+ * parent, as well as downwards. Newly created edits are unparented. New edits
+ * are added to the tree by calling one of the <code>add</code> methods on a parent
+ * edit.
+ * <p>
+ * An edit tree is well formed in the following sense:
+ * <ul>
+ *   <li>a parent edit covers all its children</li>
+ *   <li>children don't overlap</li>
+ *   <li>an edit with length 0 can't have any children</li>
+ * </ul>
+ * Any manipulation of the tree that violates one of the above requirements results
+ * in a <code>MalformedTreeException</code>.
+ * <p>
+ * Insert edits are represented by an edit of length 0. If more than one insert 
+ * edit exists at the same offset then the edits are executed in the order in which
+ * they have been added to a parent. The following code example:
+ * <pre>
+ *    IDocument document= new Document("org");
+ * 	  MultiEdit edit= new MultiEdit();
+ *    edit.add(new InsertEdit(0, "www.");
+ *    edit.add(new InsertEdit(0, "eclipse.");
+ *    edit.apply(document);
+ * </pre> 
+ * therefore results in string: "www.eclipse.org".
  * 
- * @@ say something what happens if two insert are added at the same offset.
+ * <p>
+ * This class isn't intended to be subclassed outside of the edit framework. Clients 
+ * are only allowed to subclass <code>SimpleTextEdit</code> and <code>MultiTextEdit</code>.
  * 
  * @see TextBufferEditor
  */
@@ -59,6 +76,11 @@ public abstract class TextEdit {
 	private static final Iterator EMPTY_ITERATOR= new EmptyIterator();
 	private static final TextEdit[] EMPTY_ARRAY= new TextEdit[0];
 	
+	private static final int DELETED_VALUE= -1;
+	
+	private int fOffset;
+	private int fLength;
+	
 	private TextEdit fParent;
 	private List fChildren;
 
@@ -66,7 +88,10 @@ public abstract class TextEdit {
 	 * Create a new text edit. Parent is initialized to <code>
 	 * null<code> and the edit doesn't have any children.
 	 */
-	protected TextEdit() {
+	protected TextEdit(int offset, int length) {
+		Assert.isTrue(offset >= 0 && length >= 0);
+		fOffset= offset;
+		fLength= length;
 	}
 	
 	/**
@@ -75,8 +100,117 @@ public abstract class TextEdit {
 	 * @param source the source to copy form
 	 */
 	protected TextEdit(TextEdit source) {
-		// do nothing. Parent and childs are
-		// populated by the EditCopier class
+		fOffset= source.fOffset;
+		fLength= source.fLength;
+	}
+
+	//---- Region management -----------------------------------------------
+
+	/**
+	 * Returns the range that this edit is manipulating. The returned
+	 * <code>IRegion</code> contains the edit's offset and length at
+	 * the point in time when this call is made. Any subsequent changes
+	 * to the edit's offset and length aren't reflected in the returned
+	 * region object.
+	 * 
+	 * @return the manipulated region
+	 */
+	public final TextRange getTextRange() {
+		return new TextRange(fOffset, fLength);
+	}
+	
+	/**
+	 * Sets the edits region to the given value. Changing an edit's
+	 * region is only support as long as the edit doesn't have any
+	 * children and as long as it isn't added to a parent edit. Trying
+	 * to change the edit's region in these situations result in an
+	 * assertion failure. 
+	 * 
+	 * @param region the new region this edit is manipulating
+	 */
+	public final void setRegion(TextRange region) {
+		Assert.isTrue(fParent == null && fChildren == null);
+		fOffset= region.getOffset();
+		fLength= region.getLength();
+	}
+	
+	/**
+	 * Returns the offset of the edit. An offset is a 0-based 
+	 * character index.
+	 * 
+	 * @return the offset of the edit
+	 */
+	public final int getOffset() {
+		return fOffset;
+	}
+	
+	/**
+	 * Returns the length of the edit.
+	 * 
+	 * @return the length of the edit
+	 */
+	public final int getLength() {
+		return fLength;
+	}
+	
+	/**
+	 * Returns the inclusive end position of this edit. The inclusive end
+	 * position denotes the last character of the region manipulated by
+	 * this edit. The returned value is the result of the following
+	 * calculation:
+	 * <pre>
+	 *   getOffset() + getLength() - 1;
+	 * <pre>
+	 * 
+	 * @return the inclusive end position
+	 */
+	public final int getInclusiveEnd() {
+		return fOffset + fLength - 1;
+	}
+	
+	/**
+	 * Returns the exclusive end position of this edit. The exclusive end
+	 * position denotes the next character of the region manipulated by 
+	 * this edit. The returned value is the result of the following
+	 * calculation:
+	 * <pre>
+	 *   getOffset() + getLength();
+	 * </pre>
+	 * 
+	 * @return the exclusive end position
+	 */
+	public final int getExclusiveEnd() {
+		return fOffset + fLength;
+	}
+	
+	/**
+	 * Returns whether this edit has been deleted or not.
+	 * 
+	 * @return <code>true</code> if the edit has been 
+	 *  deleted; otherwise <code>false</code> is returned.
+	 */
+	public final boolean isDeleted() {
+		return fOffset == DELETED_VALUE && fLength == DELETED_VALUE;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the edit covers the given edit
+	 * <code>other</code>. If the length of the edit is zero <code>
+	 * false</code> is returned. An insert edit can't cover any other
+	 * edit, even if the other edit has the same offset and length.
+	 * 
+	 * @param other the other edit
+	 * @return <code>true<code> if the edit covers the other edit;
+	 *  otherwise <code>false</code> is returned.
+	 * @see Regions#covers(IRegion, IRegion)  
+	 */
+	public final boolean covers(TextEdit other) {
+		if (fLength == 0) {	// an insert edit can't cover anything
+			return false;
+		} else {
+			int otherOffset= other.fOffset;
+			return fOffset <= otherOffset && otherOffset + other.fLength <= fOffset + fLength;
+		}		
 	}
 
 	//---- parent and children management -----------------------------
@@ -95,12 +229,12 @@ public abstract class TextEdit {
 	 * Adds the given edit <code>child</code> to this edit.
 	 * 
 	 * @param child the child edit to add
-	 * @exception <code>EditException<code> is thrown if the child
+	 * @exception <code>MalformedTreeException<code> is thrown if the child
 	 *  edit can't be added to this edit. This is the case if the child 
 	 *  overlaps with one of its siblings or if the child edit's region
 	 *  isn't fully covered by this edit.
 	 */
-	public final void add(TextEdit child) throws IllegalEditException {
+	public final void add(TextEdit child) throws MalformedTreeException {
 		internalAdd(child);
 	}
 	
@@ -108,12 +242,12 @@ public abstract class TextEdit {
 	 * Adds all edits in <code>edits</code> to this edit.
 	 * 
 	 * @param edits the text edits to add
-	 * @exception <code>EditException</code> is thrown if one of 
+	 * @exception <code>MalformedTreeException</code> is thrown if one of 
 	 *  the given edits can't be added to this edit.
 	 * 
 	 * @see #add(TextEdit)
 	 */
-	public final void addAll(TextEdit[] edits) throws IllegalEditException {
+	public final void addAll(TextEdit[] edits) throws MalformedTreeException {
 		for (int i= 0; i < edits.length; i++) {
 			internalAdd(edits[i]);
 		}
@@ -167,7 +301,7 @@ public abstract class TextEdit {
 	 * @return <code>true</code> if this edit has children; otherwise
 	 *  <code>false</code> is returned
 	 */
-	public boolean hasChildren() {
+	public final boolean hasChildren() {
 		return fChildren != null && ! fChildren.isEmpty();
 	}
 
@@ -177,24 +311,56 @@ public abstract class TextEdit {
 	 * 
 	 * @return the edit's children
 	 */
-	public TextEdit[] getChildren() {
+	public final TextEdit[] getChildren() {
 		if (fChildren == null)
 			return EMPTY_ARRAY;
 		return (TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]);
 	}
 	
 	/**
-	 * Returns an iterator over the child edits.
+	 * Returns an iterator over the children.
 	 * 
-	 * @return an iterator over the child edits
+	 * @return an iterator over the children
 	 */
-	public Iterator iterator() {
+	public final Iterator iterator() {
 		if (fChildren == null)
 			return EMPTY_ITERATOR;
 		return fChildren.iterator();
 	}
 	
-	//---- equals and hashcode ---------------------------------------------
+	/**
+	 * Returns the text range spawned by the given array of text edits.
+	 * The method requires that the given array contains at least of
+	 * edit. If all edits passed are deleted the method returns <code>
+	 * null</code>.
+	 * 
+	 * @param edits an array of edits
+	 * @return the text range spawned by the given array of edits or
+	 *  <code>null</code> if all edits are marked as deleted
+	 */
+	public static TextRange getTextRange(TextEdit[] edits) {
+		Assert.isTrue(edits != null && edits.length > 0);
+			
+		int offset= Integer.MAX_VALUE;
+		int end= Integer.MIN_VALUE;
+		int deleted= 0;
+		for (int i= 0; i < edits.length; i++) {
+			TextEdit edit= edits[i];
+			if (edit.isDeleted()) {
+				deleted++;
+			} else {
+				offset= Math.min(offset, edit.getOffset());
+				end= Math.max(end, edit.getExclusiveEnd());
+			}
+		}
+		if (edits.length == deleted) {
+			return null;
+		} else {
+			return TextRange.createFromStartAndExclusiveEnd(offset, end);
+		}
+	}
+		
+	//---- Object methods ------------------------------------------------------
 
 	/**
 	 * The <code>Edit</code> implementation of this <code>Object</code>
@@ -206,9 +372,9 @@ public abstract class TextEdit {
 	 * 
 	 * @see Object#equals(java.lang.Object)
 	 */
-//	public final boolean equals(Object obj) {
-//		return this == obj; // equivalent to Object.equals
-//	}
+	public final boolean equals(Object obj) {
+		return this == obj; // equivalent to Object.equals
+	}
 	
 	/**
 	 * The <code>Edit</code> implementation of this <code>Object</code>
@@ -219,36 +385,111 @@ public abstract class TextEdit {
 	 * 
 	 * @see Object#hashCode()
 	 */
-//	public final int hashCode() {
-//		return super.hashCode();
-//	}
-	
-	//---- Region management -----------------------------------------------
-
-	/**
-	 * Returns the range that this edit is manipulating. The returned
-	 * <code>IRegion</code> contains the edit's offset and length at
-	 * the point in time when this call is made. Any subsequent changes
-	 * to the edit's offset and length aren't reflected in the returned
-	 * region object.
-	 * 
-	 * @return the manipulated range
-	 */
-	public abstract TextRange getTextRange();
-	
-	public int getOffset() {
-		return getTextRange().getOffset();
+	public final int hashCode() {
+		return super.hashCode();
 	}
 	
-	public int getLength() {
-		return getTextRange().getLength();
+	/* non Java-doc
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuffer buffer= new StringBuffer("{"); //$NON-NLS-1$
+		String name= getClass().getName();
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			 buffer.append(name.substring(index + 1));
+		} else {
+			buffer.append(name);
+		}
+		buffer.append(" } "); //$NON-NLS-1$
+		if (isDeleted()) {
+			buffer.append("[deleted]"); //$NON-NLS-1$
+		} else {
+			buffer.append("["); //$NON-NLS-1$
+			buffer.append(fOffset);
+			buffer.append(","); //$NON-NLS-1$
+			buffer.append(fLength);
+			buffer.append("]"); //$NON-NLS-1$
+		}
+		return buffer.toString();
+	}
+	
+	//---- Copying -------------------------------------------------------------
+	
+	/**
+	 * Creates a deep copy of the edit tree rooted at this
+	 * edit.
+	 * 
+	 * @return a deep copy of the edit tree
+	 * @see #doCopy() 
+	 */
+	public final TextEdit copy() {
+		TextEditCopier copier= new TextEditCopier(this);
+		return copier.perform();
+	}
+		
+	/**
+	 * Creates and returns a copy of this edit. The copy method should be 
+	 * implemented in a way so that the copy can executed without causing
+	 * any harm to the original edit. Implementors of this method are
+	 * responsible for creating deep or shallow copies of referenced
+	 * object to fullfil this requirement.
+	 * <p>
+	 * Implementers of this method should use the copy constructor <code>
+	 * Edit#Edit(Edit source) to initialize the edit part of the copy.
+	 * Implementors aren't responsible to actually copy the children or
+	 * to set the right parent.
+	 * <p>
+	 * This method <b>should not be called</b> from outside the framework.
+	 * Please use <code>copy</code> to create a copy of a edit tree.
+	 * 
+	 * @return a copy of this edit.
+	 * @see #copy()
+	 * @see #postProcessCopy(TextEditCopier)
+	 * @see TextEditCopier
+	 */
+	protected abstract TextEdit doCopy();
+	
+	/**
+	 * This method is called on every edit of the copied tree to do some
+	 * postprocessing like connected an edit to a different edit in the tree.
+	 * <p>
+	 * This default implementation does nothing
+	 * 
+	 * @param copier the copier that manages a map between original and
+	 *  copied edit.
+	 * @see TextEditCopier
+	 */
+	protected void postProcessCopy(TextEditCopier copier) {
 	}
 	
 	//---- Execution -------------------------------------------------------
 	
 	/**
-	 * Connects this edit to the given <code>IDocument</code>. The passed 
-	 * document is the same instance passed to the perform method.
+	 * Applies the edit tree rooted by this edit to the given document.
+	 * 
+	 * @param document the document to be manipulated
+	 * @exception MalformedTreeException is thrown if the tree isn't
+	 *  in a valid state. This exception is thrown before any edit
+	 *  is executed. So the document is still in its original state.
+	 * @exception BadLocationException is thrown if one of the edits
+	 *  in the tree can't be executed. The state of the document is
+	 *  undefined if this exception is thrown. This exception only
+	 *  occurs if the document is manipulated by some other clients 
+	 *  during execution of the edit tree. Otherwise it is guaranteed
+	 *  that the tree can be executed without causing any <code>
+	 *  BadLocationException</code>. 
+	 * @see #checkIntegrity()
+	 * @see #perform(IDocument)
+	 */
+	public final void apply(IDocument document) throws MalformedTreeException, PerformEditException {
+		EditProcessor processor= new EditProcessor(document);
+		processor.add(this);
+		processor.performEdits();
+	}
+	
+	/**
+	 * Checks the edit's integrity. 
 	 * <p>
 	 * Note that this method <b>should only be called</b> by the edit
 	 * framework and not by normal clients.
@@ -256,145 +497,35 @@ public abstract class TextEdit {
 	 * This default implementation does nothing. Subclasses may override
 	 * if needed.
 	 *  
-	 * @param document the document this edit will be applied to
-	 * @exception EditException if the edit isn't in a valid state
-	 *  and can therefore not be connected to the given document.
+	 * @exception MalformedTreeException if the edit isn't in a valid state
+	 *  and can therefore not be executed
 	 */
-	protected void connect(IDocument document) throws IllegalEditException {
+	protected void checkIntegrity() throws MalformedTreeException {
 		// does nothing
 	}
 	
 	/**
-	 * Performs the text edit. Note that this method <b>should only be called</b> 
-	 * by a <code>EditProcessor</code>. 
+	 * Performs the text edit.
+	 * 
+	 * <p>
+	 * Note that this method <b>should only be called</b> by the edit framework. 
 	 * 
 	 * @param document the actual document to manipulate
-	 */
-	public abstract void perform(IDocument document) throws PerformEditException;
-	
-	/**
-	 * This method gets called after all <code>TextEdit</code>s added to a text buffer
-	 * editor are executed. Implementors usually do some clean-up or release allocated 
-	 * resources that are now longer needed.
-	 * <p>
-	 * Subclasses may extend this implementation.
-	 * </p>
-	 */
-	public void performed() {
-		// does nothing
-	}
-	
-	//---- Copying -------------------------------------------------------------
-		
-	/**
-	 * Creates and returns a copy of this edit. The copy method should be 
-	 * implemented in a way so that the copy can be added to a different 
-	 * <code>EditProcessor</code> without causing any harm to original 
-	 * edit.
-	 * <p>
-	 * Implementers of this method should use the copy constructor <code>
-	 * Edit#Edit(Edit source) to initialize the edit part of the copy.
-	 * <p>
-	 * This method <b>should not be called</b> from outside the framework.
-	 * Please use <code>EditCopier</code> to create a copy of a edit tree.
 	 * 
-	 * @return a copy of this edit.
-	 * @see EditCopier
+	 * @see #apply(IDocument)
 	 */
-	protected abstract TextEdit copy0();
-	
-	public abstract boolean matches(Object other);
-	
-	public boolean matchesSubtree(Object obj) {
-		if (!matches(obj))
-			return false;
-		TextEdit other= (TextEdit)obj;
-		int size= fChildren != null ? fChildren.size() : 0;
-		int otherSize= other.fChildren != null ? other.fChildren.size() : 0;
-		if (size != otherSize)
-			return false;
-		if (size == 0 && otherSize == 0)
-			return true;
-		for (Iterator iter1= fChildren.iterator(), iter2= other.fChildren.iterator(); iter1.hasNext();) {
-			TextEdit thisChild= (TextEdit)iter1.next();
-			TextEdit otherChild= (TextEdit)iter2.next();
-			if (other != otherChild.getParent())
-				return false;
-			if (! thisChild.matchesSubtree(otherChild))
-				return false;
-		}
-		return true;
-	}
-	
-	protected TextEdit createPlaceholder() {
-		TextRange range= getTextRange();
-		return new MultiTextEdit(range.getOffset(), range.getLength());
-	}
-	
-	protected void postProcessCopy(TextEditCopier copier) {
-	}
-	
-	/* non Java-doc
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		String name= getClass().getName();
-		int index= name.lastIndexOf('.');
-		if (index != -1) {
-			name= name.substring(index + 1);
-		}
-		return "{" + name + "} " + getTextRange().toString(); //$NON-NLS-1$ //$NON-NLS-2$
-	}
-	
-	/**
-	 * Returns the text range spawned by the given array of text edits.
-	 * The method requires that the given array contains at least of
-	 * edit.
-	 * 
-	 * @param edits an array of edits
-	 * @return the text range spawned by the given array of edits.
-	 */
-	public static TextRange getTextRange(TextEdit[] edits) {
-		Assert.isTrue(edits != null && edits.length > 0);
-			
-		int offset= Integer.MAX_VALUE;
-		int end= Integer.MIN_VALUE;
-		int deleted= 0;
-		for (int i= 0; i < edits.length; i++) {
-			TextRange range= edits[i].getTextRange();
-			if (range.isDeleted()) {
-				deleted++;
-			} else {
-				offset= Math.min(offset, range.getOffset());
-				end= Math.max(end, range.getExclusiveEnd());
-			}
-		}
-		if (edits.length == deleted) {
-			return TextRange.DELETED;
-		} else {
-			return TextRange.createFromStartAndExclusiveEnd(offset, end);
-		}
-	}	
-	
-	protected TextRange getChildrenTextRange() {
-		Assert.isTrue(fChildren != null);
-		return getTextRange((TextEdit[])fChildren.toArray(new TextEdit[fChildren.size()]));
-	}
-
-	public void adjustOffset(int delta) {
-		getTextRange().addToOffset(delta);
-	}
-	
-	public void adjustLength(int delta) {
-		getTextRange().addToLength(delta);
-	}
-	
-	public void markAsDeleted() {
-		getTextRange().markAsDeleted();
-	}
+	protected abstract void perform(IDocument document) throws PerformEditException;
 	
 	
 	//---- Helpers -------------------------------------------------------------------------------------------
+	
+	protected void performReplace(IDocument document, String text) throws PerformEditException {
+		try {
+			document.replace(fOffset, fLength, text);
+		} catch (BadLocationException e) {
+			throw new PerformEditException(this, e.getMessage(), e);
+		}
+	}
 	
 	/* package */ void performReplace(IDocument document, TextRange range, String text) throws PerformEditException {
 		try {
@@ -404,38 +535,25 @@ public abstract class TextEdit {
 		}
 	}
 	
-	/* package */ void executePostProcessCopy(TextEditCopier copier) {
-		postProcessCopy(copier);
-		if (fChildren != null) {
-			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				((TextEdit)iter.next()).executePostProcessCopy(copier);
-			}
-		}
-	}
-	
-	/* package */ int getNumberOfChildren() {
-		List children= internalGetChildren();
-		if (children == null)
-			return 0;
-		int result= children.size();
-		for (Iterator iter= children.iterator(); iter.hasNext();) {
-			TextEdit edit= (TextEdit)iter.next();
-			result+= edit.getNumberOfChildren();
-		}
-		return result;
-	}	
-
-	
 	//---- Setter and Getters -------------------------------------------------------------------------------
 	
 	/* package */ void aboutToBeAdded(TextEdit parent) {
-	}
-	
+	}	
 	
 	/* package */ void setParent(TextEdit parent) {
 		if (parent != null)
 			Assert.isTrue(fParent == null);
 		fParent= parent;
+	}
+	
+	/* package */ void setOffset(int offset) {
+		Assert.isTrue(offset >= 0);
+		fOffset= offset;
+	}
+	
+	/* package */ void setLength(int length) {
+		Assert.isTrue(length >= 0);
+		fLength= length;
 	}
 			
 	/* package */ List internalGetChildren() {
@@ -446,111 +564,166 @@ public abstract class TextEdit {
 		fChildren= children;
 	}
 	
-	/* package */ void internalAdd(TextEdit edit) throws IllegalEditException {
-		edit.aboutToBeAdded(this);
-		TextRange eRange= edit.getTextRange();
-		if (eRange.isDeleted())
-			throw new IllegalEditException(this, edit, "Can't add deleted edit");
-		TextRange range= getTextRange();
-		if (!Regions.covers(range, eRange))
-			throw new IllegalEditException(this, edit, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
+	/* package */ void internalAdd(TextEdit child) throws MalformedTreeException {
+		child.aboutToBeAdded(this);
+		if (child.isDeleted())
+			throw new MalformedTreeException(this, child, "Can't add deleted edit");
+		if (!covers(child))
+			throw new MalformedTreeException(this, child, TextManipulationMessages.getString("TextEdit.range_outside")); //$NON-NLS-1$
 		if (fChildren == null) {
 			fChildren= new ArrayList(2);
 		}
-		int index= getInsertionIndex(edit);
-		fChildren.add(index, edit);
-		edit.setParent(this);
+		int index= getInsertionIndex(child);
+		fChildren.add(index, child);
+		child.setParent(this);
 	}
 	
-	/* package */ int getInsertionIndex(TextEdit edit) {
-		TextRange range= edit.getTextRange();
+	private int getInsertionIndex(TextEdit edit) {
 		int size= fChildren.size();
 		if (size == 0)
 			return 0;
-		int rStart= range.getOffset();
-		int rEnd= range.getInclusiveEnd();
+		int offset= edit.getOffset();
+		int end= edit.getInclusiveEnd();
 		for (int i= 0; i < size; i++) {
-			TextRange other= ((TextEdit)fChildren.get(i)).getTextRange();
-			int oStart= other.getOffset();
-			int oEnd= other.getInclusiveEnd();
+			TextEdit other= (TextEdit)fChildren.get(i);
+			int childOffset= other.getOffset();
+			int childEnd= other.getInclusiveEnd();
 			// make sure that a duplicate insertion point at the same offet is inserted last 
-			if (rStart > oEnd || (rStart == oStart && range.getLength() == 0 && other.getLength() == 0))
+			if (offset > childEnd || (offset == childOffset && edit.getLength() == 0 && other.getLength() == 0))
 				continue;
-			if (rEnd < oStart)
+			if (end < childOffset)
 				return i;
-			throw new IllegalEditException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
+			throw new MalformedTreeException(this, edit, TextManipulationMessages.getString("TextEdit.overlapping")); //$NON-NLS-1$
 		}
 		return size;
 	}
+		
+	//---- Offset & Length updating -------------------------------------------------
 	
-	//---- Validation methods -------------------------------------------------------------------------------
-	
-	/* package */ void checkRange(DocumentEvent event) {
-		TextRange range= getTextRange();
-		int eventOffset= event.getOffset();
-		int eventLength= event.getLength();
-		int eventEnd = eventOffset + eventLength - 1;
-		// "Edit changes text that lies outside its defined range"
-		Assert.isTrue(range.getOffset() <= eventOffset && eventEnd <= range.getInclusiveEnd());
+	/**
+	 * Adjusts the edits offset according to the given
+	 * delta. This method doesn't update any children.
+	 * 
+	 * @param delta the delta of the text replace operation
+	 */
+	/* package */ void adjustOffset(int delta) {
+		if (isDeleted())
+			return;
+		fOffset+= delta;
+		Assert.isTrue(fOffset >= 0);
 	}
 	
-	protected static IStatus createErrorStatus(String message) {
-		return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, message, null);
+	/**
+	 * Adjusts the edits length according to the given
+	 * delta. This method doesn't update any children.
+	 * 
+	 * @param delta the delta of the text replace operation
+	 */
+	/* package */ void adjustLength(int delta) {
+		if (isDeleted())
+			return;
+		fLength+= delta;
+		Assert.isTrue(fLength >= 0);
 	}
 	
-	protected static IStatus createOKStatus() {
-		return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, TextManipulationMessages.getString("TextEdit.is_valid"), null); //$NON-NLS-1$
+	/** 
+	 * Marks the edit as deleted. This method doesn't update
+	 * any children.
+	 */	
+	/* package */ void markAsDeleted() {
+		fOffset= DELETED_VALUE;
+		fLength= DELETED_VALUE;
 	}
 	
-	//---- Edit processing --------------------------------------------------------------------------------
-	
-	protected void updateTextRange(int delta, List executedEdits) {
-		for (Iterator iter= executedEdits.iterator(); iter.hasNext();) {
-			((TextEdit)iter.next()).predecessorExecuted(delta);
-		}
-		adjustLength(delta);
-		updateParents(delta);
+	/**
+	 * Updates all previously executed edits. This method doesn't 
+	 * have any tree iteration info object hence it has to walk 
+	 * the tree by itself. This is slower than the corresponding
+	 * update method that takes a <code>TreeIterationInfo</code>
+	 * object.
+	 * 
+	 * @param event the document event describing the change
+	 */
+	/* package */ final void update(DocumentEvent event) {
+		checkEvent(event);
+		int delta= getDelta(event);
+		if (fParent != null)
+			fParent.update(delta, this);
+		adjustLength(this, delta);
 	}
 	
-	/* package */ void execute(IDocument document, Updater updater, IProgressMonitor pm) throws PerformEditException {
-		List children= internalGetChildren();
-		pm.beginTask("", children != null ? children.size() + 1 : 1); //$NON-NLS-1$
-		if (children != null) {
-			for (int i= children.size() - 1; i >= 0; i--) {
-				((TextEdit)children.get(i)).execute(document, updater, new SubProgressMonitor(pm, 1));
+	private void update(int delta, TextEdit child) {
+		if (fParent != null)
+			fParent.update(delta, this);
+		// We have children. Otherwise we wouldn't end here.
+		boolean doIt= false;
+		for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
+			TextEdit edit= (TextEdit)iter.next();
+			if (doIt) {
+				adjustOffset(edit, delta);	
+			} else {
+				if (edit == child)
+					doIt= true;
 			}
 		}
-		try {
-			updater.setActiveNode(this);
-			perform(document);
-		} finally {
-			updater.setActiveNode(null);
-		}
-		pm.worked(1);
 	}
 	
-	/* package */ void childExecuted(int delta) {
-		adjustLength(delta);
+	/**
+	 * Updates all previously executed edits.
+	 * 
+	 * @param event the document event describing the change
+	 * @param info a tree iteration info object describing the
+	 * position of the current edit in the tree. 
+	 */
+	/* package */ void update(DocumentEvent event, TreeIterationInfo info) {
+		checkEvent(event);
+		final int delta= getDelta(event);
+		Visitor visitor= new Visitor() {
+			public void visit(TextEdit edit) {
+				adjustOffset(edit, delta);
+			}
+		};
+		info.accept(visitor);
+		adjustLength(this, delta);
 	}
 	
-	/* package */ void predecessorExecuted(int delta) {
-		adjustOffset(delta);
-	}
 	
+	private void checkEvent(DocumentEvent event) {
+		int eventOffset= event.getOffset();
+		int eventLength= event.getLength();
+		Assert.isTrue(fOffset <= eventOffset && eventOffset + eventLength <= fOffset + fLength);
+	}
+
 	/* package */ void markChildrenAsDeleted() {
 		if (fChildren != null) {
 			for (Iterator iter= fChildren.iterator(); iter.hasNext();) {
-				TextEdit edit= (TextEdit) iter.next();
-				edit.markAsDeleted();
-				edit.markChildrenAsDeleted();
+				TextEdit edit= (TextEdit)iter.next();
+				if (!edit.isDeleted()) {
+					edit.markAsDeleted();
+					edit.markChildrenAsDeleted();
+				}
 			}
 		}	
 	}
 	
-	protected void updateParents(int delta) {
-		TextEdit edit= getParent();
+	private static int getDelta(DocumentEvent event) {
+		String text= event.getText();
+		return (text == null ? -event.getLength() : text.length()) - event.getLength();
+	}
+	
+	private static void adjustOffset(TextEdit edit, int delta) {
+		edit.adjustOffset(delta);
+		List children= edit.internalGetChildren();
+		if (children != null) {
+			for (Iterator iter= children.iterator(); iter.hasNext();) {
+				adjustOffset((TextEdit)iter.next(), delta);
+			}
+		}
+	}
+	
+	private static void adjustLength(TextEdit edit, int delta) {
 		while (edit != null) {
-			edit.childExecuted(delta);
+			edit.adjustLength(delta);
 			edit= edit.getParent();
 		}
 	}
