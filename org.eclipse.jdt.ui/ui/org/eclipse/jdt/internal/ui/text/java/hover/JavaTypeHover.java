@@ -117,7 +117,7 @@ public class JavaTypeHover implements IJavaEditorTextHover {
 					if (curr instanceof IMember) {
 						IMember member= (IMember) curr;
 						HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
-						Reader reader= JavaDocAccess.getJavaDoc(member);
+						Reader reader= JavaDocAccess.getJavaDoc(member, true);
 						if (reader != null) {
 							HTMLPrinter.addParagraph(buffer, new JavaDoc2HTMLTextReader(reader));
 						}

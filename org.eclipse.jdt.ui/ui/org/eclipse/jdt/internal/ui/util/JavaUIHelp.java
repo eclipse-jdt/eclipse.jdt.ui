@@ -151,7 +151,7 @@ public class JavaUIHelp {
 			if (fElement instanceof IMember) {
 
 				try {
-					SingleCharReader reader= JavaDocAccess.getJavaDoc((IMember) fElement);
+					SingleCharReader reader= JavaDocAccess.getJavaDoc((IMember) fElement, true);
 					if (reader != null) {
 
 						HTML2TextReader htmlReader= new HTML2TextReader(reader, null);

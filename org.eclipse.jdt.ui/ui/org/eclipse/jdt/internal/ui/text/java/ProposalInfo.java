@@ -10,7 +10,7 @@ import java.io.Reader;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -69,7 +69,7 @@ public class ProposalInfo {
 		try {
 			IType type= JavaModelUtil.findType(fJavaProject, new String(fPackageName), new String(fTypeName));
 			if (type != null) {
-				IMember member= null;
+				Reader reader= null;
 				if (fMemberName != null) {
 					String name= new String(fMemberName);
 					if (fParameterTypes != null) {
@@ -77,24 +77,23 @@ public class ProposalInfo {
 						for (int i= 0; i < fParameterTypes.length; i++) {
 							paramTypes[i]= getParameterSignature(i);
 						}
-						member= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
+						IMethod method= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
+						if (method != null) {
+							reader= JavaDocAccess.getJavaDoc(method, true);
+						}
 					} else {
 						IField field= type.getField(name);
 						if (field.exists()) {
-							member= field;
+							reader= JavaDocAccess.getJavaDoc(field, true);
 						}
 					}
 				} else {
-					member= type;
+					reader= JavaDocAccess.getJavaDoc(type, true);
 				}
 				
-				if (member != null) {
-					Reader reader= JavaDocAccess.getJavaDoc(member);
-					if (reader != null) {
-						return  new JavaDoc2HTMLTextReader(reader).getString();
-					}
-				}
-					
+				if (reader != null) {
+					return new JavaDoc2HTMLTextReader(reader).getString();
+				}				
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -103,4 +102,6 @@ public class ProposalInfo {
 		}
 		return null;
 	}
+
+
 }

@@ -10,9 +10,15 @@ import java.io.IOException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class JavaDocAccess {
@@ -31,8 +37,10 @@ public class JavaDocAccess {
 	 * Gets a reader for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
+	 * @param allowInherited For methods with no comment, the comment of the overriden class
+	 * is returned if <code>allowInherited</code> is <code>true</code>.
 	 */
-	public static SingleCharReader getJavaDoc(IMember member) throws JavaModelException {
+	public static SingleCharReader getJavaDoc(IMember member, boolean allowInherited) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
 		if (buf == null) {
 			// no source attachment found
@@ -49,17 +57,47 @@ public class JavaDocAccess {
 				return new JavaDocCommentReader(buf, start, end);
 			}
 		}
+		
+		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
+			IMethod method= (IMethod) member;
+			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
+		}
 		return null;
 	}
+
+	/**
+	 * Gets a reader for an IMember's JavaDoc comment
+	 * Returns null if the member does not contain a JavaDoc comment or
+	 * if no source is available.
+	 */
+	public static SingleCharReader getJavaDoc(IMember member) throws JavaModelException {
+		return getJavaDoc(member, false);
+	}
+
+	private static SingleCharReader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
+		IType[] superTypes= hierarchy.getAllSupertypes(type);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod method= JavaModelUtil.findMethod(name, paramTypes, isConstructor, superTypes[i]);
+			if (method != null) {
+				SingleCharReader reader= getJavaDoc(method, false);
+				if (reader != null) {
+					return reader;
+				}
+			}
+		}
+		return null;
+	}		
+
 	
 	/**
 	 * Gets a text content for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or
 	 * if no source is available.
 	 */
-	public static String getJavaDocTextString(IMember member) throws JavaModelException {
+	public static String getJavaDocTextString(IMember member, boolean allowInherited) throws JavaModelException {
 		try {
-			SingleCharReader rd= getJavaDoc(member);
+			SingleCharReader rd= getJavaDoc(member, allowInherited);
 			if (rd != null)
 				return rd.getString();
 				

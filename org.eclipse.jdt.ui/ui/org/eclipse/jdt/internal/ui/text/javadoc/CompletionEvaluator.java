@@ -268,7 +268,7 @@ public class CompletionEvaluator {
 	private String getProposalInfo(IJavaElement elem) {
 		if (elem instanceof IMember) {
 			try {
-				Reader reader= JavaDocAccess.getJavaDoc((IMember)elem);
+				Reader reader= JavaDocAccess.getJavaDoc((IMember)elem, true);
 				if (reader != null) {
 					return (new JavaDoc2HTMLTextReader(reader)).getString();
 				}				
