@@ -55,7 +55,7 @@ public abstract class OpenEditorAction extends Action {
 			return;
 		}
 		if (textEditor == null) {
-			fTestRunner.postInfo(JUnitMessages.getString("OpenEditorAction.message.cannotopen")); //$NON-NLS-1$
+			fTestRunner.setInfoMessage(JUnitMessages.getString("OpenEditorAction.message.cannotopen")); //$NON-NLS-1$
 			return;
 		}
 		reveal(textEditor);
