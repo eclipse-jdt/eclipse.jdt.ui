@@ -860,12 +860,6 @@
             id="org.eclipse.jdt.ui.preferences.JavaTemplatePreferencePage">
       </page>
       <page
-            name="%quickDiffPageName"
-            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.QuickDiffPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.QuickDiffPreferencePage">
-      </page>
-      <page
             name="%occurrencesPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.OccurrencesPreferencePage"
