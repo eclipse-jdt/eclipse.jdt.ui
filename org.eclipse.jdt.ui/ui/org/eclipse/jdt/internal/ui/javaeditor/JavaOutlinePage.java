@@ -476,6 +476,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					return false;
 				}
 				
+				/*
+				 * @see org.eclipse.jface.viewers.AbstractTreeViewer#isExpandable(java.lang.Object)
+				 */
+				public boolean isExpandable(Object element) {
+					if (hasFilters()) {
+						return getFilteredChildren(element).length > 0;
+					}
+					return super.isExpandable(element);
+				}
+				
 				protected ISourceRange getSourceRange(IJavaElement element) throws JavaModelException {
 					if (element instanceof ISourceReference)
 						return ((ISourceReference) element).getSourceRange();
