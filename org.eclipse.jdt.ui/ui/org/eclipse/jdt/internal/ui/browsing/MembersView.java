@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
+import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
 import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -67,10 +68,7 @@ public class MembersView extends JavaBrowsingPart {
 	 * Adds filters the viewer of this part.
 	 */
 	protected void addFilters() {
-		getViewer().addFilter(new EmptyInnerPackageFilter());
-		getViewer().addFilter(new EmptyPackageFilter());
-		getViewer().addFilter(new NonJavaElementFilter());
-		getViewer().addFilter(new LibraryFilter());
+		getViewer().addFilter(new MethodsViewerFilter());
 	}
 
 	/**
