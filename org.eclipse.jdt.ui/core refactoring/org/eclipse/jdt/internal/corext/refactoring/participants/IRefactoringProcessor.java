@@ -27,6 +27,8 @@ public interface IRefactoringProcessor {
 	
 	public String getProcessorName();
 	
+	public int getStyle();
+	
 	public IProject[] getScope() throws CoreException;
 	
 	public Object getElement();

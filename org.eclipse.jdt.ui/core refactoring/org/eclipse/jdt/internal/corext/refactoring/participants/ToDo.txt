@@ -50,10 +50,15 @@
 - Refactoring Wizard Page: can't provide dialog settings. Too high up in the hierarchy.
 
 - Wizard should be able to disbale preview. To do so processors and participants must
-  signal if they want to show a preview.
+  signal if they want to show a preview. Problem is that we don't know all participants
+  upfront. So the processor has to decide this.
   
 - RenameRefactoringAction has a hard cast to rename method processor to check for the
   virtual method case.
+  
+- Currently all refactorings require a save of modiifed resources before the get executed.
+  This is necessary due to undo and search infrastructure. We have to find a better solution
+  for this since we can't assume that saving resources is the right thing to do.
 
 =================================== Rename ================================================
 - rename a Java project must be a participant since a project can have more than 

@@ -156,7 +156,7 @@ public class RefactoringWizard extends Wizard {
 		return 80;
 	}
 	
-	protected boolean hasUserInputPages(){
+	protected boolean hasUserInputPages() {
 		return fHasUserInputPages;		
 	}
 	

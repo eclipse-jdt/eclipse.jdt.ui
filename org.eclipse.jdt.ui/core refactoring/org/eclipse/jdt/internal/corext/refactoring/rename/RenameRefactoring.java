@@ -60,6 +60,10 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	public IRenameProcessor getProcessor() {
 		return fProcessor;
 	}
+	
+	public int getStyle() {
+		return fProcessor.getStyle();
+	}
 		
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getNewName()

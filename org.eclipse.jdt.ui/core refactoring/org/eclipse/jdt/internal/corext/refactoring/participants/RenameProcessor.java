@@ -16,8 +16,21 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public abstract class RenameProcessor implements IRenameProcessor {
 
+	private int fStyle;
 	protected String fNewElementName;
 	
+	public int getStyle() {
+		return fStyle;
+	}
+	
+	protected RenameProcessor() {
+		fStyle= RefactoringStyles.NEEDS_PREVIEW;	
+	}
+	
+	protected RenameProcessor(int style) {
+		fStyle= style;	
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#setNewElementName(java.lang.String)
 	 */

@@ -15,7 +15,10 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -34,6 +37,14 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		fInputPageDescription= inputPageDescription;
 		fInputPageImageDescriptor= inputPageImageDescriptor;
 		fPageContextHelpId= pageContextHelpId;
+	}
+	
+	protected boolean hasPreviewPage() {
+		Refactoring refactoring= getRefactoring();
+		if (refactoring instanceof RenameRefactoring) {
+			return (((RenameRefactoring)refactoring).getStyle() & RefactoringStyles.NEEDS_PREVIEW) != 0;
+		}
+		return super.hasPreviewPage();
 	}
 	
 	/* non java-doc

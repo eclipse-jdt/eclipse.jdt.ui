@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.Processors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RefactoringStyles;
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 
 public class RenameResourceProcessor extends RenameProcessor {
@@ -36,6 +37,10 @@ public class RenameResourceProcessor extends RenameProcessor {
 
 	//---- IRenameProcessor methods ---------------------------------------
 		
+	public RenameResourceProcessor() {
+		super(RefactoringStyles.NONE);
+	}
+
 	public void initialize(Object element) throws CoreException {
 		if (!(element instanceof IAdaptable))
 			return;
