@@ -7,11 +7,13 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogSettings;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.wizard.IWizard;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -30,6 +32,12 @@ public class RefactoringWizardDialog extends WizardDialog {
 	private static final String HEIGHT= "height";
 
 	private IDialogSettings fSettings;
+	
+	/*
+	 * note: this field must not be initialized - setter is called in the call to super
+	 * and java initializes fields 'after' the call to super is made. so initializing would override setting.
+	 */
+	private boolean fMakeNextButtonDefault; 
 
 	/**
 	 * Creates a new refactoring wizard dialag with the given wizard.
@@ -66,4 +74,24 @@ public class RefactoringWizardDialog extends WizardDialog {
 		fSettings.put(HEIGHT, size.y);
 		super.finishPressed();
 	}	
+
+	/*
+	 * @see IWizardContainer#updateButtons()
+	 */
+	public void updateButtons() {
+		super.updateButtons();
+		if (! fMakeNextButtonDefault)
+			return;
+		if (getShell() == null)
+			return;
+		Button next= getButton(IDialogConstants.NEXT_ID);
+		if (next.isEnabled())
+			getShell().setDefaultButton(next);
+	}
+
+	/* usually called in the IWizard#setContainer(IWizardContainer) method
+	 */
+	public void setMakeNextButtonDefault(boolean makeNextButtonDefault) {
+		fMakeNextButtonDefault= makeNextButtonDefault;
+	}
 }
