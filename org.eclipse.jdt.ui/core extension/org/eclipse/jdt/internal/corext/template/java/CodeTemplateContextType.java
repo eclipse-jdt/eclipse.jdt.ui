@@ -43,7 +43,7 @@ public class CodeTemplateContextType extends ContextType {
 	public static final String PACKAGENAME= "package_name"; //$NON-NLS-1$
 	public static final String PROJECTNAME= "project_name"; //$NON-NLS-1$
 
-	public static final String PACKAGE_STATEMENT= "package_statement"; //$NON-NLS-1$
+	public static final String PACKAGE_DECLARATION= "package_declaration"; //$NON-NLS-1$
 	public static final String TYPE_DECLARATION= "type_declaration"; //$NON-NLS-1$
 	public static final String TYPE_COMMENT= "typecomment"; //$NON-NLS-1$
 	
@@ -109,7 +109,7 @@ public class CodeTemplateContextType extends ContextType {
 			addVariable(new CodeTemplateVariable(BODY_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.bodystatement")));			 //$NON-NLS-1$
 		} else if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
 			addVariable(new CodeTemplateVariable(ENCLOSING_TYPE,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.enclosingtype"))); //$NON-NLS-1$
-			addVariable(new CodeTemplateVariable(PACKAGE_STATEMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packstatement"))); //$NON-NLS-1$
+			addVariable(new CodeTemplateVariable(PACKAGE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.packdeclaration"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(TYPE_DECLARATION,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typedeclaration"))); //$NON-NLS-1$
 			addVariable(new CodeTemplateVariable(TYPE_COMMENT,  JavaTemplateMessages.getString("CodeTemplateContextType.variable.description.typecomment"))); //$NON-NLS-1$
 			addCompilationUnitVariables();
@@ -149,7 +149,7 @@ public class CodeTemplateContextType extends ContextType {
 		ArrayList required=  new ArrayList(5);
 		String contextName= getName();
 		if (NEWTYPE_CONTEXTTYPE.equals(contextName)) {
-			required.add(PACKAGE_STATEMENT);
+			required.add(PACKAGE_DECLARATION);
 			required.add(TYPE_DECLARATION);
 		}
 		for (int i= 0; i < variables.length; i++) {

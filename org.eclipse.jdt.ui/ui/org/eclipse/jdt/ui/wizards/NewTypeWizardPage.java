@@ -1439,27 +1439,27 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
-		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
+		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
 
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
 		if (template == null) {
-			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
 		}
 		String typeComment= StubUtility.getTypeComment(cu, getTypeName());
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
+		context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, packDecl);
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, getTypeName());
 		String content= context.evaluate(template).getString();
 		if (content.length() == 0) {
-			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
 		}
 		CompilationUnit unit= AST.parseCompilationUnit(content.toCharArray());
 		if (!pack.isDefaultPackage() && unit.getPackage() == null || unit.types().isEmpty()) {
-			return getDefaultCUContent(packStatement, typeContent, lineDelimiter);
+			return getDefaultCUContent(packDecl, typeContent, lineDelimiter);
 		}
 		return content;
 	}

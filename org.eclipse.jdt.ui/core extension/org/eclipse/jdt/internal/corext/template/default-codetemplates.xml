@@ -21,7 +21,7 @@
  * To change this generated comment go to 
  * Window&gt;Preferences&gt;Java&gt;Code Generation&gt;Code Template
  */
-${package_statement}
+${package_declaration}
 
 /**
  * @author ${user}
