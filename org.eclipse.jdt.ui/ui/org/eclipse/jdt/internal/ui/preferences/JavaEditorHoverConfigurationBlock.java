@@ -434,6 +434,7 @@ class JavaEditorHoverConfigurationBlock {
 	void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
+		updateStatus(null);
 	}
 
 	private void restoreFromPreferences() {
