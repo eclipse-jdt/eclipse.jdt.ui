@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
@@ -68,7 +69,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -335,10 +335,15 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			MessageDialog.openInformation(getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsAction.typeContainsNoFields.message")); //$NON-NLS-1$
 			return;
 		}
+		IMethod[] superConstructors= getSuperConstructors(type);
+		if (superConstructors.length == 0) {
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.nothing_found")); //$NON-NLS-1$
+			return;
+		}		
 
 		JavaElementLabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT);
 		GenerateConstructorUsingFieldsContentProvider contentProvider= new GenerateConstructorUsingFieldsContentProvider(constructorFieldsList);
-		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), labelProvider, contentProvider, fEditor, type);
+		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), labelProvider, contentProvider, fEditor, type, superConstructors);
 		dialog.setCommentString(ActionMessages.getString("SourceActionDialog.createConstructorComment")); //$NON-NLS-1$
 		dialog.setTitle(ActionMessages.getString("GenerateConstructorUsingFieldsAction.dialog.title")); //$NON-NLS-1$
 		dialog.setInitialSelections(preselected);
@@ -347,11 +352,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		dialog.setInput(new Object());
 		dialog.setMessage(ActionMessages.getString("GenerateConstructorUsingFieldsAction.dialog.label")); //$NON-NLS-1$
 		dialog.setValidator(createValidator(constructorFieldsList.size(), dialog, type));
-
-		if (dialog.getSuperConstructors().length == 0) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.getString("GenerateConstructorUsingFieldsAction.error.nothing_found")); //$NON-NLS-1$
-			return;
-		}
 
 		IField[] selected= null;
 		int dialogResult= dialog.open();
@@ -373,11 +373,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			settings.createComments= dialog.getGenerateComment();
 
 			IJavaElement elementPosition= dialog.getElementPosition();
-			int superIndex= dialog.getSuperIndex();
-			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, dialog.getSuperConstructors()[superIndex]);
+			IMethod selectedConstructor= dialog.getSuperConstructorChoice();
+			
+			AddCustomConstructorOperation op= new AddCustomConstructorOperation(type, settings, selected, false, elementPosition, selectedConstructor);
 			op.setVisbility(dialog.getVisibilityModifier());
 			// Ignore the omit super() checkbox if the default constructor is not chosen
-			if (dialog.getSuperConstructors()[dialog.getSuperIndex()].getParameterNames().length == 0)
+			if (selectedConstructor.getParameterNames().length == 0)
 				op.setOmitSuper(dialog.isOmitSuper());
 			IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
 			if (target != null) {
@@ -409,6 +410,35 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 		}
 	}
+	
+	public static IMethod[] getSuperConstructors(IType type) throws CoreException {
+		List constructorMethods= new ArrayList();
+		
+		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);				
+		IType supertype= hierarchy.getSuperclass(type);
+
+		if (supertype != null) {
+			IMethod[] superMethods= supertype.getMethods();
+			boolean constuctorFound= false;
+			for (int i= 0; i < superMethods.length; i++) {
+					IMethod curr= superMethods[i];
+					if (curr.isConstructor())  {
+						constuctorFound= true;
+						if (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment())) {
+							constructorMethods.add(curr);
+						}
+					}
+			}
+			
+			if (!constuctorFound)  {
+				IType objectType= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+				IMethod curr= objectType.getMethod("Object", new String[0]);  //$NON-NLS-1$
+				constructorMethods.add(curr);
+			}
+		}
+		return (IMethod[]) constructorMethods.toArray(new IMethod[constructorMethods.size()]);
+	}
+	
 
 	private static ISelectionStatusValidator createValidator(int entries, GenerateConstructorUsingFieldsSelectionDialog dialog, IType type) {
 		GenerateConstructorUsingFieldsValidator validator= new GenerateConstructorUsingFieldsValidator(entries, dialog, type);
@@ -498,7 +528,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 	private static class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionDialog {
 		private GenerateConstructorUsingFieldsContentProvider fContentProvider;
-		private IType fType;
 		private int fSuperIndex;
 		private int fWidth= 60;
 		private int fHeight= 18;
@@ -518,16 +547,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
 		private Button fOmitSuperButton;
 
-		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethod[] superConstructors) {
 			super(parent, labelProvider, contentProvider, editor, type);
 			fContentProvider= contentProvider;
-			fType= type;
 			fTreeViewerAdapter= new GenerateConstructorUsingFieldsTreeViewerAdapter();
-			try {
-				fSuperConstructors= StubUtility.getOverridableConstructors(fType);
-			} catch (CoreException e) {
-				ExceptionHandler.handle(e, getShell(), fDialogTitle, ActionMessages.getString("GenerateConstructorUsingFieldsSelectionDialog.error.create.failed")); //$NON-NLS-1$
-			}
+
+			fSuperConstructors= superConstructors;
 			
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 			fGenConstructorSettings= dialogSettings.getSection(SETTINGS_SECTION);
@@ -728,16 +753,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return composite;
 		}
 
-		public int getSuperIndex() {
-			return fSuperIndex;
-		}
-
 		public CheckboxTreeViewer getTreeViewer() {
 			return fTreeViewer;
 		}
 
 		public IMethod getSuperConstructorChoice() {
-			return getSuperConstructors()[getSuperIndex()];
+			return fSuperConstructors[fSuperIndex];
 		}
 
 		private class GenerateConstructorUsingFieldsTreeViewerAdapter implements ISelectionChangedListener, IDoubleClickListener {
@@ -755,9 +776,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			public void doubleClick(DoubleClickEvent event) {
 				// Do nothing
 			}
-		}
-		public IMethod[] getSuperConstructors() {
-			return fSuperConstructors;
 		}
 
 		public void setOmitSuper(boolean omitSuper) {

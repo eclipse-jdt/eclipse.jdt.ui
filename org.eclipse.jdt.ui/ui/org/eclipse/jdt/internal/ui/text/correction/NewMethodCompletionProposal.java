@@ -294,7 +294,7 @@ public class NewMethodCompletionProposal extends LinkedCorrectionProposal {
 		String favourite= null;
 		if (argNode instanceof SimpleName) {
 			SimpleName name= (SimpleName) argNode;
-			favourite= StubUtility.guessArgumentName(project, name.getIdentifier(), excludedNames);
+			favourite= StubUtility.suggestArgumentName(project, name.getIdentifier(), excludedNames);
 		}
 		
 		int dim= 0;

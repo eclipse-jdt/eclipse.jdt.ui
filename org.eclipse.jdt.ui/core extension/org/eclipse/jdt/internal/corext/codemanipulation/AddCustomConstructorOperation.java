@@ -83,7 +83,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit(), fSettings.importOrder, fSettings.importThreshold, true);
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));
 			IJavaProject project= fType.getJavaProject();
-			String[] superConstructorParamNames= StubUtility.guessArgumentNames(project, fSuperConstructor.getParameterNames());
+			String[] superConstructorParamNames= StubUtility.suggestArgumentNames(project, fSuperConstructor.getParameterNames());
 
 			String defaultConstructor= genOverrideConstructorStub(fSuperConstructor, superConstructorParamNames, fType, hierarchy, fSettings, imports, fOmitSuper);					
 			int closingBraceIndex= defaultConstructor.lastIndexOf('}'); //$NON-NLS-1$
@@ -97,6 +97,10 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 
 			String[] params= new String[fSelected.length];					
 			String[] excludedNames= new String[superConstructorParamNames.length + params.length];
+			for (int i= 0; i < excludedNames.length; i++) {
+				excludedNames[i]= ""; //$NON-NLS-1$
+			}
+			
 			
 			ArrayList superNames= new ArrayList(superConstructorParamNames.length);
 			for (int i= 0; i < superConstructorParamNames.length; i++) {
@@ -105,31 +109,22 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 			}
 			
 			StringBuffer buf= new StringBuffer(defaultConstructor.substring(0, closingParenIndex));
-						
-			if ((superConstructorParamNames.length > 0) && ((fSelected.length) > 0))
-				buf.append(", "); //$NON-NLS-1$
-				
+										
 			monitor.worked(1);
 				
-			for (int i= 0; i < fSelected.length; i++) {
-				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
-				buf.append(" "); //$NON-NLS-1$
-				String accessName= NamingConventions.removePrefixAndSuffixForFieldName(project, fSelected[i].getElementName(), fSelected[i].getFlags());
-				if (accessName.length() > 0) {
-					char first= accessName.charAt(0);
-					if (Character.isLowerCase(first)) {
-						accessName= Character.toUpperCase(first) + accessName.substring(1);
-					}
+			for (int i= 0, k= superConstructorParamNames.length; i < fSelected.length; i++, k++) {
+				if (k > 0) {
+					buf.append(", "); //$NON-NLS-1$	
 				}
-
+				buf.append(Signature.toString(fSelected[i].getTypeSignature()));				
+				buf.append(' ');
+				String accessName= NamingConventions.removePrefixAndSuffixForFieldName(project, fSelected[i].getElementName(), fSelected[i].getFlags());
 				// Allow no collisions with super constructor parameter names
-				String paramName= StubUtility.guessArgumentName(project, accessName, excludedNames);
+				String paramName= StubUtility.suggestArgumentName(project, accessName, excludedNames);
 
-				excludedNames[superConstructorParamNames.length + i]= new String(paramName);
+				excludedNames[k]= new String(paramName);
 				params[i]= paramName;
-				buf.append(paramName);
-				if (i < fSelected.length - 1)
-					buf.append(", "); //$NON-NLS-1$				
+				buf.append(paramName);		
 			}
 			monitor.worked(1);
 			

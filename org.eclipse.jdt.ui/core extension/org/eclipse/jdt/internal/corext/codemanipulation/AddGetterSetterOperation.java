@@ -234,14 +234,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 		String returnSig= field.getTypeSignature();
 		
 		String accessorName = NamingConventions.removePrefixAndSuffixForFieldName(project, fieldName, field.getFlags());
-		if (accessorName.length() > 0) {
-			char first= accessorName.charAt(0);
-			if (Character.isLowerCase(first)) {
-				accessorName= Character.toUpperCase(first) + accessorName.substring(1);
-			}
-		}		
-
-		String argname= StubUtility.guessArgumentName(project, accessorName, EMPTY);
+		String argname= StubUtility.suggestArgumentName(project, accessorName, EMPTY);
 	
 		boolean isFinal= Flags.isFinal(field.getFlags());
 

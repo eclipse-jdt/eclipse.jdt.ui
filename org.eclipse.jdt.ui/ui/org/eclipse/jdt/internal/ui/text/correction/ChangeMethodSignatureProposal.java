@@ -202,7 +202,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				String favourite= null;
 				String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
 				if (suggestedName != null) {
-					favourite= StubUtility.guessArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
+					favourite= StubUtility.suggestArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
 					addLinkedModeProposal(nameKey, favourite);
 				}
 				Type type= var.getType();

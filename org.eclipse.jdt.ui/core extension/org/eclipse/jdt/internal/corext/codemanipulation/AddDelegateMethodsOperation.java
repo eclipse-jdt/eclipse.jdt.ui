@@ -146,7 +146,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 
 	private String createStub(IField field, IMethod curr, boolean addComment, IMethod overridden, IImportsStructure imports) throws CoreException {
 		String methodName= curr.getElementName();
-		String[] paramNames= StubUtility.guessArgumentNames(curr.getJavaProject(), curr.getParameterNames());
+		String[] paramNames= StubUtility.suggestArgumentNames(curr.getJavaProject(), curr.getParameterNames());
 		String returnTypSig= curr.getReturnType();
 
 		StringBuffer buf= new StringBuffer();

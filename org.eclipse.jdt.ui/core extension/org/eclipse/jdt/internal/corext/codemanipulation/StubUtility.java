@@ -76,7 +76,7 @@ public class StubUtility {
 	 */
 	public static String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
 		String methName= method.getElementName();
-		String[] paramNames= guessArgumentNames(method.getJavaProject(), method.getParameterNames());
+		String[] paramNames= suggestArgumentNames(method.getJavaProject(), method.getParameterNames());
 		String returnType= method.isConstructor() ? null : method.getReturnType();
 		String lineDelimiter= String.valueOf('\n'); // reformatting required
 		
@@ -152,7 +152,7 @@ public class StubUtility {
 		IType parentType= method.getDeclaringType();	
 		String methodName= method.getElementName();
 		String[] paramTypes= method.getParameterTypes();
-		String[] paramNames= guessArgumentNames(parentType.getJavaProject(), method.getParameterNames());
+		String[] paramNames= suggestArgumentNames(parentType.getJavaProject(), method.getParameterNames());
 
 		String[] excTypes= method.getExceptionTypes();
 
@@ -461,7 +461,7 @@ public class StubUtility {
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
 		String retType= method.isConstructor() ? null : method.getReturnType();
-		String[] paramNames= guessArgumentNames(method.getJavaProject(), method.getParameterNames());
+		String[] paramNames= suggestArgumentNames(method.getJavaProject(), method.getParameterNames());
 		
 		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
 			method.getElementName(), paramNames, method.getExceptionTypes(), retType, overridden, lineDelimiter);
@@ -1001,19 +1001,28 @@ public class StubUtility {
 	/*
 	 * Workaraound for bug 38111
 	 */
-	public static String guessArgumentName(IJavaProject project, String baseName, String[] excluded) {
+	public static String[] getArgumentNameSuggestions(IJavaProject project, String baseName, String[] excluded) {
 		String name= Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
-		String[] argname= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+		return NamingConventions.suggestArgumentNames(project, "", name, 0, excluded); //$NON-NLS-1$
+	}
+	
+	public static String[] getFieldNameSuggestions(IJavaProject project, String baseName, int modifiers, String[] excluded) {
+		String name= Character.toUpperCase(baseName.charAt(0)) + baseName.substring(1);
+		return NamingConventions.suggestFieldNames(project, "", name, 0, modifiers, excluded); //$NON-NLS-1$
+	}	
+	 
+	public static String suggestArgumentName(IJavaProject project, String baseName, String[] excluded) {
+		String[] argnames= getArgumentNameSuggestions(project, baseName, excluded);
 		String longest= null;
-		for (int i= 0; i < argname.length; i++) {
-			if (longest == null || argname[i].length() > longest.length()) {
-				longest= argname[i];
+		for (int i= 0; i < argnames.length; i++) {
+			if (longest == null || argnames[i].length() > longest.length()) {
+				longest= argnames[i];
 			}
 		}
 		return longest;
 	}
 	
-	public static String[] guessArgumentNames(IJavaProject project, String[] paramNames) {
+	public static String[] suggestArgumentNames(IJavaProject project, String[] paramNames) {
 		String prefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
 		String suffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
 		if (prefixes.length() + suffixes.length() == 0) {
@@ -1023,7 +1032,7 @@ public class StubUtility {
 		String[] newNames= new String[paramNames.length];
 		// Ensure that the codegeneration preferences are respected
 		for (int i= 0; i < paramNames.length; i++) {
-			newNames[i]= StubUtility.guessArgumentName(project, paramNames[i], null);			
+			newNames[i]= suggestArgumentName(project, paramNames[i], null);			
 		}
 		return newNames;
 	}	
