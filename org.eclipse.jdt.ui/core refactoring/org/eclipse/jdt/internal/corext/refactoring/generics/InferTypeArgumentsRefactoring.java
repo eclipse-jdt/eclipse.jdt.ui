@@ -305,7 +305,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 //							}
 						} else {
 							ITypeBinding[] binding= TypeEnvironment.createTypeBindings(new TType[] {chosenType}, rewrite.getCu().getJavaProject());
-
+							if (binding[0] == null)
+								return;
 							typeArgument= rewrite.getImportRewrite().addImport(binding[0], rewrite.getAST());
 						}
 						typeArguments[i]= typeArgument;

@@ -62,8 +62,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor {
 
 	/**
@@ -231,7 +229,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	
 //TODO:
 	private void addConstraintsForOverriding(IMethodBinding methodBinding, TypeConstraintVariable2 returnTypeCv, TypeConstraintVariable2[] parameterTypeCvs) {
-		boolean hasParameterElementCvs= false;;
+		boolean hasParameterElementCvs= false;
 		for (int i= 0; i < parameterTypeCvs.length; i++)
 			if (parameterTypeCvs[i] != null)
 				hasParameterElementCvs= true;
@@ -305,14 +303,17 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		Expression receiver= node.getExpression();
 		//TODO: Expression can be null when visiting a non-special method in a subclass of a container type.
 		
-		Map methodTypeVariables= createMethodTypeParameters(methodBinding);
+		Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeParameters(methodBinding);
 		doVisitMethodInvocationReturnType(node, methodBinding, receiver, methodTypeVariables);
 		List arguments= node.arguments();
 		doVisitMethodInvocationArguments(methodBinding, arguments, receiver, methodTypeVariables);
 		
 	}
 
-	private Map createMethodTypeParameters(IMethodBinding methodBinding) {
+	/**
+	 * @return a map from type variable key to type variable constraint variable
+	 */
+	private Map/*<String, IndependentTypeVariable2>*/ createMethodTypeParameters(IMethodBinding methodBinding) {
 		ITypeBinding[] methodTypeParameters= methodBinding.getMethodDeclaration().getTypeParameters();
 		Map methodTypeVariables;
 		if (methodTypeParameters.length == 0) {
@@ -329,10 +330,10 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		return methodTypeVariables;
 	}
 	
-	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map methodTypeVariables) {
-		ITypeBinding genericMethodReturnType= methodBinding.getErasure().getReturnType();
-		if (genericMethodReturnType.isTypeVariable()) {
-			TypeConstraintVariable2 methodTypeVariableCv= (TypeConstraintVariable2) methodTypeVariables.get(genericMethodReturnType.getKey());
+	private void doVisitMethodInvocationReturnType(MethodInvocation node, IMethodBinding methodBinding, Expression receiver, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables) {
+		ITypeBinding declaredReturnType= methodBinding.getMethodDeclaration().getReturnType();
+		if (declaredReturnType.isTypeVariable()) {
+			TypeConstraintVariable2 methodTypeVariableCv= (TypeConstraintVariable2) methodTypeVariables.get(declaredReturnType.getKey());
 			if (methodTypeVariableCv != null) {
 				// e.g. in Collections: <T ..> T min(Collection<? extends T> coll):
 				setConstraintVariable(node, methodTypeVariableCv); //TODO: should be [retVal] <= Elem[arg] in this case?
@@ -355,22 +356,25 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					return;
 				// e.g. in List<E>: E get(int index):
 				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
-				ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, genericMethodReturnType);
+				ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, declaredReturnType);
 				// [retVal] =^= Elem[receiver]:
 				setConstraintVariable(node, elementCv);
 			}
 		
-		} else if (genericMethodReturnType.isParameterizedType()) {
+		} else if (declaredReturnType.isParameterizedType()) {
 			if (receiver == null) //TODO: deal with methods inside generic types
 				return;
 			//e.g. List<E>: Iterator<E> iterator()
 			TypeConstraintVariable2 receiverCv= (TypeConstraintVariable2) getConstraintVariable(receiver);
-			ITypeBinding genericReturnType= genericMethodReturnType.getTypeDeclaration();
+			ITypeBinding genericReturnType= declaredReturnType.getTypeDeclaration();
 			TypeConstraintVariable2 returnTypeCv= fTCModel.makeParameterizedTypeVariable(genericReturnType);
 			setConstraintVariable(node, returnTypeCv);
 			// Elem[retVal] =^= Elem[receiver]
-			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, returnTypeCv, genericMethodReturnType);
-			
+			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnType);
+		
+//		} else if (genericMethodReturnType.isArray()) {
+//			//TODO: See bug 84422. Need an ArrayTypeVariable2 and handling similar to the isParameterizedType() case.
+//			
 		} else {
 			ReturnTypeVariable2 returnTypeCv= fTCModel.makeReturnTypeVariable(methodBinding);
 			setConstraintVariable(node, returnTypeCv);
@@ -635,15 +639,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		node.setProperty(CV_PROP, constraintVariable);
 	}
 	
-	private void unexpectedNode(ASTNode node) {
-		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(node);
-		JavaPlugin.logErrorMessage((cu == null ? "" : cu.getElementName() + " - ")  //$NON-NLS-1$//$NON-NLS-2$
-				+ node.getNodeType() + ": " + node.toString()); //$NON-NLS-1$
-	}
-	
-	//TODO: tried to move to fTCModel with creating delegate => MalformedTreeException => must file a bug. 
 	private void createElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
-		//TODO(done?): do magic if type variables are from different types
 		Map leftElements= fTCModel.getElementVariables(cv);
 		Map rightElements= fTCModel.getElementVariables(initializerCv);
 		for (Iterator leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {
@@ -658,7 +654,6 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	}
 	
 	private void createElementSubtypeConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
-		//TODO(done?): do magic if type variables are from different types
 		Map leftElements= fTCModel.getElementVariables(cv);
 		Map rightElements= fTCModel.getElementVariables(initializerCv);
 		for (Iterator leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {

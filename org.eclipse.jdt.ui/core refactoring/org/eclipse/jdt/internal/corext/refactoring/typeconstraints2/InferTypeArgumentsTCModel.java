@@ -428,7 +428,7 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private void createTypeVariablesEqualityConstraints(TypeConstraintVariable2 expressionCv, ITypeBinding reference) {
-		createTypeVariablesEqualityConstraints(expressionCv, expressionCv, reference);
+		createTypeVariablesEqualityConstraints(expressionCv, EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP, expressionCv, reference);
 	}
 
 	/**
@@ -444,10 +444,11 @@ public class InferTypeArgumentsTCModel {
 	 * the type variable E in referenceCV.
 	 * 
 	 * @param expressionCv the type constraint variable of an expression
+	 * @param methodTypeVariables 
 	 * @param referenceCv the type constraint variable of a type reference
 	 * @param reference the declared type reference
 	 */
-	public void createTypeVariablesEqualityConstraints(TypeConstraintVariable2 expressionCv, TypeConstraintVariable2 referenceCv, ITypeBinding reference) {
+	public void createTypeVariablesEqualityConstraints(TypeConstraintVariable2 expressionCv, Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables, TypeConstraintVariable2 referenceCv, ITypeBinding reference) {
 		if (reference.isParameterizedType() || reference.isRawType()) {
 			ITypeBinding[] referenceTypeArguments= reference.getTypeArguments();
 			ITypeBinding[] referenceTypeParameters= reference.getTypeDeclaration().getTypeParameters();
@@ -456,7 +457,9 @@ public class InferTypeArgumentsTCModel {
 				ITypeBinding referenceTypeParameter= referenceTypeParameters[i];
 				TypeConstraintVariable2 referenceTypeArgumentCv;
 				if (referenceTypeArgument.isTypeVariable()) {
-					referenceTypeArgumentCv= getElementVariable(expressionCv, referenceTypeArgument);
+					referenceTypeArgumentCv= (TypeConstraintVariable2) methodTypeVariables.get(referenceTypeArgument.getKey());
+					if (referenceTypeArgumentCv == null)
+						referenceTypeArgumentCv= getElementVariable(expressionCv, referenceTypeArgument);
 				} else if (referenceTypeArgument.isWildcardType()) {
 					referenceTypeArgumentCv= null; //TODO: make new WildcardTypeVariable, which is compatible to nothing 
 				} else {

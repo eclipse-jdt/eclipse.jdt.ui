@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRe
 public class InferTypeArgumentsTests extends RefactoringTest {
 
 	private static final boolean BUG_83500= true;
+	private static final boolean BUG_84422= true;
 	
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
@@ -190,5 +191,53 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	public void testCuRippleMethods3() throws Exception {
 		printTestDisabledMessage("not implemented yet");
 //		performCuOK();
+	}
+	
+	public void testCuArrays01() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
+	}
+	
+	public void testCuArrays02() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
+	}
+	
+	public void testCuArrays03() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
+	}
+	
+	public void testCuArrays04() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
+	}
+	
+	public void testCuArrays05() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
+	}
+	
+	public void testCuArrays06() throws Exception {
+		if (BUG_84422) {
+			printTestDisabledMessage("BUG_84422");
+			return;
+		}
+		performCuOK();
 	}
 }
