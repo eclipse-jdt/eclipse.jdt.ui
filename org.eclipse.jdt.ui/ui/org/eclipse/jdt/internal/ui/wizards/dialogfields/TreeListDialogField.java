@@ -524,9 +524,6 @@ public class TreeListDialogField extends DialogField {
 	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException {
 		int idx= fElements.indexOf(oldElement);
 		if (idx != -1) {
-			if (oldElement.equals(newElement) || fElements.contains(newElement)) {
-				return;
-			}
 			fElements.set(idx, newElement);
 			if (fTree != null) {
 				List selected= getSelectedElements();

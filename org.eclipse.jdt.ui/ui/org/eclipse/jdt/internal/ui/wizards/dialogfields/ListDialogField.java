@@ -466,13 +466,6 @@ public class ListDialogField extends DialogField {
 		updateButtonState();
 	}
 	
-	private Button getButton(int index) {
-		if (fButtonControls != null && index >= 0 && index < fButtonControls.length) {
-			return fButtonControls[index];
-		}
-		return null;
-	}
-
 	/*
 	 * Updates the enable state of the all buttons
 	 */ 
@@ -576,9 +569,6 @@ public class ListDialogField extends DialogField {
 	public void replaceElement(Object oldElement, Object newElement) throws IllegalArgumentException { 
 		int idx= fElements.indexOf(oldElement);
 		if (idx != -1) {
-			if (oldElement.equals(newElement) || fElements.contains(newElement)) {
-				return;
-			}
 			fElements.set(idx, newElement);
 			if (fTable != null) {
 				List selected= getSelectedElements();
