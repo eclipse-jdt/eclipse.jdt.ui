@@ -56,15 +56,9 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private class ContextMenuContributor implements IContextMenuContributor {
 
 		public void fill(IMenuManager menu, IInputSelectionProvider inputProvider) {
-			IWorkbenchWindow wbWindow= null;
-			if (fView != null && fView.getSite() != null)
-				wbWindow= fView.getSite().getWorkbenchWindow();
-			if (wbWindow == null)
-				wbWindow= JavaPlugin.getActiveWorkbenchWindow();
-
 			JavaPlugin.createStandardGroups(menu);
 			new JavaSearchGroup().fill(menu, new GroupContext(inputProvider));
-			OpenTypeHierarchyUtil.addToMenu(wbWindow, menu, convertSelection(inputProvider.getSelection()));
+			OpenTypeHierarchyUtil.addToMenu(getWorbenchWindow(), menu, convertSelection(inputProvider.getSelection()));
 		}
 		
 		private Object convertSelection(ISelection selection) {
@@ -167,5 +161,14 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		fMessageFormatArgs[0]= new Integer(count);
 		return MessageFormat.format(MATCHES, fMessageFormatArgs);
 
+	}
+
+	private IWorkbenchWindow getWorbenchWindow() {
+		IWorkbenchWindow wbWindow= null;
+		if (fView != null && fView.getSite() != null)
+			wbWindow= fView.getSite().getWorkbenchWindow();
+		if (wbWindow == null)
+			wbWindow= JavaPlugin.getActiveWorkbenchWindow();
+		return wbWindow;
 	}
 }

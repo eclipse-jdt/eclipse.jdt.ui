@@ -704,37 +704,7 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 		//Potentially long operation - show a busy cursor
 		BusyIndicator.showWhile(fTreeViewer.getControl().getDisplay(), new Runnable() {
 			public void run() {
-				Iterator keyIterator= items.keySet().iterator();
-
-				//Update the store before the hierarchy to prevent updating parents before all of the children are done
-				while (keyIterator.hasNext()) {
-					Object key= keyIterator.next();
-					//Replace the items in the checked state store with those from the supplied items
-					List selections= (List) items.get(key);
-					if (selections.size() == 0)
-						//If it is empty remove it from the list
-						fCheckedStateStore.remove(key);
-					else {
-						fCheckedStateStore.put(key, selections);
-						// proceed up the tree element hierarchy
-						Object parent= fTreeContentProvider.getParent(key);
-						if (parent != null) {
-							addToHierarchyToCheckedStore(parent);
-						}
-					}
-				}
-
-				//Now update hierarchies
-				keyIterator= items.keySet().iterator();
-
-				while (keyIterator.hasNext()) {
-					Object key= keyIterator.next();
-					updateHierarchy(key);
-					if (fCurrentTreeSelection != null && fCurrentTreeSelection.equals(key)) {
-						fListViewer.setAllChecked(false);
-						fListViewer.setCheckedElements(((List) items.get(key)).toArray());
-					}
-				}
+				handleUpdateSelection(items);
 			}
 		});
 	}
@@ -773,4 +743,38 @@ public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelection
 	public Set getWhiteCheckedTreeItems() {
 		return new HashSet(fWhiteCheckedTreeItems);
 	}
+
+	private void handleUpdateSelection(Map items) {
+		Iterator keyIterator= items.keySet().iterator();
+
+		//Update the store before the hierarchy to prevent updating parents before all of the children are done
+		while (keyIterator.hasNext()) {
+			Object key= keyIterator.next();
+			//Replace the items in the checked state store with those from the supplied items
+			List selections= (List) items.get(key);
+			if (selections.size() == 0)
+				//If it is empty remove it from the list
+				fCheckedStateStore.remove(key);
+			else {
+				fCheckedStateStore.put(key, selections);
+				// proceed up the tree element hierarchy
+				Object parent= fTreeContentProvider.getParent(key);
+				if (parent != null) {
+					addToHierarchyToCheckedStore(parent);
+				}
+			}
+		}
+
+		//Now update hierarchies
+		keyIterator= items.keySet().iterator();
+
+		while (keyIterator.hasNext()) {
+			Object key= keyIterator.next();
+			updateHierarchy(key);
+			if (fCurrentTreeSelection != null && fCurrentTreeSelection.equals(key)) {
+				fListViewer.setAllChecked(false);
+				fListViewer.setCheckedElements(((List) items.get(key)).toArray());
+			}
+		}
+	}			
 }

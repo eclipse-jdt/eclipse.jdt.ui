@@ -253,15 +253,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fSearchFor[PACKAGE].addSelectionListener(javaElementInitializer);
 		
 		fSearchFor[TYPE].addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				boolean state= ((Button)event.widget).getSelection();
-				boolean implState= fLimitTo[IMPLEMENTORS].getSelection();
-				if (!state && implState) {
-					fLimitTo[IMPLEMENTORS].setSelection(false);
-					fLimitTo[REFERENCES].setSelection(true);
-				}
-				fLimitTo[IMPLEMENTORS].setEnabled(state);
-				fJavaElement= null;
+			public void widgetSelected(SelectionEvent e) {
+				handleSearchForSelected(((Button)e.widget).getSelection());
 			}
 		});
 		setControl(result);
@@ -280,27 +273,12 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		fPattern= new Combo(result, SWT.SINGLE | SWT.BORDER);
 		fPattern.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				if (fPattern.getSelectionIndex() < 0)
-					return;
-				int index= fgPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
-				SearchPatternData values= (SearchPatternData) fgPreviousSearchPatterns.get(index);
-				for (int i= 0; i < fSearchFor.length; i++)
-					fSearchFor[i].setSelection(false);
-				for (int i= 0; i < fLimitTo.length; i++)
-					fLimitTo[i].setSelection(false);
-				fSearchFor[values.searchFor].setSelection(true);
-				fLimitTo[values.limitTo].setSelection(true);
-				fLimitTo[IMPLEMENTORS].setEnabled((values.searchFor == TYPE));
-				fLimitTo[DECLARATIONS].setEnabled((values.searchFor != PACKAGE));
-				fLimitTo[ALL_OCCURRENCES].setEnabled((values.searchFor != PACKAGE));				
-				fInitialPattern= values.pattern;
-				fPattern.setText(fInitialPattern);
-				fJavaElement= values.javaElement;
+				handlePatternSelected();
 			}
 		});
 		fPattern.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				getContainer().setPerformActionEnabled(fPattern.getText().length() > 0);
+				getContainer().setPerformActionEnabled(getPattern().length() > 0);
 			}
 		});
 
@@ -313,6 +291,35 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		Label label= new Label(result, SWT.LEFT);
 		label.setText(SearchMessages.getString("SearchPage.expression.pattern")); //$NON-NLS-1$
 		return result;
+	}
+
+	private void handlePatternSelected() {
+		if (fPattern.getSelectionIndex() < 0)
+			return;
+		int index= fgPreviousSearchPatterns.size() - 1 - fPattern.getSelectionIndex();
+		SearchPatternData values= (SearchPatternData) fgPreviousSearchPatterns.get(index);
+		for (int i= 0; i < fSearchFor.length; i++)
+			fSearchFor[i].setSelection(false);
+		for (int i= 0; i < fLimitTo.length; i++)
+			fLimitTo[i].setSelection(false);
+		fSearchFor[values.searchFor].setSelection(true);
+		fLimitTo[values.limitTo].setSelection(true);
+		fLimitTo[IMPLEMENTORS].setEnabled((values.searchFor == TYPE));
+		fLimitTo[DECLARATIONS].setEnabled((values.searchFor != PACKAGE));
+		fLimitTo[ALL_OCCURRENCES].setEnabled((values.searchFor != PACKAGE));				
+		fInitialPattern= values.pattern;
+		fPattern.setText(fInitialPattern);
+		fJavaElement= values.javaElement;
+	}
+
+	private void handleSearchForSelected(boolean state) {
+		boolean implState= fLimitTo[IMPLEMENTORS].getSelection();
+		if (!state && implState) {
+			fLimitTo[IMPLEMENTORS].setSelection(false);
+			fLimitTo[REFERENCES].setSelection(true);
+		}
+		fLimitTo[IMPLEMENTORS].setEnabled(state);
+		fJavaElement= null;
 	}
 		
 	private Control createSearchFor(Composite parent) {
