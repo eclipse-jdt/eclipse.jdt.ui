@@ -170,6 +170,9 @@ public class ReorderParametersTests extends RefactoringTest {
 		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
 	}
 	
-	
+	public void test19() throws Exception{
+		printTestDisabledMessage("bug 7274 - reorder parameters: incorrect when parameters have more than 1 modifiers");
+//		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+	}
 }
 
