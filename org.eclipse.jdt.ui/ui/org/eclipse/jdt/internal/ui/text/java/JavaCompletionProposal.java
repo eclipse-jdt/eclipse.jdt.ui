@@ -259,20 +259,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		String word= fReplacementString;
 		 */ 
-		String word= fDisplayString;
-		
-		int wordLength= word == null ? 0 : word.length();
-		if (offset >  fReplacementOffset + wordLength)
-			return false;
-		
-		try {
-			int length= offset - fReplacementOffset;
-			String start= document.get(fReplacementOffset, length);
-			return word.substring(0, length).equalsIgnoreCase(start);
-		} catch (BadLocationException x) {
-		}		
-		
-		return false;
+		return startsWith(document, offset, fDisplayString);
 	}
 	
 	/**
@@ -290,4 +277,22 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
 	}
+
+	/**
+	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
+	 * <code>false</code> otherwise.	 */	
+	protected boolean startsWith(IDocument document, int offset, String word) {
+		int wordLength= word == null ? 0 : word.length();
+		if (offset >  fReplacementOffset + wordLength)
+			return false;
+		
+		try {
+			int length= offset - fReplacementOffset;
+			String start= document.get(fReplacementOffset, length);
+			return word.substring(0, length).equalsIgnoreCase(start);
+		} catch (BadLocationException x) {
+		}
+		
+		return false;	
+	}	
 }

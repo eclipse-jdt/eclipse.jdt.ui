@@ -10,15 +10,14 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -29,12 +28,51 @@ import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
   */
 public class JavaTypeCompletionProposal extends JavaCompletionProposal {
+		
+	private final ICompilationUnit fCompilationUnit; 
+	/** The type name. */
+	private final String fTypeName;
+	/** The package name. */
+	private final String fPackageName;
+	/** The unqualified type name. */
+	private final String fUnqualifiedTypeName;
+	/** The fully qualified type name. */
+	private final String fFullyQualifiedTypeName;
 	
-	private ICompilationUnit fCompilationUnit; 
+	private static String unqualify(String typeName) {
+		if (typeName == null)
+			return null;
+			
+		final int index= typeName.lastIndexOf('.');
+		return index == -1 ? typeName : typeName.substring(index + 1);			
+	}
+	
+	private static String qualify(String typeName, String packageName) {
+		if (packageName == null)	
+			return typeName;
+			
+		if (typeName == null)
+			return null;
+			
+		if (packageName.length() == 0)
+			return typeName;
+
+		return packageName + "." + typeName;
+	}
 
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {
+		this(replacementString, cu, replacementOffset, replacementLength, image, displayString, relevance, null, null);
+	}
+
+	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance,
+		String typeName, String packageName)
+	{
 		super(replacementString, replacementOffset, replacementLength, image, displayString, relevance);
 		fCompilationUnit= cu;
+		fTypeName= typeName;
+		fPackageName= packageName;
+		fUnqualifiedTypeName= unqualify(typeName);
+		fFullyQualifiedTypeName= qualify(typeName, packageName);
 	}
 	
 	/**
@@ -84,4 +122,19 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 			JavaPlugin.log(e);
 		}
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#isValidFor(IDocument, int)
+	 */
+	public boolean isValidFor(IDocument document, int offset) {
+
+		boolean isValid= super.isValidFor(document, offset);
+		if (isValid)
+			return true;
+
+		return
+			(fUnqualifiedTypeName != null && startsWith(document, offset, fUnqualifiedTypeName)) ||
+			(fFullyQualifiedTypeName != null && startsWith(document, offset, fFullyQualifiedTypeName));
+	}
+
 }

@@ -387,7 +387,7 @@ public class ResultCollector extends CompletionRequestorAdapter {
 			}
 		}
 	
-		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, cu, start, getLength(start, end), getImage(descriptor), name, relevance);
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, cu, start, getLength(start, end), getImage(descriptor), name, relevance, typeName, containerName);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters(TYPE_TRIGGERS);
 		return proposal;
