@@ -793,7 +793,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
 		factoryMethodCall.setName(ast.newSimpleName(methodName));
 
-		for(int i=0; i < fArgTypes.length; i++) {
+		for(int i=0; i < actualCtorArgs.size(); i++) {
 			Expression	actualCtorArg= (Expression) actualCtorArgs.get(i);
 			ASTNode		movedArg= unitRewriter.createMoveTarget(actualCtorArg);
 

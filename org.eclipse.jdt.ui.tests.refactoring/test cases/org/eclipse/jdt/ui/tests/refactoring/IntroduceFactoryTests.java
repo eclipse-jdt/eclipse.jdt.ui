@@ -724,4 +724,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void test84807() throws Exception {
 		singleUnitBugHelper("CtorOfParamType", true);
 	}
+
+	public void test85465() throws Exception {
+		singleUnitBugHelper("Varargs1", true);
+	}
 }
