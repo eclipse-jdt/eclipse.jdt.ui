@@ -482,7 +482,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private void removeMarkerOverlays(boolean isCanceled) {
 				if (isCanceled) {
 					fCurrentlyOverlaid.addAll(fPreviouslyOverlaid);
-				} else {
+				} else if (fPreviouslyOverlaid != null) {
 					Iterator e= fPreviouslyOverlaid.iterator();
 					while (e.hasNext()) {
 						JavaMarkerAnnotation annotation= (JavaMarkerAnnotation) e.next();
