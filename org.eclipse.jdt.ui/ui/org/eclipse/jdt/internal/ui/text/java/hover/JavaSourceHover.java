@@ -52,7 +52,10 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 		IJavaElement curr= result[0];
 		if (curr instanceof IMember && curr instanceof ISourceReference) {
 			try {
-				String source= ((ISourceReference)curr).getSource();
+				String source= ((ISourceReference) curr).getSource();
+				if (source == null)
+					return null;
+					
 				source= removeLeadingComments(source);
 				String delim= null;
 
