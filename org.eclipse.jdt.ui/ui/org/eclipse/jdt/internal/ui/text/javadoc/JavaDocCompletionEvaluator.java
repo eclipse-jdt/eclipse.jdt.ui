@@ -44,14 +44,15 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 	
 	protected final static String[] fgTagProposals= {
 		"@author", //$NON-NLS-1$
-		"@deprecated", //$NON-NLS-1$
+		"@deprecated",  "@docRoot", //$NON-NLS-1$ //$NON-NLS-2$
 		"@exception", //$NON-NLS-1$
-		"@link", //$NON-NLS-1$
+		"@inheritdoc", //$NON-NLS-1$
+		"@link", "@linkplain", //$NON-NLS-1$ //$NON-NLS-2$
 		"@param", //$NON-NLS-1$
 		"@return", //$NON-NLS-1$
 		"@see", "@serial", "@serialData", "@serialField", "@since", //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		"@throws", //$NON-NLS-1$
-		"@version" //$NON-NLS-1$
+		"@value", "@version" //$NON-NLS-1$ //$NON-NLS-2$
 	};
 	
 	protected final static String[] fgHTMLProposals= {
@@ -295,7 +296,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 	 */
 	private boolean addArgumentProposals(String tag, String argument) throws JavaModelException {	
 		IJavaElement elem= fCompilationUnit.getElementAt(fCurrentPos);
-		if ("@see".equals(tag) || "@link".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
+		if ("@see".equals(tag) || "@link".equals(tag) || "@linkplain".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-1$
 			if (elem instanceof IMember) {
 				evalSeeTag((IMember) elem, argument);
 				return true;
@@ -427,7 +428,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 			cu= (ICompilationUnit) cu.getOriginalElement();
 		}
 		/*
-		 * Explicitly create a new working copy.
+		 * Explicitly create a new non-shared working copy.
 		 */
 		ICompilationUnit newCU= (ICompilationUnit) cu.getWorkingCopy();
 		newCU.getBuffer().setContents(content);
@@ -446,7 +447,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor {
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
 	}
-	
+	  
 	private JavaCompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName, int severity) {
 		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName); 
 		StringBuffer nameBuffer= new StringBuffer();
