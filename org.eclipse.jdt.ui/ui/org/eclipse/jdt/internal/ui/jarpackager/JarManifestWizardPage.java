@@ -518,6 +518,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			setErrorMessage(null);
 			return false;
 		}
+		setErrorMessage(null);
 		return true;
 	}
 	/* 

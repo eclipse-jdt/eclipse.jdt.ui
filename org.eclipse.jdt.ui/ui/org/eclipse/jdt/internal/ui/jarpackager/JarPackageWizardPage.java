@@ -448,6 +448,7 @@ public class JarPackageWizardPage extends WizardExportResourcesPage implements I
 	 * Overrides method from IJarPackageWizardPage
 	 */
 	public boolean computePageCompletion() {
+		setErrorMessage(null);
 		return super.determinePageCompletion();
 	}
 	/*

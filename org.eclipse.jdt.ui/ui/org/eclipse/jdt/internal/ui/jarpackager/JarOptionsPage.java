@@ -234,6 +234,7 @@ public class JarOptionsPage extends WizardPage implements Listener, IJarPackageW
 				return false;
 			}
 		}
+		setErrorMessage(null);		
 		return true;
 	}
 	/*
