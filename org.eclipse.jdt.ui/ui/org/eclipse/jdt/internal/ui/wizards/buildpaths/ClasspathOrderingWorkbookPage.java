@@ -12,7 +12,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
@@ -27,11 +27,13 @@ public class ClasspathOrderingWorkbookPage extends BuildPathBasePage {
 	}
 	
 	public Control getControl(Composite parent) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fClassPathList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
 
-		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fClassPathList.setButtonsMinWidth(buttonBarWidth);
 			
 		return composite;

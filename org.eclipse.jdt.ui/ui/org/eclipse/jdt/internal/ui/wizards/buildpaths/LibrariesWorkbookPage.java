@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -125,10 +125,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	// -------- ui creation
 	
 	public Control getControl(Composite parent) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
-		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
 		
 		fLibrariesList.getTableViewer().setSorter(new CPListElementSorter());

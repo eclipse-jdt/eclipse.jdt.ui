@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridData;
 import org.eclipse.jdt.internal.ui.wizards.swt.MGridLayout;
@@ -173,6 +174,8 @@ public class ListDialogField extends DialogField {
 	 * @see DialogField#doFillIntoGrid
 	 */
 	public Control[] doFillIntoGrid(Composite parent, int nColumns) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		assertEnoughColumns(nColumns);
 		
 		Label label= getLabelControl(parent);
@@ -188,8 +191,8 @@ public class ListDialogField extends DialogField {
 		gd.grabExcessVerticalSpace= true;
 		gd.grabColumn= 0;
 		gd.horizontalSpan= nColumns - 2;
-		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(50, list);
-		gd.heightHint= SWTUtil.convertHeightInCharsToPixels(6, list);
+		gd.widthHint= converter.convertWidthInCharsToPixels(50);
+		gd.heightHint= converter.convertHeightInCharsToPixels(6);
 
 		list.setLayoutData(gd);
 		

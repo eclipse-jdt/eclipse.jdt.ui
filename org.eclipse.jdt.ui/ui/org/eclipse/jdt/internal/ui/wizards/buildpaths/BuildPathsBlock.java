@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDisposer;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -152,12 +152,14 @@ public class BuildPathsBlock {
 	public Control createControl(Composite parent) {
 		fSWTWidget= parent;
 		
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);	
 		
 		MGridLayout layout= new MGridLayout();
 		layout.marginWidth= 0;
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, parent);
-		layout.minimumHeight= SWTUtil.convertHeightInCharsToPixels(20, parent);
+		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
+		layout.minimumHeight= converter.convertHeightInCharsToPixels(20);
 		layout.numColumns= 1;		
 		composite.setLayout(layout);
 		
@@ -220,7 +222,7 @@ public class BuildPathsBlock {
 		DialogField[] editors= new DialogField[] { fBuildPathDialogField };
 		LayoutUtil.doDefaultLayout(editorcomp, editors, true, 0, 0, 0, 0);
 		
-		int maxFieldWidth= SWTUtil.convertWidthInCharsToPixels(40, parent);
+		int maxFieldWidth= converter.convertWidthInCharsToPixels(40);
 		LayoutUtil.setWidthHint(fBuildPathDialogField.getTextControl(null), maxFieldWidth);	
 	
 		editorcomp.setLayoutData(new MGridData(MGridData.FILL_HORIZONTAL));

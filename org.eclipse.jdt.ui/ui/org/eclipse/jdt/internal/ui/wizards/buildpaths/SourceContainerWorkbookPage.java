@@ -7,11 +7,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
@@ -19,6 +14,11 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
@@ -148,10 +148,12 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}			
 	
 	public Control getControl(Composite parent) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
 		layout.numColumns= 2;		
 		composite.setLayout(layout);
 		
@@ -160,16 +162,16 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		Control control= fFoldersList.getListControl(composite);
 		MGridData gd= new MGridData(MGridData.FILL_BOTH);
-		gd.horizontalIndent= SWTUtil.convertWidthInCharsToPixels(2, composite);
-		gd.widthHint= SWTUtil.convertWidthInCharsToPixels(50, composite);
-		gd.heightHint= SWTUtil.convertWidthInCharsToPixels(15, composite);
+		gd.horizontalIndent= converter.convertWidthInCharsToPixels(2);
+		gd.widthHint= converter.convertWidthInCharsToPixels(50);
+		gd.heightHint= converter.convertWidthInCharsToPixels(15);
 		control.setLayoutData(gd);
 		
 		control= fFoldersList.getButtonBox(composite);
 		gd= new MGridData(gd.VERTICAL_ALIGN_FILL + gd.HORIZONTAL_ALIGN_FILL);
 		control.setLayoutData(gd);
 		
-		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fFoldersList.setButtonsMinWidth(buttonBarWidth);
 	
 		fSWTControl= composite;

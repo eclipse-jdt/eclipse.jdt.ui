@@ -12,6 +12,14 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.widgets.Composite;
@@ -20,14 +28,6 @@ import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -204,6 +204,8 @@ public class SourceAttachmentBlock {
 	 * Creates the control
 	 */
 	public Control createControl(Composite parent) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		fSWTWidget= parent;
 		
 		Composite composite= new Composite(parent, SWT.NONE);	
@@ -211,11 +213,11 @@ public class SourceAttachmentBlock {
 		MGridLayout layout= new MGridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, composite);
+		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
 		layout.numColumns= 4;		
 		composite.setLayout(layout);
 		
-		int widthHint= SWTUtil.convertWidthInCharsToPixels(fIsVariableEntry ? 50 : 60, composite);
+		int widthHint= converter.convertWidthInCharsToPixels(fIsVariableEntry ? 50 : 60);
 		
 		
 		MGridData gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);

@@ -7,11 +7,11 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.viewers.StructuredSelection;
 
@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.CheckedListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -102,11 +102,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	// -------- UI creation ---------
 		
 	public Control getControl(Composite parent) {
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fProjectsList }, true, 0, 0, SWT.DEFAULT, SWT.DEFAULT);
 		
-		int buttonBarWidth= SWTUtil.convertWidthInCharsToPixels(24, composite);
+		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fProjectsList.setButtonsMinWidth(buttonBarWidth);
 				
 		return composite;

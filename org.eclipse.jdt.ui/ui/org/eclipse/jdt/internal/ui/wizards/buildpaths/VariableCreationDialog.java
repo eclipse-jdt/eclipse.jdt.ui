@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -116,15 +116,17 @@ public class VariableCreationDialog extends StatusDialog {
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
+		PixelConverter converter= new PixelConverter(parent);
+		
 		Composite inner= new Composite(composite, SWT.NONE);
 		
 		MGridLayout layout= new MGridLayout();
-		layout.minimumWidth= SWTUtil.convertWidthInCharsToPixels(80, parent);
+		layout.minimumWidth= converter.convertWidthInCharsToPixels(80);
 		layout.marginWidth= 0;
 		layout.numColumns= 3;
 		inner.setLayout(layout);
 		
-		int fieldWidthHint= SWTUtil.convertWidthInCharsToPixels(50, parent);
+		int fieldWidthHint= converter.convertWidthInCharsToPixels(50);
 		
 		fNameField.doFillIntoGrid(inner, 2);
 		LayoutUtil.setWidthHint(fNameField.getTextControl(null), fieldWidthHint);
