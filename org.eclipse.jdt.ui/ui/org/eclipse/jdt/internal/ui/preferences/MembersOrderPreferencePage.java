@@ -27,8 +27,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ILabelProviderListener;
+import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
@@ -44,7 +43,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
@@ -97,7 +95,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		String downLabel= JavaUIMessages.getString("MembersOrderPreferencePage.button.down"); //$NON-NLS-1$
 		String[] buttonlabels= new String[] { upLabel, downLabel };
 
-		fSortOrderList= new ListDialogField(new MemberSortAdapter(), buttonlabels, new MemberSortLabelProvider());
+		fSortOrderList= new ListDialogField(null, buttonlabels, new MemberSortLabelProvider());
 		fSortOrderList.setDownButtonIndex(1);
 		fSortOrderList.setUpButtonIndex(0);
 
@@ -119,7 +117,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SORT_ORDER_PREFERENCE_PAGE);
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
@@ -154,13 +152,13 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		LayoutUtil.setHorizontalGrabbing(fSortOrderList.getListControl(null));
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.ui.IWorkbenchPreferencePage#init(IWorkbench)
 	 */
 	public void init(IWorkbench workbench) {
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
@@ -168,7 +166,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		fSortOrderList.setElements(getSortOrderList(string));
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	//reorders elements in the Outline based on selection
@@ -190,34 +188,12 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		return true;
 	}
 
-
-
-	private class MemberSortAdapter implements IListAdapter {
-
-		public MemberSortAdapter() {
-		}
-
-		/**
-		* @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#customButtonPressed(ListDialogField, int)
-		*/
-		public void customButtonPressed(ListDialogField field, int index) {
-		}
-
-		/**
-		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter#selectionChanged(ListDialogField)
-		 */
-		public void selectionChanged(ListDialogField field) {
-		}
-		
-		public void doubleClicked(ListDialogField field) {
-		}
-	}
-
-	private class MemberSortLabelProvider implements ILabelProvider {
+	private class MemberSortLabelProvider extends LabelProvider {
 
 		public MemberSortLabelProvider() {
 		}
-		/**
+		
+		/*
 		 * @see org.eclipse.jface.viewers.ILabelProvider#getText(Object)
 		 */
 		public String getText(Object element) {
@@ -245,36 +221,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			return ""; //$NON-NLS-1$
 		}
 
-		/**
-		 * Not implemented
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#addListener(ILabelProviderListener)
-		 */
-		public void addListener(ILabelProviderListener listener) {
-		}
-
-		/**
-		 * Not implemented
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#isLabelProperty(Object, String)
-		 */
-		public boolean isLabelProperty(Object element, String property) {
-			return false;
-		}
-
-		/**
-		 * Not implemented
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#removeListener(ILabelProviderListener)
-		 */
-		public void removeListener(ILabelProviderListener listener) {
-		}
-
-		/**
-		 * Not implemented
-		 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose
-		 */
-		public void dispose() {
-		}
-
-		/**
+		/*
 		* @see org.eclipse.jface.viewers.ILabelProvider#getImage(Object)
 		*/
 		public Image getImage(Object element) {

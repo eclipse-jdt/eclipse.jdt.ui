@@ -8,21 +8,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.TreeViewer;
-import org.eclipse.jface.viewers.Viewer;
-import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
@@ -37,6 +22,23 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Tree;
 
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
+
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+
 /**
  * A list with a button bar.
  * Typical buttons are 'Add', 'Remove', 'Up' and 'Down'.
@@ -47,7 +49,7 @@ public class TreeListDialogField extends DialogField {
 
 	protected TreeViewer fTree;
 	protected ILabelProvider fLabelProvider;
-	protected ListViewerAdapter fListViewerAdapter;
+	protected TreeViewerAdapter fTreeViewerAdapter;
 	protected List fElements;
 	protected ViewerSorter fViewerSorter;
 
@@ -71,13 +73,15 @@ public class TreeListDialogField extends DialogField {
 	private Object fParentElement;
 	private int fTreeExpandLevel;
 
-
+	/**
+	 * @param adapter Can be <code>null</code>.
+	 */
 	public TreeListDialogField(ITreeListAdapter adapter, String[] buttonLabels, ILabelProvider lprovider) {
 		super();
 		fTreeAdapter= adapter;
 
 		fLabelProvider= lprovider;
-		fListViewerAdapter= new ListViewerAdapter();
+		fTreeViewerAdapter= new TreeViewerAdapter();
 		fParentElement= this;
 
 		fElements= new ArrayList(10);
@@ -103,9 +107,10 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Sets the index of the 'remove' button in the button label array passedin the constructor.
-	* The behaviour of the button marked as the 'remove' button will then
-	* behandled internally. (enable state, button invocation behaviour)
+	* Sets the index of the 'remove' button in the button label array passed in
+	* the constructor. The behaviour of the button marked as the 'remove' button
+	* will then behandled internally. (enable state, button invocation
+	* behaviour)
 	*/
 	public void setRemoveButtonIndex(int removeButtonIndex) {
 		Assert.isTrue(removeButtonIndex < fButtonLabels.length);
@@ -156,7 +161,7 @@ public class TreeListDialogField extends DialogField {
 	// ------ adapter communication
 
 	private void buttonPressed(int index) {
-		if (!managedButtonPressed(index)) {
+		if (!managedButtonPressed(index) && fTreeAdapter != null) {
 			fTreeAdapter.customButtonPressed(this, index);
 		}
 	}
@@ -193,7 +198,7 @@ public class TreeListDialogField extends DialogField {
 		gd.verticalAlignment= GridData.BEGINNING;
 		label.setLayoutData(gd);
 
-		Control list= getListControl(parent);
+		Control list= getTreeControl(parent);
 		gd= new GridData();
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
@@ -236,11 +241,12 @@ public class TreeListDialogField extends DialogField {
 	// ------ ui creation
 
 	/**
-	* Returns the list control. When called the first time, the control will be created.
+	* Returns the tree control. When called the first time, the control will be
+	* created.
 	* @param The parent composite when called the first time, or <code>null</code>
 	* after.
 	*/
-	public Control getListControl(Composite parent) {
+	public Control getTreeControl(Composite parent) {
 		if (fTreeControl == null) {
 			assertCompositeNotNull(parent);
 
@@ -253,10 +259,10 @@ public class TreeListDialogField extends DialogField {
 				}
 			});
 			fTree.setAutoExpandLevel(99);
-			fTree.setContentProvider(fListViewerAdapter);
+			fTree.setContentProvider(fTreeViewerAdapter);
 			fTree.setLabelProvider(fLabelProvider);
-			fTree.addSelectionChangedListener(fListViewerAdapter);
-			fTree.addDoubleClickListener(fListViewerAdapter);
+			fTree.addSelectionChangedListener(fTreeViewerAdapter);
+			fTree.addDoubleClickListener(fTreeViewerAdapter);
 
 			fTree.setInput(fParentElement);
 			fTree.expandToLevel(fTreeExpandLevel);
@@ -504,7 +510,7 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Gets the elements shown at the given index.
+	* Gets the element shown at the given index.
 	*/
 	public Object getElement(int index) {
 		return fElements.get(index);
@@ -547,7 +553,7 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Adds an element at the end of the list.
+	* Adds an element at the end of the tree list.
 	*/
 	public void addElement(Object element) {
 		if (fElements.contains(element)) {
@@ -562,7 +568,7 @@ public class TreeListDialogField extends DialogField {
 	}
 
 	/**
-	* Adds elements at the end of the list.
+	* Adds elements at the end of the tree list.
 	*/
 	public void addElements(List elements) {
 		int nElements= elements.size();
@@ -799,9 +805,9 @@ public class TreeListDialogField extends DialogField {
 		return result;
 	}
 
-	// ------- ListViewerAdapter
+	// ------- TreeViewerAdapter
 
-	private class ListViewerAdapter implements ITreeContentProvider, ISelectionChangedListener, IDoubleClickListener {
+	private class TreeViewerAdapter implements ITreeContentProvider, ISelectionChangedListener, IDoubleClickListener {
 
 		private final Object[] NO_ELEMENTS= new Object[0];
 
@@ -823,18 +829,24 @@ public class TreeListDialogField extends DialogField {
 		}
 		
 		public Object[] getChildren(Object element) {
-			return fTreeAdapter.getChildren(TreeListDialogField.this, element);
+			if (fTreeAdapter != null) {
+				return fTreeAdapter.getChildren(TreeListDialogField.this, element);
+			}
+			return NO_ELEMENTS;
 		}
 
 		public Object getParent(Object element) {
-			if (!fElements.contains(element)) {
+			if (!fElements.contains(element) && fTreeAdapter != null) {
 				return fTreeAdapter.getParent(TreeListDialogField.this, element);
 			}
 			return fParentElement;
 		}
 
 		public boolean hasChildren(Object element) {
-			return fTreeAdapter.hasChildren(TreeListDialogField.this, element);
+			if (fTreeAdapter != null) {
+				return fTreeAdapter.hasChildren(TreeListDialogField.this, element);
+			}
+			return false;
 		}		
 
 		// ------- ISelectionChangedListener Interface ------------
