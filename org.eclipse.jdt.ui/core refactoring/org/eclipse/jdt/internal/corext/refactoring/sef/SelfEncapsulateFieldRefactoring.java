@@ -473,6 +473,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			ChildListPropertyDescriptor descriptor= getBodyDeclarationsProperty(decl.getParent());
 			VariableDeclarationFragment newField= (VariableDeclarationFragment) rewriter.createCopyTarget(fFieldDeclaration);
 			FieldDeclaration fieldDecl= ast.newFieldDeclaration(newField);
+			fieldDecl.setType((Type)rewriter.createCopyTarget(decl.getType()));
 			fieldDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
 			rewriter.getListRewrite(decl.getParent(), descriptor).insertAfter(fieldDecl, decl, description);
 		} else {
