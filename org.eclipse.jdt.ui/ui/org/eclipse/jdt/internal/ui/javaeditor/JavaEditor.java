@@ -234,8 +234,12 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 			return;
 		
 		try {
+			ISourceRange range= reference.getSourceRange();
+			if (range == null) {
+				return;
+			}
 			// find this source reference in this editor's working copy
-			reference= getJavaSourceReferenceAt(reference.getSourceRange().getOffset());
+			reference= getJavaSourceReferenceAt(range.getOffset());
 		} catch (JavaModelException x) {
 			// be tolerant, just go with what is there
 		}
