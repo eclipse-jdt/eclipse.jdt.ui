@@ -7,8 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids: sdavids@gmx.de bug 37333 Failure Trace cannot 
- * 			navigate to non-public class in CU throwing Exception  
+ *     Sebastian Davids: sdavids@gmx.de bug 37333, 26653 
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
@@ -22,8 +21,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -35,6 +33,8 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IOpenEventListener;
+import org.eclipse.jface.util.OpenStrategy;
 
 /**
  * A view that shows a stack trace of a failed test.
@@ -55,9 +55,14 @@ class FailureTraceView implements IMenuListener {
 		fTestRunner= testRunner;
 		fClipboard= clipboard;
 		
-		fTable.addMouseListener(new MouseAdapter() {
-			public void mouseDoubleClick(MouseEvent e){
-				handleDoubleClick(e);
+		OpenStrategy handler = new OpenStrategy(fTable);
+		handler.addOpenListener(new IOpenEventListener() {
+			public void handleOpen(SelectionEvent e) {
+				if (fTable.getSelection().length != 0) {
+					Action a = createOpenEditorAction(getSelectedText());
+					if (a != null)
+						a.run();
+				}
 			}
 		});
 		
@@ -68,14 +73,6 @@ class FailureTraceView implements IMenuListener {
 				disposeIcons();
 			}
 		});
-	}
-	
-	void handleDoubleClick(MouseEvent e) {
-		if(fTable.getSelection().length != 0) {
-			Action a= createOpenEditorAction(getSelectedText());
-			if (a != null)
-				a.run();
-		}
 	}
 	
 	private void initMenu() {

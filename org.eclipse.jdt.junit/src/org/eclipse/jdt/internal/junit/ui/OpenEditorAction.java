@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.OpenStrategy;
 
 import org.eclipse.ui.texteditor.ITextEditor;
 
@@ -53,7 +54,7 @@ public abstract class OpenEditorAction extends Action {
 				return;
 			}
 			// use of internal API for backward compatibility with 1.0
-			textEditor= (ITextEditor)EditorUtility.openInEditor(element, false);			
+			textEditor= (ITextEditor)EditorUtility.openInEditor(element, OpenStrategy.activateOnOpen());			
 		} catch (CoreException e) {
 			ErrorDialog.openError(fTestRunner.getSite().getShell(), JUnitMessages.getString("OpenEditorAction.error.dialog.title"), JUnitMessages.getString("OpenEditorAction.error.dialog.message"), e.getStatus()); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
