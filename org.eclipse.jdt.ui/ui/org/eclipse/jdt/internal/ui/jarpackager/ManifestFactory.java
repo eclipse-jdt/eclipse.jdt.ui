@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
-import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IPackageFragment;
 
 /**
  * This factory creates manifest files.
@@ -114,7 +114,7 @@ public class ManifestFactory {
 		return name.replace('.', '/') + '/';
 	}
 
-	private Manifest createSuppliedManifest(JarPackage jarPackage) throws IOException, CoreException {		jarPackage.getManifestFile().setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());
+	private Manifest createSuppliedManifest(JarPackage jarPackage) throws IOException, CoreException {		IFile manifestFile= jarPackage.getManifestFile();		if (manifestFile.isLocal(IResource.DEPTH_ZERO))			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());
 		InputStream in= jarPackage.getManifestFile().getContents(false);
 		Manifest manifest= new Manifest(in);
 		return manifest;

@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
@@ -105,9 +106,8 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	private ImageDescriptor getImageDescriptor(String relativePath) {
 		try {
-			AbstractUIPlugin plugin= (AbstractUIPlugin) Platform.getPlugin(PlatformUI.PLUGIN_ID);
-			URL installURL= plugin.getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/basic/" + relativePath);
+			URL installURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
+			URL url= new URL(installURL, "icons/full/" + relativePath);
 			return ImageDescriptor.createFromURL(url);
 		} catch (MalformedURLException e) {
 			// Should not happen
@@ -139,7 +139,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 			
 		setWindowTitle("JAR Packager");
-		setDefaultPageImageDescriptor(getImageDescriptor("wizban/exportjar_wiz.gif"));
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 		setNeedsProgressMonitor(true);
 	}
 	/*
