@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 public class NewVariableEntryDialog extends StatusDialog {
 
@@ -63,9 +64,6 @@ public class NewVariableEntryDialog extends StatusDialog {
 			case IDX_EXTEND: /* extend */
 				extendButtonPressed();
 				break;
-			case IDX_CONFIG: /* config */
-				configButtonPressed();
-				break;	
 			}		
 		}
 		
@@ -80,18 +78,23 @@ public class NewVariableEntryDialog extends StatusDialog {
 		// ---------- IDialogFieldListener --------
 	
 		public void dialogFieldChanged(DialogField field) {
+			if (field == fConfigButton) {
+				configButtonPressed();
+			}
+			
 		}
 	
 	}
 	
 	private final int IDX_EXTEND= 0;
-	private final int IDX_CONFIG= 2;
 	
 	private ListDialogField fVariablesList;
 	private boolean fCanExtend;
 	private boolean fIsValidSelection;
 	
 	private IPath[] fResultPaths;
+
+	private SelectionButtonDialogField fConfigButton;
 	
 	public NewVariableEntryDialog(Shell parent) {
 		super(parent);
@@ -101,8 +104,6 @@ public class NewVariableEntryDialog extends StatusDialog {
 
 		String[] buttonLabels= new String[] { 
 			/* IDX_EXTEND */ NewWizardMessages.getString("NewVariableEntryDialog.vars.extend"), //$NON-NLS-1$
-			null,
-			/* IDX_CONFIG */ NewWizardMessages.getString("NewVariableEntryDialog.vars.config"), //$NON-NLS-1$
 		};
 				
 		VariablesAdapter adapter= new VariablesAdapter();
@@ -123,6 +124,12 @@ public class NewVariableEntryDialog extends StatusDialog {
 				return super.compare(viewer, e1, e2);
 			}
 		});
+		
+		
+		fConfigButton= new SelectionButtonDialogField(SWT.PUSH);
+		fConfigButton.setLabelText(NewWizardMessages.getString("NewVariableEntryDialog.configbutton.label")); //$NON-NLS-1$
+		fConfigButton.setDialogFieldListener(adapter);
+		
 		initializeElements();
 
 		fCanExtend= false;
@@ -170,6 +177,16 @@ public class NewVariableEntryDialog extends StatusDialog {
 		GridData listData= (GridData) fVariablesList.getListControl(null).getLayoutData();
 		listData.grabExcessHorizontalSpace= true;
 		listData.heightHint= convertHeightInCharsToPixels(10);
+		
+		Composite lowerComposite= new Composite(composite, SWT.NONE);
+		lowerComposite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		lowerComposite.setLayout(layout);
+		
+		fConfigButton.doFillIntoGrid(lowerComposite, 1);
 		
 		applyDialogFont(composite);		
 		return composite;
