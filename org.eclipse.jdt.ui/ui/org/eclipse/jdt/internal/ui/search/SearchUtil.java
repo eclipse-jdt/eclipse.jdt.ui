@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class SearchUtil extends JavaModelUtil {
 
 	// LRU working sets
-	static int LRU_WORKINGSET_LIST_SIZE= 3;
+	public static int LRU_WORKINGSET_LIST_SIZE= 3;
 	private static LRUWorkingSetsList fgLRUWorkingSets;
 
 	// Settings store
