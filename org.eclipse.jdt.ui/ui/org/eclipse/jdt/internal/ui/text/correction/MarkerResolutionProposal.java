@@ -20,6 +20,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.ui.IMarkerResolution;
+import org.eclipse.ui.IMarkerResolution2;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
@@ -52,9 +53,9 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		if (fResolution instanceof IJavaMarkerResolutionExtension) {
-			return ((IJavaMarkerResolutionExtension) fResolution).getDescription();
-		}				
+		if (fResolution instanceof IMarkerResolution2) {
+			return ((IMarkerResolution2) fResolution).getDescription();
+		}
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
 			return CorrectionMessages.getFormattedString("MarkerResolutionProposal.additionaldesc", problemDesc); //$NON-NLS-1$
@@ -82,8 +83,8 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getImage()
 	 */
 	public Image getImage() {
-		if (fResolution instanceof IJavaMarkerResolutionExtension) {
-			return ((IJavaMarkerResolutionExtension) fResolution).getImage();
+		if (fResolution instanceof IMarkerResolution2) {
+			return ((IMarkerResolution2) fResolution).getImage();
 		}		
 		return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 	}
