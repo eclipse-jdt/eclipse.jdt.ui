@@ -244,6 +244,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 			if (surroundLinesOnly && (from == start) && Strings.containsOnlyWhitespaces(content)) {
 				continue; // ignore empty lines except when range started in the middle of a line
 			}
+			for (int k= 0; k < content.length(); k++) {
+				char ch= content.charAt(k);
+				if (ch == '<') {
+					buf.append("&lt;"); //$NON-NLS-1$
+				} else if (ch == '>') {
+					buf.append("&gt;"); //$NON-NLS-1$
+				} else {
+					buf.append(ch);
+				}
+			}
 			buf.append(content);
 			if (to == end && to != endOffset) { // new line when at the end of the line, and not end of range
 				buf.append("<br>"); //$NON-NLS-1$
