@@ -20,8 +20,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -48,8 +46,7 @@ public class NewSourceFolderDialog extends StatusDialog {
 		setTitle(title);
 		
 		fContainerFieldStatus= new StatusInfo();
-		PreferenceConstants.getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, project.getName());
-		
+	
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 		
 		fUseProjectButton= new SelectionButtonDialogField(SWT.RADIO);

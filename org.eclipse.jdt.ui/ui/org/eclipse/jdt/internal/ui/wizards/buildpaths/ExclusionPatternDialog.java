@@ -4,11 +4,12 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -43,7 +44,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 		}
 
 		public String getText(Object element) {
-			return ((IPath) element).toString();
+			return (String) element;
 		}
 
 	}
@@ -84,7 +85,11 @@ public class ExclusionPatternDialog extends StatusDialog {
 		
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(CPListElement.EXCLUSION);
 		
-		fExclusionPatternList.setElements(Arrays.asList(pattern));
+		ArrayList elements= new ArrayList(pattern.length);
+		for (int i= 0; i < pattern.length; i++) {
+			elements.add(pattern[i].toString());
+		}
+		fExclusionPatternList.setElements(elements);
 	}
 	
 	
@@ -132,7 +137,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 			return;
 		}
 		List existing= fExclusionPatternList.getElements();
-		IPath entry= (IPath) selElements.get(0);
+		String entry= (String) selElements.get(0);
 		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), entry, existing, fCurrElement);
 		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
 			fExclusionPatternList.replaceElement(entry, dialog.getExclusionPattern());
@@ -188,8 +193,12 @@ public class ExclusionPatternDialog extends StatusDialog {
 	
 		
 	public IPath[] getExclusionPattern() {
-		List elements= fExclusionPatternList.getElements();
-		return (IPath[]) elements.toArray(new IPath[elements.size()]);
+		IPath[] res= new IPath[fExclusionPatternList.getSize()];
+		for (int i= 0; i < res.length; i++) {
+			String entry= (String) fExclusionPatternList.getElement(i);
+			res[i]= new Path(entry);
+		}
+		return res;
 	}
 		
 	/*

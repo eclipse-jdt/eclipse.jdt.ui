@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
@@ -358,7 +359,7 @@ public class SourceAttachmentBlock {
 				if (res != null) {
 					file= res.getLocation().toFile();
 				}
-				if (!file.isFile()) {
+				if (!file.exists()) {
 					String message=  NewWizardMessages.getFormattedString("SourceAttachmentBlock.filename.error.filenotexists", filePath.toString()); //$NON-NLS-1$
 					status.setError(message);
 					return status;
@@ -383,7 +384,7 @@ public class SourceAttachmentBlock {
 			File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
 			
 			String currVariable= currPath.segment(0);
-			JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false);
+			JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, true);
 			dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.title")); //$NON-NLS-1$
 			dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
 			dialog.setInput(fFileVariablePath.toFile());
@@ -417,10 +418,10 @@ public class SourceAttachmentBlock {
 	private IPath chooseInternalJarFile() {
 		String initSelection= fFileNameField.getText();
 		
-		Class[] acceptedClasses= new Class[] { IFile.class };
+		Class[] acceptedClasses= new Class[] { IFolder.class, IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
-		ViewerFilter filter= new ArchiveFileFilter(null);
+		ViewerFilter filter= new ArchiveFileFilter(null, false);
 
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();
@@ -433,7 +434,7 @@ public class SourceAttachmentBlock {
 			initSel= fRoot.findMember(fJARPath);
 		}
 
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
 		dialog.setAllowMultiple(false);
 		dialog.setValidator(validator);
 		dialog.addFilter(filter);
@@ -442,8 +443,8 @@ public class SourceAttachmentBlock {
 		dialog.setInput(fRoot);
 		dialog.setInitialSelection(initSel);
 		if (dialog.open() == ElementTreeSelectionDialog.OK) {
-			IFile file= (IFile) dialog.getFirstResult();
-			return file.getFullPath();
+			IResource res= (IResource) dialog.getFirstResult();
+			return res.getFullPath();
 		}
 		return null;
 	}

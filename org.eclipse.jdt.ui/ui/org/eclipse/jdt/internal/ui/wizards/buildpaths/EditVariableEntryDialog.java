@@ -143,7 +143,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
 		
 		String currVariable= currPath.segment(0);
-		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false, false);
 		dialog.setTitle(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("EditVariableEntryDialog.extvardialog.description")); //$NON-NLS-1$
 		dialog.setInput(fFileVariablePath.toFile());

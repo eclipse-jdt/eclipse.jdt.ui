@@ -442,7 +442,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] openJarFileDialog(CPListElement existing) {
 		Class[] acceptedClasses= new Class[] { IFile.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, existing == null);
-		ViewerFilter filter= new ArchiveFileFilter(getUsedJARFiles(existing));
+		ViewerFilter filter= new ArchiveFileFilter(getUsedJARFiles(existing), true);
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();
 		ITreeContentProvider cp= new WorkbenchContentProvider();

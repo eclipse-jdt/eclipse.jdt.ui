@@ -27,15 +27,15 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
  * Set input to a java.io.File that point to folder.
  */
 public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
-
+	
 	/**
 	 * Constructor for JARFileSelectionDialog.
 	 */
-	public JARFileSelectionDialog(Shell parent, boolean multiSelect) {
+	public JARFileSelectionDialog(Shell parent, boolean multiSelect, boolean acceptFolders) {
 		super(parent, new FileLabelProvider(), new FileContentProvider());
 		setSorter(new FileViewerSorter());
 		addFilter(new FileArchiveFileFilter());
-		setValidator(new FileSelectionValidator(multiSelect));
+		setValidator(new FileSelectionValidator(multiSelect, acceptFolders));
 	}
 	
 	private static boolean isArchive(File file) {
@@ -132,9 +132,11 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 	
 	private static class FileSelectionValidator implements ISelectionStatusValidator {
 		private boolean fMultiSelect;
+		private boolean fAcceptFolders;
 		
-		public FileSelectionValidator(boolean multiSelect) {
+		public FileSelectionValidator(boolean multiSelect, boolean acceptFolders) {
 			fMultiSelect= multiSelect;
+			fAcceptFolders= acceptFolders;
 		}
 		
 		public IStatus validate(Object[] selection) {
@@ -146,7 +148,7 @@ public class JARFileSelectionDialog extends ElementTreeSelectionDialog {
 				Object curr= selection[i];
 				if (curr instanceof File) {
 					File file= (File) curr;
-					if (!file.isFile()) {
+					if (!fAcceptFolders && !file.isFile()) {
 						return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
 					}
 				}

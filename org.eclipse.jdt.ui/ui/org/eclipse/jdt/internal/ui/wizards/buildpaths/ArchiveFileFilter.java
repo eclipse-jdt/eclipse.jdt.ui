@@ -28,17 +28,21 @@ public class ArchiveFileFilter extends ViewerFilter {
 	private static final String[] fgArchiveExtensions= { "jar", "zip" }; //$NON-NLS-1$ //$NON-NLS-2$
 
 	private List fExcludes;
+	private boolean fRecursive;
 	
 	/**
 	 * @param excludedFiles Excluded files will not pass the filter.
 	 * <code>null</code> is allowed if no files should be excluded. 
+	 * @param recusive Folders are only shown if, searched recursivly, contain
+	 * an archive
 	 */
-	public ArchiveFileFilter(IFile[] excludedFiles) {
+	public ArchiveFileFilter(IFile[] excludedFiles, boolean recusive) {
 		if (excludedFiles != null) {
 			fExcludes= Arrays.asList(excludedFiles);
 		} else {
 			fExcludes= null;
 		}
+		fRecursive= recusive;
 	}
 	
 	/*
@@ -51,6 +55,9 @@ public class ArchiveFileFilter extends ViewerFilter {
 			}
 			return isArchivePath(((IFile)element).getFullPath());
 		} else if (element instanceof IContainer) { // IProject, IFolder
+			if (!fRecursive) {
+				return true;
+			}
 			try {
 				IResource[] resources= ((IContainer)element).members();
 				for (int i= 0; i < resources.length; i++) {

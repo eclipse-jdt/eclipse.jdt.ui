@@ -183,9 +183,13 @@ class CPListLabelProvider extends LabelProvider {
 	}
 	
 	private String getPathString(IPath path, boolean isExternal) {
-		IPath appendedPath= path.removeLastSegments(1);
-		String appended= isExternal ? appendedPath.toOSString() : appendedPath.makeRelative().toString();
-		return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { path.lastSegment(), appended }); //$NON-NLS-1$
+		if (ArchiveFileFilter.isArchivePath(path)) {
+			IPath appendedPath= path.removeLastSegments(1);
+			String appended= isExternal ? appendedPath.toOSString() : appendedPath.makeRelative().toString();
+			return NewWizardMessages.getFormattedString("CPListLabelProvider.twopart", new String[] { path.lastSegment(), appended }); //$NON-NLS-1$
+		} else {
+			return isExternal ? path.toOSString() : path.makeRelative().toString();
+		}
 	}
 	
 	private String getVariableString(IPath path) {

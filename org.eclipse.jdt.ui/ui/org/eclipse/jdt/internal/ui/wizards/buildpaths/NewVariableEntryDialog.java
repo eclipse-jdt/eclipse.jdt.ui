@@ -161,7 +161,7 @@ public class NewVariableEntryDialog extends StatusDialog {
 	private IPath[] chooseExtensions(CPVariableElement elem) {
 		File file= elem.getPath().toFile();
 
-		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true, false);
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);

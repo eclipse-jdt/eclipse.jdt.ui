@@ -51,10 +51,10 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 	private StatusInfo fExclusionPatternStatus;
 	
 	private IContainer fCurrSourceFolder;
-	private IPath fExclusionPattern;
+	private String fExclusionPattern;
 	private List fExistingPatterns;
 		
-	public ExclusionPatternEntryDialog(Shell parent, IPath patternToEdit, List existingPatterns, CPListElement entryToEdit) {
+	public ExclusionPatternEntryDialog(Shell parent, String patternToEdit, List existingPatterns, CPListElement entryToEdit) {
 		super(parent);
 		fExistingPatterns= existingPatterns;
 		if (patternToEdit == null) {
@@ -149,8 +149,8 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 	}		
 	
 	protected void checkIfPatternValid() {
-		String pattern= fExclusionPatternDialog.getText();
-		if (pattern.trim().length() == 0) {
+		String pattern= fExclusionPatternDialog.getText().trim();
+		if (pattern.length() == 0) {
 			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.empty"));
 			return;
 		}
@@ -159,17 +159,17 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.notrelative"));
 			return;
 		}
-		if (fExistingPatterns.contains(path)) {
+		if (fExistingPatterns.contains(pattern)) {
 			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.exists"));
 			return;
 		}
 		
-		fExclusionPattern= path; 
+		fExclusionPattern= pattern; 
 		fExclusionPatternStatus.setOK();
 	}
 	
 		
-	public IPath getExclusionPattern() {
+	public String getExclusionPattern() {
 		return fExclusionPattern;
 	}
 		
