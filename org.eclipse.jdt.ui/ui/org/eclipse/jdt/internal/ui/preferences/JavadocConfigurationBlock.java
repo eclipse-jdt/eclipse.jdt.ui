@@ -507,7 +507,7 @@ public class JavadocConfigurationBlock {
 					} else {
 						File dir= new File(url.getFile());
 						if (dir.exists()) {
-							if (!dir.isDirectory()) {
+							if (dir.isFile()) {
 								status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
 								return status;
 							}
@@ -517,12 +517,7 @@ public class JavadocConfigurationBlock {
 								// only a warning, go on
 							}
 						} else {
-							if (fIsForSource) {
-								status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
-							} else {
-								status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
-								return status;
-							}
+							status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafolder")); //$NON-NLS-1$
 						}
 					}
 				}
@@ -547,19 +542,18 @@ public class JavadocConfigurationBlock {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.invalidarchivepath")); //$NON-NLS-1$
 					return status;	
 				}
+				IPath path= new Path(jdocLocation);
+				if (!path.isAbsolute()) {
+					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.archivepathnotabsolute")); //$NON-NLS-1$
+					return status;	
+				}
 				File jarFile= new File(jdocLocation);
 				if (jarFile.isDirectory())  {
 					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
 					return status;							
 				}
 				if (!jarFile.exists())  {
-					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$
-					return status;													
-				}
-				IPath path= new Path(jdocLocation);
-				if (!path.isAbsolute()) {
-					status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.error.archivepathnotabsolute")); //$NON-NLS-1$
-					return status;	
+					status.setWarning(PreferencesMessages.getString("JavadocConfigurationBlock.error.notafile")); //$NON-NLS-1$									
 				}
 				fArchiveURLResult= getArchiveURL();
 			}
