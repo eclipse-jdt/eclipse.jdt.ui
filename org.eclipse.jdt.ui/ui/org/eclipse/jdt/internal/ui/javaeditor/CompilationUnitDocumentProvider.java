@@ -37,6 +37,10 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.Document;
@@ -49,9 +53,6 @@ import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -71,7 +72,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -84,7 +84,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.IProblemRequestorExtension;
 
 
-public class CompilationUnitDocumentProvider extends FileDocumentProvider implements IWorkingCopyManager {
+public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 		
 		/**
 		 * Here for visibility issues only.
@@ -1106,24 +1106,14 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return null;
 	}
 	
-	/*
-	 * @see IWorkingCopyManager#connect(IEditorInput)
+	/**
+	 * Returns the working copy this document provider maintains for the given
+	 * element.
+	 * 
+	 * @param element the given element
+	 * @return the working copy for the given element
 	 */
-	public void connect(IEditorInput input) throws CoreException {
-		super.connect(input);
-	}
-	
-	/*
-	 * @see IWorkingCopyManager#disconnect(IEditorInput)
-	 */
-	public void disconnect(IEditorInput input) {
-		super.disconnect(input);
-	}
-	
-	/*
-	 * @see IWorkingCopyManager#getWorkingCopy(Object)
-	 */
-	public ICompilationUnit getWorkingCopy(IEditorInput element) {
+	ICompilationUnit getWorkingCopy(IEditorInput element) {
 		
 		ElementInfo elementInfo= getElementInfo(element);		
 		if (elementInfo instanceof CompilationUnitInfo) {
@@ -1141,6 +1131,9 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		return fBufferFactory;
 	}
 	
+	/**
+	 * Shuts down this document provider.
+	 */
 	public void shutdown() {
 		
 		JavaPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(fPropertyListener);
@@ -1189,4 +1182,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		fGlobalAnnotationModelListener.removeListener(listener);
 	}
 	
+	/**
+	 * Returns whether the given element is connected to this document provider.
+	 * 
+	 * @param element the element
+	 * @return <code>true</code> if the element is connected, <code>false</code> otherwise
+	 */
+	boolean isConnected(Object element) {
+		return getElementInfo(element) != null;	
+	}
 }

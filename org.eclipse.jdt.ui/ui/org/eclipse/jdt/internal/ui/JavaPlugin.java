@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -79,6 +80,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 	private static JavaPlugin fgJavaPlugin;
 
+	private IWorkingCopyManager fWorkingCopyManager;
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private JavaTextTools fJavaTextTools;
@@ -265,6 +267,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 		
 		super.shutdown();
 		
+		if (fWorkingCopyManager != null) {
+			fWorkingCopyManager.shutdown();
+			fWorkingCopyManager= null;
+		}
+		
 		if (fCompilationUnitDocumentProvider != null) {
 			fCompilationUnitDocumentProvider.shutdown();
 			fCompilationUnitDocumentProvider= null;
@@ -300,7 +307,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	public synchronized IWorkingCopyManager getWorkingCopyManager() {
-		return getCompilationUnitDocumentProvider();
+		if (fWorkingCopyManager == null) {
+			CompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
+			fWorkingCopyManager= new WorkingCopyManager(provider);
+		}
+		return fWorkingCopyManager;
 	}
 	
 	public synchronized ProblemMarkerManager getProblemMarkerManager() {
