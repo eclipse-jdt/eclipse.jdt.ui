@@ -107,6 +107,9 @@ public class JavaDebugPreferencePage extends PreferencePage implements IWorkbenc
 			fViewer.add(fActive.toArray());
 			fViewer.add(fInactive.toArray());
 			initializeCheckedState();
+			boolean useStepFilters = JDIDebugModel.getDefaultUseStepFiltersFlag();
+			fUseFiltersCheckbox.setSelection(useStepFilters);
+			toggleStepFilterWidgetsEnabled(useStepFilters);
 		}
 		
 		public void saveFilters() {
