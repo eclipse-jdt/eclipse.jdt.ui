@@ -463,7 +463,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			if (viewer instanceof ITextViewerExtension2) {
 				// attempts to reduce the redraw area
 				ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-				viewer2.invalidateTextPresentation(fRememberedStyleRange.start, fRememberedStyleRange.length);
+				viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
 			} else
 				viewer.invalidateTextPresentation();
 		}
