@@ -42,10 +42,10 @@ class SearchUtil extends JavaModelUtil {
 	static IJavaElement getJavaElement(IMarker marker) {
 		try {
 			IJavaElement je= JavaCore.create((String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID));
-			if (!marker.getAttribute("isWorkingCopy", false))
+			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false))
 				return je;
 
-			ICompilationUnit cu= getCompilationUnit(je);
+			ICompilationUnit cu= findCompilationUnit(je);
 			if (cu == null)
 				return null;
 			// Find working copy element
@@ -135,20 +135,17 @@ class SearchUtil extends JavaModelUtil {
 	 * @param	element the java element whose compilation unit is searched for
 	 * @return	the compilation unit of the given java element
 	 */
-	static ICompilationUnit getCompilationUnit(IJavaElement element) {
+	static ICompilationUnit findCompilationUnit(IJavaElement element) {
 		if (element == null)
 			return null;
+
+		if (element.getElementType() == IJavaElement.COMPILATION_UNIT)
+			return (ICompilationUnit)element;
 			
 		if (element instanceof IMember)
-			return ((IMember) element).getCompilationUnit();
-		
-		int type= element.getElementType();
-		if (IJavaElement.COMPILATION_UNIT == type)
-			return (ICompilationUnit) element;
-		if (IJavaElement.CLASS_FILE == type)
-			return null;
-			
-		return getCompilationUnit(element.getParent());
+			return ((IMember)element).getCompilationUnit();
+
+		return findCompilationUnit(element.getParent());
 	}
 
 	/*

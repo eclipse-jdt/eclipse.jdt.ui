@@ -4,34 +4,20 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import java.util.ArrayList;
-
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.search.ui.ISearchResultViewEntry;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 
@@ -116,7 +102,7 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		IMarker marker= getMarker(o);
 		if (marker == null || !marker.exists())
 			return null;
-		return SearchUtil.getJavaElement(marker);
+		return getJavaElement(marker);
 	}
 
 	private IMarker getMarker(Object o) {
@@ -127,43 +113,7 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 	
 	private IJavaElement getJavaElement(IMarker marker) {
 		if (fLastMarker != marker) {
-			try {
-				fLastJavaElement= (IJavaElement)marker.getAttribute("je");
-			} catch (CoreException ex) {
-				fLastJavaElement= null;
-			}
-//			String handle;
-//			try {
-//				handle= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
-//			} catch (CoreException ex) {
-//				ExceptionHandler.handle(ex, SearchMessages.getString("Search.Error.javaElementAccess.title"), SearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
-//				handle= null;
-//			}
-//			
-//			if (handle != null) {
-//				fLastJavaElement= JavaCore.create(handle);
-//				if (marker.getAttribute("isWorkingCopy", false)) {
-//					ICompilationUnit cu= getCompilationUnit(fLastJavaElement);
-//					// Find working copy element
-//					IWorkingCopy[] workingCopies= getWorkingCopies();
-//					int i= 0;
-//					while (i < workingCopies.length) {
-//						if (workingCopies[i].getOriginalElement().equals(cu)) {
-//							try {
-//								fLastJavaElement= findInWorkingCopy(workingCopies[i], fLastJavaElement, true);
-//								if (fLastJavaElement != null && !fLastJavaElement.exists())
-//									fLastJavaElement= cu.getElementAt(marker.getAttribute(IMarker.CHAR_START, 0));
-//							} catch(JavaModelException ex) {
-//								fLastJavaElement= null;
-//							}
-//							break;
-//						}
-//						i++;
-//					}
-//				}
-//			}
-//			else
-//				fLastJavaElement= null;
+			fLastJavaElement= SearchUtil.getJavaElement(marker);
 			fLastMarker= marker;
 		}
 		return fLastJavaElement;
@@ -183,60 +133,5 @@ class JavaSearchResultLabelProvider extends DecoratingLabelProvider {
 		int end= handle.indexOf(".java"); //$NON-NLS-1$
 		handle= handle.substring(0, start + 1) + resourceName + handle.substring(end + 5);
 		return handle;
-	}
-
-	private IWorkingCopy[] getWorkingCopies() {
-		IWorkingCopyManager wcManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		IEditorPart[] editorParts= JavaPlugin.getDefault().getDirtyEditors();
-		ArrayList workingCopies= new ArrayList(editorParts.length);
-		for (int i= 0; i < editorParts.length; i++) {
-			IWorkingCopy workingCopy= wcManager.getWorkingCopy(editorParts[i].getEditorInput());
-			if (workingCopy != null)
-				workingCopies.add(workingCopy);
-		}
-		return (IWorkingCopy[])workingCopies.toArray(new IWorkingCopy[workingCopies.size()]);
-	}
-
-	/** 
-	 * Returns the working copy of the given java element.
-	 * @param javaElement the javaElement for which the working copyshould be found
-	 * @param reconcile indicates whether the working copy must be reconcile prior to searching it
-	 * @return the working copy of the given element or <code>null</code> if none
-	 */	
-	public IJavaElement findInWorkingCopy(IWorkingCopy workingCopy, IJavaElement element, boolean reconcile) throws JavaModelException {
-		if (workingCopy != null) {
-			if (reconcile) {
-				synchronized (workingCopy) {
-					workingCopy.reconcile(null);
-					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
-				}
-			} else {
-					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
-			}
-		}
-		return null;
-	}
-
-	
-	/**
-	 * Returns the compilation unit for the given java element.
-	 * 
-	 * @param	element the java element whose compilation unit is searched for
-	 * @return	the compilation unit of the given java element
-	 */
-	private ICompilationUnit getCompilationUnit(IJavaElement element) {
-		if (element == null)
-			return null;
-			
-		if (element instanceof IMember)
-			return ((IMember) element).getCompilationUnit();
-		
-		int type= element.getElementType();
-		if (IJavaElement.COMPILATION_UNIT == type)
-			return (ICompilationUnit) element;
-		if (IJavaElement.CLASS_FILE == type)
-			return null;
-			
-		return getCompilationUnit(element.getParent());
 	}
 }
