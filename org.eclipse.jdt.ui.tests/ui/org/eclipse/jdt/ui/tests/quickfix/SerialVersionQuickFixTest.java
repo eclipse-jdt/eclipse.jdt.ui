@@ -12,17 +12,18 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -30,6 +31,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -91,10 +94,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
 		fProject= JavaProjectHelper.createJavaProject("serialIdProject", "bin");
-		Map preferences= fProject.getOptions(true);
-//		JavaProjectHelper.set15CompilerOptions(preferences);
-		fProject.setOptions(preferences);
-		JavaProjectHelper.addRTJar(fProject);
+		fProject.setRawClasspath(new IClasspathEntry[] { JavaCore.newContainerEntry(new Path(JavaRuntime.JRE_CONTAINER))}, null);
 
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(""); //$NON-NLS-1$
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.TYPECOMMENT).setPattern(""); //$NON-NLS-1$
