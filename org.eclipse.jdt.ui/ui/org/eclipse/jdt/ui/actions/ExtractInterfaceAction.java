@@ -152,7 +152,7 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 	private void startRefactoring() {
 		Assert.isNotNull(fRefactoring);
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104
-		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getInputClass()))
+		if (!ActionUtil.isProcessable(getShell(), fRefactoring.getInputType()))
 			return;
 		try{
 			Object newElementToProcess= new RefactoringStarter().activate(fRefactoring, createWizard(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$

@@ -169,7 +169,7 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	private void addReplaceAllCheckbox(Composite result) {
 		String key= "&Change references to the class ''{0}'' into references to the interface (where possible)"; 
-		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputClass().getElementName()});
+		String title= MessageFormat.format(key, new String[]{getExtractInterfaceRefactoring().getInputType().getElementName()});
 		boolean defaultValue= getExtractInterfaceRefactoring().isReplaceOccurrences();
 		fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
 		getExtractInterfaceRefactoring().setReplaceOccurrences(fReplaceAllCheckbox.getSelection());
