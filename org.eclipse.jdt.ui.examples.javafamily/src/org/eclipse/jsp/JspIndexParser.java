@@ -73,12 +73,10 @@ public class JspIndexParser extends AbstractJspParser implements IIndexer {
 			String path= fFile.getFullPath().toString();
 			
 			String encoding= null;
-			/*
-			 try {
+			try {
 				encoding= fFile.getCharset();
 			} catch (CoreException e1) {
 			}
-			*/
 			if (encoding == null)
 				encoding= ResourcesPlugin.getEncoding();
 			
