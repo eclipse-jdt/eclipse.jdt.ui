@@ -22,6 +22,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -54,7 +55,10 @@ class LaunchConfigTypeChange extends Change {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return new RefactoringStatus();
+		RefactoringStatus refactoringStatus= new RefactoringStatus();
+		if (!fConfig.exists())
+			refactoringStatus.addFatalError(JUnitMessages.getString("LaunchConfigTypeChange.configDeleted")); //$NON-NLS-1$
+		return refactoringStatus;
 	}
 	
 	/* (non-Javadoc)

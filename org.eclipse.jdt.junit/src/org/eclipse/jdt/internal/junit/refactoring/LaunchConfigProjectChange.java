@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -50,7 +51,10 @@ class LaunchConfigProjectChange extends Change {
 	}
 
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return new RefactoringStatus();
+		RefactoringStatus refactoringStatus= new RefactoringStatus();
+		if (!fConfig.exists())
+			refactoringStatus.addFatalError(JUnitMessages.getString("LaunchConfigProjectChange.configDeleted")); //$NON-NLS-1$
+		return refactoringStatus;
 	}
 		
 	/* (non-Javadoc)
