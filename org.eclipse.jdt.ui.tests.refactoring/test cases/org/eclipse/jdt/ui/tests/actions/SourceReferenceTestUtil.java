@@ -29,7 +29,7 @@ class SourceReferenceTestUtil {
 	static void delete(Object[] elems) {
 		DeleteSourceReferencesAction deleteAction= createDeleteAction(elems);
 		deleteAction.update();
-		Assert.assertTrue("delete action enabled", deleteAction.isEnabled());
+		Assert.assertTrue("delete action incorrectly disabled", deleteAction.isEnabled());
 		deleteAction.run();
 	}
 
@@ -45,7 +45,7 @@ class SourceReferenceTestUtil {
 		ISelectionProvider provider= new FakeSelectionProvider(elems);
 		IRefactoringAction copyAction= ReorgGroup.createCopyAction(provider);
 		copyAction.update();
-		Assert.assertTrue("copy enabled", copyAction.isEnabled());
+		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
@@ -53,7 +53,7 @@ class SourceReferenceTestUtil {
 		ISelectionProvider provider1= new FakeSelectionProvider(elems);
 		IRefactoringAction pasteAction= ReorgGroup.createPasteAction(provider1);
 		pasteAction.update();
-		Assert.assertTrue("paste enabled", pasteAction.isEnabled());
+		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();
 	}
 
