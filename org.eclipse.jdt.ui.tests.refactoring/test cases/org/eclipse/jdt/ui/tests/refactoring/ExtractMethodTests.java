@@ -425,6 +425,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
+	public void test123() throws Exception {
+		invalidSelectionTest();
+	}
+	
 	//---- invalid local type selection
 	
 	public void test130() throws Exception {
