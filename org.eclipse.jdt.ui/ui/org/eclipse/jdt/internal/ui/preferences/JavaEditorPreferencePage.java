@@ -1060,16 +1060,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		if (computeStateMask(fOverlayStore.getString(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)) == -1) {
 			// Fix possible illegal modifier string
 			int stateMask= fOverlayStore.getInt(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-			StringBuffer buf= new StringBuffer(""); //$NON-NLS-1$
-			if ((stateMask & SWT.CTRL) == SWT.CTRL)
-				appendModifierString(buf, SWT.CTRL);
-			if ((stateMask & SWT.ALT) == SWT.ALT)
-				appendModifierString(buf, SWT.ALT);
-			if ((stateMask & SWT.SHIFT) == SWT.SHIFT)
-				appendModifierString(buf, SWT.SHIFT);
-			if ((stateMask & SWT.COMMAND) == SWT.COMMAND)
-				appendModifierString(buf,  SWT.COMMAND);
-			fBrowserLikeLinksKeyModifierText.setText(buf.toString());
+			fBrowserLikeLinksKeyModifierText.setText(EditorUtility.getModifierString(stateMask));
 		}
 		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
@@ -1117,16 +1108,6 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 
 		return composite;
-	}
-
-	private void appendModifierString(StringBuffer buf, int modifier) {
-		if (buf == null)
-			return;
-		
-		if (buf.length() > 0)
-			buf.append(DELIMITER);
-		
-		buf.append(Action.findModifierString(modifier));
 	}
 
 	private void handleBrowserLikeLinksKeyModifierModified() {
