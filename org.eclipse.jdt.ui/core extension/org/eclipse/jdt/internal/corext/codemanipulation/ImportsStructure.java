@@ -64,9 +64,9 @@ import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
@@ -502,6 +503,62 @@ public final class ImportsStructure implements IImportsStructure {
 			return ast.newSimpleType(ASTNodeFactory.newName(ast, res));
 		}
 		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalizedBinding)));
+	}
+	
+	/**
+	 * Adds a new import declaration that is sorted in the structure using
+	 * a best match algorithm. If an import already exists, the import is
+	 * not added.
+	 * @param typeSig The type in signature notation
+	 * @param ast The ast to create the type for
+	 * @return Returns the a new AST node that is either simple if the import was successful or 
+	 * fully qualified type name if the import could not be added due to a conflict. 
+	 */
+	public Type addImportFromSignature(String typeSig, AST ast) {
+		if (typeSig == null || typeSig.length() == 0) {
+			throw new IllegalArgumentException("Invalid type signature: empty or null"); //$NON-NLS-1$
+		}
+		char ch= typeSig.charAt(0);  //workaround for bug 85713
+		if (ch == Signature.C_STAR || ch == Signature.C_EXTENDS || ch == Signature.C_SUPER) {
+			WildcardType wildcardType= ast.newWildcardType();
+			if (ch != Signature.C_STAR) {
+				Type bound= addImportFromSignature(typeSig.substring(1), ast);
+				wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
+			}
+			return wildcardType;
+		}
+		
+		int sigKind= Signature.getTypeSignatureKind(typeSig);
+		switch (sigKind) {
+			case Signature.BASE_TYPE_SIGNATURE:
+				return ast.newPrimitiveType(PrimitiveType.toCode(Signature.toString(typeSig)));
+			case Signature.ARRAY_TYPE_SIGNATURE:
+				Type elementType= addImportFromSignature(Signature.getElementType(typeSig), ast);
+				return ast.newArrayType(elementType, Signature.getArrayCount(typeSig));
+			case Signature.CLASS_TYPE_SIGNATURE:
+				String erasureSig= Signature.getTypeErasure(typeSig);
+
+				String erasureName= Signature.toString(erasureSig);
+				if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
+					erasureName= internalAddImport(erasureName);
+				}
+				Type baseType= ast.newSimpleType(ASTNodeFactory.newName(ast, erasureName));
+				String[] typeArguments= Signature.getTypeArguments(typeSig);
+				if (typeArguments.length > 0) {
+					ParameterizedType type= ast.newParameterizedType(baseType);
+					List argNodes= type.typeArguments();
+					for (int i= 0; i < typeArguments.length; i++) {
+						argNodes.add(addImportFromSignature(typeArguments[i], ast));
+					}
+					return type;
+				}
+				return baseType;
+			case Signature.TYPE_VARIABLE_SIGNATURE:
+				return ast.newSimpleType(ast.newSimpleName(Signature.toString(typeSig)));
+			default:
+				JavaPlugin.logErrorMessage("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
+		}
+		return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
 	}
 	
 
@@ -1139,11 +1196,8 @@ public final class ImportsStructure implements IImportsStructure {
 
 		if (!USE_ALLTYPE_CACHE) {
 			final int[] count= {0 };
-			ITypeNameRequestor requestor= new ITypeNameRequestor() {
-				public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
-					processType(packageName, simpleTypeName, enclosingTypeNames);
-				}
-				public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
+			TypeNameRequestor requestor= new TypeNameRequestor() {
+				public void acceptType(int flags, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 					processType(packageName, simpleTypeName, enclosingTypeNames);
 				}
 				private String getTypeContainerName(char[] packageName, char[][] enclosingTypeNames) {
