@@ -11,6 +11,28 @@
 Eclipse Platform Build Notes&nbsp;<br>
 Java Development Tooling UI</h1>
 
+<p>Eclipse Build Input October ??<sup>th</sup> 2002
+<h2>
+What's new in this drop</h2>
+
+<ul>
+<li>Added new 'Promote Local Variable to Field' refactoring - to perform, select a local variable in the
+editor and choose 'Promote Local Variable to Field'. You can then select the field's visibility and other
+modifiers (if applicable). If the variable is initialized on creation, then the refactoring
+allows moving the initialization to the class' constructors or the new field's declaration.</li>
+<li>Added new 'Convert Anonymous Class to Nested Class' refactoring - to perform, select an
+anonymous class delcaration and choose 'Convert Anonymous to Inner'. You can then choose
+a name and  visibility for the new class. The refactoring then also passes accessed local variables to 
+the new class via added constructor variables. This refactoring is useful for instance when you realize that
+your inner class has grown too big to be anonymous. Btw, you can then 
+(if it ever grows even more or proves to be more generally useful) move it to top level by using the 
+'Move Nested to Top Level' refactoring.</li>
+</ul>
+
+<h1>
+Eclipse Platform Build Notes&nbsp;<br>
+Java Development Tooling UI</h1>
+
 <p>Eclipse Build Input October 16<sup>th</sup> 2002
 <h2>
 What's new in this drop</h2>
