@@ -24,6 +24,9 @@ import junit.framework.TestSuite;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -76,7 +79,9 @@ public class QuickFixTest extends TestCase {
 	
 	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
-			assertTrue("Problem type not marked with lightbulb", JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId()));
+			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId())) {
+				assertTrue("Problem type not marked with lightbulb: " + problem, false);
+			}
 		}
 	}	
 	
@@ -226,13 +231,54 @@ public class QuickFixTest extends TestCase {
 			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
 			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
 			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i].getMessage()).append('\n');
+				buf.append(problems[i]);
+				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
+				buf.append('\n');
 			}
 			assertTrue(buf.toString(), false);
 
 		}
+		return collectCorrections(cu, problems[0]);
+	}
+	
+	protected final ArrayList collectCorrections2(ICompilationUnit cu, int nProblems) throws JavaModelException {
+		
+		final ArrayList problemsList= new ArrayList();
+		IProblemRequestor requestor= new IProblemRequestor() {
+			public void acceptProblem(IProblem problem) {
+				problemsList.add(problem);
+			}
+			public void beginReporting() {
+				problemsList.clear();
+			}
+			public void endReporting() {}
+			public boolean isActive() {	return true;}
+		};
+		
+		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
+		try {
+			wc.reconcile(true, null);
+		} finally {
+			wc.destroy();
+		}
+		
+		IProblem[] problems= (IProblem[]) problemsList.toArray(new IProblem[problemsList.size()]);
+		if (problems.length != nProblems) {
+			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
+			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
+			for (int i= 0; i < problems.length; i++) {
+				buf.append(problems[i]);
+				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
+				buf.append('\n');
+			}
+			assertTrue(buf.toString(), false);
 
-		IProblem curr= problems[0];
+		}
+		return collectCorrections(cu, problems[0]);
+	}
+		
+	protected final ArrayList collectCorrections(ICompilationUnit cu, IProblem curr) {
+			
 		int offset= curr.getSourceStart();
 		int length= curr.getSourceEnd() + 1 - offset;
 		

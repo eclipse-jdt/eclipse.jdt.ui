@@ -71,6 +71,19 @@ public class CoreTests extends TestCase {
 	}
 
 	public static void assertEqualString(String current, String expected) {	
+		if (current == null || expected == null) {
+			if (current == expected) {
+				return;
+			}
+			if (current == null) {
+				assertTrue("Content not as expected: is 'null' expected: " + expected, false);
+			} else {
+				assertTrue("Content not as expected: expected 'null' is: " + current, false);
+			}
+			
+		}
+		
+		
 		int diffPos= getDiffPos(current, expected);
 		if (diffPos != -1) {
 			int diffAhead= Math.max(0, diffPos - printRange);
