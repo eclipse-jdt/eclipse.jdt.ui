@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Action to push down methods and fields into subclasses.
@@ -87,6 +88,9 @@ public class PushDownAction extends SelectionDispatchAction{
 		try {
 			setEnabled(canEnable(getSelectedMembers(selection)));
 		} catch (JavaModelException e) {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
 			setEnabled(false);//no ui
 		}
 	}
