@@ -1388,6 +1388,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			
 			setStatusLineErrorMessage(null);
 			
+			updateState(getEditorInput());
+			validateState(getEditorInput());
+			
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
 			ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
 			
