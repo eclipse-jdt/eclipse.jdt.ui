@@ -107,6 +107,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	private IDocument fDocument;
 	private ILinkedPositionListener fListener;
 	private String fPositionCategoryName;
+	private boolean fMustLeave;
 
 
 	/**
@@ -451,16 +452,25 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	}
 	
 	private void leave(boolean success) {
-		uninstall(success);
-
-		if (fListener != null)
-			fListener.exit(success);		
+		try {
+			uninstall(success);
+	
+			if (fListener != null)
+				fListener.exit(success);
+		} finally {
+			fMustLeave= false;
+		}		
 	}
 
 	/*
 	 * @see IDocumentListener#documentAboutToBeChanged(DocumentEvent)
 	 */
 	public void documentAboutToBeChanged(DocumentEvent event) {
+
+		if (fMustLeave) {
+			leave(true);
+			return;
+		}
 
 		IDocument document= event.getDocument();
 
@@ -554,6 +564,11 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 				int offset= position.getOffset();
 				
 				if (position.equals(currentPosition)) {
+					// see bug 41849
+					if (length + deltaLength < 0) {
+						fMustLeave= true;
+						return;
+					}
 					position.setLength(length + deltaLength);					
 				} else if (offset > currentPosition.getOffset()) {
 					position.setOffset(offset + deltaLength);
@@ -617,6 +632,11 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	 * @see org.eclipse.jface.text.IAutoIndentStrategy#customizeDocumentCommand(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.DocumentCommand)
 	 */
 	public void customizeDocumentCommand(IDocument document, DocumentCommand command) {
+
+		if (fMustLeave) {
+			leave(true);
+			return;
+		}
 
 		// don't interfere with preceding auto edit strategies
 		if (command.getCommandCount() != 1) {
