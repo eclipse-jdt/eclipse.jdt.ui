@@ -95,6 +95,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 	private static final String PREF_PB_CIRCULAR_BUILDPATH= JavaCore.CORE_CIRCULAR_CLASSPATH;
 	private static final String PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE= JavaCore.COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE;
 	private static final String PREF_COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
+	private static final String PREF_PB_DUPLICATE_RESOURCE= JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE;
 
 
 
@@ -131,7 +132,8 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 			PREF_PB_UNUSED_PARAMETER, PREF_PB_SYNTHETIC_ACCESS_EMULATION, PREF_PB_NON_EXTERNALIZED_STRINGS,
 			PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 			PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_INCOMPLETE_BUILDPATH,
-			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_COMPILER_TASK_TAGS
+			PREF_PB_CIRCULAR_BUILDPATH, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, PREF_COMPILER_TASK_TAGS,
+			PREF_PB_DUPLICATE_RESOURCE
 		};	
 	}
 
@@ -374,6 +376,9 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.pb_build_path_cycles.label"); //$NON-NLS-1$
 		addComboBox(combos, label, PREF_PB_CIRCULAR_BUILDPATH, errorWarning, errorWarningLabels, 0);
+
+		label= JavaUIMessages.getString("CompilerPreferencePage.pb_duplicate_resources.label"); //$NON-NLS-1$
+		addComboBox(combos, label, PREF_PB_DUPLICATE_RESOURCE, errorWarning, errorWarningLabels, 0);
 		
 		label= JavaUIMessages.getString("CompilerPreferencePage.build_invalid_classpath.label"); //$NON-NLS-1$
 		addCheckBox(othersComposite, label, PREF_BUILD_INVALID_CLASSPATH, abortIgnoreValues, 0);
