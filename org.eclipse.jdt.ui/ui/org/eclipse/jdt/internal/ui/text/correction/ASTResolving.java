@@ -97,27 +97,48 @@ public class ASTResolving {
 				return getParameterTypeBinding(node, methodInvocation.arguments(), methodBinding);
 			}
 			break;			
-		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION:
+		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION: {
 			SuperConstructorInvocation superInvocation= (SuperConstructorInvocation) parent;
 			IMethodBinding superBinding= superInvocation.resolveConstructorBinding();
+			if (superBinding == null) { // jdt.core does not guess contructors with problems in arguments
+				ITypeBinding parentType= Bindings.getBindingOfParentType(parent);
+				if (parentType != null && parentType.getSuperclass() != null) {
+					superBinding= guessContructorBinding(parentType.getSuperclass(), superInvocation.arguments());
+				}
+			}
 			if (superBinding != null) {
 				return getParameterTypeBinding(node, superInvocation.arguments(), superBinding);
 			}
 			break;
-		case ASTNode.CONSTRUCTOR_INVOCATION:
+		}
+		case ASTNode.CONSTRUCTOR_INVOCATION: {
 			ConstructorInvocation constrInvocation= (ConstructorInvocation) parent;
 			IMethodBinding constrBinding= constrInvocation.resolveConstructorBinding();
+			if (constrBinding == null) { // jdt.core does not guess contructors with problems in arguments
+				ITypeBinding parentType= Bindings.getBindingOfParentType(parent);
+				if (parentType != null) {
+					constrBinding= guessContructorBinding(parentType, constrInvocation.arguments());
+				}
+			}
 			if (constrBinding != null) {
 				return getParameterTypeBinding(node, constrInvocation.arguments(), constrBinding);
 			}
 			break;
-		case ASTNode.CLASS_INSTANCE_CREATION:
+		}
+		case ASTNode.CLASS_INSTANCE_CREATION: {
 			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
 			IMethodBinding creationBinding= creation.resolveConstructorBinding();
+			if (creationBinding == null) { // jdt.core does not guess contructors with problems in arguments
+				ITypeBinding type= creation.getAST().apiLevel() == AST.JLS2 ? creation.getName().resolveTypeBinding() : creation.getType().resolveBinding();
+				if (type != null) {
+					creationBinding= guessContructorBinding(type, creation.arguments());
+				}
+			}
 			if (creationBinding != null) {
 				return getParameterTypeBinding(node, creation.arguments(), creationBinding);
 			}
 			break;
+		}
 		case ASTNode.PARENTHESIZED_EXPRESSION:
 			return guessBindingForReference(parent);
 		case ASTNode.ARRAY_ACCESS:
@@ -222,6 +243,17 @@ public class ASTResolving {
 		return null;
 	}
 	
+	private static IMethodBinding guessContructorBinding(ITypeBinding superclass, List arguments) {
+		IMethodBinding[] declaredMethods= superclass.getDeclaredMethods();
+		for (int i= 0; i < declaredMethods.length; i++) {
+			IMethodBinding curr= declaredMethods[i];
+			if (curr.isConstructor() && curr.getParameterTypes().length == arguments.size()) {
+				return curr;
+			}
+		}
+		return null;
+	}
+
 	public static Type guessTypeForReference(AST ast, ASTNode node) {
 		ASTNode parent= node.getParent();
 		while (parent != null) {
@@ -448,17 +480,23 @@ public class ASTResolving {
 		return (TryStatement) node;
 	}	
 	
+	public static boolean isInsideConstructorInvocation(MethodDeclaration methodDeclaration, ASTNode node) {
+		if (methodDeclaration.isConstructor()) {
+			Statement statement= ASTResolving.findParentStatement(node);
+			if (statement instanceof ConstructorInvocation || statement instanceof SuperConstructorInvocation) {
+				return true; // argument in a this or super call 
+			}
+		}
+		return false;
+	}
+	
 	public static boolean isInStaticContext(ASTNode selectedNode) {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
-			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			if (methodDecl.isConstructor()) {
-				Statement statement= findParentStatement(selectedNode);
-				if (statement instanceof ConstructorInvocation || statement instanceof SuperConstructorInvocation) {
-					return true; // argument in a this or super call 
-				}
+			if (isInsideConstructorInvocation((MethodDeclaration) decl, selectedNode)) {
+				return true;
 			}
-			return Modifier.isStatic(methodDecl.getModifiers());
+			return Modifier.isStatic(decl.getModifiers());
 		} else if (decl instanceof Initializer) {
 			return Modifier.isStatic(((Initializer)decl).getModifiers());
 		} else if (decl instanceof FieldDeclaration) {

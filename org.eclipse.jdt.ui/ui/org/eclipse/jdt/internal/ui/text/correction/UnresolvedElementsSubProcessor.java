@@ -175,6 +175,8 @@ public class UnresolvedElementsSubProcessor {
 		}
 	}
 	
+
+	
 	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) {
 		String name= simpleName.getIdentifier();
 		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
@@ -185,7 +187,7 @@ public class UnresolvedElementsSubProcessor {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
 			proposals.add(new NewVariableCompletionProposal(label, cu, NewVariableCompletionProposal.PARAM, simpleName, null, relevance, image));
 		}
-		if (type == ASTNode.METHOD_DECLARATION || type == ASTNode.INITIALIZER) {
+		if (type == ASTNode.INITIALIZER || (type == ASTNode.METHOD_DECLARATION && !ASTResolving.isInsideConstructorInvocation((MethodDeclaration) bodyDeclaration, node))) {
 			int relevance= StubUtility.hasLocalVariableName(cu.getJavaProject(), name) ? 10 : 7;
 			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createlocal.description", simpleName.getIdentifier()); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
@@ -316,42 +318,51 @@ public class UnresolvedElementsSubProcessor {
 
 			ITypeBinding objectBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 			String identifier= node.getIdentifier();
+			boolean isInStaticContext= ASTResolving.isInStaticContext(node);
 			
-			for (int i= 0; i < varsAndMethodsInScope.length; i++) {
+			loop: for (int i= 0; i < varsAndMethodsInScope.length; i++) {
 				IBinding varOrMeth= varsAndMethodsInScope[i];
 				if (varOrMeth instanceof IVariableBinding) {
 					IVariableBinding curr= (IVariableBinding) varOrMeth;
 					String currName= curr.getName();
+					if (currName.equals(otherNameInAssign)) {
+						continue loop;
+					}
 					boolean isFinal= Modifier.isFinal(curr.getModifiers());
-					if (!currName.equals(otherNameInAssign) && !(isFinal && curr.isField() && isWriteAccess)) {
-						int relevance= 0;
-						if (NameMatcher.isSimilarName(currName, identifier)) {
-							relevance += 3; // variable with a similar name than the unresolved variable
-						}
-						if (currName.equalsIgnoreCase(identifier)) {
-							relevance+= 5;
-						}
-						ITypeBinding varType= curr.getType();
-						if (varType != null) {
-							if (guessedType != null && guessedType != objectBinding) { // too many result with object
-								// var type is compatible with the guessed type
-								if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
-										|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
-									relevance += 2; // unresolved variable can be assign to this variable
-								}
+					if (isFinal && curr.isField() && isWriteAccess) {
+						continue loop;
+					}
+					if (isInStaticContext && !Modifier.isStatic(curr.getModifiers())) {
+						continue loop;
+					}
+					
+					int relevance= 0;
+					if (NameMatcher.isSimilarName(currName, identifier)) {
+						relevance += 3; // variable with a similar name than the unresolved variable
+					}
+					if (currName.equalsIgnoreCase(identifier)) {
+						relevance+= 5;
+					}
+					ITypeBinding varType= curr.getType();
+					if (varType != null) {
+						if (guessedType != null && guessedType != objectBinding) { // too many result with object
+							// var type is compatible with the guessed type
+							if (!isWriteAccess && TypeRules.canAssign(varType, guessedType)
+									|| isWriteAccess && TypeRules.canAssign(guessedType, varType)) {
+								relevance += 2; // unresolved variable can be assign to this variable
 							}
-							if (methodSenderName != null && hasMethodWithName(varType, methodSenderName)) {
-								relevance += 2;
-							}
-							if (fieldSenderName != null && hasFieldWithName(varType, fieldSenderName)) {
-								relevance += 2;
-							}
 						}
-									
-						if (relevance > 0) {
-							String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
-							proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
+						if (methodSenderName != null && hasMethodWithName(varType, methodSenderName)) {
+							relevance += 2;
 						}
+						if (fieldSenderName != null && hasFieldWithName(varType, fieldSenderName)) {
+							relevance += 2;
+						}
+					}
+								
+					if (relevance > 0) {
+						String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changevariable.description", currName); //$NON-NLS-1$
+						proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), currName, relevance));
 					}
 				} else if (varOrMeth instanceof IMethodBinding) {
 					IMethodBinding curr= (IMethodBinding) varOrMeth;
