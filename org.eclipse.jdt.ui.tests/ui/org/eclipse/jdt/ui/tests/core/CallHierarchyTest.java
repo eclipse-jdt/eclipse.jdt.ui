@@ -25,9 +25,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchy;
-import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapper;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 public class CallHierarchyTest extends TestCase {
     
