@@ -14,11 +14,13 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+
 /**
  * Wraps a scanner and offers convenient methods for finding tokens 
  */
 public class TokenScanner {
-
+	
 	private IScanner fScanner;
 	private int fEndPosition;
 	
@@ -155,6 +157,32 @@ public class TokenScanner {
 		readToToken(token, startOffset);
 		return getCurrentEndOffset();
 	}
+	
+	/**
+	 * Reads from the given offset until a non-comment token is reached and returns the start offset of the comments
+	 * directly ahead of the token.
+	 * @exception InvalidInputException Thrown when the end of the file has been reached 
+	 */		
+	public int getTokenCommentStart(int startOffset, TextBuffer buffer) throws InvalidInputException {
+		int curr= 0;
+		int res= -1;
+		int lastCommentEndLine= -1;
+		setOffset(startOffset);
+		do {
+			curr= fScanner.getNextToken();
+			if (curr == ITerminalSymbols.TokenNameEOF) {
+				throw new InvalidInputException("End of File"); //$NON-NLS-1$
+			}
+
+			int startLine= buffer.getLineOfOffset(getCurrentStartOffset());
+			if (lastCommentEndLine == -1 || startLine - lastCommentEndLine > 1) {
+				res= getCurrentStartOffset();
+			}
+			lastCommentEndLine= buffer.getLineOfOffset(getCurrentEndOffset());
+		} while (isComment(curr));
+		return res;
+	}	
+	
 
 	public int readAfterTokens(int[] tokens, boolean ignoreComments, int startOffset, int defaultPos) throws InvalidInputException {
 		setOffset(startOffset);

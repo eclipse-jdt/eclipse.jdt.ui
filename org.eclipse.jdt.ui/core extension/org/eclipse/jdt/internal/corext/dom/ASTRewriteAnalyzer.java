@@ -242,8 +242,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			return getIndent(node.getStartPosition());
 		}
 		
-		protected int getStartOfNextNode(int currIndex, int defaultPos) {
-			return getNextExistingStartPos(fList, currIndex + 1, defaultPos);
+		protected int getStartOfNextNode(int nextIndex, int defaultPos) {
+			return getNextExistingStartPos(fList, nextIndex, defaultPos);
 		}
 		
 		public int rewriteList(List list, int startPos, String keyword, String separator) {
@@ -267,7 +267,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				} else {
 					before++;
 					if (before == 1) { // first entry
-						currPos= elem.getStartPosition();
+						currPos= getStartOfNextNode(0, startPos);
 					}
 					if (!isRemoved(elem)) {
 						after++;
@@ -300,7 +300,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 				} else {
 					before--;
 					int currEnd= elem.getStartPosition() + elem.getLength();
-					int nextStart= getStartOfNextNode(i, currEnd); // start of next 
+					int nextStart= getStartOfNextNode(i + 1, currEnd); // start of next 
 				
 					if (isRemoved(elem)) {
 						// delete including the comma
@@ -459,9 +459,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer.ListRewriter#getStartPosOfNextNode(int, int)
 		 */
-		protected int getStartOfNextNode(int currIndex, int defaultPos) {
-			// TODO Auto-generated method stub
-			return super.getStartOfNextNode(currIndex, defaultPos);
+		protected int getStartOfNextNode(int nextIndex, int currEnd) {
+			try {
+				for (int i= nextIndex; i < fList.size(); i++) {
+					if (!isInserted((ASTNode) fList.get(i))) {
+						return getScanner().getTokenCommentStart(currEnd, fTextBuffer);
+					}
+				}
+			} catch (InvalidInputException e) {
+				// ignore
+			}
+			return currEnd;
 		}
 	}
 	
@@ -566,6 +574,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		}
 		return defaultOffset;
 	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	public int hashCode() {
+		// TODO Auto-generated method stub
+		return super.hashCode();
+	}
+
 	
 	final ASTNode findPreviousExistingNode(List list, ASTNode node) {
 		ASTNode res= null;
