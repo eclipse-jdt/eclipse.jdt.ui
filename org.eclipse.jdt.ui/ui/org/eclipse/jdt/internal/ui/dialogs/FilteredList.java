@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
@@ -83,6 +84,8 @@ public class FilteredList extends Composite {
 	
 	private FilterMatcher fFilterMatcher= new DefaultFilterMatcher();
 	private Comparator fComparator;
+	
+	private UpdateThread fUpdateThread;
 
 	private static class Label {
 		public final String string;
@@ -165,6 +168,8 @@ public class FilteredList extends Composite {
 		fList.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				fRenderer.dispose();
+				if (fUpdateThread != null)
+					fUpdateThread.requestStop();
 			}
 		});
 		
@@ -204,11 +209,8 @@ public class FilteredList extends Composite {
 
 		fSorter.sort(fLabels, fElements);
 
-		fFilteredIndices= new int[length];
-		fFilteredCount= filter();
-		
+		fFilteredIndices= new int[length];	
 		fFoldedIndices= new int[length];
-		fFoldedCount= fold();
 
 		updateList();
 	}
@@ -342,9 +344,17 @@ public class FilteredList extends Composite {
 	public void setFilter(String filter) {
 		fFilter= (filter == null) ? "" : filter; //$NON-NLS-1$
 
+		updateList();
+	}
+
+	private void updateList() {
 		fFilteredCount= filter();
 		fFoldedCount= fold();
-		updateList();
+
+		if (fUpdateThread != null)
+			fUpdateThread.requestStop();
+		fUpdateThread= new UpdateThread(new TableUpdater(fList, fFoldedCount));
+		fUpdateThread.start();
 	}
 	
 	/**
@@ -424,38 +434,121 @@ public class FilteredList extends Composite {
 		return k;
 	}	
 
-	/*
-	 * Updates the list widget.
-	 */	 
-	private void updateList() {
-		if (fList.isDisposed())
-			return;
-			
-		fList.setRedraw(false);
-		
-		// resize table
-		int itemCount= fList.getItemCount();
-		if (fFoldedCount < itemCount)
-			fList.remove(0, itemCount - fFoldedCount - 1);
-		else if (fFoldedCount > itemCount)
-			for (int i= 0; i != fFoldedCount - itemCount; i++)
-				new TableItem(fList, SWT.NONE);
-
-		// fill table
-		TableItem[] items= fList.getItems();
-		for (int i= 0; i != fFoldedCount; i++) {
-			TableItem item= items[i];
-			Label label= fLabels[fFilteredIndices[fFoldedIndices[i]]];
-			
-			item.setText(label.string);
-			item.setImage(label.image);
-		}
-		// select first item if any
-		if (fList.getItemCount() > 0)
-			fList.setSelection(0);
-			
-		fList.setRedraw(true);		
-		fList.notifyListeners(SWT.Selection, new Event());
+	private interface IncrementalRunnable extends Runnable {
+		public int getCount();		
+		public void cancel();
 	}
+
+	private class TableUpdater implements IncrementalRunnable {
+		private final Display fDisplay;
+		private final Table fTable;
+		private final int fCount;
+		private int fIndex;
+		
+		public TableUpdater(Table table, int count) {
+			fTable= table;
+			fDisplay= table.getDisplay();
+			fCount= count;
+		}
+		
+		/*
+		 * @see IncrementalRunnable#getCount()
+		 */
+		public int getCount() {
+			return fCount + 1;	
+		}
+		
+		/*
+		 * @see IncrementalRunnable#cancel()
+		 */
+		public void cancel() {
+			fIndex= 0;
+		}
+		
+		/*
+		 * @see Runnable#run()
+		 */
+		public void run() {
+			final int index= fIndex++;
+
+			fDisplay.syncExec(new Runnable() {
+				public void run() {
+					if (fTable.isDisposed())
+						return;
+					
+			 		final int itemCount= fTable.getItemCount();
+					
+					if (index < fCount) {
+						final TableItem item= (index < itemCount)
+							? fTable.getItem(index)
+							: new TableItem(fTable, SWT.NONE);
 	
+						final Label label= fLabels[fFilteredIndices[fFoldedIndices[index]]];
+	
+						item.setText(label.string);
+						item.setImage(label.image);		
+
+						// select first item
+						if (index == 0) {
+							fTable.setSelection(0);				 		
+							fTable.notifyListeners(SWT.Selection, new Event());
+						}
+
+					// finish
+					} else {
+				 		if (fCount < itemCount) {
+				 			fTable.setRedraw(false);
+					 		fTable.remove(fCount, itemCount - 1);
+				 			fTable.setRedraw(true);
+				 		}
+
+						// table empty -> no selection
+						if (fCount == 0)
+							fTable.notifyListeners(SWT.Selection, new Event());
+					}
+				}
+			});
+		}
+	}
+
+	private static class UpdateThread extends Thread {
+
+		/** The incremental runnable */
+		private final IncrementalRunnable fRunnable;
+		/** A flag indicating a thread stop request */
+		private boolean fStop;
+		
+		/**
+		 * Creates an update thread.
+		 */
+		public UpdateThread(IncrementalRunnable runnable) {
+			fRunnable= runnable;
+		}
+		
+		/**
+		 * Requests the thread to stop.
+		 */
+		public void requestStop() {
+			fStop= true;
+		}
+		
+		/**
+		 * @see Runnable#run()
+		 */
+		public void run() {
+			final int count= fRunnable.getCount();
+			for (int i= 0; i != count; i++) {
+				if (i % 50 == 0)
+					try { Thread.sleep(10); } catch (InterruptedException e) {}
+
+				if (fStop) {
+					fRunnable.cancel();
+					break;
+				}
+
+				fRunnable.run();
+			}		
+		}
+	}
+
 }

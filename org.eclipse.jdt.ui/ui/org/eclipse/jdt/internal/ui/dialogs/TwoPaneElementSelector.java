@@ -197,7 +197,10 @@ public class TwoPaneElementSelector extends AbstractElementListSelectionDialog {
 			return;
 			
 		fQualifierElements= getFoldedElements(index);
-		updateLowerListWidget(fQualifierElements);
+		if (fQualifierElements == null)
+			updateLowerListWidget(new Object[] {});
+		else
+			updateLowerListWidget(fQualifierElements);
 
 		updateOkState();		
 	}
