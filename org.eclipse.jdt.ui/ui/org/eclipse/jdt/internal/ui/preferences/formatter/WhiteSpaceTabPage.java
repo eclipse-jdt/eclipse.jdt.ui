@@ -412,9 +412,11 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
         private void restoreSelection() {
             final boolean selectSyntax= fDialogSettings.getBoolean(PREF_VIEW_KEY);
             if (selectSyntax) {
+            	fSyntaxComponent.refreshState();
                 fSwitchCombo.setText(fItems[1]);
                 fPageBook.showPage(fSyntaxComponent.getControl());
 			} else {
+            	fJavaElementComponent.refreshState();
 			    fSwitchCombo.setText(fItems[0]);
 			    fPageBook.showPage(fJavaElementComponent.getControl());
 			}
