@@ -4,6 +4,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -68,22 +69,37 @@ public class TempDeclarationFinder {
 
 		//overridden
 		public boolean visitNode(ASTNode node) {
-			if (!(node instanceof VariableDeclaration))
+			if (node instanceof VariableDeclaration)	
+				return visitVariableDeclaration((VariableDeclaration)node);
+			else if (node instanceof SimpleName)
+					return visitSimpleName((SimpleName)node);
+			else
 				return super.visitNode(node);
-			VariableDeclaration vd= (VariableDeclaration)node;
+		}
+		
+		private boolean addNodeAndStop(ASTNode node){
+			fNode= node;
+			return false;
+		}
+		
+		private boolean visitSimpleName(SimpleName name) {
+			if (getSelection().coveredBy(name))
+				return addNodeAndStop(name);
+			return super.visitNode(name);				
+		}
+		
+		private boolean visitVariableDeclaration(VariableDeclaration vd) {
 			if (vd.getInitializer() != null){
-				TextRange declarationRange= TextRange.createFromStartAndExclusiveEnd(node.getStartPosition(), vd.getInitializer().getStartPosition());
-				if (getSelection().coveredBy(declarationRange)){
-					fNode= node;
-					return false;
-				} else 
-					return super.visitNode(node);
+				TextRange declarationRange= TextRange.createFromStartAndExclusiveEnd(vd.getStartPosition(), vd.getInitializer().getStartPosition());
+				if (getSelection().coveredBy(declarationRange))
+					return addNodeAndStop(vd);
+				else 
+					return super.visitNode(vd);
 			} else {
-				if (getSelection().coveredBy(node)){
-					fNode= node;
-					return false;
-				} else 
-					return super.visitNode(node);
+				if (getSelection().coveredBy(vd))
+					return addNodeAndStop(vd);
+				else 
+					return super.visitNode(vd);
 			}
 		}
 		
