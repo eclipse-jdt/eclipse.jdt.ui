@@ -185,8 +185,8 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		
-		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
-		if (surroundingTry != null) {
+		TryStatement surroundingTry= ASTResolving.findParentTryStatement(selectedNode);
+		if (surroundingTry != null && ASTNodes.isParent(surroundingTry.getBody(), selectedNode)) {
 			ASTRewrite rewrite= new ASTRewrite(surroundingTry);
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addadditionalcatch.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);

@@ -300,9 +300,22 @@ public class ASTResolving {
 	public static Statement findParentStatement(ASTNode node) {
 		while ((node != null) && (!(node instanceof Statement))) {
 			node= node.getParent();
+			if (node instanceof BodyDeclaration) {
+				return null;
+			}
 		}
 		return (Statement) node;
 	}
+	
+	public static TryStatement findParentTryStatement(ASTNode node) {
+		while ((node != null) && (!(node instanceof TryStatement))) {
+			node= node.getParent();
+			if (node instanceof BodyDeclaration) {
+				return null;
+			}
+		}
+		return (TryStatement) node;
+	}	
 	
 	public static boolean isInStaticContext(ASTNode selectedNode) {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
