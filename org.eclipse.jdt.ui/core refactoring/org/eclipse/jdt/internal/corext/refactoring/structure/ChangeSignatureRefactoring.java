@@ -83,6 +83,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private static final String CONST_CLASS_DECL = "class A{";//$NON-NLS-1$
 	private static final String CONST_ASSIGN = " i=";		//$NON-NLS-1$
 	private static final String CONST_CLOSE = ";}";			//$NON-NLS-1$
+	private static final String DEFAULT_NEW_PARAM_TYPE= "int";//$NON-NLS-1$
+	private static final String DEFAULT_NEW_PARAM_VALUE= "0"; //$NON-NLS-1$
 	private static final Collection KEYWORD_TYPE_NAMES= Arrays.asList(new String[]{
                                                            	"boolean",  //$NON-NLS-1$
                                                            	"byte",		//$NON-NLS-1$
@@ -172,6 +174,31 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 * 	 * @return List of <code>ParameterInfo</code> objects.	 */
 	public List getParameterInfos(){
 		return fParameterInfos;
+	}
+	
+	public void setupNewParameterInfo(ParameterInfo parameter) {
+		parameter.setDefaultValue(DEFAULT_NEW_PARAM_VALUE);
+		parameter.setType(DEFAULT_NEW_PARAM_TYPE);
+		parameter.setNewName(findUnusedParameterName());
+	} 
+	
+	private String findUnusedParameterName() {
+		Set usedNames= getUsedParameterNames();
+		int i= 0;
+		String prefix= "arg"; 
+		while(true){
+			String candidate= prefix + i++;
+			if (! usedNames.contains(candidate))
+				return candidate;
+		}
+	}
+	
+	private Set getUsedParameterNames(){
+		Set names= new HashSet(2);
+		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+			names.add(((ParameterInfo) iter.next()).getNewName());
+		}
+		return names;
 	}
 	
 	public RefactoringStatus checkParameters() throws JavaModelException{
