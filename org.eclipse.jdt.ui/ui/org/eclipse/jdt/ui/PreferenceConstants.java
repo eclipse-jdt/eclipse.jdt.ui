@@ -1388,9 +1388,9 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 *
-	 * @since 2.1
+	 * @since 3.0
 	 */	
-	public static final String EDITOR_SMART_TYPING= "org.eclipse.jdt.ui.editor.smart_typing"; //$NON-NLS-1$
+	public static final String EDITOR_SMART_TYPING= "smart_typing"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls the "smart semicolon" smart typing handler
@@ -1398,9 +1398,19 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
 	 *
-	 * @since 2.1
+	 * @since 3.0
 	 */	
-	public static final String EDITOR_SMART_SEMICOLON= "org.eclipse.jdt.ui.editor.smart_semicolon"; //$NON-NLS-1$
+	public static final String EDITOR_SMART_SEMICOLON= "smart_semicolon"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that controls the "smart opening brace" smart typing handler
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 *
+	 * @since 3.0
+	 */	
+	public static final String EDITOR_SMART_OPENING_BRACE= "smart_opening_brace"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls if the Java code assist gets auto activated.
@@ -1878,8 +1888,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);
 		
 		// work in progress
-		store.setDefault(PreferenceConstants.EDITOR_SMART_TYPING, false);
-		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, true);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_TYPING, true);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_SEMICOLON, false);
+		store.setDefault(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, false);
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	

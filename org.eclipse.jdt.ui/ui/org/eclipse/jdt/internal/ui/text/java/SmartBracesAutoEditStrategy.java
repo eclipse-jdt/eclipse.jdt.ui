@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
 /**
  * An auto edit strategy which inserts the closing brace automatically if possible.
+ * @deprecated
  */
 public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 	
@@ -163,7 +164,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 				
 				if (isBackspace(command) || isClosingBracket(command)) {
 					// restore
-					command.addCommand(fUndoEvent.getOffset(), fUndoEvent.getLength(), fUndoEvent.getText(), fDocumentListener);
+					command.addCommand(fUndoEvent.getOffset(), fUndoEvent.getLength(), fUndoEvent.getText(), true, fDocumentListener);
 					command.owner= fDocumentListener;
 					command.doit= false;
 					fSourceRegion= null;
@@ -234,7 +235,7 @@ public final class SmartBracesAutoEditStrategy implements IAutoEditStrategy {
 	}
 
 	private void addReplace(IDocument document, DocumentCommand command, int offset, int length, String text) throws BadLocationException {
-		command.addCommand(offset, length, text, fDocumentListener); //$NON-NLS-1$
+		command.addCommand(offset, length, text, true, fDocumentListener); //$NON-NLS-1$
 		command.owner= fDocumentListener;
 		command.doit= false;
 		String oldText= document.get(offset, length);

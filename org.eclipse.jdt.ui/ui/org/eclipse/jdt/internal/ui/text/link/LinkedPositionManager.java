@@ -544,7 +544,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			
 			try {
 				if (position.getType().equals(currentPosition.getType()) && !position.equals(currentPosition))
-					command.addCommand(position.getOffset() + deltaOffset, command.length, command.text, this);
+					command.addCommand(position.getOffset() + deltaOffset, command.length, command.text, true, this);
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			}

@@ -79,6 +79,10 @@ public class WorkInProgressPreferencePage
 		FieldEditor	editor= new BooleanFieldEditor(PreferenceConstants.EDITOR_SMART_SEMICOLON, PreferencesMessages.getString(PREFIX + "smartTyping.smartSemicolon"), getFieldEditorParent()); //$NON-NLS-1$
 		addField(editor);
 		fSmartTypingItems.add(editor);
+
+		editor= new BooleanFieldEditor(PreferenceConstants.EDITOR_SMART_OPENING_BRACE, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), getFieldEditorParent()); //$NON-NLS-1$
+		addField(editor);
+		fSmartTypingItems.add(editor);
 	}
 
 	/*
