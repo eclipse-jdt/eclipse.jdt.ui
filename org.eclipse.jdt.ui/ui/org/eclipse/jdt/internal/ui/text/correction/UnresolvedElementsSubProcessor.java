@@ -51,10 +51,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -67,9 +65,7 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -486,88 +482,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	private static int evauateTypeKind(ASTNode node, IJavaProject project) {
-		int kind= SimilarElementsRequestor.ALL_TYPES;
-		
-		ASTNode parent= node.getParent();
-		while (parent instanceof QualifiedName) {
-			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
-				return SimilarElementsRequestor.REF_TYPES;
-			}
-			node= parent;
-			parent= parent.getParent();
-		}
-		while (parent instanceof Type) {
-			if (parent instanceof QualifiedType) {
-				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
-				}
-			} else if (parent instanceof ParameterizedType) {
-				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
-				}
-			} else if (parent instanceof WildcardType) {
-				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
-				}
-			}
-			node= parent;
-			parent= parent.getParent();
-		}
-		
-		switch (parent.getNodeType()) {
-			case ASTNode.TYPE_DECLARATION:
-				if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
-					kind= SimilarElementsRequestor.INTERFACES;
-				} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
-					kind= SimilarElementsRequestor.CLASSES;
-				}
-				break;
-			case ASTNode.ENUM_DECLARATION:
-				kind= SimilarElementsRequestor.INTERFACES;
-				break;
-			case ASTNode.METHOD_DECLARATION:
-				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
-					kind= SimilarElementsRequestor.CLASSES;
-				} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
-					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
-				}
-				break;
-			case ASTNode.INSTANCEOF_EXPRESSION:
-				kind= SimilarElementsRequestor.REF_TYPES  & ~SimilarElementsRequestor.VARIABLES;
-				break;
-			case ASTNode.THROW_STATEMENT:
-				kind= SimilarElementsRequestor.CLASSES;
-				break;
-			case ASTNode.CLASS_INSTANCE_CREATION:
-				if (((ClassInstanceCreation) parent).getAnonymousClassDeclaration() == null) {
-					kind= SimilarElementsRequestor.CLASSES;
-				} else {
-					kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
-				}
-				break;
-			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				int superParent= parent.getParent().getNodeType();
-				if (superParent == ASTNode.CATCH_CLAUSE) {
-					kind= SimilarElementsRequestor.CLASSES;
-				}
-				break;
-			case ASTNode.TAG_ELEMENT:
-				kind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
-				break;
-			case ASTNode.MARKER_ANNOTATION:
-			case ASTNode.SINGLE_MEMBER_ANNOTATION:
-			case ASTNode.NORMAL_ANNOTATION:
-				kind= SimilarElementsRequestor.ANNOTATIONS;
-				break;
-			case ASTNode.TYPE_PARAMETER:
-				if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
-					kind= SimilarElementsRequestor.INTERFACES;
-				} else {
-					kind= SimilarElementsRequestor.REF_TYPES;
-				}
-				break;
-			default:
-		}
+		int kind= ASTResolving.getPossibleTypeKinds(node);
 		if (!JavaModelUtil.is50OrHigher(project)) {
 			return kind & ~(SimilarElementsRequestor.ANNOTATIONS | SimilarElementsRequestor.ENUMS | SimilarElementsRequestor.VARIABLES);
 		}

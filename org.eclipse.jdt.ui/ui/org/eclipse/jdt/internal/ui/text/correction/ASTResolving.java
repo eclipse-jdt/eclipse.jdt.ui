@@ -130,7 +130,7 @@ public class ASTResolving {
 			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
 			IMethodBinding creationBinding= creation.resolveConstructorBinding();
 			if (creationBinding == null) { // jdt.core does not guess contructors with problems in arguments
-				ITypeBinding type= creation.getAST().apiLevel() == AST.JLS2 ? creation.getName().resolveTypeBinding() : creation.getType().resolveBinding();
+				ITypeBinding type= creation.getType().resolveBinding();
 				if (type != null) {
 					creationBinding= guessContructorBinding(type, creation.arguments());
 				}
@@ -207,11 +207,7 @@ public class ASTResolving {
 		case ASTNode.RETURN_STATEMENT:
 			MethodDeclaration decl= ASTResolving.findParentMethodDeclaration(parent);
 			if (decl != null && !decl.isConstructor()) {
-				if (decl.getAST().apiLevel() == AST.JLS2) {
-					return decl.getReturnType().resolveBinding();
-				} else {
-					return decl.getReturnType2().resolveBinding();
-				}
+				return decl.getReturnType2().resolveBinding();
 			}
 			break;
 		case ASTNode.CAST_EXPRESSION:
@@ -556,20 +552,92 @@ public class ASTResolving {
 		return false;
 	}
 	
-				
-	public static Type getTypeFromTypeBinding(AST ast, ITypeBinding binding) {
-		if (binding.isArray()) {
-			int dim= binding.getDimensions();
-			return ast.newArrayType(getTypeFromTypeBinding(ast, binding.getElementType()), dim);
-		} else if (binding.isPrimitive()) {
-			String name= binding.getName();
-			return ast.newPrimitiveType(PrimitiveType.toCode(name));
-		} else if (!binding.isNullType() && !binding.isAnonymous()) {
-			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
+	public static int getPossibleTypeKinds(ASTNode node) {
+		int kind= SimilarElementsRequestor.ALL_TYPES;
+		
+		ASTNode parent= node.getParent();
+		while (parent instanceof QualifiedName) {
+			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
+				return SimilarElementsRequestor.REF_TYPES;
+			}
+			node= parent;
+			parent= parent.getParent();
 		}
-		return null;
+		while (parent instanceof Type) {
+			if (parent instanceof QualifiedType) {
+				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
+			} else if (parent instanceof ParameterizedType) {
+				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
+			} else if (parent instanceof WildcardType) {
+				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
+					return SimilarElementsRequestor.REF_TYPES;
+				}
+			}
+			node= parent;
+			parent= parent.getParent();
+		}
+		
+		switch (parent.getNodeType()) {
+			case ASTNode.TYPE_DECLARATION:
+				if (node.getLocationInParent() == TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY) {
+					kind= SimilarElementsRequestor.INTERFACES;
+				} else if (node.getLocationInParent() == TypeDeclaration.SUPERCLASS_TYPE_PROPERTY) {
+					kind= SimilarElementsRequestor.CLASSES;
+				}
+				break;
+			case ASTNode.ENUM_DECLARATION:
+				kind= SimilarElementsRequestor.INTERFACES;
+				break;
+			case ASTNode.METHOD_DECLARATION:
+				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
+					kind= SimilarElementsRequestor.CLASSES;
+				} else if (node.getLocationInParent() == MethodDeclaration.RETURN_TYPE2_PROPERTY) {
+					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
+				}
+				break;
+			case ASTNode.INSTANCEOF_EXPRESSION:
+				kind= SimilarElementsRequestor.REF_TYPES  & ~SimilarElementsRequestor.VARIABLES;
+				break;
+			case ASTNode.THROW_STATEMENT:
+				kind= SimilarElementsRequestor.CLASSES;
+				break;
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				if (((ClassInstanceCreation) parent).getAnonymousClassDeclaration() == null) {
+					kind= SimilarElementsRequestor.CLASSES;
+				} else {
+					kind= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
+				}
+				break;
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				int superParent= parent.getParent().getNodeType();
+				if (superParent == ASTNode.CATCH_CLAUSE) {
+					kind= SimilarElementsRequestor.CLASSES;
+				}
+				break;
+			case ASTNode.TAG_ELEMENT:
+				kind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
+				break;
+			case ASTNode.MARKER_ANNOTATION:
+			case ASTNode.SINGLE_MEMBER_ANNOTATION:
+			case ASTNode.NORMAL_ANNOTATION:
+				kind= SimilarElementsRequestor.ANNOTATIONS;
+				break;
+			case ASTNode.TYPE_PARAMETER:
+				if (((TypeParameter) parent).typeBounds().indexOf(node) > 0) {
+					kind= SimilarElementsRequestor.INTERFACES;
+				} else {
+					kind= SimilarElementsRequestor.REF_TYPES;
+				}
+				break;
+			default:
+		}
+		return kind;
 	}
-	
+		
 	public static String getFullName(Name name) {
 		return name.getFullyQualifiedName();
 	}

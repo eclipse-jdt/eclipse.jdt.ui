@@ -10,11 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.ArrayList;
+
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -24,38 +24,47 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
 /**
  * Add imports to a compilation unit.
@@ -150,12 +159,14 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		SimpleName nameNode= null;
 		if (root != null) { // got an AST
 			ASTNode node= NodeFinder.perform(root, offset, length);
+			if (node instanceof MarkerAnnotation) {
+				node= ((Annotation) node).getTypeName();
+			}
 			if (node instanceof QualifiedName) {
 				nameNode= ((QualifiedName) node).getName();
 			} else if (node instanceof SimpleName) {
 				nameNode= (SimpleName) node;
 			}
-			
 		}
 		
 		String name, simpleName, containerName;
@@ -251,8 +262,8 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { fCompilationUnit.getJavaProject() });
 		
-		TypeInfo[] types= findAllTypes(simpleName, searchScope, new SubProgressMonitor(monitor, 1));
-		if (types.length== 0) {
+		TypeInfo[] types= findAllTypes(simpleName, searchScope, nameNode, new SubProgressMonitor(monitor, 1));
+		if (types.length == 0) {
 			fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.getFormattedString("AddImportsOperation.error.notresolved.message", simpleName), null); //$NON-NLS-1$
 			return null;
 		}
@@ -322,8 +333,48 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	/*
 	 * Finds a type by the simple name.
 	 */
-	private static TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) {
-		return AllTypesCache.getTypesForName(simpleTypeName, searchScope, monitor);
+	private TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, SimpleName nameNode, IProgressMonitor monitor) {
+		ArrayList typeRefsFound= new ArrayList();
+		TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, searchScope, monitor);
+		int typeKinds= SimilarElementsRequestor.ALL_TYPES;
+		if (nameNode != null) {
+			typeKinds= ASTResolving.getPossibleTypeKinds(nameNode);
+		}
+		for (int i= 0; i < infos.length; i++) {
+			TypeInfo curr= infos[i];
+			if (curr.getPackageName().length() > 0) { // do not suggest imports from the default package
+				if (isOfKind(curr, typeKinds) && isVisible(curr)) {
+					typeRefsFound.add(curr);
+				}
+			}
+		}
+		return (TypeInfo[]) typeRefsFound.toArray(new TypeInfo[typeRefsFound.size()]);
+	}
+	
+	private boolean isOfKind(TypeInfo curr, int typeKinds) {
+		int flags= curr.getModifiers();
+		if (Flags.isAnnotation(flags)) {
+			return (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+		}
+		if (Flags.isEnum(flags)) {
+			return (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+		}
+		if (Flags.isInterface(flags)) {
+			return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
+		}
+		return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
+	}
+
+	
+	private boolean isVisible(TypeInfo curr) {
+		int flags= curr.getModifiers();
+		if (Flags.isPrivate(flags)) {
+			return false;
+		}
+		if (Flags.isPublic(flags) || Flags.isProtected(flags)) {
+			return true;
+		}
+		return curr.getPackageName().equals(fCompilationUnit.getParent().getElementName());
 	}
 	
 	

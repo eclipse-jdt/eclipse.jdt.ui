@@ -30,12 +30,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.SimilarElementsRequestor;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
@@ -88,7 +89,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private HashSet fImportsAdded;
 		
 		private ImportsStructure fImpStructure;
-				
+		
 		private ArrayList fTypeRefsFound; // cached array list for reuse
 		
 		private boolean fDoIgnoreLowerCaseNames;
@@ -114,10 +115,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			fImplicitImports.add(cu.getParent().getElementName());	
 			
 			fAnalyzer= new ScopeAnalyzer(root);
-
+			
 			fSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
 			fCurrPackage= (IPackageFragment) cu.getParent();
-					
+			
 			fTypeRefsFound= new ArrayList();  	// cached array list for reuse
 			fImportsAdded= new HashSet();		
 			fAllowDefaultPackageImports= cu.getJavaProject().getOption(JavaCore.COMPILER_COMPLIANCE, true).equals(JavaCore.VERSION_1_3);
@@ -160,7 +161,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			return true;				
 		}
-			
+		
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
@@ -182,7 +183,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 							typeBinding= typeBinding.getElementType();
 						}
 						typeBinding= typeBinding.getTypeDeclaration();
-
+						
 						if (needsImport(typeBinding, ref)) {
 							fImpStructure.addImport(typeBinding);
 							fImportsAdded.add(typeName);
@@ -192,10 +193,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				
 				fImportsAdded.add(typeName);
-						
+				
 				ArrayList typeRefsFound= fTypeRefsFound; // reuse
 				
-				findTypeRefs(typeName, typeRefsFound, monitor);				
+				findTypeRefs(ref, typeRefsFound, monitor);				
 				int nFound= typeRefsFound.size();
 				if (nFound == 0) {
 					// nothing found
@@ -207,7 +208,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				} else {
 					String containerToImport= null;
 					boolean ambiguousImports= false;
-									
+					
 					// multiple found, use old import structure to find an entry
 					for (int i= 0; i < nFound; i++) {
 						TypeInfo typeRef= (TypeInfo) typeRefsFound.get(i);
@@ -238,24 +239,52 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			return null;
 		}
-				
-		private void findTypeRefs(String simpleTypeName, Collection typeRefsFound, IProgressMonitor monitor) throws JavaModelException {
+		
+		private void findTypeRefs(SimpleName ref, Collection typeRefsFound, IProgressMonitor monitor) throws JavaModelException {
+			String simpleTypeName= ref.getIdentifier();
 			if (fDoIgnoreLowerCaseNames && simpleTypeName.length() > 0) {
 				char ch= simpleTypeName.charAt(0);
 				if (Strings.isLowerCase(ch) && Character.isLetter(ch)) {
 					return;
 				}
 			}
+			
+			int typeKinds= ASTResolving.getPossibleTypeKinds(ref);
 			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, monitor);
 			for (int i= 0; i < infos.length; i++) {
 				TypeInfo curr= infos[i];
 				if (curr.getPackageName().length() > 0 || fAllowDefaultPackageImports) { // do not suggest imports from the default package
-					IType type= curr.resolveType(fSearchScope);
-					if (type != null && JavaModelUtil.isVisible(type, fCurrPackage)) {
+					if (isOfKind(curr, typeKinds) && isVisible(curr)) {
 						typeRefsFound.add(curr);
 					}
 				}
 			}
+		}
+		
+		private boolean isOfKind(TypeInfo curr, int typeKinds) {
+			int flags= curr.getModifiers();
+			if (Flags.isAnnotation(flags)) {
+				return (typeKinds & SimilarElementsRequestor.ANNOTATIONS) != 0;
+			}
+			if (Flags.isEnum(flags)) {
+				return (typeKinds & SimilarElementsRequestor.ENUMS) != 0;
+			}
+			if (Flags.isInterface(flags)) {
+				return (typeKinds & SimilarElementsRequestor.INTERFACES) != 0;
+			}
+			return (typeKinds & SimilarElementsRequestor.CLASSES) != 0;
+		}
+
+		
+		private boolean isVisible(TypeInfo curr) {
+			int flags= curr.getModifiers();
+			if (Flags.isPrivate(flags)) {
+				return false;
+			}
+			if (Flags.isPublic(flags) || Flags.isProtected(flags)) {
+				return true;
+			}
+			return curr.getPackageName().equals(fCurrPackage.getElementName());
 		}
 	}	
 

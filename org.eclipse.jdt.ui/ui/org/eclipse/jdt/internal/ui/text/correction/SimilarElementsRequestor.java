@@ -164,14 +164,14 @@ public class SimilarElementsRequestor extends CompletionRequestor {
 		if (Signature.getTypeSignatureKind(typeNameSig) == Signature.TYPE_VARIABLE_SIGNATURE) {
 			return VARIABLES;
 		}
+		if (Flags.isAnnotation(flags)) {
+			return ANNOTATIONS;
+		}
 		if (Flags.isInterface(flags)) {
 			return INTERFACES;
 		}
 		if (Flags.isEnum(flags)) {
 			return ENUMS;
-		}
-		if (Flags.isAnnotation(flags)) {
-			return ANNOTATIONS;
 		}
 		return CLASSES;
 	}
