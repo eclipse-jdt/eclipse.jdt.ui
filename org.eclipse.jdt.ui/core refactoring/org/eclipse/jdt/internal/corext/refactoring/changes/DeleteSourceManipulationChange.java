@@ -12,15 +12,19 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteSourceManipulationChange extends AbstractDeleteChange {
@@ -40,7 +44,12 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return super.isValid(pm, false, true);
+		ISourceManipulation element= getSourceModification();
+		if (element instanceof ICompilationUnit) {
+			return super.isValid(pm, false, false);
+		} else {
+			return super.isValid(pm, false, true);
+		}
 	}
 
 	private String getElementName() {
@@ -60,41 +69,32 @@ public class DeleteSourceManipulationChange extends AbstractDeleteChange {
 	/*
 	 * @see DeleteChange#doDelete(IProgressMonitor)
 	 */
-	protected void doDelete(IProgressMonitor pm) throws JavaModelException {
-		try{
-			getSourceModification().delete(false, pm);	
-		} catch (JavaModelException jme) {
-			// the problem is that there isn't any implementation of IReorgExceptionHandler.
-			// So the code got never executed. Have to check what to do here.
-			
-//			if (! (getModifiedLanguageElement() instanceof ICompilationUnit))
-//				throw jme;
-//			if (! (context.getExceptionHandler() instanceof IReorgExceptionHandler))
-//				throw jme;
-//			if (! (jme.getException() instanceof CoreException))
-//				throw jme;
-//			ICompilationUnit cu= (ICompilationUnit)getModifiedLanguageElement();
-//			CoreException ce= (CoreException)jme.getException();
-//			IReorgExceptionHandler handler= (IReorgExceptionHandler)context.getExceptionHandler();
-//			IStatus[] children= ce.getStatus().getChildren();
-//			if (children.length == 1 && children[0].getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL){
-//				if (handler.forceDeletingResourceOutOfSynch(cu.getElementName(), ce)){
-//					cu.delete(true, pm);
-//					return;
-//				}	else
-//						return; //do not rethrow in this case
-//			} else
-//				throw jme;
-			throw jme;
+	protected void doDelete(IProgressMonitor pm) throws CoreException {
+		ISourceManipulation element= getSourceModification();
+		// we have to save dirty compilation units before deleting them. Otherwise
+		// we will end up showing ghost compilation units in the package explorer
+		// since the primary working copy still exists.
+		if (element instanceof ICompilationUnit) {
+			pm.beginTask("", 2); //$NON-NLS-1$
+			ICompilationUnit unit= (ICompilationUnit)element;
+			ITextFileBuffer buffer= RefactoringFileBuffers.getTextFileBuffer(unit);
+			int deleteTicks= 1;
+			if (buffer != null && buffer.isDirty() &&  buffer.isStateValidated() && buffer.isSynchronized()) {
+				buffer.commit(new SubProgressMonitor(pm, 1), false);
+			} else {
+				deleteTicks= 2;
+			}
+			element.delete(false, new SubProgressMonitor(pm, deleteTicks));
+		} else {
+			element.delete(false, pm);
 		}
-		
 	}
 		
 	private ISourceManipulation getSourceModification() {
 		return (ISourceManipulation)getModifiedElement();
 	}
 
-	private static IJavaElement getJavaElement(ISourceManipulation sm){
+	private static IJavaElement getJavaElement(ISourceManipulation sm) {
 		//all known ISourceManipulations are IJavaElements
 		return (IJavaElement)sm;
 	}

@@ -32,7 +32,7 @@ public class ResourceUtil {
 		List files= new ArrayList(cus.length);
 		for (int i= 0; i < cus.length; i++) {
 			IResource resource= ResourceUtil.getResource(cus[i]);
-			if (resource.getType() == IResource.FILE)
+			if (resource != null && resource.getType() == IResource.FILE)
 				files.add(resource);
 		}
 		return (IFile[]) files.toArray(new IFile[files.size()]);
@@ -40,7 +40,7 @@ public class ResourceUtil {
 
 	public static IFile getFile(ICompilationUnit cu) {
 		IResource resource= ResourceUtil.getResource(cu);
-		if (resource.getType() == IResource.FILE)
+		if (resource != null && resource.getType() == IResource.FILE)
 			return (IFile)resource;
 		else
 			return null;
