@@ -14,11 +14,19 @@ Description of package "org.eclipse.jdt.junit.internal":
 	- This methods construct the classPath and the '.plugins-path' file 
 		for the VMRunnerConfiguration that is constructed in the Launcher.
 
-- TestApplication
+- TestUIApplication
 	- An extension of the application 'org.eclipse.ui.workbench'.
 	- It overrides the method 'runEventLoop()'; 
 		First all events are dispatched and then the TestRunner is started
 		and all tests are executed, at last the workbench is closed.
+
+- TestApplication
+	- This application only starts a workspace. 
+	- It is an extension of an IPlatformRunnable.
+	- You can test plugins that do not need the ui infra.
+	- In the run(...) method a org.eclipse.junit.internal.TestRunner is started 
+		and all tests are executed.
+
 
 - TestRunner
 	- Implementation of a TestRunner that extends org.eclipse.junit.internal.TestRunner. 
@@ -32,3 +40,5 @@ Description of package "org.eclipse.jdt.junit.internal":
 		- Option for turning on/off -debugging
 		- Option for configureing the standard UIMain args
 		- Possibility to add ftp, http ... locations of plugin.xml files
+		
+		

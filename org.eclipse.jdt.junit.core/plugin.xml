@@ -32,12 +32,22 @@
 	</runtime>
 
 	<extension
+	      id="uitestapplication"
+	      point="org.eclipse.core.runtime.applications">
+		   <application>
+		      <run
+		            class="org.eclipse.jdt.junit.internal.TestUIApplication">
+		           <parameter name="productInfo" value="product.ini"/>
+		      </run>
+		   </application>
+	</extension>
+	
+	<extension
 	      id="testapplication"
 	      point="org.eclipse.core.runtime.applications">
 		   <application>
 		      <run
 		            class="org.eclipse.jdt.junit.internal.TestApplication">
-		           <parameter name="productInfo" value="product.ini"/>
 		      </run>
 		   </application>
 	</extension>
@@ -51,10 +61,25 @@
   	     	 label = "%UIEclipseLauncher.label" 
   	     	 wizard = "org.eclipse.junit.ApplicationWizard"   	     	 
 	     	 public = "true"
-	     	 description = "Launches UI Eclipse JUnit Test(s)"
+	     	 description = "Launches Eclipse UI JUnit Test(s)"
+	     	 application = "org.eclipse.jdt.junit.uitestapplication"
+	     	 pluginID = "org.eclipse.jdt.junit"/>
+    </extension> 
+
+    <extension 
+      point = "org.eclipse.debug.core.launchers"> 
+         <launcher 
+             id = "org.eclipse.jdt.junit.workspacelauncher"
+             class = "org.eclipse.jdt.junit.internal.Launcher"
+             modes = "run, debug"
+  	     	 label = "%CoreEclipseLauncher.label" 
+  	     	 wizard = "org.eclipse.junit.ApplicationWizard"   	     	 
+	     	 public = "true"
+	     	 description = "Launches Eclipse Workspace JUnit Test(s)"
 	     	 application = "org.eclipse.jdt.junit.testapplication"
 	     	 pluginID = "org.eclipse.jdt.junit"/>
     </extension> 
+
 
 	<extension
 		point="org.eclipse.ui.preferencePages">
