@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
@@ -211,7 +212,7 @@ public class PackageExplorerActionGroup extends CompositeActionGroup implements 
 		toolBar.add(fForwardAction);
 		toolBar.add(fUpAction);
 		
-		if (JavaBasePreferencePage.showCompilationUnitChildren()) {
+		if (AppearancePreferencePage.showCompilationUnitChildren()) {
 			toolBar.add(new Separator());
 			fMemberFilterActionGroup.contributeToToolBar(toolBar);
 		}

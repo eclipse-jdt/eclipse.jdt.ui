@@ -103,7 +103,7 @@ public class PreferenceConstants {
 	/**
 	 * Enable / Disable showing cu children in the packages view. Boolean value.
 	 */
-	public static final String SHOW_CU_CHILDREN=JavaBasePreferencePage.SHOW_CU_CHILDREN;
+	public static final String SHOW_CU_CHILDREN=AppearancePreferencePage.SHOW_CU_CHILDREN;
 
 	/**
 	 * Enable / Disable to update the packages view selection when editors are switched. Boolean value.
@@ -528,12 +528,12 @@ public class PreferenceConstants {
 	/**
 	 * Link Java Browsing views to the active editor. Boolean value.
 	 */
-	public static final String BROWSING_LINK_VIEW_TO_EDITOR= JavaBasePreferencePage.LINK_VIEW_TO_EDITOR;
+	public static final String BROWSING_LINK_VIEW_TO_EDITOR= JavaBasePreferencePage.LINK_BROWSING_VIEW_TO_EDITOR;
 
 	/**
 	 * Stack Java Browsing views vertically. Boolean value.
 	 */
-	public static final String BROWSING_STACK_VERTICALLY= AppearancePreferencePage.STACK_VERTICALLY;
+	public static final String BROWSING_STACK_VERTICALLY= AppearancePreferencePage.STACK_BROWSING_VIEWS_VERTICALLY;
 	
 	
 	/**

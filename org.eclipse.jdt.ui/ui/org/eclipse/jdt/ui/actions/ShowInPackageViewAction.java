@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 /**
  * This action reveals the currently selected Java element in the packages
@@ -125,7 +126,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	private void run(IJavaElement element) {
 		if (element == null)
 			return;
-		boolean showMembers= JavaPlugin.getDefault().getPreferenceStore().getBoolean(JavaBasePreferencePage.SHOW_CU_CHILDREN);
+		boolean showMembers= JavaPlugin.getDefault().getPreferenceStore().getBoolean(AppearancePreferencePage.SHOW_CU_CHILDREN);
 		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 		if (view != null) {
 			if (reveal(view, element))

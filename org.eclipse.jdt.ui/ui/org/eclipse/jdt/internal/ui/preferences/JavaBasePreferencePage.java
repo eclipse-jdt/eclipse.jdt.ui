@@ -51,9 +51,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
  */
 public class JavaBasePreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-	// used by PackageExplorerPart to listen for changes
-	public static final String SHOW_CU_CHILDREN="org.eclipse.jdt.ui.packages.cuchildren"; //$NON-NLS-1$
-
+	
 	public static final String LINK_PACKAGES_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktoeditor"; //$NON-NLS-1$
 	public static final String LINK_TYPEHIERARCHY_TO_EDITOR= "org.eclipse.jdt.ui.packages.linktypehierarchytoeditor"; //$NON-NLS-1$
 	public static final String SRCBIN_FOLDERS_IN_NEWPROJ= "org.eclipse.jdt.ui.wizards.srcBinFoldersInNewProjects"; //$NON-NLS-1$
@@ -63,7 +61,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static final String OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE= "perspective"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_IN_VIEW_PART= "viewPart"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE="org.eclipse.jdt.ui.typeHierarchy.reusePerspective"; //$NON-NLS-1$
-	public static final String LINK_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
+	public static final String LINK_BROWSING_VIEW_TO_EDITOR= "org.eclipse.jdt.ui.browsing.linktoeditor"; //$NON-NLS-1$
 	
 	public static final String DOUBLE_CLICK= "packageview.doubleclick"; //$NON-NLS-1$
 	public static final String DOUBLE_CLICK_GOES_INTO= "packageview.gointo"; //$NON-NLS-1$
@@ -77,7 +75,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	
 	public static boolean linkBrowsingViewSelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(JavaBasePreferencePage.LINK_VIEW_TO_EDITOR);
+		return store.getBoolean(JavaBasePreferencePage.LINK_BROWSING_VIEW_TO_EDITOR);
 	}
 	
 	public static String getSourceFolderName() {
@@ -95,11 +93,6 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return store.getBoolean(LINK_PACKAGES_TO_EDITOR);
 	}
 	
-	public static boolean showCompilationUnitChildren() {
-		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-		return store.getBoolean(SHOW_CU_CHILDREN);
-	}
-
 	public static boolean linkTypeHierarchySelectionToEditor() {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(LINK_TYPEHIERARCHY_TO_EDITOR);
@@ -168,7 +161,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 	public static void initDefaults(IPreferenceStore store) {
 		store.setDefault(LINK_PACKAGES_TO_EDITOR, true);
 		store.setDefault(LINK_TYPEHIERARCHY_TO_EDITOR, false);
-		store.setDefault(LINK_VIEW_TO_EDITOR, true);
+		store.setDefault(LINK_BROWSING_VIEW_TO_EDITOR, true);
 		store.setDefault(OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART);
 		store.setDefault(OPEN_TYPE_HIERARCHY_REUSE_PERSPECTIVE, false);
 
@@ -272,7 +265,7 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		
 		new Label(composite, SWT.NONE); // spacer
 		new Label(composite, SWT.NONE).setText("Java Browsing Settings");
-		addCheckBox(composite, "&Link Java Browsing views selection to active editor", LINK_VIEW_TO_EDITOR);
+		addCheckBox(composite, "&Link Java Browsing views selection to active editor", LINK_BROWSING_VIEW_TO_EDITOR);
 		
 		new Label(composite, SWT.NONE).setText("Package view settings");
 		addCheckBox(composite, JavaUIMessages.getString("JavaBasePreferencePage.linkPackageView"), LINK_PACKAGES_TO_EDITOR); //$NON-NLS-1$
