@@ -734,7 +734,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 					PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
-					PREF_PB_MISSING_JAVADOC_COMMENTS.equals(changedKey) ||
+					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey)) {				
 				updateEnableStates();
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
