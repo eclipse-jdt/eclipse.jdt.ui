@@ -165,7 +165,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		assertTrue("action should be disabled", ! copyAction.isEnabled());
 	}
 
-	private void checkEnabled(Object[] elements) throws JavaModelException{
+	private void checkEnabled(Object[] elements) throws Exception{
 		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
 		copyAction.setAutoRepeatOnFailure(true);
 		copyAction.update(copyAction.getSelection());
@@ -174,7 +174,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkClipboard(elements);
 	}
 
-	private void checkClipboard(Object[] elementsCopied) throws JavaModelException {
+	private void checkClipboard(Object[] elementsCopied) throws Exception {
 		IResource[] resourcesCopied= getResources(elementsCopied);
 		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
 		IType[] mainTypesCopied= ReorgUtils.getMainTypes(javaElementsCopied);
@@ -195,8 +195,8 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		checkElements(javaElementsExpected, clipboardJavaElements);
 	}
 	
-	private void checkTypedSources(IJavaElement[] javaElementsCopied, TypedSource[] clipboardTypedSources) throws JavaModelException {
-		TypedSource[] typedSources= TypedSource.createTypeSources(javaElementsCopied);
+	private void checkTypedSources(IJavaElement[] javaElementsCopied, TypedSource[] clipboardTypedSources) throws Exception {
+		TypedSource[] typedSources= TypedSource.createTypedSources(javaElementsCopied);
 		assertEquals("different number", typedSources.length, clipboardTypedSources.length);		
 		TypedSource.sortByType(typedSources);
 		TypedSource.sortByType(clipboardTypedSources);
@@ -287,7 +287,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		int count= 0;
 		for (int i= 0; i < javaElementsCopied.length; i++) {
 			IJavaElement element= javaElementsCopied[i];
-			if (! ReorgUtils.isInsideCompilationUnit(element))
+			if (element instanceof ICompilationUnit)
 				count++;
 		}
 		return count;
