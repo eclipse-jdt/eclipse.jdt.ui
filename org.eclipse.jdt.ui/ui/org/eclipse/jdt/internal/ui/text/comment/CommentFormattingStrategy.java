@@ -127,9 +127,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				final CommentRegion region= CommentObjectFactory.createRegion(this, position, TextUtilities.getDefaultLineDelimiter(document));
 				final String indentation= getLineIndentation(document, region, position.getOffset());
 
-				final Map partitioners= TextUtilities.removeDocumentPartitioners(document);
 				region.format(indentation);
-				TextUtilities.addDocumentPartitioners(document, partitioners);
 			}
 		} catch (BadLocationException exception) {
 			// Should not happen
