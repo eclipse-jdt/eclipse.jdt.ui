@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.text.link;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+//import org.eclipse.core.runtime.IStatus;
+//import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -237,7 +237,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 */
 	public void setCurrentPosition(Position position, int caretOffset) {
 		if (!fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		
 		if (!fFramePosition.equals(position)) {
 			fNeedRedraw= true;
@@ -255,7 +255,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 */
 	public void enter() {
 		if (fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		else {
 			fIsActive= true;
 			// JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI activated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
@@ -332,7 +332,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	 */
 	public IRegion getSelectedRegion() {
 		if (!fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		
 		if (fFramePosition == null)
 			return new Region(fFinalCaretOffset, 0);
@@ -342,7 +342,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	
 	private void leave(int flags) {
 		if (!fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		else {
 			fIsActive= false;
 			//JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI deactivated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
@@ -440,7 +440,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 
 	private void next() {
 		if (!fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		
 		redrawRegion();
 		
@@ -465,7 +465,7 @@ public class LinkedPositionUI implements ILinkedPositionListener,
 	
 	private void previous() {
 		if (!fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionUI is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		
 		redrawRegion();
 		

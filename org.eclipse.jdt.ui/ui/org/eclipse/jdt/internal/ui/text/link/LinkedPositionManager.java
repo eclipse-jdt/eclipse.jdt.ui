@@ -16,8 +16,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+//import org.eclipse.core.runtime.IStatus;
+//import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -283,7 +283,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	private void install(boolean canCoexist) {
 		
 		if (fIsActive)
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is already active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		else {
 			fIsActive= true;
 			//JavaPlugin.log(new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager activated: "+fPositionCategoryName, new Exception())); //$NON-NLS-1$
@@ -311,7 +311,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		
 		if (!fIsActive)
 			// we migth also just return
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager activated: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager activated: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		else {
 			fDocument.removeDocumentListener(this);
 			
@@ -448,7 +448,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 
 		if (!fIsActive)
 			// we migth also just return an empty array
-			JavaPlugin.log(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
+			;//JavaPlugin(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), IStatus.OK, "LinkedPositionManager is not active: "+fPositionCategoryName, new IllegalStateException())); //$NON-NLS-1$
 		
 		try {
 			Position[] positions= document.getPositions(fPositionCategoryName);
