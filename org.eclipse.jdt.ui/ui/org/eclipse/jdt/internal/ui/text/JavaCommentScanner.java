@@ -300,21 +300,18 @@ public class JavaCommentScanner extends AbstractJavaScanner{
 	 * @see org.eclipse.jdt.internal.ui.text.AbstractJavaScanner#adaptToPreferenceChange(org.eclipse.jface.util.PropertyChangeEvent)
 	 */
 	public void adaptToPreferenceChange(PropertyChangeEvent event) {
-		if (fTaskTagRule != null) {
-			if (event.getProperty().equals(COMPILER_TASK_TAGS)) {
-				Object value= event.getNewValue();
-				if (value instanceof String) {
-					fTaskTagRule.clearTaskTags();
-					fTaskTagRule.addTaskTags((String) value);
-				}
-			} else if (event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
-				Object value= event.getNewValue();
-				if (value instanceof String)
-					fTaskTagRule.setCaseSensitive(ENABLED.equals(value));
+		if (fTaskTagRule != null && event.getProperty().equals(COMPILER_TASK_TAGS)) {
+			Object value= event.getNewValue();
+			if (value instanceof String) {
+				fTaskTagRule.clearTaskTags();
+				fTaskTagRule.addTaskTags((String) value);
 			}
-		} else if (super.affectsBehavior(event)) {
+		} else if (fTaskTagRule != null && event.getProperty().equals(COMPILER_TASK_CASE_SENSITIVE)) {
+			Object value= event.getNewValue();
+			if (value instanceof String)
+				fTaskTagRule.setCaseSensitive(ENABLED.equals(value));
+		} else if (super.affectsBehavior(event))
 			super.adaptToPreferenceChange(event);
-		}
 	}
 
 	/*
