@@ -42,6 +42,16 @@
   <objectState adaptable="org.eclipse.jdt.core.IJavaElement">
       <property name="instanceof" value="IPackageFragmentRoot"/>
   </objectState>
+  
+- XML expression must support arrays of elements. For example we want to be able
+  to move more than one method to a different class. This effects the objectState
+  XML element.
+  
+- more than one processor is available: The preferred processor can't be remembered
+  based on the type of the element, since the XML expression can be more complex. So
+  the registry must store the preferred user processor based on the list of picked 
+  processors. If it is the same has been computed for the element in question than 
+  the preferred one can be used. Otherwise the user has to be asked.
 
 ======================================= UI ===============================================
   
