@@ -1,17 +1,32 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.testplugin;import java.net.URL;
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.testplugin;
+
+import java.net.URL;
+
+/**
+ * Helper class to launch a test
+ */
 public class TestPluginLauncher {
+	
+	public static final String APP_NAME= "org.eclipse.jdt.testplugin.test";
+	
+	public static void run(String location, Class testCase, String[] args) {
+		run(APP_NAME, location, testCase, args);
+	}
 	
 	public static void run(String application, String location, Class testCase, String[] args) {
 		try {
 			String bootLocation= getBootLocation();
-			String[] newArgs= new String[args.length + 3];
-			System.arraycopy(args, 0, newArgs, 2, args.length);
-			newArgs[0]= "-dev";
-			newArgs[1]= "bin";
-			newArgs[args.length + 2]= testCase.getName();
-			args= newArgs;
+			String[] newArgs= new String[4];
+			newArgs[0]= testCase.getName();
+			newArgs[1]= "-dev";
+			newArgs[2]= "bin";
+			newArgs[3]= "-debug";
 			NewMain newMain= new NewMain(application, location, null, bootLocation, false);
-			newMain.run(args);
+			newMain.run(newArgs);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -9,9 +9,11 @@ import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import experiments.ReorderParametersRefactoring;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class ReorderParametersTests extends RefactoringTest {
 	
@@ -29,7 +31,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), ReorderParametersTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), ReorderParametersTests.class, args);
 	}
 	
 	public static Test suite() {

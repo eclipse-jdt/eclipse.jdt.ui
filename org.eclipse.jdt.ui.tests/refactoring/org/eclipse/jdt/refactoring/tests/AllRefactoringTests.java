@@ -4,12 +4,14 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class AllRefactoringTests {
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), AllRefactoringTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AllRefactoringTests.class, args);
 	}
 
 	public static Test suite() {

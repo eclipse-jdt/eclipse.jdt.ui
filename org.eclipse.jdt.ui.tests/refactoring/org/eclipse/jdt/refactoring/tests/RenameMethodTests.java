@@ -4,17 +4,16 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.*;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class RenameMethodTests {
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodTests.class, args);
 	}
 
 	public static Test suite() {

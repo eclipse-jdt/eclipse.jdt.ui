@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenamePrivateMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenamePrivateMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class RenamePrivateMethodTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenamePrivateMethod/";
@@ -14,7 +16,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePrivateMethodTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePrivateMethodTests.class, args);
 	}
 	
 	public static Test suite() {

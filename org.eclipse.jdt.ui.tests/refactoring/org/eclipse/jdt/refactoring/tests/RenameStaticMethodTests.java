@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameStaticMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import junit.framework.Test;import junit.framework.TestSuite;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameStaticMethodRefactoring;import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final String REFACTORING_PATH= "RenameStaticMethod/";
@@ -14,7 +16,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameStaticMethodTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameStaticMethodTests.class, args);
 	}
 	
 	public static Test suite() {

@@ -26,10 +26,12 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.ui.util.TypeRef;
 import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class TypeRefTest extends TestCase {
 
@@ -43,7 +45,7 @@ public class TypeRefTest extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeRefTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeRefTest.class, args);
 	}
 
 	public static Test suite() {

@@ -4,7 +4,25 @@
  */
 package org.eclipse.jdt.testplugin.test;
 
-import junit.framework.Test;import junit.framework.TestCase;import junit.framework.TestSuite;import org.eclipse.core.runtime.Path;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.testplugin.JavaTestProject;import org.eclipse.jdt.testplugin.JavaTestSetup;import org.eclipse.jdt.testplugin.TestPluginLauncher;import org.eclipse.jdt.testplugin.core.TestPluginCoreLauncher;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.testplugin.JavaTestProject;
+import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+
+import junit.framework.TestCase;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class JavaTestCase extends TestCase {
 	
@@ -15,7 +33,7 @@ public class JavaTestCase extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginCoreLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaTestCase.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaTestCase.class, args);
 	}		
 			
 	public static Test suite() {

@@ -20,9 +20,11 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.testplugin.*;
+
 
 
 public class TypeHierarchyTest extends TestCase {
@@ -34,7 +36,7 @@ public class TypeHierarchyTest extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeHierarchyTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeHierarchyTest.class, args);
 	}		
 			
 	public static Test suite() {

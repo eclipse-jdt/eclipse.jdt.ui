@@ -5,7 +5,7 @@
 package org.eclipse.jdt.refactoring.tests;
 
 import org.eclipse.jdt.core.*;import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitRefactoring;import org.eclipse.jdt.core.search.*;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.testplugin.*;
 import junit.framework.*;
 
@@ -18,7 +18,7 @@ public class MoveCUTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), MoveCUTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), MoveCUTests.class, args);
 	}
 	
 	public static Test suite() {

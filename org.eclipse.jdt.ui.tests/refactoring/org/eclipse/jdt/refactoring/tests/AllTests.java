@@ -4,11 +4,13 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class AllTests {
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), AllTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AllTests.class, args);
 	}
 
 	public static Test suite() {

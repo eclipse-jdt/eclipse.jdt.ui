@@ -2,16 +2,19 @@ package org.eclipse.jdt.refactoring.tests;
 
 import java.io.InputStream;
 import java.io.StringBufferInputStream;
-import junit.framework.Test;
-import junit.framework.TestSuite;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceChange;
+
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+
+import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceChange;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class RenameResourceChangeTests extends RefactoringTest {
 	
@@ -20,7 +23,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameResourceChangeTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameResourceChangeTests.class, args);
 	}
 	
 	public static Test suite() {

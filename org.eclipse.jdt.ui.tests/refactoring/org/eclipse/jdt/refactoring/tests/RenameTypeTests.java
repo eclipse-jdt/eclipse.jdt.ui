@@ -4,24 +4,24 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.*;
+
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -32,7 +32,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameTypeTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameTypeTests.class, args);
 	}
 	
 	public static Test suite() {

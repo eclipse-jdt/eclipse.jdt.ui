@@ -14,7 +14,9 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.internal.core.refactoring.RenameResourceChange;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class PathTransformationTests extends TestCase {
 
@@ -23,7 +25,7 @@ public class PathTransformationTests extends TestCase {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), PathTransformationTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), PathTransformationTests.class, args);
 	}
 	
 	public static Test suite() {

@@ -19,7 +19,8 @@ import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodInInterface
 
 import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.*;
+import org.eclipse.jdt.testplugin.*;
+
 
 public class RenameMethodInInterfaceTests extends RefactoringTest {
 
@@ -30,7 +31,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodInInterfaceTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenameMethodInInterfaceTests.class, args);
 	}
 	
 	public static Test suite() {

@@ -4,19 +4,19 @@
  */
 package org.eclipse.jdt.refactoring.tests;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.*;
+
+import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
+import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 public class RenamePackageTests extends RefactoringTest {
 	
@@ -28,7 +28,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePackageTests.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), RenamePackageTests.class, args);
 	}
 
 	public static Test suite() {

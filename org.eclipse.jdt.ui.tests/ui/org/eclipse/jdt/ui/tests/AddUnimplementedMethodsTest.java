@@ -21,9 +21,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.ui.codemanipulation.AddUnimplementedMethodsOperation;
+import org.eclipse.jdt.testplugin.*;
+
 
 
 public class AddUnimplementedMethodsTest extends TestCase {
@@ -38,7 +40,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), AddUnimplementedMethodsTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AddUnimplementedMethodsTest.class, args);
 	}		
 		
 	public static Test suite() {

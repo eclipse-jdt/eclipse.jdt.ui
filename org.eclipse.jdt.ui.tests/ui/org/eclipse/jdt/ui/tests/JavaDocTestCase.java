@@ -28,12 +28,14 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.testplugin.JavaTestProject;
 import org.eclipse.jdt.testplugin.JavaTestSetup;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.ui.TestPluginUILauncher;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocTextReader;
 import org.eclipse.jdt.internal.ui.text.javadoc.StandardDocletPageBuffer;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.jdt.testplugin.*;
+
 
 
 public class JavaDocTestCase extends TestCase {
@@ -45,7 +47,7 @@ public class JavaDocTestCase extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginUILauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaDocTestCase.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaDocTestCase.class, args);
 	}		
 			
 	public static Test suite() {
