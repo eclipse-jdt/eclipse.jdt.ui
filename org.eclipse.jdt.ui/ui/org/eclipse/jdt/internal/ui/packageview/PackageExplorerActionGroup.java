@@ -162,7 +162,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	public void dispose() {
 		ISelectionProvider provider= fPart.getSite().getSelectionProvider();
 		provider.removeSelectionChangedListener(this);
-		
 		super.dispose();
 	}
 	
@@ -188,8 +187,8 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 			}
 		} else {
 			if (fLastElement != REST) {
-				actionBars.setGlobalActionHandler(ActionFactory.RENAME.getId(), null);
-				actionBars.setGlobalActionHandler(ActionFactory.MOVE.getId(), null);
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.RENAME, null);
+				actionBars.setGlobalActionHandler(IWorkbenchActionConstants.MOVE, null);
 				actionBars.updateActionBars();
 				fLastElement= REST;
 			}
@@ -239,7 +238,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 	/* package */ void fillToolBar(IToolBarManager toolBar) {
 		toolBar.add(fBackAction);
 		toolBar.add(fForwardAction);
-		toolBar.add(fUpAction);
+		toolBar.add(fUpAction); 
 		
 		toolBar.add(new Separator());
 		toolBar.add(fCollapseAllAction);
@@ -310,9 +309,9 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		if (viewer.isExpandable(element)) {
 			if (doubleClickGoesInto()) {
 				// don't zoom into compilation units and class files
-				if (element instanceof IOpenable && 
-					!(element instanceof ICompilationUnit) && 
-					!(element instanceof IClassFile)) {
+				if (element instanceof ICompilationUnit || element instanceof IClassFile)
+					return;
+				if (element instanceof IOpenable || element instanceof IContainer) {
 					fZoomInAction.run();
 				}
 			} else {
@@ -351,7 +350,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		}
 	}
 	
-	
 	private void doWorkingSetChanged(PropertyChangeEvent event) {
 		IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
 		
@@ -370,7 +368,7 @@ class PackageExplorerActionGroup extends CompositeActionGroup implements ISelect
 		}
 		
 	}
-	
+
 	private boolean doubleClickGoesInto() {
 		return PreferenceConstants.DOUBLE_CLICK_GOES_INTO.equals(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.DOUBLE_CLICK));
 	}
