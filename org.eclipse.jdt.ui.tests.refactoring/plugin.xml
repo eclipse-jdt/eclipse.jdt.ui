@@ -3,7 +3,7 @@
 <plugin
    name="%Plugin.name"
    id="org.eclipse.jdt.ui.tests.refactoring"
-   version="2.1.0"
+   version="3.0.0"
    provider-name = "%Plugin.providerName"
    class="org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin">
    
