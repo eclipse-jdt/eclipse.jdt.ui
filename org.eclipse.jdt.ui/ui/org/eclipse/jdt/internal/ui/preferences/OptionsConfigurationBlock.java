@@ -33,6 +33,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -46,16 +47,20 @@ import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.resource.JFaceResources;
 
 import org.eclipse.ui.forms.events.ExpansionAdapter;
 import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.events.HyperlinkAdapter;
+import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
+import org.eclipse.ui.forms.widgets.ImageHyperlink;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -107,6 +112,7 @@ public abstract class OptionsConfigurationBlock {
 	protected ArrayList fComboBoxes;
 	protected ArrayList fTextBoxes;
 	protected HashMap fLabels;
+	protected ArrayList fExpandedComposites;
 	
 	private SelectionListener fSelectionListener;
 	private ModifyListener fTextModifyListener;
@@ -129,6 +135,7 @@ public abstract class OptionsConfigurationBlock {
 		fComboBoxes= new ArrayList();
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
+		fExpandedComposites= new ArrayList();
 		
 //		IScopeContext scopeContext= null;
 //		if (project != null) {
@@ -358,7 +365,7 @@ public abstract class OptionsConfigurationBlock {
 	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns) {
 		final ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
-		excomposite.setExpanded(true);
+		excomposite.setExpanded(false);
 		excomposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
 		excomposite.addExpansionListener(new ExpansionAdapter() {
 			public void expansionStateChanged(ExpansionEvent e) {
@@ -371,15 +378,39 @@ public abstract class OptionsConfigurationBlock {
 		});
 		
 		updateSectionStyle(excomposite);
+		fExpandedComposites.add(excomposite);
 		return excomposite;
 	}
 	
 	protected void updateSectionStyle(ExpandableComposite excomposite) {
+		//excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
 		if (excomposite.isExpanded()) {
-			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
-		} else {
-			excomposite.setFont(JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT));
+			for (int i= 0; i < fExpandedComposites.size(); i++) {
+				ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+				if (curr != excomposite && excomposite.isExpanded()) {
+					curr.setExpanded(false);
+				}
+			}
+			
 		}
+//		if (excomposite.isExpanded()) {
+//			excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+//		} else {
+//			excomposite.setFont(JFaceResources.getFontRegistry().get(JFaceResources.DIALOG_FONT));
+//		}
+	}
+	
+	protected ImageHyperlink createHelpLink(Composite parent, final String link) {
+		ImageHyperlink info = new ImageHyperlink(parent, SWT.NULL);
+		makeScrollableCompositeAware(info);
+		Image image = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_HELP);
+		info.setImage(image);
+		info.addHyperlinkListener(new HyperlinkAdapter() {
+			public void linkActivated(HyperlinkEvent e) {
+				WorkbenchHelp.displayHelpResource(link);
+			}
+		});
+		return info;
 	}
 	
 

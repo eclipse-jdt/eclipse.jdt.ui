@@ -145,6 +145,9 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_SEARCH_READACCESS= NAME_PREFIX + "occ_read.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_WRITEACCESS= NAME_PREFIX + "occ_write.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_SEARCH_OCCURRENCE= NAME_PREFIX + "occ_match.gif"; //$NON-NLS-1$
+	
+	public static final String IMG_OBJS_HELP= NAME_PREFIX + "help.gif"; //$NON-NLS-1$
+
 	/*
 	 * Set of predefined Image Descriptors.
 	 */
@@ -271,6 +274,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SEARCH_OCCURRENCE= createManaged(T_OBJ, IMG_OBJS_SEARCH_OCCURRENCE);
 
 	public static final ImageDescriptor DESC_OBJS_LOCAL_VARIABLE= createManaged(T_OBJ, IMG_OBJS_LOCAL_VARIABLE);
+	
+	public static final ImageDescriptor DESC_OBJS_HELP= createManaged(T_ELCL, IMG_OBJS_HELP);
+
 	
 	public static final ImageDescriptor DESC_OBJ_OVERRIDES= create(T_OBJ, "over_co.gif");  					//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJ_IMPLEMENTS= create(T_OBJ, "implm_co.gif");  				//$NON-NLS-1$
