@@ -1136,7 +1136,7 @@
       </viewer>
       <contentTypeBinding
 			contentTypeId="org.eclipse.jdt.core.javaSource"
-            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
+            contentViewerId="org.eclipse.jdt.internal.ui.compare.JavaTextViewerCreator">
 	  </contentTypeBinding>
    </extension>
    <extension
