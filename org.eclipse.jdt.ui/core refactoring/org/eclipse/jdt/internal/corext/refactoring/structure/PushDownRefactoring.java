@@ -630,14 +630,18 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						adjustors.add(adjustor);
 						if (infos[offset].isFieldInfo()) {
 							final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) infos[offset].getMember(), sourceRewriter.getRoot());
-							FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
-							unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-							ImportRewriteUtil.addImports(unitRewriter, oldField.getParent(), new HashMap(), new HashMap(), false);
+							if (oldField != null) {
+								FieldDeclaration newField= createNewFieldDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldField);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+								ImportRewriteUtil.addImports(unitRewriter, oldField.getParent(), new HashMap(), new HashMap(), false);
+							}
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
-							MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldMethod);
-							unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-							ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
+							if (oldMethod != null) {
+								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldMethod);
+								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+								ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
+							}
 						}
 					}
 				}

@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -632,13 +633,13 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			if (fMembersToMove[i].getElementType() != IJavaElement.FIELD)
 				continue;
 			IField field= (IField) fMembersToMove[i];
-			String type= getTypeName(field);
+			String type= Signature.toString(field.getTypeSignature());
 			Assert.isTrue(mapping.containsKey(field));
 			for (Iterator iter= ((Set) mapping.get(field)).iterator(); iter.hasNext();) {
 				IField matchingField= (IField) iter.next();
 				if (field.equals(matchingField))
 					continue;
-				if (type.equals(getTypeName(matchingField)))
+				if (type.equals(Signature.toString(matchingField.getTypeSignature())))
 					continue;
 				String[] keys= { createFieldLabel(matchingField), createTypeLabel(matchingField.getDeclaringType())};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_field_type", //$NON-NLS-1$
@@ -860,7 +861,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			if (members[i].getElementType() != IJavaElement.METHOD)
 				continue;
 			IMethod method= (IMethod) members[i];
-			String returnType= getReturnTypeName(method);
+			String returnType= Signature.toString(Signature.getReturnType(method.getSignature()).toString());
 			Assert.isTrue(mapping.containsKey(method));
 			for (Iterator iter= ((Set) mapping.get(method)).iterator(); iter.hasNext();) {
 				IMethod matchingMethod= (IMethod) iter.next();
@@ -868,7 +869,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 					continue;
 				if (!notDeletedMembersInSubtypes.contains(matchingMethod))
 					continue;
-				if (returnType.equals(getReturnTypeName(matchingMethod)))
+				if (returnType.equals(Signature.toString(Signature.getReturnType(matchingMethod.getSignature()).toString())))
 					continue;
 				String[] keys= { createMethodLabel(matchingMethod), createTypeLabel(matchingMethod.getDeclaringType())};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_method_return_type", //$NON-NLS-1$
@@ -1010,19 +1011,25 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 							adjustments.remove(member);
 							if (member instanceof IField) {
 								final VariableDeclarationFragment oldField= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, root);
-								FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status));
-								rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-								ImportRewriteUtil.addImports(rewrite, oldField.getParent(), new HashMap(), new HashMap(), false);
+								if (oldField != null) {
+									FieldDeclaration newField= createNewFieldDeclarationNode(rewriter, root, (IField) member, oldField, mapping, new SubProgressMonitor(subsub, 1), status, getModifiersWithUpdatedVisibility(member, member.getFlags(), adjustments, new SubProgressMonitor(subsub, 1), true, status));
+									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newField, ASTNodes.getInsertionIndex(newField, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+									ImportRewriteUtil.addImports(rewrite, oldField.getParent(), new HashMap(), new HashMap(), false);
+								}
 							} else if (member instanceof IMethod) {
 								final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) member, root);
-								MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
-								rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-								ImportRewriteUtil.addImports(rewrite, oldMethod, new HashMap(), new HashMap(), false);
+								if (oldMethod != null) {
+									MethodDeclaration newMethod= createNewMethodDeclarationNode(sourceRewriter, rewrite, ((IMethod) member), oldMethod, root, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
+									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+									ImportRewriteUtil.addImports(rewrite, oldMethod, new HashMap(), new HashMap(), false);
+								}
 							} else if (member instanceof IType) {
 								final AbstractTypeDeclaration oldType= ASTNodeSearchUtil.getAbstractTypeDeclarationNode((IType) member, root);
-								BodyDeclaration newType= createNewTypeDeclarationNode(((IType) member), oldType, root, mapping, rewriter);
-								rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newType, ASTNodes.getInsertionIndex(newType, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
-								ImportRewriteUtil.addImports(rewrite, oldType, new HashMap(), new HashMap(), false);
+								if (oldType != null) {
+									BodyDeclaration newType= createNewTypeDeclarationNode(((IType) member), oldType, root, mapping, rewriter);
+									rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newType, ASTNodes.getInsertionIndex(newType, declaration.bodyDeclarations()), rewrite.createGroupDescription(RefactoringCoreMessages.getString("HierarchyRefactoring.add_member"))); //$NON-NLS-1$
+									ImportRewriteUtil.addImports(rewrite, oldType, new HashMap(), new HashMap(), false);
+								}
 							} else
 								Assert.isTrue(false);
 							subsub.worked(1);
