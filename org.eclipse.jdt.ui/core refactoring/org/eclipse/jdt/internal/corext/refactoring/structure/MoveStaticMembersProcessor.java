@@ -20,14 +20,17 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
+
+import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -74,12 +77,14 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -394,8 +399,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private IFile[] getAllFilesToModify(List modifiedCus) {
 		Set result= new HashSet();
 		IResource resource= fDestinationType.getCompilationUnit().getResource();
-		if (result != null)
-			result.add(resource);
+		result.add(resource);
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			resource= fMembersToMove[i].getCompilationUnit().getResource();
 			if (resource != null)
@@ -787,46 +791,50 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			return;
 		}
 		
-		// First update references in moved members, in order to extract the source.
-		String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
-		pm.worked(1);
-		if (status.hasFatalError())
-			return;
-		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
-		engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
-		engine.setFiltering(true, true);
-		engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
-		engine.setStatus(status);
-		engine.searchPattern(new SubProgressMonitor(pm, 1));
-		ICompilationUnit[] units= engine.getCompilationUnits();
-		modifiedCus.addAll(Arrays.asList(units));
-		SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
-		sub.beginTask("", units.length); //$NON-NLS-1$
-		for (int i= 0; i < units.length; i++) {
-			ICompilationUnit unit= units[i];
-			CompilationUnitRewrite ast= getCuRewrite(unit);
-			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
-				ast, fMemberBindings, targetBinding, fSourceBinding);
-			ast.getRoot().accept(analyzer);
-			status.merge(analyzer.getStatus());
-			if (status.hasFatalError()) {
-				fChange= null;
+		try {
+			// First update references in moved members, in order to extract the source.
+			String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
+			pm.worked(1);
+			if (status.hasFatalError())
 				return;
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
+			engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
+			engine.setFiltering(true, true);
+			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
+			engine.setStatus(status);
+			engine.searchPattern(new SubProgressMonitor(pm, 1));
+			ICompilationUnit[] units= engine.getCompilationUnits();
+			modifiedCus.addAll(Arrays.asList(units));
+			SubProgressMonitor sub= new SubProgressMonitor(pm, 1);
+			sub.beginTask("", units.length); //$NON-NLS-1$
+			for (int i= 0; i < units.length; i++) {
+				ICompilationUnit unit= units[i];
+				CompilationUnitRewrite ast= getCuRewrite(unit);
+				ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
+					ast, fMemberBindings, targetBinding, fSourceBinding);
+				ast.getRoot().accept(analyzer);
+				status.merge(analyzer.getStatus());
+				if (status.hasFatalError()) {
+					fChange= null;
+					return;
+				}
+				if (analyzer.needsTargetImport())
+					ast.getImportRewrite().addImport(targetBinding);
+				if (!isSourceOrTarget(unit))
+					fChange.add(ast.createChange());
+				sub.worked(1);
 			}
-			if (analyzer.needsTargetImport())
-				ast.getImportRewrite().addImport(targetBinding);
-			if (!isSourceOrTarget(unit))
-				fChange.add(ast.createChange());
-			sub.worked(1);
+			status.merge(moveMembers(fMemberDeclarations, memberSources));
+			fChange.add(fSource.createChange());
+			modifiedCus.add(fSource.getCu());
+			if (! fSource.getCu().equals(fTarget.getCu())) {
+				fChange.add(fTarget.createChange());
+				modifiedCus.add(fTarget.getCu());
+			}
+			pm.worked(1);
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
 		}
-		status.merge(moveMembers(fMemberDeclarations, memberSources));
-		fChange.add(fSource.createChange());
-		modifiedCus.add(fSource.getCu());
-		if (! fSource.getCu().equals(fTarget.getCu())) {
-			fChange.add(fTarget.createChange());
-			modifiedCus.add(fTarget.getCu());
-		}
-		pm.worked(1);
 	}
 	
 	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit) {
@@ -866,7 +874,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		return result;
 	}
 	
-	private String[] getUpdatedMemberSource(RefactoringStatus status, BodyDeclaration[] members, ITypeBinding target) throws CoreException {
+	private String[] getUpdatedMemberSource(RefactoringStatus status, BodyDeclaration[] members, ITypeBinding target) throws CoreException, BadLocationException {
 		List typeRefs= new ArrayList();
 		boolean targetNeedsSourceImport= false;
 		boolean isSourceNotTarget= fSource != fTarget;
@@ -877,7 +885,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 				typeRefs.addAll(TypeReferenceFinder.perform(declaration));
 			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
-			if (getDeclaringType().isInterface() && ! fDestinationType.isInterface()) {
+			if (getDeclaringType().isInterface() && !fDestinationType.isInterface()) {
 				if (declaration instanceof FieldDeclaration) {
 					FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 					int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
@@ -894,7 +902,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 			}
 			ITrackedNodePosition trackedPosition= fSource.getASTRewrite().track(declaration);
 			declaration.setProperty(TRACKED_POSITION_PROPERTY, trackedPosition);
-			targetNeedsSourceImport |= analyzer.targetNeedsSourceImport();
+			targetNeedsSourceImport|= analyzer.targetNeedsSourceImport();
 			status.merge(analyzer.getStatus());
 		}
 		// Adjust imports
@@ -909,22 +917,23 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 		// extract updated members
 		String[] updatedMemberSources= new String[members.length];
-		TextBuffer buffer= TextBuffer.create(fSource.getCu().getSource());
-		TextBufferEditor editor= new TextBufferEditor(buffer);
-		TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), fSource.getCu().getJavaProject().getOptions(true));
-		editor.add(edit);
-		editor.performEdits(new NullProgressMonitor());
-		for (int i= 0; i < members.length; i++) {
-			updatedMemberSources[i]= getUpdatedMember(buffer, members[i]);
+		try {
+			ITextFileBuffer buffer= RefactoringFileBuffers.connect(fSource.getCu());
+			TextEdit edit= fSource.getASTRewrite().rewriteAST(buffer.getDocument(), fSource.getCu().getJavaProject().getOptions(true));
+			edit.apply(buffer.getDocument(), TextEdit.UPDATE_REGIONS);
+			for (int i= 0; i < members.length; i++) {
+				updatedMemberSources[i]= getUpdatedMember(buffer, members[i]);
+			}
+			fSource.clearASTRewrite();
+			return updatedMemberSources;
+		} finally {
+			RefactoringFileBuffers.disconnect(fSource.getCu());
 		}
-		fSource.clearASTRewrite();
-		return updatedMemberSources;		
 	}
-	
-	private String getUpdatedMember(TextBuffer buffer, BodyDeclaration declaration) {
+
+	private String getUpdatedMember(ITextFileBuffer buffer, BodyDeclaration declaration) throws BadLocationException {
 		ITrackedNodePosition trackedPosition= (ITrackedNodePosition) declaration.getProperty(TRACKED_POSITION_PROPERTY);
-		String newSource= buffer.getContent(trackedPosition.getStartPosition(), trackedPosition.getLength());
-		return Strings.trimIndentation(newSource, fPreferences.tabWidth, false);
+		return Strings.trimIndentation(buffer.getDocument().get(trackedPosition.getStartPosition(), trackedPosition.getLength()), fPreferences.tabWidth, false);
 	}
 
 	private RefactoringStatus moveMembers(BodyDeclaration[] members, String[] sources) throws CoreException {

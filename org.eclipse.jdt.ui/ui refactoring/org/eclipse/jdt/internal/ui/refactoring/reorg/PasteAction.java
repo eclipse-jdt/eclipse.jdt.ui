@@ -31,6 +31,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -72,8 +74,8 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -569,12 +571,16 @@ public class PasteAction extends SelectionDispatchAction{
 							insertToType(rewrite, createNewNodeToInsertToType(source, rewrite), (AbstractTypeDeclaration) destination);
 					}
 				}
-				TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
-				TextEdit rootEdit= rewrite.rewriteAST(textBuffer.getDocument(), fDestination.getJavaProject().getOptions(true));
 				final CompilationUnitChange result= new CompilationUnitChange(ReorgMessages.getString("PasteAction.change.name"), getDestinationCu()); //$NON-NLS-1$
-				if (getDestinationCu().isWorkingCopy())
-					result.setSaveMode(TextFileChange.LEAVE_DIRTY);
-				TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
+				try {
+					ITextFileBuffer buffer= RefactoringFileBuffers.connect(getDestinationCu());
+					TextEdit rootEdit= rewrite.rewriteAST(buffer.getDocument(), fDestination.getJavaProject().getOptions(true));
+					if (getDestinationCu().isWorkingCopy())
+						result.setSaveMode(TextFileChange.LEAVE_DIRTY);
+					TextChangeCompatibility.addTextEdit(result, ReorgMessages.getString("PasteAction.edit.name"), rootEdit); //$NON-NLS-1$
+				} finally {
+					RefactoringFileBuffers.disconnect(getDestinationCu());
+				}
 				return result;
 			}
 

@@ -27,6 +27,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -78,8 +80,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -423,12 +425,16 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
 	private Change createChange(ASTRewrite rewrite) throws CoreException {
-        TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
-        TextBuffer textBuffer= TextBuffer.create(fCu.getBuffer().getContents());
-        TextEdit resultingEdits= rewrite.rewriteAST(textBuffer.getDocument(), fCu.getJavaProject().getOptions(true));
-        TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
-        return change;
-    }
+		TextChange change= new CompilationUnitChange("", fCu); //$NON-NLS-1$
+		try {
+			ITextFileBuffer buffer= RefactoringFileBuffers.connect(fCu);
+			TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.getString("ConvertAnonymousToNestedRefactoring.edit_name"), resultingEdits); //$NON-NLS-1$
+		} finally {
+			RefactoringFileBuffers.disconnect(fCu);
+		}
+		return change;
+	}
 
     private void modifyConstructorCall(ASTRewrite rewrite, ITypeBinding[] parameters) {
         rewrite.replace(fAnonymousInnerClassNode.getParent(), createNewClassInstanceCreation(rewrite, parameters), null);

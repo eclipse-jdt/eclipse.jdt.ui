@@ -26,7 +26,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -78,9 +79,9 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ASTNodeDeleteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -408,14 +409,16 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 
 	private static TextChange addTextEditFromRewrite(TextChangeManager manager, ICompilationUnit cu, OldASTRewrite rewrite) throws CoreException {
-		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
-		TextEdit resultingEdits= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdits);
-
-		TextChange textChange= manager.get(cu);
-		TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), resultingEdits); //$NON-NLS-1$
-		rewrite.removeModifications();
-		return textChange;
+		try {
+			ITextFileBuffer buffer= RefactoringFileBuffers.connect(cu);
+			TextEdit edit= rewrite.rewriteAST(buffer.getDocument(), cu.getJavaProject().getOptions(true));
+			TextChange textChange= manager.get(cu);
+			TextChangeCompatibility.addTextEdit(textChange, RefactoringCoreMessages.getString("ExtractInterfaceRefactoring.update_type_declaration"), edit); //$NON-NLS-1$
+			rewrite.removeModifications();
+			return textChange;
+		} finally {
+			RefactoringFileBuffers.disconnect(cu);
+		}
 	}
     
 	private void deleteExtractedMethods(CompilationUnit typeCuNode, ICompilationUnit cu, OldASTRewrite typeCuRewrite) throws CoreException {

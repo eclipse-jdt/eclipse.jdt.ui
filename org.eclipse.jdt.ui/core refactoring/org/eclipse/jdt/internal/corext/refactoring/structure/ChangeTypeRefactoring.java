@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -89,8 +89,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ReturnTypeVar
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeConstraint;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -515,18 +515,15 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private void addAllChangesFor(ICompilationUnit icu, Set vars, CompilationUnitChange unitChange) throws CoreException {
 		CompilationUnit	unit=  ASTCreator.createAST(icu, null);
 		ASTRewrite unitRewriter= ASTRewrite.create(unit.getAST());
-		TextBuffer buffer= null;
 		MultiTextEdit root= new MultiTextEdit();
-		 
 		try {
 			unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
-			buffer= TextBuffer.acquire((IFile) icu.getResource());
+			ITextFileBuffer buffer= RefactoringFileBuffers.connect(icu);
 			String typeName= updateImports(icu, buffer, root);
 			updateCu(unit, vars, unitChange, unitRewriter, typeName);
 			root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true)));
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			RefactoringFileBuffers.disconnect(icu);
 		}
 	}
 
@@ -1116,7 +1113,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * update a CompilationUnit's imports after changing the type of declarations
 	 */
-	private String updateImports(ICompilationUnit icu, TextBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
+	private String updateImports(ICompilationUnit icu, ITextFileBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
 		ImportRewrite rewrite= new ImportRewrite(icu);
 		String typeName= rewrite.addImport(fSelectedType.getFullyQualifiedName());
 		rootEdit.addChild(rewrite.createEdit(buffer.getDocument()));
