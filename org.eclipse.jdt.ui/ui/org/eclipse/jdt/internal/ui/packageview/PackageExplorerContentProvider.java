@@ -64,7 +64,6 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	
 	private TreeViewer fViewer;
 	private Object fInput;
-
 	private boolean fIsFlatLayout;
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
 	
@@ -578,7 +577,9 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			public void run() {
 				Control ctrl= fViewer.getControl();
 				if (ctrl != null && !ctrl.isDisposed()){
-					fViewer.add(parent, element);
+					// TODO workaround for 39754 New projects being added to the TreeViewer twice
+					if (fViewer.testFindItem(element) == null) 
+						fViewer.add(parent, element);
 				}
 			}
 		});
