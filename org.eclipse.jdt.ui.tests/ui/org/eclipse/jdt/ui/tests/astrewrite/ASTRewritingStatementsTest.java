@@ -1454,6 +1454,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        try {\n");	
 		buf.append("        } catch (IOException e) {\n");
 		buf.append("        }\n");
+		buf.append("        try {\n");	
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -1468,7 +1471,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 		Block block= methodDecl.getBody();
 		List blockStatements= block.statements();
-		assertTrue("Number of statements not 3", blockStatements.size() == 3);
+		assertTrue("Number of statements not 4", blockStatements.size() == 4);
 		{ // add catch, replace finally
 			TryStatement tryStatement= (TryStatement) blockStatements.get(0);
 			
@@ -1514,7 +1517,30 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			rewrite.markAsInserted(body);
 			
 			tryStatement.setFinally(body);
-		}		
+		}
+		{ // insert catch before and after existing
+			TryStatement tryStatement= (TryStatement) blockStatements.get(3);
+			
+			CatchClause catchClause1= ast.newCatchClause();
+			SingleVariableDeclaration decl1= ast.newSingleVariableDeclaration();
+			decl1.setType(ast.newSimpleType(ast.newSimpleName("ParseException")));
+			decl1.setName(ast.newSimpleName("e"));
+			catchClause1.setException(decl1);
+			
+			rewrite.markAsInserted(catchClause1);
+			
+			tryStatement.catchClauses().add(0, catchClause1);
+			
+			CatchClause catchClause2= ast.newCatchClause();
+			SingleVariableDeclaration decl2= ast.newSingleVariableDeclaration();
+			decl2.setType(ast.newSimpleType(ast.newSimpleName("FooException")));
+			decl2.setName(ast.newSimpleName("e"));
+			catchClause2.setException(decl2);
+			
+			rewrite.markAsInserted(catchClause2);
+			
+			tryStatement.catchClauses().add(catchClause2);			
+		}				
 			
 	
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1538,6 +1564,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        } finally {\n");
 		buf.append("            return;\n");		
 		buf.append("        }\n");
+		buf.append("        try {\n");
+		buf.append("        } catch (ParseException e) {\n");
+		buf.append("        } catch (IOException e) {\n");
+		buf.append("        } catch (FooException e) {\n");
+		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());

@@ -22,32 +22,17 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -150,32 +135,85 @@ public class LocalCorrectionsSubProcessor {
 			if (refactoring.checkActivationBasics(astRoot, null).isOK()) {
 				String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.surroundwith.description"); //$NON-NLS-1$
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 0, image);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, (CompilationUnitChange) refactoring.createChange(null), 4, image);
 				proposals.add(proposal);
 			}
 		}
 		
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
+		if (decl == null) {
+			return;
+		}
+		ITypeBinding[] uncaughtExceptions= ExceptionAnalyzer.perform(decl, Selection.createFromStartLength(problemPos.getOffset(), problemPos.getLength()));
+		
+		TryStatement surroundingTry= (TryStatement) ASTNodes.getParent(selectedNode, ASTNode.TRY_STATEMENT);
+		if (surroundingTry != null) {
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addadditionalcatch.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
+			
+			AST ast= astRoot.getAST();
+			List catchClauses= surroundingTry.catchClauses();
+			for (int i= 0; i < uncaughtExceptions.length; i++) {
+				String imp= proposal.addImport(uncaughtExceptions[i]);
+				Name name= ASTNodeFactory.newName(ast, imp);
+				SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
+				var.setName(ast.newSimpleName("e"));
+				var.setType(ast.newSimpleType(name));
+				CatchClause newClause= ast.newCatchClause();
+				newClause.setException(var);
+				rewrite.markAsInserted(newClause);
+				catchClauses.add(newClause);
+			}
+			proposal.calculateEditsAndClearRewrites();
+			proposals.add(proposal);				
+		}
+		
 		if (decl instanceof MethodDeclaration) {
 			ASTRewrite rewrite= new ASTRewrite(astRoot);
-			
-			String uncaughtName= problemPos.getArguments()[0];
-			
-			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			List exceptions= methodDecl.thrownExceptions();
-			SimpleName addedException= astRoot.getAST().newSimpleName(Signature.getSimpleName(uncaughtName));
-			exceptions.add(addedException);
-			
-			rewrite.markAsInserted(addedException);
-			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 0, image);
-			proposal.addImport(uncaughtName);
-            
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			
+			AST ast= astRoot.getAST();
+			MethodDeclaration methodDecl= (MethodDeclaration) decl;
+			List exceptions= methodDecl.thrownExceptions();
+			for (int i= 0; i < uncaughtExceptions.length; i++) {
+				String imp= proposal.addImport(uncaughtExceptions[i]);
+				Name name= ASTNodeFactory.newName(ast, imp);
+				rewrite.markAsInserted(name);
+				exceptions.add(name);
+			}
+			//proposal.calculateEditsAndClearRewrites();
 			proposals.add(proposal);
 		}
 	}
+	
+	/**
+	 * Method addUnreachableCatchProposals.
+	 * @param problemPos
+	 * @param proposals
+	 */
+	public static void addUnreachableCatchProposals(ProblemPosition problemPos, ArrayList proposals) {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findCoveringNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		if (selectedNode == null) {
+			return;
+		}
+		
+		if (selectedNode.getNodeType() == ASTNode.BLOCK && selectedNode.getParent().getNodeType() == ASTNode.CATCH_CLAUSE ) {
+			ASTRewrite rewrite= new ASTRewrite(astRoot);
+			rewrite.markAsRemoved(selectedNode.getParent());
+			
+			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.removecatchclause.description"); //$NON-NLS-1$
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
+			proposals.add(proposal);
+		}
+	}	
 	
 	public static void addNLSProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
 		final ICompilationUnit cu= problemPos.getCompilationUnit();
@@ -263,5 +301,6 @@ public class LocalCorrectionsSubProcessor {
 		}
 
 	}
+
 
 }

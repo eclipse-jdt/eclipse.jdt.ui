@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
 
-/* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
+public class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
 
 	private Selection fSelection;
 	

@@ -215,7 +215,7 @@ public class ReturnTypeSubProcessor {
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 10, image);
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
 					proposals.add(proposal);
 				}
  			} else {
@@ -234,12 +234,9 @@ public class ReturnTypeSubProcessor {
 				
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description");
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 10, image);
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
 				proposals.add(proposal);
 			} 
-				
-				
-				
 		}
 	
 	}

@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import java.util.StringTokenizer;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 public class ASTNodeFactory {
 
@@ -39,5 +43,19 @@ public class ASTNodeFactory {
 		result.accept(new PositionClearer());
 		return result;
 	}
+	
+	public static Name newName(AST ast, String name) {
+		StringTokenizer tok= new StringTokenizer(name, ".");
+		Name res= null;
+		while (tok.hasMoreTokens()) {
+			SimpleName curr= ast.newSimpleName(tok.nextToken());
+			if (res == null) {
+				res= curr;
+			} else {
+				res= ast.newQualifiedName(res, curr);
+			}
+		}
+		return res;
+	}	
 
 }

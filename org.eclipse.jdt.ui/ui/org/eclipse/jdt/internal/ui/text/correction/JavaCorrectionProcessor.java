@@ -72,6 +72,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.InterfaceNotFound: 
 			case IProblem.TypeMismatch:
 			case IProblem.UnhandledException:
+			case IProblem.UnreachableCatch:
 			case IProblem.VoidMethodReturnsValue:
 			case IProblem.ShouldReturnValue:
 			case IProblem.MissingReturnType:
@@ -234,6 +235,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					break;
 				case IProblem.UnhandledException:
 					LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(problemPos, proposals);
+					break;
+				case IProblem.UnreachableCatch:
+					LocalCorrectionsSubProcessor.addUnreachableCatchProposals(problemPos, proposals);
 					break;
 				case IProblem.VoidMethodReturnsValue:
 					ReturnTypeSubProcessor.addVoidMethodReturnsProposals(problemPos, proposals);
