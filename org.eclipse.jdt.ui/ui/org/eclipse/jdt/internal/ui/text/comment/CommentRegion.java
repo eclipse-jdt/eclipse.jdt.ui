@@ -194,8 +194,7 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	/**
 	 * Formats the comment region.
 	 * 
-	 * @param indentation
-	 *                   The indentation of the comment region
+	 * @param indentation	the indentation of the comment region
 	 * @return The resulting text edit of the formatting process
 	 */
 	public final TextEdit format(final String indentation) {
