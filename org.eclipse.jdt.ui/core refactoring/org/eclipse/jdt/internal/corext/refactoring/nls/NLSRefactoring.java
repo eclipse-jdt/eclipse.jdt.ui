@@ -869,7 +869,7 @@ public class NLSRefactoring extends Refactoring {
 		String methodBody= CodeGeneration.getMethodBodyContent(fCu, fAccessorClassName, "getString", false, bodyStatement, fgLineDelimiter); //$NON-NLS-1$
 		if (methodBody == null)
 			methodBody= "";  //$NON-NLS-1$
-		return createNewGetStringMethodComment() + "public static String getString(String key) {"  //$NON-NLS-2$//$NON-NLS-1$
+		return createNewGetStringMethodComment() + "public static String getString(String key) {" //$NON-NLS-1$
 						+ fgLineDelimiter + methodBody + fgLineDelimiter + '}';
 	}
 
