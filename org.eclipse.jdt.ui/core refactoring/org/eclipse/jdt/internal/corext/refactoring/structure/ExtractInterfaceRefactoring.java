@@ -5,11 +5,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -30,7 +28,6 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -93,9 +90,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TemplateUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
-import org.eclipse.jdt.internal.corext.template.Template;
-import org.eclipse.jdt.internal.corext.template.Templates;
-import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 
@@ -109,7 +103,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private boolean fReplaceOccurrences= false;
 	private TextChangeManager fChangeManager;
 	private Set fBadVarSet;
-	private Map fCUsToCuNodes;//ICompilationUnit -> CompilationUnit
+
+	private ASTNodeMappingManager fASTMappingManager;
+//	private Map fCUsToCuNodes;//ICompilationUnit -> CompilationUnit
 	
 	public ExtractInterfaceRefactoring(IType clazz, CodeGenerationSettings codeGenerationSettings){
 		Assert.isNotNull(clazz);
@@ -118,7 +114,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		fCodeGenerationSettings= codeGenerationSettings;
 		fExtractedMembers= new IMember[0];
 		fBadVarSet= new HashSet(0);
-		fCUsToCuNodes= new HashMap(0);
+//		fCUsToCuNodes= new HashMap(0);
+		fASTMappingManager= new ASTNodeMappingManager();
 	}
 	
 	/*
@@ -524,15 +521,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private ASTNode[] getReferenceNodes(IMember member, IProgressMonitor pm) throws JavaModelException{
-		SearchResultGroup[] referenceGroups= getMemberReferences(member, pm);
-		List result= new ArrayList();
-		for (int i= 0; i < referenceGroups.length; i++) {
-			ICompilationUnit referencedCu= referenceGroups[i].getCompilationUnit();
-			if (referencedCu == null)
-				continue;
-			result.addAll(Arrays.asList(getAstNodes(referenceGroups[i].getSearchResults(), getAST(referencedCu))));
-		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);		
+		return ReferenceASTNodeFinder.findReferenceNodes(member, fASTMappingManager, pm);
 	}
 		
 	private boolean isReferenceUpdatable(ASTNode varReference, Collection nodesToRemove) throws JavaModelException{
@@ -674,38 +663,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (cu == null)
 			return new ASTNode[0];
 		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		ASTNode[] nodes= getAstNodes(searchResultGroup.getSearchResults(), getAST(wc));
+		ASTNode[] nodes= ReferenceASTNodeFinder.getAstNodes(searchResultGroup.getSearchResults(), getAST(wc));
 		for (int i= 0; i < nodes.length; i++) {
 			nodeSet.add(nodes[i]);
 		}
 		return (ASTNode[]) nodeSet.toArray(new ASTNode[nodeSet.size()]);	
 	}
-	
-	private static ASTNode[] getAstNodes(SearchResult[] searchResults, CompilationUnit cuNode) {
-		List result= new ArrayList(searchResults.length);
-		for (int i= 0; i < searchResults.length; i++) {
-			ASTNode node= getAstNode(searchResults[i], cuNode);
-			if (node != null)
-				result.add(node);
-		}
-		return (ASTNode[]) result.toArray(new ASTNode[result.size()]);
-	}
-
-	private static ASTNode getAstNode(SearchResult searchResult, CompilationUnit cuNode) {
-		ASTNode selectedNode= getAstNode(cuNode, searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
-		if (selectedNode == null)
-			return null;
-		if (selectedNode.getParent() == null)
-			return null;
-		return selectedNode;
-	}
-
-	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
-		cuNode.accept(analyzer);
-		return analyzer.getFirstSelectedNode();
-	}
-	
+		
 	private void addInterfaceImport(TextChangeManager manager, ICompilationUnit cu) throws CoreException {
 		ImportEdit importEdit= new ImportEdit(cu, fCodeGenerationSettings);
 		importEdit.addImport(getFullyQualifiedInterfaceName());
@@ -1070,27 +1034,10 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	}
 	
 	private CompilationUnit getAST(ICompilationUnit cu){
-		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		if (fCUsToCuNodes.containsKey(wc)){
-			return (CompilationUnit)fCUsToCuNodes.get(wc);
-		}	
-		CompilationUnit cuNode= AST.parseCompilationUnit(wc, true);
-		fCUsToCuNodes.put(wc, cuNode);
-		return cuNode;	
+		return fASTMappingManager.getAST(cu);
 	}
 	
 	private ICompilationUnit getCompilationUnit(ASTNode node) {
-		CompilationUnit cuNode= (CompilationUnit)ASTNodes.getParent(node, CompilationUnit.class);
-		Assert.isTrue(fCUsToCuNodes.containsValue(cuNode)); //the cu node must've been created before
-		
-		for (Iterator iter= fCUsToCuNodes.keySet().iterator(); iter.hasNext();) {
-			ICompilationUnit cu= (ICompilationUnit) iter.next();
-			if (fCUsToCuNodes.get(cu) == cuNode)
-				return cu;
-		}	
-		Assert.isTrue(false); //checked before
-		return null;
+		return fASTMappingManager.getCompilationUnit(node);
 	}
-
-	
 }
