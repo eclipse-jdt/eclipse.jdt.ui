@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -59,7 +60,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 		super(JavaEditorMessages.getString("AddImportOnSelection.label"));		 //$NON-NLS-1$
 		setToolTipText(JavaEditorMessages.getString("AddImportOnSelection.tooltip")); //$NON-NLS-1$
 		setDescription(JavaEditorMessages.getString("AddImportOnSelection.description")); //$NON-NLS-1$
-		
+		Assert.isNotNull(fEditor);
 		fEditor= editor;
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.ADD_IMPORT_ON_SELECTION_ACTION);
 		setEnabled(getCompilationUnit() != null);	
@@ -92,7 +93,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			AddImportsOperation op= new AddImportsOperation(cu, doc, (ITextSelection) selection, new SelectTypeQuery(getShell()));
 			try {
 				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
-				progressService.runInUI(progressService, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+				progressService.runInUI(fEditor.getSite().getWorkbenchWindow(), new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
 				IStatus status= op.getStatus();
 				if (!status.isOK()) {
 					IStatusLineManager manager= getStatusLineManager();
