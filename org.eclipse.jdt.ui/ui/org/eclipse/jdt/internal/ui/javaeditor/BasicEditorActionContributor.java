@@ -96,6 +96,9 @@ public class BasicEditorActionContributor extends BasicTextEditorActionContribut
 		
 		fShiftRight.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_RIGHT);
 		fShiftLeft.setImageDescriptor(JavaPluginImages.DESC_MENU_SHIFT_LEFT);
+		
+		fShiftRight.setAccelerator(0);
+		fShiftLeft.setAccelerator(0);
 	}
 	
 	/**
