@@ -60,9 +60,9 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRe
 public class MoveAction extends SelectionDispatchAction{
 	
 	private CompilationUnitEditor fEditor;
-	private SelectionDispatchAction fMoveInstanceMethodAction;
-	private SelectionDispatchAction fMoveStaticMembersAction;
-	private SelectionDispatchAction fReorgMoveAction;//can be null
+	private MoveInstanceMethodAction fMoveInstanceMethodAction;
+	private MoveStaticMembersAction fMoveStaticMembersAction;
+	private ReorgMoveAction fReorgMoveAction;//can be null
 	
 	/**
 	 * Creates a new <code>MoveAction</code>. The action requires

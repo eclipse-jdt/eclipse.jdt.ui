@@ -122,7 +122,7 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 	 */		
 	public void run(ITextSelection selection) {
 		try {
-			run(selection.getOffset(), selection.getLength(), getCompilationUnitForTextSelection());
+			run(selection, getCompilationUnitForTextSelection());
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
@@ -137,25 +137,28 @@ public class MoveInstanceMethodAction extends SelectionDispatchAction {
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
 	}
 		
-	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) throws JavaModelException{
+	private void run(ITextSelection selection, ICompilationUnit cu) throws JavaModelException{
 		Assert.isNotNull(cu);
-		Assert.isTrue(selectionOffset >= 0);
-		Assert.isTrue(selectionLength >= 0);
+		Assert.isTrue(selection.getOffset() >= 0);
+		Assert.isTrue(selection.getLength() >= 0);
 		
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
 
-		IMethod method= getMethod();
+		IMethod method= getMethod(cu, selection);
 
-		if (method != null)
+		if (method != null) {
 			run(method);
+		} else {
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, RefactoringMessages.getString("MoveInstanceMethodAction.No_reference_or_declaration"));
+		}
 	}
 	
-	private IMethod getMethod() {
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
-		if (elements == null || elements.length != 1 || ! (elements[0] instanceof IMethod))
-			return null;
-		return (IMethod) elements[0];
+	private static IMethod getMethod(ICompilationUnit cu, ITextSelection selection) throws JavaModelException {
+		IJavaElement element= SelectionConverter.getElementAtOffset(cu, selection);
+		if (element instanceof IMethod)
+			return (IMethod) element;
+		return null;
 	}
 
 	private ICompilationUnit getCompilationUnitForTextSelection() {
