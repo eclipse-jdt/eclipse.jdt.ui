@@ -137,8 +137,10 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			IClasspathEntry entry= entries[i];
 			if (entry != null && entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) { 
 				IPackageFragmentRoot[] roots1= project.findPackageFragmentRoots(entry);
-				containedRoots.addAll(Arrays.asList(roots1));
-				containers.add(entry);
+				if (roots1.length > 0) {
+					containedRoots.addAll(Arrays.asList(roots1));
+					containers.add(entry);
+				}
 			}
 		}
 		for (int i= 0; i < roots.length; i++) {
