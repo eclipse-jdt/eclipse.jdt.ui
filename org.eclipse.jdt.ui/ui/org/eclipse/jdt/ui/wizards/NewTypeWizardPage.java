@@ -1215,8 +1215,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(NewWizardMessages.getString("NewTypeWizardPage.ChoosePackageDialog.empty")); //$NON-NLS-1$
 		dialog.setElements(packages);
-		if (fCurrPackage != null) {
-			dialog.setInitialSelections(new Object[] { fCurrPackage });
+		IPackageFragment pack= getPackageFragment();
+		if (pack != null) {
+			dialog.setInitialSelections(new Object[] { pack });
 		}
 
 		if (dialog.open() == dialog.OK) {
@@ -1236,10 +1237,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.TYPE, scope);
 		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.ChooseEnclosingTypeDialog.description")); //$NON-NLS-1$
-		if (fCurrEnclosingType != null) {
-			dialog.setInitialSelections(new Object[] { fCurrEnclosingType });
-			dialog.setFilter(fCurrEnclosingType.getElementName().substring(0, 1));
-		}
+		dialog.setFilter(Signature.getSimpleName(getEnclosingTypeText()));
 		
 		if (dialog.open() == dialog.OK) {	
 			return (IType) dialog.getFirstResult();
@@ -1259,9 +1257,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
 		dialog.setTitle(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("NewTypeWizardPage.SuperClassDialog.message")); //$NON-NLS-1$
-		if (fSuperClass != null) {
-			dialog.setFilter(fSuperClass.getElementName());
-		}
+		dialog.setFilter(getSuperClass());
 
 		if (dialog.open() == dialog.OK) {
 			return (IType) dialog.getFirstResult();
