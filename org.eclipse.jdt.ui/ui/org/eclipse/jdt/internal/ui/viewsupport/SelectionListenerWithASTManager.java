@@ -31,6 +31,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -85,15 +86,7 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob= new Job(JavaUIMessages.getString("SelectionListenerWithASTManager.job.title")) { //$NON-NLS-1$
 				public IStatus run(IProgressMonitor monitor) {
 					synchronized (PartListenerGroup.this) {
-						if (monitor.isCanceled()) {
-							return Status.CANCEL_STATUS;
-						}
-						calculateASTandInform(selection, monitor);
-						if (monitor.isCanceled()) {
-							return Status.CANCEL_STATUS;
-						} else {
-							return Status.OK_STATUS;
-						}
+						return calculateASTandInform(selection, monitor);
 					}
 				}
 			};
@@ -102,30 +95,50 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.schedule();
 		}
 		
-		private CompilationUnit computeAST() {
+		private CompilationUnit computeAST(IProgressMonitor monitor) {
 			IEditorInput editorInput= fPart.getEditorInput();
 			if (editorInput != null) {
 				IJavaElement element= (IJavaElement) editorInput.getAdapter(IJavaElement.class);
 				if (element instanceof ICompilationUnit) {
+					ICompilationUnit cu= (ICompilationUnit) element;
+					char[] buffer= null;
 					synchronized (element) { // sychronize on cu to avoid conflict with reconciler: bug 
-						return AST.parseCompilationUnit((ICompilationUnit) element, true);
+						if (!monitor.isCanceled()) {
+							try {
+								buffer= cu.getBuffer().getCharacters();
+							} catch (JavaModelException e) {
+								// ignore
+							}
+						}
 					}
-				}
-				if (element instanceof IClassFile) {
+					if (buffer != null) {
+						return AST.parseCompilationUnit(buffer, cu.getElementName(), cu.getJavaProject());
+					}
+				} else if (element instanceof IClassFile) {
 					return AST.parseCompilationUnit((IClassFile) element, true);
 				}				
 			}
 			return null;
 		}
 		
-		protected void calculateASTandInform(ITextSelection selection, IProgressMonitor monitor) {
-			CompilationUnit astRoot= computeAST();
+		protected IStatus calculateASTandInform(ITextSelection selection, IProgressMonitor monitor) {
+			if (monitor.isCanceled()) {
+				return Status.CANCEL_STATUS;
+			}
+			// create AST
+			CompilationUnit astRoot= computeAST(monitor);
+			
 			if (astRoot != null && !monitor.isCanceled()) {
 				Object[] listeners= fAstListeners.getListeners();
 				for (int i= 0; i < listeners.length; i++) {
 					((ISelectionListenerWithAST) listeners[i]).selectionChanged(fPart, selection, astRoot);
+					if (monitor.isCanceled()) {
+						return Status.CANCEL_STATUS;
+					}
 				}
+				return Status.OK_STATUS;			
 			}
+			return Status.CANCEL_STATUS;
 		}
 	}
 	
