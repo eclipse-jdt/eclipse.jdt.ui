@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
- * Action to convert an anonymous inner class to a nested class
+ * Action to convert an anonymous inner class to a nested class.
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

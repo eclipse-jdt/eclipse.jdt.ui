@@ -39,7 +39,13 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-/** 
+/**
+ * Extract a new interface from a class and tries to use the interface instead 
+ * of the concrete class where possible. 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.1
  */
 public class ExtractInterfaceAction extends SelectionDispatchAction {

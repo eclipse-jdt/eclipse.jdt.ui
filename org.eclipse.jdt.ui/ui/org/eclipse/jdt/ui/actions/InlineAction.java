@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
+ * 
+ * @since 2.1
  */
 public class InlineAction extends SelectionDispatchAction {
 

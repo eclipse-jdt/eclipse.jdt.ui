@@ -372,6 +372,9 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		}
 				
 
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
 	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.getString("OrganizeImportsAction.error.title"), fEditor != null)) //$NON-NLS-1$ 
 			return;

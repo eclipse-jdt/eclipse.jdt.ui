@@ -40,6 +40,12 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /** 
+ * Action to convert a nested class to a top level class.
+ * 
+ * <p>
+ * This class may be instantiated; it is not intended to be subclassed.
+ * </p>
+ * 
  * @since 2.1
  */
 public class ConvertNestedToTopAction extends SelectionDispatchAction {

@@ -411,6 +411,8 @@ public class JdtActionConstants {
 	/**
 	 * Search menu: name of standard Occurrences in File global action (value
 	 * <code>"org.eclipse.jdt.ui.actions.OccurrencesInFile"</code>).
+	 * 
+	 * @since 2.1
 	 */
 	public static final String FIND_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.actions.OccurrencesInFile"; //$NON-NLS-1$
 }

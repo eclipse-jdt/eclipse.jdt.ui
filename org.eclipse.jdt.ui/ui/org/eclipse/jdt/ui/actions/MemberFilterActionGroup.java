@@ -246,6 +246,12 @@ public class MemberFilterActionGroup extends ActionGroup {
 		tbm.add(fFilterActions[2]); // public
 	}
 	
+	/**
+	 * Adds the filter actions to the given menu manager.
+	 * 
+	 * @param menu the menu manager to which the actions are added
+	 * @since 2.1
+	 */
 	public void contributeToViewMenu(IMenuManager menu) {
 		if (!fInViewMenu)
 			return;

@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
- * @since 2.0
+ * @since 2.1
  */
 public class ExtractConstantAction extends SelectionDispatchAction {
 

@@ -56,7 +56,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 	
-	public InlineTempAction(IWorkbenchSite site) {
+	/* package */ InlineTempAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);

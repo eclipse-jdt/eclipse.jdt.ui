@@ -39,7 +39,9 @@ import org.eclipse.jdt.internal.ui.refactoring.UseSupertypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-/** 
+/**
+ * Tries to use a super type of a class where possible.
+ *  
  * @since 2.1
  */
 public class UseSupertypeAction extends SelectionDispatchAction{
