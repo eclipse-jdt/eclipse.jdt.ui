@@ -34,14 +34,14 @@ public class CompilationUnitChange extends TextFileChange {
 	 * @param name the change's name mainly used to render the change in the UI
 	 * @param cunit the compilation unit this text change works on
 	 */
-	public CompilationUnitChange(String name, ICompilationUnit cunit) throws CoreException {
+	public CompilationUnitChange(String name, ICompilationUnit cunit) {
 		super(name, getFile(cunit));
 		Assert.isNotNull(cunit);
 		fCUnit= cunit;
 		setTextType("java"); //$NON-NLS-1$
 	}
 	
-	private static IFile getFile(ICompilationUnit cunit) throws CoreException {
+	private static IFile getFile(ICompilationUnit cunit) {
 		return (IFile) cunit.getResource();
 	}
 	
