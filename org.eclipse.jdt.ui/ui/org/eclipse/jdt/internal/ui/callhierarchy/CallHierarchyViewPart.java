@@ -106,6 +106,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private static final String DIALOGSTORE_JAVA_LABEL_FORMAT = "CallHierarchyViewPart.java_label_format"; //$NON-NLS-1$
     private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
     private static final String TAG_CALL_MODE = "call_mode"; //$NON-NLS-1$
+    private static final String TAG_IMPLEMENTORS_MODE = "implementors_mode"; //$NON-NLS-1$
     private static final String TAG_JAVA_LABEL_FORMAT = "java_label_format"; //$NON-NLS-1$
     private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
     static final int VIEW_ORIENTATION_VERTICAL = 0;
@@ -113,6 +114,8 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     static final int VIEW_ORIENTATION_SINGLE = 2;
     static final int CALL_MODE_CALLERS = 0;
     static final int CALL_MODE_CALLEES = 1;
+    static final int IMPLEMENTORS_ENABLED = 0;
+    static final int IMPLEMENTORS_DISABLED = 1;
     static final int JAVA_LABEL_FORMAT_DEFAULT = JavaElementLabelProvider.SHOW_DEFAULT;
     static final int JAVA_LABEL_FORMAT_SHORT = JavaElementLabelProvider.SHOW_BASICS;
     static final int JAVA_LABEL_FORMAT_LONG = JavaElementLabelProvider.SHOW_OVERLAY_ICONS |
@@ -130,6 +133,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private int fCurrentOrientation;
     private int fCurrentCallMode;
     private int fCurrentJavaLabelFormat;
+    private int fCurrentImplementorsMode;
     private MethodWrapper fCalleeRoot;
     private MethodWrapper fCallerRoot;
     private IMemento fMemento;
@@ -142,6 +146,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     private SearchScopeActionGroup fSearchScopeActions;
     private ToggleOrientationAction[] fToggleOrientationActions;
     private ToggleCallModeAction[] fToggleCallModeActions;
+    private ToggleImplementorsAction[] fToggleImplementorsActions;
     private ToggleJavaLabelFormatAction[] fToggleJavaLabelFormatActions;
     private CallHierarchyFiltersActionGroup fFiltersActionGroup;
     private HistoryDropDownAction fHistoryDropDownAction;
@@ -263,6 +268,24 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
     }
 
     /**
+     * called from ToggleImplementorsAction.
+     * @param implementorsMode IMPLEMENTORS_USED or IMPLEMENTORS_NOT_USED
+     */
+    void setImplementorsMode(int implementorsMode) {
+        if (fCurrentImplementorsMode != implementorsMode) {
+            for (int i = 0; i < fToggleImplementorsActions.length; i++) {
+                fToggleImplementorsActions[i].setChecked(implementorsMode == fToggleImplementorsActions[i].getImplementorsMode());
+            }
+
+            fCurrentImplementorsMode = implementorsMode;
+
+            CallHierarchy.getDefault().setSearchUsingImplementorsEnabled(implementorsMode == IMPLEMENTORS_ENABLED);
+            
+            updateView();
+        }
+    }
+
+    /**
      * called from ToggleCallModeAction.
      * @param orientation CALL_MODE_CALLERS or CALL_MODE_CALLEES
      */
@@ -348,6 +371,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         initOrientation();
         initCallMode();
+        initImplementorsMode();
         initJavaLabelFormat();
 
         if (fMemento != null) {
@@ -383,16 +407,22 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
      * Restores the type hierarchy settings from a memento.
      */
     private void restoreState(IMemento memento) {
-        Integer orientation = memento.getInteger(TAG_ORIENTATION);
+        Integer orientation= memento.getInteger(TAG_ORIENTATION);
 
         if (orientation != null) {
             setOrientation(orientation.intValue());
         }
 
-        Integer callMode = memento.getInteger(TAG_CALL_MODE);
+        Integer callMode= memento.getInteger(TAG_CALL_MODE);
 
         if (callMode != null) {
             setCallMode(callMode.intValue());
+        }
+
+        Integer implementorsMode= memento.getInteger(TAG_IMPLEMENTORS_MODE);
+
+        if (implementorsMode != null) {
+            setImplementorsMode(implementorsMode.intValue());
         }
 
         Integer javaLabelFormat = memento.getInteger(TAG_JAVA_LABEL_FORMAT);
@@ -428,6 +458,18 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         // will fill the main tool bar
         setCallMode(mode);
+    }
+
+    private void initImplementorsMode() {
+        int mode;
+
+        
+        mode= CallHierarchy.getDefault().isSearchUsingImplementorsEnabled() ? IMPLEMENTORS_ENABLED : IMPLEMENTORS_DISABLED;
+
+        fCurrentImplementorsMode= -1;
+        
+        // will fill the main tool bar
+        setImplementorsMode(mode);
     }
 
     private void initOrientation() {
@@ -481,6 +523,13 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
 
         viewMenu.add(new Separator());
 
+// TODO: Should be reenabled if this toggle should actually be used
+//        for (int i = 0; i < fToggleImplementorsActions.length; i++) {
+//            viewMenu.add(fToggleImplementorsActions[i]);
+//        }
+//
+//        viewMenu.add(new Separator());
+        
         for (int i = 0; i < fToggleJavaLabelFormatActions.length; i++) {
             viewMenu.add(fToggleJavaLabelFormatActions[i]);
         }
@@ -592,6 +641,7 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         }
 
         memento.putInteger(TAG_CALL_MODE, fCurrentCallMode);
+        memento.putInteger(TAG_IMPLEMENTORS_MODE, fCurrentImplementorsMode);
         memento.putInteger(TAG_ORIENTATION, fCurrentOrientation);
         memento.putInteger(TAG_JAVA_LABEL_FORMAT, fCurrentJavaLabelFormat);
 
@@ -868,6 +918,10 @@ public class CallHierarchyViewPart extends ViewPart implements IDoubleClickListe
         fToggleCallModeActions = new ToggleCallModeAction[] {
                 new ToggleCallModeAction(this, CALL_MODE_CALLERS),
                 new ToggleCallModeAction(this, CALL_MODE_CALLEES)
+            };
+        fToggleImplementorsActions = new ToggleImplementorsAction[] {
+                new ToggleImplementorsAction(this, IMPLEMENTORS_ENABLED),
+                new ToggleImplementorsAction(this, IMPLEMENTORS_DISABLED)
             };
         fToggleJavaLabelFormatActions = new ToggleJavaLabelFormatAction[] {
                 new ToggleJavaLabelFormatAction(this, JAVA_LABEL_FORMAT_DEFAULT),

@@ -27,10 +27,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.callhierarchy.ICallHierarchyPreferencesConstants;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class CallHierarchy {
+    private static final String PREF_USE_IMPLEMENTORS= "PREF_USE_IMPLEMENTORS"; //$NON-NLS-1$
     private static final String PREF_USE_FILTERS = "PREF_USE_FILTERS"; //$NON-NLS-1$
     private static final String PREF_FILTERS_LIST = "PREF_FILTERS_LIST"; //$NON-NLS-1$
 
@@ -50,20 +50,21 @@ public class CallHierarchy {
     /**
      * @return
      */
-    public boolean isSearchForCalleesUsingImplementorsEnabled() {
+    public boolean isSearchUsingImplementorsEnabled() {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
-        return settings.getBoolean(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH);
+        return settings.getBoolean(PREF_USE_IMPLEMENTORS);
     }
 
     /**
      * @return
      */
-    public boolean isSearchForCallersUsingImplementorsEnabled() {
+    public void setSearchUsingImplementorsEnabled(boolean enabled) {
         IPreferenceStore settings = JavaPlugin.getDefault().getPreferenceStore();
 
-        return settings.getBoolean(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH);
+        settings.setValue(PREF_USE_IMPLEMENTORS, enabled);
     }
+
 
     /**
      * @param method
@@ -71,7 +72,7 @@ public class CallHierarchy {
      * @return
      */
     public Collection getImplementingMethods(IMethod method) {
-        if (isSearchForCalleesUsingImplementorsEnabled()) {
+        if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForImplementors(new IJavaElement[] {
                         method
                     }, new NullProgressMonitor());
@@ -90,7 +91,7 @@ public class CallHierarchy {
      * @return
      */
     public Collection getInterfaceMethods(IMethod method) {
-        if (isSearchForCallersUsingImplementorsEnabled()) {
+        if (isSearchUsingImplementorsEnabled()) {
             IJavaElement[] result = Implementors.getInstance().searchForInterfaces(new IJavaElement[] {
                         method
                     }, new NullProgressMonitor());

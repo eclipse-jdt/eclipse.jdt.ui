@@ -11,8 +11,6 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.callhierarchy;
 
-import org.eclipse.core.runtime.IAdaptable;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -46,8 +44,11 @@ class FocusOnSelectionAction extends Action {
         
         if (element instanceof IMethod) {
             method= (IMethod) element;
-        } else if (element instanceof IAdaptable) {
-            method= (IMethod) ((IAdaptable) element).getAdapter(IMethod.class);
+        } else if (element instanceof MethodWrapper) {
+            IMember member= ((MethodWrapper) element).getMember();
+            if (member.getElementType() == IJavaElement.METHOD) {
+                method= (IMethod) member;
+            }
         }
         
         if (method != null) {

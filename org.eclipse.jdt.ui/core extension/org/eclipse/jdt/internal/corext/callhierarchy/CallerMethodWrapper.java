@@ -21,13 +21,12 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class CallerMethodWrapper extends MethodWrapper {
@@ -83,9 +82,6 @@ class CallerMethodWrapper extends MethodWrapper {
         Collection result = new ArrayList();
 
         result.add(getMember());
-        if (getMember().getElementType() == IJavaElement.METHOD) {
-            result.addAll(CallHierarchy.getDefault().getInterfaceMethods((IMethod) getMember()));
-        }
 
         return result;
     }

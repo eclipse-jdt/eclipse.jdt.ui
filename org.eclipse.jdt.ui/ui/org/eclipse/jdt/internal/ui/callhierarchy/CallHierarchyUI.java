@@ -75,13 +75,6 @@ class CallHierarchyUI {
         settings.setValue(PREF_MAX_CALL_DEPTH, maxCallDepth);
     }
     
-    public void initializeDefaultBasePreferences(IPreferenceStore store) {
-        store.setDefault(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLER_SEARCH,
-            false);
-        store.setDefault(ICallHierarchyPreferencesConstants.PREF_USE_IMPLEMENTORS_FOR_CALLEE_SEARCH,
-            false);
-    }
-
     public static void jumpToMember(IJavaElement element) {
         if (element != null) {
             try {
