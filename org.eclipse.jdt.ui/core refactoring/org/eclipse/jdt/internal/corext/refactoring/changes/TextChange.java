@@ -309,7 +309,8 @@ public abstract class TextChange extends AbstractTextChange {
 			}
 		}
 		editor.add(copiedEdit);		
-		fCopier= null;
+		if (!fKeepExecutedTextEdits)
+			fCopier= null;
 	}
 	
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
