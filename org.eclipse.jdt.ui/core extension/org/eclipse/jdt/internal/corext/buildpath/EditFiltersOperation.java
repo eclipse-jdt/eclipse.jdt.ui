@@ -99,11 +99,10 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 		if (element instanceof IJavaProject) {
 			if (!project.isOnClasspath(project))
 				return false;
+		} else if (element instanceof IPackageFragmentRoot) {
+			return ((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE;
 		}
-		else if (!(element instanceof IPackageFragmentRoot))
-			return false;
-		IPackageFragmentRoot root= (IPackageFragmentRoot) element;
-		return root.getKind() == IPackageFragmentRoot.K_SOURCE;
+		return false;
 	}
 	
 	/**
