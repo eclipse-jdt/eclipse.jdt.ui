@@ -52,7 +52,7 @@ public class JavaTextTools {
 		public void propertyChange(Preferences.PropertyChangeEvent event) {
 			adaptToPreferenceChange(new PropertyChangeEvent(event.getSource(), event.getProperty(), event.getOldValue(), event.getNewValue()));
 		}
-	};
+	}
 		
 	/** The color manager. */
 	private JavaColorManager fColorManager;
