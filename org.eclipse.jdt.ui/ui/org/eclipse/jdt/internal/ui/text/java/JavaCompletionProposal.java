@@ -257,4 +257,28 @@ public class JavaCompletionProposal implements ICompletionProposal, ICompletionP
 		fReplacementLength= replacementLength;
 	}
 
+	/**
+	 * Gets the replacement string.
+	 * @return Returns a String
+	 */
+	public String getReplacementString() {
+		return fReplacementString;
+	}
+
+	/**
+	 * Sets the replacement string.
+	 * @param replacementString The replacement string to set
+	 */
+	public void setReplacementString(String replacementString) {
+		fReplacementString= replacementString;
+	}
+
+	/**
+	 * Sets the image.
+	 * @param image The image to set
+	 */
+	public void setImage(Image image) {
+		fImage= image;
+	}
+
 }

@@ -195,6 +195,11 @@ public class ResultCollector implements ICodeCompletionRequestor {
 		}
 		
 		fMethods.add(proposal);
+		
+		if (returnTypeName.length == 0 && fCompilationUnit != null) {
+			proposal= createAnonymousTypeCompletion(declaringTypePackageName, declaringTypeName, name, parameterTypeNames, parameterNames, completionName, start, end);
+			fMethods.add(proposal);
+		}		
 	}
 
 	
@@ -295,6 +300,29 @@ public class ResultCollector implements ICodeCompletionRequestor {
 			nameBuffer.append(declaringTypeName);
 		}
 		return createCompletion(start, end, new String(completionName), iconName, nameBuffer.toString());
+	}
+
+	private JavaCompletionProposal createAnonymousTypeCompletion(char[] declaringTypePackageName, char[] declaringTypeName, char[] name, char[][] parameterTypeNames, char[][] parameterNames, char[] completionName, int start, int end) {
+		StringBuffer declTypeBuf= new StringBuffer();
+		if (declaringTypePackageName.length > 0) {
+			declTypeBuf.append(declaringTypePackageName);
+			declTypeBuf.append('.');
+		}
+		declTypeBuf.append(declaringTypeName);
+		
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(name);
+		nameBuffer.append('(');
+		if (parameterTypeNames.length > 0) {
+			nameBuffer.append(getParameterSignature(parameterTypeNames, parameterNames));
+		}
+		nameBuffer.append(')');
+		nameBuffer.append("  ");
+		nameBuffer.append(JavaTextMessages.getString("ResultCollector.anonymous_type")); //$NON-NLS-1$
+	
+		int length= end - start;
+		
+		return new AnonymousTypeCompletionProposal(fCompilationUnit, start, length, new String(completionName), nameBuffer.toString(), declTypeBuf.toString());
 	}
 
 	

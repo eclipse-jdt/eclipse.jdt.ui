@@ -1260,7 +1260,7 @@ public abstract class TypePage extends ContainerPage {
 			}
 		}
 		if (doUnimplementedMethods) {
-			StubUtility.evalUnimplementedMethods(type, hierarchy, newMethods, imports);
+			StubUtility.evalUnimplementedMethods(type, hierarchy, false, newMethods, imports);
 		}
 		return (String[]) newMethods.toArray(new String[newMethods.size()]);		
 		

@@ -51,7 +51,7 @@ public class AddUnimplementedMethodsOperation implements IWorkspaceRunnable {
 			
 			ArrayList toImplement= new ArrayList();
 			ImportsStructure imports= new ImportsStructure(fType.getCompilationUnit());
-			StubUtility.evalUnimplementedMethods(fType, hierarchy, toImplement, imports);
+			StubUtility.evalUnimplementedMethods(fType, hierarchy, false, toImplement, imports);
 			
 			int nToImplement= toImplement.size();
 			ArrayList createdMethods= new ArrayList(nToImplement);

@@ -268,12 +268,15 @@ public class StubUtility {
 		}
 	}
 
+
 	/**
 	 * Searches for unimplemented methods of a type.
-	 * @param newMethods The source for the created methods (Vector of String)
+	 * @param isSubType If set, the evaluation is for a subtype of the given type. If not set, the
+	 * evaluation is for the type itself.
+	 * @param newMethods The source for the created methods (List of String)
 	 * @param imports Type names for input declarations required (for example 'java.util.Vector')
 	 */
-	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, List newMethods, IImportsStructure imports) throws JavaModelException {
+	public static void evalUnimplementedMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType, List newMethods, IImportsStructure imports) throws JavaModelException {
 		List allMethods= new ArrayList();
 
 		IMethod[] typeMethods= type.getMethods();
@@ -299,9 +302,13 @@ public class StubUtility {
 
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethod curr= (IMethod) allMethods.get(i);
-			if (Flags.isAbstract(curr.getFlags()) && !type.equals(curr.getDeclaringType())) {
-				// implement all abstract methods
-				String newStub= genStub(type, curr, false, true, imports);
+			if (Flags.isAbstract(curr.getFlags()) && (isSubType || !type.equals(curr.getDeclaringType()))) {
+				// implement all abstract methods. See tag points to declaration
+				IMethod desc= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, curr.getElementName(), curr.getParameterTypes(), curr.isConstructor());
+				if (desc == null) {
+					desc= curr;
+				}
+				String newStub= genStub(type, desc, false, true, imports);
 				newMethods.add(newStub);
 			}
 		}
@@ -327,6 +334,7 @@ public class StubUtility {
 			}
 		}
 	}
+
 
 	/**
 	 * Examines a string and returns the first line delimiter found.
