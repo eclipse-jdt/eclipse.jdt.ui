@@ -19,28 +19,17 @@ public final class SearchResult {
 	private int fStart, fEnd;
 	private int fAccuracy;
 	
-	private boolean fIsQualified;
-
-	public SearchResult(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy){
-		this(resource, start, end, enclosingElement, accuracy, false);
-	}
-	
 	/**
 	 * @see IJavaSearchResultCollector#accept
 	 */
-	public SearchResult(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy, boolean qualified){
+	public SearchResult(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy){
 		fResource= resource;
 		fStart= start;
 		fEnd= end;
 		fEnclosingElement= enclosingElement;
 		fAccuracy= accuracy;
-		fIsQualified= qualified;
 	}
 
-	public boolean isQualified(){
-		return fIsQualified;
-	}
-	
 	public int getStart(){
 		return fStart;	
 	}
@@ -72,7 +61,7 @@ public final class SearchResult {
 			 + "\n\tjavaElement:" + fEnclosingElement + "(instanceof " + fEnclosingElement.getClass() + ")" //$NON-NLS-1$ //$NON-NLS-3$ //$NON-NLS-2$
 			 + getElementSourceRange()
 			 + "\n\tAccuracy:" + fAccuracy //$NON-NLS-1$
-			 + "\n\tqualified:" + fIsQualified + "/>"; //$NON-NLS-1$ //$NON-NLS-2$
+			 + "/>"; //$NON-NLS-1$
 	}
 	
 	//just for debugging

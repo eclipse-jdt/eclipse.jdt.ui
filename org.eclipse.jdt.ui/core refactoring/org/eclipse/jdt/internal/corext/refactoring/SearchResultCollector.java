@@ -39,10 +39,6 @@ public class SearchResultCollector implements IJavaSearchResultCollector {
 		fFound.add(new SearchResult(res, start, end, element, accuracy));
 	}
 	
-	public void accept(IResource res, int start, int end, IJavaElement element, int accuracy, boolean qualified) {
-		fFound.add(new SearchResult(res, start, end, element, accuracy, qualified));
-	}
-
 	/**
 	 * @see IJavaSearchResultCollector#done
 	 */
