@@ -22,7 +22,7 @@
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<zip zipfile="${dest}/jdtvcmsrc.zip">
-		    <fileset dir="Eclipse Java UI VCM" />
+		    <fileset dir="vcm" />
   		</zip>				
 	</target>
 </project>

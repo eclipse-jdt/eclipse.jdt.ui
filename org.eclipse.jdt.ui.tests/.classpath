@@ -1,24 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" path="Java UI Tests"/>
-    <classpathentry kind="src" path="Test Plugin"/>
-    <classpathentry kind="src" path="JUnit"/>
-    <classpathentry kind="src" path="Refactoring Tests"/>
+    <classpathentry kind="src" path="examples"/>
+    <classpathentry kind="src" path="refactoring"/>
+    <classpathentry kind="src" path="test plugin"/>
+    <classpathentry kind="src" path="ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.ui"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
-    <classpathentry kind="src" path="/org.eclipse.ui"/>
-    <classpathentry kind="lib" path="/org.junit/junit.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.help/help.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.core.resources/resources.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.core.runtime/runtime.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.core.boot/boot.jar"/>
-    <classpathentry kind="lib" path="/Eclipse Core Launcher/startup.jar"/>
-    <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
-    <classpathentry kind="var" path="JRE_LIB" rootpath="src" sourcepath="JRE_SRC"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.ui.test.harness"/>
-    <classpathentry kind="src" path="Java UI Examples"/>
+    <classpathentry kind="src" path="/org.eclipse.ui"/>
+    <classpathentry kind="lib" path="/org.eclipse.help/help.jar"
+        rootpath="" sourcepath="/org.eclipse.help/helpsrc.zip"/>
+    <classpathentry kind="lib"
+        path="/org.eclipse.core.resources/resources.jar" rootpath="" sourcepath="/org.eclipse.core.resources/resourcessrc.zip"/>
+    <classpathentry kind="lib"
+        path="/org.eclipse.core.runtime/runtime.jar" rootpath="" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
     <classpathentry kind="lib" path="/org.eclipse.swt/ws/win32/swt.jar"
         rootpath="common" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
+    <classpathentry kind="lib" path="/org.eclipse.core.boot/boot.jar"
+        rootpath="" sourcepath="/org.eclipse.core.boot/bootsrc.zip"/>
+    <classpathentry kind="lib" path="/Eclipse Core Launcher/startup.jar"
+        rootpath="" sourcepath="/Eclipse Core Launcher/startupsrc.zip"/>
+    <classpathentry kind="lib" path="/org.junit/junit.jar"/>
+    <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="src" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>

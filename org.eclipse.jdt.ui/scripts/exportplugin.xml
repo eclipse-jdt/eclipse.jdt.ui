@@ -27,10 +27,10 @@
 			<fileset dir="icons" />
 		</copy>
 		<zip zipfile="${dest}/jdtsrc.zip">
-		    <fileset dir="Eclipse Java Core Refactoring" />
-		    <fileset dir="Eclipse Java UI Refactoring" />
-		    <fileset dir="Eclipse Java UI Debug" />
-		    <fileset dir="Eclipse Java UI" />
+		    <fileset dir="core refactoring" />
+		    <fileset dir="ui refactoring" />
+		    <fileset dir="ui debug" />
+		    <fileset dir="ui" />
   		</zip>		
 	</target>
 </project>

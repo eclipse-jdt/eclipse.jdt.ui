@@ -31,7 +31,7 @@
 			<fileset dir="doc-html" />
 		</copy>
 		<zip zipfile="${dest}/jdtexamplessrc.zip">
-		    <fileset dir="Eclipse Java UI Examples" />
+		    <fileset dir="examples" />
   		</zip>				
 	</target>
 </project>

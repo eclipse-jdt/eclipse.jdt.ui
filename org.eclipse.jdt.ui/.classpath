@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" path="Eclipse Java Core Refactoring"/>
-    <classpathentry kind="src" path="Eclipse Java UI Refactoring"/>
-    <classpathentry kind="src" path="Eclipse Java UI Debug"/>
-    <classpathentry kind="src" path="Eclipse Java UI"/>
+    <classpathentry kind="src" path="ui"/>
+    <classpathentry kind="src" path="ui debug"/>
+    <classpathentry kind="src" path="ui refactoring"/>
+    <classpathentry kind="src" path="core refactoring"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.core"/>
     <classpathentry kind="src" path="/org.eclipse.search"/>
     <classpathentry kind="src" path="/org.eclipse.debug.core"/>
@@ -14,13 +14,15 @@
     <classpathentry kind="src" path="/org.eclipse.ui"/>
     <classpathentry kind="src" path="/org.eclipse.swt"/>
     <classpathentry kind="lib" path="/org.eclipse.jdt.debug/jdi.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.help/help.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.core.resources/resources.jar"/>
+    <classpathentry kind="lib" path="/org.eclipse.help/help.jar"
+        rootpath="" sourcepath="/org.eclipse.help/helpsrc.zip"/>
+    <classpathentry kind="lib"
+        path="/org.eclipse.core.resources/resources.jar" rootpath="" sourcepath="/org.eclipse.core.resources/resourcessrc.zip"/>
     <classpathentry kind="lib"
         path="/org.eclipse.core.runtime/runtime.jar" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
-    <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
-    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="lib" path="/org.eclipse.swt/ws/win32/swt.jar"
         rootpath="common" sourcepath="/org.eclipse.swt/swtsrc.zip"/>
+    <classpathentry kind="lib" path="/org.apache.xerces/xerces.jar"/>
+    <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
