@@ -15,8 +15,6 @@
     <classpathentry kind="src" path="/org.eclipse.swt"/>
     <classpathentry kind="lib" path="/org.eclipse.jdt.debug/jdi.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.help/help.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.compare/compare.jar"/>
-    <classpathentry kind="lib" path="/org.eclipse.search/search.jar"/>
     <classpathentry kind="lib" path="/org.eclipse.core.resources/resources.jar"/>
     <classpathentry kind="lib"
         path="/org.eclipse.core.runtime/runtime.jar" sourcepath="/org.eclipse.core.runtime/runtimesrc.zip"/>
