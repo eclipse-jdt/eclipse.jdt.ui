@@ -49,14 +49,14 @@ class SourceReferenceTestUtil {
 //	}	
 
 	static void copy(Object[] elems, Clipboard clipboard) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems), clipboard);
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), clipboard);
 		copyAction.update();
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();
 	}	
 
 	static void paste(Object[] elems, Clipboard clipboard) {
-		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), new MockSelectionProvider(elems), clipboard);
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), clipboard);
 		pasteAction.update();
 		Assert.assertTrue("paste incorrectly disabled", pasteAction.isEnabled());
 		pasteAction.run();

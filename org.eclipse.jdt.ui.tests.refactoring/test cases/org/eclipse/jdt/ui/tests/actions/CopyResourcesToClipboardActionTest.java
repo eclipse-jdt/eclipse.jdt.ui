@@ -108,13 +108,13 @@ public class CopyResourcesToClipboardActionTest extends RefactoringTest{
 	}
 
 	private void checkEnabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements), fClipboard);
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.update();
 		assertTrue("action should be enabled", copyAction.isEnabled());
 	}
 	
 	private void checkDisabled(Object[] elements) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), new MockSelectionProvider(elements), fClipboard);
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elements), fClipboard);
 		copyAction.update();
 		assertTrue("action should not be enabled", ! copyAction.isEnabled());
 	}
