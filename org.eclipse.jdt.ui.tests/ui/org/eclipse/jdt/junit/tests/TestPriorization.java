@@ -55,7 +55,7 @@ public class TestPriorization extends TestCase {
 		List order= new ArrayList();
 		collectOrder(prioritized, order);
 		String[] expected= {
-				"testD", "testE", "testF"
+				"testF", "testD", "testE"
 		};
 		//printOrder(order);
 		assertTrue(checkOrder(expected, order));
