@@ -35,7 +35,7 @@ class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	private INewNameQuery fNameQuery;
 	
 	public CreateCopyOfCompilationUnitChange(IPath path, String source, ICompilationUnit oldCu, INewNameQuery nameQuery) {
-		super(path, source);
+		super(path, source, true);
 		fOldCu= oldCu;
 		fNameQuery= nameQuery;
 	}

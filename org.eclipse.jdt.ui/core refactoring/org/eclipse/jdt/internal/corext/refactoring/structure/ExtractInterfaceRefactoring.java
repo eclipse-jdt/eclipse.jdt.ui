@@ -354,7 +354,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 //				change.addTextEdit("", edit);
 //		}
 		
-		return new CreateTextFileChange(interfaceCuPath, formattedSource);	
+		return new CreateTextFileChange(interfaceCuPath, formattedSource, true);	
 		
 	}
 	
