@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import java.text.DateFormat;
+import java.util.Calendar;
 
 import org.eclipse.jdt.internal.corext.template.SimpleTemplateVariable;
 import org.eclipse.jdt.internal.corext.template.TemplateContext;
@@ -55,6 +56,19 @@ public class GlobalVariables {
 		}
 	}		
 
+	/**
+	 * The year variable evaluates to the current year.
+	 */
+	static class Year extends SimpleTemplateVariable {
+		public Year() {
+			super(JavaTemplateMessages.getString("GlobalVariables.variable.name.year"), JavaTemplateMessages.getString("GlobalVariables.variable.description.year")); //$NON-NLS-1$ //$NON-NLS-2$
+			setResolved(true);
+		}
+		public String evaluate(TemplateContext context) {
+			return Integer.toString(Calendar.getInstance().get(Calendar.YEAR));
+		}
+	}
+	
 	/**
 	 * The time variable evaluates to the current time.
 	 */
