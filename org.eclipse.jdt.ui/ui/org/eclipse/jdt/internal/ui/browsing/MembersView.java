@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -232,5 +233,21 @@ public class MembersView extends JavaBrowsingPart {
 					viewer.setExpandedState(element, !viewer.getExpandedState(element));
 			}
 		});
+	}
+
+	boolean isInputAWorkingCopy() {
+		Object input= getViewer().getInput();
+		if (input instanceof IJavaElement) {
+			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)input).getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu != null)
+				return cu.isWorkingCopy();
+		}
+		return false;
+	}
+
+	protected void restoreSelection() {
+		IEditorPart editor= getViewSite().getPage().getActiveEditor();
+		if (editor != null)
+			setSelectionFromEditor(editor);
 	}
 }
