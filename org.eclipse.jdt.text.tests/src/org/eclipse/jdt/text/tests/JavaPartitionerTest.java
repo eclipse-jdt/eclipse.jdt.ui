@@ -78,7 +78,7 @@ public class JavaPartitionerTest extends TestCase {
 	
 	protected void checkPartitioning(ITypedRegion[] expectation, ITypedRegion[] result) {
 		
-		assertTrue("invalid number of partitions", expectation.length == result.length);
+		assertEquals("invalid number of partitions", expectation.length, result.length);
 		
 		for (int i= 0; i < expectation.length; i++) {
 			ITypedRegion e= expectation[i];
