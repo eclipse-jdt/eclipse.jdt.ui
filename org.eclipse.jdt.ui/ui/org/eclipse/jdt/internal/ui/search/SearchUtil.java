@@ -202,7 +202,7 @@ public class SearchUtil extends JavaModelUtil {
 	 * 
 	 * @see JavaModelUtil#findMemberInCompilationUnit(ICompilationUnit, IMember)
 	 */		
-	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
+	public static IMember findInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
 		if (member.getElementType() == IJavaElement.TYPE) {
 			return findTypeInCompilationUnit(cu, getTypeQualifiedName((IType)member));
 		} else {
@@ -242,7 +242,7 @@ public class SearchUtil extends JavaModelUtil {
 	public static IJavaElement findInCompilationUnit(ICompilationUnit cu, IJavaElement element) throws JavaModelException {
 		
 		if (element instanceof IMember)
-			return findMemberInCompilationUnit(cu, (IMember) element);
+			return findInCompilationUnit(cu, (IMember)element);
 		
 		int type= element.getElementType();
 		switch (type) {
