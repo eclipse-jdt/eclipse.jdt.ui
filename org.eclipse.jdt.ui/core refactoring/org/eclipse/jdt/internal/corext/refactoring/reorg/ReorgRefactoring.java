@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 
 public abstract class ReorgRefactoring extends Refactoring {
 	
@@ -708,20 +709,20 @@ public abstract class ReorgRefactoring extends Refactoring {
 	private static List convertToInputElements(List elements){
 		List converted= new ArrayList(elements.size());
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
-			Object convertedObject= convertToInputElements(iter.next());
+			Object convertedObject= convertToInputElement(iter.next());
 			if (convertedObject != null)
 				converted.add(convertedObject);
 		}
 		return converted;
 	}
 	
-	private static Object convertToInputElements(Object element) {
+	private static Object convertToInputElement(Object element) {
 		if (! (element instanceof IType))
 			return element;
 		IType type= (IType)element;
 		try {
 			if (JavaElementUtil.isMainType(type))
-				return type.getCompilationUnit();
+				return WorkingCopyUtil.getOriginal(type.getCompilationUnit());
 			else
 				return null;	
 		} catch(JavaModelException e) {
