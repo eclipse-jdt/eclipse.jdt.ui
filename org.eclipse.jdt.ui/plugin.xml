@@ -1508,12 +1508,14 @@
                id="org.eclipse.jdt.ui.actions.OpenSuperImplementation">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.navigate.gotopackage"
                label="%GoToPackageAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
                id="org.eclipse.jdt.ui.actions.GoToPackage">
          </action>
          <action
+               definitionId="org.eclipse.jdt.ui.navigate.gototype"
                label="%GoToTypeAction.label"
                retarget="true"
                menubarPath="navigate/goTo/"
@@ -2930,6 +2932,19 @@
             command="org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+      <!-- try -->
+      <command
+            name="Type Hierarchy"
+            description="Type Hierarchy"
+            category="org.eclipse.ui.category.views"
+            id="org.eclipse.jdt.ui.TypeHierarchy">
+      </command>
+      <keyBinding
+            string="Alt+Shift+5"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.TypeHierarchy"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
       
 <!-- refactoring -->
       <command
@@ -3585,6 +3600,20 @@
             command="org.eclipse.jdt.ui.edit.text.java.open.call.hierarchy"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
+      
+      <command
+            name="%ActionDefinition.gotoPackage.name"
+            description="%ActionDefinition.gotoPackage.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="org.eclipse.jdt.ui.navigate.gotopackage">
+      </command>
+      <command
+            name="%ActionDefinition.gotoType.name"
+            description="%ActionDefinition.gotoType.description"
+            categoryId="org.eclipse.ui.category.navigate"
+            id="org.eclipse.jdt.ui.navigate.gototype">
+      </command>
+      
 <!-- project -->
       <command
             name="%ActionDefinition.generateJavadoc.name"
