@@ -21,6 +21,14 @@ public class ASTUtil {
 	private ASTUtil(){
 	}
 	
+	public static int getStart(long position){
+		return (int) (position >>> 32);
+	}
+	
+	public static int getEnd(long position){
+		return (int)(position & 0xFFFFFFFF);
+	}
+	
 	public static int getSimpleLength(AstNode node) {
 		return node.sourceEnd - node.sourceStart + 1;
 	}
