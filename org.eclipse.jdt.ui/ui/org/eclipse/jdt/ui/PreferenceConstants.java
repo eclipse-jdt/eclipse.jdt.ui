@@ -116,6 +116,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated Use JavaCore preference store (key JavaCore.
+	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */	
 	public static final String CODEGEN_USE_GETTERSETTER_PREFIX= "org.eclipse.jdt.ui.gettersetter.prefix.enable";//$NON-NLS-1$
 
@@ -136,6 +138,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated Use JavaCore preference store (key JavaCore.
+	 * CODEASSIST_FIELD_PREFIXES and CODEASSIST_STATIC_FIELD_PREFIXES)
 	 */	
 	public static final String CODEGEN_USE_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.enable";//$NON-NLS-1$
 
@@ -151,7 +155,8 @@ public class PreferenceConstants {
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
 	/**
-	 * A name preference that controls if a JavaDoc stub gets added to newly created types and methods.
+	 * A name preference that controls if a comment stubs will be added
+	 * automatocally to newly created types and methods.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
@@ -164,6 +169,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated New code template story: user can
+	 * specify the overriding method comment.
 	 */
 	public static final String CODEGEN__NON_JAVADOC_COMMENTS= "org.eclipse.jdt.ui.seecomments"; //$NON-NLS-1$
 
@@ -172,6 +179,8 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated New code template story: user can
+	 * specify the new type code template.
 	 */
 	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 	
