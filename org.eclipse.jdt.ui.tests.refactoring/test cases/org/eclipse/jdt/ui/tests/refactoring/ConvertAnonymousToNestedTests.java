@@ -47,6 +47,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	public static Test setUpTest(Test someTest) {
+	    return new MySetup(someTest);
+	}
+	
 	private String getSimpleTestFileName(boolean canInline, boolean input){
 		String fileName = "A_" + getName();
 		if (canInline)
@@ -195,12 +199,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test11() throws Exception{
-		//printTestDisabledMessage("disabled: bug 39076");
 		helper1(5, 15, 5, 17, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test12() throws Exception{
-		//printTestDisabledMessage("disabled: bug 39076");
 		helper1(8, 9, 10, 10, true, "Inner", Modifier.PRIVATE);
 	}
 
@@ -229,12 +231,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	}
 
 	public void test19() throws Exception{
-//		printTestDisabledMessage("disabled: bug 39076");
 		helper1(5, 12, 6, 21, true, "Inner", Modifier.PRIVATE);
 	}
 
 	public void test20() throws Exception{
-//		printTestDisabledMessage("regression test for bug 37570");
 		helper1(4, 25, 4, 25, true, "Inner", Modifier.PRIVATE);
 	}
 
@@ -264,5 +264,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
     public void test27() throws Exception{
     	helper1(11, 39, 11, 39, true, "Inner", Modifier.PRIVATE);   
+    }
+
+    public void test28() throws Exception{
+        printTestDisabledMessage("disabled: bug 43360");
+    	// helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
     }
 }

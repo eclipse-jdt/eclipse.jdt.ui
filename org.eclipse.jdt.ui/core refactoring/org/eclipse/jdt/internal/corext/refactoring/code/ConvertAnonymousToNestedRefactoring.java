@@ -599,7 +599,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private boolean shouldInnerClassBeStatic() {
-        if (isEnclosedInAnonymousDeclarationThatIsEqualsToGlobalTypeDeclaration()) {
+        if (isEnclosedInAnonymousDeclarationThatIsSubclassToGlobalTypeDeclaration()) {
             return false;
         }
         if (isEnclosedInAStaticMethod()) {
@@ -634,11 +634,11 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         return false;
     }
 
-    private boolean isEnclosedInAnonymousDeclarationThatIsEqualsToGlobalTypeDeclaration() {
+    private boolean isEnclosedInAnonymousDeclarationThatIsSubclassToGlobalTypeDeclaration() {
         AnonymousClassDeclaration enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)ASTNodes.getParent(fAnonymousInnerClassNode, ASTNode.ANONYMOUS_CLASS_DECLARATION);
         while (enclosingAnonymousClassDeclaration != null) {
             ITypeBinding binding= enclosingAnonymousClassDeclaration.resolveBinding();
-            if (binding != null && Bindings.equals(binding.getSuperclass(), getTypeDeclaration().resolveBinding())) {
+            if (binding != null && Bindings.isSuperType(getTypeDeclaration().resolveBinding(), binding.getSuperclass())) {
                 return true;
             }
             enclosingAnonymousClassDeclaration= (AnonymousClassDeclaration)ASTNodes.getParent(enclosingAnonymousClassDeclaration, ASTNode.ANONYMOUS_CLASS_DECLARATION);
