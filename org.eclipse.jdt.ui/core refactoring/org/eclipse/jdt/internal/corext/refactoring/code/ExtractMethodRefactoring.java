@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -157,6 +158,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (fSelectionStart < 0 || fSelectionLength == 0)
 				return mergeTextSelectionStatus(result);
 			
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
+			if (result.hasFatalError())
+				return result;
+			
 			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
 			root.accept(createVisitor());
 			
@@ -176,6 +181,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 				
 			}
 			return result;
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally {
 			pm.worked(1);
 			pm.done();

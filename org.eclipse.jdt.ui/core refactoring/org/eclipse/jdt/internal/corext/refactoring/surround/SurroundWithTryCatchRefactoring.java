@@ -29,11 +29,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -97,12 +99,20 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
-		fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
-		rootNode.accept(fAnalyzer);
-		result.merge(fAnalyzer.getStatus());
-		return result;
+		try {
+			RefactoringStatus result= new RefactoringStatus();
+			result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit})));
+			if (result.hasFatalError())
+				return result;
+			
+			CompilationUnit rootNode= AST.parseCompilationUnit(fCUnit, true);
+			fAnalyzer= new SurroundWithTryCatchAnalyzer(fCUnit, fSelection);
+			rootNode.accept(fAnalyzer);
+			result.merge(fAnalyzer.getStatus());
+			return result;
+		} catch(CoreException e) {
+			throw new JavaModelException(e);
+		}
 	}
 
 	/*

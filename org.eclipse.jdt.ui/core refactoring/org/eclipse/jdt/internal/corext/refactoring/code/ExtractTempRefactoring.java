@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextUtil;
@@ -116,10 +117,19 @@ public class ExtractTempRefactoring extends Refactoring {
 			if (fSelectionStart < 0)
 				return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring");
 			pm.worked(1);
+			
+			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+			if (result.hasFatalError())
+				return result;
+				
+			if (! fCu.isStructureKnown())		
+				return RefactoringStatus.createFatalErrorStatus("This file has syntax errors - please fix them first");
 		
 			initializeAST();
 		
 			return checkSelection(new SubProgressMonitor(pm, 5));
+		} catch (CoreException e){	
+			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}	

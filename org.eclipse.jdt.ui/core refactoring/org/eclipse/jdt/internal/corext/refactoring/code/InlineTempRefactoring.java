@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempDeclarationFinder;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceFinder;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class InlineTempRefactoring extends Refactoring {
@@ -74,13 +76,19 @@ public class InlineTempRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 1);
+			
+			RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{fCu}));
+			if (result.hasFatalError())
+				return result;
 				
 			if (! fCu.isStructureKnown())		
 				return RefactoringStatus.createFatalErrorStatus("This file has syntax errors - please fix them first");
 				
 			initializeAST();
 							
-			return checkSelection();			
+			return checkSelection();
+		} catch (CoreException e){		
+			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
