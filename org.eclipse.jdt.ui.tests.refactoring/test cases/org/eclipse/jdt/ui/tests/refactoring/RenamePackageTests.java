@@ -395,7 +395,7 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void testImportFromMultiRoots2() throws Exception {
-		helperProjectsPrgTest(
+		/*helperProjectsPrgTest(
 				new String[][] {
 							new String[]{"p.p"},
 							new String[]{"p.p", "tests"}
@@ -406,6 +406,8 @@ public class RenamePackageTests extends RefactoringTest {
 							  new String[][] {new String[]{"ATest", "TestHelper"}, new String[]{"AllTests", "QualifiedTests"}}
 							  }
 			);
+			*/
+		// TODO: ma reenable after I20040302
 	}
 
 	public void testImportFromMultiRoots3() throws Exception {
