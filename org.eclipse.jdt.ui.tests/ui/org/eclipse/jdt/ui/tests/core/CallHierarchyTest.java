@@ -325,6 +325,32 @@ public class CallHierarchyTest extends TestCase {
     /**
      * Tests calls that origin from an inner class  
      */
+    public void testAnonymousInnerClassInsideMethodCallees() throws Exception {
+        //regression test for bug 56732 call hierarchy: Call Hierarchy doesn't show callees of method from anonymous type 
+        helper.createAnonymousInnerClassInsideMethod();
+        
+        IMethod methodM= helper.getType1().getMethod("m", EMPTY);
+
+        MethodWrapper wrapper= CallHierarchy.getDefault().getCalleeRoot(methodM);
+        MethodWrapper[] callers= wrapper.getCalls(new NullProgressMonitor());
+        assertRecursive(callers, false);
+        
+        assertEquals("Wrong number of callees", 3, callers.length);
+        
+        IMethod methodRun= methodM.getType("", 1).getMethod("run", EMPTY); 
+
+        wrapper= CallHierarchy.getDefault().getCalleeRoot(methodRun);
+        callers= wrapper.getCalls(new NullProgressMonitor());
+        assertRecursive(callers, false);
+        
+        assertEquals("Wrong number of callees", 1, callers.length);
+        assertEquals("Wrong callee method", "println", callers[0].getMember().getElementName());
+        assertEquals("Wrong callee type", "java.io.PrintStream", callers[0].getMember().getDeclaringType().getFullyQualifiedName());
+    }
+
+    /**
+     * Tests calls that origin from an inner class  
+     */
     public void testAnonymousInnerClassOnClassCallees() throws Exception {
 		//regression test for bug 37290 call hierarchy: Searching for callees into anonymous inner classes fails 
         helper.createAnonymousInnerClass();

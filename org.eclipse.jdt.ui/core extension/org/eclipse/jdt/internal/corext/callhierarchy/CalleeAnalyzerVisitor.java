@@ -78,11 +78,13 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(ClassInstanceCreation node) {
         progressMonitorWorked(1);
-        if (!isNodeWithinMethod(node)) {
+        if (!isFurtherTraversalNecessary(node)) {
             return false;
         }
 
-        addMethodCall(node.resolveConstructorBinding(), node);
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveConstructorBinding(), node);
+        }
 
         return true;
     }
@@ -96,11 +98,13 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(ConstructorInvocation node) {
         progressMonitorWorked(1);
-        if (!isNodeWithinMethod(node)) {
+        if (!isFurtherTraversalNecessary(node)) {
             return false;
         }
 
-        addMethodCall(node.resolveConstructorBinding(), node);
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveConstructorBinding(), node);
+        }
 
         return true;
     }
@@ -110,7 +114,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(MethodDeclaration node) {
         progressMonitorWorked(1);
-        return isNodeWithinMethod(node);
+        return isFurtherTraversalNecessary(node);
     }
 
     /**
@@ -122,11 +126,13 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(MethodInvocation node) {
         progressMonitorWorked(1);
-        if (!isNodeWithinMethod(node)) {
+        if (!isFurtherTraversalNecessary(node)) {
             return false;
         }
 
-        addMethodCall(node.resolveMethodBinding(), node);
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveMethodBinding(), node);
+        }
 
         return true;
     }
@@ -141,12 +147,14 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(SuperConstructorInvocation node) {
         progressMonitorWorked(1);
-        if (!isNodeWithinMethod(node)) {
+        if (!isFurtherTraversalNecessary(node)) {
             return false;
         }
 
-        addMethodCall(node.resolveConstructorBinding(), node);
-
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveConstructorBinding(), node);
+        }
+        
         return true;
     }
 
@@ -159,12 +167,14 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      */
     public boolean visit(SuperMethodInvocation node) {
         progressMonitorWorked(1);
-        if (!isNodeWithinMethod(node)) {
+        if (!isFurtherTraversalNecessary(node)) {
             return false;
         }
 
-        addMethodCall(node.resolveMethodBinding(), node);
-
+        if (isNodeWithinMethod(node)) {
+            addMethodCall(node.resolveMethodBinding(), node);
+        }
+        
         return true;
     }
     
@@ -175,7 +185,7 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
      * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(org.eclipse.jdt.core.dom.AnonymousClassDeclaration)
      */
     public boolean visit(AnonymousClassDeclaration node) {
-        return false;
+        return isNodeEnclosingMethod(node);
     }
 
 
@@ -276,6 +286,25 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
         }
 
         return true;
+    }
+
+    private boolean isNodeEnclosingMethod(ASTNode node) {
+        int nodeStartPosition = node.getStartPosition();
+        int nodeEndPosition = nodeStartPosition + node.getLength();
+
+        if (nodeStartPosition < fMethodStartPosition && nodeEndPosition > fMethodEndPosition) {
+            // Is the method completely enclosed by the node?
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * @param node
+     * @return
+     */
+    private boolean isFurtherTraversalNecessary(ASTNode node) {
+        return isNodeWithinMethod(node) || isNodeEnclosingMethod(node);
     }
 
     /**

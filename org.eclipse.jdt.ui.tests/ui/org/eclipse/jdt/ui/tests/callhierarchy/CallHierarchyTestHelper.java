@@ -183,6 +183,32 @@ public class CallHierarchyTestHelper {
     }
 
     /**
+     * Creates an anonymous inner class inside another method and sets the class attribute fType1.
+     */
+    public void createAnonymousInnerClassInsideMethod() throws Exception {
+        createPackages();
+        
+        ICompilationUnit cu1= fPack1.getCompilationUnit("AnonymousInnerInsideMethod.java");
+        fType1=
+            cu1.createType(
+                "public class AnonymousInnerInsideMethod {\n" +
+                "  void m() {\n" +
+                "    System.out.println(\"before\");\n"+
+                "    Runnable runnable = new Runnable() {\n"+
+                "      public void run() {\n"+
+                "        System.out.println(\"run\");\n"+
+                "      }\n"+
+                "    };\n"+
+                "    runnable.run();\n"+
+                "  }\n"+
+                "}\n",
+                null,
+                true,
+                null);
+                
+    }
+
+    /**
      * Creates a class with a static initializer and sets the class attribute fType1.
      */
     public void createStaticInitializerClass() throws Exception {
