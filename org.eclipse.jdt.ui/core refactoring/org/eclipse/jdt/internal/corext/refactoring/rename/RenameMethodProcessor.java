@@ -215,11 +215,11 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		}	
 	}
 	
-	private IJavaSearchScope createRefactoringScope() throws CoreException {
+	protected final IJavaSearchScope createRefactoringScope() throws CoreException {
 		return RefactoringScopeFactory.create(fMethod);
 	}
 	
-	ISearchPattern createSearchPattern(IProgressMonitor pm) throws CoreException {
+	ISearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
 		return createSearchPattern(pm, fMethod, null);
 	}
 	
@@ -248,11 +248,14 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		return fOccurrences;	
 	}
 	
-	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
+	/*
+	 * XXX made protected to allow overriding and working around bug 39700
+	 */
+	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
-		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
+		ISearchPattern pattern= createOccurrenceSearchPattern(new SubProgressMonitor(pm, 1));
 		return RefactoringSearchEngine.search(createRefactoringScope(), pattern,
-			new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), fMethod.getElementName()));	
+			new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), getMethod().getElementName()));	
 	}
 
 	private static boolean isSpecialCase(IMethod method) throws CoreException {
