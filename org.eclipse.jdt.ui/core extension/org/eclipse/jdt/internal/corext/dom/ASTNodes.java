@@ -730,6 +730,14 @@ public class ASTNodes {
 		return result;
 	}
 	
+	public static Type getTopMostType(Type type) {
+		Type result= type;
+		while(result.getParent() instanceof Type) {
+			result= (Type)result.getParent();
+		}
+		return result;
+	}
+	
 	public static int changeVisibility(int modifiers, int visibility) {
 		return (modifiers & CLEAR_VISIBILITY) | visibility;
 	}

@@ -1,0 +1,220 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2004 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.search;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.ThrowStatement;
+import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
+import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
+import org.eclipse.jdt.internal.corext.refactoring.code.flow.InOutFlowAnalyzer;
+
+
+public class MethodExitsFinder extends ASTVisitor {
+	
+	private AST fAST;
+	private MethodDeclaration fMethodDeclaration;
+	private List fResult;
+	private List fCatchedExceptions;
+
+	public String initialize(CompilationUnit root, int offset, int length) {
+		fAST= root.getAST();
+		ASTNode node= NodeFinder.perform(root, offset, length);
+		if (!(node instanceof Type))
+			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
+		Type type= ASTNodes.getTopMostType((Type)node);
+		if (!(type.getParent() instanceof MethodDeclaration))
+			return SearchMessages.getString("MethodExitsFinder.no_return_type_selected"); //$NON-NLS-1$
+		fMethodDeclaration= (MethodDeclaration)node.getParent();
+		return null;
+	}
+
+	public List perform() {
+		fResult= new ArrayList();
+		fCatchedExceptions= new ArrayList();
+		fMethodDeclaration.accept(this);
+		Block block= fMethodDeclaration.getBody();
+		if (block != null) {
+			List statements= block.statements();
+			if (statements.size() > 0) {
+				Statement last= (Statement)statements.get(statements.size() - 1);
+				int maxVariableId= LocalVariableIndex.perform(fMethodDeclaration);
+				FlowContext flowContext= new FlowContext(0, maxVariableId + 1);
+				flowContext.setConsiderAccessMode(false);
+				flowContext.setComputeMode(FlowContext.ARGUMENTS);
+				InOutFlowAnalyzer flowAnalyzer= new InOutFlowAnalyzer(flowContext);
+				FlowInfo info= flowAnalyzer.perform(new ASTNode[] {last});
+				if (!info.isNoReturn()) {
+					if (!info.isPartialReturn())
+						return fResult;
+				}
+			}
+			SimpleName name= fAST.newSimpleName("x"); //$NON-NLS-1$
+			name.setSourceRange(fMethodDeclaration.getStartPosition() + fMethodDeclaration.getLength() - 1, 1);
+			fResult.add(name);
+		}
+		return fResult;
+	}
+	
+	public boolean visit(TypeDeclaration node) {
+		// Don't dive into a local type.
+		return false;
+	}
+	
+	public boolean visit(AnonymousClassDeclaration node) {
+		// Don't dive into a local type.
+		return false;
+	}
+	
+	public boolean visit(ReturnStatement node) {
+		fResult.add(node);
+		return super.visit(node);
+	}
+	
+	public boolean visit(TryStatement node) {
+		int currentSize= fCatchedExceptions.size();
+		List catchClauses= node.catchClauses();
+		for (Iterator iter= catchClauses.iterator(); iter.hasNext();) {
+			IVariableBinding variable= ((CatchClause)iter.next()).getException().resolveBinding();
+			if (variable != null && variable.getType() != null) {
+				fCatchedExceptions.add(variable.getType());
+			}
+		}
+		node.getBody().accept(this);
+		int toRemove= fCatchedExceptions.size() - currentSize;
+		for(int i= toRemove; i > 0; i--) {
+			fCatchedExceptions.remove(currentSize);
+		}
+		
+		// visit catch and finally
+		for (Iterator iter= catchClauses.iterator(); iter.hasNext(); ) {
+			((CatchClause)iter.next()).accept(this);
+		}
+		if (node.getFinally() != null)
+			node.getFinally().accept(this);
+			
+		// return false. We have visited the body by ourselves.	
+		return false;
+	}
+	
+	public boolean visit(ThrowStatement node) {
+		ITypeBinding exception= node.getExpression().resolveTypeBinding();
+		if (isExitPoint(exception)) {
+			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
+			name.setSourceRange(node.getStartPosition(), 5);
+			fResult.add(name);
+		}	
+		return true;
+	}
+	
+	public boolean visit(MethodInvocation node) {
+		if (isExitPoint(node.resolveMethodBinding())) {
+			fResult.add(node.getName());
+		}
+		return true;
+	}
+	
+	public boolean visit(SuperMethodInvocation node) {
+		if (isExitPoint(node.resolveMethodBinding())) {
+			fResult.add(node.getName());
+		}
+		return true;
+	}
+	
+	public boolean visit(ClassInstanceCreation node) {
+		if (isExitPoint(node.resolveConstructorBinding())) {
+			fResult.add(node.getName());
+		}
+		return true;
+	}
+	
+	public boolean visit(ConstructorInvocation node) {
+		if (isExitPoint(node.resolveConstructorBinding())) {
+			// mark this
+			SimpleName name= fAST.newSimpleName("xxxx"); //$NON-NLS-1$
+			name.setSourceRange(node.getStartPosition(), 4);
+			fResult.add(name);
+		}
+		return true;
+	}
+	
+	public boolean visit(SuperConstructorInvocation node) {
+		if (isExitPoint(node.resolveConstructorBinding())) {
+			SimpleName name= fAST.newSimpleName("xxxxx"); //$NON-NLS-1$
+			name.setSourceRange(node.getStartPosition(), 5);
+			fResult.add(name);
+		}
+		return true;
+	}
+	
+	private boolean isExitPoint(ITypeBinding binding) {
+		if (binding == null)
+			return false;
+		return !isCatched(binding);
+	}
+	
+	private boolean isExitPoint(IMethodBinding binding) {
+		if (binding == null)
+			return false;
+		ITypeBinding[] exceptions= binding.getExceptionTypes();
+		for (int i= 0; i < exceptions.length; i++) {
+			if (!isCatched(exceptions[i]))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean isCatched(ITypeBinding binding) {
+		for (Iterator iter= fCatchedExceptions.iterator(); iter.hasNext();) {
+			ITypeBinding catchException= (ITypeBinding)iter.next();
+			if (catches(catchException, binding))
+				return true;
+		}
+		return false;
+	}
+	
+	private boolean catches(ITypeBinding catchTypeBinding, ITypeBinding throwTypeBinding) {
+		while(throwTypeBinding != null) {
+			if (throwTypeBinding == catchTypeBinding)
+				return true;
+			throwTypeBinding= throwTypeBinding.getSuperclass();	
+		}
+		return false;
+	}	
+}

@@ -255,6 +255,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	
 	public boolean visit(ConstructorInvocation node) {
 		if (matches(node.resolveConstructorBinding())) {
+			// mark this
 			SimpleName name= fAST.newSimpleName("xxxx"); //$NON-NLS-1$
 			name.setSourceRange(node.getStartPosition(), 4);
 			fResult.add(name);

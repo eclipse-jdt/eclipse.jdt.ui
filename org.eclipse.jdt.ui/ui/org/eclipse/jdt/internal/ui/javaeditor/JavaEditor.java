@@ -209,6 +209,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
+import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
 import org.eclipse.jdt.internal.ui.search.OccurrencesFinder;
 import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.CustomSourceInformationControl;
@@ -2150,6 +2151,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	private boolean fMarkExceptionOccurrences;
 	/**
+	 * Tells whether to mark method exits in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.0
+	 */
+	private boolean fMarkMethodExitPoints;
+	/**
 	 * 
 	 */
 	private ISelection fForcedMarkOccurrencesSelection;
@@ -2237,6 +2244,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkFieldOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES);
 		fMarkLocalVariableypeOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES);
 		fMarkExceptionOccurrences= store.getBoolean(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES);
+		fMarkMethodExitPoints= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS);
 	}
 	
 	/*
@@ -3009,6 +3017,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					fMarkExceptionOccurrences= ((Boolean)event.getNewValue()).booleanValue();
 				return;
 			}
+			if (PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS.equals(property)) {
+				if (event.getNewValue() instanceof Boolean)
+					fMarkMethodExitPoints= ((Boolean)event.getNewValue()).booleanValue();
+				return;
+			}
 			if (PreferenceConstants.EDITOR_STICKY_OCCURRENCES.equals(property)) {
 				if (event.getNewValue() instanceof Boolean)
 					fStickyOccurrenceAnnotations= ((Boolean)event.getNewValue()).booleanValue();
@@ -3547,6 +3560,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
 			if (message == null) {
 				matches= exceptionFinder.perform();
+			}
+		}
+		if (matches.size() == 0 && fMarkMethodExitPoints) {
+			MethodExitsFinder finder= new MethodExitsFinder();
+			message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= finder.perform();
 			}
 		}
 		if (matches.size() == 0) {

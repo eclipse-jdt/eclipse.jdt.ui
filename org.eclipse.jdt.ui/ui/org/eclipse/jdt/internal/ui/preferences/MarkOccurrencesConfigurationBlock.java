@@ -84,6 +84,7 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_FIELD_OCCURRENCES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES));
+		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STICKY_OCCURRENCES));
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -129,6 +130,10 @@ class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock
 		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markExceptionOccurrences"); //$NON-NLS-1$
 		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, 0); //$NON-NLS-1$
 		createDependency(master, PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, slave);
+
+		label= PreferencesMessages.getString("MarkOccurrencesConfigurationBlock.markMethodExitPoints"); //$NON-NLS-1$
+		slave= addCheckBox(composite, label, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, 0); //$NON-NLS-1$
+		createDependency(master, PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, slave);
 
 		addFiller(composite);
 		
