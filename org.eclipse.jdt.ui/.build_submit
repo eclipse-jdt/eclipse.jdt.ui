@@ -1,8 +1,0 @@
---begin .build_submit---
-plugin.jars
-plugin.properties
-plugin.xml
-plugin.xml.org
-snippetsupport.jar
-icons
---end .build_submit---
