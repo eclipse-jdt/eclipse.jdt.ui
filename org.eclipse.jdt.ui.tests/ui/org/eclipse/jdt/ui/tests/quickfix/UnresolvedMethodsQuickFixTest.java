@@ -25,17 +25,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.TypeRules;
 import org.eclipse.jdt.internal.corext.template.CodeTemplates;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
@@ -2394,100 +2389,105 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3 }, new String[] { expected1, expected2, expected3 });		
-	}	
+	}
 	
 	
-	public void testCanAssign() throws Exception {
+	public void testMissingCastParents1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("import java.io.Serializable;\n");
 		buf.append("public class E {\n");
-		buf.append("    boolean bool;\n");
-		buf.append("    char c;\n");
-		buf.append("    byte b;\n");
-		buf.append("    short s;\n");
-		buf.append("    int i;\n");
-		buf.append("    long l;\n");
-		buf.append("    float f;\n");
-		buf.append("    double d;\n");
-		buf.append("    Object object;\n");
-		buf.append("    Vector vector;\n");
-		buf.append("    Cloneable cloneable;\n");
-		buf.append("    Collection collection;\n");
-		buf.append("    Serializable serializable;\n");
-		buf.append("    Object[] objectArr;\n");
-		buf.append("    int[] int_arr;\n");
-		buf.append("    long[] long_arr;\n");
-		buf.append("    Vector[] vector_arr;\n");
-		buf.append("    Collection[] collection_arr;\n");
-		buf.append("    Object[][] objectArrArr;\n");
-		buf.append("    Collection[][] collection_arrarr;\n");
-		buf.append("    Vector[][] vector_arrarr;\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        String x= (String) o.substring(1);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
-		IProblem[] problems= astRoot.getProblems();
-		assertNumberOf("problems", problems.length, 0);
-		
-		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
-		VariableDeclarationFragment bool= findFieldDeclaration(type, "bool");
-		VariableDeclarationFragment c= findFieldDeclaration(type, "c");
-		VariableDeclarationFragment b= findFieldDeclaration(type, "b");
-		VariableDeclarationFragment s= findFieldDeclaration(type, "s");
-		VariableDeclarationFragment i= findFieldDeclaration(type, "i");
-		VariableDeclarationFragment l= findFieldDeclaration(type, "l");
-		VariableDeclarationFragment f= findFieldDeclaration(type, "f");
-		VariableDeclarationFragment d= findFieldDeclaration(type, "d");		
-		VariableDeclarationFragment object= findFieldDeclaration(type, "object");
-		VariableDeclarationFragment vector= findFieldDeclaration(type, "vector");
-		VariableDeclarationFragment cloneable= findFieldDeclaration(type, "cloneable");
-		VariableDeclarationFragment collection= findFieldDeclaration(type, "collection");
-		VariableDeclarationFragment serializable= findFieldDeclaration(type, "serializable");
-		VariableDeclarationFragment objectArr= findFieldDeclaration(type, "objectArr");
-		VariableDeclarationFragment int_arr= findFieldDeclaration(type, "int_arr");
-		VariableDeclarationFragment long_arr= findFieldDeclaration(type, "long_arr");			
-		VariableDeclarationFragment vector_arr= findFieldDeclaration(type, "vector_arr");
-		VariableDeclarationFragment collection_arr= findFieldDeclaration(type, "collection_arr");
-		VariableDeclarationFragment objectArrArr= findFieldDeclaration(type, "objectArrArr");
-		VariableDeclarationFragment collection_arrarr= findFieldDeclaration(type, "collection_arrarr");
-		VariableDeclarationFragment vector_arrarr= findFieldDeclaration(type, "vector_arrarr");
-		
-		VariableDeclarationFragment[] targets= new VariableDeclarationFragment[] { 
-			bool, c, b, s, i, l, f, d, object, vector, cloneable, serializable, collection, objectArr, int_arr, long_arr,
-			vector_arr, collection_arr, objectArrArr, collection_arrarr, vector_arrarr
-		};
-		for (int k= 0; k < targets.length; k++) {
-			for (int n= 0; n < targets.length; n++) {
-				VariableDeclarationFragment f1= targets[k];
-				VariableDeclarationFragment f2= targets[n];
-				String line= f2.getName().getIdentifier() + "= " + f1.getName().getIdentifier();
-				
-				buf= new StringBuffer();
-				buf.append("package test1;\n");
-				buf.append("public class F extends E {\n");
-				buf.append("    void foo() {\n");
-				buf.append("        ").append(line).append(";\n");
-				buf.append("    }\n");
-				buf.append("}\n");
-				char[] content= buf.toString().toCharArray();
-				
-				astRoot= AST.parseCompilationUnit(content, "F.java", cu1.getJavaProject());
-				problems= astRoot.getProblems();
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-				ITypeBinding b1= f1.resolveBinding().getType();
-				assertNotNull(b1);
-				ITypeBinding b2= f2.resolveBinding().getType();
-				assertNotNull(b2);
-				boolean res= TypeRules.canAssign(b1, b2.getQualifiedName());
-				assertEquals(line, problems.length == 0, res);
-				boolean res2= TypeRules.canAssign(b1, b2);
-				assertEquals(line, problems.length == 0, res2);			
-			}	
-		}
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        String x= ((String) o).substring(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();		
+
+		assertEqualString(preview1, expected1);
+	}
+	
+	public void testMissingCastParents2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        String x= (String) o.substring(1).toLowerCase();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(Object o) {\n");
+		buf.append("        String x= ((String) o).substring(1).toLowerCase();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();		
+
+		assertEqualString(preview1, expected1);
+	}
+	
+	public void testMissingCastParents3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object obj;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String x= (String) E.obj.substring(1).toLowerCase();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOf("proposals", proposals.size(), 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    private static Object obj;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        String x= ((String) E.obj).substring(1).toLowerCase();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();		
+
+		assertEqualString(preview1, expected1);
 	}
 
 }
