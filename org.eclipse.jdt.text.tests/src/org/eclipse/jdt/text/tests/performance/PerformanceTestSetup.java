@@ -74,7 +74,7 @@ public class PerformanceTestSetup extends TestSetup {
 			ResourceTestHelper.fullBuild();
 			if (wasAutobuilding) {
 				ResourceTestHelper.enableAutoBuilding();
-				EditorTestHelper.joinJobs(2000, 30000, 1000);
+				EditorTestHelper.joinBackgroundActivities();
 			}
 		}
 	}
