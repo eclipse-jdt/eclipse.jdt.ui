@@ -283,8 +283,8 @@ public final class WhiteSpaceOptions {
         );
         
     private final static PreviewSnippet TYPE_ARGUMENTS_PREVIEW= new PreviewSnippet(
-            CodeFormatter.K_CLASS_BODY_DECLARATIONS,
-            "A a=\n new<String, Element> A();" //$NON-NLS-1$
+            CodeFormatter.K_STATEMENTS,
+            "x.<String, Element>foo();" //$NON-NLS-1$
         );
 	
 	private final static PreviewSnippet TYPE_PARAMETER_PREVIEW= new PreviewSnippet(
