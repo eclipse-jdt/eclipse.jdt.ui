@@ -33,6 +33,6 @@ public class FindHierarchyDeclarationsAction extends FindDeclarationsAction {
 	}
 
 	protected String getScopeDescription(IType type) {
-		return SearchMessages.getFormattedString("HierarchyScope", new String[] {type.getElementName()});
+		return SearchMessages.getFormattedString("HierarchyScope", new String[] {type.getElementName()}); //$NON-NLS-1$
 	}
 }

@@ -34,10 +34,10 @@ public class FindHierarchyReferencesAction extends FindReferencesAction {
 
 	protected String getScopeDescription(IJavaElement element) {
 		IType type= getType(element);
-		String typeName= "";
+		String typeName= ""; //$NON-NLS-1$
 		if (type != null)
 			typeName= type.getElementName();
-		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName});
+		return SearchMessages.getFormattedString("HierarchyScope", new String[] {typeName}); //$NON-NLS-1$
 	}
 
 	private IType getType(IJavaElement element) {

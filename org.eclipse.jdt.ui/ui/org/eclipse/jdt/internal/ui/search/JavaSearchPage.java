@@ -137,19 +137,19 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 		// Setup search scope
 		IJavaSearchScope scope= null;
-		String scopeDescription= "";
+		String scopeDescription= ""; //$NON-NLS-1$
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= SearchMessages.getString("WorkspaceScope");
+				scopeDescription= SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 				scope= SearchEngine.createWorkspaceScope();
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= SearchMessages.getString("SelectionScope");
+				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
 				scope= getSelectedResourcesScope();
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
-				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()});
+				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
 				scope= SearchEngine.createJavaSearchScope(getContainer().getSelectedWorkingSet().getResources());
 		}		
 		

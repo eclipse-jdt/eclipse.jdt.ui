@@ -84,6 +84,6 @@ public abstract class ElementSearchAction extends JavaElementAction {
 	}
 	
 	protected String getScopeDescription(IJavaElement type) {
-		return SearchMessages.getString("WorkspaceScope");
+		return SearchMessages.getString("WorkspaceScope"); //$NON-NLS-1$
 	}
 }
