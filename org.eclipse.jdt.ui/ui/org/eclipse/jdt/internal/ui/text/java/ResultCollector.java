@@ -375,20 +375,22 @@ public class ResultCollector extends CompletionRequestorAdapter {
 
 	
 	protected JavaCompletionProposal createTypeCompletion(int start, int end, String completion, ImageDescriptor descriptor, String typeName, String containerName, ProposalInfo proposalInfo, int relevance) {
-		StringBuffer buf= new StringBuffer(typeName);
-		if (containerName != null) {
+		
+		String fullName= JavaModelUtil.concatenateName(containerName, typeName); // containername can be null
+		
+		StringBuffer buf= new StringBuffer(Signature.getSimpleName(fullName));
+		String typeQualifier= Signature.getQualifier(fullName);
+		if (typeQualifier.length() > 0) {
 			buf.append(" - "); //$NON-NLS-1$
-			if (containerName.length() > 0) {
-				buf.append(containerName);
-			} else {
-				buf.append(JavaTextMessages.getString("ResultCollector.default_package")); //$NON-NLS-1$
-			}
+			buf.append(typeQualifier);
+		} else if (containerName != null) {
+			buf.append(JavaTextMessages.getString("ResultCollector.default_package")); //$NON-NLS-1$
 		}
 		String name= buf.toString();
 
 		ICompilationUnit cu= null;
 		if (containerName != null && fCompilationUnit != null) {
-			if (completion.equals(JavaModelUtil.concatenateName(containerName, typeName))) {
+			if (completion.equals(fullName)) {
 				cu= fCompilationUnit;
 			}
 		}
