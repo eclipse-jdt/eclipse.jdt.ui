@@ -27,8 +27,8 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 	 *
 	 * @return int
 	 */
-	protected int countSelectedElements() {		return fJarPackage.getSelectedElements().size();
-	}
+	protected int countSelectedElements() {		int count= 0;		Iterator iter= fJarPackage.getSelectedElements().iterator();		while (iter.hasNext()) {			Object element= iter.next();			IResource resource= null;			if (element instanceof IJavaElement) {				IJavaElement je= (IJavaElement)element;				try {					resource= je.getUnderlyingResource();				} catch (JavaModelException ex) {					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.underlyingResourceNotFound", je.getElementName()), ex); //$NON-NLS-1$					return count;				}			}			else				resource= (IResource)element;			if (resource.getType() == IResource.FILE)				count++;			else				count += getTotalChildCount((IContainer)resource);		}		return count;
+	}		private int getTotalChildCount(IContainer container) {		IResource[] members;		try {			members= container.members();		} catch (CoreException ex) {			return 0;		}		int count= 0;		for (int i= 0; i < members.length; i++) {			if (members[i].getType() == IResource.FILE)				count++;			else				count += getTotalChildCount((IContainer)members[i]);		}		return count;	}
 	/**
 	 * Exports the passed resource to the JAR file
 	 *
