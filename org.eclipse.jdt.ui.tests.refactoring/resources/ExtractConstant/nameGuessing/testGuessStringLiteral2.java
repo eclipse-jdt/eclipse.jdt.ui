@@ -1,6 +1,6 @@
 package p;
 class A {
 	void foo() {
-		String s= "/** SäbelÄndSichel123*34//Bla//bla...";//expected SÄBEL_ÄND_SICHEL123_34_Bla_bla
+		String s= "/** HansImGlueck123*34//Bla//bla...";//expected HANS_IM_GLUECK123_34_BLA_BLA
 	}
 }

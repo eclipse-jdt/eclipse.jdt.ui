@@ -372,7 +372,7 @@ public class ExtractConstantTests extends RefactoringTest {
 
 	public void testGuessStringLiteral2() throws Exception {
 		//test for bug 37377
-		guessHelper(4, 19, 4, 58, "SÄBEL_ÄND_SICHEL123_34_BLA_BLA");
+		guessHelper(4, 19, 4, 56, "HANS_IM_GLUECK123_34_BLA_BLA");
 	}
 
 	public void testGuessFromGetterName0() throws Exception {
