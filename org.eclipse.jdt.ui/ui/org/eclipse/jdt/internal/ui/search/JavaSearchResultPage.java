@@ -20,6 +20,9 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
@@ -31,7 +34,9 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -601,6 +606,19 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			return SHOW_IN_TARGET_LIST;
 		}
 		return null;
+	}
+	
+	protected void handleOpen(OpenEvent event) {
+		Object firstElement= ((IStructuredSelection)event.getSelection()).getFirstElement();
+		if (firstElement instanceof ICompilationUnit || 
+				firstElement instanceof IClassFile || 
+				firstElement instanceof IMember) {
+			if (getDisplayedMatchCount(firstElement) == 0) {
+				fActionGroup.handleOpen(event);
+				return;
+			}
+		}
+		super.handleOpen(event);
 	}
 	
 }
