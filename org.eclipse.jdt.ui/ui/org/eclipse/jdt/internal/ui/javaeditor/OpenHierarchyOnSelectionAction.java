@@ -50,28 +50,6 @@ public class OpenHierarchyOnSelectionAction extends OpenOnSelectionAction {
 		helper.selectMember(getMember(sourceReference));
 	}
 	
-	protected void openClassHierarchy(IType type, IMember member) {
-		if (type == null) {
-			getShell().getDisplay().beep();
-		} else {
-			IWorkbenchPage page= JavaPlugin.getDefault().getActivePage();
-			try {
-				IViewPart view= view= page.showView(JavaUI.ID_TYPE_HIERARCHY);
-				if (view instanceof TypeHierarchyViewPart) {
-					TypeHierarchyViewPart part= (TypeHierarchyViewPart) view;
-				
-					if (type != null)
-						part.setInput(type);
-				
-					if (member != null)
-						part.selectMember(member);
-				}
-			} catch (PartInitException e) {
-				MessageDialog.openError(getShell(), "Error in OpenHierarchyOnSelectionAction", e.getMessage());
-			}
-		}
-	}
-
 	protected IType getType(ISourceReference sourceReference) {
 		if ( !(sourceReference instanceof IJavaElement))
 			return null;
