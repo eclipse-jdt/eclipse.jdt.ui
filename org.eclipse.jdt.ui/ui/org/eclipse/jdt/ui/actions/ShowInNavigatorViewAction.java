@@ -138,11 +138,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 		if (element instanceof ICompilationUnit) {
 			element= JavaModelUtil.toOriginal((ICompilationUnit) element);
 		}
-		IResource resource= element.getResource();
-		if (resource.exists()) {
-			return resource;
-		}
-		return null;
+		return element.getResource();
 	}
 	
 	private static String getDialogTitle() {
