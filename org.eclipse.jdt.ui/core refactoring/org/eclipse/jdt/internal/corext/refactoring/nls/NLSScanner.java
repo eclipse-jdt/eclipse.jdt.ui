@@ -40,7 +40,7 @@ public class NLSScanner {
 	/**
 	 * Returns the <code>NLSLine</code> that corresponds to the source line that the selected string literal is located on.	 * @param cu compilation unit	 * @param position position in the cu	 * @return NLSLine The line associated with the line that the selected string literal is located on
 	 * or <code>null</code> if no string is selected.	 * @throws JavaModelException 	 */
-	public static NLSLine scanCurrentPosition(ICompilationUnit cu, int position) throws JavaModelException{
+	public static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException{
 		try {
 			Assert.isTrue(position >= 0 && position <= cu.getSourceRange().getLength());
 			NLSLine[] allLines= scan(cu);
