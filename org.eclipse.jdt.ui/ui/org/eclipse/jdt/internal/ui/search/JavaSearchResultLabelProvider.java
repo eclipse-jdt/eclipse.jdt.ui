@@ -20,7 +20,7 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
+
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -48,7 +48,6 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 				AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS  | JavaElementLabels.P_COMPRESSED,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS);
 		fLabelProvider.addLabelDecorator(new ProblemsLabelDecorator(null));
-		fLabelProvider.addLabelDecorator(new OverrideIndicatorLabelDecorator(null));
 	}	
 
 	public String getText(Object o) {
@@ -86,10 +85,13 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 	public Image getImage(Object o) {
 		IJavaElement javaElement= getJavaElement(o);
 
-		if (javaElement == null || !javaElement.exists())
+		if (javaElement == null)
 			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
 
 		Image image= fLabelProvider.getImage(javaElement);
+		if (image == null)
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
+		
 		if (fDecorator != null) {
 			Image decoratedImage= fDecorator.decorateImage(image, javaElement);
 			if (decoratedImage != null)
@@ -120,9 +122,14 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 			return (IJavaElement)o;
 		if (!(o instanceof ISearchResultViewEntry))
 			return null;
+
 		IMarker marker= getMarker(o);
 		if (marker == null || !marker.exists())
 			return null;
+
+		if (!marker.getAttribute(SearchUI.POTENTIAL_MATCH, false))
+			return (IJavaElement)((ISearchResultViewEntry)o).getGroupByKey();
+		
 		return getJavaElement(marker);
 	}
 

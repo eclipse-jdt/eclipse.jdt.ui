@@ -267,9 +267,9 @@ public class JavaElementImageProvider {
 			return null; //$NON-NLS-1$
 		
 		} catch (JavaModelException e) {
-			if (!e.isDoesNotExist()) {
-				JavaPlugin.log(e);
-			}
+			if (e.isDoesNotExist())
+				return JavaPluginImages.DESC_OBJS_UNKNOWN;
+			JavaPlugin.log(e);
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
 	}
