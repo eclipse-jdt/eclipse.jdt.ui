@@ -734,7 +734,9 @@ public class ResultCollector extends CompletionRequestor {
 					internalAcceptPotentialMethodDeclaration(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()),
 							proposal.getName(), proposal.getReplaceStart(), proposal.getReplaceEnd(), proposal.getRelevance());
 					break;
-
+				case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
+					internalAcceptAnnotationAttributeReference(proposal);
+					break;
 			}
 		} catch (IllegalArgumentException e) {
 			// all signature processing method may throw IAEs
@@ -743,6 +745,28 @@ public class ResultCollector extends CompletionRequestor {
 			JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Exception when processing proposal for: " + String.valueOf(proposal.getName()), e)); //$NON-NLS-1$
 		}
 	}	
+	
+	private void internalAcceptAnnotationAttributeReference(CompletionProposal proposal) {
+		String displayString= createAnnotationAttributeDisplayString(proposal).toString();
+		ImageDescriptor descriptor= createMemberDescriptor(proposal.getFlags());
+		String completion= String.valueOf(proposal.getCompletion());
+		fMethods.add(new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal.getReplaceStart(), proposal.getReplaceEnd()), getImage(descriptor), displayString, proposal.getRelevance(), fTextViewer));
+	}
+	
+	private StringBuffer createAnnotationAttributeDisplayString(CompletionProposal attributeProposal) {
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(attributeProposal.getName()).append("  "); //$NON-NLS-1$
+		
+		char[] attributeType= computeTypeDisplayName(SignatureUtil.getUpperBound(SignatureUtil.fix83600(attributeProposal.getSignature())));
+		nameBuffer.append(attributeType);
+
+		String declaringType= extractTypeFQN(attributeProposal);
+		declaringType= Signature.getSimpleName(declaringType);
+		nameBuffer.append(" - "); //$NON-NLS-1$
+		nameBuffer.append(declaringType);
+
+		return nameBuffer;
+	}
 	
 	private char[][] getParameterPackages(char[] methodSignature) {
 		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
