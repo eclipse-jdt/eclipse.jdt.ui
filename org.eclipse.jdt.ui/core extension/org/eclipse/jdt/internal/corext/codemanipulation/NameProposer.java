@@ -42,11 +42,26 @@ public class NameProposer {
 		}
 	}
 	
+	public String proposeGetterSignature(IField field) throws JavaModelException {
+		return proposeGetterName(field) + "()"; 
+	}
+	
+	public String proposeSetterSignature(IField field) throws JavaModelException {
+		return proposeGetterName(field) + "(" + Signature.toString(field.getTypeSignature()) + ")"; 
+	}
+	
 	public String proposeGetterName(IField field) throws JavaModelException {
 		boolean isBoolean=	field.getTypeSignature().equals(Signature.SIG_BOOLEAN);
 		return proposeGetterName(field.getElementName(), isBoolean);
 	}	
 	
+	public String proposeSetterName(IField field) throws JavaModelException {
+		return proposeSetterName(field.getElementName());
+	}
+	
+	/**
+	 * @seprecated use proposeSetterName(IField)
+	 */
 	public String proposeSetterName(String fieldName) {
 		return SETTER_NAME + proposeAccessorName(fieldName);
 	}
