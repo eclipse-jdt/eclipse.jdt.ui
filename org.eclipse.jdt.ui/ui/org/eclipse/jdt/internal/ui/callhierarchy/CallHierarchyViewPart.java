@@ -54,8 +54,10 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionContext;
@@ -124,9 +126,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	
     private static final String DIALOGSTORE_VIEWORIENTATION = "CallHierarchyViewPart.orientation"; //$NON-NLS-1$
     private static final String DIALOGSTORE_CALL_MODE = "CallHierarchyViewPart.call_mode"; //$NON-NLS-1$
-    private static final String TAG_ORIENTATION = "orientation"; //$NON-NLS-1$
-    private static final String TAG_CALL_MODE = "call_mode"; //$NON-NLS-1$
-    private static final String TAG_RATIO = "ratio"; //$NON-NLS-1$
+	/**
+	 * The key to be used is <code>DIALOGSTORE_RATIO + fCurrentOrientation</code>.
+	 */
+	private static final String DIALOGSTORE_RATIO= "CallHierarchyViewPart.ratio"; //$NON-NLS-1$
+	
     static final int VIEW_ORIENTATION_VERTICAL = 0;
     static final int VIEW_ORIENTATION_HORIZONTAL = 1;
     static final int VIEW_ORIENTATION_SINGLE = 2;
@@ -167,6 +171,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
     private CallHierarchyViewer fCallHierarchyViewer;
     private boolean fShowCallDetails;
 	protected Composite fParent;
+	private IPartListener2 fPartListener;
 
     public CallHierarchyViewPart() {
         super();
@@ -262,7 +267,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             updateCheckedState();
 
             fCurrentOrientation = orientation;
-            fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, orientation);
+			
+			restoreSplitterRatio();
         }
     }
 
@@ -369,7 +375,51 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         if (fMemento != null) {
             restoreState(fMemento);
         }
+		restoreSplitterRatio();
+		addPartListener();
    }
+
+	private void restoreSplitterRatio() {
+		String ratio= fDialogSettings.get(DIALOGSTORE_RATIO + fCurrentOrientation);
+		if (ratio == null)
+			return;
+		int intRatio= Integer.parseInt(ratio);
+        fHierarchyLocationSplitter.setWeights(new int[] {intRatio, 1000 - intRatio});
+	}
+
+	private void saveSplitterRatio() {
+		if (fHierarchyLocationSplitter != null && ! fHierarchyLocationSplitter.isDisposed()) {
+	        int[] weigths = fHierarchyLocationSplitter.getWeights();
+	        int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
+			String key= DIALOGSTORE_RATIO + fCurrentOrientation;
+	        fDialogSettings.put(key, ratio);
+		}
+	}
+
+	private void addPartListener() {
+		fPartListener= new IPartListener2() {
+					public void partActivated(IWorkbenchPartReference partRef) { }
+					public void partBroughtToTop(IWorkbenchPartReference partRef) { }
+					public void partClosed(IWorkbenchPartReference partRef) {
+						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
+							saveViewSettings();
+					}
+					public void partDeactivated(IWorkbenchPartReference partRef) {
+						if (ID_CALL_HIERARCHY.equals(partRef.getId()))
+							saveViewSettings();
+					}
+					public void partOpened(IWorkbenchPartReference partRef) { }
+					public void partHidden(IWorkbenchPartReference partRef) { }
+					public void partVisible(IWorkbenchPartReference partRef) { }
+					public void partInputChanged(IWorkbenchPartReference partRef) { }
+				};
+		getViewSite().getPage().addPartListener(fPartListener);
+	}
+
+	protected void saveViewSettings() {
+		saveSplitterRatio();
+		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, fOrientation);
+	}
 
 	private void addResizeListener(Composite parent) {
 		parent.addControlListener(new ControlListener() {
@@ -382,6 +432,8 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 	}
 
 	void computeOrientation() {
+		saveSplitterRatio();
+		fDialogSettings.put(DIALOGSTORE_VIEWORIENTATION, fOrientation);
 		if (fOrientation != VIEW_ORIENTATION_AUTOMATIC) {
 			setOrientation(fOrientation);
 		}
@@ -410,28 +462,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * Restores the type hierarchy settings from a memento.
      */
     private void restoreState(IMemento memento) {
-        Integer orientation= memento.getInteger(TAG_ORIENTATION);
-
-        if (orientation != null) {
-            fOrientation= orientation.intValue();
-        }
-        computeOrientation();
-        updateCheckedState();
-        
-        Integer callMode= memento.getInteger(TAG_CALL_MODE);
-
-        if (callMode != null) {
-            setCallMode(callMode.intValue());
-        }
-
-        Integer ratio = memento.getInteger(TAG_RATIO);
-
-        if (ratio != null) {
-            fHierarchyLocationSplitter.setWeights(new int[] {
-                    ratio.intValue(), 1000 - ratio.intValue()
-                });
-        }
-        
         fSearchScopeActions.restoreState(memento);
     }
 
@@ -497,6 +527,11 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		
 		if (fClipboard != null)
 	        fClipboard.dispose();
+		
+		if (fPartListener != null) {
+			getViewSite().getPage().removePartListener(fPartListener);
+			fPartListener= null;
+		}
 
         super.dispose();
     }
@@ -539,13 +574,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
             return;
         }
 
-        memento.putInteger(TAG_CALL_MODE, fCurrentCallMode);
-        memento.putInteger(TAG_ORIENTATION, fOrientation);
-
-        int[] weigths = fHierarchyLocationSplitter.getWeights();
-        int ratio = (weigths[0] * 1000) / (weigths[0] + weigths[1]);
-        memento.putInteger(TAG_RATIO, ratio);
-        
         fSearchScopeActions.saveState(memento);
     }
 
