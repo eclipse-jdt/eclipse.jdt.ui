@@ -40,7 +40,6 @@ public abstract class AbstractRefactoringASTAnalyzer  extends AbstractSyntaxTree
 	
 	protected static String getFullPath(ICompilationUnit cu) {
 		Assert.isTrue(cu.exists());
-		IPath path= null;
 		try {
 			return Refactoring.getResource(cu).getFullPath().toString();
 		} catch (JavaModelException e) {
