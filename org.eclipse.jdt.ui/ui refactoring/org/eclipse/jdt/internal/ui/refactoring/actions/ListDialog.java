@@ -73,7 +73,7 @@ public class ListDialog extends SelectionDialog {
 	protected Control createDialogArea(Composite container) {
 		Composite parent= (Composite) super.createDialogArea(container);
 		createMessageArea(parent);
-		fTableViewer= new TableViewer(parent);
+		fTableViewer= new TableViewer(parent, getTableStyle());
 		fTableViewer.setContentProvider(fContentProvider);
 		final Table table= fTableViewer.getTable();
 		final TableColumn c= new TableColumn(table, SWT.NULL);
@@ -90,5 +90,9 @@ public class ListDialog extends SelectionDialog {
 		gd.widthHint= convertWidthInCharsToPixels(50);
 		table.setLayoutData(gd);
 		return parent;
+	}
+	
+	protected int getTableStyle() {
+		return SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER;
 	}
 }
