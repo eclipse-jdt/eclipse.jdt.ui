@@ -109,6 +109,32 @@ public class PropertiesFilePartitionerTest extends TestCase {
 		}
 	}
 	
+	public void testPartitioningWithEndingEscape() {
+		try {
+			fDocument.replace(40, 0, "\n key value\\n\nkey value\n");
+			ITypedRegion[] result= fDocument.computePartitioning(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, 0, fDocument.getLength(), false);
+			TypedRegion[] expectation= {
+				new TypedRegion(0, 11, IPropertiesFilePartitions.COMMENT),
+				new TypedRegion(11, 3, IDocument.DEFAULT_CONTENT_TYPE),
+				new TypedRegion(14, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+				new TypedRegion(21, 3, IDocument.DEFAULT_CONTENT_TYPE),
+				new TypedRegion(24, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+				new TypedRegion(31, 3, IDocument.DEFAULT_CONTENT_TYPE),
+				new TypedRegion(34, 7, IPropertiesFilePartitions.PROPERTY_VALUE),
+				new TypedRegion(41, 4, IDocument.DEFAULT_CONTENT_TYPE),
+				new TypedRegion(45, 9, IPropertiesFilePartitions.PROPERTY_VALUE),
+				new TypedRegion(54, 3, IDocument.DEFAULT_CONTENT_TYPE),
+				new TypedRegion(57, 7, IPropertiesFilePartitions.PROPERTY_VALUE)
+			};
+			
+			checkPartitioning(expectation, result);
+		} catch (BadLocationException x) {
+			fail();
+		} catch (BadPartitioningException x) {
+			fail();
+		}
+	}
+	
 	public void testPartitioningWithLeadingWhitespace() {
 		try {
 			fDocument.replace(40, 0, "\n key value\n  key value\n\tkey value\n\t\tkey value");
