@@ -70,6 +70,19 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.util.PropertyChangeEvent;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
+import org.eclipse.jface.viewers.IPostSelectionProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -114,18 +127,10 @@ import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.DoubleClickEvent;
-import org.eclipse.jface.viewers.IDoubleClickListener;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.editors.text.DefaultEncodingSupport;
+import org.eclipse.ui.editors.text.EditorsUI;
+import org.eclipse.ui.editors.text.IEncodingSupport;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorInput;
@@ -139,9 +144,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.DefaultEncodingSupport;
-import org.eclipse.ui.editors.text.EditorsUI;
-import org.eclipse.ui.editors.text.IEncodingSupport;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -175,13 +177,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.util.IModifierConstants;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.util.IModifierConstants;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -193,8 +194,10 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
@@ -2166,7 +2169,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * This editor's projection model updater 
 	 * @since 3.0
 	 */
-	private JavaProjectionModelUpdater fProjectionModelUpdater;
+	private IJavaFoldingStructureProvider fProjectionModelUpdater;
 	/**
 	 * The override and implements indicator manager for this editor.
 	 * @since 3.0
@@ -2782,6 +2785,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionModelUpdater= null;
 		}
 		
+		if (fProjectionSupport != null) {
+			fProjectionSupport.dispose();
+			fProjectionSupport= null;
+		}
+		
 		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
 		uninstallOccurrencesFinder();
@@ -2835,7 +2843,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		});
 		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
 		
-		if (isProjectionEnabled())
+		if (isFoldingEnabled())
 			fFoldingGroup= new FoldingActionGroup(this, getViewer());
 		
 		ResourceAction resAction= new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION, true); //$NON-NLS-1$
@@ -2915,7 +2923,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		action= new ClipboardOperationAction(JavaEditorMessages.getResourceBundle(), "Editor.Paste.", this, ITextOperationTarget.PASTE); //$NON-NLS-1$
 		setAction(ITextEditorActionConstants.PASTE, action);
-
 	}
 	
 	public void updatedTitleImage(Image image) {
@@ -2957,6 +2964,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					Boolean disable= (Boolean) event.getNewValue();
 					enableOverwriteMode(!disable.booleanValue());
 				}
+				return;
 			}
 			
 			if (PreferenceConstants.EDITOR_MARK_OCCURRENCES.equals(property)) {
@@ -3026,6 +3034,20 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				} else {
 					if (fOverrideIndicatorManager != null)
 						uninstallOverrideIndicator();
+				}
+				return;
+			}
+			
+			if (PreferenceConstants.EDITOR_FOLDING_PROVIDER.equals(property)) {
+				if (sourceViewer instanceof ProjectionViewer) {
+					ProjectionViewer projectionViewer= (ProjectionViewer) sourceViewer;
+					if (fProjectionModelUpdater != null)
+						fProjectionModelUpdater.uninstall();
+					// either freshly enabled or provider changed
+					fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+					if (fProjectionModelUpdater != null) {
+						fProjectionModelUpdater.install(this, projectionViewer);
+					}
 				}
 				return;
 			}
@@ -3224,8 +3246,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		synchronizeOutlinePageSelection();
 	}
 	
-	private boolean isProjectionEnabled() {
-		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection");
+	private boolean isFoldingEnabled() {
+		return JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
 	}
 
 	/*
@@ -3234,7 +3256,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
 		
-		if (isProjectionEnabled()) {
+		if (isFoldingEnabled()) {
 			
 			ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
 			
@@ -3242,16 +3264,18 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error"); //$NON-NLS-1$
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 			fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
-				public IInformationControl createInformationControl(Shell parent) {
-					return new CustomSourceInformationControl(parent, IDocument.DEFAULT_CONTENT_TYPE);
+				public IInformationControl createInformationControl(Shell shell) {
+					return new CustomSourceInformationControl(shell, IDocument.DEFAULT_CONTENT_TYPE);
 				}
 			});
 			fProjectionSupport.install();
 			
-			fProjectionModelUpdater= new JavaProjectionModelUpdater();
-			fProjectionModelUpdater.install(this, projectionViewer);
+			fProjectionModelUpdater= JavaPlugin.getDefault().getFoldingStructureProviderRegistry().getCurrentFoldingProvider();
+			if (fProjectionModelUpdater != null)
+				fProjectionModelUpdater.install(this, projectionViewer);
 			
-			
+			if (isFoldingEnabled())
+				projectionViewer.doOperation(ProjectionViewer.TOGGLE);
 		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {

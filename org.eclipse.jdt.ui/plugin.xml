@@ -44,7 +44,7 @@
    <extension-point id="quickFixProcessors" name="%quickFixProcessorExtensionPoint" schema="schema/quickFixProcessors.exsd"/>
    <extension-point id="quickAssistProcessors" name="%quickAssistProcessorExtensionPoint" schema="schema/quickAssistProcessors.exsd"/>
    <extension-point id="classpathContainerPage" name="%classpathContainerPageExtensionPoint" schema="schema/classpathContainerPage.exsd"/>
-   
+   <extension-point id="foldingStructureProviders" name="%foldingStructureProvidersExtensionPoint" schema="schema/foldingStructureProviders.exsd"/>
    <extension-point id="queryParticipants" name="Java Query Participants" schema="schema/queryParticipants.exsd"/>
    
 
@@ -4334,5 +4334,14 @@
       </objectContribution>
    </extension>
    
+	<extension
+		point= "org.eclipse.jdt.ui.foldingStructureProviders">
+		<provider
+			id="org.eclipse.jdt.ui.text.defaultFoldingProvider"
+			name= "%defaultFoldingStructureProviderName"
+			class="org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingStructureProvider"
+			preferencesClass="org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingPreferenceBlock">
+		</provider>
+	</extension>
 
 </plugin>
