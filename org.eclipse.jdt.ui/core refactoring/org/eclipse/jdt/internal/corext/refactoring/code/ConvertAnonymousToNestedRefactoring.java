@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -300,10 +302,19 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     	newType.setModifiers(createModifiersForNestedClass());
     	newType.setName(getAST().newSimpleName(fClassName));
     	setSuperType(newType);
+    	removeInitializationFromDeclaredFields(rewrite, newType);
         copyBodyDeclarationsToNestedClass(rewrite, newType);
         createFieldsForAccessedLocals(rewrite, newType);
 	    createNewConstructorIfNeeded(rewrite, newType);
         return newType;
+    }
+    
+    private void removeInitializationFromDeclaredFields(ASTRewrite rewrite, TypeDeclaration newType) {
+		 for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
+            VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+            Assert.isNotNull(fragment.getInitializer());
+            rewrite.markAsRemoved(fragment.getInitializer());
+        }
     }
     
     private void createFieldsForAccessedLocals(ASTRewrite rewrite, TypeDeclaration newType) {
@@ -324,27 +335,32 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     
     private IVariableBinding[] getUsedLocalVariables(){
     	final Set result= new HashSet(0);
-    	fAnonymousInnerClassNode.accept(new ASTVisitor(){
-    		public boolean visit(SimpleName node) {
-    			IBinding binding= node.resolveBinding();
-    			if (isLocalBinding(binding))
-	    			result.add(binding);	
-    			return true;
-            }
-            private boolean isLocalBinding(IBinding binding){
-    			if (!(binding instanceof IVariableBinding))
-    				return false;
-    			if (! Modifier.isFinal(binding.getModifiers()))
-    				return false;
-   				ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
-   				if (declaringNode == null)
-    				return false;
-    			if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
-    				return false;
-    			return true;	
-            }
-    	});
+    	fAnonymousInnerClassNode.accept(createTempUsageFinder(result));
     	return (IVariableBinding[]) result.toArray(new IVariableBinding[result.size()]);
+    }
+
+    private ASTVisitor createTempUsageFinder(final Set result) {
+        return new ASTVisitor(){
+        	public boolean visit(SimpleName node) {
+        		IBinding binding= node.resolveBinding();
+        		if (ConvertAnonymousToNestedRefactoring.this.isBindingToTemp(binding))
+        			result.add(binding);	
+        		return true;
+            }
+        };
+    }
+    
+    private boolean isBindingToTemp(IBinding binding){
+		if (!(binding instanceof IVariableBinding))
+			return false;
+		if (! Modifier.isFinal(binding.getModifiers()))
+			return false;
+		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
+		if (declaringNode == null)
+			return false;
+		if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
+			return false;
+		return true;	
     }
     
     private void createNewConstructorIfNeeded(ASTRewrite rewrite, TypeDeclaration newType) throws JavaModelException {
@@ -371,6 +387,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             superConstructorInvocation.arguments().add(getAST().newSimpleName(param.getName().getIdentifier()));
         }
         constructorBody.statements().add(superConstructorInvocation);
+        
         for (int i= 0; i < usedLocals.length; i++) {
             IVariableBinding local= usedLocals[i];
             String assignmentCode= ToolFactory.createCodeFormatter().format("this." + local.getName() + "=" + local.getName(), 0, null, getLineSeparator());
@@ -378,12 +395,57 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
 	        constructorBody.statements().add(assignmentStatement);
         }
+    	
+        addFieldInitialization(rewrite, constructorBody);
+        
     	newConstructor.setBody(constructorBody);
     	
 		addExceptionsToNewConstructor(newConstructor, rewrite);
     	rewrite.markAsInserted(newConstructor);
     	int index= 1 + usedLocals.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations());
         newType.bodyDeclarations().add(index, newConstructor);
+    }
+
+    private void addFieldInitialization(ASTRewrite rewrite, Block constructorBody) {        
+        for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
+            VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
+            Assignment assignmentExpression= getAST().newAssignment();
+            assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
+            assignmentExpression.setLeftHandSide(getAST().newSimpleName(fragment.getName().getIdentifier()));
+            Expression rhs= (Expression)rewrite.createCopy(fragment.getInitializer());
+            assignmentExpression.setRightHandSide(rhs);
+            ExpressionStatement assignmentStatement= getAST().newExpressionStatement(assignmentExpression);
+            constructorBody.statements().add(assignmentStatement);
+        }
+    }
+    
+    //live List of VariableDeclarationFragments
+    private List getFieldsToInitializeInConstructor(){
+    	List result= new ArrayList(0);
+        for (Iterator iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext();) {
+            BodyDeclaration element= (BodyDeclaration) iter.next();
+            if (!(element instanceof FieldDeclaration))
+            	continue;
+            FieldDeclaration field= (FieldDeclaration)element;
+        	for (Iterator fragmentIter= field.fragments().iterator(); fragmentIter.hasNext();) {
+                VariableDeclarationFragment fragment= (VariableDeclarationFragment) fragmentIter.next();
+                if (isToBeInitializerInConstructor(fragment))
+                	result.add(fragment);
+            }
+        }
+        return result;
+    }
+
+    private boolean isToBeInitializerInConstructor(VariableDeclarationFragment fragment) {
+    	if (fragment.getInitializer() == null)
+    		return false;
+    	return areLocalsUsedIn(fragment.getInitializer());	
+    }
+    
+    private boolean areLocalsUsedIn(Expression fieldInitializer) {
+    	Set localsUsed= new HashSet(0);
+		fieldInitializer.accept(createTempUsageFinder(localsUsed));
+        return ! localsUsed.isEmpty();
     }
 
     private void addParametersForLocalsUsedInInnerClass(ASTRewrite rewrite, IVariableBinding[] usedLocals, MethodDeclaration newConstructor) {
