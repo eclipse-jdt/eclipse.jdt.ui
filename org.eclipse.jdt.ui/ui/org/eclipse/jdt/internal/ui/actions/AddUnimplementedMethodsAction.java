@@ -60,7 +60,7 @@ public class AddUnimplementedMethodsAction extends Action {
 			}		
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(type);
-			type= EditorUtility.getWorkingCopy(type);
+			type= (IType)EditorUtility.getWorkingCopy(type);
 			
 			if (type == null) {
 				MessageDialog.openInformation(shell, JavaUIMessages.getString("AddUnimplementedMethodsAction.dialogTitle"), JavaUIMessages.getString("AddUnimplementedMethodsAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$

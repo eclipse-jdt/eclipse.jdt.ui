@@ -5,7 +5,8 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  * All Rights Reserved.
  */
 
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.ui.IEditorDescriptor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IEditorRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
+import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IMarker;import org.eclipse.core.resources.IResource;import org.eclipse.core.resources.IStorage;import org.eclipse.core.runtime.CoreException;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.IBreakpointManager;import org.eclipse.ui.IEditorDescriptor;import org.eclipse.ui.IEditorInput;import org.eclipse.ui.IEditorPart;import org.eclipse.ui.IEditorRegistry;import org.eclipse.ui.IWorkbenchPage;import org.eclipse.ui.PartInitException;import org.eclipse.ui.PlatformUI;import org.eclipse.ui.part.FileEditorInput;import org.eclipse.jdt.core.IClassFile;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.IWorkingCopy;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.debug.core.JDIDebugModel;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 
 /**
  * A number of routines for working with JavaElements in editors
@@ -184,18 +185,17 @@ public class EditorUtility {
 	}
 	
 	/** 
-	 * Gets the working copy of an type opened in an editor
+	 * Gets the working copy of an member opened in an editor
 	 * @param part the editor part
-	 * @param type the original type (or another working copy)
-	 * @return the working copy of the type, or null if not found
+	 * @param type the original member (or another working copy)
+	 * @return the working copy of the member, or null if not found
 	 */	
-	public static IType getWorkingCopy(IType type) throws JavaModelException {
-		ICompilationUnit cu= type.getCompilationUnit();
+	public static IMember getWorkingCopy(IMember member) throws JavaModelException {
+		ICompilationUnit cu= member.getCompilationUnit();
 		if (cu != null) {
 			ICompilationUnit workingCopy= getWorkingCopy(cu);
 			if (workingCopy != null) {
-				String typeQualifiedName= JavaModelUtility.getTypeQualifiedName(type);
-				return JavaModelUtility.findTypeInCompilationUnit(workingCopy, typeQualifiedName);
+				return JavaModelUtility.findMemberInCompilationUnit(workingCopy, member);
 			}
 		}
 		return null;

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.codemanipulation.StubUtility;
 
 /**
  * Utility methods for the Java Model. These methods should be part of
@@ -46,11 +48,11 @@ public class JavaModelUtility {
 	 * @return the type found, or null if not existing
 	 * The method does not find inner types. Waiting for a Java Core solution
 	 */	
-	public static IType findType(IJavaProject jproject, String str) throws JavaModelException {
-		String pathStr= str.replace('.', '/') + ".java"; //$NON-NLS-1$
+	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
+		String pathStr= fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
 		IJavaElement jelement= jproject.findElement(new Path(pathStr));
 		if (jelement instanceof ICompilationUnit) {
-			String simpleName= Signature.getSimpleName(str);
+			String simpleName= Signature.getSimpleName(fullyQualifiedName);
 			return ((ICompilationUnit)jelement).getType(simpleName);
 		} else if (jelement instanceof IClassFile) {
 			return ((IClassFile)jelement).getType();
@@ -104,6 +106,33 @@ public class JavaModelUtility {
 			String currName= getTypeQualifiedName(types[i]);
 			if (typeQualifiedName.equals(currName)) {
 				return types[i];
+			}
+		}
+		return null;
+	}
+	
+	/** 
+	 * Finds a a member in a compilation unit. Typical usage is to find the corresponding
+	 * member in its working copy.
+	 * @param cu the compilation unit (eg. working copy) to search in
+	 * @param member the member (eg. from the original)
+	 * @return the member found, or null if not existing
+	 */		
+	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
+		if (member.getElementType() == IJavaElement.TYPE) {
+			return findTypeInCompilationUnit(cu, getTypeQualifiedName((IType)member));
+		} else {
+			IType declaringType= findTypeInCompilationUnit(cu, getTypeQualifiedName(member.getDeclaringType()));
+			if (declaringType != null) {
+				IMember result;
+				if (member.getElementType() == IJavaElement.FIELD) {
+					result= declaringType.getField(member.getElementName());
+				} else {
+					result= StubUtility.findMethod((IMethod)member, declaringType);
+				}
+				if (result.exists()) {
+					return result;
+				}
 			}
 		}
 		return null;

@@ -96,11 +96,11 @@ public class StubUtility {
 			} else {
 				// generate a default java doc comment
 				String desc= "Method " + method.getElementName(); //$NON-NLS-1$
-				genDefaultJavaDocComment(desc, paramNames, retTypeSig, excTypes, buf);
+				genJavaDocStub(desc, paramNames, retTypeSig, excTypes, buf);
 			}
 		} else {
 			String desc= "Constructor for " + parenttype.getElementName(); //$NON-NLS-1$
-			genDefaultJavaDocComment(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
+			genJavaDocStub(desc, paramNames, Signature.SIG_VOID, excTypes, buf);
 		}		
 		int flags= method.getFlags();
 		if (Flags.isPublic(flags) || (declaringtype.isInterface() && parenttype.isClass())) {
@@ -218,7 +218,7 @@ public class StubUtility {
 	/**
 	 * Generates a default JavaDoc comment stub for a method.
 	 */
-	public static void genDefaultJavaDocComment(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
+	public static void genJavaDocStub(String descr, String[] paramNames, String retTypeSig, String[] excTypeSigs, StringBuffer buf) {
 		buf.append("\t/**\n"); //$NON-NLS-1$
 		buf.append("\t * "); buf.append(descr); buf.append(".\n"); //$NON-NLS-2$ //$NON-NLS-1$
 		for (int i= 0; i < paramNames.length; i++) {

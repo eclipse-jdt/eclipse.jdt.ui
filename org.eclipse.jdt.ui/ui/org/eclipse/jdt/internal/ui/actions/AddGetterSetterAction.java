@@ -62,32 +62,29 @@ public class AddGetterSetterAction extends Action {
 		
 		try {
 			ICompilationUnit cu= fields[0].getCompilationUnit();
-			// open the editor
+			// open the editor, forces the creation of a working copy
 			IEditorPart editor= EditorUtility.openInEditor(cu);
 			
-			ICompilationUnit workingCopyCU= EditorUtility.getWorkingCopy(cu);
-			if (workingCopyCU == null) {
-				showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
-				return;
-			}
-		
-			int nFields= fields.length;
-			IField[] workingCopyFields= new IField[nFields];
-			
-			for (int i= 0; i < nFields; i++) {
-				IField field= fields[i];
-				String parentTypeSig= JavaModelUtility.getFullyQualifiedName(field.getDeclaringType());
-				IType workingCopyType= JavaModelUtility.findTypeInCompilationUnit(workingCopyCU, parentTypeSig);
-				if (workingCopyType == null) {
-					showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.typeRemoved", field.getElementName())); //$NON-NLS-1$
+			ICompilationUnit workingCopyCU;
+			IField[] workingCopyFields;
+			if (cu.isWorkingCopy()) {
+				workingCopyCU= cu;
+				workingCopyFields= fields;
+			} else {
+				workingCopyCU= EditorUtility.getWorkingCopy(cu);
+				if (workingCopyCU == null) {
+					showError(JavaUIMessages.getString("AddGetterSetterAction.error.actionFailed")); //$NON-NLS-1$
 					return;
-				} else {
-					// get the field of the working copy
-					workingCopyFields[i]= workingCopyType.getField(field.getElementName());
-					if (!workingCopyFields[i].exists()) {
-						showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.fieldRemoved", field.getElementName())); //$NON-NLS-1$
+				}
+				workingCopyFields= new IField[fields.length];
+				for (int i= 0; i < fields.length; i++) {
+					IField field= fields[i];
+					IField workingCopyField= (IField) JavaModelUtility.findMemberInCompilationUnit(workingCopyCU, field);
+					if (workingCopyField == null) {
+						showError(JavaUIMessages.getFormattedString("AddGetterSetterAction.error.fieldNotExisting", field.getElementName())); //$NON-NLS-1$
 						return;
 					}
+					workingCopyFields[i]= workingCopyField;
 				}
 			}
 		

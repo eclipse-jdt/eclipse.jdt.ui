@@ -1095,7 +1095,7 @@ public abstract class TypePage extends ContainerPage {
 			
 			// if we are working on a enclosed type that is open in an editor,
 			// then replace the enclosing type with its working copy
-			IType workingCopy= EditorUtility.getWorkingCopy(enclosingType);
+			IType workingCopy= (IType)EditorUtility.getWorkingCopy(enclosingType);
 			if (workingCopy != null) {
 				enclosingType= workingCopy;
 			}

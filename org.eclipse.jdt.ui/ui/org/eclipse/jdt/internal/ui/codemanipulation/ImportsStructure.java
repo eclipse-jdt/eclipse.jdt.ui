@@ -313,8 +313,10 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-		if (!created.isEmpty()) {
-			try {
+		
+		try {
+			String newContent;
+			if (!created.isEmpty()) {
 				if (!container.exists()) {
 					buf.append(lineDelim);	// nl after import (<nl+>)
 					if (importsStart > 0) { // package statement
@@ -324,14 +326,16 @@ public class ImportsStructure implements IImportsStructure {
 						buf.append(lineDelim);
 					}
 				}
-				String newContent= buf.toString();
-				if (hasChanged(doc, importsStart, importsLen, newContent)) {
-					doc.replace(importsStart, importsLen, newContent);
-				}
-			} catch (BadLocationException e) {
-				// can not happen
-				JavaPlugin.log(e);
+				newContent= buf.toString();
+			} else {
+				newContent= ""; //$NON-NLS-1$
 			}
+			if (hasChanged(doc, importsStart, importsLen, newContent)) {
+				doc.replace(importsStart, importsLen, newContent);
+			}
+		} catch (BadLocationException e) {
+			// can not happen
+			JavaPlugin.log(e);
 		}
 	}
 	
@@ -346,8 +350,6 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		return false;	
 	}
-	
-
 	
 	private boolean isImportNeeded(String packName, IType[] cuTypes) {
 		if (packName.length() == 0 || "java.lang".equals(packName)) { //$NON-NLS-1$

@@ -81,25 +81,17 @@ public class AddMethodStubAction extends Action {
 			return;
 		}
 		
-		final Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		
-		try {
-			IType usedType= null;
-			
-			IEditorPart editor= EditorUtility.isOpenInEditor(fParentType.getCompilationUnit());
-			if (editor != null) {
-				// work on the working copy
-				usedType= EditorUtility.getWorkingCopy(fParentType);
-				if (usedType == null) {
-					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
-					return;
-				}
-			} else {
-				usedType= fParentType;
-			}	
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		try {		
+			// open an editor and work on a working copy
+			IEditorPart editor= EditorUtility.openInEditor(fParentType);
+			IType usedType= (IType)EditorUtility.getWorkingCopy(fParentType);
+			if (usedType == null) {
+				MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
+				return;
+			}
 			
 			ArrayList newMethods= new ArrayList(10);
-			ArrayList existingMethods= new ArrayList(10);	
 			
 			// remove the methods that already exist
 			Iterator iter= ((IStructuredSelection)fSelection).iterator();
@@ -110,25 +102,13 @@ public class AddMethodStubAction extends Action {
 				}
 			}			
 			IMethod[] methods= (IMethod[]) newMethods.toArray(new IMethod[newMethods.size()]); 
-			
-			
-			if (usedType == fParentType) {
-				// not yet open
-				editor= EditorUtility.openInEditor(fParentType);
-				usedType= EditorUtility.getWorkingCopy(fParentType);
-				if (usedType == null) {
-					MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ErrorDialog.title"), JavaUIMessages.getString("AddMethodStubAction.type_removed_in_editor")); //$NON-NLS-2$ //$NON-NLS-1$
-					return;
-				}				
-			}
-				
 			AddMethodStubOperation op= new AddMethodStubOperation(usedType, methods, createOverrideQuery(), createReplaceQuery(), false);
 		
 			ProgressMonitorDialog dialog= new ProgressMonitorDialog(shell);
 			dialog.run(false, true, op);
 			IMethod[] res= op.getCreatedMethods();
 			if (res != null && res.length > 0 && editor != null) {
-				EditorUtility.openInEditor(res[0], true);
+				//EditorUtility.openInEditor(res[0], true);
 				EditorUtility.revealInEditor(editor, res[0]);
 			}
 		} catch (InvocationTargetException e) {
@@ -137,11 +117,11 @@ public class AddMethodStubAction extends Action {
 		} catch (JavaModelException e) {
 			ErrorDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), null, e.getStatus()); //$NON-NLS-1$
 			JavaPlugin.log(e.getStatus());
-		} catch (InterruptedException e) {
-			// Do nothing. Operation has been canceled by user.
 		} catch (PartInitException e) {
 			MessageDialog.openError(shell, JavaUIMessages.getString("AddMethodStubAction.ActionFailed.title"), e.getMessage()); //$NON-NLS-1$
 			JavaPlugin.log(e);
+		} catch (InterruptedException e) {
+			// Do nothing. Operation has been canceled by user.
 		}
 	}
 	
@@ -196,7 +176,8 @@ public class AddMethodStubAction extends Action {
 	}	
 	
 	public static boolean canActionBeAdded(IType parentType, ISelection selection) {
-		if (parentType == null || parentType.getCompilationUnit() == null || !(selection instanceof IStructuredSelection)) {
+		if (parentType == null || parentType.getCompilationUnit() == null ||
+				selection.isEmpty() || !(selection instanceof IStructuredSelection)) {
 			return false;
 		}
 		Object[] elems= ((IStructuredSelection)selection).toArray();
