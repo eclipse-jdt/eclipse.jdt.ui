@@ -32,6 +32,8 @@ import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -64,8 +66,9 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 	}
 	
 	public void update() {
+		boolean hasLightBulb= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB);
 		// Begin Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=20114
-		if (!(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
+		if (!hasLightBulb || !(fTextEditor instanceof ITextEditorExtension) || ((ITextEditorExtension) fTextEditor).isEditorInputReadOnly()) {
 			fPosition= null;
 			super.update();
 			return;
