@@ -53,24 +53,20 @@ public class SelectionProviderMediator implements ISelectionProvider {
 	 */
 	 
 	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		if (fSelectionChangedListeners == null) {
+		if (fSelectionChangedListeners == null)
 			fSelectionChangedListeners= new ArrayList(4);
-		}
 		
-		if (!fSelectionChangedListeners.contains(listener)) {
+		if (!fSelectionChangedListeners.contains(listener))
 			fSelectionChangedListeners.add(listener);
-		}
 	}
 	
 	/**
 	 * @see ISelectionProvider#removeSelectionChangedListener
 	 */
 	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		if (fSelectionChangedListeners != null) {
-			fSelectionChangedListeners.add(listener);
-		}
+		if (fSelectionChangedListeners != null)
+			fSelectionChangedListeners.remove(listener);
 	}	
-		
 		
 	/**
 	 * @see ISelectionProvider#getSelection
