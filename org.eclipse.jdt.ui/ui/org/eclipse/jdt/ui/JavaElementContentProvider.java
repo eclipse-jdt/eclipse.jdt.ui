@@ -81,7 +81,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		int flags= delta.getFlags();
 		IJavaElement element= delta.getElement();
 
-		if (!getProvideWorkingCopy() && element instanceof IWorkingCopy && ((IWorkingCopy)element).isWorkingCopy())
+		if (!getProvideWorkingCopy() && isWorkingCopy(element))
 			return;
 
 		if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT && !element.getJavaProject().isOnClasspath(element))
@@ -94,6 +94,12 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		}
 
 		if (kind == IJavaElementDelta.REMOVED) {
+			// when a working copy is removed all we have to do
+			// is to refresh the compilation unit
+			if (isWorkingCopy(element)) {
+				refreshWorkingCopy((IWorkingCopy)element);
+				return;
+			}
 			Object parent= internalGetParent(element);			
 			postRemove(element);
 			if (parent instanceof IPackageFragment) 
@@ -107,6 +113,12 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			return;
 		}
 		if (kind == IJavaElementDelta.ADDED) { 
+			// when a working copy is added all we have to do
+			// is to refresh the compilation unit
+			if (isWorkingCopy(element)) {
+				refreshWorkingCopy((IWorkingCopy)element);
+				return;
+			}
 			Object parent= internalGetParent(element);
 			// we are filtering out empty subpackages, so we
 			// have to handle additions to them specially. 
@@ -126,7 +138,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 				}
 			} else {  
 				postAdd(parent, element);
-			}						
+			}
 		}
 
 		if (element instanceof ICompilationUnit) {
@@ -180,6 +192,20 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 		for (int i= 0; i < affectedChildren.length; i++) {
 			processDelta(affectedChildren[i]);
 		}
+	}
+
+	/**
+	 * Refreshes the Compilation unit corresponding to the workging copy
+	 * @param iWorkingCopy
+	 */
+	private void refreshWorkingCopy(IWorkingCopy workingCopy) {
+		IJavaElement original= workingCopy.getOriginalElement();
+		if (original != null)
+			postRefresh(original);
+	}
+
+	private boolean isWorkingCopy(IJavaElement element) {
+		return (element instanceof IWorkingCopy) && ((IWorkingCopy)element).isWorkingCopy();
 	}
 	
 	/**
