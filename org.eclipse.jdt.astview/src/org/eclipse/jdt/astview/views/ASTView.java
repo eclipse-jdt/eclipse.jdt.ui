@@ -348,6 +348,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fUseReconcilerAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
+	private Action fClearAction;
 	private TreeCopyAction fCopyAction;
 	private Action fDoubleClickAction;
 	private Action fLinkWithEditor;
@@ -443,13 +444,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		try {
 			CompilationUnit root= createAST(input, astLevel);
 			
-			fViewer.setInput(root);
-			fSash.setMaximizedControl(fViewer.getTree());
-			fTrayRoots= new ArrayList();
-			if (fTray != null)
-				fTray.setInput(fTrayRoots);
-			setASTUptoDate(true);
-			
+			resetView(root);
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
 				fViewer.getTree().setRedraw(false);
@@ -461,6 +456,18 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} catch (RuntimeException e) {
 			throw new CoreException(getErrorStatus("Could not create AST:\n" + e.getMessage(), e)); //$NON-NLS-1$
 		}
+	}
+
+	private void resetView(CompilationUnit root) {
+		if (root == null)
+			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
+		fViewer.setInput(root);
+		fSash.setMaximizedControl(fViewer.getTree());
+		fTrayRoots= new ArrayList();
+		if (fTray != null)
+			fTray.setInput(fTrayRoots);
+		setASTUptoDate(root != null);
+		fClearAction.setEnabled(root != null);
 	}
 	
 	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
@@ -634,10 +641,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 			// ignore
 		}
 		if (fOpenable == null) {
-			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
+			resetView(null);
+		} else {
+			setASTUptoDate(fOpenable != null);
 		}
-		
-		setASTUptoDate(fOpenable != null);
 	}
 
 
@@ -676,6 +683,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void fillContextMenu(IMenuManager manager) {
 		manager.add(fFocusAction);
 		manager.add(fRefreshAction);
+		manager.add(fClearAction);
 		manager.add(fCollapseAction);
 		manager.add(fExpandAction);
 		manager.add(new Separator());
@@ -692,6 +700,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(fFocusAction);
 		manager.add(fRefreshAction);
+		manager.add(fClearAction);
 		manager.add(new Separator());
 		fDrillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator());
@@ -715,6 +724,16 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fRefreshAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fRefreshAction, ASTViewImages.REFRESH);
 
+		fClearAction = new Action() {
+			public void run() {
+				performClear();
+			}
+		};
+		fClearAction.setText("&Clear AST"); //$NON-NLS-1$
+		fClearAction.setToolTipText("Clear AST and release memory"); //$NON-NLS-1$
+		fClearAction.setEnabled(false);
+		ASTViewImages.setImageDescriptors(fClearAction, ASTViewImages.CLEAR);
+		
 		fUseReconcilerAction = new Action("&Use Reconciler", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
 				performUseReconciler();
@@ -964,6 +983,16 @@ public class ASTView extends ViewPart implements IShowInSource {
 				showAndLogError("Could not set AST view input ", e); //$NON-NLS-1$
 			}
 		}
+	}
+
+	protected void performClear() {
+		fOpenable= null;
+		try {
+			setInput(null);
+		} catch (CoreException e) {
+			showAndLogError("Could not reset AST view ", e); //$NON-NLS-1$
+		}
+		resetView(null);
 	}
 
 	private void showAndLogError(String message, CoreException e) {

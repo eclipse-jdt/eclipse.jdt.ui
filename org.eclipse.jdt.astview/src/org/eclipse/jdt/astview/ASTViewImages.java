@@ -30,6 +30,7 @@ public class ASTViewImages {
 
 	public static final String SETFOCUS= "setfocus.gif"; //$NON-NLS-1$
 	public static final String REFRESH= "refresh.gif"; //$NON-NLS-1$
+	public static final String CLEAR= "clear.gif"; //$NON-NLS-1$
 
 	public static final String ADD_TO_TRAY= "add.gif"; //$NON-NLS-1$
 	
