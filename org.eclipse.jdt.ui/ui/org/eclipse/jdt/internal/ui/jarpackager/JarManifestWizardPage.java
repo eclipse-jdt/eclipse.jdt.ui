@@ -836,7 +836,7 @@ public class JarManifestWizardPage extends WizardPage implements Listener, IJarP
 			public void isValid(Object[] selection, StatusInfo res) {
 				for (int i= 0; i < selection.length; i++) {
 					if (!(selection[i] instanceof IPackageFragment)) {
-						res.setError(JarPackagerMessages.getString("JarManifestWizardPage.error.mustContainPackages"));
+						res.setError(JarPackagerMessages.getString("JarManifestWizardPage.error.mustContainPackages")); //$NON-NLS-1$
 						return;
 					}
 				}
