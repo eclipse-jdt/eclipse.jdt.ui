@@ -944,24 +944,8 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private static VariableDeclarationFragment[] getVariableDeclarationFragments(FieldDeclaration fd){
 		return (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
 	}
-	
-	private boolean canReplaceTypeInFieldDeclaration(FieldDeclaration fd, IProgressMonitor pm) throws JavaModelException {
-		VariableDeclarationFragment[] fragments= getVariableDeclarationFragments(fd);
-		pm.beginTask("", fragments.length);
-		try{
-			for (int i= 0; i < fragments.length; i++) {
-				IField field= Binding2JavaModel.lookupIField(fragments[i].resolveBinding(), getCompilationUnit(fd).getJavaProject());
-				if (field != null && anyReferenceHasDirectProblems(field, new SubProgressMonitor(pm, 1)))
-					return false;						
-			}
-			return true;
-		} finally {
-			pm.done();
-		}	
-	}
-	
-	private boolean canReplaceTypeInVariableDeclarationStatement(VariableDeclarationStatement vds, IProgressMonitor pm) throws JavaModelException{
-		VariableDeclarationFragment[] fragments= getVariableDeclarationFragments(vds);
+		
+	private boolean canReplaceTypeInDeclarationFragments(VariableDeclarationFragment[] fragments, IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", fragments.length);
 		try{
 			for (int i= 0; i < fragments.length; i++) {
@@ -972,6 +956,14 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private boolean canReplaceTypeInFieldDeclaration(FieldDeclaration fd, IProgressMonitor pm) throws JavaModelException {
+		return canReplaceTypeInDeclarationFragments(getVariableDeclarationFragments(fd), pm);
+	}
+	
+	private boolean canReplaceTypeInVariableDeclarationStatement(VariableDeclarationStatement vds, IProgressMonitor pm) throws JavaModelException{
+		return canReplaceTypeInDeclarationFragments(getVariableDeclarationFragments(vds), pm);
 	}
 
 	private void addToBadVarSet(VariableDeclaration variableDeclaration) {
