@@ -76,6 +76,7 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.UnusedPrivateConstructor:
 			case IProblem.UnusedPrivateField:
 			case IProblem.UnusedPrivateType:
+			case IProblem.MethodRequiresBody:
 				return true;
 			default:
 				return false;
@@ -194,6 +195,9 @@ public class QuickFixProcessor implements ICorrectionProcessor {
 			case IProblem.BodyForNativeMethod:
 				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, proposals);
 				break;
+			case IProblem.MethodRequiresBody:
+				ModifierCorrectionSubProcessor.addMethodRequiresBodyProposals(context, proposals);
+				break;					
 			case IProblem.OuterLocalMustBeFinal:				
 				ModifierCorrectionSubProcessor.addNonFinalLocalProposal(context, proposals);
 				break;

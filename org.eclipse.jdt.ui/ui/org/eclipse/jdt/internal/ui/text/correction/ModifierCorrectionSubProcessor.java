@@ -284,6 +284,36 @@ public class ModifierCorrectionSubProcessor {
 		proposal.ensureNoModifications();
 		return proposal;
 	}
+
+	public static void addMethodRequiresBodyProposals(ICorrectionContext context, List proposals) throws CoreException {
+		ICompilationUnit cu= context.getCompilationUnit();
+		AST ast= context.getASTRoot().getAST();
+		
+		ASTNode selectedNode= context.getCoveringNode();
+		if (!(selectedNode instanceof MethodDeclaration)) {
+			return;
+		}
+		MethodDeclaration decl=  (MethodDeclaration) selectedNode;
+		
+		ASTRewrite rewrite= new ASTRewrite(decl);
+		
+		MethodDeclaration modifiedNode= ast.newMethodDeclaration();
+		modifiedNode.setConstructor(decl.isConstructor());
+		modifiedNode.setExtraDimensions(decl.getExtraDimensions());
+		modifiedNode.setModifiers(decl.getModifiers() & ~Modifier.ABSTRACT);
+		rewrite.markAsModified(decl, modifiedNode);		
+		
+		Block body= ast.newBlock();
+		decl.setBody(body);
+		rewrite.markAsInserted(body);
+
+		String label= CorrectionMessages.getString("ModifierCorrectionSubProcessor.addmissingbody.description"); //$NON-NLS-1$
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
+		proposal.ensureNoModifications();
+
+		proposals.add(proposal);
+	}
 	
 
 }
