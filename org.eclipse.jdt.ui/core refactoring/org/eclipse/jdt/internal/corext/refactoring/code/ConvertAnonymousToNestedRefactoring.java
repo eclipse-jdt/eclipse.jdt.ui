@@ -146,9 +146,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		
     		initializeDefaults();
 	        return new RefactoringStatus();
-    	} catch (CoreException e) {
-    		throw new JavaModelException(e);
-        } finally{
+    	} finally{
     		pm.done();
     	}
     }

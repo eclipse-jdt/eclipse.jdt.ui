@@ -235,9 +235,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 		     
 		    initializeDefaults();
 	        return result;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
-    	} finally {
+		} finally {
     		pm.done();
     	}
     }
