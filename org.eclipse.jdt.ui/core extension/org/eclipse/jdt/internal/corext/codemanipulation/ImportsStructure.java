@@ -397,15 +397,15 @@ public class ImportsStructure implements IImportsStructure {
 	 * to a conflict. 
 	 */
 	public String addImport(ITypeBinding binding) {
-		binding= ASTResolving.normalizeTypeBinding(binding);
-		if (binding == null) {
-			return ""; //$NON-NLS-1$
+		ITypeBinding normalizedBinding= ASTResolving.normalizeTypeBinding(binding);
+		if (normalizedBinding == null) {
+			return binding.getName();
 		}
-		String qualifiedName= binding.getQualifiedName();
+		String qualifiedName= normalizedBinding.getQualifiedName();
 		if (qualifiedName.length() > 0) {
 			return addImport(qualifiedName);
 		}
-		return binding.getName();
+		return normalizedBinding.getName();
 	}
 		
 	/**
