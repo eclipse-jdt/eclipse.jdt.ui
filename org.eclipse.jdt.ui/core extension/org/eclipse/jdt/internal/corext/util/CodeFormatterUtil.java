@@ -10,28 +10,9 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.util;
 
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
-
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jdt.core.ICodeFormatter;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 public class CodeFormatterUtil {
 
@@ -67,10 +48,8 @@ public class CodeFormatterUtil {
 	}
 	
 	public static int getTabWidth() {
-		Hashtable options= JavaCore.getOptions();
 		try {
-			String result= (String)options.get(JavaCore.FORMATTER_TAB_SIZE);
-			return Integer.parseInt(result);
+			return Integer.parseInt((String)JavaCore.getOptions().get(JavaCore.FORMATTER_TAB_SIZE));
 		} catch (NumberFormatException e) {
 			return 4;
 		}
