@@ -67,8 +67,21 @@ public class JavaDocLocations {
 	private static final boolean IS_CASE_SENSITIVE = !new File("Temp").equals(new File("temp")); //$NON-NLS-1$ //$NON-NLS-2$
 
 	
-	private static Map fgJavadocLocations= new HashMap(5);
+	private static Map fgJavadocLocations= null;
+	private static JavaDocVMInstallListener fgVMInstallListener= null;
 	
+	
+	private static Map getJavaDocLocations() {
+		if (fgJavadocLocations == null) {
+			fgJavadocLocations= new HashMap();
+			try {
+				initJavadocLocations(); //delayed initialization
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return fgJavadocLocations;	
+	}
 
 	private static IPath canonicalizedPath(IPath externalPath) {
 		if (externalPath == null || IS_CASE_SENSITIVE)
@@ -87,9 +100,9 @@ public class JavaDocLocations {
 
 	private static void setJavadocBaseLocation(IPath path, URL url) {
 		if (url == null) {
-			fgJavadocLocations.remove(path);
+			getJavaDocLocations().remove(path);
 		} else {
-			fgJavadocLocations.put(path, url);
+			getJavaDocLocations().put(path, url);
 		}
 	}
 	
@@ -97,7 +110,7 @@ public class JavaDocLocations {
 	 * Gets the Javadoc location for an archive with the given path.
 	 */
 	private static URL getJavadocBaseLocation(IPath path) {
-		return (URL) fgJavadocLocations.get(path);
+		return (URL) getJavaDocLocations().get(path);
 	}		
 	
 	/**
@@ -139,12 +152,12 @@ public class JavaDocLocations {
 		}	
 	}
 		
-	private static String getLocationsAsXMLString() throws CoreException {
+	private static String getLocationsAsXMLString(Map locations) throws CoreException {
 		Document document = new DocumentImpl();
 		Element rootElement = document.createElement(NODE_ROOT);
 		document.appendChild(rootElement);
 
-		Iterator iter= fgJavadocLocations.keySet().iterator();
+		Iterator iter= locations.keySet().iterator();
 		
 		while (iter.hasNext()) {
 			IPath path= (IPath) iter.next();
@@ -204,13 +217,21 @@ public class JavaDocLocations {
 	}	
 	
 	
-	public static void saveJavadocLocations() throws CoreException {
+	public static void shutdownJavadocLocations() throws CoreException {
+		if (fgJavadocLocations == null) {
+			return;
+		}
+		
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		String xmlString= getLocationsAsXMLString();
+		String xmlString= getLocationsAsXMLString(fgJavadocLocations);
 		root.setPersistentProperty(QUALIFIED_NAME, xmlString);
+		
+		fgVMInstallListener.remove();
+		fgVMInstallListener= null;
+		fgJavadocLocations= null;
 	}
 	
-	public static void loadJavadocLocations() throws CoreException {
+	private static void initJavadocLocations() throws CoreException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		String xmlString= root.getPersistentProperty(QUALIFIED_NAME); 
 		if (xmlString != null) {
@@ -221,6 +242,9 @@ public class JavaDocLocations {
 				throw new CoreException(status);
 			}
 		}
+		
+		fgVMInstallListener= new JavaDocVMInstallListener();
+		fgVMInstallListener.init();		
 	}
 	
 	public static URL getJavadocLocation(IJavaElement element, boolean includeMemberReference) throws JavaModelException {
