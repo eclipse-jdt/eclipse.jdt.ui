@@ -320,7 +320,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		} else {
 			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.tooltip.package")); //$NON-NLS-1$
 		}
-		buf.append("<b>"); //$NON-NLS-1$
+		buf.append(" <b>"); //$NON-NLS-1$
 		buf.append(JavaElementLabels.getElementLabel(fTypeContainer, JavaElementLabels.T_FULLY_QUALIFIED));
 		buf.append("</b><br>"); //$NON-NLS-1$
 		buf.append("public "); //$NON-NLS-1$
