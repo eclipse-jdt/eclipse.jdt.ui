@@ -501,4 +501,15 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         boolean declareStatic= false;
 		passHelper(4, 13, 4, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
+	
+	public void test18() throws Exception{
+		printTestDisabledMessage("regression test for bug 39363");
+		if (true) return;
+		int accessModifier= Modifier.PRIVATE;
+		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
+		boolean declareFinal= false;
+		boolean declareStatic= false;
+		passHelper(5, 13, 5, 14, "i", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+
 }
