@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class TypeInfoLabelProvider extends LabelProvider {
 	
@@ -72,13 +73,13 @@ public class TypeInfoLabelProvider extends LabelProvider {
 				buf.append(typeRef.getTypeQualifiedName());
 
 			if (isSet(SHOW_PACKAGE_POSTFIX)) {
-				buf.append(JavaUIMessages.getString("TypeInfoLabelProvider.dash")); //$NON-NLS-1$
+				buf.append(JavaElementLabels.CONCAT_STRING);
 				String packName= typeRef.getPackageName();
 				buf.append(getPackageName(packName));
 			}
 		}
 		if (isSet(SHOW_ROOT_POSTFIX)) {
-			buf.append(JavaUIMessages.getString("TypeInfoLabelProvider.dash"));//$NON-NLS-1$
+			buf.append(JavaElementLabels.CONCAT_STRING);
 			buf.append(typeRef.getPackageFragmentRootPath().toString());
 		}
 		return buf.toString();				
