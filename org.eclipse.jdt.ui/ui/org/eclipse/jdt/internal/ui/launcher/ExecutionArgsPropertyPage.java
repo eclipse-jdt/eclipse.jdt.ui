@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 import org.eclipse.jdt.launching.ExecutionArguments;
+import org.eclipse.jface.dialogs.ErrorDialog;
 
 public class ExecutionArgsPropertyPage extends PropertyPage {
 
@@ -106,7 +107,8 @@ public class ExecutionArgsPropertyPage extends PropertyPage {
 			try {
 				ExecutionArguments.setArguments(type, new ExecutionArguments(fVMArgs.getText(), fProgramArgs.getText()));
 			} catch (CoreException e) {
-				JavaLaunchUtils.errorDialog(getControl().getShell(), LauncherMessages.getString("executionArgsPropertyPage.error.title"), LauncherMessages.getString("executionArgsPropertyPage.error.setArgs"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+				JavaPlugin.log(e);
+				ErrorDialog.openError(getControl().getShell(), LauncherMessages.getString("executionArgsPropertyPage.error.title"), LauncherMessages.getString("executionArgsPropertyPage.error.setArgs"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 			}
 		}
 	}

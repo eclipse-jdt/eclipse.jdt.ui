@@ -5,7 +5,19 @@
 
 package org.eclipse.jdt.internal.ui.launcher;
 
-import java.io.File;import java.io.IOException;import java.util.ArrayList;import java.util.List;import org.eclipse.debug.core.DebugPlugin;import org.eclipse.debug.core.model.IProcess;import org.eclipse.jdt.launching.IVMInstall;import org.eclipse.jdt.launching.JavaRuntime;import org.eclipse.jdt.launching.VMRunnerConfiguration;import org.eclipse.jdt.launching.VMRunnerResult;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.model.IProcess;
+
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+import org.eclipse.jdt.launching.VMRunnerConfiguration;
+import org.eclipse.jdt.launching.VMRunnerResult;
 
 public class JDK12Launcher extends JavaLauncher {
 	
@@ -13,12 +25,10 @@ public class JDK12Launcher extends JavaLauncher {
 		super(vmInstance);
 	}
 	
-	public VMRunnerResult run(VMRunnerConfiguration config) {
+	public VMRunnerResult run(VMRunnerConfiguration config) throws CoreException {
 		String location= getJDKLocation(""); //$NON-NLS-1$
 		if ("".equals(location)) { //$NON-NLS-1$
-			String msg= LauncherMessages.getString("jdkLauncher.noJDKHome"); //$NON-NLS-1$
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), msg, new LauncherException(msg)); //$NON-NLS-1$
-			return null;
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.noJDKHome"), null));
 		}
 		
 		String program= location+File.separator+"bin"+File.separator+"java"; //$NON-NLS-2$ //$NON-NLS-1$
@@ -61,7 +71,7 @@ public class JDK12Launcher extends JavaLauncher {
 			process.setAttribute(JavaRuntime.ATTR_CMDLINE, renderCommandLine(cmdLine));
 			return new VMRunnerResult(null, new IProcess[] { process });
 		} catch (IOException e) {
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), LauncherMessages.getString("jdkLauncher.error.startMV"), new LauncherException(e)); //$NON-NLS-2$ //$NON-NLS-1$
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.startMV"), e));
 		}
 		return null;
 		

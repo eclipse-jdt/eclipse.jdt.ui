@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.model.IDebugTarget;
 import org.eclipse.debug.core.model.IProcess;
@@ -38,29 +39,31 @@ import com.sun.jdi.connect.Connector.IntegerArgument;
 public class JDK12DebugLauncher extends JDK12Launcher {
 
 
+	public interface IRetryQuery {
+		boolean queryRetry();
+	}
+
+	private IRetryQuery fRetryQuery;
+
 	/**
 	 * Creates a new lauchner
 	 */
-	public JDK12DebugLauncher(IVMInstall vmInstance) {
+	public JDK12DebugLauncher(IVMInstall vmInstance, IRetryQuery query) {
 		super(vmInstance);
+		fRetryQuery= query;
 	}
 
 	/**
 	 * @see IVMRunner#run
 	 */
-	public VMRunnerResult run(VMRunnerConfiguration config) {
+	public VMRunnerResult run(VMRunnerConfiguration config) throws CoreException {
 		int port= SocketUtil.findUnusedLocalPort(null, 5000, 15000);
 		if (port == -1) {
-			String msg= LauncherMessages.getString("jdkLauncher.noPort"); //$NON-NLS-1$
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), msg, new LauncherException(msg)); //$NON-NLS-1$
-			return null;
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.noPort"), null)); //$NON-NLS-1$
 		}
 		String location= getJDKLocation(""); //$NON-NLS-1$
 		if ("".equals(location)) { //$NON-NLS-1$
-			String msg= LauncherMessages.getString("jdkLauncher.error.noJDKHome"); //$NON-NLS-1$
-			String title= LauncherMessages.getString("jdkLauncher.error.title"); //$NON-NLS-1$
-			showErrorDialog(title, msg, new LauncherException(msg));
-			return null;
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.noJDKHome"), null)); //$NON-NLS-1$
 		}
 		String program= location+File.separator+"bin"+File.separator+"java"; //$NON-NLS-2$ //$NON-NLS-1$
 		File javawexe= new File(program+"w.exe"); //$NON-NLS-1$
@@ -99,9 +102,7 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 
 		ListeningConnector connector= getConnector();
 		if (connector == null) {
-			String msg= LauncherMessages.getString("jdkLauncher.error.noConnector"); //$NON-NLS-1$
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), msg, new LauncherException(msg)); //$NON-NLS-1$
-			return null;
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.noConnector"), null)); //$NON-NLS-1$
 		}
 		Map map= connector.defaultArguments();
 		int timeout= fVMInstance.getDebuggerTimeout();
@@ -116,10 +117,10 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 					p= Runtime.getRuntime().exec(cmdLine);
 		
 				} catch (IOException e) {
-					if (p != null)
+					if (p != null) {
 						p.destroy();
-					showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), LauncherMessages.getString("jdkLauncher.error.startVM"), new LauncherException(e)); //$NON-NLS-1$ //$NON-NLS-2$
-					return null;
+					}
+					throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.title"), e)); //$NON-NLS-1$
 				}
 		
 				IProcess process= DebugPlugin.getDefault().newProcess(p, renderProcessLabel(cmdLine));
@@ -136,22 +137,30 @@ public class JDK12DebugLauncher extends JDK12Launcher {
 						IDebugTarget debugTarget= JDIDebugModel.newDebugTarget(vm, renderDebugTarget(config.getClassToLaunch(), port), process, true, false);
 						return new VMRunnerResult(debugTarget, new IProcess[] { process });
 					} catch (InterruptedIOException e) {
-						retry= askRetry(LauncherMessages.getString("jdkLauncher.error.title"), LauncherMessages.getString("jdkLauncher.error.timeout")); //$NON-NLS-1$ //$NON-NLS-2$
+						retry= fRetryQuery.queryRetry();
 					}
 				} while (retry);
 			} finally {
 				connector.stopListening(map);
 			}
 		} catch (IOException e) {
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), LauncherMessages.getString("jdkLauncher.error.connect"), new LauncherException(e)); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.connect"), e)); //$NON-NLS-1$
 		} catch (IllegalConnectorArgumentsException e) {
-			showErrorDialog(LauncherMessages.getString("jdkLauncher.error.title"), LauncherMessages.getString("jdkLauncher.error.connect"), new LauncherException(e)); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new CoreException(createStatus(LauncherMessages.getString("jdkLauncher.error.connect"), e)); //$NON-NLS-1$
 		}
 		if (p != null)
 			p.destroy();
 		return null;
 	}
 	
+	private void setTimeout(VirtualMachine vm) {		
+		if (vm instanceof org.eclipse.jdi.VirtualMachine) {
+			int timeout= fVMInstance.getDebuggerTimeout();
+			org.eclipse.jdi.VirtualMachine vm2= (org.eclipse.jdi.VirtualMachine)vm;
+			vm2.setRequestTimeout(timeout);
+		}
+	}
+		
 	protected void specifyArguments(Map map, int portNumber, int timeout) {
 		// XXX: Revisit - allows us to put a quote (") around the classpath
 		Connector.IntegerArgument port= (Connector.IntegerArgument) map.get("port"); //$NON-NLS-1$

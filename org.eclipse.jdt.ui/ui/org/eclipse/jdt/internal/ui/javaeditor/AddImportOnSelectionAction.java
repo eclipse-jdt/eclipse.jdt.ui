@@ -104,6 +104,11 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IResource[] { cu.getJavaProject().getProject() });
 					
 					TypeInfo[] types= findAllTypes(simpleName, searchScope, null);
+					if (types.length== 0) {
+						getShell().getDisplay().beep();
+						return;
+					}
+					
 					TypeInfo chosen= selectResult(types, containerName, getShell());
 					if (chosen == null) {
 						return;
@@ -134,8 +139,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getMessage()); //$NON-NLS-1$
 				}
 			}
-		}
-		getShell().getDisplay().beep();		
+		}		
 	}
 	
 	private int getNameStart(IDocument doc, int pos) throws BadLocationException {

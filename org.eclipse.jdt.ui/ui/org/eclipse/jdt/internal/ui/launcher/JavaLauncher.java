@@ -12,10 +12,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 
@@ -56,43 +59,21 @@ public abstract class JavaLauncher implements IVMRunner {
 		for (int i= 0; i < args.length; i++)
 			v.add(args[i]);
 	}
-	
-	protected void showErrorDialog(final String title, final String message, final IStatus error) {
-		Display d= SWTUtil.getStandardDisplay();
-		if (d != null) {
-			d.syncExec(new Runnable() {
-				public void run() {
-					JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), title, message, error);
-				}
-			});
-		} else {
-			JavaPlugin.logErrorStatus(message, error);
-		}
-	}
-	
-	protected boolean askRetry(final String title, final String message) {
-		final boolean[] result= new boolean[1];
-		SWTUtil.getStandardDisplay().syncExec(new Runnable() {
-			public void run() {
-				result[0]= (MessageDialog.openConfirm(JavaPlugin.getActiveWorkbenchShell(), title, message));
-			}
-		});
-		return result[0];
-	}
-	
-	
-	protected void setTimeout(VirtualMachine vm) {		
-		if (vm instanceof org.eclipse.jdi.VirtualMachine) {
-			int timeout= fVMInstance.getDebuggerTimeout();
-			org.eclipse.jdi.VirtualMachine vm2= (org.eclipse.jdi.VirtualMachine)vm;
-			vm2.setRequestTimeout(timeout);
-		}
-	}
+		
 
+	
 	protected String getJDKLocation(String dflt) {
 		File location= fVMInstance.getInstallLocation();
 		if (location == null)
 			return dflt;
 		return location.getAbsolutePath();
 	}
+	
+	protected static IStatus createStatus(String message, Throwable th) {
+		return new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message, th);
+	}
+		
+		
+	
+	
 }

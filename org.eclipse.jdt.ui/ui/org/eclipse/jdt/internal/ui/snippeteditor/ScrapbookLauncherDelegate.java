@@ -42,6 +42,7 @@ import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.launching.VMRunnerResult;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -162,7 +163,8 @@ public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate i
 				return true;
 			}
 		} catch (CoreException e) {
-			JavaLaunchUtils.errorDialog(JavaPlugin.getActiveWorkbenchShell(), SnippetMessages.getString("ScrapbookLauncher.error.title"), SnippetMessages.getString("ScrapbookLauncher.error.exception"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
+			JavaPlugin.log(e);
+			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), SnippetMessages.getString("ScrapbookLauncher.error.title"), SnippetMessages.getString("ScrapbookLauncher.error.exception"), e.getStatus()); //$NON-NLS-2$ //$NON-NLS-1$
 		}
 		return false;
 	}
