@@ -38,7 +38,7 @@
 
 
    <extension-point id="testRunListeners" name="%testRunListeners.name" schema="schema/testRunListeners.exsd"/>
-   <extension-point id="junitLaunchConfigs" name="JUnit Launch Configurations" schema="schema/junitLaunchConfigs.exsd"/>
+   <extension-point id="junitLaunchConfigs" name="%junitLaunchConfigs.name" schema="schema/junitLaunchConfigs.exsd"/>
 
    <extension
          point="org.eclipse.ui.views">
@@ -321,7 +321,7 @@
       </renameParticipant>
       <renameParticipant
             class="org.eclipse.jdt.internal.junit.refactoring.ProjectRenameParticipant"
-            name="JUnit Project Rename Participant"
+            name="%junitRenameParticipant"
             id="org.eclipse.jdt.junit.renameTypeParticipant">
          <enablement>
            <with variable="affectedNatures">

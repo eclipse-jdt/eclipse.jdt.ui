@@ -45,7 +45,7 @@
    <extension-point id="quickAssistProcessors" name="%quickAssistProcessorExtensionPoint" schema="schema/quickAssistProcessors.exsd"/>
    <extension-point id="classpathContainerPage" name="%classpathContainerPageExtensionPoint" schema="schema/classpathContainerPage.exsd"/>
    <extension-point id="foldingStructureProviders" name="%foldingStructureProvidersExtensionPoint" schema="schema/foldingStructureProviders.exsd"/>
-   <extension-point id="queryParticipants" name="Java Query Participants" schema="schema/queryParticipants.exsd"/>
+   <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
    
 
 <extension
