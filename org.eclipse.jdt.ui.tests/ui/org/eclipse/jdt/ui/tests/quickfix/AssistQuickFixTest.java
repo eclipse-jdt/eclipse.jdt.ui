@@ -96,12 +96,16 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 		
 		boolean doField= true, doLocal= true;
 		for (int i= 0; i < proposals.size(); i++) {
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) proposals.get(i);
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
 			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
 				assertTrue("same proposal kind", doField);
 				doField= false;
@@ -165,12 +169,16 @@ public class AssistQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(context,  proposals);
-		assertNumberOf("proposals", proposals.size(), 2);
+		assertNumberOf("proposals", proposals.size(), 3);
 		assertCorrectLabels(proposals);
 
 		boolean doField= true, doLocal= true;
 		for (int i= 0; i < proposals.size(); i++) {
-			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) proposals.get(i);
+			Object curr= proposals.get(i);
+			if (!(curr instanceof AssignToVariableAssistProposal)) {
+				continue;
+			}			
+			AssignToVariableAssistProposal proposal= (AssignToVariableAssistProposal) curr;
 			if (proposal.getVariableKind() == AssignToVariableAssistProposal.FIELD) {
 				assertTrue("same proposal kind", doField);
 				doField= false;
