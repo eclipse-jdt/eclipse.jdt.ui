@@ -205,7 +205,7 @@ public class JavadocTagsSubProcessor {
 	private static JavaDocTag findTag(JavaDocTag[] existingTags, String name, String arg) {
 		for (int i= 0; i < existingTags.length; i++) {
 			JavaDocTag curr= existingTags[i];
-			if (curr.getName().equals(name)) {
+			if (name.equals(curr.getName())) {
 				if (arg != null) {
 					String argument= getArgument(curr.getContent());
 					if (argument.equals(arg)) {
@@ -223,7 +223,7 @@ public class JavadocTagsSubProcessor {
 		for (int i= 0; i < existingTags.length; i++) {
 			JavaDocTag curr= existingTags[i];
 			String currName= curr.getName();
-			if (currName.equals(JavaDocTag.THROWS) || currName.equals(JavaDocTag.EXCEPTION)) {
+			if (JavaDocTag.THROWS.equals(currName) || JavaDocTag.EXCEPTION.equals(currName)) {
 				String argument= getArgument(curr.getContent());
 				if (argument.equals(arg) || (Signature.getSimpleName(argument)).equals(arg)) {
 					return curr;
