@@ -235,9 +235,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
 		
 		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
-		formatter.setFormattingStrategy(strategy, JavaPartitionScanner.JAVA_DOC);
-		formatter.setFormattingStrategy(strategy, JavaPartitionScanner.JAVA_MULTILINE_COMMENT);
-		
+		formatter.enablePartitionAwareFormatting(false);		
 		formatter.setPartitionManagingPositionCategories(fJavaTextTools.getPartitionManagingPositionCategories());
 		
 		return formatter;
