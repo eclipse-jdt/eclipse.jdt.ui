@@ -480,7 +480,7 @@ public class ScopeAnalyzer {
 			if (hasFlag(VARIABLES, fFlags) && node.getStartPosition() < fPosition) {
 				addResult(node.resolveBinding());					
 			}
-			return false;
+			return true;
 		}
 		
 		public boolean visit(VariableDeclarationStatement node) {
