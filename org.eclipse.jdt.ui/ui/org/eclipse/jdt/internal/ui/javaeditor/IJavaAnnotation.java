@@ -26,7 +26,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
  */
 public interface IJavaAnnotation {
 	
-	AnnotationType getAnnotationType();
+	/**
+	 * Returns the type of the given Java annotation.
+	 * 
+	 * @return the type of the given annotation or <code>null</code> if it has none.
+	 */
+	String getAnnotationType();
 	
 	boolean isTemporary();
 	

@@ -114,7 +114,12 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 		 * Annotation representating an <code>IProblem</code>.
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation {
-			
+
+			private static final String TASK_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.task"; //$NON-NLS-1$
+			private static final String ERROR_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.error"; //$NON-NLS-1$
+			private static final String WARNING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.warning"; //$NON-NLS-1$
+			private static final String INFO_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.info"; //$NON-NLS-1$
+
 			private static Image fgQuickFixImage;
 			private static Image fgQuickFixErrorImage;
 			private static boolean fgQuickFixImagesInitialized= false;
@@ -124,7 +129,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			private IProblem fProblem;
 			private Image fImage;
 			private boolean fQuickFixImagesInitialized= false;
-			private AnnotationType fType;
+			private String fType;
 			
 			
 			public ProblemAnnotation(IProblem problem, ICompilationUnit cu) {
@@ -134,11 +139,13 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				setLayer(MarkerAnnotation.PROBLEM_LAYER + 1);
 				
 				if (IProblem.Task == fProblem.getID())
-					fType= AnnotationType.TASK;
+					fType= TASK_ANNOTATION_TYPE;
 				else if (fProblem.isWarning())
-					fType= AnnotationType.WARNING;
+					fType= WARNING_ANNOTATION_TYPE;
+				else if (fProblem.isError())
+					fType= ERROR_ANNOTATION_TYPE;
 				else
-					fType= AnnotationType.ERROR;			
+					fType= INFO_ANNOTATION_TYPE;
 			}
 			
 			private void initializeImages() {
@@ -150,7 +157,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
 							fgQuickFixImagesInitialized= true;
 						}
-						if (fType == AnnotationType.ERROR)
+						if (fType == ERROR_ANNOTATION_TYPE)
 							fImage= fgQuickFixErrorImage;
 						else
 							fImage= fgQuickFixImage;
@@ -212,7 +219,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 * @see IJavaAnnotation#isProblem()
 			 */
 			public boolean isProblem() {
-				return  fType == AnnotationType.WARNING || fType == AnnotationType.ERROR;
+				return  fType == WARNING_ANNOTATION_TYPE || fType == ERROR_ANNOTATION_TYPE;
 			}
 			
 			/*
@@ -258,7 +265,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 				return null;
 			}
 			
-			public AnnotationType getAnnotationType() {
+			public String getAnnotationType() {
 				return fType;
 			}
 

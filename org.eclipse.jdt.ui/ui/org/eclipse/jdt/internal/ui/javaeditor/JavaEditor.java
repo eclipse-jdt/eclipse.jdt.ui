@@ -147,8 +147,6 @@ import org.eclipse.ui.views.contentoutline.ContentOutline;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
 
-import org.eclipse.search.ui.SearchUI;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -1137,44 +1135,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected final static String PRINT_MARGIN_COLOR= PreferenceConstants.EDITOR_PRINT_MARGIN_COLOR;
 	/** Preference key for print margin ruler column */
 	protected final static String PRINT_MARGIN_COLUMN= PreferenceConstants.EDITOR_PRINT_MARGIN_COLUMN;
-	/** Preference key for error indication */
-	protected final static String ERROR_INDICATION= PreferenceConstants.EDITOR_PROBLEM_INDICATION;
-	/** Preference key for error color */
-	protected final static String ERROR_INDICATION_COLOR= PreferenceConstants.EDITOR_PROBLEM_INDICATION_COLOR;
-	/** Preference key for warning indication */
-	protected final static String WARNING_INDICATION= PreferenceConstants.EDITOR_WARNING_INDICATION;
-	/** Preference key for warning color */
-	protected final static String WARNING_INDICATION_COLOR= PreferenceConstants.EDITOR_WARNING_INDICATION_COLOR;
-	/** Preference key for task indication */
-	protected final static String TASK_INDICATION= PreferenceConstants.EDITOR_TASK_INDICATION;
-	/** Preference key for task color */
-	protected final static String TASK_INDICATION_COLOR= PreferenceConstants.EDITOR_TASK_INDICATION_COLOR;
-	/** Preference key for bookmark indication */
-	protected final static String BOOKMARK_INDICATION= PreferenceConstants.EDITOR_BOOKMARK_INDICATION;
-	/** Preference key for bookmark color */
-	protected final static String BOOKMARK_INDICATION_COLOR= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_COLOR;
-	/** Preference key for search result indication */
-	protected final static String SEARCH_RESULT_INDICATION= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION;
-	/** Preference key for search result color */
-	protected final static String SEARCH_RESULT_INDICATION_COLOR= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_COLOR;
-	/** Preference key for unknown annotation indication */
-	protected final static String UNKNOWN_INDICATION= PreferenceConstants.EDITOR_UNKNOWN_INDICATION;
-	/** Preference key for unknown annotation color */
-	protected final static String UNKNOWN_INDICATION_COLOR= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_COLOR;
 	/** Preference key for shwoing the overview ruler */
 	protected final static String OVERVIEW_RULER= PreferenceConstants.EDITOR_OVERVIEW_RULER;
-	/** Preference key for error indication in overview ruler */
-	protected final static String ERROR_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_ERROR_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for warning indication in overview ruler */
-	protected final static String WARNING_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_WARNING_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for task indication in overview ruler */
-	protected final static String TASK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_TASK_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for bookmark indication in overview ruler */
-	protected final static String BOOKMARK_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_BOOKMARK_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for search result indication in overview ruler */
-	protected final static String SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER;
-	/** Preference key for unknown annotation indication in overview ruler */
-	protected final static String UNKNOWN_INDICATION_IN_OVERVIEW_RULER= PreferenceConstants.EDITOR_UNKNOWN_INDICATION_IN_OVERVIEW_RULER;
 	/** Preference key for compiler task tags */
 	private final static String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;
 	/** Preference key for browser like links */
@@ -1284,8 +1246,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		ISharedTextColors sharedColors= JavaPlugin.getDefault().getJavaTextTools().getColorManager();
 		
 		fOverviewRuler= new OverviewRuler(fAnnotationAccess, VERTICAL_RULER_WIDTH, sharedColors);		
-		fOverviewRuler.addHeaderAnnotationType(AnnotationType.WARNING);
-		fOverviewRuler.addHeaderAnnotationType(AnnotationType.ERROR);
+		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
+		while (e.hasNext()) {
+			AnnotationPreference preference= (AnnotationPreference) e.next();
+			if (preference.contributesToHeader())
+				fOverviewRuler.addHeaderAnnotationType(preference.getAnnotationType());
+		}
 		
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, fOverviewRuler, isOverviewRulerVisible(), styles);
 		
@@ -2515,16 +2481,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 
 	protected void configureSourceViewerDecorationSupport() {
-	
-		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
 
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.UNKNOWN, UNKNOWN_INDICATION_COLOR, UNKNOWN_INDICATION, UNKNOWN_INDICATION_IN_OVERVIEW_RULER, 0);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.BOOKMARK, BOOKMARK_INDICATION_COLOR, BOOKMARK_INDICATION, BOOKMARK_INDICATION_IN_OVERVIEW_RULER, 1);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.TASK, TASK_INDICATION_COLOR, TASK_INDICATION, TASK_INDICATION_IN_OVERVIEW_RULER, 2);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.SEARCH, SEARCH_RESULT_INDICATION_COLOR, SEARCH_RESULT_INDICATION, SEARCH_RESULT_INDICATION_IN_OVERVIEW_RULER, 3);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.WARNING, WARNING_INDICATION_COLOR, WARNING_INDICATION, WARNING_INDICATION_IN_OVERVIEW_RULER, 4);
-		fSourceViewerDecorationSupport.setAnnotationPainterPreferenceKeys(AnnotationType.ERROR, ERROR_INDICATION_COLOR, ERROR_INDICATION, ERROR_INDICATION_IN_OVERVIEW_RULER, 5);
-				
+
+		Iterator e= fAnnotationPreferences.getAnnotationPreferences().iterator();
+		while (e.hasNext())
+			fSourceViewerDecorationSupport.setAnnotationPreference((AnnotationPreference) e.next());	
+
+		fSourceViewerDecorationSupport.setCharacterPairMatcher(fBracketMatcher);
 		
 		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
 		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
@@ -2709,33 +2672,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		IAnnotationModel model= getDocumentProvider().getAnnotationModel(getEditorInput());
 		Iterator e= new JavaAnnotationIterator(model, true);
 		while (e.hasNext()) {
-			
 			IJavaAnnotation a= (IJavaAnnotation) e.next();
-			
-			// Map Java AnnotationType to workbench texteditor's annotation type
-			// XXX: This can be removed once Java plug-in uses workbench texteditor's type
-			String type= null;
-			int severity= IMarker.SEVERITY_INFO;				
-			if (a.getAnnotationType() == AnnotationType.BOOKMARK) {
-				type= IMarker.BOOKMARK;
-			} else if (a.getAnnotationType() == AnnotationType.SEARCH) {
-				type= SearchUI.SEARCH_MARKER;
-			} else if (a.getAnnotationType() == AnnotationType.TASK) {
-				type= IMarker.TASK;
-			} else if (a.getAnnotationType() == AnnotationType.WARNING) {
-				type= IMarker.PROBLEM;
-				severity= IMarker.SEVERITY_WARNING;
-			} else if (a.getAnnotationType() == AnnotationType.ERROR) {
-				type= IMarker.PROBLEM;
-				severity= IMarker.SEVERITY_ERROR;
-			}				
-
 			Preferences workbenchTextEditorPrefStore= Platform.getPlugin("org.eclipse.ui.workbench.texteditor").getPluginPreferences(); //$NON-NLS-1$
 			Iterator iter= fAnnotationPreferences.getAnnotationPreferences().iterator();
 			boolean isNavigationTarget= false;
 			while (iter.hasNext()) {
 				AnnotationPreference annotationPref= (AnnotationPreference)iter.next();
-				if (annotationPref.getMarkerType().equals(type) && annotationPref.getSeverity() == severity) {
+				if (annotationPref.getAnnotationType().equals(a.getAnnotationType())) {
 					String key;
 					if (forward)
 						key= annotationPref.getIsGoToNextNavigationTargetKey();
