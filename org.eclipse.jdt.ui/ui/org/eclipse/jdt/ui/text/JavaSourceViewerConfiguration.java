@@ -151,12 +151,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	private AbstractJavaScanner fJavaDocScanner;
 	/**
-	 * The new preference store
-	 * <p>Note that this is work in progress and still subject to change.</p>
+	 * The combined preference store
 	 *
 	 * @since 3.0
 	 */
-	private IPreferenceStore fNewPreferenceStore;
+	private IPreferenceStore fCombinedPreferenceStore;
 	/**
 	 * The color manager
 	 *
@@ -169,24 +168,21 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * using the given preference store, the color manager and the specified document partitioning.
 	 * <p>
 	 * Creates a Java source viewer configuration in the new setup without text tools. Clients are
-	 * allowed to call {@link JavaSourceViewerConfiguration#setNewPreferenceStore(IPreferenceStore)} and
+	 * allowed to call {@link JavaSourceViewerConfiguration#setCombinedPreferenceStore(IPreferenceStore)} and
 	 * {@link JavaSourceViewerConfiguration#handlePropertyChangeEvent(PropertyChangeEvent)}
 	 * and disallowed to call {@link JavaSourceViewerConfiguration#getPreferenceStore()} on the resulting
-	 * Java source viewer configuration.</p>
-	 * <p>
-	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * Java source viewer configuration.
 	 * </p>
 	 *
 	 * @param colorManager the color manager
-	 * @param newPreferenceStore the new preference store, can be read-only
+	 * @param combinedPreferenceStore the combined preference store, can be read-only
 	 * @param editor the editor in which the configured viewer(s) will reside
 	 * @param partitioning the document partitioning for this configuration
-	 * 
 	 * @since 3.0
 	 */
-	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore newPreferenceStore, ITextEditor editor, String partitioning) {
+	public JavaSourceViewerConfiguration(IColorManager colorManager, IPreferenceStore combinedPreferenceStore, ITextEditor editor, String partitioning) {
 		fColorManager= colorManager;
-		setNewPreferenceStore(newPreferenceStore);
+		setCombinedPreferenceStore(combinedPreferenceStore);
 		fTextEditor= editor;
 		fDocumentPartitioning= partitioning;
 	}
@@ -204,7 +200,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public JavaSourceViewerConfiguration(JavaTextTools tools, ITextEditor editor, String partitioning) {
 		fJavaTextTools= tools;
 		fColorManager= tools.getColorManager();
-		fNewPreferenceStore= createCombinedPreferenceStore();
+		fCombinedPreferenceStore= createCombinedPreferenceStore();
 		fCodeScanner= (AbstractJavaScanner) fJavaTextTools.getCodeScanner();
 		fMultilineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getMultilineCommentScanner();
 		fSinglelineCommentScanner= (AbstractJavaScanner) fJavaTextTools.getSinglelineCommentScanner();
@@ -298,13 +294,13 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the new setup without
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
-	 * <p>
-	 * FIXME: deprecate when new API is stabilized.
-	 * </p> 
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
+	 * </p>
 	 * 
 	 * @return the preference store used to initialize this configuration
 	 * @since 2.0
+	 * @deprecated As of 3.0, use {@link JavaSourceViewerConfiguration#getCombinedPreferenceStore()}.
+	 *                       Note that the combined preference store is read-only.
 	 */
 	public IPreferenceStore getPreferenceStore() {
 		Assert.isTrue(!isNewSetup());
@@ -312,39 +308,33 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 	
 	/**
-	 * Returns the new preference store used by this configuration to initialize
-	 * the individual bits and pieces.
-	 * <p>
-	 * XXX: Note that this is work in progress and API is still subject to change.
-	 * </p>
+	 * Returns the combined preference store used by this configuration to initialize
+	 * the individual bits and pieces. The combined preference store is read-only.
 	 * 
-	 * @return the new preference store used to initialize this configuration
-	 * 
+	 * @return the combined preference store used to initialize this configuration
 	 * @since 3.0
 	 */
-	public IPreferenceStore getNewPreferenceStore() {
-		return fNewPreferenceStore;
+	public IPreferenceStore getCombinedPreferenceStore() {
+		return fCombinedPreferenceStore;
 	}
 	
 	/**
-	 * Sets the preference store used by this configuration to initialize
+	 * Sets the combined preference store used by this configuration to initialize
 	 * the individual bits and pieces to the given preference store.
 	 * <p>
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
-	 * <p>
-	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * </p>
 	 * 
-	 * @param preferenceStore the preference store to initialize this configuration
+	 * @param preferenceStore the combined preference store to initialize this configuration, can be read-only
 	 * 
 	 * @since 3.0
 	 */
-	public void setNewPreferenceStore(IPreferenceStore preferenceStore) {
+	public void setCombinedPreferenceStore(IPreferenceStore preferenceStore) {
 		Assert.isTrue(isNewSetup());
 		
-		fNewPreferenceStore= preferenceStore;
+		fCombinedPreferenceStore= preferenceStore;
 		initializeScanners();
 	}
 	
@@ -358,11 +348,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	}
 
 	/**
-	 * Creates and returns a new preference store which combines the preference
+	 * Creates and returns a preference store which combines the preference
 	 * stores from the text tools.
 	 *
 	 * @param tools Text tools
-	 * @return the combined preference store
+	 * @return the combined preference store, which is read-only
 	 * 
 	 * @since 3.0
 	 */
@@ -381,11 +371,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 */
 	private void initializeScanners() {
 		Assert.isTrue(isNewSetup());
-		fCodeScanner= new JavaCodeScanner(getColorManager(), getNewPreferenceStore());
-		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
-		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
-		fStringScanner= new SingleTokenJavaScanner(getColorManager(), getNewPreferenceStore(), IJavaColorConstants.JAVA_STRING);
-		fJavaDocScanner= new JavaDocScanner(getColorManager(), getNewPreferenceStore());
+		fCodeScanner= new JavaCodeScanner(getColorManager(), getCombinedPreferenceStore());
+		fMultilineCommentScanner= new JavaCommentScanner(getColorManager(), getCombinedPreferenceStore(), IJavaColorConstants.JAVA_MULTI_LINE_COMMENT);
+		fSinglelineCommentScanner= new JavaCommentScanner(getColorManager(), getCombinedPreferenceStore(), IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT);
+		fStringScanner= new SingleTokenJavaScanner(getColorManager(), getCombinedPreferenceStore(), IJavaColorConstants.JAVA_STRING);
+		fJavaDocScanner= new JavaDocScanner(getColorManager(), getCombinedPreferenceStore());
 	}
 
 	/*
@@ -452,7 +442,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 
 			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
 			
-			ContentAssistPreference.configure(assistant, getNewPreferenceStore());
+			ContentAssistPreference.configure(assistant, getCombinedPreferenceStore());
 			
 			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
@@ -526,7 +516,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		// prefix[0] is either '\t' or ' ' x tabWidth, depending on useSpaces
 				
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		boolean useSpaces= getNewPreferenceStore().getBoolean(SPACES_FOR_TABS);
+		boolean useSpaces= getCombinedPreferenceStore().getBoolean(SPACES_FOR_TABS);
 		
 		for (int i= 0; i <= tabWidth; i++) {
 		    StringBuffer prefix= new StringBuffer();
@@ -557,7 +547,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTabWidth(ISourceViewer)
 	 */
 	public int getTabWidth(ISourceViewer sourceViewer) {
-		IPreferenceStore store= getNewPreferenceStore();
+		IPreferenceStore store= getCombinedPreferenceStore();
 		
 		if (store.contains(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH))
 			return store.getInt(ExtendedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH);
@@ -803,12 +793,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	/**
 	 * Determines whether the preference change encoded by the given event
 	 * changes the behavior of one of its contained components.
-	 * <p>
-	 * XXX: Note that this is work in progress and API is still subject to change.
-	 * </p>
 	 * 
 	 * @param event the event to be investigated
 	 * @return <code>true</code> if event causes a behavioral change
+	 * 
 	 * @since 3.0
 	 */
 	public boolean affectsTextPresentation(PropertyChangeEvent event) {
@@ -825,9 +813,7 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * <p>
 	 * Clients are not allowed to call this method if the old setup with
 	 * text tools is in use.
-	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)</p>
-	 * <p>
-	 * XXX: Note that this is work in progress and API is still subject to change.
+	 * @see JavaSourceViewerConfiguration#JavaSourceViewerConfiguration(IColorManager, IPreferenceStore, ITextEditor, String)
 	 * </p>
 	 * 
 	 * @param event the event to which to adapt
