@@ -25,19 +25,17 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	 */
 	public void createControl(Composite parent) {
 		Composite superComposite= new Composite(parent, SWT.NONE);
-		setControl(superComposite);				superComposite.setLayout(new GridLayout());		Composite composite= new Composite(superComposite, SWT.NONE);		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));			
+		setControl(superComposite);		initializeDialogUnits(superComposite);				superComposite.setLayout(new GridLayout());		Composite composite= new Composite(superComposite, SWT.NONE);		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));			
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;		layout.verticalSpacing= 8;
 		composite.setLayout(layout);
-		RowLayouter layouter= new RowLayouter(2);
-		
+		RowLayouter layouter= new RowLayouter(2);		
 		Label label= new Label(composite, SWT.NONE);
 		label.setText(getLabelText());
 		
 		Text text= createTextInputField(composite);
-		text.selectAll();
-		text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-				
+		text.selectAll();		GridData gd= new GridData(GridData.FILL_HORIZONTAL);		gd.widthHint= convertWidthInCharsToPixels(25);
+		text.setLayoutData(gd);				
 		layouter.perform(label, text, 1);				addOptionalUpdateReferencesCheckbox(composite, layouter);		addOptionalUpdateCommentsAndStringCheckboxes(composite, layouter);				WorkbenchHelp.setHelp(getControl(), fHelpContextID);	}		private void addOptionalUpdateCommentsAndStringCheckboxes(Composite result, RowLayouter layouter) {		if (!(getRefactoring() instanceof ITextUpdatingRefactoring))			return; 				ITextUpdatingRefactoring refactoring= (ITextUpdatingRefactoring)getRefactoring();		if (!refactoring.canEnableTextUpdating())			return;				addUpdateJavaDocCheckbox(result, layouter, refactoring);		addUpdateCommentsCheckbox(result, layouter, refactoring);		addUpdateStringsCheckbox(result, layouter, refactoring);	}
 
 	private void addOptionalUpdateReferencesCheckbox(Composite result, RowLayouter layouter) {		if (! (getRefactoring() instanceof IReferenceUpdatingRefactoring))			return;		final IReferenceUpdatingRefactoring ref= (IReferenceUpdatingRefactoring)getRefactoring();			if (! ref.canEnableUpdateReferences())				return;
