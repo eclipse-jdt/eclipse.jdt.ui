@@ -626,14 +626,15 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}	
 	
 
-	private void rewriteModifiers(int startPos, int oldModifiers, int newModifiers, String description) {
+	private void rewriteModifiers(int offset, int oldModifiers, int newModifiers, String description) {
 		if (oldModifiers == newModifiers) {
 			return;
 		}
 		
 		try {
-			IScanner scanner= getScanner(startPos);
+			IScanner scanner= getScanner(offset);
 			int tok= scanner.getNextToken();
+			int startPos= scanner.getCurrentTokenStartPosition();
 			int endPos= startPos;
 			loop: while (true) {
 				boolean keep= true;
@@ -659,8 +660,17 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 					doTextRemove(currPos, endPos - currPos, description);
 				}
 			} 
-			int addedModifiers= (newModifiers ^ oldModifiers) & newModifiers;
+			int addedModifiers= newModifiers & ~oldModifiers;
 			if (addedModifiers != 0) {
+				if (startPos != endPos) {
+					int visibilityModifiers= addedModifiers & (Modifier.PUBLIC | Modifier.PRIVATE | Modifier.PROTECTED);
+					if (visibilityModifiers != 0) {
+						StringBuffer buf= new StringBuffer();
+						ASTFlattener.printModifiers(visibilityModifiers, buf);
+						doTextInsert(startPos, buf.toString(), description);
+						addedModifiers &= ~visibilityModifiers;
+					}
+				}
 				StringBuffer buf= new StringBuffer();
 				ASTFlattener.printModifiers(addedModifiers, buf);
 				doTextInsert(endPos, buf.toString(), description);
