@@ -24,6 +24,7 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
@@ -227,7 +228,7 @@ public class JavaContext extends CompilationUnitContext {
 				
 		if (localArrays.length > 0) {
 			String typeName= localArrays[localArrays.length - 1].typeName;
-			return typeName.substring(0, typeName.indexOf('['));
+			return typeName.substring(0, typeName.lastIndexOf('['));
 		}
 		
 		return null;
@@ -243,11 +244,16 @@ public class JavaContext extends CompilationUnitContext {
 		
 		if (localArrays.length > 0) {
 			String typeName= localArrays[localArrays.length - 1].typeName;
-			String baseTypeName= typeName.substring(0, typeName.indexOf('['));
-			String variableName= completion.typeToVariable(baseTypeName);
-			
-			if (!completion.existsLocalName(variableName))
-				return variableName;
+			String baseTypeName= typeName.substring(0, typeName.lastIndexOf('['));
+
+			NameProposer proposer= new NameProposer();
+			String[] proposals= proposer.proposeLocalVariableName(baseTypeName);
+
+			for (int i= 0; i < proposals.length; i++) {
+				String variableName= proposals[i];
+				if (!completion.existsLocalName(variableName))
+					return variableName;				
+			}
 		}
 
 		return null;

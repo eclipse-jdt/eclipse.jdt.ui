@@ -15,8 +15,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 /**
  * A completion requestor to collect informations on local variables.
  * This class is used for guessing variable names like arrays, collections, etc.
@@ -208,18 +206,6 @@ class CompilationUnitCompletion extends CompletionRequestorAdapter {
 				return true;			
 		
 		return false;
-	}
-
-	static String typeToVariable(String string) {
-		Assert.isTrue(string.length() > 0);		
-		char first= string.charAt(0);
-		
-		// base type
-		if (Character.isLowerCase(first))
-			return "value"; //$NON-NLS-1$
-
-		// class or interface
-		return Character.toLowerCase(first) + string.substring(1);
 	}
 
 }

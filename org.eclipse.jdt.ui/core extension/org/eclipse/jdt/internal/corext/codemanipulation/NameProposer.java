@@ -4,6 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
@@ -82,6 +85,35 @@ public class NameProposer {
 			}
 		}
 		return name;
+	}
+	
+	public String[] proposeLocalVariableName(String variableType) {
+		String name= Signature.getSimpleName(variableType);
+		int arrIndex= name.indexOf('[');
+		if (arrIndex != -1)
+			name= name.substring(0, arrIndex);
+
+		List names= new ArrayList();
+
+		for (int i= name.length() - 1; i >= 0; i--) {
+			char character= name.charAt(i);
+			if (Character.isLowerCase(character))
+				continue;
+				
+			char lowerCaseCharacter= Character.toLowerCase(character);
+			StringBuffer buffer= new StringBuffer();
+			buffer.append(lowerCaseCharacter);
+			buffer.append(name.substring(i + 1));
+			if (arrIndex != -1)
+				buffer.append('s');
+
+			names.add(buffer.toString());				
+		}
+		
+		if (names.size() == 0)
+			names.add(String.valueOf(Character.toLowerCase(name.charAt(0))));
+		
+		return (String[]) names.toArray(new String[names.size()]);
 	}
 
 	public String proposeParameterName(String paramType) {
