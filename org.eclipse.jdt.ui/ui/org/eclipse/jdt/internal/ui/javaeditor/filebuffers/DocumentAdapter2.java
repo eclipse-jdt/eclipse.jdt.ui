@@ -34,6 +34,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ui.IFileEditorInput;
 
@@ -198,36 +199,8 @@ public class DocumentAdapter2 implements IBuffer, IDocumentListener {
 	 * valid line delimiters, this set must be reduced to size 1.
 	 */
 	protected String getLineDelimiter() {
-		
-		if (fLineDelimiter == null) {
-			
-			try {
-				fLineDelimiter= fDocument.getLineDelimiter(0);
-			} catch (BadLocationException x) {
-			}
-			
-			if (fLineDelimiter == null) {
-				/*
-				 * Follow up fix for: 1GF5UU0: ITPJUI:WIN2000 - "Organize Imports" in java editor inserts lines in wrong format
-				 * The line delimiter must always be a legal document line delimiter.
-				 */
-				String sysLineDelimiter= System.getProperty("line.separator"); //$NON-NLS-1$
-				String[] delimiters= fDocument.getLegalLineDelimiters();
-				Assert.isTrue(delimiters.length > 0);
-				for (int i= 0; i < delimiters.length; i++) {
-					if (delimiters[i].equals(sysLineDelimiter)) {
-						fLineDelimiter= sysLineDelimiter;
-						break;
-					}
-				}
-				
-				if (fLineDelimiter == null) {
-					// system line delimiter is not a legal document line delimiter
-					fLineDelimiter= delimiters[0];
-				}
-			}
-		}
-		
+		if (fLineDelimiter == null)
+			fLineDelimiter= TextUtilities.getDefaultLineDelimiter(fDocument);
 		return fLineDelimiter;
 	}	
 	

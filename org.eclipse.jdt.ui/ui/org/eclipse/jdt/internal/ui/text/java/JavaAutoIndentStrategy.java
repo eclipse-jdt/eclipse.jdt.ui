@@ -1081,15 +1081,10 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return buffer.toString();
 	}
 
-	private boolean equalsDelimiter(IDocument d, String txt) {
-
-		String[] delimiters= d.getLegalLineDelimiters();
-
-		for (int i= 0; i < delimiters.length; i++) {
-			if (txt.equals(delimiters[i]))
-				return true;
-		}
-
+	private boolean isLineDelimiter(IDocument document, String text) {
+		String[] delimiters= document.getLegalLineDelimiters();
+		if (delimiters != null)
+			return TextUtilities.equals(delimiters, text) > -1;
 		return false;
 	}
 
@@ -1107,7 +1102,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		if (!isSmartMode())
 			return;
 		
-		if (c.length == 0 && c.text != null && equalsDelimiter(d, c.text))
+		if (c.length == 0 && c.text != null && isLineDelimiter(d, c.text))
 			smartIndentAfterNewLine(d, c);
 		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);

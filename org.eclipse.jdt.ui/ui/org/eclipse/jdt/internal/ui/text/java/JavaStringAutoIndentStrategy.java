@@ -46,7 +46,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		fPartitioning= partitioning;
 	}
 	
-	private boolean isLineDelimiters(IDocument document, String text) throws BadLocationException {
+	private boolean isLineDelimiter(IDocument document, String text) {
 		String[] delimiters= document.getLegalLineDelimiters();
 		if (delimiters != null)
 			return TextUtilities.equals(delimiters, text) > -1;
@@ -142,7 +142,7 @@ public class JavaStringAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 				
-			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiters(document, command.text) && isSmartMode())
+			if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_WRAP_STRINGS) && isLineDelimiter(document, command.text) && isSmartMode())
 				javaStringIndentAfterNewLine(document, command);
 				
 		} catch (BadLocationException e) {

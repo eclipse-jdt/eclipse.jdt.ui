@@ -32,7 +32,6 @@ import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.formatter.ContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatter;
-import org.eclipse.jface.text.formatter.IFormattingStrategy;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
@@ -58,6 +57,7 @@ import org.eclipse.jdt.internal.ui.text.JavaElementProvider;
 import org.eclipse.jdt.internal.ui.text.JavaOutlineInformationControl;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
@@ -451,14 +451,18 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getContentFormatter(ISourceViewer)
 	 */
 	public IContentFormatter getContentFormatter(ISourceViewer sourceViewer) {
-		
 		ContentFormatter formatter= new ContentFormatter();
 		formatter.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		IFormattingStrategy strategy= new JavaFormattingStrategy(sourceViewer);
-		
-		formatter.setFormattingStrategy(strategy, IDocument.DEFAULT_CONTENT_TYPE);
-		formatter.enablePartitionAwareFormatting(false);		
-		
+		if (getPreferenceStore().getBoolean("work_in_progress_enable_comment_formatting")) {  //$NON-NLS-1$
+			formatter.enablePartitionAwareFormatting(true);
+			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_DOC);
+			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			formatter.setFormattingStrategy(new CommentFormattingStrategy(sourceViewer), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+		} else {
+			formatter.enablePartitionAwareFormatting(false);
+			formatter.setFormattingStrategy(new JavaFormattingStrategy(sourceViewer), IDocument.DEFAULT_CONTENT_TYPE);
+		}
 		return formatter;
 	}
 	
