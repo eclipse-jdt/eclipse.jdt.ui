@@ -20,11 +20,10 @@ import junit.framework.TestSuite;
 public class PerformanceTestSuite extends TestSuite {
 
 	public static Test suite() {
-		return new PerformanceTestSuite();
+		return new OpenEditorTestSetup(new PerformanceTestSuite());
 	}
 	
 	public PerformanceTestSuite() {
-		addTestSuite(OpenEditorTestSetup.class);
 		addTestSuite(RevertTextEditorTest.class);
 		addTestSuite(RevertJavaEditorTest.class);
 		addTestSuite(ScrollJavaEditorTest.class);

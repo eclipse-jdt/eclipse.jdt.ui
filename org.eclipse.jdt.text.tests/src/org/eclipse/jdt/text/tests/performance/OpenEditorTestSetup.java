@@ -16,7 +16,8 @@ import java.io.IOException;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-import junit.framework.TestCase;
+import junit.extensions.TestSetup;
+import junit.framework.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
@@ -35,7 +36,11 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
-public class OpenEditorTestSetup extends TestCase {
+public class OpenEditorTestSetup extends TestSetup {
+
+	public OpenEditorTestSetup(Test test) {
+		super(test);
+	}
 
 	public static final String PROJECT= "org.eclipse.swt";
 	
@@ -43,7 +48,10 @@ public class OpenEditorTestSetup extends TestCase {
 
 	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
 	
-	public void testSetup() throws Exception {
+	/*
+	 * @see junit.extensions.TestSetup#setUp()
+	 */
+	protected void setUp() throws Exception {
 		IWorkbench workbench= PlatformUI.getWorkbench();
 		IWorkbenchPage activePage= workbench.getActiveWorkbenchWindow().getActivePage();
 		
@@ -65,6 +73,13 @@ public class OpenEditorTestSetup extends TestCase {
 		
 //		workbench.close(); // ensures the workbench state gets saved during the Automated Test Suite (not needed when run from Plug-in Test launch configuration)
 //      don't close here, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=71362
+	}
+	
+	/*
+	 * @see junit.extensions.TestSetup#tearDown()
+	 */
+	protected void tearDown() throws Exception {
+		// do nothing, the set up workspace will be used by the open editor tests
 	}
 	
 	private void setUpTestCases() throws Exception {
