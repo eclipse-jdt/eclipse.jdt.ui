@@ -12,9 +12,6 @@ import java.io.IOException;import org.eclipse.core.runtime.CoreException;imp
  */
 public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate {
 
-	private static final int SIZING_WIZARD_WIDTH= 470;
-	private static final int SIZING_WIZARD_HEIGHT= 550;
-
 	/*
 	 * @see IActionDelegate
 	 */

@@ -83,9 +83,6 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 	}
 	private UntypedListener fUntypedListener= new UntypedListener();
 
-	// Constants
-	protected static final int SIZING_TEXT_FIELD_WIDTH= 250;
-
 	// Model
 	private JarPackage fJarPackage;
 	
@@ -238,8 +235,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		fNewManifestFileText.addListener(SWT.Modify, fUntypedListener);
 		
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fNewManifestFileText.setLayoutData(data);
 
 		// browse button
@@ -270,7 +266,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		fManifestFileText= new Text(manifestFileGroup, SWT.SINGLE | SWT.BORDER);
 		fManifestFileText.addListener(SWT.Modify, fUntypedListener);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fManifestFileText.setLayoutData(data);
 
 		// browse button
@@ -362,7 +358,7 @@ public class JarManifestWizardPage extends WizardPage implements IJarPackageWiza
 		fMainClassText= new Text(mainClassGroup, SWT.SINGLE | SWT.BORDER | SWT.READ_ONLY);
 		fMainClassText.addListener(SWT.Modify, fUntypedListener);
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fMainClassText.setLayoutData(data);
 
 		// browse button

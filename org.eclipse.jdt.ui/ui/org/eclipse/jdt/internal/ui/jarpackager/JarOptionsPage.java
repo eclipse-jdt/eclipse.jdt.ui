@@ -24,9 +24,6 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		}
 	}
 
-	// Constants
-	protected static final int SIZING_TEXT_FIELD_WIDTH= 250;
-
 	private JarPackage fJarPackage;
 
 	// widgets
@@ -273,7 +270,7 @@ public class JarOptionsPage extends WizardPage implements IJarPackageWizardPage 
 		fDescriptionFileText= new Text(fDescriptionFileGroup, SWT.SINGLE | SWT.BORDER);
 		fDescriptionFileText.addListener(SWT.Modify, new UntypedListener());
 		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.GRAB_HORIZONTAL);
-		data.widthHint= SIZING_TEXT_FIELD_WIDTH;
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fDescriptionFileText.setLayoutData(data);
 
 		// destination browse button
