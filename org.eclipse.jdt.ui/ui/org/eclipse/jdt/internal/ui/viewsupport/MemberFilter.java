@@ -70,7 +70,8 @@ public class MemberFilter extends ViewerFilter {
 				if (hasFilter(FILTER_FIELDS) && memberType == IJavaElement.FIELD) {
 					return false;
 				}
-				if (hasFilter(FILTER_LOCALTYPES) && memberType == IJavaElement.TYPE && !(member.getParent() instanceof IType)) {
+
+				if (hasFilter(FILTER_LOCALTYPES) && memberType == IJavaElement.TYPE && isLocalType((IType) member)) {
 					return false;
 				}
 				
@@ -89,6 +90,11 @@ public class MemberFilter extends ViewerFilter {
 			// ignore
 		}
 		return true;
+	}
+	
+	private boolean isLocalType(IType type) {
+		IJavaElement parent= type.getParent();
+		return parent instanceof IMember && !(parent instanceof IType);
 	}
 	
 	private boolean isMemberInInterface(IMember member) throws JavaModelException {
