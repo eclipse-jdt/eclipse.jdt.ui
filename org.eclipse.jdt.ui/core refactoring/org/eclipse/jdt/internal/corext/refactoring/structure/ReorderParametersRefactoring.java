@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 
-public class ReorderParametersRefactoring extends Refactoring {
+class ReorderParametersRefactoring extends Refactoring {
 	
 	private IMethod fMethod;
 	private IMethod[] fRippleMethods;
@@ -90,6 +90,10 @@ public class ReorderParametersRefactoring extends Refactoring {
 		return getIndexOf(name, fNewParameterNames);
 	}
 	
+	public boolean isInputSameAsInitial(){
+		return isIdentityPermutation(fPermutation);
+	}
+	
 	/*
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
@@ -99,15 +103,8 @@ public class ReorderParametersRefactoring extends Refactoring {
 
 			RefactoringStatus result= new RefactoringStatus();
 			
-			if (isIdentityPermutation(fPermutation)){
-				result.addFatalError("The order specified is the same as the current one.");
-				return result;
-			}
-			
 			fRippleMethods= RippleMethodFinder.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1));
-			
 			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 1));			
-
 			fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
 			if (result.hasFatalError())
 				return result;
@@ -288,28 +285,33 @@ public class ReorderParametersRefactoring extends Refactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+		TextChangeManager manager= new TextChangeManager();
+		createChange(pm, manager);
+		return new CompositeChange("Reorder parameters", manager.getAllChanges());
+	}
+	
+	public void createChange(IProgressMonitor pm, TextChangeManager manager) throws JavaModelException {
 		try{
-			TextChangeManager manager= new TextChangeManager();
-			pm.beginTask("preparing preview", fOccurrences.length);
+			pm.beginTask("Preparing preview", fOccurrences.length);
 			for (int i= 0; i < fOccurrences.length ; i++){
 				SearchResultGroup group= fOccurrences[i]; 
 				List regionArrays= getSourceRangeArrays(group);
 				for (Iterator iter= regionArrays.iterator(); iter.hasNext();) {
 					ISourceRange[] sourceRanges= (ISourceRange[]) iter.next();
 					Assert.isTrue(sourceRanges.length == fPermutation.length);
-					ICompilationUnit cu= getCompilatonUnit(group);
+					ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getCompilatonUnit(group));
 					if (cu == null)
 						continue;
 					MultiTextEdit edit= new PermuteSourceRangesTextEdit(sourceRanges, convertPermutation(fPermutation));	
-					manager.get(cu).addTextEdit("reorder parameters", edit);			
+					manager.get(cu).addTextEdit("Reorder parameters", edit);			
 				}
 				pm.worked(1);
 			}
-			pm.done();
-			return new CompositeChange("reorder parameters", manager.getAllChanges());
 		} catch (CoreException e){
 			throw new JavaModelException(e);
-		}	
+		}	finally{
+			pm.done();
+		}		
 	}
 	
 	private static ICompilationUnit getCompilatonUnit(SearchResultGroup group){
