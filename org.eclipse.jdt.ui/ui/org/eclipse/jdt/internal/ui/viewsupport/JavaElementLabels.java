@@ -3,6 +3,8 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -209,6 +211,13 @@ public class JavaElementLabels {
 	 * e.g. <code>o*.e*.search</code>
 	 */	
 	public final static int P_COMPRESSED= 1 << 29;
+	
+	/**
+	 * Post qualify referenced package fragement roots. For example
+	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
+	 * from another project.
+	 */
+	public final static int REFERENCED_ROOT_POST_QUALIFIED= 1 << 30; 
 	
 	/**
 	 * Qualify all elements
@@ -591,27 +600,48 @@ public class JavaElementLabels {
 	 * Appends the label for a package fragment root to a StringBuffer. Considers the ROOT_* flags.
 	 */	
 	public static void getPackageFragmentRootLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
-		boolean varNamePrepended= false;
-		boolean isArchive= root.isArchive();
-		if (isArchive && getFlag(flags, ROOT_VARIABLE)) {
-			try {
-				IClasspathEntry rawEntry= root.getRawClasspathEntry();
-				if (rawEntry != null) {
-					if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-						buf.append(rawEntry.getPath().makeRelative());
-						buf.append(CONCAT_STRING);
-						varNamePrepended= true;
-					}
+		if (root.isArchive())
+			getArchiveLabel(root, flags, buf);
+		else
+			getFolderLabel(root, flags, buf);
+	}
+	
+	private static void getArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		// Handle variables different	
+		if (getFlag(flags, ROOT_VARIABLE) && getVariableLabel(root, flags, buf))
+			return;
+		boolean external= root.isExternal();
+		if (external)
+			getExternalArchiveLabel(root, flags, buf);
+		else
+			getInternalArchiveLabel(root, flags, buf);
+	}
+	
+	private static boolean getVariableLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		try {
+			IClasspathEntry rawEntry= root.getRawClasspathEntry();
+			if (rawEntry != null) {
+				if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+					buf.append(rawEntry.getPath().makeRelative());
+					buf.append(CONCAT_STRING);
+					if (root.isExternal())
+						buf.append(root.getPath().toOSString());
+					else
+						buf.append(root.getPath().makeRelative().toString());
+					return true;
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e); // problems with class path
 			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e); // problems with class path
 		}
-		boolean isExternal= root.isExternal();
-		if (isExternal) {
-			IPath path= root.getPath();
+		return false;
+	}
+
+	private static void getExternalArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		IPath path= root.getPath();
+		if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
 			int segements= path.segmentCount();
-			if (segements > 0 && !varNamePrepended) {
+			if (segements > 0) {
 				buf.append(path.segment(segements - 1));
 				if (segements > 1 || path.getDevice() != null) {
 					buf.append(CONCAT_STRING);
@@ -620,42 +650,49 @@ public class JavaElementLabels {
 			} else {
 				buf.append(path.toOSString());
 			}
-		} else if (isArchive && !isExternal && !getFlag(flags, ROOT_QUALIFIED | ROOT_POST_QUALIFIED)) {
-			IPath path= root.getPath();
-			String qualified= null;
-			String name= null;
-			int segments= path.segmentCount();
-			if (segments > 1) {
-				name= path.segment(segments - 1);
-				qualified= path.removeLastSegments(1).makeRelative().toString(); 
-			} else {
-				name= path.toString();
-			}
-			if (JavaModelUtil.isReferenced(root)) {
-				buf.append(name);
-				if (qualified != null) {
-					buf.append(CONCAT_STRING);
-					buf.append(qualified);
-				}
-			} else {
-				buf.append(name);
-			}
 		} else {
-			if (getFlag(flags, ROOT_QUALIFIED)) {
-				// This is necessary since the path of an internal Jar is always the
-				// path to its resource. But it may be referenced.
-				buf.append(root.getParent().getPath().makeRelative().toString());
-				buf.append('/');
-				buf.append(root.getElementName());
-			} else {
-				buf.append(root.getElementName());
-			}
-			if (getFlag(flags, ROOT_POST_QUALIFIED)) {
+			buf.append(path.toOSString());
+		}
+	}
+
+	private static void getInternalArchiveLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		IResource resource= root.getResource();
+		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
+		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
+		if (rootQualified) {
+			buf.append(root.getPath().makeRelative().toString());
+		} else {
+			buf.append(root.getElementName());
+			if (referencedQualified) {
+				buf.append(CONCAT_STRING);
+				buf.append(resource.getParent().getFullPath().makeRelative().toString());
+			} else if (getFlag(flags, ROOT_POST_QUALIFIED)) {
 				buf.append(CONCAT_STRING);
 				buf.append(root.getParent().getPath().makeRelative().toString());
 			}
-		}		
-	}	
+		}
+	}
+
+	private static void getFolderLabel(IPackageFragmentRoot root, int flags, StringBuffer buf) {
+		IResource resource= root.getResource();
+		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
+		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
+		if (rootQualified) {
+			buf.append(root.getPath().makeRelative().toString());
+		} else {
+			if (resource != null)
+				buf.append(resource.getProjectRelativePath().toString());
+			else
+				buf.append(root.getElementName());
+			if (referencedQualified) {
+				buf.append(CONCAT_STRING);
+				buf.append(resource.getProject().getName());
+			} else if (getFlag(flags, ROOT_POST_QUALIFIED)) {
+				buf.append(CONCAT_STRING);
+				buf.append(root.getParent().getElementName());
+			}
+		}
+	}
 
 	private static void refreshPackageNamePattern() {
 		String pattern= getPkgNamePatternForPackagesView();
