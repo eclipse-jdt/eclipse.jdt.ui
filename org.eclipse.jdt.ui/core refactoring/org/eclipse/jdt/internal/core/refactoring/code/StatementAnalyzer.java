@@ -375,7 +375,6 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 	
 	private void endVisitAssignment(Assignment assignment, BlockScope scope, boolean compound) {
-		int visitMode= getVisitMode(assignment);
 		endVisitNode(assignment, scope);
 	}
 	
@@ -400,7 +399,10 @@ public class StatementAnalyzer implements IAbstractSyntaxTreeVisitor {
 	}
 	
 	private int getVisitMode(AstNode node) {
-		return ((Integer)fNodeData.remove(node)).intValue();
+		Object o= fNodeData.remove(node);
+		if (!(o instanceof Integer))
+			return UNDEFINED;
+		return ((Integer)o).intValue();
 	}
 	
 	private boolean visitAbstractMethodDeclaration(AbstractMethodDeclaration node, Scope scope) {
