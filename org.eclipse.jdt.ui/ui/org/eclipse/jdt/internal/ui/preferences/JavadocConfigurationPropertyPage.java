@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.net.URL;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -21,6 +23,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -59,7 +64,14 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	protected Control createContents(Composite parent) {
 		
 		IJavaElement elem= getJavaElement();
-		fJavadocConfigurationBlock= new JavadocConfigurationBlock(elem, getShell(), this);
+		URL initialLocation= null;
+		try {
+			initialLocation= JavaUI.getJavadocBaseLocation(elem);
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}		
+		
+		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
 		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 
@@ -103,7 +115,14 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		return fJavadocConfigurationBlock.performOk();
+		URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
+		IJavaElement elem= getJavaElement();
+		if (elem instanceof IJavaProject) {
+			JavaUI.setProjectJavadocLocation((IJavaProject) elem, javadocLocation);
+		} else {
+			JavaUI.setLibraryJavadocLocation(elem.getPath(), javadocLocation);
+		}
+		return true;
 	}
 
 	/**

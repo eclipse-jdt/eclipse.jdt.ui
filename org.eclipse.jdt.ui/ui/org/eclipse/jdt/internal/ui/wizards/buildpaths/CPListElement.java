@@ -133,8 +133,6 @@ public class CPListElement {
 		return attribute;
 	}
 	
-
-	
 	public Object getAttribute(String key) {
 		CPListElementAttribute attrib= (CPListElementAttribute) fAttributes.get(key);
 		if (attrib != null) {
@@ -175,45 +173,15 @@ public class CPListElement {
 		fParentContainer= element;
 	}
 	
-	private CPListElement getParentContainer() {
+	public CPListElement getParentContainer() {
 		return fParentContainer;
 	}	
 	
-	public void attributeChanged(String key) {
+	private void attributeChanged(String key) {
 		fCachedEntry= null;
 	}
 	
 	
-	/**
-	 * Sets the paths for source annotation
-	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#attachSource
-	 * @deprecated 
-	 */	
-	public void setSourceAttachment(IPath path, IPath prefix) {
-		setAttribute(SOURCEATTACHMENT, path);
-		setAttribute(SOURCEATTACHMENTROOT, prefix);
-	}
-	
-	/**
-	 * Gets the current path prefix used when accessing the source attachment
-	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#getSourceAttachmentPath	 
-	 * @return The source attachment prefix
-	 * @deprecated 
-	 */	
-	public IPath getSourceAttachmentPath() {
-		return (IPath) getAttribute(SOURCEATTACHMENT);
-	}
-	
-	/**
-	 * Returns the root path used for accessing source attchments
-	 * @see org.eclipse.jdt.core.
-	 * IPackageFragmentRoot#getSourceAttachmentRootPath
-	 * 	  @deprecated
-	 */
-	public IPath getSourceAttachmentRootPath() {
-		return (IPath) getAttribute(SOURCEATTACHMENTROOT);
-	}
-
 	/*
 	 * @see Object#equals(java.lang.Object)
 	 */
@@ -262,28 +230,9 @@ public class CPListElement {
 		if (isExported != fIsExported) {
 			fIsExported = isExported;
 			
-			fCachedEntry= null;
+			attributeChanged(null);
 		}
 	}
-
-	/**
-	 * Gets the Javadoc location.
-	 * @return Returns a URL
-	 * 	 	  @deprecated
-	 */
-	public URL getJavadocLocation() {
-		return (URL) getAttribute(JAVADOC);
-	}
-
-	/**
-	 * Sets the Javadoc location.
-	 * @param javadocLocation The javadocLocation to set
-	 * @deprecated
-	 */
-	public void setJavadocLocation(URL javadocLocation) {
-		setAttribute(JAVADOC, javadocLocation);
-	}
-		
 
 	/**
 	 * Gets the project.

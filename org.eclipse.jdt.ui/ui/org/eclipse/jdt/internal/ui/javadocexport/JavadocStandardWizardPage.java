@@ -50,6 +50,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -557,7 +559,13 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 			super(parent);
 			setTitle(JavadocExportMessages.getString("JavadocStandardWizardPage.javadocpropertydialog.title")); //$NON-NLS-1$
 
-			fJavadocConfigurationBlock= new JavadocConfigurationBlock(selection, parent, this);
+			URL initialLocation= null;
+			try {
+				initialLocation= JavaUI.getJavadocBaseLocation(selection);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation);
 		}
 
 		protected Control createDialogArea(Composite parent) {
@@ -576,10 +584,14 @@ public class JavadocStandardWizardPage extends JavadocWizardPage {
 		 * @see Dialog#okPressed()
 		 */
 		protected void okPressed() {
-			fJavadocConfigurationBlock.performOk();
-			super.okPressed();
-
+			URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
+			if (fElement instanceof IJavaProject) {
+				JavaUI.setProjectJavadocLocation((IJavaProject) fElement, javadocLocation);
+			} else {
+				JavaUI.setLibraryJavadocLocation(fElement.getPath(), javadocLocation);
+			}
 			fListDialogField.refresh();
+			super.okPressed();
 		}
 
 		/*

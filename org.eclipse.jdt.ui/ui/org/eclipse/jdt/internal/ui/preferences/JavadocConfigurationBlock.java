@@ -20,16 +20,10 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.DirectoryDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
@@ -46,16 +40,16 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 public class JavadocConfigurationBlock {
 	
 	private StringButtonDialogField fJavaDocField;
+	private URL fInitialURL;
 	private Button fValidateButton;
-	private IJavaElement fElem;
 	private Shell fShell;
 	private IStatusChangeListener fContext;
 	private URL fJavaDocLocation;
 	
-	public JavadocConfigurationBlock(IJavaElement element, Shell shell,  IStatusChangeListener context) {
+	public JavadocConfigurationBlock(Shell shell,  IStatusChangeListener context, URL initURL) {
 		fShell= shell;
-		fElem= element;	
-		fContext= context;	
+		fContext= context;
+		fInitialURL= initURL;
 	}
 	
 	public Control createContents(Composite parent) {
@@ -65,11 +59,6 @@ public class JavadocConfigurationBlock {
 		topLayout.marginWidth= 0;
 		topLayout.marginHeight= 0;
 		topComp.setLayout(topLayout);
-
-		if (fElem == null) {
-			return topComp;
-		}
-
 
 		JDocConfigurationAdapter adapter= new JDocConfigurationAdapter();
 
@@ -81,12 +70,11 @@ public class JavadocConfigurationBlock {
 		fJavaDocField.doFillIntoGrid(topComp, 3);
 
 		PixelConverter converter= new PixelConverter(topComp);
-		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(40));
+		LayoutUtil.setWidthHint(fJavaDocField.getTextControl(null), converter.convertWidthInCharsToPixels(50));
 		LayoutUtil.setHorizontalGrabbing(fJavaDocField.getTextControl(null));
 
 		// Fillers;
-		new Label(topComp, SWT.LEFT);
-		new Label(topComp, SWT.LEFT);
+		DialogField.createEmptySpace(topComp, 2);
 		
 		fValidateButton= new Button(topComp, SWT.PUSH);
 		fValidateButton.setText(JavaUIMessages.getString("JavadocConfigurationBlock.ValidateButton.label")); //$NON-NLS-1$
@@ -108,22 +96,8 @@ public class JavadocConfigurationBlock {
 	//Sets the default by getting the stored URL setting if it exists
 	//otherwise the text box is left empty.
 	private void setValues() {
-
-		// try to find it as Java element (needed for external jars)
-
-		String initialValue = ""; //$NON-NLS-1$
-
-		if (fElem != null) {
-			try {
-				fJavaDocLocation = JavaDocLocations.getJavadocBaseLocation(fElem);
-				if (fJavaDocLocation != null)
-					initialValue = fJavaDocLocation.toExternalForm();
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-			}
-		}
+		String initialValue = fInitialURL != null ? fInitialURL.toExternalForm() : ""; //$NON-NLS-1$
 		fJavaDocField.setText(initialValue);
-
 	}
 		
 	public void setFocus() {
@@ -134,20 +108,10 @@ public class JavadocConfigurationBlock {
 		setValues();
 	}
 	
-	public boolean performOk() {
-		if (fElem != null) {
-			IPath path = fElem.getPath();
-			if (fElem instanceof IJavaProject)
-				JavaDocLocations.setProjectJavadocLocation(
-					(IJavaProject) fElem,
-					fJavaDocLocation);
-			else
-				JavaDocLocations.setLibraryJavadocLocation(path, fJavaDocLocation);
-			return true;
-		}
-		return false;
+	public URL getJavadocLocation() {
+		return fJavaDocLocation;
 	}
-	
+		
 	private class EntryValidator implements Runnable {
 
 		private String fInvalidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
@@ -297,7 +261,8 @@ public class JavadocConfigurationBlock {
 				status.setError(JavaUIMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
 				return status;
 			}
-		} else status.setWarning(JavaUIMessages.getString("JavadocConfigurationBlock.EmptyJavadocLocation.warning")); //$NON-NLS-1$
+		} 
+		//else status.setWarning(JavaUIMessages.getString("JavadocConfigurationBlock.EmptyJavadocLocation.warning")); //$NON-NLS-1$
 		return status;
 	}
 

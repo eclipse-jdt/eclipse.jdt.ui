@@ -4,6 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,10 +46,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
+import org.eclipse.jdt.internal.ui.javadocexport.JavadocExportMessages;
+import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -266,13 +271,21 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private void editAttributeEntry(CPListElementAttribute elem) {
-		if (elem.getKey().equals(CPListElement.SOURCEATTACHMENT)) {
+		String key= elem.getKey();
+		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
 			CPListElement selElement= (CPListElement) elem.getParent();
-			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement.getClasspathEntry());
+			SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), fWorkspaceRoot, selElement);
 			if (dialog.open() == SourceAttachmentDialog.OK) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, dialog.getSourceAttachmentPath());
 				fLibrariesList.refresh();
-				fClassPathList.refresh();
+				fClassPathList.refresh(); // images
+			}
+		} else if (key.equals(CPListElement.JAVADOC)) {
+			CPListElement selElement= (CPListElement) elem.getParent();
+			JavadocPropertyDialog dialog= new JavadocPropertyDialog(getShell(), selElement);
+			if (dialog.open() == JavadocPropertyDialog.OK) {
+				selElement.setAttribute(CPListElement.JAVADOC, dialog.getJavaDocLocation());
+				fLibrariesList.refresh();
 			}
 		}
 	}
@@ -325,8 +338,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
-			CPListElementAttribute attrib= (CPListElementAttribute) elem;
-			return attrib.getKey().equals(CPListElement.SOURCEATTACHMENT);
+			return ((CPListElementAttribute) elem).getParent().getParentContainer() == null;
 		}
 		return false;
 	}
@@ -338,19 +350,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			updateClasspathList();
 		}
 	}	
-	
-	private boolean canDoSourceAttachment(List selElements) {
-		if (selElements != null && selElements.size() == 1) {
-			CPListElement elem= (CPListElement) selElements.get(0);
-			if (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
-				return (!(elem.getResource() instanceof IFolder));
-			} else if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-				return true;
-			}
-		}
-		return false;
-	}		
-	
+		
 	private void updateClasspathList() {
 		List projelements= fLibrariesList.getElements();
 		
@@ -637,6 +637,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 					}
 				}
 			}
+			elem.setAttribute(CPListElement.JAVADOC, JavaUI.getLibraryJavadocLocation(elem.getPath()));
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e.getStatus());
 		}
@@ -782,10 +783,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		private SourceAttachmentBlock fSourceAttachmentBlock;
 				
-		public SourceAttachmentDialog(Shell parent, IWorkspaceRoot root, IClasspathEntry entry) {
+		public SourceAttachmentDialog(Shell parent, IWorkspaceRoot root, CPListElement element) {
 			super(parent);
-			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.SourceAttachmentDialog.title", entry.getPath().toString())); //$NON-NLS-1$
-			fSourceAttachmentBlock= new SourceAttachmentBlock(root, this, entry);
+			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.SourceAttachmentDialog.title", element.getPath().toString())); //$NON-NLS-1$
+			fSourceAttachmentBlock= new SourceAttachmentBlock(root, this, element.getClasspathEntry());
 		}
 		
 		/*
@@ -817,6 +818,45 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 				
 	}
+	
+	private class JavadocPropertyDialog extends StatusDialog implements IStatusChangeListener {
+
+		private JavadocConfigurationBlock fJavadocConfigurationBlock;
+		private CPListElement fElement;
+
+		public JavadocPropertyDialog(Shell parent, CPListElement element) {
+			super(parent);
+			setTitle(JavadocExportMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
+			fElement= element;
+			
+			URL initialLocation= JavaUI.getLibraryJavadocLocation(element.getPath());
+			fJavadocConfigurationBlock= new JavadocConfigurationBlock(parent, this, initialLocation);
+		}
+
+		protected Control createDialogArea(Composite parent) {
+			Composite composite= (Composite) super.createDialogArea(parent);
+			Control inner= fJavadocConfigurationBlock.createContents(composite);
+			inner.setLayoutData(new GridData(GridData.FILL_BOTH));
+			return composite;
+		}
+
+		public void statusChanged(IStatus status) {
+			updateStatus(status);
+		}
+		
+		public URL getJavaDocLocation() {
+			return fJavadocConfigurationBlock.getJavadocLocation();
+		}
+
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.JAVADOC_PROPERTY_DIALOG);
+		}
+	}
+	
 	
 	/*
 	 * @see BuildPathBasePage#getSelection
