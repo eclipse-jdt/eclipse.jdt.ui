@@ -112,7 +112,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			}, ChangeParametersControl.Mode.INTRODUCE_PARAMETER, fParamNameProposals);
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getIntroduceParameterRefactoring().getParameterInfos());
-			cp.editLastParameter();
+			cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
 			return cp;
 		}
 	

@@ -265,16 +265,13 @@ public class ChangeParametersControl extends Composite {
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
 	}
 	
-	public void editLastParameter() {
+	public void editParameter(ParameterInfo info) {
 		fTableViewer.getControl().setFocus();
-		for (int i= fParameterInfos.size() - 1; i >= 0; i--) {
-			ParameterInfo info= (ParameterInfo) fParameterInfos.get(i);
-			if (! info.isDeleted()) {
-				fTableViewer.setSelection(new StructuredSelection(info), true);
-				updateButtonsEnabledState();
-				editColumnOrNextPossible(NEWNAME_PROP);
-				return;	
-			}
+		if (! info.isDeleted()) {
+			fTableViewer.setSelection(new StructuredSelection(info), true);
+			updateButtonsEnabledState();
+			editColumnOrNextPossible(NEWNAME_PROP);
+			return;	
 		}
 	}
 

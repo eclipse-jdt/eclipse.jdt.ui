@@ -178,4 +178,8 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 	public void testSimple_Constructor1() throws Exception {
 		performOK();
 	}
+	
+	public void testSimple_Vararg1() throws Exception {
+		performOK();
+	}
 }

@@ -157,14 +157,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 			initializeExcludedParameterNames(cuRewrite);
 			
-			fParameter= ParameterInfo.createInfoForAddedParameter();
-			fParameter.setNewName(guessedParameterName());
-			ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
-			fParameter.setNewTypeBinding(typeBinding);
-			fParameter.setNewTypeName(typeBinding.getName());
-			String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
-			fParameter.setDefaultValue(defaultValue);
-			fChangeSignatureRefactoring.getParameterInfos().add(fParameter);
+			addParameterInfo();
 			
 			fChangeSignatureRefactoring.setBodyUpdater(new BodyUpdater() {
 				public void updateBody(MethodDeclaration methodDeclaration, CompilationUnitRewrite rewrite, RefactoringStatus updaterResult) {
@@ -176,6 +169,23 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private void addParameterInfo() throws JavaModelException {
+		fParameter= ParameterInfo.createInfoForAddedParameter();
+		fParameter.setNewName(guessedParameterName());
+		ITypeBinding typeBinding= fSelectedExpression.resolveTypeBinding();
+		fParameter.setNewTypeBinding(typeBinding);
+		fParameter.setNewTypeName(typeBinding.getName());
+		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
+		fParameter.setDefaultValue(defaultValue);
+		List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
+		int parametersCount= parameterInfos.size();
+		if (parametersCount > 0 &&
+				((ParameterInfo) parameterInfos.get(parametersCount - 1)).isOldVarargs())
+			parameterInfos.add(parametersCount - 1, fParameter);
+		else
+			parameterInfos.add(fParameter);
 	}
 
 	private void replaceSelectedExpression(CompilationUnitRewrite cuRewrite) {
@@ -297,6 +307,10 @@ public class IntroduceParameterRefactoring extends Refactoring {
 
 	public List getParameterInfos() {
 		return fChangeSignatureRefactoring.getParameterInfos();
+	}
+	
+	public ParameterInfo getAddedParameterInfo() {
+		return fParameter;
 	}
 	
 	public String getMethodSignaturePreview() throws JavaModelException {
