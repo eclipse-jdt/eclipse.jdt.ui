@@ -66,7 +66,7 @@ public class DeleteFromClasspathChange extends Change {
 			}
 			
 			IClasspathEntry last= JavaCore.getResolvedClasspathEntry(cp[cp.length - 1]);
-			if (toBeDeleted(last))
+			if (last != null && toBeDeleted(last))
 				setDeletedEntryProperties(last);
 				
 			project.setRawClasspath(newCp, pm);
