@@ -54,6 +54,9 @@ public class ImportsStructure implements IImportsStructure {
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
+		synchronized (fCompilationUnit) {
+			fCompilationUnit.reconcile();
+		}
 		
 		IImportContainer container= cu.getImportContainer();
 		
