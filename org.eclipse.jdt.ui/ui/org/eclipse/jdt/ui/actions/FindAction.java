@@ -275,8 +275,8 @@ public abstract class FindAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), element))
 			return;
 		
-//		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(WorkInProgressPreferencePage.PREF_BGSEARCH)) {
-		if (true) {
+		if (JavaPlugin.useNewSearch()) {
+			// will return true except for debugging purposes.
 			try {
 				performNewSearch(element);
 			} catch (JavaModelException ex) {
