@@ -46,7 +46,7 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 		if (resourceData[0].getType() == IResource.PROJECT)
 			pasteProject((IProject) resourceData[0]);
 		else
-			ReorgGroup.createDnDCopyAction(resourceData, getFirstSelectedResource(selection)).run();
+			ReorgActionFactory.createDnDCopyAction(resourceData, getFirstSelectedResource(selection)).run();
 	}
 	
 	private void pasteProject(IProject project){
