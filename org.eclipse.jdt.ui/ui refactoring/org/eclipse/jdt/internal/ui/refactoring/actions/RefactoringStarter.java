@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 
 /**
- * A helper class to ativate the UI of a refactoring
+ * A helper class to activate the UI of a refactoring
  */
 public class RefactoringStarter {
 	
@@ -108,7 +108,7 @@ public class RefactoringStarter {
 					}
 				}
 			};
-			InputDialog dialog= new InputDialog(shell, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator);
+			InputDialog dialog= new RenameInputDialog(shell, dialogTitle, dialogMessage, renameRefactoring.getCurrentName(), validator, renameRefactoring);
 			int result= dialog.open();
 			if (result != Window.OK) {
 				triggerBuild();
