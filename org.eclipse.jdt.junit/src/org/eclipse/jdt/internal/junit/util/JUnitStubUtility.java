@@ -7,24 +7,29 @@
 
 package org.eclipse.jdt.internal.junit.util;
 
+import org.eclipse.swt.SWT;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
+
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage.ImportsManager;
-import org.eclipse.swt.SWT;
 
 /**
  * Utility methods for code generation.
- * TO DO: some methods are duplicated from org.eclipse.jdt.ui
+ * TODO: some methods are duplicated from org.eclipse.jdt.ui
  */
 public class JUnitStubUtility {
 
@@ -43,26 +48,30 @@ public class JUnitStubUtility {
 	/**
 	 * Examines a string and returns the first line delimiter found.
 	 */
-	public static String getLineDelimiterUsed(IJavaElement elem) throws JavaModelException {
-		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null && cu.exists()) {
-			IBuffer buf= cu.getBuffer();
-			int length= buf.getLength();
-			for (int i= 0; i < length; i++) {
-				char ch= buf.getChar(i);
-				if (ch == SWT.CR) {
-					if (i + 1 < length) {
-						if (buf.getChar(i + 1) == SWT.LF) {
-							return "\r\n"; //$NON-NLS-1$
+	public static String getLineDelimiterUsed(IJavaElement elem) {
+		try {
+			ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu != null && cu.exists()) {
+				IBuffer buf= cu.getBuffer();
+				int length= buf.getLength();
+				for (int i= 0; i < length; i++) {
+					char ch= buf.getChar(i);
+					if (ch == SWT.CR) {
+						if (i + 1 < length) {
+							if (buf.getChar(i + 1) == SWT.LF) {
+								return "\r\n"; //$NON-NLS-1$
+							}
 						}
+						return "\r"; //$NON-NLS-1$
+					} else if (ch == SWT.LF) {
+						return "\n"; //$NON-NLS-1$
 					}
-					return "\r"; //$NON-NLS-1$
-				} else if (ch == SWT.LF) {
-					return "\n"; //$NON-NLS-1$
 				}
 			}
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (JavaModelException e) {
+			return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	public static String codeFormat(String sourceString, int initialIndentationLevel, String lineDelim) {
@@ -264,4 +273,24 @@ public class JUnitStubUtility {
 			imports.addImport(resolvedTypeName);		
 		}
 	}
+	
+	public static String getTodoTaskTag(IJavaProject project) {
+		String markers= null;
+		if (project == null) {
+			markers= JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS);
+		} else {
+			markers= project.getOption(JavaCore.COMPILER_TASK_TAGS, true);
+		}
+		
+		if (markers != null && markers.length() > 0) {
+			int idx= markers.indexOf(',');
+			if (idx == -1) {
+				return markers;
+			} else {
+				return markers.substring(0, idx);
+			}
+		}
+		return null;
+	}
+
 }

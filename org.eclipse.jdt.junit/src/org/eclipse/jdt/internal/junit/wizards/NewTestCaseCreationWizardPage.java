@@ -6,15 +6,31 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.ListIterator;
 
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -23,7 +39,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
@@ -31,8 +46,11 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
@@ -40,26 +58,12 @@ import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility.GenStubSettings;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * The first page of the TestCase creation wizard. 
@@ -96,7 +100,6 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private Text fTestClassText;
 	private String fTestClassTextInitialValue;
 
-	private IMethod[] fTestMethods;
 	private boolean fFirstTime;  
 
 	public NewTestCaseCreationWizardPage() {
@@ -246,7 +249,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		composite.setLayout(layout);
 
 		createContainerControls(composite, nColumns);	
-		createPackageControls(composite, nColumns);		
+		createPackageControls(composite, nColumns);
 		createSeparator(composite, nColumns);
 		createTestClassControls(composite, nColumns);		
 		createClassToTestControls(composite, nColumns);
@@ -424,7 +427,7 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			genStubSettings.fMethodOverwrites= true;
 			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
-			constr += "public "+getTypeName()+"(String name) {\nsuper(name);\n}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+			constr += "public "+getTypeName()+"(String name) {" + //$NON-NLS-1$  //$NON-NLS-2$ 					getLineDelimiter() +					"super(name);" + //$NON-NLS-1$ 					getLineDelimiter() +					"}" + //$NON-NLS-1$ 					getLineDelimiter() + getLineDelimiter();
 		}
 		type.createMethod(constr, null, true, null);	
 		fIndexOfFirstTestMethod++;
@@ -461,8 +464,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			setUp= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
 		} else {
 			if (settings.createComments)
-				setUp= "/**\n * Sets up the fixture, for example, open a network connection.\n * This method is called before a test is executed.\n * @throws Exception\n */\n"; //$NON-NLS-1$
-			setUp+= "protected void "+SETUP+"() throws Exception {}\n\n"; //$NON-NLS-1$ //$NON-NLS-2$
+				setUp= "/**" + //$NON-NLS-1$					getLineDelimiter() + 					" * Sets up the fixture, for example, open a network connection." + //$NON-NLS-1$					getLineDelimiter() +					" * This method is called before a test is executed." + //$NON-NLS-1$					getLineDelimiter() +					" * @throws Exception" + //$NON-NLS-1$					getLineDelimiter() +					" */" + //$NON-NLS-1$					getLineDelimiter(); 
+			setUp+= "protected void "+SETUP+"() throws Exception {}" + //$NON-NLS-1$ //$NON-NLS-2$				getLineDelimiter() + getLineDelimiter(); 
 		}
 		type.createMethod(setUp, null, false, null);	
 		fIndexOfFirstTestMethod++;
@@ -508,21 +511,21 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		List allMethods= new ArrayList();
 		allMethods.addAll(Arrays.asList(allMethodsArray));
 		List overloadedMethods= getOveloadedMethods(allMethods);
-		
+			
 		/* used when for example both sum and Sum methods are present. Then
 		 * sum -> testSum
 		 * Sum -> testSum1
 		 */
 		List newMethodsNames= new ArrayList();				
-		for (int i = 0; i < methods.length; i++) {
-			IMethod method= methods[i];
-			String elementName= method.getElementName();
+			for (int i = 0; i < methods.length; i++) {
+			IMethod testedMethod= methods[i];
+			String elementName= testedMethod.getElementName();
 			StringBuffer methodName= new StringBuffer(NewTestCaseCreationWizardPage2.PREFIX+Character.toUpperCase(elementName.charAt(0))+elementName.substring(1));
 			StringBuffer newMethod= new StringBuffer();
-
-			if (overloadedMethods.contains(method)) {
-				appendMethodComment(newMethod, method);
-				String[] params= method.getParameterTypes();
+	
+			if (overloadedMethods.contains(testedMethod)) {
+				appendMethodComment(newMethod, testedMethod);
+				String[] params= testedMethod.getParameterTypes();
 				appendParameterNamesToMethodName(methodName, params);
 			}
 			/* Should I for examples have methods
@@ -543,9 +546,33 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			newMethodsNames.add(methodName.toString());
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
 				newMethod.append("final "); //$NON-NLS-1$
-			newMethod.append("public void "+methodName.toString()+"() {}\n\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			newMethod.append("public void ");//$NON-NLS-1$ 
+			newMethod.append(methodName.toString());
+			newMethod.append("()");//$NON-NLS-1$ 
+			appendTestMethodBody(newMethod, testedMethod);
 			type.createMethod(newMethod.toString(), null, false, null);	
 		}
+	}
+
+	private String getLineDelimiter(){
+		IType classToTest= getClassToTest();
+		
+		if (classToTest != null && classToTest.exists())
+			return JUnitStubUtility.getLineDelimiterUsed(classToTest);
+		else	
+			return JUnitStubUtility.getLineDelimiterUsed(getPackageFragment());
+	}
+	
+	private void appendTestMethodBody(StringBuffer newMethod, IMethod testedMethod) {
+		newMethod.append("{"); //$NON-NLS-1$
+		if (createTasks()){
+			newMethod.append(getLineDelimiter());
+			newMethod.append("//"); //$NON-NLS-1$
+			newMethod.append(JUnitStubUtility.getTodoTaskTag(getPackageFragment().getJavaProject()));
+			newMethod.append(WizardMessages.getFormattedString("NewTestClassWizPage.marker.message", testedMethod.getElementName())); //$NON-NLS-1$
+			newMethod.append(getLineDelimiter());		
+		}
+		newMethod.append("}").append(getLineDelimiter()).append(getLineDelimiter()); //$NON-NLS-1$
 	}
 
 	public void appendParameterNamesToMethodName(StringBuffer methodName, String[] params) {
@@ -561,7 +588,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	private void appendMethodComment(StringBuffer newMethod, IMethod method) throws JavaModelException {
 		String returnType= Signature.toString(method.getReturnType());
 		String body= WizardMessages.getFormattedString("NewTestClassWizPage.comment.class_to_test", new String[]{returnType, method.getElementName()}); //$NON-NLS-1$
-		newMethod.append("/*\n * "+body+"(");  //$NON-NLS-1$ //$NON-NLS-2$
+		newMethod.append("/*");//$NON-NLS-1$
+		newMethod.append(getLineDelimiter());		newMethod.append(" * ");//$NON-NLS-1$
+		newMethod.append(body);
+		newMethod.append("(");//$NON-NLS-1$
 		String[] paramTypes= method.getParameterTypes();
 		if (paramTypes.length > 0) {
 			if (paramTypes.length > 1) {
@@ -571,7 +601,9 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 			}
 			newMethod.append(Signature.toString(paramTypes[paramTypes.length-1]));
 		}
-		newMethod.append(")\n */\n"); //$NON-NLS-1$
+		newMethod.append(")");//$NON-NLS-1$
+		newMethod.append(getLineDelimiter());
+		newMethod.append(" */");//$NON-NLS-1$		newMethod.append(getLineDelimiter()); 
 	}
 
 	private List getOveloadedMethods(List allMethods) {
@@ -637,39 +669,10 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 		return fIndexOfFirstTestMethod;
 	}
 
-	/**
-	 * @see IDialogPage#createControl(Composite)
-	 */
-	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
-		super.createType(monitor);
-
-		if (fPage2.getCreateTasksButtonSelection()) {
-			createTaskMarkers();
-		}
+	private boolean createTasks() {
+		return fPage2.getCreateTasksButtonSelection();
 	}	
 
-	private void createTaskMarkers() throws CoreException {
-		IType createdType= getCreatedType();
-		fTestMethods= createdType.getMethods();
-		ICompilationUnit cu= createdType.getCompilationUnit();
-		cu.save(null, false);
-		IResource res= createdType.getCompilationUnit().getResource();
-		if (res == null)
-			return;
-			
-		for (int i= getIndexOfFirstMethod(); i < fTestMethods.length; i++) {
-			IMethod method= fTestMethods[i];
-			IMarker marker= res.createMarker("org.eclipse.jdt.junit.junit_task"); //$NON-NLS-1$
-			HashMap attributes= new HashMap(10);
-			attributes.put(IMarker.PRIORITY, new Integer(IMarker.PRIORITY_NORMAL));
-			attributes.put(IMarker.MESSAGE, WizardMessages.getFormattedString("NewTestClassWizPage.marker.message",method.getElementName())); //$NON-NLS-1$
-			ISourceRange markerRange= method.getSourceRange();
-			attributes.put(IMarker.CHAR_START, new Integer(markerRange.getOffset()));
-			attributes.put(IMarker.CHAR_END, new Integer(markerRange.getOffset()+markerRange.getLength()));
-			marker.setAttributes(attributes);
-		}
-	}
-	
 	private void validateSuperClass() {
 		fMethodStubsButtons.setEnabled(2, true);//enable setUp() checkbox
 		fMethodStubsButtons.setEnabled(3, true);//enable tearDown() checkbox
