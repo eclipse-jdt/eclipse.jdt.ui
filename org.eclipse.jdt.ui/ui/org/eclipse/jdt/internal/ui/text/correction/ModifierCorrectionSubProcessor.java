@@ -158,7 +158,7 @@ public class ModifierCorrectionSubProcessor {
 				Block newBody= ast.newBlock();
 				rewrite.markAsInserted(newBody);
 				decl.setBody(newBody);
-				Expression expr= ASTResolving.getInitExpression(decl.getReturnType());
+				Expression expr= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
 				if (expr != null) {
 					ReturnStatement returnStatement= ast.newReturnStatement();
 					returnStatement.setExpression(expr);

@@ -236,7 +236,7 @@ public class ReturnTypeSubProcessor {
 				if (returnStatement.getExpression() == null) {
 					ASTRewrite rewrite= new ASTRewrite(methodDecl);
 					
-					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
+					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions());
 					if (expression != null) {
 						returnStatement.setExpression(expression);
 						rewrite.markAsInserted(expression);
@@ -258,7 +258,7 @@ public class ReturnTypeSubProcessor {
 				
 				List statements= block.statements();
 				ReturnStatement returnStatement= ast.newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
+				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
 				statements.add(returnStatement);
 				rewrite.markAsInserted(returnStatement);
 				

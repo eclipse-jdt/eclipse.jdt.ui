@@ -82,7 +82,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			List statements= block.statements();
 			ReturnStatement returnStatement= block.getAST().newReturnStatement();
-			returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
+			returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions()));
 			statements.add(returnStatement);
 			rewrite.markAsInserted(returnStatement);
 			
@@ -421,7 +421,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(0);
 			Expression expr= returnStatement.getExpression();
-			Expression modified= ASTResolving.getInitExpression(methodDecl.getReturnType());
+			Expression modified= ASTResolving.getInitExpression(methodDecl.getReturnType(), methodDecl.getExtraDimensions());
 	
 			rewrite.markAsReplaced(expr, modified);
 			

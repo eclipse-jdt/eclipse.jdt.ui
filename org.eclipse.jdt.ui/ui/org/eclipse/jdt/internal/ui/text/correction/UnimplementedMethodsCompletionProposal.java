@@ -119,7 +119,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		Block body= ast.newBlock();
 		decl.setBody(body);
 		
-		Expression expression= ASTResolving.getInitExpression(decl.getReturnType());
+		Expression expression= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
 			returnStatement.setExpression(expression);

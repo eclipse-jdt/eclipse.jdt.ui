@@ -93,7 +93,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			Type type= evaluateVariableType(ast);
 			newDecl.setType(type);
 			newDeclFrag.setName(ast.newSimpleName(node.getIdentifier()));
-			newDeclFrag.setInitializer(ASTResolving.getInitExpression(type));
+			newDeclFrag.setInitializer(ASTResolving.getInitExpression(type, 0));
 			
 			ASTNode parent= node.getParent();
 			if (parent.getNodeType() == ASTNode.ASSIGNMENT) {
@@ -162,7 +162,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 						
 			newDecl.setModifiers(evaluateFieldModifiers(newTypeDecl));
 			if (fSenderBinding.isInterface()) {
-				fragment.setInitializer(ASTResolving.getInitExpression(type));
+				fragment.setInitializer(ASTResolving.getInitExpression(type, 0));
 			}
 		
 			boolean isAnonymous= newTypeDecl.getNodeType() == ASTNode.ANONYMOUS_CLASS_DECLARATION;

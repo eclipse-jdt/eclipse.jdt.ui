@@ -393,8 +393,8 @@ public class ASTResolving {
 		return null;
 	}
 	
-	public static Expression getInitExpression(Type type) {
-		if (type.isPrimitiveType()) {
+	public static Expression getInitExpression(Type type, int extraDimensions) {
+		if (extraDimensions == 0 && type.isPrimitiveType()) {
 			PrimitiveType primitiveType= (PrimitiveType) type;
 			if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.BOOLEAN) {
 				return type.getAST().newBooleanLiteral(false);
