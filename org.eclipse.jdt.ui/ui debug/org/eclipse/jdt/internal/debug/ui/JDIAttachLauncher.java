@@ -48,15 +48,8 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 	 * Perform the attach launch.
 	 */
 	protected boolean doLaunch(Object element, ILauncher launcher) {
-		AttachingConnector connector= null;
-		Iterator iter= Bootstrap.virtualMachineManager().attachingConnectors().iterator();
-		while (iter.hasNext()) {
-			AttachingConnector lc= (AttachingConnector) iter.next();
-			if (lc.name().equals("com.sun.jdi.SocketAttach")) {
-				connector= lc;
-				break;
-			}
-		}
+		AttachingConnector connector= getAttachingConnector();
+		
 
 		// determine the launched project from the element
 		IResource res= null;
@@ -137,6 +130,19 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 			element= objects[0];
 		}
 		return doLaunchUsingWizard(element, launcher);
+	}
+	
+	protected static AttachingConnector getAttachingConnector() {
+		AttachingConnector connector= null;
+		Iterator iter= Bootstrap.virtualMachineManager().attachingConnectors().iterator();
+		while (iter.hasNext()) {
+			AttachingConnector lc= (AttachingConnector) iter.next();
+			if (lc.name().equals("com.sun.jdi.SocketAttach")) {
+				connector= lc;
+				break;
+			}
+		}
+		return connector;
 	}
 
 }

@@ -1,10 +1,35 @@
+package org.eclipse.jdt.internal.debug.ui;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.debug.ui;
 
-import org.eclipse.swt.SWT;import org.eclipse.swt.events.HelpEvent;import org.eclipse.swt.events.HelpListener;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Display;import org.eclipse.swt.widgets.Event;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Listener;import org.eclipse.swt.widgets.Text;import org.eclipse.swt.widgets.Widget;import org.eclipse.jface.preference.IPreferenceStore;import org.eclipse.jface.wizard.WizardPage;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.IPreferencesConstants;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import com.sun.jdi.connect.AttachingConnector;import com.sun.jdi.connect.Connector;import java.util.Map;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.HelpEvent;
+import org.eclipse.swt.events.HelpListener;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.Widget;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.IPreferencesConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * The main page in a <code>JDIAttachLauncherWizard</code>. 
@@ -18,7 +43,9 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	private static final String ALLOW_TERMINATE= PREFIX + "allowTerminate";
 	private static final String ERROR= PREFIX + "error.";
 	private static final String PORT_ERROR= ERROR + "port";
+	private static final String HOST_ERROR= ERROR + "host";
 
+	
 	private String fInitialHost;
 	private String fInitialPort;
 	private boolean fAllowTerminate;
@@ -30,6 +57,9 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	private static final int SIZING_TEXT_FIELD_WIDTH= 250;
 	private static final int SIZING_INDENTATION_WIDTH= 10;
 
+	private Connector.Argument fHostParam= null;
+	private Connector.Argument fPortParam= null;
+	
 	/**
 	 * Constructs the page.
 	 */
@@ -37,6 +67,14 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 		super(DebugUIUtils.getResourceString(PREFIX + "title"));
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAVA_ATTACH);
 		setDescription(DebugUIUtils.getResourceString(PREFIX + "description"));
+		
+		AttachingConnector connector= JDIAttachLauncher.getAttachingConnector();
+		
+		if (connector != null) {
+			Map map= connector.defaultArguments();
+			fHostParam= (Connector.Argument) map.get("hostname");
+			fPortParam= (Connector.Argument) map.get("port");
+		}
 	}
 
 	/**
@@ -181,20 +219,24 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	 */
 	public void handleEvent(Event ev) {
 		Widget source= ev.widget;
-		setPageComplete(validatePage());
+		boolean valid= validatePage();
+		if (valid) {
+			setErrorMessage(null);
+		}
+		setPageComplete(valid);
 	}
 
 	/**
-	 * Returns a <code>boolean</code> indicating whether this page's visual
-	 * components currently all contain valid values.
+	 * Returns whether this page's visual components
+	 * currently all contain valid values.
 	 */
 	protected boolean validatePage() {
 		return validatePortGroup() && validateHostGroup();
 	}
 
 	/**
-	 * Returns a <code>boolean</code> indicating whether this page's port name
-	 * specification group's visual components currently all contain valid values.
+	 * Returns whether this page's port name specification
+	 * group's visual components currently all contain valid values.
 	 */
 	protected boolean validatePortGroup() {
 		String portFieldContents= fPortField.getText();
@@ -202,6 +244,14 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 			setErrorMessage(DebugUIUtils.getResourceString(PORT_ERROR));
 			return false;
 		}
+		if (fPortParam != null) {
+			if (!fPortParam.isValid(portFieldContents)) {
+				setErrorMessage(DebugUIUtils.getResourceString(PORT_ERROR));
+				return false;
+			}
+			return true;
+		}
+		
 		try {
 			Integer.parseInt(portFieldContents);
 		} catch (NumberFormatException nfe) {
@@ -212,11 +262,16 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	}
 
 	/**
-	 * Returns a <code>boolean</code> indicating whether this page's host name
-	 * specification group's visual components currently all contain valid values.
+	 * Returns whether this page's host name specification
+	 * group's visual components currently all contain valid values.
 	 */
 	protected boolean validateHostGroup() {
 		String host= fHostField.getText();
+		if (fHostParam != null) {
+			if (!fHostParam.isValid(host)) {
+				setErrorMessage(DebugUIUtils.getResourceString(HOST_ERROR));
+			}
+		}
 		return true;
 	}
 
@@ -231,5 +286,4 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	protected boolean getAllowTerminate() {
 		return fAllowTerminateButton.getSelection();
 	}
-	
 }
