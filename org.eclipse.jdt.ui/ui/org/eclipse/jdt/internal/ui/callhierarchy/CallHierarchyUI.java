@@ -113,12 +113,7 @@ public class CallHierarchyUI {
     }
 
     public static void openInEditor(Object element, Shell shell, String title) {
-        CallLocation callLocation= null;
-        if (element instanceof CallLocation) {
-            callLocation= (CallLocation) element;
-        } else if (element instanceof CallLocation) {
-            callLocation= CallHierarchy.getCallLocation(element);
-        }
+        CallLocation callLocation= CallHierarchy.getCallLocation(element);
 
         if (callLocation == null) {
             return;
