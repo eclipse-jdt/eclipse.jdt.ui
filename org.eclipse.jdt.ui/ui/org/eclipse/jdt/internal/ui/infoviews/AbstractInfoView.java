@@ -53,6 +53,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 			JavaElementLabels.F_APP_TYPE_SIGNATURE;
 
 	protected IJavaElement fCurrentInput;
+	private IWorkbenchPart fLastActivatedPart;
 
 	private IPartListener2 fPartListener= new IPartListener2() {
 		public void partVisible(IWorkbenchPartReference ref) {
@@ -68,6 +69,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 				setInputFrom(ref.getPart(false));
 		}
 		public void partActivated(IWorkbenchPartReference ref) {
+			fLastActivatedPart= ref.getPart(false);
 		}
 		public void partBroughtToTop(IWorkbenchPartReference ref) {
 		}
@@ -103,17 +105,23 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener {
 		setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
 	
-	private void startListeningForSelectionChanges() {
+	protected void startListeningForSelectionChanges() {
 		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
 	}
 
-	private void stopListeningForSelectionChanges() {
+	protected void stopListeningForSelectionChanges() {
 		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(this);
 	}
 
 	public void selectionChanged(IWorkbenchPart part, ISelection selection) {
 		if (part.equals(this))
 			return;
+			
+		if (fLastActivatedPart != null && fLastActivatedPart.equals(part)) {
+			fLastActivatedPart= null;
+			return;
+		}
+		fLastActivatedPart= null;
 		
 		setInputFrom(part);
 	}

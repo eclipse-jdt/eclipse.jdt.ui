@@ -32,7 +32,6 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jdt.core.ICodeAssist;
@@ -41,7 +40,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
@@ -61,8 +59,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
  */
 public class SourceView extends AbstractInfoView {
 
-	private IJavaElement fSelectedElement;
-	private int fCommentLines;
+	/** Symbolic Java editor font name. */ 
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
 
 	/**
@@ -84,20 +81,19 @@ public class SourceView extends AbstractInfoView {
 		}
 	};
 
+
 	/** This view's source viewer */
 	private SourceViewer fViewer;
 	/** The viewer's font properties change listener. */
 	private IPropertyChangeListener fFontPropertyChangeListener= new FontPropertyChangeListener();
 	/** The open action */
 	private OpenAction fOpen;
+	/** The number of removed leading comment lines. */
+	private int fCommentLineCount;
 
 
 	protected void internalCreatePartControl(Composite parent) {
-		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL) {
-			public ISelection getSelection() {
-				return convertToJavaElementSelection(super.getSelection());
-			}
-		};
+		fViewer= new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL);
 		fViewer.configure(new JavaSourceViewerConfiguration(JavaPlugin.getDefault().getJavaTextTools(), null));
 		fViewer.setEditable(false);
 
@@ -105,11 +101,23 @@ public class SourceView extends AbstractInfoView {
 		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 
 		// Setup OpenAction		
-		fOpen= new OpenAction(getViewSite());
-		fOpen.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
+		fOpen= new OpenAction(getViewSite()) {
+			/*
+			 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#getSelection()
+			 */
+			public ISelection getSelection() {
+				return convertToJavaElementSelection(fViewer.getSelection());
+			}
+			/*
+			 * @see org.eclipse.jdt.ui.actions.OpenAction#run(java.lang.Object[])
+			 */
+			public void run(Object[] elements) {
+				stopListeningForSelectionChanges();
+				super.run(elements);
+				startListeningForSelectionChanges();
+			}
+		}; 
 		getViewSite().getActionBars().setGlobalActionHandler(JdtActionConstants.OPEN, fOpen);
-		
-		getViewSite().setSelectionProvider(fViewer);
 	}
 
 	protected void setForeground(Color color) {
@@ -122,8 +130,7 @@ public class SourceView extends AbstractInfoView {
 
 	public ISelection convertToJavaElementSelection(ISelection selection) {
 		
-		fSelectedElement= null;
-		
+		// This condition should always be false.
 		if (!(selection instanceof ITextSelection && fCurrentInput instanceof ISourceReference))
 			return selection;
 
@@ -137,24 +144,11 @@ public class SourceView extends AbstractInfoView {
 			IJavaElement[] elements= null;
 			try {
 				ISourceRange range= ((ISourceReference)fCurrentInput).getSourceRange();
-
-				IDocument originalDoc= new Document(((ISourceReference)fCurrentInput).getSource());
-				IDocument inputDoc= (IDocument)fViewer.getInput();
-				int origOffset= 0;
-				try {
-					IRegion origLineInfo= originalDoc.getLineInformation(fCommentLines + textSelection.getStartLine());
-					IRegion inputLineInfo= inputDoc.getLineInformation(textSelection.getStartLine());
-					origOffset= origLineInfo.getOffset() + origLineInfo.getLength() - inputLineInfo.getLength() - inputLineInfo.getOffset() + textSelection.getOffset();
-				} catch (BadLocationException e1) {
-					return StructuredSelection.EMPTY;
-				}
-
-				elements= ((ICodeAssist)codeAssist).codeSelect(range.getOffset() + origOffset, textSelection.getLength());
+				elements= ((ICodeAssist)codeAssist).codeSelect(range.getOffset() + getOffsetInUnclippedDocument(textSelection), textSelection.getLength());
 			} catch (JavaModelException e) {
 				return StructuredSelection.EMPTY;
 			}
 			if (elements != null && elements.length > 0) {
-				fSelectedElement= elements[0];
 				return new StructuredSelection(elements[0]);
 			} else
 				return StructuredSelection.EMPTY;
@@ -163,6 +157,32 @@ public class SourceView extends AbstractInfoView {
 		return StructuredSelection.EMPTY;
 	}
 
+	/**
+	 * Computes and returns the offset in the unclipped document
+	 * based on the given text selection from the clipped
+	 * document.
+	 * 
+	 * @param textSelection
+	 * @return the offest in the unclipped document or <code>-1</code> if the offset cannot be computed
+	 */
+	private int getOffsetInUnclippedDocument(ITextSelection textSelection) {
+		IDocument unclippedDocument= null;;
+		try {
+			unclippedDocument= new Document(((ISourceReference)fCurrentInput).getSource());
+		} catch (JavaModelException e) {
+			return -1;
+		}
+		IDocument clippedDoc= (IDocument)fViewer.getInput();
+		try {
+			IRegion unclippedLineInfo= unclippedDocument.getLineInformation(fCommentLineCount + textSelection.getStartLine());
+			IRegion clippedLineInfo= clippedDoc.getLineInformation(textSelection.getStartLine());
+			int removedIndentation= unclippedLineInfo.getLength() - clippedLineInfo.getLength();
+			int relativeLineOffset= textSelection.getOffset() - clippedLineInfo.getOffset();
+			return unclippedLineInfo.getOffset() + removedIndentation + relativeLineOffset ;
+		} catch (BadLocationException ex) {
+			return -1;
+		}
+	}
 	
 	/*
 	 * @see IWorkbenchPart#dispose()
@@ -183,11 +203,6 @@ public class SourceView extends AbstractInfoView {
 
 		if (fViewer == null || !(input instanceof ISourceReference))
 			return false;
-
-		if (fSelectedElement != null && fSelectedElement.equals(input))
-			return false;
-
-		fSelectedElement= null;
 
 		String source;
 		try {
@@ -231,6 +246,12 @@ public class SourceView extends AbstractInfoView {
 		return true;
 	}
 
+	/**
+	 * Removes the leading comments from the given source.
+	 * 
+	 * @param source the string with the source
+	 * @return the source without leading comments
+	 */
 	private String removeLeadingComments(String source) {
 		JavaCodeReader reader= new JavaCodeReader();
 		IDocument document= new Document(source);
@@ -255,9 +276,9 @@ public class SourceView extends AbstractInfoView {
 		}
 
 		try {
-			fCommentLines= document.getLineOfOffset(i);
+			fCommentLineCount= document.getLineOfOffset(i);
 		} catch (BadLocationException e) {
-			fCommentLines= 0;
+			fCommentLineCount= 0;
 		}
 
 		if (i < 0)
@@ -303,29 +324,5 @@ public class SourceView extends AbstractInfoView {
 			StyledText styledText= fViewer.getTextWidget();
 			styledText.setFont(font);
 		}	
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#addSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void addSelectionChangedListener(ISelectionChangedListener listener) {
-		if (fViewer != null)
-			fViewer.addSelectionChangedListener(listener);
-	}
-
-	/*
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#removeSelectionChangedListener(org.eclipse.jface.viewers.ISelectionChangedListener)
-	 */
-	public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-		if (fViewer != null)
-			fViewer.removeSelectionChangedListener(listener);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ISelectionProvider#setSelection(org.eclipse.jface.viewers.ISelection)
-	 */
-	public void setSelection(ISelection selection) {
-		// XXX Auto-generated method stub
-		
 	}
 }
