@@ -68,6 +68,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
+	private AddJARToClasspathAction fAddJARToClasspathAction;
 	
 	private OrganizeImportsAction fOrganizeImports;
 
@@ -169,6 +170,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddBookmark= new AddBookmarkAction(site.getShell());
+		fAddJARToClasspathAction= new AddJARToClasspathAction(site);
 		fAddTaskAction= new AddTaskAction(site);
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
@@ -194,6 +196,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
+		registerSelectionListener(provider, fAddJARToClasspathAction);
 		registerSelectionListener(provider, fExternalizeStrings);
 		registerSelectionListener(provider, fFindStringsToExternalize);
 		registerSelectionListener(provider, fOrganizeImports);
@@ -202,7 +205,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
 		if (fRegisteredSelectionListeners == null)
-			fRegisteredSelectionListeners= new ArrayList(12);
+			fRegisteredSelectionListeners= new ArrayList(20);
 		provider.addSelectionChangedListener(listener);
 		fRegisteredSelectionListeners.add(listener);
 	}
@@ -256,6 +259,7 @@ public class GenerateActionGroup extends ActionGroup {
 			appendToGroup(menu, fAddUnimplementedConstructors);
 			appendToGroup(menu, fAddJavaDocStub);
 			appendToGroup(menu, fAddBookmark);
+			appendToGroup(menu, fAddJARToClasspathAction);
 		}
 	}
 	
