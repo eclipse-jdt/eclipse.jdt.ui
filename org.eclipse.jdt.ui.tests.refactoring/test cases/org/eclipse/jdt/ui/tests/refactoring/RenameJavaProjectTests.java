@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -52,7 +53,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			JavaProjectHelper.addRTJar(p1);
 
-			RenameRefactoring ref= new RenameRefactoring(p1);
+			RenameRefactoring ref= new RenameRefactoring(new RenameJavaProjectProcessor(p1));
 			assertTrue(ref.isAvailable());
 			ref.setNewName(newProjectName);
 			RefactoringStatus result= performRefactoring(ref);

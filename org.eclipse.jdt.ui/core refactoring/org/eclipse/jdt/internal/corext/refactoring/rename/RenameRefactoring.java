@@ -37,21 +37,18 @@ import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange
 
 public class RenameRefactoring extends Refactoring implements IProcessorBasedRefactoring, IRenameRefactoring {
 
-	private Object fElement;
 	private IRenameProcessor fProcessor;
 	private IRenameParticipant[] fElementParticipants;
 	private IRenameParticipant[] fDerivedParticipants;
 	private IRefactoringParticipant[] fResourceParticipants;
 	
-	public RenameRefactoring(Object element) throws CoreException {
-		Assert.isNotNull(element);
-		
-		fElement= element;
-		fProcessor= RenameExtensionManager.getProcessor(new Object[] {fElement});
+	public RenameRefactoring(IRenameProcessor processor) throws CoreException {
+		Assert.isNotNull(processor);
+		fProcessor= processor;
 	}
 	
-	public boolean isAvailable() {
-		return fProcessor != null;
+	public boolean isAvailable() throws CoreException {
+		return fProcessor.isAvailable();
 	}
 		
 	public Object getAdapter(Class clazz) {
@@ -207,9 +204,6 @@ public class RenameRefactoring extends Refactoring implements IProcessorBasedRef
 	 * for debugging only
 	 */
 	public String toString() {
-		if (isAvailable())
-			return getName();
-		else
-			return "No refactoring available to process: " + fElement;
+		return getName();
 	}
 }

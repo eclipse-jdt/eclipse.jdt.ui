@@ -26,27 +26,23 @@ import org.eclipse.ltk.internal.refactoring.core.DelegatingValidationStateChange
 
 public class DeleteRefactoring extends Refactoring {
 
-	private Object[] fElements;
 	private DeleteProcessor fProcessor;
 	private IDeleteParticipant[] fElementParticipants;
 	private IDeleteParticipant[] fDerivedParticipants;
 	private IRefactoringParticipant[] fMappedParticipants;
 
 	/**
-	 * Constructs a new delete refactoring for the given set
-	 * of elements.
+	 * Constructs a new delete refactoring for the given processor.
 	 * 
-	 * @param elements the elements to be deleted
+	 * @param processor the delete processor
 	 */
-	public DeleteRefactoring(Object[] elements) throws CoreException {
-		Assert.isTrue(elements != null);
-		
-		fElements= elements;
-		fProcessor= DeleteExtensionManager.getProcessor(fElements);
+	public DeleteRefactoring(DeleteProcessor processor) {
+		Assert.isNotNull(processor);
+		fProcessor= processor;
 	}
 	
-	public boolean isAvailable() {
-		return fProcessor != null;
+	public boolean isAvailable() throws CoreException {
+		return fProcessor.isAvailable();
 	}
 
 	public int getStyle() {

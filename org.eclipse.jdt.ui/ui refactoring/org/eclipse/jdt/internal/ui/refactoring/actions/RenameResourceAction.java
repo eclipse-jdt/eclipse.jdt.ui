@@ -10,15 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringAction;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 
-public class RenameResourceAction extends RenameRefactoringAction {
+import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
+public class RenameResourceAction extends SelectionDispatchAction {
 
 	public RenameResourceAction(IWorkbenchSite site) {
 		super(site);
@@ -26,12 +35,31 @@ public class RenameResourceAction extends RenameRefactoringAction {
 	
 	public void selectionChanged(IStructuredSelection selection) {
 		IResource element= getResource(selection);
-		if (element == null)
+		if (element == null) {
 			setEnabled(false);
-		else
-			setEnabled(true);
+		} else {
+			RenameResourceProcessor processor= new RenameResourceProcessor(element);
+			try {
+				setEnabled(processor.isAvailable());
+			} catch (CoreException e) {
+				setEnabled(false);
+			}
+		}
 	}
 
+	public void run(IStructuredSelection selection) {
+		RenameResourceProcessor processor= new RenameResourceProcessor(getResource(selection));
+		try {
+			if(!processor.isAvailable())
+				return;
+			RenameRefactoring refactoring= new RenameRefactoring(processor);
+			UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(refactoring);
+			starter.activate(refactoring, getShell(), true);
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, getShell(), "Rename Resource", "Unexpected exception occurred.");
+		}
+	}
+	
 	private static IResource getResource(IStructuredSelection selection) {
 		if (selection.size() != 1)
 			return null;

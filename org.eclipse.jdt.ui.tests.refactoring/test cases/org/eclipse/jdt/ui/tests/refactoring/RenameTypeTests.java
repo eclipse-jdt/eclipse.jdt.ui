@@ -55,7 +55,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 		
 	private RenameRefactoring createRefactoring(IType type, String newName) throws CoreException {
-		RenameRefactoring ref= new RenameRefactoring(type);
+		RenameTypeProcessor processor= new RenameTypeProcessor(type);
+		RenameRefactoring ref= new RenameRefactoring(processor);
 		ref.setNewName(newName);
 		return ref;
 	}

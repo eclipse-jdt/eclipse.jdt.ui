@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenameStaticMethodTests extends RefactoringTest {
@@ -44,8 +45,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		try{
-			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
-			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
+			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			processor.setNewElementName(newMethodName);
 			RefactoringStatus result= performRefactoring(refactoring);
 			assertNotNull("precondition was supposed to fail", result);
@@ -63,8 +64,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType classA= getType(cu, "A");
-			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
-			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
+			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			processor.setUpdateReferences(updateReferences);
 			processor.setNewElementName(newMethodName);
 			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
@@ -182,8 +183,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 
 		IType classB= getType(cuB, "B");
-		RenameRefactoring refactoring= new RenameRefactoring(classB.getMethod("method", new String[0]));
-		RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classB.getMethod("method", new String[0]));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(true);
 		processor.setNewElementName("newmethod");
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
@@ -201,8 +202,8 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			ICompilationUnit cuB= createCUfromTestFile(packageB, "B");
 	
 			IType classA= getType(cuA, "A");
-			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod("method2", new String[0]));
-			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod("method2", new String[0]));
+			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			processor.setUpdateReferences(true);
 			processor.setNewElementName("fred");
 			assertEquals("was supposed to pass", null, performRefactoring(refactoring));

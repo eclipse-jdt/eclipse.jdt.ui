@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
@@ -21,8 +20,8 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.DeleteResourceAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteExtensionManager;
 import org.eclipse.jdt.internal.corext.refactoring.participants.DeleteRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -59,7 +58,8 @@ public class DeleteAction extends SelectionDispatchAction {
 		}
 		try {
 			Object[] elements= selection.toArray();
-			setEnabled(DeleteExtensionManager.hasProcessor(elements));
+			JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+			setEnabled(processor.isAvailable());
 		} catch (CoreException e) {
 			//no ui here - this happens on selection changes
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
@@ -90,19 +90,15 @@ public class DeleteAction extends SelectionDispatchAction {
 		try {
 			Object[] elements= selection.toArray();
 			DeleteRefactoring ref= createRefactoring(elements);
-			if (!ref.isAvailable()) {
-				MessageDialog.openInformation(getShell(), 
-					"Delete", 
-					"No refactoring available to process the selected elements.");
-				return;
-			}
-			UserInterfaceStarter.run(ref, getShell(), false);
+			UserInterfaceStarter starter= DeleteUserInterfaceManager.getDefault().getStarter(ref);
+			starter.activate(ref, getShell(), false);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
 	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		return new DeleteRefactoring(elements);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		return new DeleteRefactoring(processor);
 	}
 }

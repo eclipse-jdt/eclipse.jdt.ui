@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenamePrivateMethodTests extends RefactoringTest {
@@ -42,7 +43,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		refactoring.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
@@ -55,8 +57,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
-		RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classA.getMethod(methodName, signatures));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
@@ -151,7 +153,8 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		RenameRefactoring refactoring= new RenameRefactoring(classB.getMethod("m", new String[]{"I"}));
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(classB.getMethod("m", new String[]{"I"}));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		refactoring.setNewName("kk");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));

@@ -41,17 +41,25 @@ public class RenameJavaProjectProcessor extends RenameProcessor implements IRefe
 	private boolean fUpdateReferences;
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
+	
+	public RenameJavaProjectProcessor(IJavaProject project) {
+		initialize(project);
+	}
 
 	public void initialize(Object[] elements) {
 		Assert.isTrue(elements != null && elements.length == 1);
 		Object element= elements[0];
 		if (!(element instanceof IJavaProject))
 			return;
-		fProject= (IJavaProject)element;
+		initialize((IJavaProject)element);
+	}
+	
+	private void initialize(IJavaProject project) {
+		fProject= project;
 		setNewElementName(fProject.getElementName());
 		fUpdateReferences= true;
 	}
-	
+
 	public boolean isAvailable() throws CoreException {
 		if (fProject == null)
 			return false;

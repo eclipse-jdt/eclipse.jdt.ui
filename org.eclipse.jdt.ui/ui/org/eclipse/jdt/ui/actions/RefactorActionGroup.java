@@ -43,7 +43,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -117,8 +116,6 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private List fEditorActions;
 
-	private SelectionDispatchAction fRenameRefactoringAction;
-	
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
 			setEnabled(false);
@@ -317,10 +314,6 @@ public class RefactorActionGroup extends ActionGroup {
 		fInlineAction= new InlineAction(fSite);
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
 		initAction(fInlineAction, provider, selection);
-		
-		fRenameRefactoringAction= new RenameRefactoringAction(fSite);
-		// no action definition id
-		initAction(fRenameRefactoringAction, provider, selection);
 		
 		fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
 		fIntroduceFactoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);

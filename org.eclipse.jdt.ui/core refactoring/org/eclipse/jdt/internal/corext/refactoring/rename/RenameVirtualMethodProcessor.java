@@ -38,6 +38,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	private IMethod fOriginalMethod;
 	private boolean fActivationChecked;
 	
+	public RenameVirtualMethodProcessor(IMethod method) {
+		super(method);
+		fOriginalMethod= getMethod();
+	}
+	
 	public IMethod getOriginalMethod() {
 		return fOriginalMethod;
 	}

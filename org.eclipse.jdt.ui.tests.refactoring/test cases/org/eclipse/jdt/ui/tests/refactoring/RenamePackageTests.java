@@ -56,7 +56,7 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	// -------------
 	private RenameRefactoring createRefactoring(IPackageFragment pack, String newName) throws CoreException {
-		RenameRefactoring result= new RenameRefactoring(pack);
+		RenameRefactoring result= new RenameRefactoring(new RenamePackageProcessor(pack));
 		result.setNewName(newName);
 		return result;
 	}

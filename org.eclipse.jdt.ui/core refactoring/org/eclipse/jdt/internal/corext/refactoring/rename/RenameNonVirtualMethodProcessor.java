@@ -37,6 +37,10 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
+	public RenameNonVirtualMethodProcessor(IMethod method) {
+		super(method);
+	}
+	
 	public boolean isAvailable() throws CoreException {
 		return super.isAvailable() && !MethodChecks.isVirtual(getMethod());
 	}

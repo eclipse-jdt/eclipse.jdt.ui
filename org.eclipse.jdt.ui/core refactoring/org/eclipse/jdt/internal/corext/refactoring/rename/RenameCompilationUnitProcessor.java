@@ -51,6 +51,14 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 	private ICompilationUnit fCu;
 	
 	//---- IRefactoringProcessor --------------------------------
+	
+	public RenameCompilationUnitProcessor(ICompilationUnit unit) throws CoreException {
+		fCu= unit;
+		if (fCu != null) {
+			computeRenameTypeRefactoring();
+			setNewElementName(fCu.getElementName());
+		}
+	}
 
 	public void initialize(Object[] elements) throws CoreException {
 		Assert.isTrue(elements != null && elements.length == 1);
@@ -286,8 +294,7 @@ public class RenameCompilationUnitProcessor extends RenameProcessor implements I
 		}
 		IType type= getTypeWithTheSameName();
 		if (type != null) {
-			fRenameTypeProcessor= new RenameTypeProcessor();
-			fRenameTypeProcessor.initialize(new Object[] {type});
+			fRenameTypeProcessor= new RenameTypeProcessor(type);
 		} else {
 			fRenameTypeProcessor= null;
 		}

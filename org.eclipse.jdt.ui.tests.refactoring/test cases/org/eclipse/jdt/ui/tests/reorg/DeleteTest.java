@@ -60,12 +60,14 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	private void verifyDisabled(Object[] elements) throws CoreException {
-		DeleteRefactoring ref= new DeleteRefactoring(elements);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		DeleteRefactoring ref= new DeleteRefactoring(processor);
 		assertTrue("delete should be disabled", !ref.isAvailable());
 	}
 
 	private void verifyEnabled(Object[] elements) throws CoreException {
-		DeleteRefactoring ref= new DeleteRefactoring(elements);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		DeleteRefactoring ref= new DeleteRefactoring(processor);
 		assertTrue("delete should be enabled", ref.isAvailable());
 	}
 
@@ -645,8 +647,9 @@ public class DeleteTest extends RefactoringTest{
 	}
 	
 	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		DeleteRefactoring result= new DeleteRefactoring(elements);
-		((JavaDeleteProcessor)result.getProcessor()).setQueries(createReorgQueries());
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		DeleteRefactoring result= new DeleteRefactoring(processor);
+		processor.setQueries(createReorgQueries());
 		return result;		
 	}	
 }

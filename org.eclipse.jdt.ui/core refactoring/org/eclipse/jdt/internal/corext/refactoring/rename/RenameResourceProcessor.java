@@ -35,6 +35,13 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 public class RenameResourceProcessor extends RenameProcessor {
 
 	private IResource fResource;
+	
+	public RenameResourceProcessor(IResource resource) {
+		fResource= resource;
+		if (fResource != null) {
+			setNewElementName(fResource.getName());
+		}
+	}
 
 	//---- IRenameProcessor methods ---------------------------------------
 		

@@ -40,16 +40,24 @@ public class RenameSourceFolderProcessor extends RenameProcessor {
 	private IPackageFragmentRoot fSourceFolder;
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
+	
+	public RenameSourceFolderProcessor(IPackageFragmentRoot root) {
+		initialize(root);
+	}
 
 	public void initialize(Object[] elements) {
 		Assert.isTrue(elements != null && elements.length == 1);
 		Object element= elements[0];
 		if (!(element instanceof IPackageFragmentRoot))
 			return;
-		fSourceFolder= (IPackageFragmentRoot)element;
-		setNewElementName(fSourceFolder.getElementName());
+		initialize((IPackageFragmentRoot)element);
 	}
 	
+	private void initialize(IPackageFragmentRoot sourceFolder) {
+		fSourceFolder= sourceFolder;
+		setNewElementName(fSourceFolder.getElementName());
+	}
+
 	public boolean isAvailable() throws CoreException {
 		if (fSourceFolder == null)
 			return false;

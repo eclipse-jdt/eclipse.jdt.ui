@@ -31,7 +31,9 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -69,7 +71,11 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 
 	private Change fDeleteChange;
 	
-	public JavaDeleteProcessor() {
+	public JavaDeleteProcessor(Object[] elements) {
+		fElements= elements;
+		fResources= getResources(elements);
+		fJavaElements= getJavaElements(elements);
+		fStyle= getStyle(fResources, fJavaElements);
 		fSuggestGetterSetterDeletion= true;
 		fWasCanceled= false;
 	}
@@ -84,10 +90,77 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	}
 	
 	public boolean isAvailable() throws CoreException {
+		if (fElements.length == 0)
+			return false;
 		if (fElements.length != fResources.length + fJavaElements.length)
+			return false;
+		for (int i= 0; i < fResources.length; i++) {
+			if (!canDelete(fResources[i]))
+				return false;
+		}
+		for (int i= 0; i < fJavaElements.length; i++) {
+			if (!canDelete(fJavaElements[i]))
+				return false;
+		}
+		return true;
+	}
+	
+	private boolean canDelete(IResource resource) {
+		if (!resource.exists() || resource.isPhantom())
+			return false;
+		if (resource.getType() == IResource.ROOT || resource.getType() == IResource.PROJECT)
 			return false;
 		return true;
 	}
+	
+	private boolean canDelete(IJavaElement element) throws CoreException {
+		if (! element.exists())
+			return false;
+		
+		if (element instanceof IJavaModel || element instanceof IJavaProject)
+			return false;
+		
+		if (element.getParent() != null && element.getParent().isReadOnly())
+			return false;
+		
+		if (element instanceof IPackageFragmentRoot){
+			IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+			if (root.isExternal() || Checks.isClasspathDelete(root)) //TODO rename isClasspathDelete
+				return false;
+		}
+		if (element instanceof IPackageFragment && isEmptySuperPackage((IPackageFragment)element))
+			return false;
+		
+		if (isFromExternalArchive(element))
+			return false;
+					
+		if (element instanceof IMember && ((IMember)element).isBinary())
+			return false;
+		
+		if (ReorgUtils.isDeletedFromEditor(element))
+			return false;								
+				
+		return true;
+	}
+	
+	private static boolean isFromExternalArchive(IJavaElement element) {
+		return element.getResource() == null && ! isWorkingCopyElement(element);
+	}
+	
+	private static boolean isWorkingCopyElement(IJavaElement element) {
+		if (element instanceof ICompilationUnit) 
+			return ((ICompilationUnit)element).isWorkingCopy();
+		if (ReorgUtils.isInsideCompilationUnit(element))
+			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
+		return false;
+	}
+
+	private static boolean isEmptySuperPackage(IPackageFragment pack) throws JavaModelException {
+		return  pack.hasSubpackages() &&
+				pack.getNonJavaResources().length == 0 &&
+				pack.getChildren().length == 0;
+	}	
+	
 	
 	public String getProcessorName() {
 		return RefactoringCoreMessages.getString("DeleteRefactoring.7"); //$NON-NLS-1$

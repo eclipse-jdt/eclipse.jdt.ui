@@ -95,6 +95,27 @@
    <extension-point id="changePreviewViewers" name="%changeViewerExtensionPoint"/>
    <extension-point id="refactoringUserInterfaces" name="%refactoringWizardExtensionPoint"/>
 
+   <extension point="org.eclipse.core.runtime.adapters">
+		<factory 
+            class="org.eclipse.jdt.internal.ui.JavaElementAdapterFactory" 
+            adaptableType="org.eclipse.jdt.core.IJavaElement">
+            
+            <adapter type="org.eclipse.core.resources.IResource"/>
+            <adapter type="org.eclipse.core.resources.IProject"/>
+            
+            <adapter type="org.eclipse.ui.IPersistableElement"/>
+            <adapter type="org.eclipse.ui.IContributorResourceAdapter"/>
+            <adapter type="org.eclipse.ui.IContainmentAdapter"/>
+            
+            <adapter type="org.eclipse.ui.model.IWorkbenchAdapter"/>
+            <adapter type="org.eclipse.ui.views.properties.IPropertySource"/>
+            <adapter type="org.eclipse.ui.views.tasklist.ITaskListResourceAdapter"/>
+            
+            <adapter type="org.eclipse.jdt.internal.ui.IResourceLocator"/>
+		</factory>
+   </extension>     	
+
+
    <extension
          point="org.eclipse.jdt.ui.classpathContainerPage">
       <classpathContainerPage
@@ -4028,147 +4049,6 @@
       </propertyTester>
    </extension>
    
-<!--- refactoring processors -->   
-   
-   <extension point="org.eclipse.jdt.ui.renameProcessors">
-      <renameProcessor
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor"
-            id="org.eclipse.jdt.renameProcessor.IResource">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.core.resources.IResource"/>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-   </extension>
-   <extension point="org.eclipse.jdt.ui.renameProcessors">
-      <renameProcessor
-            override="org.eclipse.jdt.renameProcessor.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor"
-            id="org.eclipse.jdt.renameProcessor.IJavaProject">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <adapt type="org.eclipse.jdt.core.IJavaProject">
-                  <test property="org.eclipse.jdt.ui.isAvailable"/>
-               </adapt>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            override="org.eclipse.jdt.renameProcessor.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor"
-            id="org.eclipse.jdt.renameProcessor.IPackageFragmentRoot">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <adapt type="org.eclipse.jdt.core.IPackageFragmentRoot">
-                  <test property="org.eclipse.jdt.ui.isAvailable"/>
-               </adapt>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            override="org.eclipse.jdt.renameProcessor.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor"
-            id="org.eclipse.jdt.renameProcessor.IPackageFragment">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.jdt.core.IPackageFragment"/>
-               <test property="org.eclipse.jdt.ui.isAvailable"/>
-               <not><test property="org.eclipse.jdt.ui.isDefaultPackage"/></not>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            override="org.eclipse.jdt.renameProcessor.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor"
-            id="org.eclipse.jdt.renameProcessor.ICompilationUnit">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <adapt type="org.eclipse.jdt.core.ICompilationUnit">
-                  <test property="org.eclipse.jdt.ui.isAvailable"/>
-               </adapt>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            override="org.eclipse.jdt.renameProcessor.IFile"
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor"
-            id="org.eclipse.jdt.renameProcessor.IType">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.jdt.core.IType"/>
-               <test property="org.eclipse.jdt.ui.isAvailable"/>
-               <not><test property="org.eclipse.jdt.ui.isAnonymous"/></not>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor"
-            id="org.eclipse.jdt.renameProcessor.IField">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.jdt.core.IField"/>
-               <test property="org.eclipse.jdt.ui.isAvailable"/>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor"
-            id="org.eclipse.jdt.renameProcessor.NonVirtualMethod">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.jdt.core.IMethod"/>
-               <test property="org.eclipse.jdt.ui.isAvailable"/>
-               <not><test property="org.eclipse.jdt.ui.isVirtual"/></not>
-               <not><test property="org.eclipse.jdt.ui.isConstructor"/></not>
-               <not><test property="org.eclipse.jdt.ui.isMainMethod"/></not>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-      <renameProcessor
-            class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor"
-            id="org.eclipse.jdt.renameProcessor.VirtualMethod">
-         <enablement>
-            <count value="1"/>
-            <iterate>
-               <instanceof value="org.eclipse.jdt.core.IMethod"/>
-               <test property="org.eclipse.jdt.ui.isVirtual"/>
-               <test property="org.eclipse.jdt.ui.isAvailable"/>
-            </iterate>
-         </enablement>
-      </renameProcessor>
-   </extension>
-   <extension
-         point="org.eclipse.jdt.ui.deleteProcessors">
-      <deleteProcessor
-            class="org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor"
-            id="org.eclipse.jdt.deleteProcessor">
-         <enablement>
-            <count value="+"/>
-            <iterate>
-               <or>
-                  <and>
-                     <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
-                     <test property="org.eclipse.jdt.ui.canDelete"/>
-                  </and>
-                  <and>
-                     <instanceof value="org.eclipse.core.resources.IResource"/>
-                     <test property="org.eclipse.jdt.ui.canDelete"/>
-                  </and>
-               </or>
-            </iterate>
-         </enablement>
-      </deleteProcessor>
-   </extension>
-   
 <!--- Status viewer -->
    
    <extension point="org.eclipse.jdt.ui.statusContextViewers">
@@ -4208,87 +4088,6 @@
       </changePreviewViewer>
    </extension>
    
-   
-   <extension point="org.eclipse.jdt.ui.refactoringUserInterfaces">
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameResourceWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IResource">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-   </extension>
-   
-   <extension
-         point="org.eclipse.jdt.ui.refactoringUserInterfaces">
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.DeleteWizard"
-            id="org.eclipse.jdt.ui.deleteProcessor">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameJavaProjectWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IJavaProject">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSourceFolderWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IPackageFragmentRoot">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenamePackageWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IPackageFragment">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameCuWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.ICompilationUnit">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameTypeWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IType">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameFieldWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IField">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor"/>
-         </enablement>
-      </refactoringUserInterface>
-      <refactoringUserInterface
-            wizard="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodWizard"
-            class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodUserInterfaceStarter"
-            id="org.eclipse.jdt.renameProcessor.ui.IMethod">
-         <enablement>
-            <or>
-               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor"/>
-               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor"/>
-            </or>
-         </enablement>
-      </refactoringUserInterface>
-   </extension>
    
    <extension
          point="org.eclipse.ui.views">

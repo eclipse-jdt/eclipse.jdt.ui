@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -55,6 +54,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
+
+	//---- Structured selection ------------------------------------------------
 	
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
@@ -70,35 +71,12 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		setEnabled(false);
 	}
 	
-	public void run(IStructuredSelection selection) {
-		IJavaElement element= getJavaElement(selection);
-		if (element == null)
-			return;
-		try {
-			run(element, null);	
-		} catch (CoreException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
-		}	
-	}
-
-	public void selectionChanged(ITextSelection selection) {
-		if (selection instanceof JavaTextSelection) {
-			try {
-				IJavaElement[] elements= ((JavaTextSelection)selection).resolveElementAtOffset();
-				setEnabled(RenameExtensionManager.hasProcessor(elements));
-			} catch (CoreException e) {
-				setEnabled(false);
-			}
-		} else {
-			setEnabled(true);
-		}
-	}
-		
 	private static boolean canEnable(IStructuredSelection selection) throws CoreException {
 		IJavaElement element= getJavaElement(selection);
 		if (element == null)
 			return false;
-		return RenameExtensionManager.hasProcessor(new Object[] {element});
+		RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
+		return support != null && support.preCheck().isOK();
 	} 
 
 	private static IJavaElement getJavaElement(IStructuredSelection selection) {
@@ -110,12 +88,43 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		return (IJavaElement)first;
 	}
 	
+	public void run(IStructuredSelection selection) {
+		IJavaElement element= getJavaElement(selection);
+		if (element == null)
+			return;
+		try {
+			run(element, null);	
+		} catch (CoreException e){
+			ExceptionHandler.handle(e, RefactoringMessages.getString("RenameJavaElementAction.name"), RefactoringMessages.getString("RenameJavaElementAction.exception"));  //$NON-NLS-1$ //$NON-NLS-2$
+		}	
+	}
+	
+	//---- text selection ------------------------------------------------------------
+
+	public void selectionChanged(ITextSelection selection) {
+		if (selection instanceof JavaTextSelection) {
+			try {
+				IJavaElement[] elements= ((JavaTextSelection)selection).resolveElementAtOffset();
+				if (elements.length == 1) {
+					RenameSupport support= createGeneric(elements[0], null, RenameSupport.UPDATE_REFERENCES);
+					setEnabled(support != null && support.preCheck().isOK());
+				} else {
+					setEnabled(false);
+				}
+			} catch (CoreException e) {
+				setEnabled(false);
+			}
+		} else {
+			setEnabled(true);
+		}
+	}
+		
 	public void run(ITextSelection selection) {
 		try {
 			IJavaElement element= getJavaElement();
 			if (element != null) {
 				RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-				if (support.preCheck().isOK()) {
+				if (support != null && support.preCheck().isOK()) {
 					run(element, support);
 					return;
 				}
@@ -131,7 +140,8 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		if (element == null)
 			return false;
 		try {
-			return createGeneric(element, null, RenameSupport.UPDATE_REFERENCES).preCheck().isOK();
+			RenameSupport support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
+			return support != null && support.preCheck().isOK();
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.filterNotPresentException(e))
 				JavaPlugin.log(e);
@@ -140,6 +150,15 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 		}
 		return false;
 	}
+	
+	private IJavaElement getJavaElement() {
+		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
+		if (elements == null || elements.length != 1)
+			return null;
+		return elements[0];
+	}
+	
+	//---- helper methods -------------------------------------------------------------------
 
 	private void run(IJavaElement element, RenameSupport support) throws CoreException {
 		// Work around for http://dev.eclipse.org/bugs/show_bug.cgi?id=19104		
@@ -150,17 +169,10 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 			return;
 		if (support == null) {
 			support= createGeneric(element, null, RenameSupport.UPDATE_REFERENCES);
-			if (!support.preCheck().isOK())
+			if (support == null || !support.preCheck().isOK())
 				return;
 		}
 		support.openDialog(getShell());
-	}
-	
-	private IJavaElement getJavaElement() {
-		IJavaElement[] elements= SelectionConverter.codeResolveHandled(fEditor, getShell(), RefactoringMessages.getString("RenameJavaElementAction.name")); //$NON-NLS-1$
-		if (elements == null || elements.length != 1)
-			return null;
-		return elements[0];
 	}
 	
 	private static RenameSupport createGeneric(IJavaElement element, String newName, int flags) throws CoreException {

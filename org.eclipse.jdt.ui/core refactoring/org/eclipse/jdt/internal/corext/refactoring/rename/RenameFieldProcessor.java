@@ -72,6 +72,10 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 	
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
+
+	public RenameFieldProcessor(IField field) {
+		initialize(field);
+	}
 	
 	//---- IRefactoringProcessor --------------------------------
 
@@ -80,7 +84,11 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		Object field= elements[0];
 		if (!(field instanceof IField))
 			return;
-		fField= (IField)field;
+		initialize((IField)field);
+	}
+	
+	private void initialize(IField field) {
+		fField= field;
 		setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
@@ -90,7 +98,7 @@ public class RenameFieldProcessor extends RenameProcessor implements IReferenceU
 		fRenameGetter= false;
 		fRenameSetter= false;
 	}
-	
+
 	public boolean isAvailable() throws CoreException {
 		if (fField == null)
 			return false;

@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -32,8 +31,17 @@ import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -41,7 +49,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
-import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringAction;
+import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
+import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
 /**
  * Central access point to execute rename refactorings.
@@ -91,7 +100,8 @@ public class RenameSupport {
 			showInformation(parent, fPreCheckStatus);
 			return; 
 		}
-		RenameRefactoringAction.run(fRefactoring, parent);
+		UserInterfaceStarter starter= RenameUserInterfaceManager.getDefault().getStarter(fRefactoring);
+		starter.activate(fRefactoring, parent, true);
 	}
 	
 	/**
@@ -108,7 +118,7 @@ public class RenameSupport {
 	 * 
 	 * @throws InterruptedException if the operation has been canceled by the
 	 * user.
-	 * @throws InvocationTargetException if an error occured while executing the
+	 * @throws InvocationTargetException if an error occurred while executing the
 	 * operation.
 	 * 
 	 * @see #openDialog(Shell)
@@ -150,8 +160,8 @@ public class RenameSupport {
 	/** Flag indicating that the setter method is to be updated as well. */
 	public static final int UPDATE_SETTER_METHOD= 1 << 5;
 
-	private RenameSupport(IJavaElement element, String newName, int flags) throws CoreException {
-		fRefactoring= new RenameRefactoring(element);
+	private RenameSupport(IRenameProcessor processor, String newName, int flags) throws CoreException {
+		fRefactoring= new RenameRefactoring(processor);
 		initialize(fRefactoring, newName, flags);
 	}
 
@@ -164,11 +174,12 @@ public class RenameSupport {
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IJavaProject project, String newName, int flags) throws CoreException {
-		return new RenameSupport(project, newName, flags);
+		IRenameProcessor processor= new RenameJavaProjectProcessor(project);
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	/**
@@ -178,11 +189,12 @@ public class RenameSupport {
 	 * @param newName the package fragment roor's new name. <code>null</code> is
 	 * a valid value indicating that no new name is provided.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IPackageFragmentRoot root, String newName) throws CoreException {
-		return new RenameSupport(root, newName, 0);
+		IRenameProcessor processor= new RenameSourceFolderProcessor(root);
+		return new RenameSupport(processor, newName, 0);
 	}
 	
 	/**
@@ -197,11 +209,12 @@ public class RenameSupport {
 	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
 	 * <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IPackageFragment fragment, String newName, int flags) throws CoreException {
-		return new RenameSupport(fragment, newName, flags);
+		IRenameProcessor processor= new RenamePackageProcessor(fragment);
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	/**
@@ -216,11 +229,12 @@ public class RenameSupport {
 	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
 	 * <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(ICompilationUnit unit, String newName, int flags) throws CoreException {
-		return new RenameSupport(unit, newName, flags);
+		IRenameProcessor processor= new RenameCompilationUnitProcessor(unit);
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	/**
@@ -235,11 +249,12 @@ public class RenameSupport {
 	 * <code>UPDATE_STRING_LITERALS</code>, or their bitwise OR, or
 	 * <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IType type, String newName, int flags) throws CoreException {
-		return new RenameSupport(type, newName, flags);
+		IRenameProcessor processor= new RenameTypeProcessor(type);
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	/**
@@ -251,11 +266,17 @@ public class RenameSupport {
 	 * @param flags flags controlling additional parameters. Valid flags are
 	 * <code>UPDATE_REFERENCES</code> or <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IMethod method, String newName, int flags) throws CoreException {
-		return new RenameSupport(method, newName, flags);
+		IRenameProcessor processor;
+		if (MethodChecks.isVirtual(method)) {
+			processor= new RenameVirtualMethodProcessor(method);
+		} else {
+			processor= new RenameNonVirtualMethodProcessor(method);
+		}
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	/**
@@ -271,17 +292,14 @@ public class RenameSupport {
 	 * and </code>UPDATE_SETTER_METHOD</code>, or their bitwise OR, or
 	 * <code>NONE</code>.
 	 * @return the <tt>RenameSupport</tt>.
-	 * @throws CoreException if an unexpected error occured while creating
+	 * @throws CoreException if an unexpected error occurred while creating
 	 * the <tt>RenameSupport</tt>.
 	 */
 	public static RenameSupport create(IField field, String newName, int flags) throws CoreException {
-		RenameSupport result= new RenameSupport(field, newName, flags);
-		RenameFieldProcessor processor= (RenameFieldProcessor)result.fRefactoring.getProcessor();
-		if (processor != null) {
-			processor.setRenameGetter(updateGetterMethod(flags));
-			processor.setRenameSetter(updateSetterMethod(flags));
-		}
-		return result;
+		RenameFieldProcessor processor= new RenameFieldProcessor(field);
+		processor.setRenameGetter(updateGetterMethod(flags));
+		processor.setRenameSetter(updateSetterMethod(flags));
+		return new RenameSupport(processor, newName, flags);
 	}
 	
 	private static void initialize(RenameRefactoring refactoring, String newName, int flags) {
@@ -331,7 +349,7 @@ public class RenameSupport {
 	
 	private void ensureChecked() throws CoreException {
 		if (fPreCheckStatus == null) {
-			if (fRefactoring.getProcessor() == null) {
+			if (!fRefactoring.isAvailable()) {
 				fPreCheckStatus= RefactoringStatus.createFatalErrorStatus("This refactoring is not enabled.");
 			} else {
 				fPreCheckStatus= new RefactoringStatus();

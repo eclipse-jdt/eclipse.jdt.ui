@@ -65,6 +65,10 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
 	
+	public RenameMethodProcessor(IMethod method) {
+		initialize(method);
+	}
+	
 	protected void setData(RenameMethodProcessor other) {
 		fUpdateReferences= other.fUpdateReferences;
 		fNewElementName= other.fNewElementName;
@@ -77,11 +81,15 @@ public abstract class RenameMethodProcessor extends RenameProcessor implements I
 		Object method= elements[0];
 		if (!(method instanceof IMethod))
 			return;
-		fMethod= (IMethod)method;
+		initialize((IMethod)method);
+	}
+		
+	private void initialize(IMethod method) {
+		fMethod= method;
 		setNewElementName(fMethod.getElementName());
 		fUpdateReferences= true;
 	}
-		
+
 	public boolean isAvailable() throws CoreException {
 		if (fMethod == null)
 			return false;

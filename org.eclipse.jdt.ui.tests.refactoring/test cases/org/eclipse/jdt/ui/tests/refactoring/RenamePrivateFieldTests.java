@@ -66,8 +66,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName, String typeName,
 							boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameRefactoring refactoring= new RenameRefactoring(declaringType.getField(fieldName));
-		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		RenameFieldProcessor processor= new RenameFieldProcessor(declaringType.getField(fieldName));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		processor.setRenameGetter(renameGetter);
 		processor.setRenameSetter(renameSetter);
@@ -91,8 +91,8 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
-		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setUpdateJavaDoc(updateJavaDoc);
 		processor.setUpdateComments(updateComments);

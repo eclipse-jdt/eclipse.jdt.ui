@@ -65,8 +65,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
-		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
@@ -79,8 +79,8 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
-		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		RenameFieldProcessor processor= new RenameFieldProcessor(classA.getField(fieldName));
+		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setNewElementName(newFieldName);
 		processor.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(refactoring);

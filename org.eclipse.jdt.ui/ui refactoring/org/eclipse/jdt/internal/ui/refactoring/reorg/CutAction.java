@@ -136,10 +136,9 @@ public class CutAction extends SelectionDispatchAction{
 	}
 
 	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		DeleteRefactoring ref= new DeleteRefactoring(elements);
-		JavaDeleteProcessor processor= (JavaDeleteProcessor)ref.getAdapter(JavaDeleteProcessor.class);
-		if (processor != null)
-			processor.setSuggestGetterSetterDeletion(false);
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		DeleteRefactoring ref= new DeleteRefactoring(processor);
+		processor.setSuggestGetterSetterDeletion(false);
 		return ref;
 	}
 }

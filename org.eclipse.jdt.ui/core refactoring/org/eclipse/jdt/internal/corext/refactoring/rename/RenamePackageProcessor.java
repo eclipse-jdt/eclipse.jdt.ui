@@ -112,20 +112,28 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 	private String fFilePatterns;
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
+	
+	public RenamePackageProcessor(IPackageFragment fragment) {
+		initialize(fragment);
+	}
 
 	public void initialize(Object[] elements) {
 		Assert.isTrue(elements != null && elements.length == 1);
 		Object element= elements[0];
 		if (!(element instanceof IPackageFragment))
 			return;
-		fPackage= (IPackageFragment)element;
+		initialize((IPackageFragment)element);
+	}
+	
+	private void initialize(IPackageFragment fragment) {
+		fPackage= fragment;
 		setNewElementName(fPackage.getElementName());
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
 	}
-	
+
 	public boolean isAvailable() throws CoreException {
 		if (fPackage == null)
 			return false;

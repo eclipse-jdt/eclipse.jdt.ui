@@ -71,6 +71,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.ValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.util.ASTCreator;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
@@ -176,7 +177,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
 		
-		fRoot= AST.parseCompilationUnit(fField.getCompilationUnit(), true);
+		fRoot= ASTCreator.perform(fField.getCompilationUnit(), true);
 		ISourceRange sourceRange= fField.getNameRange();
 		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
 		if (node == null) {
@@ -288,7 +289,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 				rewriter= fRewriter;
 				descriptions= ownerDescriptions;
 			} else {
-				root= AST.parseCompilationUnit(unit, true);
+				root= ASTCreator.perform(unit, true);
 				rewriter= new ASTRewrite(root);
 				descriptions= new ArrayList();
 			}

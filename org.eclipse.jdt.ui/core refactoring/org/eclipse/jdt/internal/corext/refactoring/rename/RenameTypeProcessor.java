@@ -91,6 +91,10 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
+	public RenameTypeProcessor(IType type) {
+		initialize(type);
+	}
+	
 	public IType getType() {
 		return fType;
 	}
@@ -102,16 +106,22 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		Object element= elements[0];
 		if (!(element instanceof IType))
 			return;
-		fType= (IType)element;
+		initialize((IType)element);
+	}
+	
+	private void initialize(IType type) {
+		fType= type;
 		setNewElementName(fType.getElementName());
 		fUpdateReferences= true; //default is yes
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
 	}
-	
+
 	public boolean isAvailable() throws CoreException {
 		if (fType == null)
+			return false;
+		if (fType.isAnonymous())
 			return false;
 		if (! Checks.isAvailable(fType))
 			return false;

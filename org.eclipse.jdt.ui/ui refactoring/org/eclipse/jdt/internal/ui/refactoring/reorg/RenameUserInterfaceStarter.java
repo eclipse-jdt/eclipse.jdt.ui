@@ -105,7 +105,7 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 		}
 	}
 	
-	protected void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
+	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
 		IRenameProcessor processor= (IRenameProcessor)refactoring.getAdapter(IRenameProcessor.class);
 		SelectionState state= new SelectionState(processor.getElements());
 		super.activate(refactoring, parent, save);
