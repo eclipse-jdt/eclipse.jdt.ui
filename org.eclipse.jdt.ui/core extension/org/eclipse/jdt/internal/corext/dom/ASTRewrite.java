@@ -186,8 +186,8 @@ public final class ASTRewrite {
 	 * @param node Description of the change. 
 	 */		
 	public final void markAsReplaced(ASTNode node, ASTNode replacingNode, String description) {
-		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)");
-		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node");
+		Assert.isTrue(replacingNode != null, "Tries to replace with null (use remove instead)"); //$NON-NLS-1$
+		Assert.isTrue(replacingNode.getStartPosition() == -1, "Tries to replace with existing node"); //$NON-NLS-1$
 		assertIsInside(node);
 		ASTReplace replace= new ASTReplace();
 		replace.replacingNode= replacingNode;
@@ -215,7 +215,7 @@ public final class ASTRewrite {
 	 * @param node Description of the change. 
 	 */			
 	public final void markAsModified(ASTNode node, ASTNode modifiedNode, String description) {
-		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type");
+		Assert.isTrue(node.getClass().equals(modifiedNode.getClass()), "Tries to modify with a node of different type"); //$NON-NLS-1$
 		assertIsInside(node);
 		ASTModify modify= new ASTModify();
 		modify.modifiedNode= modifiedNode;
@@ -238,15 +238,15 @@ public final class ASTRewrite {
 	 * to replace at the target position. 
 	 */
 	public final ASTNode createCopy(ASTNode node) {
-		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node");
-		Assert.isTrue(getCopySourceEdit(node) == null, "Node used as more than one copy source");
+		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
+		Assert.isTrue(getCopySourceEdit(node) == null, "Node used as more than one copy source"); //$NON-NLS-1$
 		assertIsInside(node);
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node.getStartPosition(), node.getLength());
 		setCopySourceEdit(node, copySource);
 		
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName());
+			Assert.isTrue(false, "Can not create copy for elements of type " + node.getClass().getName()); //$NON-NLS-1$
 		}
 		return ASTWithExistingFlattener.createPlaceholder(node.getAST(), node, placeHolderType);
 	}
@@ -256,23 +256,23 @@ public final class ASTRewrite {
 	 * to replace at the target position. 
 	 */
 	public final ASTNode createCopy(ASTNode startNode, ASTNode endNode) {
-		Assert.isTrue(startNode.getStartPosition() != -1, "Tries to copy a non-existing node");
-		Assert.isTrue(endNode.getStartPosition() != -1, "Tries to copy a non-existing node");
-		Assert.isTrue(getCopySourceEdit(startNode) == null, "Start node used as more than one copy source ");
-		Assert.isTrue(getCopySourceEdit(endNode) == null, "End node used as more than one copy source ");
-		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent");
+		Assert.isTrue(startNode.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
+		Assert.isTrue(endNode.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
+		Assert.isTrue(getCopySourceEdit(startNode) == null, "Start node used as more than one copy source "); //$NON-NLS-1$
+		Assert.isTrue(getCopySourceEdit(endNode) == null, "End node used as more than one copy source "); //$NON-NLS-1$
+		Assert.isTrue(startNode.getParent() == endNode.getParent(), "Nodes must have same parent"); //$NON-NLS-1$
 		assertIsInside(startNode);
 		assertIsInside(endNode);
 		int start= startNode.getStartPosition();
 		int end= endNode.getStartPosition() + endNode.getLength();
-		Assert.isTrue(start < end, "Start node must have smaller offset than end node");
+		Assert.isTrue(start < end, "Start node must have smaller offset than end node"); //$NON-NLS-1$
 
 		Object copySource= ASTRewriteAnalyzer.createSourceCopy(start, end - start);
 		setCopySourceEdit(startNode, copySource);
 		setCopySourceEdit(endNode, copySource);
 		int placeHolderType= getPlaceholderType(startNode);
 		if (placeHolderType == UNKNOWN) {
-			Assert.isTrue(false, "Can not create copy for elements of type " + startNode.getClass().getName());
+			Assert.isTrue(false, "Can not create copy for elements of type " + startNode.getClass().getName()); //$NON-NLS-1$
 		}		
 		return ASTWithExistingFlattener.createPlaceholder(startNode.getAST(), startNode, placeHolderType);
 	}	
@@ -363,8 +363,8 @@ public final class ASTRewrite {
 		setChangeProperty(node, null);
 	}
 
-	private static final String CHANGEKEY= "ASTChangeData";
-	private static final String COPYSOURCEKEY= "ASTCopySource";
+	private static final String CHANGEKEY= "ASTChangeData"; //$NON-NLS-1$
+	private static final String COPYSOURCEKEY= "ASTCopySource"; //$NON-NLS-1$
 	
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
 		fChangedProperties.put(node, change);
@@ -385,7 +385,7 @@ public final class ASTRewrite {
 	private void assertIsInside(ASTNode node) {
 		int endPos= node.getStartPosition() + node.getLength();
 		if (fRootNode.getStartPosition() > node.getStartPosition() || fRootNode.getStartPosition() + fRootNode.getLength() < endPos) {
-			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root");
+			Assert.isTrue(false, "Node that is changed is not located inside of ASTRewrite root"); //$NON-NLS-1$
 		}
 	}
 	

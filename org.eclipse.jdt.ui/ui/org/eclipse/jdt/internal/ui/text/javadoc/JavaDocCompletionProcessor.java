@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.text.template.TemplateEngine;
  */
 public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 	
-	private static final String PROCESSOR_CONTRIBUTION_ID= "javadocCompletionProcessor";
+	private static final String PROCESSOR_CONTRIBUTION_ID= "javadocCompletionProcessor"; //$NON-NLS-1$
 	
 	private IEditorPart fEditor;
 	private char[] fProposalAutoActivationSet;
@@ -72,7 +72,7 @@ public class JavaDocCompletionProcessor implements IContentAssistProcessor {
 				IConfigurationElement[] elements=	registry.getConfigurationElementsFor(JavaUI.ID_PLUGIN, PROCESSOR_CONTRIBUTION_ID);
 				IJavadocCompletionProcessor[] result= new IJavadocCompletionProcessor[elements.length];
 				for (int i= 0; i < elements.length; i++) {
-					result[i]= (IJavadocCompletionProcessor) elements[i].createExecutableExtension("class");
+					result[i]= (IJavadocCompletionProcessor) elements[i].createExecutableExtension("class"); //$NON-NLS-1$
 				}
 				fSubProcessors= result;
 			} catch (CoreException e) {

@@ -76,11 +76,11 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 				return task.name;
 			} else {
 				if (PRIORITY_HIGH.equals(task.priority)) {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.high.priority");
+					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.high.priority"); //$NON-NLS-1$
 				} else if (PRIORITY_NORMAL.equals(task.priority)) {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.normal.priority");
+					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.normal.priority"); //$NON-NLS-1$
 				} else {
-					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.low.priority");
+					return PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.low.priority"); //$NON-NLS-1$
 				}
 			}	
 		}
@@ -97,19 +97,19 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 						
 		TaskTagAdapter adapter=  new TaskTagAdapter();
 		String[] buttons= new String[] {
-			/* 0 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.add.button"),
-			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"),
+			/* 0 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.add.button"), //$NON-NLS-1$
+			/* 1 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.remove.button"), //$NON-NLS-1$
 			null,
-			/* 3 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"),
+			/* 3 */ PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.edit.button"), //$NON-NLS-1$
 		};
 		fTodoTasksList= new ListDialogField(adapter, buttons, new TodoTaskLabelProvider());
 		fTodoTasksList.setDialogFieldListener(adapter);
-		fTodoTasksList.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.label"));
+		fTodoTasksList.setLabelText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.label")); //$NON-NLS-1$
 		fTodoTasksList.setRemoveButtonIndex(1);
 		
 		String[] columnsHeaders= new String[] {
-			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.name.column"),
-			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.priority.column"),
+			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.name.column"), //$NON-NLS-1$
+			PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.tasks.priority.column"), //$NON-NLS-1$
 		};
 		
 		fTodoTasksList.setTableColumns(new ListDialogField.ColumnsDescription(columnsHeaders, true));
@@ -179,7 +179,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= 2;
 
 		Group group= new Group(markersComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.taskmarkers.label"));
+		group.setText(PreferencesMessages.getString("TodoTaskConfigurationBlock.markers.taskmarkers.label")); //$NON-NLS-1$
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 		
@@ -233,7 +233,7 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	 */
 	protected Map getDefaultOptions() {
 		Map map= super.getDefaultOptions();
-		map.put(PREF_COMPILER_TASK_TAGS, "TODO");
+		map.put(PREF_COMPILER_TASK_TAGS, "TODO"); //$NON-NLS-1$
 		map.put(PREF_COMPILER_TASK_PRIORITIES, PRIORITY_NORMAL);
 		return map;
 	}
@@ -248,8 +248,8 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	private void unpackTodoTasks() {
 		String currTags= (String) fWorkingValues.get(PREF_COMPILER_TASK_TAGS);	
 		String currPrios= (String) fWorkingValues.get(PREF_COMPILER_TASK_PRIORITIES);
-		String[] tags= getTokens(currTags, ",");
-		String[] prios= getTokens(currPrios, ",");
+		String[] tags= getTokens(currTags, ","); //$NON-NLS-1$
+		String[] prios= getTokens(currPrios, ","); //$NON-NLS-1$
 		ArrayList elements= new ArrayList(tags.length);
 		for (int i= 0; i < tags.length; i++) {
 			TodoTask task= new TodoTask();

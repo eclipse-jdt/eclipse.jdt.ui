@@ -43,7 +43,7 @@ public class MarkerResolutionProposal implements IJavaCompletionProposal {
 	public String getAdditionalProposalInfo() {
 		try {
 			String problemDesc= (String) fMarker.getAttribute(IMarker.MESSAGE);
-			return CorrectionMessages.getFormattedString("MarkerResolutionProposal.additionaldesc", problemDesc);
+			return CorrectionMessages.getFormattedString("MarkerResolutionProposal.additionaldesc", problemDesc); //$NON-NLS-1$
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

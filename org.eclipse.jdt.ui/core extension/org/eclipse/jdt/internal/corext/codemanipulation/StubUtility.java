@@ -98,7 +98,7 @@ public class StubUtility {
 			if (comment != null) {
 				buf.append(comment);
 			} else {
-				buf.append("/**\n *\n **/");
+				buf.append("/**\n *\n **/"); //$NON-NLS-1$
 			}
 			buf.append('\n');
 		}
@@ -244,7 +244,7 @@ public class StubUtility {
 					buf.append("return 0;"); //$NON-NLS-1$
 				}
 			}			
-			return "";
+			return ""; //$NON-NLS-1$
 		}
 	}	
 
@@ -480,7 +480,7 @@ public class StubUtility {
 			}
 			buf.append("@param "); buf.append(paramNames[i]); //$NON-NLS-1$
 		}
-		if (returnType != null && !returnType.equals("void")) {
+		if (returnType != null && !returnType.equals("void")) { //$NON-NLS-1$
 			if (buf.length() > 0) {
 				buf.append('\n'); buf.append(lineStart);
 			}			
@@ -498,7 +498,7 @@ public class StubUtility {
 			if (buf.length() > 0) {
 				buf.append('\n'); buf.append(lineStart);
 			}
-			buf.append("@deprecated");
+			buf.append("@deprecated"); //$NON-NLS-1$
 		}
 		textBuffer.replace(offset, length, buf.toString());
 	}

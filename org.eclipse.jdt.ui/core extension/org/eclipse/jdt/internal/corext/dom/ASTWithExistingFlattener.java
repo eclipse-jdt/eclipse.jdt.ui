@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 
 public class ASTWithExistingFlattener extends ASTFlattener {
 
-	private static final String KEY= "ExistingASTNode";
+	private static final String KEY= "ExistingASTNode"; //$NON-NLS-1$
 
 	public static class NodeMarker {
 		public Object data;
@@ -31,10 +31,10 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		ASTNode placeHolder;
 		switch (nodeType) {
 			case ASTRewrite.EXPRESSION:
-				placeHolder= ast.newSimpleName("z");
+				placeHolder= ast.newSimpleName("z"); //$NON-NLS-1$
 				break;
 			case ASTRewrite.TYPE:
-				placeHolder= ast.newSimpleType(ast.newSimpleName("X"));
+				placeHolder= ast.newSimpleType(ast.newSimpleName("X")); //$NON-NLS-1$
 				break;				
 			case ASTRewrite.STATEMENT:
 				placeHolder= ast.newReturnStatement();

@@ -195,7 +195,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
-		return ast.newSimpleType(ast.newSimpleName("Object"));
+		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
 	
 	private int evaluateFieldModifiers(ASTNode newTypeDecl) {

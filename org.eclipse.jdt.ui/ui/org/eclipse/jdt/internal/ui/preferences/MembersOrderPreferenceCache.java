@@ -54,21 +54,21 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		int i= 0;
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken().trim();
-			if ("T".equals(token)) {
+			if ("T".equals(token)) { //$NON-NLS-1$
 				offsets[TYPE_INDEX]= i++;
-			} else if ("M".equals(token)) {
+			} else if ("M".equals(token)) { //$NON-NLS-1$
 				offsets[METHOD_INDEX]= i++;
-			} else if ("F".equals(token)) {
+			} else if ("F".equals(token)) { //$NON-NLS-1$
 				offsets[FIELDS_INDEX]= i++;
-			} else if ("I".equals(token)) {
+			} else if ("I".equals(token)) { //$NON-NLS-1$
 				offsets[INIT_INDEX]= i++;
-			} else if ("SF".equals(token)) {
+			} else if ("SF".equals(token)) { //$NON-NLS-1$
 				offsets[STATIC_FIELDS_INDEX]= i++;
-			} else if ("SI".equals(token)) {
+			} else if ("SI".equals(token)) { //$NON-NLS-1$
 				offsets[STATIC_INIT_INDEX]= i++;
-			} else if ("SM".equals(token)) {
+			} else if ("SM".equals(token)) { //$NON-NLS-1$
 				offsets[STATIC_METHODS_INDEX]= i++;
-			} else if ("C".equals(token)) {
+			} else if ("C".equals(token)) { //$NON-NLS-1$
 				offsets[CONSTRUCTORS_INDEX]= i++;
 			}
 		}

@@ -61,17 +61,17 @@ public class CompilerPropertyPage extends PropertyPage {
 		
 		fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseWorkspaceSettings.setDialogFieldListener(listener);
-		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label"));
+		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.label")); //$NON-NLS-1$
 
 		fChangeWorkspaceSettings= new SelectionButtonDialogField(SWT.PUSH);
-		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.change"));
+		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useworkspacesettings.change")); //$NON-NLS-1$
 		fChangeWorkspaceSettings.setDialogFieldListener(listener);
 	
 		fUseWorkspaceSettings.attachDialogField(fChangeWorkspaceSettings);
 
 		fUseProjectSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseProjectSettings.setDialogFieldListener(listener);
-		fUseProjectSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label"));
+		fUseProjectSettings.setLabelText(PreferencesMessages.getString("CompilerPropertyPage.useprojectsettings.label")); //$NON-NLS-1$
 	}
 
 	/*
@@ -129,7 +129,7 @@ public class CompilerPropertyPage extends PropertyPage {
 	
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fChangeWorkspaceSettings) {
-			String id= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage";
+			String id= "org.eclipse.jdt.ui.preferences.CompilerPreferencePage"; //$NON-NLS-1$
 			CompilerPreferencePage page= new CompilerPreferencePage();
 			showPreferencePage(id, page);
 		} else {

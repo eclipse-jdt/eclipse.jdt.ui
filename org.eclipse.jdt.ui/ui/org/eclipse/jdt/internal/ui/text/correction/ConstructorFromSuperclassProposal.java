@@ -81,7 +81,7 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 			}			
 		}
 		buf.append(')');	
-		return CorrectionMessages.getFormattedString("ConstructorFromSuperclassProposal.description", buf.toString());
+		return CorrectionMessages.getFormattedString("ConstructorFromSuperclassProposal.description", buf.toString()); //$NON-NLS-1$
 	}
 	
 	/* (non-Javadoc)
@@ -110,7 +110,7 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 		Block body= ast.newBlock();
 		decl.setBody(body);		
 	
-		String bodyStatement= "";
+		String bodyStatement= ""; //$NON-NLS-1$
 		if (binding == null) {
 			decl.setModifiers(Modifier.PUBLIC);
 		} else {
@@ -173,7 +173,7 @@ public class ConstructorFromSuperclassProposal extends ASTRewriteCorrectionPropo
 		}			
 		String[] names= new String[nParams];
 		for (int i= 0; i < names.length; i++) {
-			names[i]= "arg" + i;
+			names[i]= "arg" + i; //$NON-NLS-1$
 		}
 		return names;
 	}

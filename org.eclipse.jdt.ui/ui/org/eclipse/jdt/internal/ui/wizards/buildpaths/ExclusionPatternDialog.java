@@ -62,15 +62,15 @@ public class ExclusionPatternDialog extends StatusDialog {
 	public ExclusionPatternDialog(Shell parent, CPListElement entryToEdit) {
 		super(parent);
 		fCurrElement= entryToEdit;
-		setTitle(NewWizardMessages.getString("ExclusionPatternDialog.title"));
+		setTitle(NewWizardMessages.getString("ExclusionPatternDialog.title")); //$NON-NLS-1$
 
-		String label= NewWizardMessages.getFormattedString("ExclusionPatternDialog.pattern.label", entryToEdit.getPath().makeRelative().toString());
+		String label= NewWizardMessages.getFormattedString("ExclusionPatternDialog.pattern.label", entryToEdit.getPath().makeRelative().toString()); //$NON-NLS-1$
 		
 		String[] buttonLabels= new String[] {
-			/* IDX_ADD */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.add"),
-			/* IDX_EDIT */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.edit"),
+			/* IDX_ADD */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.add"), //$NON-NLS-1$
+			/* IDX_EDIT */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.edit"), //$NON-NLS-1$
 			null,
-			/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.remove")
+			/* IDX_REMOVE */ NewWizardMessages.getString("ExclusionPatternDialog.pattern.remove") //$NON-NLS-1$
 		};
 
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();

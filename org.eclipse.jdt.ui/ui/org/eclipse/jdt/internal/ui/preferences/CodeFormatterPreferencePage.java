@@ -32,7 +32,7 @@ public class CodeFormatterPreferencePage extends PreferencePage implements IWork
 		setDescription(PreferencesMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		
+		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		 //$NON-NLS-1$
 		
 		fConfigurationBlock= new CodeFormatterConfigurationBlock(this, null);
 	}

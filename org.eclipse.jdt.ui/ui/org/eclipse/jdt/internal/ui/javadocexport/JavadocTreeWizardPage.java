@@ -249,19 +249,19 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		fVisibilitySelection= fStore.getAccess();
 		fPrivateVisibility.setSelection(fVisibilitySelection.equals(fStore.PRIVATE));
 		if (fPrivateVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label"));
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.privatevisibilitydescription.label")); //$NON-NLS-1$
 		//$NON-NLS-1$
 		fProtectedVisibility.setSelection(fVisibilitySelection.equals(fStore.PROTECTED));
 		if (fProtectedVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label"));
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.protectedvisibilitydescription.label")); //$NON-NLS-1$
 		//$NON-NLS-1$
 		fPackageVisibility.setSelection(fVisibilitySelection.equals(fStore.PACKAGE));
 		if (fPackageVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label"));
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.packagevisibledescription.label")); //$NON-NLS-1$
 		//$NON-NLS-1$
 		fPublicVisibility.setSelection(fVisibilitySelection.equals(fStore.PUBLIC));
 		if (fPublicVisibility.getSelection())
-			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label"));
+			fDescriptionLabel.setText(JavadocExportMessages.getString("JavadocTreeWizardPage.publicvisibilitydescription.label")); //$NON-NLS-1$
 		//$NON-NLS-1$
 	}
 

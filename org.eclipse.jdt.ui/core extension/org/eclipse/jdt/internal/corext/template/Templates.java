@@ -35,7 +35,7 @@ public class Templates extends TemplateSet {
 	}
 	
 	public Templates() {
-		super("template");
+		super("template"); //$NON-NLS-1$
 		create();
 	}		
 

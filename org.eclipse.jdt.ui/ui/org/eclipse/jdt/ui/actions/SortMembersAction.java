@@ -147,7 +147,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		if (input instanceof ICompilationUnit && ElementValidator.check(input, getShell(), getDialogTitle(), true))
 			run(shell, (ICompilationUnit) input, fEditor);
 		else
-			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("SortMembersAction.not_applicable"));
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.getString("SortMembersAction.not_applicable")); //$NON-NLS-1$
 	}
 
 	//---- Helpers -------------------------------------------------------------------

@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public class ASTResolving {
 	
 	public static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
-		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) {
+		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
 			if (binding.isAnonymous()) {
 				ITypeBinding[] baseBindings= binding.getInterfaces();
 				if (baseBindings.length > 0) {
@@ -336,7 +336,7 @@ public class ASTResolving {
 			found= false;
 			int curr= scanner.getNextToken();
 			if (curr == ITerminalSymbols.TokenNameEOF) {
-				throw new InvalidInputException("End of File");
+				throw new InvalidInputException("End of File"); //$NON-NLS-1$
 			}
 			for (int i= 0; i < prevTokens.length; i++) {
 				if (prevTokens[i] == curr) {
@@ -352,7 +352,7 @@ public class ASTResolving {
 		do {
 			curr= scanner.getNextToken();
 			if (curr == ITerminalSymbols.TokenNameEOF) {
-				throw new InvalidInputException("End of File");
+				throw new InvalidInputException("End of File"); //$NON-NLS-1$
 			}
 		} while (curr != tok); 
 	}	
@@ -405,7 +405,7 @@ public class ASTResolving {
 			} else if (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID) {
 				return null;				
 			} else {
-				return type.getAST().newNumberLiteral("0");
+				return type.getAST().newNumberLiteral("0"); //$NON-NLS-1$
 			}
 		}
 		return type.getAST().newNullLiteral();
@@ -414,12 +414,12 @@ public class ASTResolving {
 	public static Expression getInitExpression(AST ast, ITypeBinding type) {
 		if (type.isPrimitive()) {
 			String name= type.getName();
-			if ("boolean".equals(name)) {
+			if ("boolean".equals(name)) { //$NON-NLS-1$
 				return ast.newBooleanLiteral(false);
-			} else if ("void".equals(name)) {
+			} else if ("void".equals(name)) { //$NON-NLS-1$
 				return null;
 			} else {
-				return ast.newNumberLiteral("0");
+				return ast.newNumberLiteral("0"); //$NON-NLS-1$
 			}
 		}
 		return ast.newNullLiteral();
@@ -486,7 +486,7 @@ public class ASTResolving {
 		if (name.isQualifiedName()) {
 			return getFullName(((QualifiedName) name).getQualifier());
 		}
-		return "";
+		return ""; //$NON-NLS-1$
 	}
 	
 	public static String getSimpleName(Name name) {

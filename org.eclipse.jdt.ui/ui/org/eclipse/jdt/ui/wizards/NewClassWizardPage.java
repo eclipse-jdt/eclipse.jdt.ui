@@ -241,9 +241,9 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 
 		if (doMain) {
 			StringBuffer buf= new StringBuffer();
-			buf.append("public static void main(");
-			buf.append(imports.addImport("java.lang.String"));
-			buf.append("[] args) {}");
+			buf.append("public static void main("); //$NON-NLS-1$
+			buf.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
+			buf.append("[] args) {}"); //$NON-NLS-1$
 			type.createMethod(buf.toString(), null, false, null);
 		}
 		

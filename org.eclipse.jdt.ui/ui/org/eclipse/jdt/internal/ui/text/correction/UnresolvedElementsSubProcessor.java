@@ -296,7 +296,7 @@ public class UnresolvedElementsSubProcessor {
 					}
 				}
 				// new top level type
-				if (enclosingPackage != null && !enclosingPackage.getCompilationUnit(typeName + ".java").exists()) {
+				if (enclosingPackage != null && !enclosingPackage.getCompilationUnit(typeName + ".java").exists()) { //$NON-NLS-1$
 					if ((kind & SimilarElementsRequestor.CLASSES) != 0) {
 			            proposals.add(new NewCUCompletionUsingWizardProposal(cu, node, true, enclosingPackage, relevance));
 					}

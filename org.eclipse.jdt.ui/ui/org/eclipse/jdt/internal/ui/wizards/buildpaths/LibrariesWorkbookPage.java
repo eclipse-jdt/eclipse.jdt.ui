@@ -610,7 +610,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
 		if (existing == null) {
 			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell());
-			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title"));
+			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title")); //$NON-NLS-1$
 			if (dialog.open() == NewVariableEntryDialog.OK) {
 				List existingElements= fLibrariesList.getElements();
 				
@@ -636,7 +636,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				}
 			}
 			EditVariableEntryDialog dialog= new EditVariableEntryDialog(getShell(), existing.getPath(), existingPaths);
-			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"));
+			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title")); //$NON-NLS-1$
 			if (dialog.open() == EditVariableEntryDialog.OK) {
 				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, dialog.getPath(), null);
 				return new CPListElement[] { elem };

@@ -78,7 +78,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 			for (int i = 0; i < elements.length; i++) {
 				IConfigurationElement element= elements[i];
 				if (element.getName().equals(TAG_WIZARD)) {
-					if ("true".equals(element.getAttribute(ATT_JAVATYPE))) {
+					if ("true".equals(element.getAttribute(ATT_JAVATYPE))) { //$NON-NLS-1$
 						containers.add(new OpenTypeWizardAction(element));
 					}
 				}

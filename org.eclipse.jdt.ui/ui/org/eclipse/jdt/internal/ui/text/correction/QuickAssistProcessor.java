@@ -121,7 +121,7 @@ public class QuickAssistProcessor implements ICorrectionProcessor {
 			methodDeclaration.thrownExceptions().add(newName);
 		}			
 	
-		String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description");
+		String label= CorrectionMessages.getString("QuickAssistProcessor.catchclausetothrows.description"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
 		proposal.ensureNoModifications();

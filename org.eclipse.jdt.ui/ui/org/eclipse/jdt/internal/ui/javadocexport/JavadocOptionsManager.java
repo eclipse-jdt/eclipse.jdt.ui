@@ -206,13 +206,13 @@ public class JavadocOptionsManager {
 			//load a default antpath
 			fAntpath= settings.get(ANTPATH);
 			if (fAntpath == null)
-				fAntpath= "";
+				fAntpath= ""; //$NON-NLS-1$
 			//$NON-NLS-1$
 
 			//load a default antpath
 			fDestination= settings.get(DESTINATION);
 			if (fDestination == null)
-				fDestination= "";
+				fDestination= ""; //$NON-NLS-1$
 			//$NON-NLS-1$
 
 			fTitle= settings.get(TITLE);

@@ -58,9 +58,9 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		super(parent);
 		fExistingPatterns= existingPatterns;
 		if (patternToEdit == null) {
-			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.add.title"));
+			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.add.title")); //$NON-NLS-1$
 		} else {
-			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.edit.title"));
+			setTitle(NewWizardMessages.getString("ExclusionPatternEntryDialog.edit.title")); //$NON-NLS-1$
 			fExistingPatterns.remove(patternToEdit);
 		}
 		
@@ -72,12 +72,12 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		
 		fExclusionPatternStatus= new StatusInfo();
 		
-		String label= NewWizardMessages.getFormattedString("ExclusionPatternEntryDialog.pattern.label", entryToEdit.getPath().makeRelative().toString());
+		String label= NewWizardMessages.getFormattedString("ExclusionPatternEntryDialog.pattern.label", entryToEdit.getPath().makeRelative().toString()); //$NON-NLS-1$
 		
 		ExclusionPatternAdapter adapter= new ExclusionPatternAdapter();
 		fExclusionPatternDialog= new StringButtonDialogField(adapter);
 		fExclusionPatternDialog.setLabelText(label);
-		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionPatternEntryDialog.pattern.button"));
+		fExclusionPatternDialog.setButtonLabel(NewWizardMessages.getString("ExclusionPatternEntryDialog.pattern.button")); //$NON-NLS-1$
 		fExclusionPatternDialog.setDialogFieldListener(adapter);
 		fExclusionPatternDialog.enableButton(fCurrSourceFolder != null);
 		
@@ -102,7 +102,7 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 		inner.setLayout(layout);
 		
 		Label description= new Label(inner, SWT.WRAP);
-		description.setText(NewWizardMessages.getString("ExclusionPatternEntryDialog.description"));
+		description.setText(NewWizardMessages.getString("ExclusionPatternEntryDialog.description")); //$NON-NLS-1$
 		GridData gd= new GridData();
 		gd.horizontalSpan= 2;
 		gd.widthHint= convertWidthInCharsToPixels(80);
@@ -151,16 +151,16 @@ public class ExclusionPatternEntryDialog extends StatusDialog {
 	protected void checkIfPatternValid() {
 		String pattern= fExclusionPatternDialog.getText().trim();
 		if (pattern.length() == 0) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.empty"));
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.empty")); //$NON-NLS-1$
 			return;
 		}
 		IPath path= new Path(pattern);
 		if (path.isAbsolute() || path.getDevice() != null) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.notrelative"));
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.notrelative")); //$NON-NLS-1$
 			return;
 		}
 		if (fExistingPatterns.contains(pattern)) {
-			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.exists"));
+			fExclusionPatternStatus.setError(NewWizardMessages.getString("ExclusionPatternEntryDialog.error.exists")); //$NON-NLS-1$
 			return;
 		}
 		

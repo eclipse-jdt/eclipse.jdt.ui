@@ -349,9 +349,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 				}
 			}
 		} catch (CoreException e) {
-			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed"));
+			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed"));
+			ExceptionHandler.handle(e, DIALOG_TITLE, ActionMessages.getString("AddDelegateMethodsAction.error.actionfailed")); //$NON-NLS-1$
 		}		
 		
 	}
@@ -490,7 +490,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			if (fType.isClass()) {
 				StringBuffer body= new StringBuffer();
 				if (!Signature.SIG_VOID.equals(returnTypSig)) {
-					body.append("return ");
+					body.append("return "); //$NON-NLS-1$
 				}
 				body.append(fieldName).append('.').append(methodName).append('(');
 				for (int i = 0; i < paramNames.length; i++) {
@@ -498,7 +498,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (i < paramNames.length - 1)
 					body.append(',');
 				}
-				body.append(");");
+				body.append(");"); //$NON-NLS-1$
 				methodDeclaration= body.toString();
 			}
 			

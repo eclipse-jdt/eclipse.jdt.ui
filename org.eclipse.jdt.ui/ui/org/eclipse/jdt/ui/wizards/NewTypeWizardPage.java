@@ -1338,7 +1338,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			if (!isInnerClass) {
 				lineDelimiter= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 										
-				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
+				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				createdWorkingCopy= (ICompilationUnit) parentCU.getSharedWorkingCopy(null, JavaUI.getBufferFactory(), null);
 							
 				imports= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, false);
@@ -1428,7 +1428,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 
 	private String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
-		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';';
+		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
 
 		Template template= CodeTemplates.getCodeTemplate(CodeTemplates.NEWTYPE);
 		if (template == null) {

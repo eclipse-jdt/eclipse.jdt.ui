@@ -158,21 +158,21 @@ public class CodeTemplateBlock {
 			Template template = (Template) element;
 			String name= template.getName();
 			if (CodeTemplates.CATCHBLOCK.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.catchblock.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.catchblock.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.METHODSTUB.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.methodstub.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.CONSTRUCTORSTUB.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.constructorstub.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.NEWTYPE.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.newtype.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.TYPECOMMENT.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.typecomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.METHODCOMMENT.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.methodcomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.OVERRIDECOMMENT.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.overridecomment.label"); //$NON-NLS-1$
 			} else if (CodeTemplates.CONSTRUCTORCOMMENT.equals(name)) {
-				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label");
+				return PreferencesMessages.getString("CodeTemplateBlock.constructorcomment.label"); //$NON-NLS-1$
 			}
 			return template.getDescription();
 		}
@@ -184,8 +184,8 @@ public class CodeTemplateBlock {
 	private final static int IDX_EXPORT= 3;
 	private final static int IDX_EXPORTALL= 4;
 	
-	private final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node");
-	private final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node");
+	private final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node"); //$NON-NLS-1$
+	private final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node"); //$NON-NLS-1$
 	
 	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
 	
@@ -308,7 +308,7 @@ public class CodeTemplateBlock {
 			Template template= (Template) selection.get(0);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
-			fPatternViewer.getDocument().set("");
+			fPatternViewer.getDocument().set(""); //$NON-NLS-1$
 		}		
 	}
 	
@@ -438,14 +438,14 @@ public class CodeTemplateBlock {
 	}
 	
 	private void openReadErrorDialog(CoreException e) {
-		String title= PreferencesMessages.getString("CodeTemplateBlock.error.read.title");
-		String message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message");
+		String title= PreferencesMessages.getString("CodeTemplateBlock.error.read.title"); //$NON-NLS-1$
+		String message= PreferencesMessages.getString("CodeTemplateBlock.error.read.message"); //$NON-NLS-1$
 		ExceptionHandler.handle(e, getShell(), title, message);		
 	}
 	
 	private void openWriteErrorDialog(CoreException e) {
-		String title= PreferencesMessages.getString("CodeTemplateBlock.error.write.title");
-		String message= PreferencesMessages.getString("CodeTemplateBlock.error.write.message");
+		String title= PreferencesMessages.getString("CodeTemplateBlock.error.write.title"); //$NON-NLS-1$
+		String message= PreferencesMessages.getString("CodeTemplateBlock.error.write.message"); //$NON-NLS-1$
 		ExceptionHandler.handle(e, getShell(), title, message);	
 	}	
 

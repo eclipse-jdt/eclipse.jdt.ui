@@ -23,8 +23,8 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
   */
 public class ClasspathContainerSelectionPage extends WizardPage {
 
-	private static final String DIALOGSTORE_SECTION= "ClasspathContainerSelectionPage";
-	private static final String DIALOGSTORE_CONTAINER_IDX= "index";
+	private static final String DIALOGSTORE_SECTION= "ClasspathContainerSelectionPage"; //$NON-NLS-1$
+	private static final String DIALOGSTORE_CONTAINER_IDX= "index"; //$NON-NLS-1$
 
 
 	private static class ClasspathContainerLabelProvider extends LabelProvider {

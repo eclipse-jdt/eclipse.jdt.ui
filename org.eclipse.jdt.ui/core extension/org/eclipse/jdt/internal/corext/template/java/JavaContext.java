@@ -324,7 +324,7 @@ public class JavaContext extends CompilationUnitContext {
 	private static String createArray(String type, int dimension) {
 		StringBuffer buffer= new StringBuffer(type);
 		for (int i= 0; i < dimension; i++)
-			buffer.append("[]");
+			buffer.append("[]"); //$NON-NLS-1$
 		return buffer.toString();
 	}
 

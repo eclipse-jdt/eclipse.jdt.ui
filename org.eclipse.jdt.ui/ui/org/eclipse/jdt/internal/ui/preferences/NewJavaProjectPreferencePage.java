@@ -246,11 +246,11 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 	
 	private static IClasspathEntry getJREContainerEntry() {
-		return JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER"));
+		return JavaCore.newContainerEntry(new Path("org.eclipse.jdt.launching.JRE_CONTAINER")); //$NON-NLS-1$
 	}
 	
 	private static IClasspathEntry getJREVariableEntry() {
-		return JavaCore.newVariableEntry(new Path("JRE_LIB"), new Path("JRE_SRC"), new Path("JRE_SRCROOT"));
+		return JavaCore.newVariableEntry(new Path("JRE_LIB"), new Path("JRE_SRC"), new Path("JRE_SRCROOT")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}	
 
 	/*

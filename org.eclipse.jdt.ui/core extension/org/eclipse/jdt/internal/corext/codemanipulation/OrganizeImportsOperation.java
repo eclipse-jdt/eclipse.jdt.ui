@@ -422,7 +422,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return;
 			}
 			TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
-			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null);
+			TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
 			int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
 			if (index >= 0 && index < allTypes.length) {
 				for (int i= index - 1; i>= 0; i--) {

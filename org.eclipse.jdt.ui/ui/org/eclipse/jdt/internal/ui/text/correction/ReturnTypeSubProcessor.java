@@ -183,7 +183,7 @@ public class ReturnTypeSubProcessor {
 				typeName= typeBinding.getName();
 			} else {
 				type= ast.newPrimitiveType(PrimitiveType.VOID);
-				typeName= "void";
+				typeName= "void"; //$NON-NLS-1$
 			}	
 
 			String label= CorrectionMessages.getFormattedString("ReturnTypeSubProcessor.missingreturntype.description", typeName); //$NON-NLS-1$		
@@ -242,7 +242,7 @@ public class ReturnTypeSubProcessor {
 					}
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					
+					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					 //$NON-NLS-1$
 					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
 					proposal.ensureNoModifications();
 					proposals.add(proposal);
@@ -262,7 +262,7 @@ public class ReturnTypeSubProcessor {
 				rewrite.markAsInserted(returnStatement);
 				
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description");
+				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description"); //$NON-NLS-1$
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 3, image);
 				proposal.ensureNoModifications();
 				proposals.add(proposal);

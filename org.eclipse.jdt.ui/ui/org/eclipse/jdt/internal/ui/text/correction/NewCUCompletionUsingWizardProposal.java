@@ -122,7 +122,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
-			dialog.getShell().setText("New");
+			dialog.getShell().setText(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.dialogtitle")); //$NON-NLS-1$
 
 			configureWizardPage(wizard);
 			dialog.open();
@@ -207,7 +207,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 			case ASTNode.METHOD_DECLARATION:
 				MethodDeclaration decl= (MethodDeclaration) parent;
 				if (decl.thrownExceptions().contains(node)) {
-					return ast.resolveWellKnownType("java.lang.Exception");
+					return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
 				}
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
@@ -247,33 +247,34 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		} else {
 			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info")); //$NON-NLS-1$
 		}
-		buf.append("<br>");
-		buf.append("<br>");
+		buf.append("<br>"); //$NON-NLS-1$
+		buf.append("<br>"); //$NON-NLS-1$
 		if (fTypeContainer instanceof IType) {
-			buf.append("Enclosing type: <b>");
+			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.tooltip.enclosingtype")); //$NON-NLS-1$
 		} else {
-			buf.append("Package: <b>");
+			buf.append(CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.tooltip.package")); //$NON-NLS-1$
 		}
+		buf.append("<b>"); //$NON-NLS-1$
 		buf.append(JavaElementLabels.getElementLabel(fTypeContainer, JavaElementLabels.T_FULLY_QUALIFIED));
-		buf.append("</b><br>");
-		buf.append("public ");
+		buf.append("</b><br>"); //$NON-NLS-1$
+		buf.append("public "); //$NON-NLS-1$
 		if (fIsClass) {
-			buf.append("class <b>");
+			buf.append("class <b>"); //$NON-NLS-1$
 		} else {
-			buf.append("interface <b>");
+			buf.append("interface <b>"); //$NON-NLS-1$
 		}
 		buf.append(ASTResolving.getSimpleName(fNode));
 		
 		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
 		if (superclass != null) {
 			if (superclass.isClass() || !fIsClass) {
-				buf.append("</b> extends <b>");
+				buf.append("</b> extends <b>"); //$NON-NLS-1$
 			} else {
-				buf.append("</b> implements <b>");
+				buf.append("</b> implements <b>"); //$NON-NLS-1$
 			}
 			buf.append(superclass.getName());
 		}
-		buf.append("</b> {<br>}<br>");
+		buf.append("</b> {<br>}<br>"); //$NON-NLS-1$
 		return buf.toString();
 	}
 

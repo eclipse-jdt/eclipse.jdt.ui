@@ -52,7 +52,7 @@ public class CodeTemplates extends TemplateSet {
 	}
 	
 	public CodeTemplates() {
-		super("codetemplate");
+		super("codetemplate"); //$NON-NLS-1$
 		create();
 	}
 	

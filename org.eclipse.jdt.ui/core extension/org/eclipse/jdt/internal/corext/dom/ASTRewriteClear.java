@@ -351,7 +351,7 @@ public class ASTRewriteClear extends ASTVisitor {
 	 */
 	public void postVisit(ASTNode node) {
 		if (fRewrite.isInserted(node)) {
-			Assert.isTrue(false, "Inserted node not removed " + node + ", parent: " + node.getParent());
+			Assert.isTrue(false, "Inserted node not removed " + node + ", parent: " + node.getParent()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 

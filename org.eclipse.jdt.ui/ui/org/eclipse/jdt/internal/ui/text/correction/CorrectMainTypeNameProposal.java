@@ -29,10 +29,10 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 * Constructor for CorrectTypeNameProposal.
 	 */
 	public CorrectMainTypeNameProposal(ICompilationUnit cu, String oldTypeName, int relevance) {
-		super("", cu, null, relevance, null);
+		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fNewName= Signature.getQualifier(cu.getElementName());
 		
-		setDisplayName(CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renametype.description", fNewName));
+		setDisplayName(CorrectionMessages.getFormattedString("ReorgCorrectionsSubProcessor.renametype.description", fNewName)); //$NON-NLS-1$
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 		
 		fOldName= oldTypeName;
@@ -43,7 +43,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		char[] content= getCompilationUnit().getBuffer().getCharacters();
-		CompilationUnit astRoot= AST.parseCompilationUnit(content, fOldName + ".java", getCompilationUnit().getJavaProject());
+		CompilationUnit astRoot= AST.parseCompilationUnit(content, fOldName + ".java", getCompilationUnit().getJavaProject()); //$NON-NLS-1$
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
 		TypeDeclaration decl= findTypeDeclaration(astRoot.types(), fOldName);
 		if (decl != null) {

@@ -39,7 +39,7 @@ public class JavaPreferencesSettings  {
 	public static String[] getImportOrderPreference(IPreferenceStore prefs) {
 		String str= prefs.getString(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
 		if (str != null) {
-			return unpackList(str, ";");
+			return unpackList(str, ";"); //$NON-NLS-1$
 		}
 		return new String[0];
 	}
@@ -51,7 +51,7 @@ public class JavaPreferencesSettings  {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			if (str != null) {
-				return unpackList(str, ",");
+				return unpackList(str, ","); //$NON-NLS-1$
 			}
 		}
 		return new String[0];
@@ -64,7 +64,7 @@ public class JavaPreferencesSettings  {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			if (str != null) {
-				return unpackList(str, ",");
+				return unpackList(str, ","); //$NON-NLS-1$
 			}
 		}
 		return new String[0];

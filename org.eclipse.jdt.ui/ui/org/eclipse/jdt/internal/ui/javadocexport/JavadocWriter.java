@@ -221,7 +221,7 @@ public class JavadocWriter {
 		StringBuffer res= new StringBuffer();
 		int backSegments= fBasePath.segmentCount() - matchingSegments;
 		while (backSegments > 0) {
-			res.append("..");
+			res.append(".."); //$NON-NLS-1$
 			res.append(File.separatorChar);
 			backSegments--;
 		}

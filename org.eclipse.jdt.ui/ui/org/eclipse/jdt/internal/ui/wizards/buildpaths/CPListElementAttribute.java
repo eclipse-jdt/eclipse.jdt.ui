@@ -4,11 +4,11 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
   */
 public class CPListElementAttribute {
 	
-	public static final String K_SOURCEATTACHMENT= "sourcepath";
-	public static final String K_SOURCEATTACHMENTROOT= "rootpath";
-	public static final String K_JAVADOC= "javadoc";
-	public static final String K_OUTPUT= "output";
-	public static final String K_EXCLUSION= "exclusion";
+	public static final String K_SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
+	public static final String K_SOURCEATTACHMENTROOT= "rootpath"; //$NON-NLS-1$
+	public static final String K_JAVADOC= "javadoc"; //$NON-NLS-1$
+	public static final String K_OUTPUT= "output"; //$NON-NLS-1$
+	public static final String K_EXCLUSION= "exclusion"; //$NON-NLS-1$
 	
 	private CPListElement fParent;
 	private String fKey;

@@ -54,7 +54,7 @@ public class ImportsStructure implements IImportsStructure {
 	private int fNumberOfImportsCreated;
 	private boolean fHasChanges= false;
 	
-	private static final String JAVA_LANG= "java.lang";
+	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
 	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
@@ -341,7 +341,7 @@ public class ImportsStructure implements IImportsStructure {
 		}
 		PackageEntry bestMatch= null;
 		PackageMatcher matcher= new PackageMatcher();
-		matcher.initialize(newName, "");
+		matcher.initialize(newName, ""); //$NON-NLS-1$
 		for (int i= 0; i < fPackageEntries.size(); i++) {
 			PackageEntry curr= (PackageEntry) fPackageEntries.get(i);
 			if (!curr.isComment()) {
@@ -727,7 +727,7 @@ public class ImportsStructure implements IImportsStructure {
 	
 	public String printStructure() {
 		int nPackages= fPackageEntries.size();
-		StringBuffer buf= new StringBuffer("\n-----------------------\n");
+		StringBuffer buf= new StringBuffer("\n-----------------------\n"); //$NON-NLS-1$
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			entry.dumpStructure(buf);
@@ -942,18 +942,18 @@ public class ImportsStructure implements IImportsStructure {
 		
 		public void dumpStructure(StringBuffer buf) {
 			if (isComment()) {
-				buf.append("comment\n");
+				buf.append("comment\n"); //$NON-NLS-1$
 			} else {
-				buf.append(fName); buf.append(", groupId: "); buf.append(fGroup); buf.append("\n");
+				buf.append(fName); buf.append(", groupId: "); buf.append(fGroup); buf.append("\n"); //$NON-NLS-1$ //$NON-NLS-2$
 				int nImports= getNumberOfImports();
 				for (int i= 0; i < nImports; i++) {
 					ImportDeclEntry curr= getImportAt(i);
-					buf.append("  ");
+					buf.append("  "); //$NON-NLS-1$
 					buf.append(curr.getSimpleName());
 					if (curr.isNew()) {
-						buf.append(" (new)");
+						buf.append(" (new)"); //$NON-NLS-1$
 					}
-					buf.append("\n");
+					buf.append("\n"); //$NON-NLS-1$
 				}
 			}
 		}

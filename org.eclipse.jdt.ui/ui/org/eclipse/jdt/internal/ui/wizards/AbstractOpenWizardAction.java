@@ -154,8 +154,8 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 			dialog.getShell().setText(NewWizardMessages.getString("AbstractOpenWizardAction.title")); //$NON-NLS-1$
 			dialog.open();
 		} catch (CoreException e) {
-			String title= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.title");
-			String message= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.message");
+			String title= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("AbstractOpenWizardAction.createerror.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, shell, title, message);
 		}
 	}

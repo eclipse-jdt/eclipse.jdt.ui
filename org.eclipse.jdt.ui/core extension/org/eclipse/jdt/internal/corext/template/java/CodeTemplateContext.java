@@ -45,7 +45,7 @@ public class CodeTemplateContext extends TemplateContext {
 		while (iterator.hasNext()) {
 			TemplateVariable var= (TemplateVariable) iterator.next();
 			if (var instanceof CodeTemplateContextType.CodeTemplateVariable) {
-				Assert.isNotNull(getVariable(var.getName()), "Variable " + var.getName() + "not defined");
+				Assert.isNotNull(getVariable(var.getName()), "Variable " + var.getName() + "not defined"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
 

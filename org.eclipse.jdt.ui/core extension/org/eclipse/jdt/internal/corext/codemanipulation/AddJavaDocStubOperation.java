@@ -124,7 +124,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 						break;
 				}
 				if (comment == null) {
-					comment= "/**\n *\n **/";
+					comment= "/**\n *\n **/"; //$NON-NLS-1$
 				}
 				int indent= StubUtility.getIndentUsed(curr);
 				String formattedComment= StubUtility.codeFormat(comment + lineDelim, indent, lineDelim);

@@ -60,22 +60,22 @@ public class OutputLocationDialog extends StatusDialog {
 		
 	public OutputLocationDialog(Shell parent, CPListElement entryToEdit) {
 		super(parent);
-		setTitle(NewWizardMessages.getString("OutputLocationDialog.title"));
+		setTitle(NewWizardMessages.getString("OutputLocationDialog.title")); //$NON-NLS-1$
 		fContainerFieldStatus= new StatusInfo();
 	
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
 
 		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
-		fUseDefault.setLabelText(NewWizardMessages.getString("OutputLocationDialog.usedefault.label"));
+		fUseDefault.setLabelText(NewWizardMessages.getString("OutputLocationDialog.usedefault.label")); //$NON-NLS-1$
 		fUseDefault.setDialogFieldListener(adapter);		
 
-		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().segment(0));
+		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().segment(0)); //$NON-NLS-1$
 		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
 		fUseSpecific.setLabelText(label);
 		fUseSpecific.setDialogFieldListener(adapter);		
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
-		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("OutputLocationDialog.location.button"));
+		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("OutputLocationDialog.location.button")); //$NON-NLS-1$
 		fContainerDialogField.setDialogFieldListener(adapter);
 		
 		fUseSpecific.attachDialogField(fContainerDialogField);

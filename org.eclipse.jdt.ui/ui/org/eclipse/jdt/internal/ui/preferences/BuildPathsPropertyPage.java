@@ -43,8 +43,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
 		
 		
-	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage";
-	private static final String INDEX= "pageIndex";
+	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage"; //$NON-NLS-1$
+	private static final String INDEX= "pageIndex"; //$NON-NLS-1$
 		
 	private BuildPathsBlock fBuildPathsBlock;
 	

@@ -102,7 +102,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		fUseFolderOutputs= new SelectionButtonDialogField(SWT.CHECK);
 		fUseFolderOutputs.setSelection(false);
-		fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check"));
+		fUseFolderOutputs.setLabelText(NewWizardMessages.getString("SourceContainerWorkbookPage.folders.check")); //$NON-NLS-1$
 		fUseFolderOutputs.setDialogFieldListener(adapter);
 	}
 	

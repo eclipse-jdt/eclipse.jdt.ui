@@ -39,7 +39,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		setDescription(PreferencesMessages.getString("CodeGenerationPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeGenerationPreferencePage.title"));		
+		setTitle(PreferencesMessages.getString("CodeGenerationPreferencePage.title"));		 //$NON-NLS-1$
 		
 		fNamesConfigurationBlock= new NameConventionConfigurationBlock(this, null);
 		

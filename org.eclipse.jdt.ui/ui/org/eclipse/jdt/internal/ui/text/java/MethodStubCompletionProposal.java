@@ -73,7 +73,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				settings.callSuper= declaringType.isClass() && !Flags.isAbstract(method.getFlags()) && !Flags.isStatic(method.getFlags());
 				settings.methodOverwrites= !Flags.isStatic(method.getFlags());
 				
-				String definingTypeName= (definingType != null) ? definingType.getElementName() : "";
+				String definingTypeName= (definingType != null) ? definingType.getElementName() : ""; //$NON-NLS-1$
 				
 				String stub= StubUtility.genStub(fCompilationUnit, definingTypeName, method, declaringType, settings, impStructure);
 

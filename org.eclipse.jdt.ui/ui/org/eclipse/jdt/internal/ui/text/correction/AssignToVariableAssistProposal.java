@@ -62,10 +62,10 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		fExpressionStatement= node;
 		fTypeBinding= typeBinding;
 		if (variableKind == LOCAL) {
-			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntolocal.description"));
+			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntolocal.description")); //$NON-NLS-1$
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL));
 		} else {
-			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntofield.description"));
+			setDisplayName(CorrectionMessages.getString("AssignToVariableAssistProposal.assigntofield.description")); //$NON-NLS-1$
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
 	}
@@ -102,7 +102,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		VariableDeclarationStatement newDecl= ast.newVariableDeclarationStatement(newDeclFrag);
 		newDecl.setType(ASTResolving.getTypeFromTypeBinding(ast, fTypeBinding));
 		
-		rewrite.markAsReplaced(fExpressionStatement, newDecl, "ID");
+		rewrite.markAsReplaced(fExpressionStatement, newDecl, "ID"); //$NON-NLS-1$
 		
 		addImport(fTypeBinding);
 		return rewrite;
@@ -131,7 +131,7 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		assignment.setLeftHandSide(ast.newSimpleName(varName));
 		assignment.setRightHandSide((Expression) rewrite.createCopy(expression));
 
-		rewrite.markAsReplaced(expression, assignment, "ID");
+		rewrite.markAsReplaced(expression, assignment, "ID"); //$NON-NLS-1$
 		
 		decls.add(findInsertIndex(decls, fExpressionStatement.getStartPosition()), newDecl);
 		
@@ -144,13 +144,13 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : "";
+		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
 		String[] excludedNames= new String[0];
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestLocalVariableNames(project, packName, typeName, binding.getDimensions(), excludedNames);
 		if (names.length == 0) {
-			return "class1"; // fix for pr, remoev after 20030127
+			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
 		}
 		return names[0]; 
 	}
@@ -159,13 +159,13 @@ public class AssignToVariableAssistProposal extends ASTRewriteCorrectionProposal
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		ITypeBinding base= binding.isArray() ? binding.getElementType() : binding;
 		IPackageBinding packBinding= base.getPackage();
-		String packName= packBinding != null ? packBinding.getName() : "";
+		String packName= packBinding != null ? packBinding.getName() : ""; //$NON-NLS-1$
 		
 		String[] excludedNames= new String[0];
 		String typeName= base.getName();
 		String[] names= NamingConventions.suggestFieldNames(project, packName, typeName, binding.getDimensions(), binding.getModifiers(), excludedNames);
 		if (names.length == 0) {
-			return "class1"; // fix for pr, remoev after 20030127
+			return "class1"; // fix for pr, remoev after 20030127 //$NON-NLS-1$
 		}
 		return names[0];		
 	}	

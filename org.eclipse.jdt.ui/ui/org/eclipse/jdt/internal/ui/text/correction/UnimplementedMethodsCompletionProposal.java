@@ -122,7 +122,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		Block body= ast.newBlock();
 		decl.setBody(body);
 	
-		String bodyStatement= "";
+		String bodyStatement= ""; //$NON-NLS-1$
 		Expression expression= ASTResolving.getInitExpression(decl.getReturnType(), decl.getExtraDimensions());
 		if (expression != null) {
 			ReturnStatement returnStatement= ast.newReturnStatement();
@@ -160,7 +160,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		}			
 		String[] names= new String[nParams];
 		for (int i= 0; i < names.length; i++) {
-			names[i]= "arg" + i;
+			names[i]= "arg" + i; //$NON-NLS-1$
 		}
 		return names;
 	}

@@ -52,16 +52,16 @@ public class NewSourceFolderDialog extends StatusDialog {
 		SourceContainerAdapter adapter= new SourceContainerAdapter();
 		
 		fUseProjectButton= new SelectionButtonDialogField(SWT.RADIO);
-		fUseProjectButton.setLabelText("&Project as source folder");
+		fUseProjectButton.setLabelText(NewWizardMessages.getString("NewSourceFolderDialog.useproject.button")); //$NON-NLS-1$
 		fUseProjectButton.setDialogFieldListener(adapter);
 
 		fUseFolderButton= new SelectionButtonDialogField(SWT.RADIO);
-		fUseFolderButton.setLabelText("&Folder as source folder");
+		fUseFolderButton.setLabelText(NewWizardMessages.getString("NewSourceFolderDialog.usefolder.button")); //$NON-NLS-1$
 		fUseFolderButton.setDialogFieldListener(adapter);		
 		
 		fContainerDialogField= new StringDialogField();
 		fContainerDialogField.setDialogFieldListener(adapter);
-		fContainerDialogField.setLabelText("&Source folder name:");
+		fContainerDialogField.setLabelText(NewWizardMessages.getString("NewSourceFolderDialog.sourcefolder.label")); //$NON-NLS-1$
 		
 		fUseFolderButton.attachDialogField(fContainerDialogField);
 		

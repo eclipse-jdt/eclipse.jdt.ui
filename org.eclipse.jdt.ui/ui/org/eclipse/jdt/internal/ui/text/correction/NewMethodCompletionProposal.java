@@ -119,7 +119,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		
 		Block body= null;
 
-		String bodyStatement= "";
+		String bodyStatement= ""; //$NON-NLS-1$
 		if (!isConstructor()) {
 			Type returnType= evaluateMethodType(ast);
 			if (returnType == null) {
@@ -176,11 +176,6 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		IJavaProject project= getCompilationUnit().getJavaProject();
 		String[] excludedNames= (String[]) takenNames.toArray(new String[takenNames.size()]);
 		String[] names= NamingConventions.suggestArgumentNames(project, packName, typeName, dim, excludedNames);
-		
-		if (names.length == 0) {
-			return "class1"; // fix for pr, remoev after 20030127
-		}
-		
 		takenNames.add(names[0]);
 		return names[0];
 	}
@@ -251,7 +246,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			addImport(binding);
 			return ASTResolving.getTypeFromTypeBinding(ast, binding);
 		}
-		return ast.newSimpleType(ast.newSimpleName("Object"));
+		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}
 	
 	public void apply(IDocument document) {

@@ -60,7 +60,7 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		if (packageName.length() == 0)
 			return typeName;
 
-		return packageName + "." + typeName;
+		return packageName + '.' + typeName;
 	}
 
 	public JavaTypeCompletionProposal(String replacementString, ICompilationUnit cu, int replacementOffset, int replacementLength, Image image, String displayString, int relevance) {

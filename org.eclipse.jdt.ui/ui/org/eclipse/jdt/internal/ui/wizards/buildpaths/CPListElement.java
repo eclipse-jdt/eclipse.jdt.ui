@@ -22,11 +22,11 @@ import org.eclipse.jdt.ui.JavaUI;
 
 public class CPListElement {
 	
-	public static final String SOURCEATTACHMENT= "sourcepath";
-	public static final String SOURCEATTACHMENTROOT= "rootpath";
-	public static final String JAVADOC= "javadoc";
-	public static final String OUTPUT= "output";
-	public static final String EXCLUSION= "exclusion";
+	public static final String SOURCEATTACHMENT= "sourcepath"; //$NON-NLS-1$
+	public static final String SOURCEATTACHMENTROOT= "rootpath"; //$NON-NLS-1$
+	public static final String JAVADOC= "javadoc"; //$NON-NLS-1$
+	public static final String OUTPUT= "output"; //$NON-NLS-1$
+	public static final String EXCLUSION= "exclusion"; //$NON-NLS-1$
 	
 	private IJavaProject fProject;
 	

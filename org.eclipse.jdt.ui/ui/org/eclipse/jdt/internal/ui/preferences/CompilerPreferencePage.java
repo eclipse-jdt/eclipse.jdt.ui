@@ -32,7 +32,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		setDescription(PreferencesMessages.getString("CompilerPreferencePage.description")); //$NON-NLS-1$
 		
 		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CompilerPreferencePage.title"));		
+		setTitle(PreferencesMessages.getString("CompilerPreferencePage.title"));		 //$NON-NLS-1$
 		
 		fConfigurationBlock= new CompilerConfigurationBlock(this, null);
 	}

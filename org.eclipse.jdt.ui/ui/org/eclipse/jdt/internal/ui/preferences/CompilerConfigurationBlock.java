@@ -201,7 +201,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= 2;
 
 		Group group= new Group(markersComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.deprecated.label"));
+		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.deprecated.label")); //$NON-NLS-1$
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 		
@@ -215,7 +215,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		layout.numColumns= 2;
 
 		group= new Group(markersComposite, SWT.NONE);
-		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.nls.label"));
+		group.setText(PreferencesMessages.getString("CompilerConfigurationBlock.markers.nls.label")); //$NON-NLS-1$
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
 
@@ -521,7 +521,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
 
-		String[] filters= getTokens(text, ",");
+		String[] filters= getTokens(text, ","); //$NON-NLS-1$
 		for (int i= 0; i < filters.length; i++) {
 			String fileName= filters[i].replace('*', 'x');
 			int resourceType= IResource.FILE;

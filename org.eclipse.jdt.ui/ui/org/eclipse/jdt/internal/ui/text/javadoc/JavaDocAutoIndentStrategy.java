@@ -707,7 +707,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		String lineContents= document.get(firstChar, length);
 
 		String prefix= lineContents.trim();		
-		if (!prefix.startsWith("*") || prefix.startsWith("*/"))
+		if (!prefix.startsWith("*") || prefix.startsWith("*/")) //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 			
 		lineContents= lineContents.substring(1).trim().toLowerCase();
@@ -721,7 +721,7 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			return false;
 
 		// preserve HTML tags which are not inline
-		if (lineContents.startsWith("<") && !isInlineTag(lineContents))
+		if (lineContents.startsWith("<") && !isInlineTag(lineContents)) //$NON-NLS-1$
 			return false;
 
 		return true;

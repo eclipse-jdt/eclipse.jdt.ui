@@ -68,11 +68,11 @@ class CPListLabelProvider extends LabelProvider {
 	}
 	
 	public String getCPListElementAttributeText(CPListElementAttribute attrib) {
-		String notAvailable= "(None)";
+		String notAvailable= NewWizardMessages.getString("CPListLabelProvider.none"); //$NON-NLS-1$
 		StringBuffer buf= new StringBuffer();
 		String key= attrib.getKey();
 		if (key.equals(CPListElement.SOURCEATTACHMENT)) {
-			buf.append("Source attachment: ");
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.source_attachment.label")); //$NON-NLS-1$
 			IPath path= (IPath) attrib.getValue();
 			if (path != null && !path.isEmpty()) {
 				if (attrib.getParent().getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
@@ -84,7 +84,7 @@ class CPListLabelProvider extends LabelProvider {
 				buf.append(notAvailable);
 			}
 		} else if (key.equals(CPListElement.SOURCEATTACHMENTROOT)) {
-			buf.append("Source attachment root: ");
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.source_attachment_root.label")); //$NON-NLS-1$
 			IPath path= (IPath) attrib.getValue();
 			if (path != null && !path.isEmpty()) {
 				buf.append(path.toString());
@@ -92,7 +92,7 @@ class CPListLabelProvider extends LabelProvider {
 				buf.append(notAvailable);
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
-			buf.append("Javadoc location: ");
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.javadoc_location.label")); //$NON-NLS-1$
 			URL path= (URL) attrib.getValue();
 			if (path != null) {
 				buf.append(path.toExternalForm());
@@ -100,20 +100,20 @@ class CPListLabelProvider extends LabelProvider {
 				buf.append(notAvailable);
 			}
 		} else if (key.equals(CPListElement.OUTPUT)) {
-			buf.append("Output folder: ");
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.output_folder.label")); //$NON-NLS-1$
 			IPath path= (IPath) attrib.getValue();
 			if (path != null) {
 				buf.append(path.makeRelative().toString());
 			} else {
-				buf.append("(Default output folder)");
+				buf.append(NewWizardMessages.getString("CPListLabelProvider.default_output_folder.label")); //$NON-NLS-1$
 			}
 		} else if (key.equals(CPListElement.EXCLUSION)) {
-			buf.append("Exclusion filter: ");
+			buf.append(NewWizardMessages.getString("CPListLabelProvider.exclusion_filter.label")); //$NON-NLS-1$
 			IPath[] patterns= (IPath[]) attrib.getValue();
 			if (patterns != null && patterns.length > 0) {
 				for (int i= 0; i < patterns.length; i++) {
 					if (i > 0) {
-						buf.append("; ");
+						buf.append(NewWizardMessages.getString("CPListLabelProvider.exclusion_filter_separator")); //$NON-NLS-1$
 					}
 					buf.append(patterns[i].toString());
 				}
@@ -179,7 +179,7 @@ class CPListLabelProvider extends LabelProvider {
 			default:
 				// pass
 		}
-		return "unknown element";
+		return NewWizardMessages.getString("CPListLabelProvider.unknown_element.label"); //$NON-NLS-1$
 	}
 	
 	private String getPathString(IPath path, boolean isExternal) {

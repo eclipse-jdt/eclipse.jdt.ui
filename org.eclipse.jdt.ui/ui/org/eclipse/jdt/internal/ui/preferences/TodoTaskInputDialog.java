@@ -67,16 +67,16 @@ public class TodoTaskInputDialog extends StatusDialog {
 		fNameDialogField.setLabelText(PreferencesMessages.getString("TodoTaskInputDialog.name.label")); //$NON-NLS-1$
 		fNameDialogField.setDialogFieldListener(adapter);
 		
-		fNameDialogField.setText((task != null) ? task.name : "");
+		fNameDialogField.setText((task != null) ? task.name : ""); //$NON-NLS-1$
 		
 		String[] items= new String[] {
-			PreferencesMessages.getString("TodoTaskInputDialog.priority.high"),
-			PreferencesMessages.getString("TodoTaskInputDialog.priority.normal"),
-			PreferencesMessages.getString("TodoTaskInputDialog.priority.low")
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.high"), //$NON-NLS-1$
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.normal"), //$NON-NLS-1$
+			PreferencesMessages.getString("TodoTaskInputDialog.priority.low") //$NON-NLS-1$
 		};
 		
 		fPriorityDialogField= new ComboDialogField(SWT.READ_ONLY);
-		fPriorityDialogField.setLabelText(PreferencesMessages.getString("TodoTaskInputDialog.priority.label"));
+		fPriorityDialogField.setLabelText(PreferencesMessages.getString("TodoTaskInputDialog.priority.label")); //$NON-NLS-1$
 		fPriorityDialogField.setItems(items);
 		if (task != null) {
 			if (JavaCore.COMPILER_TASK_PRIORITY_HIGH.equals(task.priority)) {

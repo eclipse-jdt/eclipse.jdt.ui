@@ -61,17 +61,17 @@ public class TodoTaskPropertyPage extends PropertyPage {
 		
 		fUseWorkspaceSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseWorkspaceSettings.setDialogFieldListener(listener);
-		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useworkspacesettings.label"));
+		fUseWorkspaceSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useworkspacesettings.label")); //$NON-NLS-1$
 
 		fChangeWorkspaceSettings= new SelectionButtonDialogField(SWT.PUSH);
-		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useworkspacesettings.change"));
+		fChangeWorkspaceSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useworkspacesettings.change")); //$NON-NLS-1$
 		fChangeWorkspaceSettings.setDialogFieldListener(listener);
 	
 		fUseWorkspaceSettings.attachDialogField(fChangeWorkspaceSettings);
 
 		fUseProjectSettings= new SelectionButtonDialogField(SWT.RADIO);
 		fUseProjectSettings.setDialogFieldListener(listener);
-		fUseProjectSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useprojectsettings.label"));
+		fUseProjectSettings.setLabelText(PreferencesMessages.getString("TodoTaskPropertyPage.useprojectsettings.label")); //$NON-NLS-1$
 	}
 
 	/*
@@ -133,7 +133,7 @@ public class TodoTaskPropertyPage extends PropertyPage {
 	
 	private void doDialogFieldChanged(DialogField field) {
 		if (field == fChangeWorkspaceSettings) {
-			String id= "org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage";
+			String id= "org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage"; //$NON-NLS-1$
 			TodoTaskPreferencePage page= new TodoTaskPreferencePage();
 			showPreferencePage(id, page);
 		} else {
