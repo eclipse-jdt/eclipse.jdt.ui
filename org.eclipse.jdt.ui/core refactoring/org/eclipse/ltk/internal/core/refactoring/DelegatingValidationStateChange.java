@@ -16,8 +16,8 @@ import java.util.List;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IDynamicValidationStateChange;
 import org.eclipse.ltk.core.refactoring.IValidationStateListener;
 
