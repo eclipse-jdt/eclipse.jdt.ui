@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
-import org.eclipse.jdt.internal.ui.javadocexport.JavadocExportMessages;
 import org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationBlock;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -826,7 +825,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 		public JavadocPropertyDialog(Shell parent, CPListElement element) {
 			super(parent);
-			setTitle(JavadocExportMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
+			setTitle(NewWizardMessages.getFormattedString("LibrariesWorkbookPage.JavadocPropertyDialog.title", element.getPath().toString())); //$NON-NLS-1$
 			fElement= element;
 			
 			URL initialLocation= JavaUI.getLibraryJavadocLocation(element.getPath());
