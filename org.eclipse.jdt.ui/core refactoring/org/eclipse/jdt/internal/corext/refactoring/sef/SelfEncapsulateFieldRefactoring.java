@@ -279,7 +279,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (messages.length != 0) {
 			result.addError(RefactoringCoreMessages.getFormattedString(
 				"SelfEncapsulateField.compiler_errors_update",
-				element.getElementName()), JavaSourceContext.create(element, null));
+				element.getElementName()), JavaSourceContext.create(element));
 		}
 		return true;
 	} 

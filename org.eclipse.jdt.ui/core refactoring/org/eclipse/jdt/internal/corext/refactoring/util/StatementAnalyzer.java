@@ -9,6 +9,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 
 /**
  * Analyzer to check if a selection covers a valid set of statements of an abstract syntax
@@ -37,14 +39,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
  */
 public class StatementAnalyzer extends SelectionAnalyzer {
 
+	protected ICompilationUnit fCUnit;
 	private CompilationUnitBuffer fBuffer;
 	private RefactoringStatus fStatus;
 
-	public StatementAnalyzer(CompilationUnitBuffer buffer, Selection selection, boolean traverseSelectedNode) {
+	public StatementAnalyzer(ICompilationUnit cunit, Selection selection, boolean traverseSelectedNode) throws JavaModelException {
 		super(selection, traverseSelectedNode);
-		Assert.isNotNull(buffer);
+		Assert.isNotNull(cunit);
+		fCUnit= cunit;
 		fStatus= new RefactoringStatus();
-		fBuffer= buffer;
+		fBuffer= new CompilationUnitBuffer(fCUnit);
 	}
 	
 	protected void checkSelectedNodes() {
@@ -195,6 +199,11 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 	
 	protected void invalidSelection(String message) {
 		fStatus.addFatalError(message);
+		reset();
+	}
+	
+	protected void invalidSelection(String message, RefactoringStatusEntry.Context context) {
+		fStatus.addFatalError(message, context);
 		reset();
 	}
 	

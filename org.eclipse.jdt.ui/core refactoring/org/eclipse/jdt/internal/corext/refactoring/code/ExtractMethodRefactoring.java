@@ -62,7 +62,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private boolean fCallOnDeclarationLine= true;
 	
 	private ExtractMethodAnalyzer fAnalyzer;
-	private CompilationUnitBuffer fBuffer;
+	// private CompilationUnitBuffer fBuffer;
 	private String fVisibility;
 	private String fMethodName;
 	private boolean fCallNeedsSemicolon;
@@ -159,7 +159,6 @@ public class ExtractMethodRefactoring extends Refactoring {
 			if (fSelectionStart < 0 || fSelectionLength == 0)
 				return mergeTextSelectionStatus(result);
 			
-			fBuffer= new CompilationUnitBuffer(fCUnit);
 			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
 			root.accept(createVisitor());
 			
@@ -185,8 +184,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 	}
 	
-	private ASTVisitor createVisitor() {
-		fAnalyzer= new ExtractMethodAnalyzer(fBuffer, Selection.createFromStartLength(fSelectionStart, fSelectionLength));
+	private ASTVisitor createVisitor() throws JavaModelException {
+		fAnalyzer= new ExtractMethodAnalyzer(fCUnit, Selection.createFromStartLength(fSelectionStart, fSelectionLength));
 		return fAnalyzer;
 	}
 	

@@ -4,16 +4,21 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.CompilationUnitBuffer;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public class CodeAnalyzer2 extends StatementAnalyzer {
 
-	public CodeAnalyzer2(CompilationUnitBuffer buffer, Selection selection, boolean traverseSelectedNode) {
-		super(buffer, selection, traverseSelectedNode);
+	public CodeAnalyzer2(ICompilationUnit cunit, Selection selection, boolean traverseSelectedNode) throws JavaModelException {
+		super(cunit, selection, traverseSelectedNode);
 	}
 	
 	protected final void checkSelectedNodes() {
@@ -21,8 +26,9 @@ public class CodeAnalyzer2 extends StatementAnalyzer {
 		RefactoringStatus status= getStatus();
 		if (status.hasFatalError())
 			return;
-		if (getFirstSelectedNode() instanceof ArrayInitializer) {
-			status.addFatalError("Operation not applicable to an array initializer.");
+		ASTNode node= getFirstSelectedNode();
+		if (node instanceof ArrayInitializer) {
+			status.addFatalError("Operation not applicable to an array initializer.", JavaSourceContext.create(fCUnit, node));
 		}
 	}
 }

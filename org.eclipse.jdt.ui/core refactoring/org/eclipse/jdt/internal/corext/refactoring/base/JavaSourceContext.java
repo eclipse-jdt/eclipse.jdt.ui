@@ -13,10 +13,12 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.dom.Binding2JavaModel;
+import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 
@@ -122,21 +124,6 @@ public abstract class JavaSourceContext extends Context {
 	}
 	
 	/**
-	 * Creates an status entry context for the given compilation unit
-	 * 
-	 * @param cunit the compilation unit for which the context is supposed to be created
-	 * @param range the source range that has caused the error or <code>null</code>
-	 *  	if the source range is unknown.
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
-	 * 	context cannot be created
-	 */
-	public static Context create(ICompilationUnit cunit, ISourceRange range) {
-		if (cunit == null)
-			return NULL_CONTEXT;
-		return new CompilationUnitSourceContext(cunit, range);
-	}
-
-	/**
 	 * Creates an status entry context for the given method binding
 	 * 
 	 * @param method the method binding for which the context is supposed to be created
@@ -155,6 +142,64 @@ public abstract class JavaSourceContext extends Context {
 		} catch (JavaModelException e) {
 		}
 		return create(mr);
+	}
+
+	/**
+	 * Creates an status entry context for the given compilation unit.
+	 * 
+	 * @param cunit the compilation unit containing the error
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * 	context cannot be created
+	 */
+	public static Context create(ICompilationUnit cunit) {
+		return create(cunit, (ISourceRange)null);
+	}
+
+	/**
+	 * Creates an status entry context for the given compilation unit and source range.
+	 * 
+	 * @param cunit the compilation unit containing the error
+	 * @param range the source range that has caused the error or <code>null</code>
+	 *  	if the source range is unknown.
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * 	context cannot be created
+	 */
+	public static Context create(ICompilationUnit cunit, ISourceRange range) {
+		if (cunit == null)
+			return NULL_CONTEXT;
+		return new CompilationUnitSourceContext(cunit, range);
+	}
+
+	/**
+	 * Creates an status entry context for the given compilation unit and AST node.
+	 * 
+	 * @param cunit the compilation unit containing the error
+	 * @param astNode an astNode denoting the source range that has caused the error
+	 * 
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * 	context cannot be created
+	 */
+	public static Context create(ICompilationUnit cunit, ASTNode node) {
+		ISourceRange range= null;
+		if (node != null)
+			range= new SourceRange(node.getStartPosition(), node.getLength());
+		return create(cunit, range);
+	}
+
+	/**
+	 * Creates an status entry context for the given compilation unit and selection.
+	 * 
+	 * @param cunit the compilation unit containing the error
+	 * @param selection a selection denoting the source range that has caused the error
+	 * 
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * 	context cannot be created
+	 */
+	public static Context create(ICompilationUnit cunit, Selection selection) {
+		ISourceRange range= null;
+		if (selection != null)
+			range= new SourceRange(selection.getOffset(), selection.getLength());
+		return create(cunit, range);
 	}
 
 	/**
