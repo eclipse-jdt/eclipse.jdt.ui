@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceStatus;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -20,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -29,14 +31,17 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactori
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IDeepCopyQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class CopyQueries implements ICopyQueries {
+public class ReorgQueries implements ICopyQueries {
 
 	private static final String EMPTY= " "; //XXX workaround for bug#16256 //$NON-NLS-1$
 
 	private IDeepCopyQuery fDeepCopyQuery;
 
-	public CopyQueries() {
+	public ReorgQueries() {
 		//just one instance, so that we get the correct 'yes to all' behavior
 		fDeepCopyQuery= new DeepCopyQuery(); 
 	}
@@ -48,21 +53,21 @@ public class CopyQueries implements ICopyQueries {
 
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu) {
 		String[] keys= {removeTrailingJava(cu.getElementName())};
-		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, removeTrailingJava(cu.getElementName()));
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res) {
 		String[] keys= {res.getName()};
-		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createResourceNameValidator(res), message, res.getName());
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack) {
 		String[] keys= {pack.getElementName()};
-		String message= ReorgMessages.getFormattedString("CopyQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
+		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
 		return createStaticQuery(createPackageNameValidator(pack), message, pack.getElementName());
 	}
 
@@ -83,7 +88,7 @@ public class CopyQueries implements ICopyQueries {
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial){
 		return new INewNameQuery(){
 			public String getNewName() {
-				InputDialog dialog= new InputDialog(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("CopyQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
+				InputDialog dialog= new InputDialog(JavaPlugin.getActiveWorkbenchShell(), ReorgMessages.getString("ReorgQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
 				return dialog.getValue();
@@ -97,15 +102,15 @@ public class CopyQueries implements ICopyQueries {
 				if (newText == null || "".equals(newText) || res.getParent() == null) //$NON-NLS-1$
 					return EMPTY;
 				if (res.getParent().findMember(newText) != null)
-					return ReorgMessages.getString("CopyQueries.resourceWithThisNameAlreadyExists"); //$NON-NLS-1$
+					return ReorgMessages.getString("ReorgQueries.resourceWithThisNameAlreadyExists"); //$NON-NLS-1$
 				if (! res.getParent().getFullPath().isValidSegment(newText))
-					return ReorgMessages.getString("CopyQueries.invalidNameMessage"); //$NON-NLS-1$
+					return ReorgMessages.getString("ReorgQueries.invalidNameMessage"); //$NON-NLS-1$
 				IStatus status= res.getParent().getWorkspace().validateName(newText, res.getType());
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();
 					
 				if (res.getName().equalsIgnoreCase(newText))
-					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 					
 				return null;
 			}
@@ -132,7 +137,7 @@ public class CopyQueries implements ICopyQueries {
 					return refStatus.getFirstMessage(RefactoringStatus.FATAL);
 
 				if (cu.getElementName().equalsIgnoreCase(newCuName))
-					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 				
 				return null;	
 			}
@@ -154,13 +159,13 @@ public class CopyQueries implements ICopyQueries {
 				try {
 					if (parent instanceof IPackageFragmentRoot){ 
 						if (! RenamePackageRefactoring.isPackageNameOkInRoot(newText, (IPackageFragmentRoot)parent))
-							return ReorgMessages.getString("CopyQueries.packagewithThatNameexistsMassage");	 //$NON-NLS-1$
+							return ReorgMessages.getString("ReorgQueries.packagewithThatNameexistsMassage");	 //$NON-NLS-1$
 					}	
 				} catch (JavaModelException e) {
 					return EMPTY;
 				}
 				if (pack.getElementName().equalsIgnoreCase(newText))
-					return ReorgMessages.getString("CopyQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
+					return ReorgMessages.getString("ReorgQueries.resourceExistsWithDifferentCaseMassage"); //$NON-NLS-1$
 					
 				return null;
 			}
@@ -207,11 +212,11 @@ public class CopyQueries implements ICopyQueries {
 						IDialogConstants.NO_TO_ALL_ID,
 						IDialogConstants.CANCEL_ID};
  
-					String message= ReorgMessages.getFormattedString("CopyQueries.deep_copy", //$NON-NLS-1$
+					String message= ReorgMessages.getFormattedString("ReorgQueries.deep_copy", //$NON-NLS-1$
 						new String[] {source.getFullPath().makeRelative().toString()});
 					MessageDialog dialog= new MessageDialog(
 						parentShell, 
-						ReorgMessages.getString("CopyQueries.Linked_Resource"), //$NON-NLS-1$
+						ReorgMessages.getString("ReorgQueries.Linked_Resource"), //$NON-NLS-1$
 						null,
 						message,
 						MessageDialog.QUESTION,
@@ -242,6 +247,124 @@ public class CopyQueries implements ICopyQueries {
 				throw new OperationCanceledException();
 			}
 			return false;
+		}
+	}
+	
+	static class OverwriteQuery {
+
+		private boolean alwaysOverwriteNonReadOnly= false;
+		private boolean alwaysOverwrite= false;
+		private boolean fCanceled= false;
+		
+		public boolean overwrite(final Object element) {
+		
+			IResource resource= ResourceUtil.getResource(element);
+
+			if (resource != null){
+				IPath location = resource.getLocation();
+				if (location == null) {
+					//undefined path variable
+					return false;
+				}
+
+				if (location.toFile().exists() == false) {
+					//link target does not exist
+					return false;
+				}
+			}
+
+			if (fCanceled)
+				return false;
+			
+			if (alwaysOverwrite) 
+				return true;
+
+			final boolean isReadOnly= isReadOnly(element);
+		
+			if (alwaysOverwriteNonReadOnly && ! isReadOnly) 
+				return true;
+
+			final Shell parentShell= JavaPlugin.getActiveWorkbenchShell();
+			final int[] result = new int[1];
+			// Dialogs need to be created and opened in the UI thread
+			Runnable query = new Runnable() {
+				public void run() {
+					int resultId[]= {
+						IDialogConstants.YES_ID,
+						IDialogConstants.YES_TO_ALL_ID,
+						IDialogConstants.NO_ID,
+						IDialogConstants.CANCEL_ID};
+ 
+					String message= createMessage(element, isReadOnly);
+					MessageDialog dialog= new MessageDialog(
+						parentShell, 
+						ReorgMessages.getString("ReorgQueries.Confirm_Overwritting"), //$NON-NLS-1$
+						null,
+						message,
+						MessageDialog.QUESTION,
+						new String[] {
+							IDialogConstants.YES_LABEL,
+							IDialogConstants.YES_TO_ALL_LABEL,
+							IDialogConstants.NO_LABEL,
+							IDialogConstants.CANCEL_LABEL },
+						0);
+					dialog.open();
+					result[0]= resultId[dialog.getReturnCode()];
+				}
+			};
+			parentShell.getDisplay().syncExec(query);
+			if (result[0] == IDialogConstants.YES_TO_ALL_ID) {
+				alwaysOverwriteNonReadOnly= true;
+				if (isReadOnly)
+					alwaysOverwrite= true;
+				return true;
+			} else if (result[0] == IDialogConstants.YES_ID) {
+				return true;
+			} else if (result[0] == IDialogConstants.CANCEL_ID) {
+				fCanceled= true;
+				return false;
+			} else if (result[0] == IDialogConstants.NO_ID) {
+				return false;
+			} 
+			Assert.isTrue(false);
+			return false;
+		}
+	
+		public String createMessage(Object element, boolean isReadOnly) {
+			String[] keys= {ReorgUtils.getName(element)};
+			if (isReadOnly)
+				return ReorgMessages.getFormattedString("ReorgQueries.exists_read-only", keys); //$NON-NLS-1$
+		 	else
+				return ReorgMessages.getFormattedString("ReorgQueries.exists", keys); //$NON-NLS-1$
+		}
+
+		public boolean isCanceled(){
+			return fCanceled;
+		}
+	
+		private static boolean isReadOnly(Object element) {
+			if (element instanceof IResource)
+				return isReadOnlyResource((IResource)element);
+			else if (element instanceof IJavaElement){
+				IResource resource= ResourceUtil.getResource(element);
+				if (resource == null)
+					return false;
+				if (isReadOnlyResource(resource))
+					return true;
+				return ((IJavaElement)element).isReadOnly();
+			} else
+				return false;
+		}
+	
+		private static boolean isReadOnlyResource(IResource resource) {
+			IStatus status= Resources.makeCommittable(resource, null);
+			if (status.isOK())
+				return false;
+			if (status.getCode() == IJavaStatusConstants.VALIDATE_EDIT_CHANGED_CONTENT)
+				return false;
+			if (status.getCode() == IResourceStatus.OUT_OF_SYNC_LOCAL)
+				return false;
+			return true;	
 		}
 	}
 }

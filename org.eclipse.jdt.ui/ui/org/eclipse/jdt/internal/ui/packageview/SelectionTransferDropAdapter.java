@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
-import org.eclipse.jdt.internal.ui.reorg.CopyQueries;
+import org.eclipse.jdt.internal.ui.reorg.ReorgQueries;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtCopyAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
@@ -206,7 +206,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fMoveRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtMoveAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new CopyQueries());
+			fMoveRefactoring= new MoveRefactoring(fElements, JavaPreferencesSettings.getCodeGenerationSettings(), query, new ReorgQueries());
 		}	
 		
 		if (!canMoveElements())
@@ -275,7 +275,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		
 		if (fCopyRefactoring == null){
 			IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(getViewer().getControl().getShell());
-			fCopyRefactoring= new CopyRefactoring(fElements, new CopyQueries(), query);
+			fCopyRefactoring= new CopyRefactoring(fElements, new ReorgQueries(), query);
 		}
 		
 		if (!canCopyElements())

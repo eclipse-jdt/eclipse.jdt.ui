@@ -22,7 +22,7 @@ public class JdtCopyAction extends ReorgDestinationAction {
 	}
 
 	ReorgRefactoring createRefactoring(List elements){
-		return new CopyRefactoring(elements, new CopyQueries(), createUpdateClasspathQuery(getShell()));
+		return new CopyRefactoring(elements, new ReorgQueries(), createUpdateClasspathQuery(getShell()));
 	}
 	
 	String getActionName() {

@@ -201,6 +201,6 @@ public class PasteResourcesFromClipboardAction extends SelectionDispatchAction {
 
 	private static CopyRefactoring createCopyRefactoring(Shell shell, IResource[] resourceData) {
 		IPackageFragmentRootManipulationQuery query= JdtCopyAction.createUpdateClasspathQuery(shell);
-		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new CopyQueries(), query);
+		return new CopyRefactoring(ClipboardActionUtil.getConvertedResources(resourceData), new ReorgQueries(), query);
 	}
 }

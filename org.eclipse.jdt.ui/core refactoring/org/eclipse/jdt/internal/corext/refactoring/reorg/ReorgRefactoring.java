@@ -6,9 +6,11 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
@@ -116,16 +118,6 @@ public abstract class ReorgRefactoring extends Refactoring {
 		fDestination= destination;	
 	}
 	
-	public Set getElementsThatExistInTarget() throws JavaModelException{
-		Set result= new HashSet();
-		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
-			Object each= iter.next();
-			if (causesNameConflict(each))
-				result.add(each);
-		}
-		return result;		
-	}
-	
 	public boolean canBeAncestor(Object ancestor){
 		if (ancestor instanceof IJavaModel)
 			return true;
@@ -146,6 +138,18 @@ public abstract class ReorgRefactoring extends Refactoring {
 		return (ancestor instanceof IContainer);
 	}
 
+	//Map: Object -> Object (element in source that exists in the destination -> element in destination)
+	public Map getElementsThatExistInTarget() throws JavaModelException{
+		Map result= new HashMap();
+		for (Iterator iter= getElements().iterator(); iter.hasNext(); ){
+			Object each= iter.next();
+			Object conflicting= getConflictingElementFromDestination(each);
+			if (conflicting != null)
+				result.put(each, conflicting);
+		}
+		return result;		
+	}
+	
 	abstract boolean isValidDestinationForCusAndFiles(Object dest) throws JavaModelException;
 
 	public final boolean isValidDestination(Object dest) throws JavaModelException{
@@ -481,7 +485,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}	
 	//---
 	
-	private boolean causesNameConflict(Object o) throws JavaModelException{
+	private Object getConflictingElementFromDestination(Object o) throws JavaModelException{
 		String newName= ReorgUtils.getName(o);
 		
 		if (o instanceof ICompilationUnit){
@@ -489,85 +493,89 @@ public abstract class ReorgRefactoring extends Refactoring {
 			ICompilationUnit cu= (ICompilationUnit)o;
 			if (dest instanceof IPackageFragment){
 				if (cu.getParent().equals(dest))
-					return false;
-				return causesNameConflict((IPackageFragment)dest, newName);
+					return null;
+				return getConflictingElementFromDestination((IPackageFragment)dest, newName);
 			}	
 			if (dest instanceof IContainer){
 				if (ResourceUtil.getResource(cu).getParent().equals(dest))
-					return false;
-				return causesNameConflict((IContainer)dest, newName);
+					return null;
+				return getConflictingElementFromDestination((IContainer)dest, newName);
 			}		
-			return true;	
+			return null;//XXX can i get here?	
 		}	
 
 		if (o instanceof IPackageFragmentRoot){
 			IProject dest= getDestinationForSourceFolders(getDestination());
 			if (((IPackageFragmentRoot)o).getJavaProject().getProject().equals(dest))
-				return false;
-			return causesNameConflict(dest, newName);
+				return null;
+			return getConflictingElementFromDestination(dest, newName);
 		}	
 		
 		if (o instanceof IPackageFragment){
 			IPackageFragmentRoot dest= getDestinationForPackages(getDestination());
 			if (((IPackageFragment)o).getParent().equals(dest))
-				return false;
-			return causesNameConflict(dest, newName);
+				return null;
+			return getConflictingElementFromDestination(dest, newName);
 		}	
 		
 		if (o instanceof IResource){
 			IContainer dest= getDestinationForResources(getDestination());
 			if (((IResource)o).getParent().equals(dest))
-				return false;
-			return causesNameConflict(dest, newName);
+				return null;
+			return getConflictingElementFromDestination(dest, newName);
 		}	
 
 		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
-		return true;
+		return null;
 	}
 	
-	private boolean causesNameConflict(IContainer c, String name){
+	private Object getConflictingElementFromDestination(IContainer c, String name){
 		if (c == null)
-			return false;
-						
-		if (c.findMember(name) != null)
-			return true;
+			return null;
+					
+		IResource foundMember= c.findMember(name);
+		if (foundMember != null)
+			return foundMember;
 			
-		return (!c.getFullPath().isValidSegment(name));
+		return null;//XXX should check c.getFullPath().isValidSegment(name) ?
 	}
 	
-	private boolean causesNameConflict(IJavaProject project, String name) throws JavaModelException{
+	private Object getConflictingElementFromDestination(IJavaProject project, String name) throws JavaModelException{
 		if (project == null)
-			return false;
+			return null;
 		IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 		for (int i = 0; i < roots.length; i++) {
 			IPackageFragmentRoot root = roots[i];
 			if (root.getElementName().equals(name))
-				return true;
+				return root;
 		}
-		return false;
+		return null;
 	}
-	
-	private boolean causesNameConflict(IPackageFragmentRoot root, String name) throws JavaModelException{
+
+	private Object getConflictingElementFromDestination(IPackageFragmentRoot root, String name) throws JavaModelException{
 		if (root == null)
-			return false;
+			return null;
 			
 		IPackageFragment pkg= root.getPackageFragment(name);
-		return (pkg.exists() && pkg.hasChildren());
+		if (pkg.exists() && pkg.hasChildren())
+			return pkg;
+		else
+			return null;	
 	}
-	
-	private boolean causesNameConflict(IPackageFragment pkg, String name) throws JavaModelException{
+		
+	private Object getConflictingElementFromDestination(IPackageFragment pkg, String name) throws JavaModelException{
 		if (pkg == null)
-			return false;
+			return null;
 			
 		// the order is important here since getCompilationUnit() throws an exception
 		// if the name is invalid.
 		IStatus status= JavaConventions.validateCompilationUnitName(name);
 		if (! status.isOK())
-			return true;
-			
-		return (pkg.getCompilationUnit(name).exists() || getResource(pkg, name) != null);		
-	}
-		
+			return null;//XXX not sure here
+		if (pkg.getCompilationUnit(name).exists() || getResource(pkg, name) != null)
+			return pkg.getCompilationUnit(name);
+		return null;
+	}		
 	//
 	private boolean canReorgAll(){
 		for (Iterator iter= getElements().iterator(); iter.hasNext();){

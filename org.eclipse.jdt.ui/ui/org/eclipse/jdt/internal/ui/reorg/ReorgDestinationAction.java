@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
@@ -32,7 +33,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -143,42 +143,20 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 
 	//returns null iff canceled
 	private static Set getExcluded(ReorgRefactoring refactoring) throws JavaModelException{
-		Set elements= refactoring.getElementsThatExistInTarget();
-		Set result= new HashSet();
-		for (Iterator iter= elements.iterator(); iter.hasNext(); ){
-			Object o= iter.next();
-			int action= askIfOverwrite(ReorgUtils.getName(o));
-			if (action == IDialogConstants.CANCEL_ID)
-				return null;
-			if (action == IDialogConstants.YES_TO_ALL_ID)	
-				return new HashSet(0); //nothing excluded
-			if (action == IDialogConstants.NO_ID)		
-				result.add(o);	
-		}
-		return result;
-	}
-	
-	private static int askIfOverwrite(String elementName){
-		Shell shell= JavaPlugin.getActiveWorkbenchShell().getShell();
-		String title= ReorgMessages.getString("JdtMoveAction.move"); //$NON-NLS-1$
-		String question= ReorgMessages.getFormattedString("JdtMoveAction.overwrite", elementName);//$NON-NLS-1$
+		Map elements= refactoring.getElementsThatExistInTarget();
 		
-		String[] labels= new String[] {IDialogConstants.YES_LABEL, IDialogConstants.YES_TO_ALL_LABEL,
-															 IDialogConstants.NO_LABEL,  IDialogConstants.CANCEL_LABEL };
-		final MessageDialog dialog = new MessageDialog(shell,	title, null, question, MessageDialog.QUESTION,	labels,  0);
-		shell.getDisplay().syncExec(new Runnable() {
-			public void run() {
-				dialog.open();
-			}
-		});
-		int result = dialog.getReturnCode();
-		if (result == 0)
-			return IDialogConstants.YES_ID;
-		if (result == 1)
-			return IDialogConstants.YES_TO_ALL_ID;
-		if (result == 2)
-			return IDialogConstants.NO_ID;
-		return IDialogConstants.CANCEL_ID;
+		ReorgQueries.OverwriteQuery overwriteQuery= new ReorgQueries.OverwriteQuery();
+		
+		Set result= new HashSet();
+		for (Iterator iter= elements.keySet().iterator(); iter.hasNext(); ){
+			Object element= iter.next();
+			Object conflicting= elements.get(element);
+			if (! overwriteQuery.overwrite(conflicting))
+				result.add(element);
+		}
+		if (overwriteQuery.isCanceled())
+			return null;
+		return result;
 	}
 	
 	//hook to override
@@ -395,7 +373,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 	}
 	
 	//-----
-	static class ContainerFilter extends ViewerFilter {
+	private static class ContainerFilter extends ViewerFilter {
 		private ReorgRefactoring fRefactoring;
 	
 		ContainerFilter(ReorgRefactoring refactoring) {
@@ -426,7 +404,7 @@ public abstract class ReorgDestinationAction extends SelectionDispatchAction {
 		}
 	}
 	//------
-	static class ReorgSelectionValidator implements ISelectionStatusValidator {
+	private static class ReorgSelectionValidator implements ISelectionStatusValidator {
 		private ReorgRefactoring fRefactoring;
 		
 		public ReorgSelectionValidator(ReorgRefactoring refactoring) {
