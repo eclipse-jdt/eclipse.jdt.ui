@@ -604,7 +604,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		}
 	}
 
-	private Control createBehaviorPage(Composite parent) {
+	private Control createAppearancePage(Composite parent) {
 
 		Composite behaviorComposite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout(); layout.numColumns= 2;
@@ -621,16 +621,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.insertSpaceForTabs"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.SPACES_FOR_TABS, 0);
-		
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
-
-		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
-		addCheckBox(behaviorComposite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
-		
+				
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.synchronizeOnCursor"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, 0);
 
@@ -649,9 +640,10 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.showPrintMargin"); //$NON-NLS-1$
 		addCheckBox(behaviorComposite, label, CompilationUnitEditor.PRINT_MARGIN, 0);
 
-		Label l= new Label(behaviorComposite, SWT.LEFT);
+		Label l= new Label(behaviorComposite, SWT.LEFT );
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 		
 		l= new Label(behaviorComposite, SWT.LEFT);
@@ -717,6 +709,23 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		return behaviorComposite;
 	}
 	
+	private Control createProblemIndicationPage(Composite parent) {
+		Composite composite= new Composite(parent, SWT.NULL);
+		GridLayout layout= new GridLayout(); layout.numColumns= 2;
+		composite.setLayout(layout);
+				
+		String label= JavaUIMessages.getString("JavaEditorPreferencePage.showProblemsBeforeCompiling"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitDocumentProvider.HANDLE_TEMPORARY_PROBLEMS, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.highlightProblems"); //$NON-NLS-1$
+		addCheckBox(composite, label, CompilationUnitEditor.PROBLEM_INDICATION, 0);
+
+		label= JavaUIMessages.getString("JavaEditorPreferencePage.showQuickFixables"); //$NON-NLS-1$
+		addCheckBox(composite, label, JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, 0);
+		
+		return composite;
+	}
+
 	private Control createContentAssistPage(Composite parent) {
 
 		Composite contentAssistComposite= new Composite(parent, SWT.NULL);
@@ -749,8 +758,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.autoActivationTriggersForJavaDoc"); //$NON-NLS-1$
 		addTextField(contentAssistComposite, label, ContentAssistPreference.AUTOACTIVATION_TRIGGERS_JAVADOC, 4, 0, false);
-				
-				
+								
 		label= JavaUIMessages.getString("JavaEditorPreferencePage.backgroundForCompletionProposals"); //$NON-NLS-1$
 		addColorButton(contentAssistComposite, label, ContentAssistPreference.PROPOSALS_BACKGROUND, 0);
 		
@@ -780,18 +788,19 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		TabItem item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.general")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
-		item.setControl(createBehaviorPage(folder));
+		item.setControl(createAppearancePage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.colors")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createColorPage(folder));
 		
 		item= new TabItem(folder, SWT.NONE);
 		item.setText(JavaUIMessages.getString("JavaEditorPreferencePage.codeAssist")); //$NON-NLS-1$
-		item.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CFILE));
 		item.setControl(createContentAssistPage(folder));
+
+		item= new TabItem(folder, SWT.NONE);
+		item.setText("Problem Indi&cation");
+		item.setControl(createProblemIndicationPage(folder));
 		
 		initialize();
 		
