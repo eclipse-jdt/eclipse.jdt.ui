@@ -432,7 +432,7 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		return value.equals(fWorkingValues.get(key));
 	}
 
-	/*
+	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
@@ -454,14 +454,36 @@ public class CompilerPreferencePage extends PreferencePage implements IWorkbench
 		} else {
 			updateComplianceEnableState();
 		}
-		StatusInfo status= new StatusInfo();
-		if (checkValue(PREF_COMPLIANCE, VERSION_1_4) && checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_3)) {
-			status.setError(JavaUIMessages.getString("CompilerPreferencePage.validation14.error"));
-		} else if (checkValue(PREF_COMPLIANCE, VERSION_1_3) && checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
-			status.setError(JavaUIMessages.getString("CompilerPreferencePage.validation13.error"));
-		} 
-		updateStatus(status);
+		updateStatus(getValidation());
 	}
+	
+	private IStatus getValidation() {
+		StatusInfo status= new StatusInfo();
+		if (checkValue(PREF_COMPLIANCE, VERSION_1_4)) {
+			if (!checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl14notsrc14.error"));
+				return status;
+			}
+		} else if (checkValue(PREF_COMPLIANCE, VERSION_1_3)) {
+			if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13src14.error"));
+				return status;
+			} else if (checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_4)) {
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.cpl13trg14.error"));
+				return status;
+			}
+		}
+		if (checkValue(PREF_SOURCE_COMPATIBILITY, VERSION_1_4)) {
+			if (!checkValue(PREF_PB_ASSERT_AS_IDENTIFIER, ERROR)) {
+				status.setError(JavaUIMessages.getString("CompilerPreferencePage.src14asrterr.error"));
+				return status;
+			}
+		}
+		return status;
+	}		
+
+	
+	
 
 	/*
 	 * Update the compliance controls' enable state
