@@ -502,9 +502,10 @@
             name="%propertiesFileEditorName"
             icon="icons/full/obj16/file_obj.gif"
             extensions="properties"
-            contributorClass="org.eclipse.ui.texteditor.BasicTextEditorActionContributor"
-            class="org.eclipse.ui.editors.text.TextEditor"
-            id="org.eclipse.jdt.ui.DefaultTextEditor">
+            contributorClass="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditorActionContributor"
+            class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileEditor"
+            symbolicFontName="org.eclipse.jdt.ui.PropertiesFileEditor.textfont"
+            id="org.eclipse.jdt.ui.PropertiesFileEditor">
       </editor>
       <editor
             name="%jarDescEditorName"
@@ -527,6 +528,15 @@
             id="org.eclipse.jdt.ui.editors.textfont">
          <description>
             %javaEditorFontDefintion.description
+         </description>
+      </fontDefinition>
+      <fontDefinition
+            label="%propertiesFileEditorFontDefiniton.label"
+            defaultsTo="org.eclipse.jface.textfont"
+            categoryId="org.eclipse.jdt.ui.presentation"
+            id="org.eclipse.jdt.ui.PropertiesFileEditor.textfont">
+         <description>
+            %propertiesFileEditorFontDefintion.description
          </description>
       </fontDefinition>
    </extension>
@@ -768,6 +778,17 @@
             class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentFactory">
       </factory>
    </extension>
+   
+   <extension
+         id="PropertiesFileDocumentSetupParticipant"
+         name="%propertiesFileDocumentSetupParticipant"
+         point="org.eclipse.core.filebuffers.documentSetup">
+      <participant
+            contentTypeId="org.eclipse.jdt.core.javaProperties"
+            class="org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentSetupParticipant">
+      </participant>
+   </extension>
+
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -829,6 +850,12 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage"
             id="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage">
+      </page>
+      <page
+            name="%propertiesFileEditorPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.PropertiesFileEditorPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.PropertiesFileEditorPreferencePage">
       </page>
       <page
             name="%compilerOptionsPrefName"
