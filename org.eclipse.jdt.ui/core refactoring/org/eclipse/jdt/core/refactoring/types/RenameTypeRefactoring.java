@@ -123,8 +123,8 @@ public class RenameTypeRefactoring extends TypeRefactoring implements IRenameRef
 			pm.worked(1);
 			result.merge(checkImportedTypes());	
 			pm.worked(1);
-			if (mustRenameCU() && resourceExists(getNewFilePath(getType(), fNewName)))
-				result.addFatalError("Cannot rename a compilation unit to " + fNewName + ".java - name already used by another file in this directory");
+			if (mustRenameCU())
+				result.merge(Checks.checkCompilationUnitNewName(getType().getCompilationUnit(), fNewName + ".java"));
 			pm.worked(1);	
 			if (isEnclosedInType(getType(), fNewName))	
 				result.addError("Type " + getType().getFullyQualifiedName() + " is enclosed in a type named " + fNewName);
