@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IRegion;
 import org.eclipse.jdt.core.IType;
@@ -151,6 +152,15 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 					for (int i= 0; i < roots.length; i++) {
 						if (!roots[i].isExternal()) {
 							region.add(roots[i]);
+						}
+					}
+				} else if (element.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
+					IPackageFragmentRoot[] roots= element.getJavaProject().getPackageFragmentRoots();
+					String name= element.getElementName();
+					for (int i= 0; i < roots.length; i++) {
+						IPackageFragment pack= roots[i].getPackageFragment(name);
+						if (pack.exists()) {
+							region.add(pack);
 						}
 					}
 				} else {
