@@ -98,12 +98,12 @@ public class StubUtility {
 			if (comment != null) {
 				buf.append(comment);
 			} else {
-				buf.append("/**\n *\n **/"); //$NON-NLS-1$
+				buf.append("/**\n *\n */"); //$NON-NLS-1$
 			}
 			buf.append('\n');
 		}
 		// add method declaration
-		String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
+		String bodyStatement= settings.noBody ? null : getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
 		String bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement);
 		genMethodDeclaration(destTypeName, method, bodyContent, imports, buf);
 		return buf.toString();
@@ -233,7 +233,6 @@ public class StubUtility {
 				buf.append(paramNames[i]);
 			}
 			buf.append(");"); //$NON-NLS-1$
-			return buf.toString();
 		} else {
 			if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
 				if (!isPrimitiveType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
@@ -244,8 +243,8 @@ public class StubUtility {
 					buf.append("return 0;"); //$NON-NLS-1$
 				}
 			}			
-			return ""; //$NON-NLS-1$
 		}
+		return buf.toString();
 	}	
 
 	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement) throws CoreException {
