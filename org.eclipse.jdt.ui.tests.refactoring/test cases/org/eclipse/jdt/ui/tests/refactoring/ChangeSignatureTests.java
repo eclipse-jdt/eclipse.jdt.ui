@@ -42,8 +42,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
-	private static final boolean RUN_CONSTRUCTOR_TEST = true;
-	private static final boolean BUG_49772= true;
+	private static final boolean RUN_CONSTRUCTOR_TEST= true;
 
 	public ChangeSignatureTests(String name) {
 		super(name);
@@ -1427,10 +1426,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testImport05() throws Exception {
-		if (BUG_49772) {
-			printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
-			return;
-		}
+		// printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
 		String[] signature= {};
 		String[] newNames= null;
 		String[] newTypes= null;
@@ -1466,10 +1462,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testImport07() throws Exception {
-		if (BUG_49772) {
-			printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
-			return;
-		}
+		// printTestDisabledMessage("49772: Change method signature: remove unused imports [refactoring]");
 		String[] signature= {"QList;"};
 		String[] newNames= null;
 		String[] newTypes= null;

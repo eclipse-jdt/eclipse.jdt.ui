@@ -25,7 +25,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
@@ -46,16 +49,12 @@ public class CompilationUnitRewrite {
 	
 	private OldASTRewrite fRewrite; // lazily initialized
 	private ImportRewrite fImportRewrite; // lazily initialized
-//	private ImportRemover fImportRemover;
-//	private List/*<String>*/ fAddedImports;
-//	private List/*<ASTNode>*/ fRemovedNodes;
+	private ImportRemover fImportRemover;
 	
 	public CompilationUnitRewrite(ICompilationUnit cu) {
 		fCu= cu;
 		fRoot= new RefactoringASTParser(AST.JLS2).parse(fCu, true);
 		fTextEditGroups= new ArrayList();
-//		fAddedImports= new ArrayList();
-//		fRemovedNodes= new ArrayList();
 	}
 	
 	public void clearASTRewrite() {
@@ -67,8 +66,6 @@ public class CompilationUnitRewrite {
 	public void clearASTAndImportRewrites() {
 		clearASTRewrite();
 		fImportRewrite= null;
-//		fAddedImports= new ArrayList();
-//		fRemovedNodes= new ArrayList();
 	}
 	
 	public TextEditGroup createGroupDescription(String name) {
@@ -84,32 +81,49 @@ public class CompilationUnitRewrite {
 	 */
 	public TextChange createChange() throws CoreException {
 		boolean needsAstRewrite= fRewrite != null; //TODO: do we need something like ASTRewrite#hasChanges() here? 
+		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
 		boolean needsImportRewrite= fImportRewrite != null && ! fImportRewrite.isEmpty();
-		if (! needsAstRewrite && ! needsImportRewrite)
+		if (! needsAstRewrite && ! needsImportRemoval && ! needsImportRewrite)
 			return null;
 			
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
 		TextBuffer buffer= TextBuffer.acquire(getFile(fCu));
+		IDocument document= buffer.getDocument();
+		MultiTextEdit multiEdit= new MultiTextEdit();
 		try {
-			//TODO: create ImportsRemover, which removes unused imports from information
-			// collected in fAddedImports and fRemovedNodes.
-			MultiTextEdit edit= new MultiTextEdit();
-			cuChange.setEdit(edit);
-			if (needsAstRewrite)
-				fRewrite.rewriteNode(buffer, edit);
-			if (needsImportRewrite) {
-				String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
-				TextEdit importsEdit= fImportRewrite.createEdit(buffer.getDocument());
-				edit.addChild(importsEdit);
-				cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
+			cuChange.setEdit(multiEdit);
+			if (needsAstRewrite) {
+				TextEdit rewriteEdit= fRewrite.rewriteAST(document, null);
+				if (! isEmptyEdit(rewriteEdit)) {
+					multiEdit.addChild(rewriteEdit);
+					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
+						cuChange.addTextEditGroup((TextEditGroup) iter.next());
+					}
+				}
 			}
-			for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-				cuChange.addTextEditGroup((TextEditGroup) iter.next());
+			if (needsImportRemoval) {
+				ITypeBinding[] bindings= fImportRemover.getImportsToRemove();
+				for (int i= 0; i < bindings.length; i++)
+					getImportRewrite().removeImport(bindings[i]);
+			}
+			if (fImportRewrite != null && ! fImportRewrite.isEmpty()) {
+				TextEdit importsEdit= fImportRewrite.createEdit(document);
+				if (! isEmptyEdit(importsEdit)) {
+					multiEdit.addChild(importsEdit);
+					String importUpdateName= RefactoringCoreMessages.getString("ASTData.update_imports"); //$NON-NLS-1$
+					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
+				}
 			}
 		} finally {
 			TextBuffer.release(buffer);
 		}
+		if (isEmptyEdit(multiEdit))
+			return null;
 		return cuChange;
+	}
+	
+	private static boolean isEmptyEdit(TextEdit edit) {
+		return edit.getClass() == MultiTextEdit.class && ! edit.hasChildren();
 	}
 	
 	private static IFile getFile(ICompilationUnit cu) {
@@ -148,11 +162,10 @@ public class CompilationUnitRewrite {
 		return fImportRewrite;
 	}
 	
-//	public void registerAddedImport(String simpleName) {
-//		fAddedImports.add(simpleName);
-//	}
-//	
-//	public void registerRemovedNode(ASTNode removed) {
-//		fRemovedNodes.add(removed);
-//	}
+	public ImportRemover getImportRemover() {
+		if (fImportRemover == null) {
+			fImportRemover= new ImportRemover(fRoot);
+		}
+		return fImportRemover;
+	}
 }

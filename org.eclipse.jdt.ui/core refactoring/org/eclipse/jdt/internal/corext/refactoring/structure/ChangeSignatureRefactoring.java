@@ -135,7 +135,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		Assert.isNotNull(method);
 		fMethod= method;
 		fParameterInfos= createParameterInfoList(method);
-		//fExceptionInfos is created in checkActivation
+		//fExceptionInfos is created in checkInitialConditions
 		fReturnTypeName= getInitialReturnTypeName();
 		fMethodName= getInitialMethodName();
 		fVisibility= getInitialMethodVisibility();
@@ -953,7 +953,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				cuRewrite= new CompilationUnitRewrite(cu);
 			ASTNode[] nodes= ASTNodeSearchUtil.findNodes(group.getSearchResults(), cuRewrite.getRoot());
 			for (int j= 0; j < nodes.length; j++) {
-				//TODO: collect removed type references (SimpleNames) -> do it in CompilationUnitRewrite
 				createOccurrenceUpdate(nodes[j], cuRewrite, result).updateNode();
 			}
 			if (isNoArgConstructor && namedSubclassMapping.containsKey(cu)){
@@ -966,10 +965,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						modifyImplicitCallsToNoArgConstructor(subtypeNode, cuRewrite);
 				}
 			}
-			//TODO: create ImportRemover which looks for other occurrences of removed type references
-			// and removes the import iff none found and no unresolved ref with that name found.
-			// Don't consider refs in javadocs!
-			manager.manage(cu, cuRewrite.createChange());
+			TextChange change= cuRewrite.createChange();
+			if (change != null)
+				manager.manage(cu, change);
 		}
 		
 		pm.done();
@@ -1156,7 +1154,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		protected final ImportRewrite getImportRewrite() {
 			return fCuRewrite.getImportRewrite();
 		}
-
+		
+		protected final ImportRemover getImportRemover() {
+			return fCuRewrite.getImportRemover();
+		}
+		
 		protected final ICompilationUnit getOccurrenceCu() {
 			return getImportRewrite().getCompilationUnit();
 		}
@@ -1189,12 +1191,16 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				ASTNode node= (ASTNode) nodesIter.next();
 				ASTNode newNode= (ASTNode) newIter.next();
 				listRewrite.replace(node, newNode, fDescription);
+				getImportRemover().registerRemovedNode(node);
 			}
 			while (nodesIter.hasNext()) {
-				listRewrite.remove((ASTNode) nodesIter.next(), fDescription);
+				ASTNode node= (ASTNode) nodesIter.next();
+				listRewrite.remove(node, fDescription);
+				getImportRemover().registerRemovedNode(node);
 			}
 			while (newIter.hasNext()) {
-				listRewrite.insertLast((ASTNode) newIter.next(), fDescription);
+				ASTNode node= (ASTNode) newIter.next();
+				listRewrite.insertLast(node, fDescription);
 			}
 		}
 		
@@ -1228,6 +1234,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		protected final void replaceTypeNode(Type typeNode, String newTypeName){
 			Type newTypeNode= createNewTypeNode(newTypeName);
 			getASTRewrite().replace(typeNode, newTypeNode, fDescription);
+			getImportRemover().registerRemovedNode(typeNode);
 		}
 	
 		protected abstract ASTNode createNewParamgument(ParameterInfo info);
@@ -1239,12 +1246,14 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				SimpleName nameNode= getMethodNameNode();
 				SimpleName newNameNode= nameNode.getAST().newSimpleName(fMethodName);
 				getASTRewrite().replace(nameNode, newNameNode, fDescription);
+				getImportRemover().registerRemovedNode(nameNode);
 			}
 		}
 
 		protected final Type createNewTypeNode(String newTypeName) {
 			String elementTypeName= getElementTypeName(newTypeName);
 			String importedTypeName= getImportRewrite().addImport(elementTypeName);
+			getImportRemover().registerAddedImport(importedTypeName);
 			int dimensions= getArrayDimensions(newTypeName);
 			
 			Type newTypeNode= (Type) getASTRewrite().createStringPlaceholder(importedTypeName, ASTNode.SIMPLE_TYPE);
@@ -1478,8 +1487,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				 // if (Bindings.isSuperType(typeToRemove, currentType))
 				if (currentType == null)
 					continue; // newly added or unresolvable type
-				if (Bindings.equals(typeToRemove, currentType))
+				if (Bindings.equals(typeToRemove, currentType)) {
 					getASTRewrite().remove(currentName, fDescription);
+					getImportRemover().registerRemovedNode(currentName);
+				}
 			}
 		}
 	
@@ -1494,8 +1505,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (typeBinding.getQualifiedName().equals(fullyQualified))
 					return; // don't add it again
 			}
-			String simple= getImportRewrite().addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
-			ASTNode exNode= getASTRewrite().createStringPlaceholder(simple, ASTNode.SIMPLE_NAME);
+			String importedType= getImportRewrite().addImport(JavaModelUtil.getFullyQualifiedName(exceptionInfo.getType()));
+			getImportRemover().registerAddedImport(importedType);
+			ASTNode exNode= getASTRewrite().createStringPlaceholder(importedType, ASTNode.SIMPLE_NAME);
 			exceptionListRewrite.insertLast(exNode, fDescription);
 		}
 		
@@ -1523,8 +1535,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (PrimitiveType.VOID.toString().equals(fReturnTypeName)) {
 					for (int i = 0; i < tags.size(); i++) {
 						TagElement tag= (TagElement) tags.get(i);
-						if (TagElement.TAG_RETURN.equals(tag.getTagName()))
+						if (TagElement.TAG_RETURN.equals(tag.getTagName())) {
 							getASTRewrite().remove(tag, fDescription);
+							getImportRemover().registerRemovedNode(tag);
+						}
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
 					TagElement returnNode= createReturnTag();
@@ -1551,10 +1565,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						if (identifier.equals(info.getOldName())) {
 							if (info.isDeleted()) {
 								getASTRewrite().remove(tag, fDescription);
+								getImportRemover().registerRemovedNode(tag);
 								removed= true;
 							} else if (info.isRenamed()) {
 								SimpleName newName= simpleName.getAST().newSimpleName(info.getNewName());
 								getASTRewrite().replace(simpleName, newName, fDescription);
+								getImportRemover().registerRemovedNode(simpleName);
 							}
 							break;
 						}
@@ -1616,6 +1632,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
 						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
 							getASTRewrite().remove(tag, fDescription);
+							getImportRemover().registerRemovedNode(tag);
 							break;
 						}
 						exceptionTags.add(tag);
