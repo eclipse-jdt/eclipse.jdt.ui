@@ -126,7 +126,13 @@ public class ReorgQueries implements IReorgQueries{
 						getButtonLabels(),
 						0);
 					dialog.open();
-					result[0]= resultId[dialog.getReturnCode()];
+					
+					if (dialog.getReturnCode() == -1) { //MessageDialog closed without choice => cancel | no
+						//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
+						result[0]= fAllowCancel ? IDialogConstants.CANCEL_ID : IDialogConstants.NO_ID;
+					} else {
+						result[0]= resultId[dialog.getReturnCode()];
+					}
 				}
 
 				private String[] getButtonLabels() {
@@ -247,6 +253,7 @@ public class ReorgQueries implements IReorgQueries{
 					
 					switch (dialog.getReturnCode()) {
 						case -1 : //MessageDialog closed without choice => cancel | no
+							//see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=48400
 							result[0]= fAllowCancel ? IDialogConstants.CANCEL_ID : IDialogConstants.NO_ID;
 							break;
 						case 0 :
