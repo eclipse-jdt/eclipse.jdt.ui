@@ -4,39 +4,40 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.window.Window;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
-
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
+import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
+import org.eclipse.jdt.internal.ui.refactoring.PerformRefactoringUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.*;
-import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
-import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
-import org.eclipse.jdt.internal.ui.refactoring.PerformChangeOperation;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog2;
 
 /**
  * A helper class to activate the UI of a refactoring
@@ -96,7 +97,8 @@ public class RefactoringStarter {
 			}
 			renameRefactoring.setNewName(dialog.getValue());
 			PerformChangeOperation pco= new PerformChangeOperation(new CreateChangeOperation(refactoring, CheckConditionsOperation.PRECONDITIONS));
-			PerformRefactoringUtil.performRefactoring(pco, refactoring, JavaPlugin.getActiveWorkbenchWindow(), parent);
+			IRunnableContext context= new ProgressMonitorDialog(JavaPlugin.getActiveWorkbenchShell());
+			PerformRefactoringUtil.performRefactoring(pco, refactoring, context, parent);
 			return null;
 		} 		
 	}
