@@ -305,9 +305,7 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 					if (count == 0) {
 						showException(result.getException());
 					} else {
-						for (int i = 0; i < count; i++) {
-							showProblem(problems[i]);
-						}
+						showAllProblems(problems);
 					}
 				} else {
 					final IJavaValue value= result.getValue();
@@ -401,17 +399,27 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		selectAndReveal(fSnippetEnd, resultString.length());
 	}
 	
-	protected void showProblem(IMarker problem) {
-		int estart= MarkerUtilities.getCharStart(problem)+fSnippetStart;
+	protected void showAllProblems(IMarker[] problems) {
+		IDocument document = getSourceViewer().getDocument();
+		String delimiter = document.getLegalLineDelimiters()[0];
+		int insertionPoint = fSnippetStart;
+		for (int i = 0; i < problems.length; i++) {
+			insertionPoint = showOneProblem(document, problems[i], insertionPoint, delimiter);
+		}
+		selectAndReveal(fSnippetStart, insertionPoint - fSnippetStart);
+		fSnippetStart = insertionPoint;
+	}
+
+	protected int showOneProblem(IDocument document, IMarker problem, int insertionPoint, String delimiter) {
 		String message= SnippetMessages.getString("SnippetEditor.error.unqualified"); //$NON-NLS-1$
-		message= problem.getAttribute(IMarker.MESSAGE, message);
+		message= problem.getAttribute(IMarker.MESSAGE, message) + delimiter;
 		try {
-			getSourceViewer().getDocument().replace(estart, 0, message);
+			document.replace(insertionPoint, 0, message);
 		} catch (BadLocationException e) {
 		}
-		selectAndReveal(estart, message.length());
-	}
-	
+		return insertionPoint += message.length();
+	}	
+
 	protected void showException(Throwable exception) {
 		if (exception instanceof DebugException) {
 			DebugException de = (DebugException)exception;
