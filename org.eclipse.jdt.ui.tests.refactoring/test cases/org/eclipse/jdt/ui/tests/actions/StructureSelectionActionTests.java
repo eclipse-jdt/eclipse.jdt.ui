@@ -279,13 +279,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.structureselection.StructureSelect
 	}
 
 	public void test34() throws Exception{
-		printTestDisabledMessage("regression test for bug#23118");
-//		helperSelectUp(5, 14, 5, 14);
+//		printTestDisabledMessage("regression test for bug#23118");
+		helperSelectUp(5, 14, 5, 14);
 	}
 
 	public void test35() throws Exception{
-		printTestDisabledMessage("regression test for bug#23118");
-//		helperSelectUp(5, 14, 5, 14);
+//		printTestDisabledMessage("regression test for bug#23118");
+		helperSelectUp(5, 14, 5, 14);
 	}
 	
 	public void testZeroLength0() throws Exception{
