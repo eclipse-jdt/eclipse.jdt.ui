@@ -58,10 +58,10 @@ public class ControlContentAssistHelper {
 	
 	/**
 	 * @param combo the combo box to install ContentAssist
-	 * @param processor the IContentAssistProcessor
+	 * @param processor the <code>IContentAssistProcessor</code>
 	 * @return the installed ContentAssistant
 	 */
-	public static ContentAssistant createComboContentAssistant(final Combo combo, IContentAssistProcessor processor) {
+	public static IContentAssistant createComboContentAssistant(final Combo combo, IContentAssistProcessor processor) {
 		final ContentAssistant contentAssistant= createContentAssistant(combo, processor);
 		contentAssistant.install(new ComboContentAssistSubjectAdapter(combo));
 		return contentAssistant;
@@ -69,10 +69,10 @@ public class ControlContentAssistHelper {
 	
 	/**
 	 * @param text the text field to install ContentAssist
-	 * @param processor the IContentAssistProcessor
+	 * @param processor the <code>IContentAssistProcessor</code>
 	 * @return the installed ContentAssistant
 	 */
-	public static ContentAssistant createTextContentAssistant(final Text text, IContentAssistProcessor processor) {
+	public static IContentAssistant createTextContentAssistant(final Text text, IContentAssistProcessor processor) {
 		final ContentAssistant contentAssistant= createContentAssistant(text, processor);
 		contentAssistant.install(new TextContentAssistSubjectAdapter(text));
 		return contentAssistant;
@@ -92,7 +92,7 @@ public class ControlContentAssistHelper {
 		});
 	
 		control.addKeyListener(getContentAssistKeyAdapter(contentAssistant));
-		hookForSmartCue(control);
+		installContentAssistCue(control);
 		return contentAssistant;
 	}
 
@@ -145,29 +145,34 @@ public class ControlContentAssistHelper {
 	/**
 	 * Installs a visual cue indicating availability of content assist on the given control.
 	 */
-	public static void hookForSmartCue(final Control control) {
+	private  static void installContentAssistCue(final Control control) {
 		
 		if (!(control instanceof Text) && !(control instanceof Combo))
 			return;
 		
-		class Handler implements FocusListener, PaintListener {
+		final int dx;
+		final int dy;
+		if (SWT.getPlatform().equals("carbon")) { //$NON-NLS-1$
+			if (control instanceof Combo) {
+				dx= -9; dy= 0;
+			} else {
+				dx= -5; dy= 3;
+			}
+		} else {
+			if (control instanceof Combo) {
+				dx= -7; dy= 0;
+			} else {
+				dx= -8;	dy= 0;
+			}
+		}
+		
+		class CueHandler implements FocusListener, PaintListener {
 			Image fBulb;
 			ImageDescriptor fBulbID= ImageDescriptor.createFromFile(ControlContentAssistHelper.class, "bulb.gif"); //$NON-NLS-1$
 			
 			public void paintControl(PaintEvent e) {
 				if (control.isDisposed())
 					return;
-				int dx, dy;
-				if (control instanceof Combo || control instanceof Text) { //TODO: original was w/o || control instanceof Text
-					if (SWT.getPlatform().equals("carbon"))	//$NON-NLS-1$
-						dx= -9;
-					else
-						dx= -8;
-					dy= 0;
-				} else {
-					dx= -5;
-					dy= 3;
-				}
 				Point global= control.toDisplay(dx, dy);
 				Point p= ((Control) e.widget).toControl(global);
 				if (fBulb == null)
@@ -194,6 +199,6 @@ public class ControlContentAssistHelper {
 			}
 		}
 		
-		control.addFocusListener(new Handler());
+		control.addFocusListener(new CueHandler());
 	}
 }

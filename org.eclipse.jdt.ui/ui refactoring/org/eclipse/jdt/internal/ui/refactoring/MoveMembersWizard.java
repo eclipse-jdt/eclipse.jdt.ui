@@ -39,7 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
@@ -82,7 +82,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private Combo fDestinationField;
 		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
-		private ContentAssistant fContentAssistant;
+		private IContentAssistant fContentAssistant;
 
 		public MoveMembersInputPage() {
 			super(PAGE_NAME, true);
@@ -184,10 +184,10 @@ public class MoveMembersWizard extends RefactoringWizard {
 		}
 			
 		public void dispose() {
+			super.dispose();
 			if (fContentAssistant != null) {
 				fContentAssistant.uninstall();
 				fContentAssistant= null;
-				super.dispose();
 			}
 		}
 		
