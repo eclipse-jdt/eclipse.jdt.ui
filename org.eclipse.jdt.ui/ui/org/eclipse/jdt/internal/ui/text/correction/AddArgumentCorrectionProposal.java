@@ -84,6 +84,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 
 		int offset= fCallerNode.getStartPosition();
 		Expression best= null;
+		ITypeBinding bestType= null;
 		
 		ScopeAnalyzer analyzer= new ScopeAnalyzer(root);
 		IBinding[] bindings= analyzer.getDeclarationsInScope(offset, ScopeAnalyzer.VARIABLES);
@@ -91,8 +92,9 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 			IVariableBinding curr= (IVariableBinding) bindings[i];
 			ITypeBinding type= curr.getType();
 			if (type != null && TypeRules.canAssign(type, requiredType) && testModifier(curr)) {
-				if (best == null) {
+				if (best == null || isMoreSpecific(bestType, type)) {
 					best= ast.newSimpleName(curr.getName());
+					bestType= type;
 				}
 				addLinkedPositionProposal(key, curr.getName(), null);
 			}
@@ -104,6 +106,11 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 		addLinkedPositionProposal(key, ASTNodes.asString(defaultExpression), null);
 		return best;
 	}
+	
+	private boolean isMoreSpecific(ITypeBinding best, ITypeBinding curr) {
+		return (TypeRules.canAssign(best, curr) && !TypeRules.canAssign(curr, best));
+	}
+	
 	
 	private boolean testModifier(IVariableBinding curr) {
 		int modifiers= curr.getModifiers();

@@ -1873,7 +1873,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(X x) {\n");
-		buf.append("        x.xoo(1, 1, x);\n");
+		buf.append("        x.xoo(1, 1, x.toString());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -1881,7 +1881,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X {\n");
-		buf.append("    public void xoo(int i, Object o) {\n");
+		buf.append("    public void xoo(int i, String o) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		pack1.createCompilationUnit("X.java", buf.toString(), false, null);		
@@ -1898,7 +1898,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo(X x) {\n");
-		buf.append("        x.xoo(1, x);\n");
+		buf.append("        x.xoo(1, x.toString());\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -1909,7 +1909,7 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X {\n");
-		buf.append("    public void xoo(int i, int j, Object o) {\n");
+		buf.append("    public void xoo(int i, int j, String o) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -1920,10 +1920,10 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class X {\n");
-		buf.append("    public void xoo(int i, Object o) {\n");
+		buf.append("    public void xoo(int i, String o) {\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    public void xoo(int i, int j, X x) {\n");
+		buf.append("    public void xoo(int i, int j, String string) {\n");
 		buf.append("    }\n");		
 		buf.append("}\n");
 		String expected3= buf.toString();
@@ -2329,8 +2329,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, Object o) {\n");
-		buf.append("        foo(new Object[] { o }, i - 1);\n");
+		buf.append("    public void foo(int i, String[] o) {\n");
+		buf.append("        foo(new String[] { }, i - 1);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -2346,8 +2346,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, Object o) {\n");
-		buf.append("        foo(i - 1, new Object[] { o });\n");
+		buf.append("    public void foo(int i, String[] o) {\n");
+		buf.append("        foo(i - 1, new String[] { });\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -2358,11 +2358,11 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, Object o) {\n");
-		buf.append("        foo(new Object[] { o }, i - 1);\n");
+		buf.append("    public void foo(int i, String[] o) {\n");
+		buf.append("        foo(new String[] { }, i - 1);\n");
 		buf.append("    }\n");
 		buf.append("\n");
-		buf.append("    private void foo(Object[] objects, int i) {\n");
+		buf.append("    private void foo(String[] strings, int i) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -2373,8 +2373,8 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(Object o, int i) {\n");
-		buf.append("        foo(new Object[] { o }, i - 1);\n");
+		buf.append("    public void foo(String[] o, int i) {\n");
+		buf.append("        foo(new String[] { }, i - 1);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected3= buf.toString();		
