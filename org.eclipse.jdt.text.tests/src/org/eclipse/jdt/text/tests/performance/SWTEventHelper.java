@@ -60,6 +60,44 @@ public class SWTEventHelper {
 			EditorTestHelper.runEventQueue();
 	}
 	
+	public static void pressKeyChar(Display display, char keyChar) {
+		pressKeyChar(display, keyChar, true);
+	}
+	
+	public static void pressKeyChar(Display display, char keyChar, boolean runEventQueue) {
+		keyCharDown(display, keyChar, runEventQueue);
+		keyCharUp(display, keyChar, runEventQueue);
+	}
+
+	public static void pressKeyCharCombination(Display display, char[] keyChars) {
+		pressKeyCharCombination(display, keyChars, true);
+	}
+	
+	public static void pressKeyCharCombination(Display display, char[] keyChars, boolean runEventQueue) {
+		for (int i= 0; i < keyChars.length; i++)
+			keyCharDown(display, keyChars[i], runEventQueue);
+		for (int i= keyChars.length - 1; i >= 0; i--)
+			keyCharUp(display, keyChars[i], runEventQueue);
+	}
+
+	private static void keyCharDown(Display display, char keyChar, boolean runEventQueue) {
+		keyCharEvent(display, SWT.KeyDown, keyChar, runEventQueue);
+	}
+
+	private static void keyCharUp(Display display, char keyChar, boolean runEventQueue) {
+		keyCharEvent(display, SWT.KeyUp, keyChar, runEventQueue);
+	}
+
+	private static Event sfKeyCharEvent= new Event();
+	private static void keyCharEvent(Display display, int type, char keyChar, boolean runEventQueue) {
+		sfKeyCharEvent.type= type;
+		sfKeyCharEvent.character= keyChar;
+		
+		display.post(sfKeyCharEvent);
+		if (runEventQueue)
+			EditorTestHelper.runEventQueue();
+	}
+	
 	private static Event sfMouseMoveEvent= new Event();
 	public static void mouseMoveEvent(Display display, int x, int y, boolean runEventQueue) {
 		sfMouseMoveEvent.type= SWT.MouseMove;

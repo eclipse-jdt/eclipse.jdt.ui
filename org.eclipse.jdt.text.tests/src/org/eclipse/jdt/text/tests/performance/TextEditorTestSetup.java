@@ -25,25 +25,40 @@ import junit.framework.TestSuite;
  */
 public abstract class TextEditorTestSetup extends TestSetup {
 
+	protected final static String DEFAULT_EDITOR_ID= "";
+	
+	private AbstractTextEditor fEditor;
+
 	public TextEditorTestSetup(Test test) {
 		super(test);
 	}
 	
 	protected void setUp() throws Exception {
 		super.setUp();
-		AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
-		EditorTestHelper.joinBackgroundActivities(editor);
-		setEditor(getTest(), editor);
+		if (getEditorId() == DEFAULT_EDITOR_ID)
+			fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);
+		else
+			fEditor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), getEditorId(), true);
+		EditorTestHelper.joinBackgroundActivities(fEditor);
+		setEditor(getTest(), fEditor);
 	}
-	
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		EditorTestHelper.closeAllEditors();
+		fEditor= null;
 	}
 	
 	protected abstract String getFile();
+	
+	protected String getEditorId() {
+		return DEFAULT_EDITOR_ID;
+	}
 
+	protected AbstractTextEditor getEditor() {
+		return fEditor;
+	}
+	
 	private void setEditor(Test test, AbstractTextEditor editor) {
 		if (test instanceof ITextEditorTestCase)
 			((ITextEditorTestCase) test).setEditor(editor);
