@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IMarkerDelta;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -911,9 +910,7 @@ public class CompilationUnitDocumentProvider2 extends TextFileDocumentProvider i
 				 */
 				public ISchedulingRule getSchedulingRule() {
 					if (info.fElement instanceof IFileEditorInput)
-						// FIXME: waiting for J Core to support scheduling rules (see bug 46332)
-//						return ((IFileEditorInput)info.fElement).getFile().getParent();
-						return ResourcesPlugin.getWorkspace().getRoot();
+						return ((IFileEditorInput)info.fElement).getFile().getParent();
 					else
 						return null;
 				}
