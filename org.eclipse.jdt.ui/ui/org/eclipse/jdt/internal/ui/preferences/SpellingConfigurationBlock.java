@@ -210,10 +210,16 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	/** The status for the proposal threshold */
 	private IStatus fThresholdStatus= new StatusInfo();
 
-	/** All controls */
+	/**
+	 * All controls
+	 * @since 3.1
+	 */
 	private Control[] fAllControls;
 	
-	/** All previously enabled controls */
+	/**
+	 * All previously enabled controls
+	 * @since 3.1
+	 */
 	private Control[] fEnabledControls;
 	
 	/**
