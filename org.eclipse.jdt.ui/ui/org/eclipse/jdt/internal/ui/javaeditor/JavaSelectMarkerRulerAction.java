@@ -61,6 +61,7 @@ public class JavaSelectMarkerRulerAction extends SelectMarkerRulerAction {
 				operation.doOperation(opCode);
 				return;
 			}
+			return;
 		}
 		super.run();
 	}
