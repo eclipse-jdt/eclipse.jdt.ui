@@ -822,4 +822,124 @@ public class ChangeSignatureTests extends RefactoringTest {
 		String newReturnTypeName= null;
 		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
+	
+	public void testAll46()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll47()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll48()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll49()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll50()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll51()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll52()throws Exception{
+		String[] signature= {};
+		String[] newNames= {"i"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"1"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
 }
