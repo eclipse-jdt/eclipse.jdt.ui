@@ -4,9 +4,17 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
@@ -18,14 +26,23 @@ public class RefactoringErrorDialogUtil {
 		// no instance.
 	}
 	
-	public static void open(String dialogTitle, RefactoringStatus status) {
+	public static Object open(String dialogTitle, RefactoringStatus status) {
 		if (status.getEntries().size() == 1) {
-			String message= RefactoringMessages.getFormattedString(
-				"RefactoringErrorDialogUtil.cannot_perform_long", //$NON-NLS-1$
-				status.getFirstMessage(RefactoringStatus.FATAL)); 
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
+			RefactoringStatusEntry entry= (RefactoringStatusEntry)status.getEntries().get(0);
+			String message= status.getFirstMessage(RefactoringStatus.FATAL);
+			
+			if (   entry.getCode() != RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD
+				&& entry.getCode() != RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE){
+				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message);
+				return null;
+			}			
+			message= message + "\n\nOK to perform the operation on this method?";
+			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), dialogTitle, message))
+				return entry.getData();
+			return null;
 		} else {
 			openListDialog(dialogTitle, status);	
+			return null;
 		}
 	}
 	

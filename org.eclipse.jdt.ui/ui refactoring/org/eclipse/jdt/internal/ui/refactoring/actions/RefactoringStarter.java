@@ -69,31 +69,31 @@ public class RefactoringStarter {
 	private boolean fSavedFiles;
 	private boolean fAutobuildState;
 	
-	public void activate(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
+	public Object activate(Refactoring refactoring, RefactoringWizard wizard, String dialogTitle, boolean mustSaveEditors) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
-			return;
+			return null;
 		RefactoringStatus activationStatus= refactoring.checkActivation(new NullProgressMonitor());
 		if (! activationStatus.hasFatalError()){
 			wizard.setActivationStatus(activationStatus);
 			RefactoringWizardDialog dialog= new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
 			if (dialog.open() == Dialog.CANCEL)
 				triggerBuild();
-				
+			return null;	
 		} else{
-			RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
+			return RefactoringErrorDialogUtil.open(dialogTitle, activationStatus);
 		}	
 	}
 	
-	public void activate(final IRenameRefactoring renameRefactoring, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
+	public Object activate(final IRenameRefactoring renameRefactoring, String dialogTitle, String dialogMessage, boolean mustSaveEditors, Object element) throws JavaModelException {
 		if (! canActivate(mustSaveEditors))
-			return;
+			return null;
 		//XXX
 		if (! checkReadOnly(element))
-			return;
+			return null;
 		Refactoring refactoring= (Refactoring)renameRefactoring;
 		RefactoringStatus status= refactoring.checkActivation(new NullProgressMonitor()); 
 		if (status.hasFatalError()){
-			RefactoringErrorDialogUtil.open(dialogTitle, status);
+			return RefactoringErrorDialogUtil.open(dialogTitle, status);
 		} else{
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			IInputValidator validator= new IInputValidator(){
@@ -113,11 +113,12 @@ public class RefactoringStarter {
 			int result= dialog.open();
 			if (result != Window.OK) {
 				triggerBuild();
-				return;
+				return null;
 			}
 			renameRefactoring.setNewName(dialog.getValue());
 			PerformChangeOperation pco= new PerformChangeOperation(new CreateChangeOperation(refactoring, CheckConditionsOperation.PRECONDITIONS));
 			PerformRefactoringUtil.performRefactoring(pco, refactoring);
+			return null;
 		} 		
 	}
 	

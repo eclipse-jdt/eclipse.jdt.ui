@@ -12,6 +12,7 @@ import java.util.List;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
@@ -71,13 +72,21 @@ public class RefactoringSupportFactory {
 			Assert.isNotNull(fRefactoring);
 			RefactoringWizard wizard= createWizard(fRefactoring);
 			RefactoringStarter starter= new RefactoringStarter();
+			Object newElementToRename;
 			if (wizard != null)
-				starter.activate((Refactoring)fRefactoring, wizard, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
+				newElementToRename= starter.activate((Refactoring)fRefactoring, wizard, RefactoringMessages.getString("RefactoringSupportFactory.rename"), true); //$NON-NLS-1$
 			else	
-				starter.activate(fRefactoring, RefactoringMessages.getString("RefactoringSupportFactory.rename"), getNameEntryMessage(), false, element); //$NON-NLS-1$
-				
-			selectAndReveal(fRefactoring.getNewElement());
-			fRefactoring= null;
+				newElementToRename= starter.activate(fRefactoring, RefactoringMessages.getString("RefactoringSupportFactory.rename"), getNameEntryMessage(), false, element); //$NON-NLS-1$
+			
+			if (newElementToRename == null)	{
+				selectAndReveal(fRefactoring.getNewElement());
+				fRefactoring= null;
+			} else {
+				if (canRename(newElementToRename))
+					rename(newElementToRename);
+				else
+					MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), "Rename", "Renaming not possible.");
+			}	
 		}
 		
 		/**
