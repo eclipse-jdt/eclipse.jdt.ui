@@ -17,11 +17,20 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
+import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -60,12 +69,50 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {
+			AST ast= declNode.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			
 			if (declNode.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-				declNode= declNode.getParent();
+				ASTNode parent= declNode.getParent();
+				if (parent instanceof FieldDeclaration) {
+					FieldDeclaration fieldDecl= (FieldDeclaration) parent;
+					if (fieldDecl.fragments().size() > 1 && (fieldDecl.getParent() instanceof AbstractTypeDeclaration)) { // split
+						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
+						FieldDeclaration newField= ast.newFieldDeclaration(placeholder);
+						newField.setType((Type) ASTNode.copySubtree(ast, fieldDecl.getType()));
+						newField.modifiers().addAll(ast.newModifiers((fieldDecl.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers));
+
+						AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) fieldDecl.getParent();
+						ListRewrite listRewrite= rewrite.getListRewrite(typeDecl, typeDecl.getBodyDeclarationsProperty());
+						if (fieldDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
+							listRewrite.insertBefore(newField, parent, null);
+						} else {
+							listRewrite.insertAfter(newField, parent, null);
+						}
+						declNode= newField;
+						return rewrite;
+					}
+				} else if (parent instanceof VariableDeclarationStatement) {
+					VariableDeclarationStatement varDecl= (VariableDeclarationStatement) parent;
+					if (varDecl.fragments().size() > 1 && (varDecl.getParent() instanceof Block)) { // split
+						VariableDeclarationFragment placeholder= (VariableDeclarationFragment) rewrite.createMoveTarget(declNode);
+						VariableDeclarationStatement newStat= ast.newVariableDeclarationStatement(placeholder);
+						newStat.setType((Type) ASTNode.copySubtree(ast, varDecl.getType()));
+						newStat.modifiers().addAll(ast.newModifiers((newStat.getModifiers() & ~fExcludedModifiers) | fIncludedModifiers));
+
+						ListRewrite listRewrite= rewrite.getListRewrite(varDecl.getParent(), Block.STATEMENTS_PROPERTY);
+						if (varDecl.fragments().indexOf(declNode) == 0) { // if it as the first in the list-> insert before
+							listRewrite.insertBefore(newStat, parent, null);
+						} else {
+							listRewrite.insertAfter(newStat, parent, null);
+						}
+						return rewrite;
+					}
+				} else if (parent instanceof VariableDeclarationExpression) {
+					// can't separate
+				}
+				declNode= parent;
 			}
-			
-			ASTRewrite rewrite= ASTRewrite.create(declNode.getAST());
-			
 			ModifierRewrite listRewrite= ModifierRewrite.create(rewrite, declNode);
 			listRewrite.setModifiers(fIncludedModifiers, fExcludedModifiers, selectionDescription);
 			return rewrite;

@@ -47,19 +47,16 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		super(name);
 	}
 
-
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 	
 	public static Test suite() {
-		if (true) {
-			return allTests();
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ModifierCorrectionsQuickFixTest("testStaticOverridesMethod"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests();
 	}
 
 
@@ -832,6 +829,50 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	public void testOuterLocalMustBeFinal2() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<String> i= null, j= null;\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                Object x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final List<String> i= null;\n");
+		buf.append("        List<String> j= null;\n");
+		buf.append("        Runnable run= new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                Object x= i;\n");
+		buf.append("            }\n");
+		buf.append("        };\n");				
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	
 	public void testOuterParameterMustBeFinal() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -909,6 +950,7 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
 	
 	public void testMethodRequiresBody() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1258,6 +1300,42 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    public E() {\n");
 		buf.append("        int x= 8;\n");
 		buf.append("        x= 9;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	public void testSetFinalVariable4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    final List<String> a= null, x= a, y= a;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        x= new ArrayList<String>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    final List<String> a= null, y= a;\n");
+		buf.append("    List<String> x= a;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        x= new ArrayList<String>();\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
