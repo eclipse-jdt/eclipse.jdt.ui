@@ -84,6 +84,7 @@ public final class CopyRefactoring2 extends Refactoring{
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		Assert.isNotNull(fNewNameQueries);
+		Assert.isNotNull(fReorgQueries);
 		return fCopyPolicy.checkInput(pm, fReorgQueries);
 	}
 

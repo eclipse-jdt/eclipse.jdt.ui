@@ -90,6 +90,7 @@ public class MoveRefactoring2 extends Refactoring implements IQualifiedNameUpdat
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
+			Assert.isNotNull(fReorgQueries);
 			fWasCanceled= false;
 			return fMovePolicy.checkInput(pm, fReorgQueries);
 		} catch (OperationCanceledException e) {

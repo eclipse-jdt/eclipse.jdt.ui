@@ -88,6 +88,7 @@ class OverwriteHelper {
 
 	public void confirmOverwritting(IReorgQueries reorgQueries, IResource destination) {
 		Assert.isNotNull(destination);
+		Assert.isNotNull(reorgQueries);
 		fDestination= destination;
 		confirmOverwritting(reorgQueries);
 	}
