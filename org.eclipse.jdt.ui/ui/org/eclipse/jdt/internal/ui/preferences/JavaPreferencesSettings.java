@@ -27,7 +27,7 @@ public class JavaPreferencesSettings  {
 		return res;
 	}
 
-	private static int getImportNumberThreshold(IPreferenceStore prefs) {
+	public static int getImportNumberThreshold(IPreferenceStore prefs) {
 		int threshold= prefs.getInt(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 		if (threshold < 0) {
 			threshold= Integer.MAX_VALUE;
@@ -36,7 +36,7 @@ public class JavaPreferencesSettings  {
 	}
 
 
-	private static String[] getImportOrderPreference(IPreferenceStore prefs) {
+	public static String[] getImportOrderPreference(IPreferenceStore prefs) {
 		String str= prefs.getString(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
 		if (str != null) {
 			return unpackList(str, ";");
@@ -44,7 +44,7 @@ public class JavaPreferencesSettings  {
 		return new String[0];
 	}
 	
-	private static String[] getGetterStetterPrefixes(IPreferenceStore prefs) {
+	public static String[] getGetterStetterPrefixes(IPreferenceStore prefs) {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
 			if (str != null) {
@@ -54,7 +54,7 @@ public class JavaPreferencesSettings  {
 		return new String[0];
 	}
 
-	private static String[] getGetterStetterSuffixes(IPreferenceStore prefs) {
+	public static String[] getGetterStetterSuffixes(IPreferenceStore prefs) {
 		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
 			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
 			if (str != null) {
