@@ -23,7 +23,14 @@ import java.util.Map;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -39,16 +46,18 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 public class InferTypeArgumentsTCModel {
@@ -86,18 +95,6 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	/**
-	 * @param typeBinding the type binding to check
-	 * @return whether the constraint variable should <em>not</em> be created
-	 */
-	public boolean filterConstraintVariableType(ITypeBinding typeBinding) {
-		//TODO: filter makeDeclaringTypeVariable, since that's not used?
-		//-> would need to adapt create...Constraint methods to deal with null
-		
-		return typeBinding.isPrimitive();
-//		return TypeRules.canAssign(fCollectionBinding, typeBinding);
-	}
-	
-	/**
 	 * Allows for avoiding the creation of SimpleTypeConstraints based on properties of
 	 * their constituent ConstraintVariables and ConstraintOperators. Can be used to e.g. 
 	 * avoid creation of constraints for assignments between built-in types.
@@ -106,7 +103,7 @@ public class InferTypeArgumentsTCModel {
 	 * @param cv2
 	 * @return <code>true</code> iff the type constraint should really be created
 	 */
-	public boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
+	protected boolean keep(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
 		if ((cv1 == null || cv2 == null))
 			return false;
 		
@@ -182,16 +179,7 @@ public class InferTypeArgumentsTCModel {
 		fStoreToString= store;
 	}
 	
-	public void createSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
-		createSimpleTypeConstraint(v1, v2);
-	}
-	
-//	public ITypeConstraint2[] createStrictSubtypeConstraint(ConstraintVariable2 v1, ConstraintVariable2 v2){
-//		return createSimpleTypeConstraint(v1, v2, ConstraintOperator2.createStrictSubtypeOperator());
-//	}
-//	
-	
-	protected void createSimpleTypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
+	public void createSubtypeConstraint(ConstraintVariable2 cv1, ConstraintVariable2 cv2) {
 		if (! keep(cv1, cv2))
 			return;
 		
@@ -265,9 +253,62 @@ public class InferTypeArgumentsTCModel {
 		}
 	}
 	
-	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding) {
-		ITypeBinding typeBinding= variableBinding.getType();
-		if (filterConstraintVariableType(typeBinding))
+	private ITypeBinding getBoxedType(ITypeBinding typeBinding, ICompilationUnit cu) {
+		if (! typeBinding.isPrimitive())
+			return typeBinding;
+		
+		String primitiveName= typeBinding.getName();
+		if ("void".equals(primitiveName)) //$NON-NLS-1$ //$NON-NLS-2$
+			return null;
+		
+		//FIXME: workaround for bug 86779:
+		// return unit.getAST().resolveWellKnownType(problem.getArguments()[1]);
+		try {
+			IJavaProject javaProject= cu.getJavaProject();
+			String wrapperType= getBoxedTypeName(primitiveName);
+			IType type= javaProject.findType(wrapperType);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setProject(javaProject);
+			IBinding[] bindings= parser.createBindings(new IJavaElement[] {type} , null);
+			return (ITypeBinding) bindings[0];
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			return typeBinding;
+		}
+	}
+
+	private String getBoxedTypeName(String primitiveName) {
+		if ("long".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Long"; //$NON-NLS-1$
+		
+		else if ("int".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Integer"; //$NON-NLS-1$
+		
+		else if ("short".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Short"; //$NON-NLS-1$
+		
+		else if ("char".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Character"; //$NON-NLS-1$
+		
+		else if ("byte".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Byte"; //$NON-NLS-1$
+		
+		else if ("boolean".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Boolean"; //$NON-NLS-1$
+		
+		else if ("float".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Float"; //$NON-NLS-1$
+		
+		else if ("double".equals(primitiveName)) //$NON-NLS-1$
+			return "java.lang.Double"; //$NON-NLS-1$
+		
+		else 
+			return null;
+	}
+	
+	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
+		ITypeBinding typeBinding= getBoxedType(variableBinding.getType(), cu);
+		if (typeBinding == null)
 			return null;
 		VariableVariable2 cv= new VariableVariable2(fTypeEnvironment.create(typeBinding), variableBinding);
 		VariableVariable2 storedCv= (VariableVariable2) storedCv(cv);
@@ -282,7 +323,7 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
-		VariableVariable2 cv= makeVariableVariable(variableBinding);
+		VariableVariable2 cv= makeVariableVariable(variableBinding, cu);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
@@ -290,10 +331,10 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public TypeVariable2 makeTypeVariable(Type type) {
-		ITypeBinding typeBinding= type.resolveBinding();
-		if (filterConstraintVariableType(typeBinding))
-			return null;
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
+		ITypeBinding typeBinding= getBoxedType(type.resolveBinding(), cu);
+		if (typeBinding == null)
+			return null;
 		CompilationUnitRange range= new CompilationUnitRange(cu, type);
 		TypeVariable2 typeVariable= new TypeVariable2(fTypeEnvironment.create(typeBinding), range);
 		TypeVariable2 storedCv= (TypeVariable2) storedCv(typeVariable);
@@ -309,11 +350,11 @@ public class InferTypeArgumentsTCModel {
 
 	public IndependentTypeVariable2 makeIndependentTypeVariable(ITypeBinding typeBinding) {
 		//TODO: prune if unused!
+		Assert.isTrue(! typeBinding.isPrimitive());
 		IndependentTypeVariable2 cv= new IndependentTypeVariable2(fTypeEnvironment.create(typeBinding));
 		IndependentTypeVariable2 storedCv= (IndependentTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
-			//TODO: infinite recursion
-//			if (isAGenericType(typeBinding))
+//			if (isAGenericType(typeBinding)) // would lead to infinite recursion!
 //				makeElementVariables(storedCv, typeBinding);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "IndependentType(" + Bindings.asString(typeBinding) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -333,10 +374,11 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 		
-	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
-		ITypeBinding typeBinding= methodBinding.getParameterTypes() [parameterIndex];
-		if (filterConstraintVariableType(typeBinding))
+	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
+		ITypeBinding typeBinding= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], cu);
+		if (typeBinding == null)
 			return null;
+		
 		ParameterTypeVariable2 cv= new ParameterTypeVariable2(
 			fTypeEnvironment.create(typeBinding), parameterIndex, methodBinding);
 		ParameterTypeVariable2 storedCv= (ParameterTypeVariable2) storedCv(cv);
@@ -359,17 +401,18 @@ public class InferTypeArgumentsTCModel {
 	 * @return the ParameterTypeVariable2, or <code>null</code> 
 	 */
 	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
-		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
+		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex, cu);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
 		return cv;
 	}
 
-	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
-		ITypeBinding returnTypeBinding= methodBinding.getReturnType();
-		if (filterConstraintVariableType(returnTypeBinding))
+	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit cu) {
+		ITypeBinding returnTypeBinding= getBoxedType(methodBinding.getReturnType(), cu);
+		if (returnTypeBinding == null)
 			return null;
+		
 		ReturnTypeVariable2 cv= new ReturnTypeVariable2(fTypeEnvironment.create(returnTypeBinding), methodBinding);
 		ReturnTypeVariable2 storedCv= (ReturnTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
@@ -381,18 +424,21 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit unit) {
-		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
+		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding, unit);
 		if (cv == null)
 			return null;
+		
 		cv.setCompilationUnit(unit);
 		if (methodBinding.getDeclaringClass().isLocal())
 			fCuScopedConstraintVariables.add(cv);
 		return cv;
 	}
 	
-	public ImmutableTypeVariable2 makePlainTypeVariable(ITypeBinding typeBinding) {
-		if (filterConstraintVariableType(typeBinding))
+	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, ICompilationUnit cu) {
+		typeBinding= getBoxedType(typeBinding, cu);
+		if (typeBinding == null)
 			return null;
+		
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(fTypeEnvironment.create(typeBinding));
 		cv= (ImmutableTypeVariable2) storedCv(cv);
 		return cv;

@@ -180,6 +180,18 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 
 // -------------------------------------------------------------------------------
 	
+	public void testCuBoxing01() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuBoxing02() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuConstructor01() throws Exception {
+		performCuOK();
+	}
+	
 	public void testJUnit() throws Exception {
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
 		try {
