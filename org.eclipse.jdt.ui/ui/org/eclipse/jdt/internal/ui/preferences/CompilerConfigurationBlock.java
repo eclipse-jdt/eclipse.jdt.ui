@@ -79,7 +79,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String PREF_PB_FIELD_HIDING= JavaCore.COMPILER_PB_FIELD_HIDING;
 	private static final String PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD= JavaCore.COMPILER_PB_SPECIAL_PARAMETER_HIDING_FIELD;
 	private static final String PREF_PB_INDIRECT_STATIC_ACCESS= JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS;
-	private static final String PREF_PB_SUPERFLUOUS_SEMICOLON= JavaCore.COMPILER_PB_SUPERFLUOUS_SEMICOLON;
+	private static final String PREF_PB_EMPTY_STATEMENT= JavaCore.COMPILER_PB_EMPTY_STATEMENT;
+	private static final String PREF_PB_UNNECESSARY_ELSE= JavaCore.COMPILER_PB_UNNECESSARY_ELSE;
 	private static final String PREF_PB_UNNECESSARY_TYPE_CHECK= JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK;
 	
 	private static final String PREF_JAVADOC_SUPPORT= JavaCore.COMPILER_DOC_COMMENT_SUPPORT;
@@ -193,10 +194,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_ASSERT_AS_IDENTIFIER, PREF_PB_UNUSED_IMPORT, PREF_PB_MAX_PER_UNIT, PREF_SOURCE_COMPATIBILITY, PREF_COMPLIANCE, 
 				PREF_PB_STATIC_ACCESS_RECEIVER, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, 
 				PREF_PB_NO_EFFECT_ASSIGNMENT, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD,
-				PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, 
+				PREF_PB_UNUSED_PRIVATE, PREF_PB_CHAR_ARRAY_IN_CONCAT, PREF_PB_UNNECESSARY_ELSE,
 				PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, PREF_PB_LOCAL_VARIABLE_HIDING, PREF_PB_FIELD_HIDING,
 				PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, PREF_PB_INDIRECT_STATIC_ACCESS,
-				PREF_PB_SUPERFLUOUS_SEMICOLON, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
+				PREF_PB_EMPTY_STATEMENT, PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING, PREF_PB_SIGNAL_PARAMETER_IN_ABSTRACT,
 				PREF_PB_UNNECESSARY_TYPE_CHECK, PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION, PREF_PB_UNQUALIFIED_FIELD_ACCESS,
 				PREF_PB_UNDOCUMENTED_EMPTY_BLOCK, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, PREF_PB_DEPRECATION_WHEN_OVERRIDING,
 				PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION_WHEN_OVERRIDING,
@@ -325,16 +326,19 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_static_access_receiver.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_STATIC_ACCESS_RECEIVER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_no_effect_assignment.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_NO_EFFECT_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_indirect_access_to_static.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_INDIRECT_STATIC_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
-
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_accidential_assignement.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_POSSIBLE_ACCIDENTAL_BOOLEAN_ASSIGNMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unqualified_field_access.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_finally_block_not_completing.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_FINALLY_BLOCK_NOT_COMPLETING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
@@ -384,17 +388,24 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_field_hiding.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_incompatible_interface_method.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_INCOMPATIBLE_INTERFACE_METHOD, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_char_array_in_concat.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_CHAR_ARRAY_IN_CONCAT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unqualified_field_access.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_UNQUALIFIED_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);		
+	
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_when_overriding.label"); //$NON-NLS-1$
+		addCheckBox(composite, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, indent);
+		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+
 		
 		gd= new GridData();
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(6);
@@ -448,19 +459,12 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
-		addCheckBox(composite, label, PREF_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, indent);		
-	
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_when_overriding.label"); //$NON-NLS-1$
-		addCheckBox(composite, label, PREF_PB_DEPRECATION_WHEN_OVERRIDING, enabledDisabled, indent);
 		
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unnecessary_else.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_UNNECESSARY_ELSE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 		
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_superfluous_semicolon.label"); //$NON-NLS-1$
-		addComboBox(composite, label, PREF_PB_SUPERFLUOUS_SEMICOLON, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_empty_statement.label"); //$NON-NLS-1$
+		addComboBox(composite, label, PREF_PB_EMPTY_STATEMENT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 	
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unnecessary_type_check.label"); //$NON-NLS-1$
 		addComboBox(composite, label, PREF_PB_UNNECESSARY_TYPE_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, 0);
