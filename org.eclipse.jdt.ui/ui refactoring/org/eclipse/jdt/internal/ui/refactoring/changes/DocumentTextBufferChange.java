@@ -88,7 +88,6 @@ public class DocumentTextBufferChange extends AbstractTextBufferChange {
 	}
 	
 	protected void saveTextBuffer(IProgressMonitor pm) throws CoreException {
-		JdtHackFinder.fixme("Can't do this in aboutToPerform. If done, it jumbles up the outliner. No idea why.Have to talk to Kai.");	
 		fDocumentManager.aboutToChange();
 		fDocumentManager.save(pm);
 	}
