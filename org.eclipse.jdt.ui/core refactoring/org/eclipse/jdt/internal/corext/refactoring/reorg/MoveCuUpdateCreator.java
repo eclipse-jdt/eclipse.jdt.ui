@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -36,6 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -269,10 +269,9 @@ class MoveCuUpdateCreator {
 	}
 
 	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm) throws org.eclipse.jdt.core.JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
 		ISearchPattern pattern= createSearchPattern(unit);
-		SearchResultGroup[] references= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
-		return references;
+		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
 	}
 
 	private static boolean isQualifiedReference(SearchResult searchResult) throws JavaModelException{
