@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.testplugin;
+package org.eclipse.jdt.ui.examples;
 
 import org.eclipse.swt.graphics.Image;
 

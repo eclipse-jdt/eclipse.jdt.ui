@@ -37,11 +37,31 @@
       <decorator
             objectClass="org.eclipse.jdt.core.IJavaElement"
             adaptable="true"
-            label="%javaElementDecorator.label"
+            label="%TestLabelDecorator.label"
             state="false"
-            class="org.eclipse.jdt.testplugin.JavaElementDecorator"
-            id="org.eclipse.jdt.ui.tests.javaElementDecorator">
+            class="org.eclipse.jdt.ui.examples.JavaElementDecorator"
+            id="org.eclipse.jdt.ui.examples.javaElementDecorator">
       </decorator>
+      
+      <decorator
+		label="%TestLightweightLabelDecorator.label"
+		lightweight="true"
+		location="BOTTOM_LEFT"		
+		state="true"
+		class="org.eclipse.jdt.ui.examples.JavaElementLightweightDecorator"
+		id="org.eclipse.jdt.ui.examples.javaElementLightweightDecorator">
+		<enablement>
+			<or>
+				<objectClass
+					name="org.eclipse.core.resources.IResource">
+				</objectClass>         
+				<objectClass
+					name="org.eclipse.jdt.core.IJavaElement">
+				</objectClass>
+			</or>                
+		</enablement>
+	  </decorator>	
+      
    </extension>
    <extension
          point="org.eclipse.ui.views">
