@@ -36,10 +36,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-
 
 public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 	
@@ -88,8 +86,10 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 						synchronized (unit) {
 							if (fIsJavaReconcilingListener) {
 								ast= unit.reconcile(AST.JLS2, true, null, fProgressMonitor);
-								if (ast != null)
-									markAsUnmodifiable(ast);
+								if (ast != null) {
+									// mark as unmodifiable and original (see bug 57203)
+									ASTNodes.setFlagsToAST(ast, ASTNode.PROTECT);
+								}
 							} else
 								unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 						}
@@ -121,22 +121,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 			}
 		}
 	}
-	
-	/**
-	 * Marks the given compilation unit AST as unmodifiable.
-	 * 
-	 * @param ast the compilation unit AST to mark
-	 */
-	private void markAsUnmodifiable(CompilationUnit ast) {
-		ast.accept(new GenericVisitor() {
-			protected boolean visitNode(ASTNode node) {
-				int flags= node.getFlags();
-				node.setFlags(flags | ASTNode.PROTECT);
-				return true;
-			}
-		});
-	}
-	
+		
 	/*
 	 * @see IReconcilingStrategy#reconcile(IRegion)
 	 */

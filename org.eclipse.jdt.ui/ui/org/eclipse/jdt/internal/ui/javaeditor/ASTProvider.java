@@ -37,7 +37,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
 
 /**
@@ -435,28 +435,16 @@ public final class ASTProvider {
 
 		try {
 			CompilationUnit root= (CompilationUnit)parser.createAST(progressMonitor);
-			markAsUnmodifiable(root);
+
+			// mark as unmodifiable and original (see bug 57203)
+			ASTNodes.setFlagsToAST(root, ASTNode.PROTECT);
+
 			return root;
 		} catch (IllegalStateException ex) {
 			return null;
 		}
 	}
-	
-	/**
-	 * Marks the given compilation unit AST as unmodifiable.
-	 * 
-	 * @param ast the compilation unit AST to mark
-	 */
-	private void markAsUnmodifiable(CompilationUnit ast) {
-		ast.accept(new GenericVisitor() {
-			protected boolean visitNode(ASTNode node) {
-				int flags= node.getFlags();
-				node.setFlags(flags | ASTNode.PROTECT);
-				return true;
-			}
-		});
-	}
-	
+		
 	/**
 	 * Disposes this AST provider.
 	 */
