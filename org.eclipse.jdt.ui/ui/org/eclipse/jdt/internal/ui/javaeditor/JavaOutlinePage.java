@@ -231,18 +231,16 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 				 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 				 */
 				public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-					
-					if (oldInput == null && newInput != null) {
-						if (fListener == null)
-							fListener= new ElementChangedListener();
+					boolean isCU= (newInput instanceof ICompilationUnit);
+									
+					if (isCU && fListener == null) {
+						fListener= new ElementChangedListener();
 						JavaCore.addElementChangedListener(fListener);
-						if (fErrorTickUpdater == null) {
-							fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer);
-						}
+						fErrorTickUpdater= new JavaOutlineErrorTickUpdater(fOutlineViewer);
 						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
-					} else if (oldInput != null && newInput != null) {
+					} else if (isCU && fErrorTickUpdater != null) {
 						fErrorTickUpdater.setAnnotationModel(fEditor.getDocumentProvider().getAnnotationModel(fEditor.getEditorInput()));
-					} else if (oldInput != null && newInput == null) {
+					} else if (!isCU && fListener != null) {
 						JavaCore.removeElementChangedListener(fListener);
 						fListener= null;
 						
