@@ -29,7 +29,6 @@ import java.lang.reflect.Modifier;
 import java.net.Socket;
 import java.util.IdentityHashMap;
 import java.util.Vector;
-
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
 import junit.framework.Test;
@@ -131,7 +130,9 @@ public class RemoteTestRunner implements TestListener {
 	 */
 	private IdentityHashMap fIdMap;
 	private int	fNextId= 1;
-	
+
+	private String[] fFailureNames;
+		
 	/**
 	 * Reader thread that processes messages from the client.
 	 */
@@ -244,6 +245,15 @@ public class RemoteTestRunner implements TestListener {
 				}
 				i++;
 			
+			} else if(args[i].toLowerCase().equals("-testfailures")) { //$NON-NLS-1$
+				String testFailuresFile= args[i+1];
+				try {
+					readFailureNames(testFailuresFile);
+				} catch (IOException e) {
+					throw new IllegalArgumentException("Cannot read testfailures file.");		 //$NON-NLS-1$
+				}
+				i++;
+			
 			} else if(args[i].toLowerCase().equals("-port")) { //$NON-NLS-1$
 				fPort= Integer.parseInt(args[i+1]);
 				i++;
@@ -297,7 +307,27 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}
 
-	
+	private void readFailureNames(String testFailureFile) throws IOException {
+		BufferedReader br= new BufferedReader(new FileReader(new File(testFailureFile)));
+		try {
+			String line;
+			Vector list= new Vector();
+			while ((line= br.readLine()) != null) {
+				list.add(line);
+			}
+			fFailureNames= (String[]) list.toArray(new String[list.size()]);
+		}
+		finally {
+			br.close();
+		}
+		if (fDebugMode) {
+			System.out.println("Failures:"); //$NON-NLS-1$
+			for (int i= 0; i < fFailureNames.length; i++) {
+				System.out.println("    "+fFailureNames[i]); //$NON-NLS-1$
+			}
+		}
+	}
+
 	/**
 	 * Connects to the remote ports and runs the tests.
 	 */
@@ -401,9 +431,16 @@ public class RemoteTestRunner implements TestListener {
 	private void runTests(String[] testClassNames, String testName) {
 		// instantiate all tests
 		Test[] suites= new Test[testClassNames.length];
+		ITestPrioritizer prioritizer;
+
+		if (fFailureNames != null) 
+			prioritizer= new FailuresFirstPrioritizer(fFailureNames);
+		else
+			prioritizer= new NullPrioritizer(); 
 		
 		for (int i= 0; i < suites.length; i++) {
 			suites[i]= getTest(testClassNames[i], testName);
+			prioritizer.prioritize(suites[i]);
 		}
 		
 		// count all testMethods and inform ITestRunListeners		
@@ -553,10 +590,10 @@ public class RemoteTestRunner implements TestListener {
 		if ("3".equals(fVersion)) { //$NON-NLS-1$
 			if (isComparisonFailure(assertionFailedError)) {
 		        // transmit the expected and the actual string
-		        String expected = getField(assertionFailedError, "fExpected"); //$NON-NLS-1$
-		        String actual = getField(assertionFailedError, "fActual"); //$NON-NLS-1$
+		        Object expected = getField(assertionFailedError, "fExpected"); //$NON-NLS-1$
+		        Object actual = getField(assertionFailedError, "fActual"); //$NON-NLS-1$
 		        if (expected != null && actual != null) {
-		            notifyTestFailed2(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError), expected, actual);
+		            notifyTestFailed2(test, MessageIds.TEST_FAILED, getTrace(assertionFailedError), (String)expected, (String)actual);
 		            return;
 		       }
 		    }
@@ -810,17 +847,17 @@ public class RemoteTestRunner implements TestListener {
 			if ("3".equals(fVersion)) { //$NON-NLS-1$
 			    if (isComparisonFailure(t)) {
 			        // transmit the expected and the actual string
-			        String expected = getField(t, "fExpected"); //$NON-NLS-1$
-			        String actual = getField(t, "fActual"); //$NON-NLS-1$
+			        Object expected = getField(t, "fExpected"); //$NON-NLS-1$
+			        Object actual = getField(t, "fActual"); //$NON-NLS-1$
 			        if (expected != null && actual != null) {
 			    	    sendMessage(MessageIds.EXPECTED_START);
-			    	    sendMessage(expected);
+			    	    sendMessage((String) expected);
 			    	    sendMessage(MessageIds.EXPECTED_END);
 			    	    
 			    	    sendMessage(MessageIds.ACTUAL_START);
-			    	    sendMessage(actual);
+			    	    sendMessage((String) actual);
 			    	    sendMessage(MessageIds.ACTUAL_END);
-			    	    			    	    			       }
+			        }
 			    }
 			}
 			String trace= getTrace(t);
@@ -840,16 +877,16 @@ public class RemoteTestRunner implements TestListener {
 		}
 	}
 	
-	private String getField(Object object, String fieldName) {
+	public static Object getField(Object object, String fieldName) {
 	    Class clazz= object.getClass();
 	    try {
 	        Field field= clazz.getDeclaredField(fieldName);
 	        field.setAccessible(true);
-	        Object result= field.get(object);
-	        return result.toString();
+	        return field.get(object);	       
 	    } catch (Exception e) {
 	        // fall through
 	    }
 	    return null;
 	}
+
 }	
