@@ -17,13 +17,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -31,7 +35,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
   */
@@ -105,7 +108,7 @@ public class BindingsNameTest extends TestCase {
 	}
 	
 	public void testGetFullyQualifiedName() throws Exception {
-		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, true);
+		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
 		assertTrue(problems.length == 0);
 		
@@ -132,7 +135,7 @@ public class BindingsNameTest extends TestCase {
 	}
 	
 	public void testGetTypeQualifiedName() throws Exception {
-		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, true);
+		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
 		assertTrue(problems.length == 0);
 		
@@ -159,7 +162,7 @@ public class BindingsNameTest extends TestCase {
 	}
 	
 	public void testGetAllNameComponents() throws Exception {
-		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, true);
+		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
 		assertTrue(problems.length == 0);
 		
@@ -186,7 +189,7 @@ public class BindingsNameTest extends TestCase {
 	}
 	
 	public void testGetNameComponents() throws Exception {
-		CompilationUnit astRoot= AST.parseCompilationUnit(fCompilationUnit, true);
+		CompilationUnit astRoot= createAST(fCompilationUnit);
 		IProblem[] problems= astRoot.getProblems();
 		assertTrue(problems.length == 0);
 		
@@ -218,5 +221,12 @@ public class BindingsNameTest extends TestCase {
 			assertEquals(elements[i], list[i]);
 		}
 	}
-
+	
+	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(compilationUnit);
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null);
+	}
+	
 }

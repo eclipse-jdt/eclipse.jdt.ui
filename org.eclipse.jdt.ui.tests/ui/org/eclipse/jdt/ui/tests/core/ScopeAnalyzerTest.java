@@ -23,7 +23,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 
@@ -93,7 +95,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		
 		{
@@ -154,7 +156,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		
 		{
@@ -230,7 +232,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		
 		{
@@ -280,7 +282,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return r.x;";
@@ -330,7 +332,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return 1;";
@@ -381,7 +383,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		
 		{
@@ -473,7 +475,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "int k= 0;";
@@ -539,7 +541,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return 1;";
@@ -607,7 +609,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");		
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "F f1;";
@@ -642,7 +644,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 		{
 			String str= "return;";
@@ -655,7 +657,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}			
 			
 	}
-	
+
 	public void testMethodDeclarations2() throws Exception {
 	
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
@@ -684,7 +686,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(compilationUnit, true);
+		CompilationUnit astRoot= createAST(compilationUnit);
 		assertNoProblems(astRoot);
 
 		{
@@ -759,6 +761,12 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}
 	}
 
+	private CompilationUnit createAST(ICompilationUnit compilationUnit) {
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(compilationUnit);
+		parser.setResolveBindings(true);
+		return (CompilationUnit) parser.createAST(null);
+	}
 	
 
 }

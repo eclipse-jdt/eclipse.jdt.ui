@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -112,8 +113,12 @@ public class TypeRulesTest extends CoreTests {
 		buf.append("    Socket[][] socket_arrarr= null;\n");
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+		parser.setSource(cu1);
+		parser.setResolveBindings(true);
 		
-		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOf("problems", problems.length, 0);
 		
@@ -145,7 +150,12 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 				
-				CompilationUnit astRoot= AST.parseCompilationUnit(content, "F.java", fJProject1);
+				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				parser.setSource(content);
+				parser.setProject(fJProject1);
+				parser.setUnitName("F.java");
+				
+				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
 				ITypeBinding b1= f1.resolveBinding().getType();
@@ -179,7 +189,13 @@ public class TypeRulesTest extends CoreTests {
 				buf.append("}\n");
 				char[] content= buf.toString().toCharArray();
 				
-				CompilationUnit astRoot= AST.parseCompilationUnit(content, "F.java", fJProject1);
+				ASTParser parser= ASTParser.newParser(AST.LEVEL_2_0);
+				parser.setSource(content);
+				parser.setResolveBindings(true);
+				parser.setProject(fJProject1);
+				parser.setUnitName("F.java");
+				
+				CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
 				IProblem[] problems= astRoot.getProblems();
 
 				ITypeBinding b1= f1.resolveBinding().getType();

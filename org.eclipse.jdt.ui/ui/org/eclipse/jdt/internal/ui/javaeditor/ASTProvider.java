@@ -30,11 +30,14 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 
 /**
@@ -383,11 +386,23 @@ public final class ASTProvider {
 			return null;
 
 		try {
-			return (CompilationUnit)parser.createAST(progressMonitor);
+			CompilationUnit root= (CompilationUnit)parser.createAST(progressMonitor);
+			markAsUnmodifiable(root);
+			return root;
 		} catch (IllegalStateException ex) {
 			return null;
 		}
 	}
+	
+	private void markAsUnmodifiable(CompilationUnit root) {
+		root.accept(new GenericVisitor() {
+			protected boolean visitNode(ASTNode node) {
+				node.setFlags(ASTNode.PROTECT);
+				return true;
+			}
+		});
+	}
+	
 	
 	/**
 	 * Dispose this AST provider.

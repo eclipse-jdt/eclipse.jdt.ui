@@ -10,20 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextSelection;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
+
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextSelection;
-
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
 /**
@@ -91,7 +91,7 @@ public class JavaTextSelection extends TextSelection {
 		if (! (fElement instanceof ICompilationUnit))
 			return null;
 		// long start= System.currentTimeMillis();
-		fPartialAST= AST.parsePartialCompilationUnit((ICompilationUnit)fElement, getOffset(), true, null, null);
+		fPartialAST= JavaPlugin.getDefault().getASTProvider().getAST(fElement, true, null);
 		// System.out.println("Time requesting partial AST: " + (System.currentTimeMillis() - start));
 		return fPartialAST;
 	}
