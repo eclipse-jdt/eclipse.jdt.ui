@@ -683,7 +683,7 @@ JavaStructureDiffViewerCreator
 <!-- NLS tool 																	 -->
 <!-- =========================================================================== -->
 
-<!-- NLS Search Page
+<!-- NLS Search Page                                                             -->
 <extension point="org.eclipse.search.searchPages">
    <page id="org.eclipse.jdt.ui.refactoring.NLSSearchPage"
          tabPosition="2000000000"
@@ -692,10 +692,10 @@ JavaStructureDiffViewerCreator
          extensions="java:89, properties:90"
 		 showScopeSection="true"         
          class="org.eclipse.jdt.internal.ui.refactoring.nls.search.NLSSearchPage"
-         sizeHint="460,160">
+         sizeHint="460,160"
+         enabled="false">
    </page>
 </extension>
-                                                            -->
 
 <!-- =========================================================================== -->
 <!-- Java Browsing 																 -->
@@ -1090,12 +1090,118 @@ JavaStructureDiffViewerCreator
 		<!-- Search Menu                                                         -->
 		<!-- =================================================================== -->
 		
-      	<!-- dialog group  -->		
+      	<!-- dialog group  -->
 		<action id="org.eclipse.jdt.ui.actions.OpenJavaSearchPage"
 			menubarPath="org.eclipse.search.menu/dialogGroup"
 			label="%openJavaSearchPageAction.label"
 	        icon="icons/full/obj16/jsearch_obj.gif"
 			class="org.eclipse.jdt.internal.ui.search.OpenJavaSearchPageAction"/>
+
+      	<!-- context menu group  -->
+		<menu
+			id="implementorsSubMenu"
+			label="%implementorsSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
+      			label="%InWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
+			id="declarationsSubMenu"
+			label="%declarationsSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.DeclarationsInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.DeclarationsInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/declarationsSubMenu/group1"
+      			label="%DeclarationsInWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
+			id="writeAccessSubMenu"
+			label="%writeAccessSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.WriteAccessInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/writeAccessSubMenu/group1"
+      			label="%InWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
+			id="readAccessSubMenu"
+			label="%readAccessSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReadAccessInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/readAccessSubMenu/group1"
+      			label="%InWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+
+		<menu
+			id="referencesSubMenu"
+			label="%referencesSubMenu.label"
+			path="org.eclipse.search.menu/contextMenuActionsGroup">
+			<separator name="group1"/>
+		</menu>
+			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkingSet"
+    	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
+      			label="%InWorkingSet.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReferencesInHierarchy"
+    	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
+      			label="%InHierarchy.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace"
+    	  		menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
+      			label="%ReferencesInWorkspace.label"
+      			allowLabelUpdate="true"
+				retarget="true" />	
 
 	</actionSet>			
 </extension>
