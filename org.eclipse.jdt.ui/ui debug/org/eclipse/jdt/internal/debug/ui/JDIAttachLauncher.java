@@ -4,19 +4,18 @@
  */
 package org.eclipse.jdt.internal.debug.ui;
 
-import org.eclipse.debug.core.*;
-import org.eclipse.debug.core.model.IDebugTarget;
-import org.eclipse.debug.core.model.ILauncherDelegate;
-import org.eclipse.debug.core.model.ISourceLocator;
+import com.sun.jdi.VirtualMachine;
+import com.sun.jdi.connect.*;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.*;
+import org.eclipse.debug.core.*;
+import org.eclipse.debug.core.model.*;
 import org.eclipse.jdi.Bootstrap;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -24,13 +23,6 @@ import org.eclipse.jdt.launching.ProjectSourceLocator;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.WizardDialog;
-import com.sun.jdi.VirtualMachine;
-import com.sun.jdi.connect.AttachingConnector;
-import com.sun.jdi.connect.Connector;
-import com.sun.jdi.connect.IllegalConnectorArgumentsException;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 
 public class JDIAttachLauncher implements ILauncherDelegate {
 
@@ -145,4 +137,14 @@ public class JDIAttachLauncher implements ILauncherDelegate {
 		return connector;
 	}
 
+	public String getLaunchMemento(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getHandleIdentifier();
+		}
+		return null;
+	}
+	
+	public Object getLaunchObject(String memento) {
+		return JavaCore.create(memento);
+	}
 }

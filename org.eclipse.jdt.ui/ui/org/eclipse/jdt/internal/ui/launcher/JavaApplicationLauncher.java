@@ -234,4 +234,15 @@ public class JavaApplicationLauncher implements ILauncherDelegate, IExecutableEx
 			fModes.add(tokenizer.nextToken().trim());
 		}
 	}
+	
+	public String getLaunchMemento(Object element) {
+		if (element instanceof IJavaElement) {
+			return ((IJavaElement)element).getHandleIdentifier();
+		}
+		return null;
+	}
+	
+	public Object getLaunchObject(String memento) {
+		return JavaCore.create(memento);
+	}
 }
