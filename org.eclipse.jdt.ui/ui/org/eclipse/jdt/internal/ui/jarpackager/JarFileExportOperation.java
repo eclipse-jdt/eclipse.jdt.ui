@@ -47,7 +47,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 						boolean isInOutputFolder= false;			if (isInJavaProject) {				try {					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());				} catch (JavaModelException ex) {					isInOutputFolder= false;				}			}			
 			exportClassFiles(progressMonitor, pkgRoot, resource, jProject, destinationPath);
-			exportResourceFiles(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
+			exportResource(progressMonitor, pkgRoot, isInJavaProject, resource, destinationPath, isInOutputFolder);
 			progressMonitor.worked(1);
 			ModalContext.checkCanceled(progressMonitor);
 		} else if (element instanceof IPackageFragment)			exportPackageFragment(progressMonitor, (IPackageFragment)element);		else			exportContainer(progressMonitor, resource);
@@ -65,7 +65,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 			exportElement(children[i], progressMonitor);
 	}
 
-	private void exportResourceFiles(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
+	private void exportResource(IProgressMonitor progressMonitor, IPackageFragmentRoot pkgRoot, boolean isInJavaProject, IResource resource, IPath destinationPath, boolean isInOutputFolder) {
 		boolean isNonJavaResource= !isInJavaProject || (pkgRoot == null && !isInOutputFolder);
 		boolean isInClassFolder= false;
 		try {
