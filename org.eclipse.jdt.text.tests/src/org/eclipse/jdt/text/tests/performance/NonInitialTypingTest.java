@@ -11,9 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import junit.framework.Test;
 import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
@@ -25,16 +23,13 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
- * Measures the time to type in one single method into a large Java class
+ * Measures the time to type in one single method into a large file. Abstract implementation.
  * @since 3.1
  */
-public class NonInitialTypingTest extends TestCase {
-	
-	private static final Class THIS= NonInitialTypingTest.class;
+public abstract class NonInitialTypingTest extends TestCase {
 	
 	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
 
@@ -52,20 +47,21 @@ public class NonInitialTypingTest extends TestCase {
 
 	private KeyboardProbe fKeyboardProbe;
 
-	public static Test suite() {
-		return new PerformanceTestSetup(new TestSuite(THIS));
-	}
-	
-	protected void setUp() throws PartInitException, BadLocationException {
+	protected void setUp() throws Exception {
 		EditorTestHelper.runEventQueue();
-		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), true);
+		fEditor= (ITextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(FILE), getEditorId(), true);
 		// dirty editor to avoid initial dirtying / validate edit costs
 		fKeyboardProbe= new KeyboardProbe();
 		dirtyEditor();
-		Performance performance= Performance.getDefault();
-		fMeter= performance.createPerformanceMeter(performance.getDefaultScenarioId(this));
+		fMeter= Performance.getDefault().createPerformanceMeter(getScenarioId());
 	}
 	
+	protected abstract String getEditorId();
+
+	protected String getScenarioId() {
+		return Performance.getDefault().getDefaultScenarioId(this);
+	}
+
 	private void dirtyEditor() {
 		fEditor.getSelectionProvider().setSelection(new TextSelection(0, 0));
 		EditorTestHelper.runEventQueue();
