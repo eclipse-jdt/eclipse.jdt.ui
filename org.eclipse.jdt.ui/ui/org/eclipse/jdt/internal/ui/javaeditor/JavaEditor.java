@@ -121,6 +121,7 @@ import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionSupport;
 
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -357,7 +358,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		 * Initialize with the given options.
 		 * 
 		 * @param options The options to wrap
-		 * @param mockupPreferenceStore the mockup preference store
+		 * @param mockupPreferenceStore the mock-up preference store
 		 * @param filter the property change filter
 		 */
 		public OptionsAdapter(Map options, IPreferenceStore mockupPreferenceStore, IPropertyChangeEventFilter filter) {
@@ -646,8 +647,8 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		}
 
 		/**
-		 * Returns the mockup preference store, events are received through this preference store.
-		 * @return Returns the mockup preference store.
+		 * Returns the mock-up preference store, events are received through this preference store.
+		 * @return Returns the mock-up preference store.
 		 */
 		public IPreferenceStore getMockupPreferenceStore() {
 			return fMockupPreferenceStore;
@@ -742,7 +743,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			String modifiers= getNewPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
 			fKeyModifierMask= computeStateMask(modifiers);
 			if (fKeyModifierMask == -1) {
-				// Fallback to stored state mask
+				// Fall back to stored state mask
 				fKeyModifierMask= getNewPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
 			}
 		}
@@ -802,7 +803,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			text.removePaintListener(this);
 			
 			((ITextViewerExtension4)sourceViewer).removeTextPresentationListener(this);
-			}
+		}
 				
 		/*
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
@@ -1283,7 +1284,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (viewer instanceof ITextViewerExtension5) {
 				
 				ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-				IRegion widgetRange= extension.modelRange2WidgetRange(new Region(offset, length));
+				IRegion widgetRange= extension.modelRange2WidgetRange(fActiveRegion);
 				if (widgetRange == null)
 					return;
 					
@@ -1352,7 +1353,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	}
 	
 	/**
-	 * This action dispatches into two behaviours: If there is no current text
+	 * This action behaves in two different ways: If there is no current text
 	 * hover, the javadoc is displayed using information presenter. If there is
 	 * a current text hover, it is converted into a information presenter in
 	 * order to make it sticky.
@@ -2098,6 +2099,16 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	private ActivationListener fActivationListener= new ActivationListener();
 	private ISelectionListenerWithAST fPostSelectionListenerWithAST;
 	private OccurrencesFinderJob fOccurrencesFinderJob;
+	/** 
+	 * This editor's projection support 
+	 * @since 3.0
+	 */
+	private ProjectionSupport fProjectionSupport;
+	/** 
+	 * This editor's projection model updater 
+	 * @since 3.0
+	 */
+	private JavaProjectionModelUpdater fProjectionModelUpdater;
 	/**
 	 * The override and implements indicator manager for this editor.
 	 * @since 3.0
@@ -2356,6 +2367,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 
 			};
 		}
+		
+		if (fProjectionSupport != null) {
+			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
+			if (adapter != null)
+				return adapter;
+		}
 			
 		return super.getAdapter(required);
 	}
@@ -2537,12 +2554,20 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			while (element instanceof ISourceReference) {
 				ISourceRange range= ((ISourceReference) element).getSourceRange();
 				if (offset < range.getOffset() + range.getLength() && range.getOffset() < offset + length) {
+					
+					ISourceViewer viewer= getSourceViewer();
+					if (viewer instanceof ITextViewerExtension5) {
+						ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
+						extension.exposeModelRange(new Region(range.getOffset(), range.getLength()));
+					}
+					
 					setHighlightRange(range.getOffset(), range.getLength(), true);
 					if (fOutlinePage != null) {
 						fOutlineSelectionChangedListener.uninstall(fOutlinePage);
 						fOutlinePage.select((ISourceReference) element);
 						fOutlineSelectionChangedListener.install(fOutlinePage);
 					}
+					
 					return;
 				}
 				element= element.getParent();
@@ -2552,7 +2577,14 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			JavaPlugin.log(x.getStatus());
 		}
 		
-		resetHighlightRange();
+		ISourceViewer viewer= getSourceViewer();
+		if (viewer instanceof ITextViewerExtension5) {
+			ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
+			extension.exposeModelRange(new Region(offset, length));
+		} else {
+			resetHighlightRange();
+		}
+
 	}
 			
 	protected boolean isActivePart() {
@@ -2641,7 +2673,10 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		if (fEncodingSupport != null)
 			fEncodingSupport.reset();
+		
 		setOutlinePageInput(fOutlinePage, input);
+		if (fProjectionModelUpdater != null)
+			fProjectionModelUpdater.inputChanged();
 		
 		if (isShowingOverrideIndicators())
 			installOverrideIndicator(true);
@@ -2669,6 +2704,12 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @see IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
+		
+		if (fProjectionModelUpdater != null) {
+			fProjectionModelUpdater.dispose();
+			fProjectionModelUpdater= null;
+		}
+		
 		// cancel possible running computation
 		fMarkOccurrenceAnnotations= false;
 		uninstallOccurrencesFinder();
@@ -3062,12 +3103,27 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		super.doSetSelection(selection);
 		synchronizeOutlinePageSelection();
 	}
+	
+	private boolean isProjectionEnabled() {
+		return Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection");
+	}
 
 	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
+		
+		if (isProjectionEnabled()) {
+			fProjectionSupport= new ProjectionSupport();
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error");
+			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning");
+			fProjectionSupport.enableProjection(getSourceViewer(), getAnnotationAccess(), getSharedColors());
+			
+			fProjectionModelUpdater= new JavaProjectionModelUpdater();
+			fProjectionModelUpdater.install(this);		
+			fProjectionModelUpdater.inputChanged();
+		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {

@@ -31,8 +31,8 @@ import org.eclipse.jface.text.formatter.IFormattingContext;
 import org.eclipse.jface.text.information.IInformationPresenter;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.texteditor.ExtendedTextEditorPreferenceConstants;
 
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 
 
-public class JavaSourceViewer extends SourceViewer implements IPropertyChangeListener {
+public class JavaSourceViewer extends ProjectionViewer implements IPropertyChangeListener {
 
 	/**
 	 * Text operation code for requesting the outline for the current input.
