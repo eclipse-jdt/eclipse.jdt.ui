@@ -33,9 +33,9 @@ public class ASTRewriteClear extends ASTVisitor {
 				if (fRewrite.isCollapsed(element)) {
 					List collapsed= ((Block) element).statements();
 					list.remove(i);
-					for (int k= 0; k < collapsed.size(); k++) {
+					for (int k= collapsed.size() - 1; k >= 0 ; k--) {
 						Object curr= collapsed.remove(k);
-						list.add(i + k, curr);
+						list.add(i, curr);
 					}
 				}
 			}
