@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.Separator;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -166,6 +167,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fAccessorPackage.createControl(parent, nOfColumns, textWidth);
 
 		fAccessorClassName.doFillIntoGrid(parent, nOfColumns);
+		LayoutUtil.setWidthHint(fAccessorClassName.getTextControl(null), convertWidthInCharsToPixels(60));
 		fAccessorClassName.setDialogFieldListener(new IDialogFieldListener() {
 
 			public void dialogFieldChanged(DialogField field) {
@@ -174,6 +176,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		});
 
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
+		LayoutUtil.setWidthHint(fSubstitutionPattern.getTextControl(null), convertWidthInCharsToPixels(60));
 	}
 
 	private void createPropertyPart(Composite parent, final int nOfColumns, final int textWidth) {
@@ -183,6 +186,8 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fResourceBundlePackage.createControl(parent, nOfColumns, textWidth);
 
 		fResourceBundleFile.doFillIntoGrid(parent, nOfColumns);
+		LayoutUtil.setWidthHint(fResourceBundleFile.getTextControl(null), convertWidthInCharsToPixels(60));
+
 		fResourceBundleFile.setDialogFieldListener(new IDialogFieldListener() {
 
 			public void dialogFieldChanged(DialogField field) {
@@ -305,8 +310,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			}
 
 			if (!fileName.endsWith(NLSRefactoring.PROPERTY_FILE_EXT)) {
-				setInvalid(fResourceBundleFile, NLSUIMessages.getString("NLSAccessorConfigurationDialog.file_name_must_end") //$NON-NLS-1$
-						+ NLSRefactoring.PROPERTY_FILE_EXT + "\"."); //$NON-NLS-1$
+				setInvalid(fResourceBundleFile, NLSUIMessages.getFormattedString("NLSAccessorConfigurationDialog.file_name_must_end", NLSRefactoring.PROPERTY_FILE_EXT)); //$NON-NLS-1$
 				return;
 			}
 

@@ -309,13 +309,19 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		private DialogField fMessageField;
 		private NLSSubstitution fSubstitution;
 
-		public NLSInputDialog(Shell parent, String title, String message, NLSSubstitution substitution) {
+		public NLSInputDialog(Shell parent, NLSSubstitution substitution) {
 			super(parent);
-			setTitle(title);
+			
+			setTitle(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Title")); //$NON-NLS-1$
+
 			fSubstitution= substitution;
 			
 			fMessageField= new DialogField();
-			fMessageField.setLabelText(message);
+			if (substitution.getState() == NLSSubstitution.EXTERNALIZED) {
+				fMessageField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.ext.Label")); //$NON-NLS-1$
+			} else {
+				fMessageField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Label")); //$NON-NLS-1$
+			}
 
 			fKeyField= new StringDialogField();
 			fKeyField.setLabelText(NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Enter_key")); //$NON-NLS-1$
@@ -434,6 +440,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	 * @see IDialogPage#createControl(Composite)
 	 */
 	public void createControl(Composite parent) {
+		initializeDialogUnits(parent);
 
 		Composite supercomposite= new Composite(parent, SWT.NONE);
 		supercomposite.setLayout(new GridLayout());
@@ -487,20 +494,24 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		Label propertiesFileLabel= new Label(composite, SWT.NONE);
 		propertiesFileLabel.setText(NLSUIMessages.getString("ExternalizeWizardPage.propertiesfile.label")); //$NON-NLS-1$
 		propertiesFileLabel.setLayoutData(new GridData());
-				
+		
+		GridData data= new GridData(GridData.FILL_HORIZONTAL);
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fAccessorClassField= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fAccessorClassField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fAccessorClassField.setLayoutData(data);
 		fAccessorClassField.setEditable(false);
 		
+		data= new GridData(GridData.FILL_HORIZONTAL);
+		data.widthHint= convertWidthInCharsToPixels(40);
 		fPropertiesFileField= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fPropertiesFileField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fPropertiesFileField.setLayoutData(data);
 		fPropertiesFileField.setEditable(false);
 		
 		//new Label(composite, SWT.NONE); // placeholder
 		
 		Button configure= new Button(accessorComposite, SWT.PUSH);
 		configure.setText(NLSUIMessages.getString("ExternalizeWizardPage.configure.button")); //$NON-NLS-1$
-		GridData data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
+		data= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.VERTICAL_ALIGN_END);
 		data.widthHint= SWTUtil.getButtonWidthHint(configure);
 		data.heightHint= SWTUtil.getButtonHeightHint(configure);
 		configure.setLayoutData(data);
@@ -920,9 +931,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 				return;
 			}
 			
-			NLSInputDialog dialog= new NLSInputDialog(getShell(), NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Title"), //$NON-NLS-1$
-					NLSUIMessages.getString("ExternalizeWizardPage.NLSInputDialog.Label"), //$NON-NLS-1$
-					substitution);
+			NLSInputDialog dialog= new NLSInputDialog(getShell(), substitution);
 			if (dialog.open() == Window.CANCEL)
 				return;
 			KeyValuePair kvPair= dialog.getResult();
