@@ -347,16 +347,6 @@
          </description>
       </wizard>
       <wizard
-            name="%NewJavaScrapbookPage.label"
-            icon="icons/full/ctool16/newsbook_wiz.gif"
-            category="org.eclipse.jdt.ui.java"
-            class="org.eclipse.jdt.internal.ui.wizards.NewSnippetFileCreationWizard"
-            id="org.eclipse.jdt.ui.wizards.NewSnippetFileCreationWizard">
-         <description>
-            %NewJavaScrapbookPage.description
-         </description>
-      </wizard>
-      <wizard
             name="%NewSourceFolderCreationWizard.label"
             icon="icons/full/ctool16/newpackfolder_wiz.gif"
             category="org.eclipse.jdt.ui.java"
