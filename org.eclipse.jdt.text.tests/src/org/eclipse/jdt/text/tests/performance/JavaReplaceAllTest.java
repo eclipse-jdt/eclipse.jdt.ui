@@ -84,9 +84,8 @@ public class JavaReplaceAllTest extends TextPerformanceTestCase {
 			
 			// Fill Find field
 			SWTEventHelper.pressKeyChar(display, FIND);
-			SWTEventHelper.pressKeyChar(display, SWT.TAB);
 			
-			// Switch to Repalce field			
+			// Switch to Replace field			
 			SWTEventHelper.keyCodeDown(display, SWT.MOD3, true);
 			SWTEventHelper.pressKeyChar(display, 'e');
 			SWTEventHelper.keyCodeUp(display, SWT.MOD3, true);
