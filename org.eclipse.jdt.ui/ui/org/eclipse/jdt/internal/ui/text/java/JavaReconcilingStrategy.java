@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
@@ -79,12 +81,17 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				
 				CompilationUnit ast= null;
 				
-				// reconcile
-				synchronized (unit) {
-					if (fIsJavaReconcilingListener)
-						ast= unit.reconcile(true, true, null, fProgressMonitor);
-					else
-						unit.reconcile(false, true, null, fProgressMonitor);
+				try {
+					// reconcile
+					synchronized (unit) {
+						if (fIsJavaReconcilingListener)
+							ast= unit.reconcile(true, true, null, fProgressMonitor);
+						else
+							unit.reconcile(false, true, null, fProgressMonitor);
+					}
+				} catch (OperationCanceledException ex) {
+					Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
+					ast= null;
 				}
 				
 				/* fix for missing cancel flag communication */
@@ -93,7 +100,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 				
 				// notify listeners
 				try {
-					if (fIsJavaReconcilingListener && fNotify && !fProgressMonitor.isCanceled())
+					if (fIsJavaReconcilingListener && fNotify && (fProgressMonitor == null || !fProgressMonitor.isCanceled()))
 						fJavaReconcilingListener.reconciled(ast);
 				} finally {
 					fNotify= true;
