@@ -1,15 +1,28 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.ui.part.ResourceTransfer;
+
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 
@@ -21,7 +34,23 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 		copyToOSClipbard(getElementsToProcess());
 	}
 
-	private static String convertToInputForOSClipboard(TypedSource[] typedSources) throws JavaModelException {
+	private static Clipboard getSystemClipboard() {
+		return new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
+	}
+	
+	private static void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
+		getSystemClipboard().setContents(createClipboardInput(refs), createTransfers());
+	}
+		
+	private static Object[] createClipboardInput(ISourceReference[] refs) throws JavaModelException {
+		TypedSource[] typedSources= convertToTypedSourceArray(refs);
+		return new Object[] { convertToInputForTextTransfer(typedSources), typedSources, getResourcesForPrimaryTypes(refs)};
+	}
+	private static Transfer[] createTransfers() {
+		return new Transfer[] { TextTransfer.getInstance(), TypedSourceTransfer.getInstance(), ResourceTransfer.getInstance()};
+	}
+
+	private static String convertToInputForTextTransfer(TypedSource[] typedSources) throws JavaModelException {
 		String lineDelim= System.getProperty("line.separator", "\n"); //$NON-NLS-1$
 		StringBuffer buff= new StringBuffer();
 		for (int i= 0; i < typedSources.length; i++) {
@@ -38,12 +67,44 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 		return elems;
 	}
 	
-	private static void copyToOSClipbard(ISourceReference[] refs)  throws JavaModelException {
-		Clipboard clipboard = new Clipboard(JavaPlugin.getActiveWorkbenchShell().getDisplay());
-		TypedSource[] typedSources= convertToTypedSourceArray(refs);
-		Object[] data= new Object[] { convertToInputForOSClipboard(typedSources), typedSources};
-		Transfer[] transfers= new Transfer[] { TextTransfer.getInstance(), TypedSourceTransfer.getInstance()};
-		clipboard.setContents(data, transfers);
+	private static IResource[] getResourcesForPrimaryTypes(ISourceReference[] refs){
+		IType[] primaryTypes= getPrimaryTypes(refs);
+		List resources= new ArrayList();
+		for (int i= 0; i < primaryTypes.length; i++) {
+			IResource resource= getResource(primaryTypes[i]);
+			if (resource != null)
+				resources.add(resource);
+		}
+		return (IResource[]) resources.toArray(new IResource[resources.size()]);
+	}
+	
+	private static IType[] getPrimaryTypes(ISourceReference[] refs){
+		List primaryTypes= new ArrayList();
+		for (int i= 0; i < refs.length; i++) {
+			if (isPrimaryType(refs[i]))
+				primaryTypes.add(refs[i]);
+		}
+		return (IType[]) primaryTypes.toArray(new IType[primaryTypes.size()]);
+	}
+	
+	private static boolean isPrimaryType(ISourceReference ref){
+		if (! (ref  instanceof IType))
+			return false;
+		if (! ref.exists())	
+			return false;
+		IType type= (IType)ref;
+		if (type.getDeclaringType() != null)
+			return false;
+		return type.getElementName().equals(Signature.getQualifier(type.getCompilationUnit().getElementName()));
+	}
+	
+	private static IResource getResource(IType type){
+		try {
+			return Refactoring.getResource(type);
+		} catch(JavaModelException e) {
+			JavaPlugin.log(e);//cannot show a dialog here
+			return null;
+		}
 	}
 }
 
