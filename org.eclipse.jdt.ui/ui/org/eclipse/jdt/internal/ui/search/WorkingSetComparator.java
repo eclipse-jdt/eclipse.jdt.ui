@@ -9,7 +9,7 @@ import java.util.Comparator;
 
 import org.eclipse.ui.IWorkingSet;
 
-class WorkingSetComparator implements Comparator {
+public class WorkingSetComparator implements Comparator {
 
 	private Collator fCollator= Collator.getInstance();
 	
