@@ -6,7 +6,9 @@
  * http://www.eclipse.org/legal/cpl-v10.html
  * 
  * Contributors:
- *     IBM Corporation - initial API and implementation
+ *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
+ *       expressions into a combination of setter and getter calls.
+ *     IBM Corporation
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 

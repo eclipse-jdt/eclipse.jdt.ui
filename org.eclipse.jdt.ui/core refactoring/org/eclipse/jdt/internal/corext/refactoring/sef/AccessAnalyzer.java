@@ -7,6 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
+ *       expressions into a combination of setter and getter calls.
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
@@ -40,11 +42,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 /**
  * Analyzer to find all references to the field and to determine how to convert 
  * them into setter or getter calls.
- * 
- * Contributors:
- * 
- * jens.lukowski@gmx.de: contributed code to convert prefix and postfix expressions
- *   into a combination of setter and getter calls.
  */
 class AccessAnalyzer extends ASTVisitor {
 

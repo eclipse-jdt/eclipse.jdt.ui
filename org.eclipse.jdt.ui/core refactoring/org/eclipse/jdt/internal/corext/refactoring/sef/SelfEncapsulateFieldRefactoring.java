@@ -7,6 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     jens.lukowski@gmx.de - contributed code to convert prefix and postfix 
+ *       expressions into a combination of setter and getter calls.
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
@@ -67,11 +69,6 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 /**
  * Encapsulates a field into gettter and setter calls.
- * 
- * Contributors:
- * 
- * jens.lukowski@gmx.de: contributed code to convert prefix and postfix expressions
- *   into a combination of setter and getter calls.
  */
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
