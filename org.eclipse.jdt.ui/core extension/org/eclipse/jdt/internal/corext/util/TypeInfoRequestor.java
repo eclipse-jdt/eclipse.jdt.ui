@@ -16,6 +16,7 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 
+
 public class TypeInfoRequestor implements ITypeNameRequestor {
 	
 	private Collection fTypesFound;
@@ -30,19 +31,32 @@ public class TypeInfoRequestor implements ITypeNameRequestor {
 		fTypesFound= typesFound;
 		fFactory= new TypeInfoFactory();
 	}
+	
+	/**
+	 * @param packageName
+	 * @return
+	 */
+	protected boolean inScope(char[] packageName) {
+		return !TypeFilter.isFiltered(new String(packageName));
+	}
 
+	
 	/* non java-doc
 	 * @see ITypeNameRequestor#acceptInterface
 	 */
 	public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames,String path) {
-		fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, true, path));
+		if (inScope(packageName)) {
+			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, true, path));
+		}
 	}
 
 	/* non java-doc
 	 * @see ITypeNameRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-		fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, false, path));
+		if (inScope(packageName)) {
+			fTypesFound.add(fFactory.create(packageName, typeName, enclosingTypeNames, false, path));
+		}
 	}
 	
 }

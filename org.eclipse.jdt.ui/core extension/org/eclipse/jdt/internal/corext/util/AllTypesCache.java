@@ -114,20 +114,14 @@ public class AllTypesCache {
 				return null;
 			
 			final ArrayList typesFound= new ArrayList(fSizeHint);
-			final TypeInfoFactory factory= new TypeInfoFactory();
 
 			class RequestorAbort extends Error { }
 		
-			ITypeNameRequestor requestor= new ITypeNameRequestor() {
-				public void acceptInterface(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
+			ITypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
+				protected boolean inScope(char[] packageName) {
 					if (fRestart)
 						throw new RequestorAbort();
-					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, true, path));
-				}
-				public void acceptClass(char[] packageName, char[] typeName, char[][] enclosingTypeNames, String path) {
-					if (fRestart)
-						throw new RequestorAbort();
-					typesFound.add(factory.create(packageName, typeName, enclosingTypeNames, false, path));
+					return super.inScope(packageName);
 				}
 			};
 
@@ -210,7 +204,7 @@ public class AllTypesCache {
 		forceDeltaComplete();
 		
 		synchronized(fgLock) {
-							
+			
 			if (fgTypeCache == null) {
 				// cache is empty
 				
@@ -277,6 +271,27 @@ public class AllTypesCache {
 		return fgSizeHint;
 	}
 	
+	
+	public static void forceCacheFlush() {
+		if (fgTerminated)
+			return;
+		synchronized(fgLock) {
+			fgTypeCache= null;
+			fgNumberOfCacheFlushes++;
+			
+			if (fgTypeCacherThread != null) {
+				// if caching thread is already running, restart it
+				fgTypeCacherThread.restart();
+			} else {
+				if (fgAsyncMode) {	// start thread only if we are in background mode
+					fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
+					fgTypeCacherThread.start();
+				}
+			}
+		}
+	}
+	
+	
 	private static class TypeCacheDeltaListener implements IElementChangedListener {
 		
 		/*
@@ -287,20 +302,7 @@ public class AllTypesCache {
 				return;
 			boolean needsFlushing= processDelta(event.getDelta());
 			if (needsFlushing) {
-				synchronized(fgLock) {
-					fgTypeCache= null;
-					fgNumberOfCacheFlushes++;
-					
-					if (fgTypeCacherThread != null) {
-						// if caching thread is already running, restart it
-						fgTypeCacherThread.restart();
-					} else {
-						if (fgAsyncMode) {	// start thread only if we are in background mode
-							fgTypeCacherThread= new TypeCacher(fgSizeHint, TIMEOUT, null);
-							fgTypeCacherThread.start();
-						}
-					}
-				}
+				forceCacheFlush();
 			}
 		}
 		

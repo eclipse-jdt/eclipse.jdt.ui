@@ -559,6 +559,12 @@
             id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage">
       </page>
       <page
+            name="%typeFilterPrefName"
+            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.TypeFilterPreferencePage"
+            id="org.eclipse.jdt.ui.preferences.TypeFilterPreferencePage">
+      </page>
+      <page
             name="%codeFormatterPrefName"
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
@@ -79,6 +80,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptClass
 	 */	
 	public void acceptClass(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		if (TypeFilter.isFiltered(packageName)) {
+			return;
+		}
+		
 		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(false, false, modifiers);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
@@ -101,6 +106,11 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		char[] declaringTypePackageName, char[] declaringTypeName, char[] name,
 		char[] typePackageName, char[] typeName, char[] completionName,
 		int modifiers, int start, int end, int relevance) {
+		
+		if (TypeFilter.isFiltered(declaringTypePackageName)) {
+			return;
+		}
+		
 
 		ImageDescriptor descriptor= getFieldDescriptor(modifiers);	
 		
@@ -126,6 +136,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptInterface
 	 */	
 	public void acceptInterface(char[] packageName, char[] typeName, char[] completionName, int modifiers, int start, int end, int relevance) {
+		if (TypeFilter.isFiltered(packageName)) {
+			return;
+		}
+		
 		ImageDescriptor descriptor= JavaElementImageProvider.getTypeImageDescriptor(true, false, modifiers);
 		if (Flags.isDeprecated(modifiers))
 			descriptor= getDeprecatedDescriptor(descriptor);
@@ -138,8 +152,12 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptAnonymousType
 	 */
 	public void acceptAnonymousType(char[] superTypePackageName, char[] superTypeName, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames,
-		char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
+			char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 
+		if (TypeFilter.isFiltered(superTypePackageName)) {
+			return;
+		}
+		
 		JavaCompletionProposal	proposal= createAnonymousTypeCompletion(superTypePackageName, superTypeName, parameterTypeNames, parameterNames, completionName, completionStart, completionEnd, relevance);
 		proposal.setProposalInfo(new ProposalInfo(fJavaProject, superTypePackageName, superTypeName));
 		fTypes.add(proposal);
@@ -204,6 +222,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 		
 		if (completionName == null)
 			return;
+		
+		if (TypeFilter.isFiltered(declaringTypePackageName)) {
+			return;
+		}
 	
 		JavaCompletionProposal proposal= createMethodCallCompletion(declaringTypeName, name, parameterPackageNames, parameterTypeNames, parameterNames, returnTypeName, completionName, modifiers, start, end, relevance);
 		boolean isConstructor= returnTypeName == null ? true : returnTypeName.length == 0;
@@ -247,6 +269,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptPackage
 	 */	
 	public void acceptPackage(char[] packageName, char[] completionName, int start, int end, int relevance) {
+		if (TypeFilter.isFiltered(packageName)) {
+			return;
+		}
+		
 		fPackages.add(createCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_PACKAGE, new String(packageName), relevance));
 	}
 	
@@ -254,6 +280,10 @@ public class ResultCollector extends CompletionRequestorAdapter {
 	 * @see ICompletionRequestor#acceptType
 	 */	
 	public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int relevance) {
+		if (TypeFilter.isFiltered(packageName)) {
+			return;
+		}
+		
 		ProposalInfo info= new ProposalInfo(fJavaProject, packageName, typeName);
 		fTypes.add(createTypeCompletion(start, end, new String(completionName), JavaPluginImages.DESC_OBJS_CLASS, new String(typeName), new String(packageName), info, relevance));
 	}

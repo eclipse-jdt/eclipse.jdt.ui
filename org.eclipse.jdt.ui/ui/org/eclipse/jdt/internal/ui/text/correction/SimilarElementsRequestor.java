@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	
@@ -135,6 +136,10 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	}
 	
 	private void addType(int kind, char[] packageName, char[] typeName, char[] completionName, int relevance) {
+		if (TypeFilter.isFiltered(packageName)) {
+			return;
+		}
+		
 		StringBuffer buf= new StringBuffer();
 		if (packageName.length > 0) {
 			buf.append(packageName);
@@ -150,6 +155,10 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	}
 	
 	private void addVariable(int kind, char[] name, char[] typePackageName, char[] typeName, int relevance) {
+		if (TypeFilter.isFiltered(typePackageName)) {
+			return;
+		}
+		
 		String variableName= new String(name);
 		if (NameMatcher.isSimilarName(fName, variableName)) {
 			addResult(new SimilarElement(kind, variableName, 1));
@@ -202,6 +211,10 @@ public class SimilarElementsRequestor extends CompletionRequestorAdapter {
 	 */
 	public void acceptMethod(char[] declaringTypePackageName, char[] declaringTypeName, char[] selector, char[][] parameterPackageNames, char[][] parameterTypeNames, char[][] parameterNames, char[] returnTypePackageName, char[] returnTypeName, char[] completionName, int modifiers, int completionStart, int completionEnd, int relevance) {
 		if ((fKind & METHODS) != 0) {
+			if (TypeFilter.isFiltered(declaringTypePackageName)) {
+				return;
+			}
+			
 			String methodName= new String(selector);
 			if (fName.equals(methodName)) {
 				String[] paramTypes= new String[parameterTypeNames.length];

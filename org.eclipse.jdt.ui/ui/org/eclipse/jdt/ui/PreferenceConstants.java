@@ -69,6 +69,8 @@ public class PreferenceConstants {
 	 */
 	public static final String APPEARANCE_QUICKASSIST_LIGHTBULB="org.eclipse.jdt.quickassist.lightbulb"; //$NON-NLS-1$
 
+
+
 	/**
 	 * A named preference that defines the pattern used for package name compression.
 	 * <p>
@@ -237,7 +239,7 @@ public class PreferenceConstants {
 	public static final String CODEGEN__FILE_COMMENTS= "org.eclipse.jdt.ui.filecomments"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that holds a list of comma separated package names. The list specifies the import order used by
+	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
 	 * the "Organize Imports" opeation.
 	 * <p>
 	 * Value is of type <code>String</code>: semicolon separated list of package
@@ -245,6 +247,19 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
+	
+	/** work in progress 
+	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
+	 * @since 3.0
+	 */	
+	public static final String TYPEFILTER_ENABLED= "org.eclipse.jdt.ui.typefilter.enabled"; //$NON-NLS-1$
+	
+	/** work in progress
+	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
+	 * @since 3.0
+	 */	
+	public static final String TYPEFILTER_DISABLED= "org.eclipse.jdt.ui.typefilter.disabled"; //$NON-NLS-1$
+	
 	
 	/**
 	 * A named preference that specifies the number of imports added before a star-import declaration is used.
@@ -2035,6 +2050,10 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 
+		// TypeFilterPreferencePage
+		store.setDefault(PreferenceConstants.TYPEFILTER_ENABLED, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.TYPEFILTER_DISABLED, "java.awt*;COM*"); //$NON-NLS-1$
+		
 		// ClasspathVariablesPreferencePage
 		// CodeFormatterPreferencePage
 		// CompilerPreferencePage
@@ -2074,6 +2093,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$
 		// must add here to guarantee that it is the first in the listener list
 		store.addPropertyChangeListener(JavaPlugin.getDefault().getMemberOrderPreferenceCache());
+
 
 		// JavaEditorPreferencePage
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
