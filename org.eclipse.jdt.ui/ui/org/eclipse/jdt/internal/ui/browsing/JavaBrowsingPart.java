@@ -380,7 +380,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return false;
 	}
 
-	private boolean isAncestorOf(Object ancestor, Object element) {
+	boolean isAncestorOf(Object ancestor, Object element) {
 		if (element instanceof IJavaElement && ancestor instanceof IJavaElement)
 			return element.equals(ancestor) || isAncestorOf(ancestor, ((IJavaElement)element).getParent());
 
