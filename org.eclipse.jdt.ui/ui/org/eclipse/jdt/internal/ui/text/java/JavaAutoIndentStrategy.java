@@ -231,7 +231,17 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			String pastedText= command.text;
 			Assert.isNotNull(pastedText);
 			Assert.isTrue(pastedText.length() > 1);
-
+			
+			// #27512
+//			int selectionEnd= command.offset + command.length;
+//			IRegion region= document.getLineInformationOfOffset(selectionEnd);
+//			String selected= document.get(region.getOffset(), selectionEnd - region.getOffset());
+//			String notSelected= document.get(selectionEnd, region.getOffset() + region.getLength() - selectionEnd);
+//			if (selected.trim().length() == 0 && notSelected.trim().length() != 0) {
+//				pastedText += notSelected;
+//				command.length += notSelected.length();
+//			}
+			
 			String strippedParagraph= stripIndent(pastedText, lineDelimiter);
 
 			// check selection
@@ -241,7 +251,14 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			// format
 			String prefix= document.get(lineOffset, offset - lineOffset);
-			String indent= getIndent(document, command);
+
+			String blockIndent= getBlockIndent(document, command);
+			String insideBlockIndent= blockIndent == null ? "" : blockIndent + createIndent(1); //$NON-NLS-1$ // add one indent level
+			String previousIndent= getIndent(document, command);
+			String indent= calculateDisplayedWidth(insideBlockIndent) < calculateDisplayedWidth(previousIndent)
+				? insideBlockIndent
+				: previousIndent;
+
 			boolean formatFirstLine= prefix.trim().length() == 0;
 			String formattedParagraph= format(strippedParagraph, indent, lineDelimiter, formatFirstLine);
 
@@ -325,6 +342,25 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return buf.toString();
 	}
 	
+	private String getBlockIndent(IDocument d, DocumentCommand c) {
+		if (c.offset < 0 || d.getLength() == 0)
+			return null;
+
+		try {
+			int p= (c.offset == d.getLength() ? c.offset - 1 : c.offset);
+			int line= d.getLineOfOffset(p);
+
+			// evaluate the line with the opening bracket that matches out closing bracket
+			int indLine= findMatchingOpenBracket(d, line, c.offset, 1);
+			if (indLine != -1 && indLine != line)
+				// take the indent of the found line
+				return getIndentOfLine(d, indLine);
+
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
 
 	private static final class LineIterator implements Iterator {
 		/** The document to iterator over. */
