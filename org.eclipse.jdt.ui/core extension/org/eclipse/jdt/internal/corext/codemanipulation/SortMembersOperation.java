@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
 import org.eclipse.jdt.core.dom.*;
 
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
@@ -100,6 +101,15 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 
 			if (cat1 != cat2) {
 				return cat1 - cat2;
+			}
+			
+			if (fMemberOrderCache.isSortByVisibility()) {
+				int flags1= JdtFlags.getVisibilityCode(bodyDeclaration1);
+				int flags2= JdtFlags.getVisibilityCode(bodyDeclaration2);
+				int vis= fMemberOrderCache.getVisibilityIndex(flags1) - fMemberOrderCache.getVisibilityIndex(flags2);
+				if (vis != 0) {
+					return vis;
+				}
 			}
 
 			switch (bodyDeclaration1.getNodeType()) {
