@@ -28,7 +28,7 @@ public class ActivateJavaEditorTest extends ActivateEditorTest {
 	}
 
 	protected String getEditorId() {
-		return "org.eclipse.jdt.ui.CompilationUnitEditor";
+		return EditorTestHelper.COMPILATION_UNIT_EDITOR_ID;
 	}
 	
 	public void testActivateEditor() {

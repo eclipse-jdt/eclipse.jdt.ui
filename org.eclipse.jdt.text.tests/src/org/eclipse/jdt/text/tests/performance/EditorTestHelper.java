@@ -70,6 +70,10 @@ public class EditorTestHelper {
 		public void acceptInterface(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 		}
 	}
+
+	public static final String COMPILATION_UNIT_EDITOR_ID= "org.eclipse.jdt.ui.CompilationUnitEditor";
+	
+	public static final String TEXT_EDITOR_ID= "org.eclipse.ui.DefaultTextEditor";
 	
 	public static IEditorPart openInEditor(IFile file, boolean runEventLoop) throws PartInitException {
 		IEditorPart part= IDE.openEditor(getActivePage(), file);
@@ -83,6 +87,15 @@ public class EditorTestHelper {
 		if (runEventLoop)
 			runEventQueue(part);
 		return part;
+	}
+
+	public static AbstractTextEditor[] openInEditor(IFile[] files, String editorId) throws PartInitException {
+		AbstractTextEditor editors[]= new AbstractTextEditor[files.length];
+		for (int i= 0; i < files.length; i++) {
+			editors[i]= (AbstractTextEditor) openInEditor(files[i], editorId, true);
+			joinReconciler(getSourceViewer(editors[i]), 100, 10000, 100);
+		}
+		return editors;
 	}
 
 	public static IDocument getDocument(ITextEditor editor) {

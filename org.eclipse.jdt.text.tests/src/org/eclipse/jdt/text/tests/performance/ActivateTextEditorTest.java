@@ -28,7 +28,7 @@ public class ActivateTextEditorTest extends ActivateEditorTest {
 	}
 
 	protected String getEditorId() {
-		return "org.eclipse.ui.DefaultTextEditor";
+		return EditorTestHelper.TEXT_EDITOR_ID;
 	}
 	
 	public void testActivateEditor() {

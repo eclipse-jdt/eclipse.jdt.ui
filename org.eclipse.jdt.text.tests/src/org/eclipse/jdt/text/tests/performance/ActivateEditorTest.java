@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.core.resources.IFile;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -19,7 +18,6 @@ import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 
@@ -63,16 +61,7 @@ public abstract class ActivateEditorTest extends TextPerformanceTestCase {
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 		ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, getNumberOfEditors(), FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
-		fEditors= openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getNumberOfEditors()));
-	}
-	
-	private AbstractTextEditor[] openInEditor(IFile[] files) throws PartInitException {
-		AbstractTextEditor editors[]= new AbstractTextEditor[files.length];
-		for (int i= 0; i < files.length; i++) {
-			editors[i]= (AbstractTextEditor) EditorTestHelper.openInEditor(files[i], getEditorId(), true);
-			EditorTestHelper.joinReconciler(EditorTestHelper.getSourceViewer(editors[i]), 100, 10000, 100);
-		}
-		return editors;
+		fEditors= EditorTestHelper.openInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getNumberOfEditors()), getEditorId());
 	}
 	
 	protected void tearDown() throws Exception {
