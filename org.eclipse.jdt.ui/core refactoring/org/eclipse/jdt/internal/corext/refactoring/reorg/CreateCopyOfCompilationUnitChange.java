@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileCha
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
@@ -103,12 +102,9 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 			SearchMatch searchResult= results[j];
 			if (searchResult.getAccuracy() == SearchMatch.A_INACCURATE)
 				continue;
-			// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=49994 , 49774
-			if (SearchUtils.getEnd(searchResult) <= 1)
-				continue;
 			String oldName= wc.findPrimaryType().getElementName();
 			int length= oldName.length();
-			int offset= SearchUtils.getEnd(searchResult) - length;
+			int offset= searchResult.getOffset() + searchResult.getLength() - length; // may be qualified
 			TextChangeCompatibility.addTextEdit(manager.get(wc), name, new ReplaceEdit(offset, length, newName));
 		}
 		return manager;
