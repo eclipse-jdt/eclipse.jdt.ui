@@ -458,7 +458,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return null;
 
 			try {
-				IJavaElement[] elements= ((ICodeAssist) input).codeSelect(offset, 0);
+				
+				IJavaElement[] elements= null;
+				synchronized (input) {
+					elements= ((ICodeAssist) input).codeSelect(offset, 0);
+				}
+				
 				if (elements == null || elements.length == 0)
 					return null;
 					
