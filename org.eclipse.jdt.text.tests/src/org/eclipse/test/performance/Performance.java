@@ -16,6 +16,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 import org.eclipse.jdt.text.tests.performance.OSPerformanceMeterFactory;
 import org.eclipse.jdt.text.tests.performance.PerformanceMeterFactory;
+import org.eclipse.jdt.text.tests.performance.eval.Evaluator;
 
 public class Performance {
 
@@ -24,6 +25,33 @@ public class Performance {
 	private static final String PERFORMANCE_METER_FACTORY= "/option/performanceMeterFactory";
 	
 	private static final String PERFORMANCE_METER_FACTORY_PROPERTY= "PerformanceMeterFactory";
+
+	private static Performance fgDefault;
+	
+	/**
+	 * Returns the singleton of <code>Performance</code>
+	 * 
+	 * @return the singleton of <code>Performance</code>
+	 */
+	public static Performance getDefault() {
+		if (fgDefault == null)
+			fgDefault= new Performance();
+		return fgDefault;
+	}
+	
+	private Performance() {
+	}
+	
+	/**
+	 * Asserts default properties of the measurements captured by the given
+	 * performance meter.
+	 * 
+	 * @param performanceMeter
+	 * @throws RuntimeException if the properties do not hold
+	 */
+	public void assertPerformance(PerformanceMeter performanceMeter) {
+		Evaluator.getDefaultEvaluator().evaluate(performanceMeter.getSessionData());
+	}
 	
 	public static PerformanceMeterFactory createPerformanceMeterFactory() {
 		PerformanceMeterFactory factory;
