@@ -350,6 +350,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performExpressionTest();
 	}
 	
+	public void testConditionalExpression() throws Exception {
+		performExpressionTest();
+	}
+	
 	/************************ Control Statements Tests ********************************/
 		
 	private void performControlStatementTest() throws Exception {

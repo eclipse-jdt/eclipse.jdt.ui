@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -69,11 +70,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
+import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
@@ -644,7 +645,12 @@ public class CallInliner {
 			return false;
 		ASTNode parent= fTargetNode.getParent();
 		int type= parent.getNodeType();
-		return type == ASTNode.METHOD_INVOCATION || (parent instanceof Expression && type != ASTNode.ASSIGNMENT);
+		return 
+			type == ASTNode.METHOD_INVOCATION || 
+			(parent instanceof Expression && type != ASTNode.ASSIGNMENT) ||
+			(fSourceProvider.returnsConditionalExpression() &&
+				type == ASTNode.VARIABLE_DECLARATION_FRAGMENT &&  
+				((VariableDeclarationFragment)parent).getInitializer() == fTargetNode);
 	}
 	
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {

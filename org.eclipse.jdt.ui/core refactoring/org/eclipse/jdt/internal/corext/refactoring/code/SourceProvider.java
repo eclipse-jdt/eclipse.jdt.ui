@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -213,6 +214,14 @@ public class SourceProvider {
 		ASTNode last= getLastStatement();
 		if (last instanceof ReturnStatement) {
 			return ASTNodes.needsParentheses(((ReturnStatement)last).getExpression());
+		}
+		return false;
+	}
+	
+	public boolean returnsConditionalExpression() {
+		ASTNode last= getLastStatement();
+		if (last instanceof ReturnStatement) {
+			return ((ReturnStatement)last).getExpression() instanceof ConditionalExpression;
 		}
 		return false;
 	}
