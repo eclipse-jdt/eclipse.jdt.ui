@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
@@ -67,7 +68,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public abstract class FindAction extends SelectionDispatchAction {
 
 	// A dummy which can't be selected in the UI
-	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getDefault().getWorkspace().getRoot());
+	private static final IJavaElement RETURN_WITHOUT_BEEP= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
 		
 	private Class[] fValidTypes;
 	private JavaEditor fEditor;	
@@ -191,7 +192,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		dialog.setMessage(message);
 		dialog.setElements(types);
 		
-		if (dialog.open() == dialog.OK)
+		if (dialog.open() == Window.OK)
 			return (IType)dialog.getFirstResult();
 		else
 			return RETURN_WITHOUT_BEEP;

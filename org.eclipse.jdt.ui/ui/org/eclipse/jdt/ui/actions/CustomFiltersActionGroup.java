@@ -33,6 +33,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
@@ -423,7 +424,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			fUserDefinedPatterns,
 			getEnabledFilterIds());
 		
-		if (dialog.open() == dialog.OK) {
+		if (dialog.open() == Window.OK) {
 			setEnabledFilterIds(dialog.getEnabledFilterIds());
 			setUserDefinedPatternsEnabled(dialog.areUserDefinedPatternsEnabled());
 			setUserDefinedPatterns(dialog.getUserDefinedPatterns());
