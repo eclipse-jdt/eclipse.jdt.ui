@@ -285,7 +285,7 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 		boolean update= false;
 		if (fNext - fPrevious > 0) {
 
-			if (fContent.charAt(fPrevious) == JAVADOC_TAG_PREFIX && fSuccessor != BreakIterator.DONE) {
+			if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == JAVADOC_TAG_PREFIX) {
 
 				nextBreak();
 				if (Character.isLetter(fContent.charAt(fPrevious + 1))) {
@@ -294,14 +294,14 @@ public class SpellCheckIterator implements ISpellCheckIterator, IJavaDocTagConst
 				} else
 					fPredecessor= fNext;
 
-			} else if (fContent.charAt(fPrevious) == HTML_TAG_PREFIX && fSuccessor != BreakIterator.DONE && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/')) {
+			} else if (fSuccessor != BreakIterator.DONE && fContent.charAt(fPrevious) == HTML_TAG_PREFIX && (Character.isLetter(fContent.charAt(fNext)) || fContent.charAt(fNext) == '/')) {
 
 				if (fContent.startsWith(HTML_CLOSE_PREFIX, fPrevious))
 					nextBreak();
 
 				nextBreak();
 
-				if (fContent.charAt(fNext) == HTML_TAG_POSTFIX && fSuccessor != BreakIterator.DONE) {
+				if (fSuccessor != BreakIterator.DONE && fContent.charAt(fNext) == HTML_TAG_POSTFIX) {
 
 					nextBreak();
 					if (fSuccessor != BreakIterator.DONE) {
