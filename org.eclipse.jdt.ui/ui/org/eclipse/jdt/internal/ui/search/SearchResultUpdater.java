@@ -158,4 +158,12 @@ public class SearchResultUpdater implements IElementChangedListener, IQueryListe
 		}
 	}
 
+	public void queryStarting(ISearchQuery query) {
+		// not interested
+	}
+
+	public void queryFinished(ISearchQuery query) {
+		// not interested
+	}
+
 }
