@@ -27,14 +27,12 @@ import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 public class FocusOnSelectionAction extends Action {
 		
 	private TypeHierarchyViewPart fViewPart;
-	private String fText;
 	
 	public FocusOnSelectionAction(TypeHierarchyViewPart part) {
 		super(TypeHierarchyMessages.getString("FocusOnSelectionAction.label")); //$NON-NLS-1$
 		setDescription(TypeHierarchyMessages.getString("FocusOnSelectionAction.description")); //$NON-NLS-1$
 		setToolTipText(TypeHierarchyMessages.getString("FocusOnSelectionAction.tooltip")); //$NON-NLS-1$
 		fViewPart= part;
-		fText= TypeHierarchyMessages.getString("FocusOnSelectionAction.label"); //$NON-NLS-1$
 		
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FOCUS_ON_SELECTION_ACTION);
 	}
