@@ -101,6 +101,8 @@ public class AddToClasspathChange extends Change {
 				return JavaCore.newSourceEntry(fPath);
 			case IClasspathEntry.CPE_VARIABLE:
 				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentRootPath);	
+			case IClasspathEntry.CPE_CONTAINER:
+				return JavaCore.newContainerEntry(fPath);	
 			default:
 				Assert.isTrue(false, RefactoringCoreMessages.getString("AddToClasspathChange.assert.not_expected")); //$NON-NLS-1$
 				return null;	
