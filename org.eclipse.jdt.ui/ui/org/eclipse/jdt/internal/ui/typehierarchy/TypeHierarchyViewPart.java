@@ -630,6 +630,12 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 	}
 	
 	private void revealElementInEditor(Object elem) {
+		// only allow revealing when the type hierarchy is the active pagae
+		// no revealing after selection events due to model changes
+		if (getSite().getPage() != this) {
+			return;
+		}
+		
 		IEditorPart editorPart= EditorUtility.isOpenInEditor(elem);
 		if (editorPart != null && (elem instanceof ISourceReference)) {
 			try {
