@@ -339,29 +339,37 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
 		description.setLayoutData(gd);
 
+		Composite combos= new Composite(problemsComposite, SWT.NULL);
+		gd= new GridData();
+		gd.horizontalSpan= 2;
+		combos.setLayoutData(gd);
+		GridLayout cl= new GridLayout();
+		cl.numColumns=2; cl.marginWidth= 0; cl.marginHeight= 0;
+		combos.setLayout(cl);
+
 		String label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unreachable_code.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
+		addComboBox(combos, label, PREF_PB_UNREACHABLE_CODE, errorWarningIgnore, errorWarningIgnoreLabels, 0);	
 		
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_invalid_import.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_INVALID_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_local.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_UNUSED_LOCAL, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_parameter.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_UNUSED_PARAMETER, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_imports.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_UNUSED_IMPORT, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_unused_private.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_UNUSED_PRIVATE, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_non_externalized_strings.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation.label"); //$NON-NLS-1$
-		addComboBox(problemsComposite, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		addComboBox(combos, label, PREF_PB_DEPRECATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_deprecation_in_deprecation.label"); //$NON-NLS-1$
 		addCheckBox(problemsComposite, label, PREF_COMPILER_PB_DEPRECATION_IN_DEPRECATED_CODE, enabledDisabled, 0);
