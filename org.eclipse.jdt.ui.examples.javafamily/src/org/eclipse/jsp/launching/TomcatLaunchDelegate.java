@@ -80,7 +80,7 @@ public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfiguratio
 	 * @exception CoreException if the variable or value is undefined
 	 */
 	public static String getCatalinaHome() throws CoreException {
-		IValueVariable variable = DebugPlugin.getDefault().getStringVariableManager().getValueVariable("${catalina_home}"); //$NON-NLS-1$
+		IValueVariable variable = DebugPlugin.getDefault().getStringVariableManager().getValueVariable("catalina_home"); //$NON-NLS-1$
 		IStatus err = null;
 		if (variable == null) {
 			err = new Status(IStatus.ERROR, JspUIPlugin.getDefault().getDescriptor().getUniqueIdentifier(), 0, LaunchingMessages.getString("TomcatLaunchDelegate.9"), null); //$NON-NLS-1$
