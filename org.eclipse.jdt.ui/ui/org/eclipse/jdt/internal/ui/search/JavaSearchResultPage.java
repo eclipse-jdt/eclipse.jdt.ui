@@ -259,6 +259,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.setLabelProvider(new ColorDecoratingLabelProvider(new SortingLabelProvider(this), PlatformUI.getWorkbench().getDecoratorManager().getLabelDecorator()));
 		fContentProvider=new JavaSearchTableContentProvider(this);
 		viewer.setContentProvider(fContentProvider);
+		viewer.setSorter(new ViewerSorter());
 		setSortOrder(fCurrentSortOrder);
 	}
 
@@ -366,13 +367,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		viewer.getControl().setRedraw(false);
 		DecoratingLabelProvider dlp= (DecoratingLabelProvider) viewer.getLabelProvider();
 		((SortingLabelProvider)dlp.getLabelProvider()).setOrder(order);
-		if (order == SortingLabelProvider.SHOW_ELEMENT_CONTAINER) {
-			viewer.setSorter(new NameSorter());
-		} else if (order == SortingLabelProvider.SHOW_PATH) {
-			viewer.setSorter(new PathSorter());
-		} else
-			viewer.setSorter(new ParentSorter());
 		viewer.getControl().setRedraw(true);
+		viewer.refresh();
 		getSettings().put(KEY_SORTING, fCurrentSortOrder);
 	}
 
@@ -386,7 +382,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 	/**
 	 * Precondition here: the viewer must be showing a tree with a LevelContentProvider.
-	 * @param order
+	 * @param grouping
 	 */
 	void setGrouping(int grouping) {
 		fCurrentGrouping= grouping;
