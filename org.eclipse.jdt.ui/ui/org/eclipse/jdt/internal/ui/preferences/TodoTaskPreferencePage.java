@@ -75,14 +75,7 @@ public class TodoTaskPreferencePage extends PropertyAndPreferencePage {
 		TodoTaskPreferencePage page= new TodoTaskPreferencePage();
 		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enablePreferenceContent(boolean)
-	 */
-	protected void enablePreferenceContent(boolean enable) {
-		fConfigurationBlock.setEnabled(enable); // override default behaviour
-	}
-	
+		
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
