@@ -56,18 +56,17 @@ public class MethodsViewerFilter extends ViewerFilter {
 	 */		
 	public boolean select(Viewer viewer, Object parentElement, Object element) {
 		try {
-			if (element instanceof IField && hasFilter(FILTER_FIELDS)) {
+			if (hasFilter(FILTER_FIELDS) && element instanceof IField) {
 				return false;
 			}
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
 				int flags= member.getFlags();
-				if (Flags.isStatic(flags) && 
-					(hasFilter(FILTER_STATIC) || "<clinit>".equals(member.getElementName()))) { //$NON-NLS-1$
+				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || "<clinit>".equals(member.getElementName()))) {
 					return false;
 				}
-				if (!Flags.isPublic(flags) && !isMemberInInterface(member)) {
-					return !hasFilter(FILTER_NONPUBLIC);
+				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member)) {
+					return false;
 				}
 			}			
 		} catch (JavaModelException e) {
