@@ -18,7 +18,9 @@ import java.io.StringBufferInputStream;
 
 import junit.framework.TestCase;
 
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -173,14 +175,15 @@ public abstract class RefactoringTest extends TestCase {
 		return cu;
 	}
 
-	/**
-	 * BOGUS: this might be already implemented somewhere else (JDK? Core?)
-	 */
 	protected String getFileContents(String fileName) throws IOException {
-		if (fIsVerbose)
-			System.out.println("loading:" + fileName);
-			
-		InputStream in= getFileInputStream(fileName);
+		return getContents(getFileInputStream(fileName));
+	}
+
+	protected static String getContents(IFile file) throws IOException, CoreException {
+		return getContents(file.getContents());
+	}
+	
+	protected static String getContents(InputStream in) throws IOException {
 		BufferedReader br= new BufferedReader(new InputStreamReader(in));
 		
 		StringBuffer sb= new StringBuffer(300);
