@@ -13,25 +13,26 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 /**
  * Open a test in the Java editor and reveal a given line
@@ -39,21 +40,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class OpenEditorAtLineAction extends OpenEditorAction {
 
 	//fix for bug 37333
-	private class NonPublicClassInCUCollector implements IJavaSearchResultCollector {
+	private class NonPublicClassInCUCollector extends SearchRequestor {
 		private IJavaElement fFound;
-
-		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
-
-			if ((enclosingElement instanceof IType) && (resource.getName().equals(fCUName)))
+		
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			IJavaElement enclosingElement= (IJavaElement) match.getElement();
+			String resourceName= match.getResource().getName();
+			if ((enclosingElement instanceof IType) && (resourceName.equals(fCUName)))
 				fFound= enclosingElement;
 		}
-
-		public IProgressMonitor getProgressMonitor() {
-			return new NullProgressMonitor();
-		}
-
-		public void aboutToStart() {}
-		public void done() {}
 	}
 		
 	private int fLineNumber;
@@ -80,19 +75,20 @@ public class OpenEditorAtLineAction extends OpenEditorAction {
 		}
 	}
 	
-	protected IJavaElement findElement(IJavaProject project, String className) throws JavaModelException {
+	protected IJavaElement findElement(IJavaProject project, String className) throws CoreException {
 		IJavaElement element= project.findType(className);
 		
 		//fix for bug 37333
 		if (element == null) {
-			ISearchPattern pattern=	SearchEngine.createSearchPattern(className, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, true);
+			SearchPattern pattern=	SearchPattern.createPattern(className, IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true);
 			IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, false);
-			NonPublicClassInCUCollector collector= new NonPublicClassInCUCollector();
+			NonPublicClassInCUCollector requestor= new NonPublicClassInCUCollector();
 
 			SearchEngine searchEngine= new SearchEngine();
-			searchEngine.search(JavaPlugin.getWorkspace(), pattern, scope, collector);
+			searchEngine.search(pattern, new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()},
+					scope, requestor, new NullProgressMonitor());
 			
-			element= collector.fFound;
+			element= requestor.fFound;
 		}
 		
 		return element;

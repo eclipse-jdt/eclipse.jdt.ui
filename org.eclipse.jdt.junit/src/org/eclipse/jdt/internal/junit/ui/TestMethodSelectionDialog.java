@@ -14,28 +14,38 @@ package org.eclipse.jdt.internal.junit.ui;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Set;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.window.Window;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 /**
  * A dialog to select a test method.
@@ -44,29 +54,15 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 
 	private IJavaElement fElement;
 
-	public static class TestReferenceCollector implements IJavaSearchResultCollector {
-		IProgressMonitor fMonitor;
+	public static class TestReferenceCollector extends SearchRequestor {
 		Set fResult= new HashSet(200);
 		
-		public TestReferenceCollector(IProgressMonitor pm) {
-			fMonitor= pm;
-		}
-		
-		public void aboutToStart() {
-		}
-	
-		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) {
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			IJavaElement enclosingElement= (IJavaElement) match.getElement();
 			if (enclosingElement.getElementName().startsWith("test")) //$NON-NLS-1$
 				fResult.add(enclosingElement);
 		}
 	
-		public void done() {
-		}
-	
-		public IProgressMonitor getProgressMonitor() {
-			return fMonitor;
-		}
-		
 		public Object[] getResult() {
 			return fResult.toArray();
 		}
@@ -168,7 +164,7 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
 					col[0]= doSearchTestMethods(element, testType, pm);
-				} catch (JavaModelException e) {
+				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
 			}
@@ -177,10 +173,12 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		return col[0].getResult();
 	}
 
-	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IType testType, IProgressMonitor pm) throws JavaModelException{
+	private TestReferenceCollector doSearchTestMethods(IJavaElement element, IType testType, IProgressMonitor pm) throws CoreException{
+		SearchPattern pattern= SearchPattern.createPattern(element, IJavaSearchConstants.REFERENCES);
+		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(testType);
-		TestReferenceCollector collector= new TestReferenceCollector(pm);
-		new SearchEngine().search(ResourcesPlugin.getWorkspace(), element, IJavaSearchConstants.REFERENCES, scope, collector);
-		return collector;
+		TestReferenceCollector requestor= new TestReferenceCollector();
+		new SearchEngine().search(pattern, participants, scope, requestor, pm);
+		return requestor;
 	}
 }

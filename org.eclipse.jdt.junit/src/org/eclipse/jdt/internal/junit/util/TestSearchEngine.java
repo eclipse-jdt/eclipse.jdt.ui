@@ -15,10 +15,13 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -30,33 +33,37 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
+
 import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * Custom Search engine for suite() methods
  */
 public class TestSearchEngine {
 
-	private class JUnitSearchResultCollector implements IJavaSearchResultCollector {
-		IProgressMonitor fProgressMonitor;
+	private class JUnitSearchResultCollector extends SearchRequestor {
 		List fList;
 		Set fFailed= new HashSet();
 		Set fMatches= new HashSet();
 		
-		public JUnitSearchResultCollector(List list, IProgressMonitor progressMonitor) {
-			fProgressMonitor= progressMonitor;
+		public JUnitSearchResultCollector(List list) {
 			fList= list;
 		}
 		
-		public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws JavaModelException{
+		public void acceptSearchMatch(SearchMatch match) throws CoreException {
+			Object enclosingElement= match.getElement();
 			if (!(enclosingElement instanceof IMethod)) 
 				return;
 			
@@ -72,30 +79,24 @@ public class TestSearchEngine {
 			fMatches.add(declaringType);
 		}
 		
-		public IProgressMonitor getProgressMonitor() {
-			return fProgressMonitor;
-		}
-				
-		public void aboutToStart() {
-		}
-		
-		public void done() {
+		public void endReporting() {
 			fList.addAll(fMatches);
 		}
 	}
 	
-	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws JavaModelException {
+	private List searchMethod(IProgressMonitor pm, final IJavaSearchScope scope) throws CoreException {
 		final List typesFound= new ArrayList(200);	
 		searchMethod(typesFound, scope, pm);
 		return typesFound;	
 	}
 
-	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws JavaModelException {		
-		IJavaSearchResultCollector collector= new JUnitSearchResultCollector(v, progressMonitor);
-		ISearchPattern suitePattern= SearchEngine.createSearchPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
-		ISearchPattern testPattern= SearchEngine.createSearchPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, true); //$NON-NLS-1$
-		SearchEngine engine= new SearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), SearchEngine.createOrSearchPattern(suitePattern, testPattern), scope, collector); 
+	private List searchMethod(final List v, IJavaSearchScope scope, final IProgressMonitor progressMonitor) throws CoreException {		
+		SearchRequestor requestor= new JUnitSearchResultCollector(v);
+		SearchPattern suitePattern= SearchPattern.createPattern("suite() Test", IJavaSearchConstants.METHOD, IJavaSearchConstants.DECLARATIONS, SearchPattern.R_EXACT_MATCH, true); //$NON-NLS-1$
+		SearchPattern testPattern= SearchPattern.createPattern("test*() void", IJavaSearchConstants.METHOD , IJavaSearchConstants.DECLARATIONS, SearchPattern.R_PATTERN_MATCH, true); //$NON-NLS-1$
+		SearchPattern pattern= SearchPattern.createOrPattern(suitePattern, testPattern);
+		SearchParticipant[] participants= new SearchParticipant[] {SearchEngine.getDefaultSearchParticipant()};
+		new SearchEngine().search(pattern, participants, scope, requestor, progressMonitor); 
 		return v;
 	}
 	
@@ -120,7 +121,7 @@ public class TestSearchEngine {
 			for (int i= 0; i < nElements; i++) {
 				try {
 					collectTypes(elements[i], new SubProgressMonitor(pm, 1), result);
-				} catch (JavaModelException e) {
+				} catch (CoreException e) {
 					JUnitPlugin.log(e.getStatus());
 				}
 				if (pm.isCanceled()) {
@@ -132,7 +133,7 @@ public class TestSearchEngine {
 		}
 	}
 
-	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws JavaModelException/*, InvocationTargetException*/ {
+	private static void collectTypes(Object element, IProgressMonitor pm, Set result) throws CoreException/*, InvocationTargetException*/ {
 		element= computeScope(element);
 		while((element instanceof IJavaElement) && !(element instanceof ICompilationUnit) && (element instanceof ISourceReference)) {
 			if(element instanceof IType) {
@@ -169,7 +170,7 @@ public class TestSearchEngine {
 		return element;
 	}
 	
-	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws JavaModelException {	
+	private static List searchSuiteMethods(IProgressMonitor pm, IJavaElement element) throws CoreException {	
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element });
 		TestSearchEngine searchEngine= new TestSearchEngine(); 
 		return searchEngine.searchMethod(pm, scope);

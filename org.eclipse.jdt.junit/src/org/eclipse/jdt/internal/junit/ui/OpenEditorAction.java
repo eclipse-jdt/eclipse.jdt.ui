@@ -11,15 +11,19 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Abstract Action for opening a Java editor.
@@ -73,7 +77,7 @@ public abstract class OpenEditorAction extends Action {
 		return fClassName;
 	}
 
-	protected abstract IJavaElement findElement(IJavaProject project, String className) throws JavaModelException;
+	protected abstract IJavaElement findElement(IJavaProject project, String className) throws CoreException;
 	
 	protected abstract void reveal(ITextEditor editor);
 	
