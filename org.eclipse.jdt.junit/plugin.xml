@@ -152,7 +152,7 @@
             visible="false"
             id="org.eclipse.jdt.junit.JUnitActionSet">
 			<action
-				label="Test..."
+				label="Referring Tests..."
 				tooltip="Go to Test Referring to Selection"
 				class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
 				menubarPath="navigate/goTo/"
