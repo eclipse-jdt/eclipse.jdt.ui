@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-class ASTNodeMappingManager {
+public class ASTNodeMappingManager {
 
 	private final Map fCUsToCuNodes;
 	private final Map fCuNodesToCus;
