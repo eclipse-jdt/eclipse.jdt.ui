@@ -294,10 +294,15 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		public IRegion[] computeProjectionRegions(IDocument document) throws BadLocationException {
 			int nameStart= offset;
 			try {
-				// TODO - we would need to reconcile here in order to get the correct ranges
+				/* The member's name range may not be correct. However,
+				 * reconciling would trigger another element delta which would
+				 * lead to reentrant situations. Therefore, we optimistically
+				 * assume that the name range is correct, but double check the
+				 * received lines below. */ 
 				ISourceRange nameRange= fMember.getNameRange();
 				if (nameRange != null)
 					nameStart= nameRange.getOffset();
+				
 			} catch (JavaModelException e) {
 				// ignore and use default
 			}
@@ -305,9 +310,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			int firstLine= document.getLineOfOffset(offset);
 			int captionLine= document.getLineOfOffset(nameStart);
 			int lastLine= document.getLineOfOffset(offset + length);
-			
-			Assert.isTrue(firstLine <= captionLine, "first folded line is greater than the caption line"); //$NON-NLS-1$
-			Assert.isTrue(captionLine <= lastLine, "caption line is greater than the last folded line"); //$NON-NLS-1$
+
+			/* see comment above - adjust the caption line to be inside the
+			 * entire folded region, and rely on later element deltas to correct
+			 * the name range. */
+			if (captionLine < firstLine)
+				captionLine= firstLine;
+			if (captionLine > lastLine)
+				captionLine= lastLine;
 			
 			IRegion preRegion;
 			if (firstLine < captionLine) {
