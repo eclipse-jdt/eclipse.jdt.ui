@@ -13,10 +13,12 @@ public class GotoPackageAction extends JavaUIAction {
 	private static final String DIALOG_PREFIX= PREFIX + "dialog.";
 	private static final String ERROR_OPEN_PREFIX= PREFIX + "error.open.";
 	private PackageExplorerPart fPackageExplorer;
+	private EmptyInnerPackageFilter fFilter;
 	
 	public GotoPackageAction(PackageExplorerPart part) {
 		super("Package...");
 		fPackageExplorer= part;
+		fFilter= new EmptyInnerPackageFilter();
 	}
  
 	public void run() { 
@@ -46,7 +48,7 @@ public class GotoPackageAction extends JavaUIAction {
 		 		if (!set.contains(root)) {
 					set.add(root);
 					IJavaElement[] packages= root.getChildren();
-					allPackages.addAll(Arrays.asList(packages));
+					appendPackages(allPackages, packages);
 				}
 			}
 		}
@@ -56,6 +58,14 @@ public class GotoPackageAction extends JavaUIAction {
 		return dialog;
 	}
 	
+	void appendPackages(List all, IJavaElement[] packages) {
+		for (int i= 0; i < packages.length; i++) {
+			IJavaElement element= packages[i];
+			if (fFilter.select(null, null, element))
+				all.add(element); 
+		}
+	}
+		
 	void gotoPackage(IPackageFragment p) {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
 		return;
