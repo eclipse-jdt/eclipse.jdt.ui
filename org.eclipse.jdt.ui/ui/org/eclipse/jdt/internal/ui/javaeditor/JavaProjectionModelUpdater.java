@@ -22,8 +22,11 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
@@ -51,7 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Updates the projection model of a class file or compilation unit.
  * @since 3.0
  */
-public class JavaProjectionModelUpdater {
+public class JavaProjectionModelUpdater implements IProjectionListener {
 	
 	private static class JavaProjectionAnnotation extends ProjectionAnnotation {
 		
@@ -123,8 +126,9 @@ public class JavaProjectionModelUpdater {
 	private IDocument fCachedDocument;
 	
 	private JavaEditor fEditor;
+	private ProjectionViewer fViewer;
 	private IJavaElement fInput;
-	private IElementChangedListener fListener;
+	private IElementChangedListener fElementListener;
 	
 	private boolean fAllowCollapsing= false;
 	private boolean fCollapseJavadoc= false;
@@ -135,26 +139,53 @@ public class JavaProjectionModelUpdater {
 	public JavaProjectionModelUpdater() {
 	}
 	
-	public void install(JavaEditor editor) {
+	public void install(JavaEditor editor, ProjectionViewer viewer) {
 		fEditor= editor;
-		if (editor instanceof CompilationUnitEditor) {
-			fListener= new ElementChangedListener();
-			JavaCore.addElementChangedListener(fListener);
+		fViewer= viewer;
+		fViewer.addProjectionListener(this);
+		projectionEnabled();
+	}
+	
+	public void uninstall() {
+		if (isInstalled()) {
+			projectionDisabled();
+			fViewer.removeProjectionListener(this);
+			fViewer= null;
+			fEditor= null;
 		}
 	}
 	
-	public void dispose() {
+	protected boolean isInstalled() {
+		return fEditor != null;
+	}
 		
-		fEditor= null;
+	/*
+	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionEnabled()
+	 */
+	public void projectionEnabled() {
+		if (fEditor instanceof CompilationUnitEditor) {
+			initialize();
+			fElementListener= new ElementChangedListener();
+			JavaCore.addElementChangedListener(fElementListener);
+		}
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.projection.IProjectionListener#projectionDisabled()
+	 */
+	public void projectionDisabled() {
 		fCachedDocument= null;
-		
-		if (fListener != null) {
-			JavaCore.removeElementChangedListener(fListener);
-			fListener= null;
+		if (fElementListener != null) {
+			JavaCore.removeElementChangedListener(fElementListener);
+			fElementListener= null;
 		}
 	}
-	
-	public void inputChanged() {
+		
+	public void initialize() {
+		
+		if (!isInstalled())
+			return;
+		
 		try {
 			
 			IDocumentProvider provider= fEditor.getDocumentProvider();
@@ -169,10 +200,12 @@ public class JavaProjectionModelUpdater {
 				fInput= editorInput.getClassFile();
 			}
 			
-			Map additions= computeAdditions((IParent) fInput);
 			ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
-			model.removeAllAnnotations();
-			model.replaceAnnotations(null, additions);
+			if (model != null) {
+				Map additions= computeAdditions((IParent) fInput);
+				model.removeAllAnnotations();
+				model.replaceAnnotations(null, additions);
+			}
 			
 		} finally {
 			fCachedDocument= null;
@@ -306,6 +339,9 @@ public class JavaProjectionModelUpdater {
 	
 	private Position createProjectionPosition(IRegion region) {
 		
+		if (fCachedDocument == null)
+			return null;
+		
 		try {
 			
 			int start= fCachedDocument.getLineOfOffset(region.getOffset());
@@ -323,6 +359,14 @@ public class JavaProjectionModelUpdater {
 	}
 		
 	protected void processDelta(IJavaElementDelta delta) {
+		
+		if (!isInstalled())
+			return;
+		
+		ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
+		if (model == null)
+			return;
+		
 		try {
 			
 			IDocumentProvider provider= fEditor.getDocumentProvider();
@@ -334,9 +378,8 @@ public class JavaProjectionModelUpdater {
 			List updates= new ArrayList();
 			
 			Map updated= computeAdditions((IParent) fInput);
-			Map previous= createAnnotationMap();
+			Map previous= createAnnotationMap(model);
 			
-			ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 			
 			Iterator e= updated.keySet().iterator();
 			while (e.hasNext()) {
@@ -452,9 +495,8 @@ public class JavaProjectionModelUpdater {
 		changes.addAll(newChanges);
 	}
 
-	private Map createAnnotationMap() {
+	private Map createAnnotationMap(IAnnotationModel model) {
 		Map map= new HashMap();
-		ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 		Iterator e= model.getAnnotationIterator();
 		while (e.hasNext()) {
 			Object annotation= e.next();

@@ -122,6 +122,7 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
+import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.EditorsUI;
@@ -2676,7 +2677,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		
 		setOutlinePageInput(fOutlinePage, input);
 		if (fProjectionModelUpdater != null)
-			fProjectionModelUpdater.inputChanged();
+			fProjectionModelUpdater.initialize();
 		
 		if (isShowingOverrideIndicators())
 			installOverrideIndicator(true);
@@ -2698,7 +2699,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void dispose() {
 		
 		if (fProjectionModelUpdater != null) {
-			fProjectionModelUpdater.dispose();
+			fProjectionModelUpdater.uninstall();
 			fProjectionModelUpdater= null;
 		}
 		
@@ -3107,14 +3108,17 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		super.createPartControl(parent);
 		
 		if (isProjectionEnabled()) {
-			fProjectionSupport= new ProjectionSupport();
+			
+			ProjectionViewer projectionViewer= (ProjectionViewer) getSourceViewer();
+			
+			fProjectionSupport= new ProjectionSupport(projectionViewer, getAnnotationAccess(), getSharedColors());
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.error");
 			fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning");
-			fProjectionSupport.enableProjection(getSourceViewer(), getAnnotationAccess(), getSharedColors());
+			fProjectionSupport.install();
 			
 			fProjectionModelUpdater= new JavaProjectionModelUpdater();
-			fProjectionModelUpdater.install(this);		
-			fProjectionModelUpdater.inputChanged();
+			fProjectionModelUpdater.install(this, projectionViewer);		
+			fProjectionModelUpdater.initialize();
 		}
 		
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
