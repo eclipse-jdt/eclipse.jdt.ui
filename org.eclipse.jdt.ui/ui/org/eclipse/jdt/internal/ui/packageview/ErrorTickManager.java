@@ -34,22 +34,27 @@ public class ErrorTickManager implements IResourceChangeListener {
 				}
 				return false;
 			}
-			
-			if (delta.getKind() == IResourceDelta.REMOVED) {
-				invalidate(r);
-			} else if (delta.getKind() == IResourceDelta.CHANGED && isErrorDelta(delta)) {
-				invalidate(r);
-			} 
+			checkInvalidate(delta, r);
 			return true;
 		}
 	}
+	
+	private void checkInvalidate(IResourceDelta delta, IPath r) {
+		if (delta.getKind() == IResourceDelta.REMOVED) {
+			invalidate(r);
+		} else if (delta.getKind() == IResourceDelta.CHANGED && isErrorDelta(delta)) {
+			invalidate(r);
+		} 
+	}
+
 
 	private boolean isErrorDelta(IResourceDelta delta) {	
 		if ((delta.getFlags() & IResourceDelta.MARKERS) == 0)
 			return false;
 		IMarkerDelta[] markerDeltas= delta.getMarkerDeltas();
 		for (int i= 0; i < markerDeltas.length; i++) {
-			if (markerDeltas[i].isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+			if (markerDeltas[i].isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER) ||
+			markerDeltas[i].isSubtypeOf(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER)) {
 				int kind= markerDeltas[i].getKind();
 				if (kind == IResourceDelta.ADDED || kind == IResourceDelta.REMOVED)
 					return true;
@@ -67,6 +72,7 @@ public class ErrorTickManager implements IResourceChangeListener {
 		public boolean visit(IResourceDelta delta) throws CoreException {
 			IResource res= delta.getResource();
 			if (res instanceof IProject) {
+				checkInvalidate(delta, res.getFullPath());
 				IProject p= (IProject)res;
 				IJavaProject jProject= getJavaProject(p);
 				if (jProject != null) {
@@ -144,19 +150,29 @@ public class ErrorTickManager implements IResourceChangeListener {
 			if (markers == null)
 				return fgEmpty;
 			boolean[] info= new boolean[2];
-			for (int i= 0; i < markers.length; i++) {
-				int priority= markers[i].getAttribute(IMarker.SEVERITY, -1);
-				if (priority == IMarker.SEVERITY_WARNING)
-					info[0]= true;
-				if (priority == IMarker.SEVERITY_ERROR)
-					info[1]= true;
-				if (info[0] && info[1])
-					break;
+			accumulateProblems(markers, info);
+			if (res instanceof IProject) {
+				markers= res.findMarkers(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER, true, IResource.DEPTH_ONE);
+				accumulateProblems(markers, info);
 			}
 			return info;
 		} catch (CoreException e) {
 		}
 		return fgEmpty; 
+	}
+	
+	private void accumulateProblems(IMarker[] markers, boolean[] info) {
+		if (markers == null)
+			return;
+		for (int i= 0; i < markers.length; i++) {
+			if (info[0] && info[1])
+				return;
+			int priority= markers[i].getAttribute(IMarker.SEVERITY, -1);
+			if (priority == IMarker.SEVERITY_WARNING)
+				info[0]= true;
+			if (priority == IMarker.SEVERITY_ERROR)
+				info[1]= true;
+		}
 	}
 	
 	// change propagation
