@@ -445,16 +445,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		foregroundColorButton.setLayoutData(gd);
-
-		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(JavaUIMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
-		gd= new GridData();
-		gd.horizontalAlignment= GridData.BEGINNING;
-		label.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
+        fBoldCheckBox.setText(JavaUIMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
+        gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
