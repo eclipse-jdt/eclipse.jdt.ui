@@ -64,7 +64,7 @@ public class JdtFlags {
 	public static boolean isStatic(IMember member) throws JavaModelException{
 		if (isNestedInterface(member))
 			return true;
-		if (isInterfaceMember(member))
+		if (member.getElementType() != IJavaElement.METHOD && isInterfaceMember(member))
 			return true;
 		return Flags.isStatic(member.getFlags());
 	}
