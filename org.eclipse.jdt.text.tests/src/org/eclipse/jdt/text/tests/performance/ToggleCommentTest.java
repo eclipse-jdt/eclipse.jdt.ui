@@ -21,12 +21,16 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
-
+/**
+ * Measures the time to comment/uncomment a large compilation unit.
+ * 
+ * @since 3.1
+ */
 public class ToggleCommentTest extends TextPerformanceTestCase {
 	
 	private static final Class THIS= ToggleCommentTest.class;
 	
-	private static final String FILE= "org.eclipse.swt/Eclipse SWT Custom Widgets/common/org/eclipse/swt/custom/StyledText.java";
+	private static final String FILE= PerformanceTestSetup.STYLED_TEXT;
 
 	private static final int WARM_UP_RUNS= 3;
 
@@ -51,6 +55,11 @@ public class ToggleCommentTest extends TextPerformanceTestCase {
 		EditorTestHelper.closeAllEditors();
 	}
 
+	/**
+	 * Measures the time to comment/uncomment a large compilation unit.
+	 * 
+	 * @throws PartInitException
+	 */
 	public void testToggleComment2() throws PartInitException {
 		measureToggleComment(getNullPerformanceMeter(), getNullPerformanceMeter(), getWarmUpRuns());
 		PerformanceMeter commentMeter= createPerformanceMeter(getDefaultScenarioId() + "-comment");
