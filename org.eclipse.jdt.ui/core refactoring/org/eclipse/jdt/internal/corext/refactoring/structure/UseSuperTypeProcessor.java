@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -28,9 +29,12 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -54,9 +58,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/** The text change manager */
 	private TextChangeManager fChangeManager= null;
-
-	/** Should type occurrences on instanceof's also be rewritten? */
-	private boolean fInstanceOf= false;
 
 	/** The subtype to replace */
 	private final IType fSubType;
@@ -154,10 +155,22 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(status);
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 3); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.getString("UseSuperTypeProcessor.creating")); //$NON-NLS-1$
 			final TextChangeManager manager= new TextChangeManager();
-			ExtractInterfaceUtil.updateReferences(manager, fSubType, fSuperType, fOwner, true, new SubProgressMonitor(monitor, 1), status);
+			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fOwner, fSubType.getCompilationUnit());
+			final AbstractTypeDeclaration subDeclaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(fSubType, rewrite.getRoot());
+			if (subDeclaration != null) {
+				final ITypeBinding subBinding= subDeclaration.resolveBinding();
+				if (subBinding != null) {
+					final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
+					if (superBinding != null) {
+						solveSuperTypeConstraints(rewrite.getCu(), rewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
+						if (!status.hasFatalError())
+							rewriteTypeOccurrences(manager, rewrite, rewrite.getCu(), rewrite.getRoot(), new HashSet(), status, new SubProgressMonitor(monitor, 1));
+					}
+				}
+			}
 			return manager;
 		} finally {
 			monitor.done();
@@ -219,15 +232,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		return Checks.isAvailable(fSubType) && Checks.isAvailable(fSuperType) && !fSubType.isAnonymous() && !fSubType.isAnnotation() && !fSuperType.isAnonymous() && !fSuperType.isAnnotation() && !fSuperType.isEnum();
 	}
 
-	/**
-	 * Returns whether type occurrences in instanceof's should be rewritten.
-	 * 
-	 * @return <code>true</code> if they are rewritten, <code>false</code> otherwise
-	 */
-	public final boolean isInstanceOf() {
-		return fInstanceOf;
-	}
-
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#loadParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
@@ -262,15 +266,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	}
 
 	/**
-	 * Determines whether type occurrences in instanceof's should be rewritten.
-	 * 
-	 * @param rewrite <code>true</code> to rewrite them, <code>false</code> otherwise
-	 */
-	public final void setInstanceOf(final boolean rewrite) {
-		fInstanceOf= rewrite;
-	}
-
-	/**
 	 * Sets the supertype as replacement..
 	 * 
 	 * @param type The supertype to set
@@ -280,5 +275,4 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 		fSuperType= type;
 	}
-
 }
