@@ -95,7 +95,17 @@ public class NLSRefactoring extends Refactoring {
 	}
 		
 	public static NLSRefactoring create(ICompilationUnit cu, CodeGenerationSettings codeGenerationSettings){
+		if (! isAvailable(cu))
+			return null;
 		return new NLSRefactoring(cu, codeGenerationSettings);
+	}
+	
+	public static boolean isAvailable(ICompilationUnit cu){
+		if (cu == null)
+			return false;
+		if (! cu.exists())
+			return false;	
+		return true;
 	}
 	
 	public void setNlsSubstitutions(NLSSubstitution[] subs){
@@ -207,25 +217,14 @@ public class NLSRefactoring extends Refactoring {
 		}	
 	}
 	
-	/**
+	/*
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		if (! fCu.exists()){
-			String msg= NLSMessages.getFormattedString("NLSrefactoring.does_not_exist", fCu.getElementName());//$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(msg);
-		}
-		
-		if (fCu.isReadOnly()){
-			String msg= NLSMessages.getFormattedString("NLSrefactoring.read_only", fCu.getElementName());//$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(msg);
-		}
-		
 		if (NLSHolder.create(fCu).getSubstitutions().length == 0)	{
 			String message= NLSMessages.getFormattedString("NLSRefactoring.no_strings", fCu.getElementName());//$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
-		
 		return new RefactoringStatus();
 	}
 	
