@@ -46,17 +46,15 @@ public class ScopeAnalyzerTest extends CoreTests {
 	}
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return setUpTest(new TestSuite(THIS));
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 
 	public static Test suite() {
-		if (true) {
-			return allTests(); 
-		} else {
-			TestSuite suite= new TestSuite();
-			suite.addTest(new ScopeAnalyzerTest("testVariableDeclarations6"));
-			return new ProjectTestSetup(suite);
-		}
+		return allTests(); 
 	}
 	
 	protected void setUp() throws Exception {
@@ -438,6 +436,46 @@ public class ScopeAnalyzerTest extends CoreTests {
 		}		
 		
 	}
+	
+	public void testSwitchOnEnum() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public enum E {\n");
+		buf.append("    A, B, C;\n");
+		buf.append("    public static final int X=1;\n");
+		buf.append("}\n");		
+		buf.append("class A {\n");
+		buf.append("    public void goo(E e) {\n");
+		buf.append("        switch (e) {\n");
+		buf.append("            case A:\n;");
+		buf.append("                break;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");		
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+		assertNoProblems(astRoot);
+		{
+			String str= "A:";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			
+			assertVariables(res, new String[] { "A", "B", "C", "e"});
+		}
+		{
+			String str= "break;";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.VARIABLES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			
+			assertVariables(res, new String[] {"e"});
+		}
+	}	
 
 
 
@@ -621,7 +659,41 @@ public class ScopeAnalyzerTest extends CoreTests {
 			
 			assertVariables(res, new String[] { "F", "EE1", "EE2", "G1", "G", "E"});
 		}
-	}		
+	}
+	
+	public void testClassInstanceCreation() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    public Object foo(G g) {\n");
+		buf.append("        return g.new G1();\n");
+		buf.append("    }\n");	
+		buf.append("}\n");		
+		buf.append("class G extends H {\n");
+		buf.append("    public class G1 {\n");
+		buf.append("    }\n");
+		buf.append("    public class G2 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class H {\n");
+		buf.append("    public class H1 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");		
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+		assertNoProblems(astRoot);
+		{
+			String str= "G1()";
+			int offset= buf.toString().indexOf(str);
+	
+			int flags= ScopeAnalyzer.TYPES;
+			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
+			
+			assertVariables(res, new String[] { "G1", "G2", "H1", "E", "G", "H"});
+		}
+	}	
 	
 		
 	

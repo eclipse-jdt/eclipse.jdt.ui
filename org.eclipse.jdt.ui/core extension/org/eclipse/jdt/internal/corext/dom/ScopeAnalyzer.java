@@ -14,7 +14,35 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CatchClause;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -82,7 +110,8 @@ public class ScopeAnalyzer {
 						if (i > 0) {
 							buf.append(',');
 						}
-						buf.append(parameters[i].getQualifiedName());
+						ITypeBinding paramType= parameters[i].getErasure();
+						buf.append(paramType.getQualifiedName());
 					}
 					buf.append(')');
 					return buf.toString();
@@ -235,18 +264,6 @@ public class ScopeAnalyzer {
 			}
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
-			}
-
-			if (hasFlag(TYPES, flags)) {
-				ASTNode normalized= ASTNodes.getNormalizedNode(selector);
-				
-				// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 
-				if (normalized.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
-					Expression expr= ((ClassInstanceCreation) normalized.getParent()).getExpression();
-					if (expr != null && expr.resolveTypeBinding() != null) {
-						addTypeDeclarations(expr.resolveTypeBinding(), flags & TYPES);
-					}
-				}
 			}
 			
 			if (hasFlag(CHECK_VISIBILITY, flags)) {
@@ -402,6 +419,39 @@ public class ScopeAnalyzer {
 				visitBackwards(node.parameters());
 				if (node.getAST().apiLevel() >= AST.JLS3) {
 					visitBackwards(node.typeParameters());
+				}
+			}
+			return false;
+		}
+		
+		public boolean visit(ClassInstanceCreation node) {
+			boolean isInside= isInside(node);
+			
+			// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 
+			if (isInside && hasFlag(TYPES, fFlags) && node.getExpression() != null) {
+				ASTNode nameNode= (node.getAST().apiLevel() >= AST.JLS3) ? (ASTNode) node.getType() : node.getName();
+				ITypeBinding binding= node.getExpression().resolveTypeBinding();
+				if (isInside(nameNode) && binding != null) {
+					addTypeDeclarations(binding, fFlags & TYPES);
+				}
+			}
+			return isInside;
+		}
+		
+		public boolean visit(SwitchCase node) {
+			// switch on enum allows to use enum constants without qualifization
+			if (hasFlag(VARIABLES, fFlags) && !node.isDefault() && isInside(node.getExpression())) {
+				SwitchStatement switchStatement= (SwitchStatement) node.getParent();
+				ITypeBinding binding= switchStatement.getExpression().resolveTypeBinding();
+				if (binding != null && binding.isEnum()) {
+					IVariableBinding[] declaredFields= binding.getDeclaredFields();
+					for (int i= 0; i < declaredFields.length; i++) {
+						IVariableBinding curr= declaredFields[i];
+						// TODO: Change when bug 82216 is fixed
+						if (curr.getType().isAssignmentCompatible(binding)) {
+							addResult(curr);
+						}
+					}
 				}
 			}
 			return false;
