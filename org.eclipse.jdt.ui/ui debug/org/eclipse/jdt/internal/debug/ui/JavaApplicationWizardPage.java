@@ -4,24 +4,43 @@
  */
 package org.eclipse.jdt.internal.debug.ui;
 
-import java.util.List;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugUIConstants;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
-import org.eclipse.jdt.internal.ui.launcher.LauncherLabelProvider;
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.jface.wizard.WizardDialog;
-import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.*;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.jface.wizard.WizardDialog;
+import org.eclipse.jface.wizard.WizardPage;
+
+import org.eclipse.ui.help.DialogPageContextComputer;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
+import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
  * The main page in a <code>JavaApplicationWizard</code>. Presents the
@@ -180,7 +199,10 @@ public class JavaApplicationWizardPage extends WizardPage {
 		list.setLayoutData(gd);
 
 		fElementsList.setContentProvider(new ElementsContentProvider());
-		fElementsList.setLabelProvider(new LauncherLabelProvider());
+		int flags= JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_CONTAINER_QUALIFICATION | 
+			JavaElementLabelProvider.SHOW_ROOT | JavaElementLabelProvider.SHOW_POSTIFIX_QUALIFICATION;
+			
+		fElementsList.setLabelProvider(new JavaElementLabelProvider(flags));
 		fElementsList.setSorter(new SimpleSorter());
 
 		final PatternFilter filter= new PatternFilter();

@@ -80,7 +80,6 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 	}
 	
 	protected void okPressed() {
-//		TypeInfo typeRef= (TypeInfo)fTypeList.getSelection().get(0);
 		TypeInfo typeRef= (TypeInfo)fTypeList.getSelection()[0];		IType resolvedType= null;
 		try {
 			resolvedType= typeRef.resolveType(SearchEngine.createWorkspaceScope());
@@ -159,7 +158,6 @@ public class AddExceptionDialog extends StatusDialog {		private static final S
 	}
 	
 	private void validateListSelection() {		StatusInfo status= new StatusInfo();
-//		if (fTypeList.getSelection().size() != 1) {
 		if (fTypeList.getSelection().length != 1) {			status.setError(LauncherMessages.getString("AddExceptionDialog.error.noSelection"));  //$NON-NLS-1$		}		updateStatus(status);
 	}
 		private void initFromDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		if (section == null) {			section= allSetttings.addNewSection(DIALOG_SETTINGS);			section.put(SETTING_CAUGHT_CHECKED, true);			section.put(SETTING_UNCAUGHT_CHECKED, true);		}		fIsCaughtSelected= section.getBoolean(SETTING_CAUGHT_CHECKED);		fIsUncaughtSelected= section.getBoolean(SETTING_UNCAUGHT_CHECKED);	}		private void saveDialogSettings() {		IDialogSettings allSetttings= JavaPlugin.getDefault().getDialogSettings();		IDialogSettings section= allSetttings.getSection(DIALOG_SETTINGS);		// won't be null since we initialize it in the method above.		section.put(SETTING_CAUGHT_CHECKED, fIsCaughtSelected);		section.put(SETTING_UNCAUGHT_CHECKED, fIsUncaughtSelected);	}		public void create() {		super.create();		fFilterText.selectAll();		fFilterText.setFocus();	}
