@@ -316,7 +316,7 @@ public class FindStringsAction implements IWorkbenchWindowActionDelegate {
 		}	
 		
 		protected void createButtonsForButtonBar(Composite parent) {
-			fOpenButton= createButton(parent, OPEN_BUTTON_ID, "&Externalize", true);
+			fOpenButton= createButton(parent, OPEN_BUTTON_ID, "&Externalize...", true);
 			fOpenButton.setEnabled(false);
 			createButton(parent, IDialogConstants.CANCEL_ID, IDialogConstants.CANCEL_LABEL, false);
 		}
