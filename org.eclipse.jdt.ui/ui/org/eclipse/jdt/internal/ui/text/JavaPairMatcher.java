@@ -101,14 +101,16 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 		try {
 
 			char prevChar= fDocument.getChar(Math.max(fOffset - 1, 0));
-			char nextChar= fDocument.getChar(fOffset);
+// modified behavior for http://dev.eclipse.org/bugs/show_bug.cgi?id=16879			
+//			char nextChar= fDocument.getChar(fOffset);
 
 			// search for opening peer character next to the activation point
 			for (i= 0; i < fPairs.length; i= i + 2) {
-				if (nextChar == fPairs[i]) {
-					fStartPos= fOffset;
-					pairIndex1= i;
-				} else if (prevChar == fPairs[i]) {
+//				if (nextChar == fPairs[i]) {
+//					fStartPos= fOffset;
+//					pairIndex1= i;
+//				} else 
+				if (prevChar == fPairs[i]) {
 					fStartPos= fOffset - 1;
 					pairIndex1= i;
 				}
@@ -119,10 +121,11 @@ public class JavaPairMatcher implements ICharacterPairMatcher {
 				if (prevChar == fPairs[i]) {
 					fEndPos= fOffset - 1;
 					pairIndex2= i;
-				} else if (nextChar == fPairs[i]) {
-					fEndPos= fOffset;
-					pairIndex2= i;
-				}
+				} 
+//				else if (nextChar == fPairs[i]) {
+//					fEndPos= fOffset;
+//					pairIndex2= i;
+//				}
 			}
 
 			if (fEndPos > -1) {
