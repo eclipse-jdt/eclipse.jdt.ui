@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,7 +22,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.FileDialog;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -32,6 +30,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -45,8 +44,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IUIConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -279,7 +276,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			
 	private CPListElement[] chooseClassContainers() {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 			
 		acceptedClasses= new Class[] { IProject.class, IFolder.class };
 
@@ -310,7 +307,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement[] chooseJarFiles() {
 		Class[] acceptedClasses= new Class[] { IFile.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 		ViewerFilter filter= new ArchiveFileFilter(getUsedJARFiles());
 		
 		ILabelProvider lp= new WorkbenchLabelProvider();

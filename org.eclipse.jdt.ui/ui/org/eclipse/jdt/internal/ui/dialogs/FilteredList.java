@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  * The elements are sorted alphabetically.
  * Optionally, the elements can be filtered and duplicate entries can
  * be hidden (folding).
+ * @deprecated Use org.eclipse.ui.dialogs.FilteredList
  */
 public class FilteredList extends Composite {
 

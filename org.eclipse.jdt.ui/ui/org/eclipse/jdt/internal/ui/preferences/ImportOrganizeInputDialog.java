@@ -18,6 +18,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaConventions;
@@ -28,7 +30,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;

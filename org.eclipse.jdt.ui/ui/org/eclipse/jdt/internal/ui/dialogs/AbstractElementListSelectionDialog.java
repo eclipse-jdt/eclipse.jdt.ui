@@ -30,6 +30,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 
 /**
  * An abstract class to select elements out of a list of elements.
+ * @deprecated Use org.eclipse.ui.dialogs.AbstractElementListSelectionDialog
  */
 public abstract class AbstractElementListSelectionDialog extends SelectionStatusDialog {
 	

@@ -26,6 +26,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.LabelProvider;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -57,7 +59,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;

@@ -20,6 +20,8 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ui.dialogs.TwoPaneElementSelector;
+
 /**
  * A dialog to select a type from a list of types. The dialog allows
  * multiple selections.

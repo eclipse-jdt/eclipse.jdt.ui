@@ -21,6 +21,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 

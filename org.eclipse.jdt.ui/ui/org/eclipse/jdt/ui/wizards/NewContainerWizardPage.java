@@ -21,6 +21,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -28,15 +30,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.*;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -333,7 +332,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
 		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
 			public boolean isSelectedValid(Object element) {
 				try {
 					if (element instanceof IJavaProject) {

@@ -21,6 +21,8 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 
+import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
+
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;

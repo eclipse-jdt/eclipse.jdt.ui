@@ -7,8 +7,6 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.zip.ZipFile;
 
@@ -22,9 +20,10 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
@@ -35,21 +34,18 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -62,8 +58,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 
 /**
  * UI to set the source attachment archive and root.
@@ -524,7 +518,7 @@ public class SourceAttachmentBlock {
 	 */	
 	private IPath chooseInternalJarFile(String initSelection) {
 		Class[] acceptedClasses= new Class[] { IFile.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 	
 		ViewerFilter filter= new ArchiveFileFilter(null);
 

@@ -43,6 +43,8 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
@@ -58,8 +60,6 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
@@ -602,7 +602,7 @@ public class BuildPathsBlock {
 		
 	private IContainer chooseContainer() {
 		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
+		ISelectionStatusValidator validator= new TypedElementSelectionValidator(acceptedClasses, false);
 		IProject[] allProjects= fWorkspaceRoot.getProjects();
 		ArrayList rejectedElements= new ArrayList(allProjects.length);
 		IProject currProject= fCurrJProject.getProject();

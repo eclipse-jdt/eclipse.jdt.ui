@@ -12,6 +12,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 

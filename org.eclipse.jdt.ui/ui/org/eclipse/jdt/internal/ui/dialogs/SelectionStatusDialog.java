@@ -24,6 +24,7 @@ import org.eclipse.ui.dialogs.SelectionDialog;
  * The status message must be passed over as StatusInfo object and can be
  * an error, warning or ok. The OK button is enabled or disabled depending
  * on the status.
+ * @deprecated Use org.eclipse.ui.dialogs.SelectionStatusDialog
  */ 
 public abstract class SelectionStatusDialog extends SelectionDialog {
 	

@@ -16,6 +16,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -27,6 +29,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -34,8 +37,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -47,8 +48,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
@@ -323,7 +322,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			
 	private CPListElement[] chooseSourceContainers() {	
 		Class[] acceptedClasses= new Class[] { IFolder.class };
-		ISelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
+		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, true);
 			
 		acceptedClasses= new Class[] { IFolder.class };
 		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, getExistingContainers());	

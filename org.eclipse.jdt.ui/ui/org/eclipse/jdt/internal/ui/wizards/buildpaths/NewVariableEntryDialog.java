@@ -27,10 +27,11 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
 
+import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
+
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 public class NewVariableEntryDialog extends Dialog {

@@ -9,17 +9,17 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import java.util.Set;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
+import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IBufferFactory;
@@ -33,11 +33,8 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
-import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
@@ -342,14 +339,15 @@ public final class JavaUI {
 	 * @return a new selection dialog
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) {
-		AbstractElementListSelectionDialog dialog= null;
 		if (multipleSelection) {
-			dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style);
+			MultiMainTypeSelectionDialog dialog= new MultiMainTypeSelectionDialog(parent, context, scope, style);
+			dialog.setFilter(filter);
+			return dialog;
 		} else {
-			dialog= new MainTypeSelectionDialog(parent, context, scope, style);
+			MainTypeSelectionDialog dialog= new MainTypeSelectionDialog(parent, context, scope, style);
+			dialog.setFilter(filter);
+			return dialog;
 		}		
-		dialog.setFilter(filter);
-		return dialog;
 	}
 
 	/**
