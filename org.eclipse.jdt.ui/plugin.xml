@@ -594,7 +594,7 @@
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="occurrenceIndicationColor"
             colorPreferenceValue="255,248,147"
-            presentationLayer="3"
+            presentationLayer="4"
             showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
             showInNextPrevDropdownToolbarAction="true"
             isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
