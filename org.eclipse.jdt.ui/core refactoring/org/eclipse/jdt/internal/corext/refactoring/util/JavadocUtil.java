@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -81,8 +83,10 @@ public class JavadocUtil {
 	 * @param methodDeclaration
 	 * @param astRewrite
 	 * @param javaProject
+	 * @param groupDescription
 	 */
-	public static void addParamJavadoc(String parameterName, MethodDeclaration methodDeclaration, ASTRewrite astRewrite, IJavaProject javaProject) {
+	public static void addParamJavadoc(String parameterName, MethodDeclaration methodDeclaration,
+			ASTRewrite astRewrite, IJavaProject javaProject, TextEditGroup groupDescription) {
 		if (! shouldAddParamJavadoc(methodDeclaration))
 			return;
 		
@@ -93,7 +97,7 @@ public class JavadocUtil {
 			leadingNames.add(curr.getName().getIdentifier());
 		}
 		TagElement parameterTag= createParamTag(parameterName, astRewrite.getAST(), javaProject);
-		JavadocTagsSubProcessor.insertTag(tagsRewrite, parameterTag, leadingNames);
+		JavadocTagsSubProcessor.insertTag(tagsRewrite, parameterTag, leadingNames, groupDescription);
 	}
 
 }

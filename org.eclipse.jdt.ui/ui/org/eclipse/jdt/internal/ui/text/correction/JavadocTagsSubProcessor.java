@@ -17,6 +17,7 @@ import java.util.Set;
 
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -320,6 +321,10 @@ public class JavadocTagsSubProcessor {
 	}
 	
 	public static void insertTag(ListRewrite rewriter, TagElement newElement, Set sameKindLeadingNames) {
+		insertTag(rewriter, newElement, sameKindLeadingNames, null);
+	}
+	
+	public static void insertTag(ListRewrite rewriter, TagElement newElement, Set sameKindLeadingNames, TextEditGroup groupDescription) {
 		List tags= rewriter.getRewrittenList();
 		
 		String insertedTagName= newElement.getTagName();
@@ -341,9 +346,9 @@ public class JavadocTagsSubProcessor {
 			}
 		}
 		if (after != null) {
-			rewriter.insertAfter(newElement, after, null);
+			rewriter.insertAfter(newElement, after, groupDescription);
 		} else {
-			rewriter.insertFirst(newElement, null);
+			rewriter.insertFirst(newElement, groupDescription);
 		}
 	}
 		

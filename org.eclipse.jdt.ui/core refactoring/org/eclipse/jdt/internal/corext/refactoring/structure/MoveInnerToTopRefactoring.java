@@ -142,6 +142,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		fImportManager= new ImportRewriteManager(codeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fMarkInstanceFieldAsFinal= true; //default
+		//TODO:
+		//- fix bug 65137
+		//- move initialization to checkInitialConditions to ensure that exceptions are handled properly
 		fDeclaringCuNode= new RefactoringASTParser(AST.JLS2).parse(getDeclaringCu(), true);
 		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(type);
 		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
@@ -719,7 +722,8 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		param.setName(paramName);
 		declaration.parameters().add(0, param);
 		rewrite.markAsInserted(param);
-		JavadocUtil.addParamJavadoc(newParamName, declaration, rewrite, fType.getJavaProject());
+		
+		JavadocUtil.addParamJavadoc(newParamName, declaration, rewrite, fType.getJavaProject(), null);
 	}
 
 	private void createConstructor(TypeDeclaration declaration, OldASTRewrite rewrite) throws CoreException {

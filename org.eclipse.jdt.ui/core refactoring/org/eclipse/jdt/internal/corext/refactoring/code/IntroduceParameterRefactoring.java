@@ -20,6 +20,8 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -403,7 +405,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		//TODO (47547): for constructors, must update implicit super(..) calls in some subclasses' constructors 
 		replaceSelectedExpression();		
 		addParameter();
-		JavadocUtil.addParamJavadoc(fParameterName, fMethodDeclaration, fSource.getASTRewrite(), fSource.getCu().getJavaProject());
 	}
 	
 	private void replaceSelectedExpression() {
@@ -422,7 +423,11 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		param.setType((Type) astRewrite.createStringPlaceholder(type, ASTNode.SIMPLE_TYPE));
 		ListRewrite parameters= astRewrite.getListRewrite(fMethodDeclaration, MethodDeclaration.PARAMETERS_PROPERTY);
 		String description= RefactoringCoreMessages.getString("IntroduceParameterRefactoring.add_parameter"); //$NON-NLS-1$
-		parameters.insertLast(param, fSource.createGroupDescription(description));
+		TextEditGroup groupDescription= fSource.createGroupDescription(description);
+		parameters.insertLast(param, groupDescription);
+		
+		JavadocUtil.addParamJavadoc(fParameterName, fMethodDeclaration, fSource.getASTRewrite(),
+				fSource.getCu().getJavaProject(), groupDescription);
 	}
 
 	private RefactoringStatus changeReferences(SubProgressMonitor pm) throws CoreException {
@@ -464,7 +469,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			} else {
 				try {
 					String expression= fSource.getCu().getBuffer().getText(fExpression.getStartPosition(), fExpression.getLength());
-					argument= (Expression) astRewrite.createStringPlaceholder(expression, fExpression.getNodeType());
+					argument= (Expression) astRewrite.createStringPlaceholder(expression, ASTNode.SIMPLE_NAME);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 					argument= (Expression) ASTNode.copySubtree(fCURewrite.getRoot().getAST(), fExpression);
