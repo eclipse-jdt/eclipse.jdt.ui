@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * This class contains some utility methods for J Search.
  */
-public class SearchUtil extends JavaModelUtil {
+public class SearchUtil {
 
 	// LRU working sets
 	public static int LRU_WORKINGSET_LIST_SIZE= 3;
@@ -158,9 +158,9 @@ public class SearchUtil extends JavaModelUtil {
 	 */		
 	public static IMember findInCompilationUnit(ICompilationUnit cu, IMember member) throws JavaModelException {
 		if (member.getElementType() == IJavaElement.TYPE) {
-			return findTypeInCompilationUnit(cu, getTypeQualifiedName((IType)member));
+			return JavaModelUtil.findTypeInCompilationUnit(cu, JavaModelUtil.getTypeQualifiedName((IType)member));
 		} else {
-			IType declaringType= findTypeInCompilationUnit(cu, getTypeQualifiedName(member.getDeclaringType()));
+			IType declaringType= JavaModelUtil.findTypeInCompilationUnit(cu, JavaModelUtil.getTypeQualifiedName(member.getDeclaringType()));
 			if (declaringType != null) {
 				IMember result= null;
 				switch (member.getElementType()) {
@@ -176,7 +176,7 @@ public class SearchUtil extends JavaModelUtil {
 					else
 						isConstructor= declaringType.getElementName().equals(meth.getElementName());
 					// XXX: End patch -----------------------
-					result= findMethod(meth.getElementName(), meth.getParameterTypes(), isConstructor, declaringType);
+					result= JavaModelUtil.findMethod(meth.getElementName(), meth.getParameterTypes(), isConstructor, declaringType);
 					break;
 				case IJavaElement.INITIALIZER:
 					result= declaringType.getInitializer(1);
