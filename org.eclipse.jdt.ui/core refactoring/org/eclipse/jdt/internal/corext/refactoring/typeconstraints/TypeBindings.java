@@ -67,7 +67,7 @@ public final class TypeBindings {
 		} else if (b2.isArray())                       
 			return false;
 		else 
-			return (getSuperTypes(b1).contains(b2));
+			return (getSuperTypes(b1).contains(b2));//TODO could optimize here - we just a yes or no
 	}
 
 	private static boolean isThisType(ITypeBinding binding, String qualifiedName){
