@@ -1426,7 +1426,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 
-	private String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
+	/**
+	 * Uses the New Java file template from the code template page to generate a
+	 * compilation unit with the given type content.
+	 * @param cu The new created compilation unit
+	 * @param typeContent The content of the type, including signature and type
+	 * body.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return String Returns the result of evaluating the new file template
+	 * with the given type content.
+	 * @throws CoreException
+	 */
+	protected String constructCUContent(ICompilationUnit cu, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packStatement= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
 
@@ -1438,7 +1449,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeName(), project, lineDelimiter, 0);
 		context.setCompilationUnitVariables(cu);
 		context.setVariable(CodeTemplateContextType.PACKAGE_STATEMENT, packStatement);
-		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, StubUtility.getTypeComment(cu, getTypeName()));
+		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, getTypeComment(cu));
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, getTypeName());
 		String content= context.evaluate(template).getString();
@@ -1561,13 +1572,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 		
 	/**
-	 * Hook mathod that gets called from <code>createType</code> to retrieve 
-	 * a file comment. This default implementation returns the content of the 
-	 * 'filecomment' template.
-	 * 
-	 * @return the file comment or <code>null</code> if a file comment 
-	 * is not desired
-	 * @deprecated
+	 * @deprecated Instead of file templates, the new type code template
+	 * specifies the stub for a compilation unit.
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU) {
 		return null;
@@ -1616,16 +1622,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	protected String getTemplate(String name, ICompilationUnit parentCU) {
 		return getTemplate(name, parentCU, 0);
 	}
-	
-	private String getCodeTemplate(String name, ICompilationUnit parentCU) {
-		return getTemplate(name, parentCU, 0);
-	
-	}
 		
 	
 	/**
 	 * Returns the string resulting from evaluation the given template in
-	 * the context of the given compilation unit.
+	 * the context of the given compilation unit. This accesses the normal
+	 * template page, not the code templates. To use code templates use
+	 * <code>constructCUContent</code> to construct a compilation unit stub or
+	 * getTypeComment for the comment of the type.
 	 * 
 	 * @param name the template to be evaluated
 	 * @param parentCU the templates evaluation context
