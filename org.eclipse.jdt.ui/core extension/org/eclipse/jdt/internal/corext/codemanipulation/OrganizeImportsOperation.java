@@ -424,7 +424,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (fIgnoreLowerCaseNames && simpleTypeName.length() > 0 && Strings.isLowerCase(simpleTypeName.charAt(0))) {
 				return;
 			}
-			TypeInfo[] infos= AllTypesCache.findTypeRefs(simpleTypeName, fSearchScope);
+			TypeInfo[] infos= AllTypesCache.getTypesForName(simpleTypeName, fSearchScope, null);
 			for (int i= 0; i < infos.length; i++) {
 				TypeInfo curr= infos[i];
 				IType type= curr.resolveType(fSearchScope);

@@ -453,7 +453,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 5); //$NON-NLS-1$
+			pm.beginTask(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.checking_preconditions"), 6); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			if (isSignatureSameAsInitial())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ChangeSignatureRefactoring.unchanged")); //$NON-NLS-1$
@@ -473,7 +473,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 
-			result.merge(collectAndCheckImports());
+			result.merge(collectAndCheckImports(new SubProgressMonitor(pm, 1)));
 
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 
@@ -492,9 +492,11 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	private RefactoringStatus collectAndCheckImports() throws JavaModelException {
+	private RefactoringStatus collectAndCheckImports(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= getNotDeletedInfos().iterator(); iter.hasNext();) {
+		List notDeleted= getNotDeletedInfos();
+		pm.beginTask("", notDeleted.size());
+		for (Iterator iter= notDeleted.iterator(); iter.hasNext();) {
 			ParameterInfo info= (ParameterInfo) iter.next();
 			if (! info.isTypeNameChanged())
 				continue;
@@ -503,8 +505,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				continue;
 			if (tryResolvingType(typeName))
 				continue;
-			result.merge(tryFinidingInTypeCache(typeName, info));
+			result.merge(tryFinidingInTypeCache(typeName, info, new SubProgressMonitor(pm, 1)));
 		}
+		pm.done();
 		return result;
 	}
 
@@ -518,8 +521,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;
 	}
 	
-	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info) throws JavaModelException{
-		List typeRefsFound= findTypeInfos(typeName);
+	private RefactoringStatus tryFinidingInTypeCache(String typeName, ParameterInfo info, IProgressMonitor pm) throws JavaModelException{
+		List typeRefsFound= findTypeInfos(typeName, pm);
 
 		if (typeRefsFound.size() == 0){
 			String[] keys= {info.getNewTypeName()};
@@ -538,10 +541,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 
-	private List findTypeInfos(String typeName) throws JavaModelException {
+	private List findTypeInfos(String typeName, IProgressMonitor pm) throws JavaModelException {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[]{getMethod().getJavaProject()}, true);
 		IPackageFragment currPackage= getMethod().getDeclaringType().getPackageFragment();
-		TypeInfo[] infos= AllTypesCache.findTypeRefs(typeName, scope);
+		TypeInfo[] infos= AllTypesCache.getTypesForName(typeName, scope, pm);
 		List typeRefsFound= new ArrayList();
 		for (int i= 0; i < infos.length; i++) {
 			TypeInfo curr= infos[i];

@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
  */
 public class AllTypesCache {
 	
+
 	private static TypeInfo[] fgTypeCache= null;
 	private static int fgSizeHint= 2000;
 	
@@ -199,17 +200,20 @@ public class AllTypesCache {
 		return fgNumberOfCacheFlushes;
 	}
 
-	public static TypeInfo[] findTypeRefs(String simpleTypeName, IJavaSearchScope searchScope) throws JavaModelException {
+	/**
+	 * Returns all types for a given name in the scope. The elements in the array are sorted by simple type name.
+	 */
+	public static TypeInfo[] getTypesForName(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) throws JavaModelException {
 		Collection result= new ArrayList();
 		Set namesFound= new HashSet();
-		TypeInfo[] allTypes= AllTypesCache.getAllTypes(null); // all types in workspace, sorted by type name
+		TypeInfo[] allTypes= AllTypesCache.getAllTypes(monitor); // all types in workspace, sorted by type name
 		TypeInfo key= new UnresolvableTypeInfo("", simpleTypeName, null, true, null); //$NON-NLS-1$
 		int index= Arrays.binarySearch(allTypes, key, AllTypesCache.getTypeNameComperator());
 		if (index >= 0 && index < allTypes.length) {
 			for (int i= index - 1; i>= 0; i--) {
 				TypeInfo curr= allTypes[i];
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (namesFound.add(curr.getFullyQualifiedName())) {
+					if (namesFound.add(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
 						result.add(curr);
 					}
 				} else {
@@ -220,7 +224,7 @@ public class AllTypesCache {
 			for (int i= index; i < allTypes.length; i++) {
 				TypeInfo curr= allTypes[i];
 				if (simpleTypeName.equals(curr.getTypeName())) {
-					if (namesFound.add(curr.getFullyQualifiedName())) {
+					if (namesFound.add(curr.getFullyQualifiedName()) && curr.isEnclosed(searchScope)) {
 						result.add(curr);
 					}
 				} else {
