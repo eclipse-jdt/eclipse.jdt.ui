@@ -14,27 +14,29 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.model.IBreakpoint;
-import org.eclipse.debug.ui.DebugUITools;
-import org.eclipse.debug.ui.IDebugModelPresentation;
 
-import org.eclipse.search.ui.SearchUI;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.ui.IMarkerHelpRegistry;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
+import org.eclipse.debug.core.model.IBreakpoint;
+import org.eclipse.debug.ui.DebugUITools;
+import org.eclipse.debug.ui.IDebugModelPresentation;
+
+import org.eclipse.search.ui.SearchUI;
+
 import org.eclipse.jdt.core.IJavaModelMarker;
 
 import org.eclipse.jdt.internal.core.Util;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 
 
@@ -84,7 +86,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IProblemAn
 			fType= AnnotationType.UNKNOWN;
 			try {
 				
-				if (marker.isSubtypeOf(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER)) {
+				if (marker.isSubtypeOf(IMarker.PROBLEM)) {
 					int severity= marker.getAttribute(IMarker.SEVERITY, -1);
 					switch (severity) {
 						case IMarker.SEVERITY_ERROR:
