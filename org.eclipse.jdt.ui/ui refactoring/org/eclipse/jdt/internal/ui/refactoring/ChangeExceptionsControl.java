@@ -110,7 +110,6 @@ public class ChangeExceptionsControl extends Composite {
 	private final IJavaProject fProject;
 
 	private TableViewer fTableViewer;
-	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fExceptionInfos;
 
@@ -175,7 +174,7 @@ public class ChangeExceptionsControl extends Composite {
 		gl.marginWidth= 0;
 		buttonComposite.setLayout(gl);
 
-		fAddButton= createAddButton(buttonComposite);	
+		createAddButton(buttonComposite);	
 		fRemoveButton= createRemoveButton(buttonComposite);
 		updateButtonsEnabledState();
 	}
