@@ -19,6 +19,7 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
+import org.eclipse.jface.text.TypedRegion;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
@@ -29,7 +30,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
  * 
  * @since 3.0
  */
-public class JavaHeuristicScanner implements Symbols {
+public final class JavaHeuristicScanner implements Symbols {
 	/** 
 	 * Returned by all methods when the requested position could not be found, or if a 
 	 * {@link BadLocationException} was thrown while scanning.
@@ -62,7 +63,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * Specifies the stop condition, upon which the <code>scanXXX</code> methods will decide whether
 	 * to keep scanning or not. This interface may implemented by clients.
 	 */
-	public interface StopCondition {
+	private static abstract class StopCondition {
 		/**
 		 * Instructs the scanner to return the current position.
 		 * 
@@ -71,13 +72,23 @@ public class JavaHeuristicScanner implements Symbols {
 		 * @param forward the iteration direction 
 		 * @return <code>true</code> if the stop condition is met.
 		 */
-		boolean stop(char ch, int position, boolean forward);
+		public abstract boolean stop(char ch, int position, boolean forward);
+
+		/**
+		 * Asks the condition to return the next position to query. The default
+		 * is to return the next/previous position.
+		 * 
+		 * @return the next position to scan
+		 */
+		public int nextPosition(int position, boolean forward) {
+			return forward ? position + 1 : position - 1;
+		}
 	}
 	
 	/**
 	 * Stops upon a non-whitespace (as defined by {@link Character#isWhitespace(char)}) character. 
 	 */
-	private static class NonWhitespace implements StopCondition {
+	private static class NonWhitespace extends StopCondition {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
@@ -91,19 +102,39 @@ public class JavaHeuristicScanner implements Symbols {
 	 * 
 	 * @see NonWhitespace 
 	 */
-	private class NonWhitespaceDefaultPartition extends NonWhitespace {
+	private final class NonWhitespaceDefaultPartition extends NonWhitespace {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
 		public boolean stop(char ch, int position, boolean forward) {
 			return super.stop(ch, position, true) && isDefaultPartition(position);
 		}
+		
+		public int nextPosition(int position, boolean forward) {
+			ITypedRegion partition= getPartition(position);
+			if (fPartition.equals(partition.getType()))
+				return super.nextPosition(position, forward);
+			
+			if (forward) {
+				int end= partition.getOffset() + partition.getLength();
+				if (position < end)
+					return end;
+				else
+					return super.nextPosition(position, forward);
+			} else {
+				int offset= partition.getOffset();
+				if (position > offset)
+					return offset - 1;
+				else
+					return super.nextPosition(position, forward);
+			}
+		}
 	}
 	
 	/**
 	 * Stops upon a non-java identifier (as defined by {@link Character#isJavaIdentifierPart(char)}) character. 
 	 */
-	private static class NonJavaIdentifierPart implements StopCondition {
+	private static class NonJavaIdentifierPart extends StopCondition {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
@@ -117,7 +148,7 @@ public class JavaHeuristicScanner implements Symbols {
 	 * 
 	 * @see NonJavaIdentifierPart 
 	 */
-	private class NonJavaIdentifierPartDefaultPartition extends NonJavaIdentifierPart {
+	private final class NonJavaIdentifierPartDefaultPartition extends NonJavaIdentifierPart {
 		/*
 		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char)
 		 */
@@ -129,7 +160,7 @@ public class JavaHeuristicScanner implements Symbols {
 	/**
 	 * Stops upon a character in the default partition that matches the given character list. 
 	 */
-	private class CharacterMatch implements StopCondition {
+	private final class CharacterMatch extends StopCondition {
 		private final char[] fChars;
 		 
 		/**
@@ -157,89 +188,6 @@ public class JavaHeuristicScanner implements Symbols {
 		public boolean stop(char ch, int position, boolean forward) {
 			return Arrays.binarySearch(fChars, ch) >= 0 && isDefaultPartition(position);
 		}
-	}
-	
-	/**
-	 * Acts like character match, but skips all scopes introduced by parenthesis, brackets, and 
-	 * braces. 
-	 */
-	protected class SkippingScopeMatch extends CharacterMatch {
-		private char fOpening, fClosing;
-		private int fDepth= 0;
-		
-		/**
-		 * Creates a new instance.
-		 * @param ch the single character to match
-		 */
-		public SkippingScopeMatch(char ch) {
-			super(ch);
-		}
-		
-		/**
-		 * Creates a new instance.
-		 * @param chars the chars to match.
-		 */
-		public SkippingScopeMatch(char[] chars) {
-			super(chars);
-		}
-
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner.StopCondition#stop(char, int)
-		 */
-		public boolean stop(char ch, int position, boolean forward) {
-			
-			if (fDepth == 0 && super.stop(ch, position, true))
-				return true;
-			else if (ch == fOpening)
-				fDepth++;
-			else if (ch == fClosing) {
-				fDepth--;
-				if (fDepth == 0) {
-					fOpening= 0;
-					fClosing= 0;
-				}
-			} else if (fDepth == 0) {
-				fDepth= 1;
-				if (forward) {
-					
-					switch (ch) {
-						case LBRACE:
-							fOpening= LBRACE;
-							fClosing= RBRACE;
-							break;
-						case LPAREN:
-							fOpening= LPAREN;
-							fClosing= RPAREN;
-							break;
-						case LBRACKET:
-							fOpening= LBRACKET;
-							fClosing= RBRACKET;
-							break;
-					}
-					
-				} else {
-					switch (ch) {
-						case RBRACE:
-							fOpening= RBRACE;
-							fClosing= LBRACE;
-							break;
-						case RPAREN:
-							fOpening= RPAREN;
-							fClosing= LPAREN;
-							break;
-						case RBRACKET:
-							fOpening= RBRACKET;
-							fClosing= LBRACKET;
-							break;
-					}
-					
-				}
-			}
-			
-			return false;
-			
-		}
-
 	}
 	
 	/** The document being scanned. */
@@ -665,7 +613,7 @@ public class JavaHeuristicScanner implements Symbols {
 				if (condition.stop(fChar, fPos, true))
 					return fPos;
 
-				fPos++;
+				fPos= condition.nextPosition(fPos, true);
 			}
 		} catch (BadLocationException e) {
 		}
@@ -725,7 +673,7 @@ public class JavaHeuristicScanner implements Symbols {
 				if (condition.stop(fChar, fPos, false))
 					return fPos;
 
-				fPos--;
+				fPos= condition.nextPosition(fPos, false);
 			}
 		} catch (BadLocationException e) {
 		}
@@ -771,13 +719,29 @@ public class JavaHeuristicScanner implements Symbols {
 		Assert.isTrue(position <= fDocument.getLength());
 		
 		try {
-			ITypedRegion region= TextUtilities.getPartition(fDocument, fPartitioning, position, false);
-			return region.getType().equals(fPartition);
-			
+			return fPartition.equals(TextUtilities.getContentType(fDocument, fPartitioning, position, false));
 		} catch (BadLocationException e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Returns the partition at <code>position</code>.
+	 * 
+	 * @param position the position to get the partition for
+	 * @return the partition at <code>position</code> or a dummy zero-length
+	 *         partition if accessing the document fails
+	 */
+	private ITypedRegion getPartition(int position) {
+		Assert.isTrue(position >= 0);
+		Assert.isTrue(position <= fDocument.getLength());
+		
+		try {
+			return TextUtilities.getPartition(fDocument, fPartitioning, position, false);
+		} catch (BadLocationException e) {
+			return new TypedRegion(position, 0, "__no_partition_at_all"); //$NON-NLS-1$
 		}
 		
-		return false;
 	}
 
 	/**
