@@ -270,7 +270,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 	}
 	
 	private static IClasspathEntry getJREVariableEntry() {
-		return JavaCore.newLibraryEntry(new Path("JRE_LIB"), new Path("JRE_SRC"), new Path("JRE_SRCROOT"));
+		return JavaCore.newVariableEntry(new Path("JRE_LIB"), new Path("JRE_SRC"), new Path("JRE_SRCROOT"));
 	}	
 
 	/*
