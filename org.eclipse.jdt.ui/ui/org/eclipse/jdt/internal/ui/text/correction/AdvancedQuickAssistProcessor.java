@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -1682,40 +1681,32 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 	private static boolean getInverseLocalVariableProposals(IInvocationContext context,
 			ASTNode covering,
 			Collection resultingCollections) {
-		// cursor should be placed on variable name
-		if (covering.getLocationInParent() != VariableDeclarationFragment.NAME_PROPERTY) {
-			return false;
-		}
-		// check that variable has initialization at place of definition
-		VariableDeclarationFragment vdf= (VariableDeclarationFragment) covering.getParent();
-		if (vdf.getInitializer() == null) {
-			return false;
-		}
 		final AST ast= covering.getAST();
+		// cursor should be placed on variable name
+		if (!(covering instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName coveringName= (SimpleName) covering;
+		// prepare bindings
+		final IBinding variableBinding= coveringName.resolveBinding();
+		if (!(variableBinding instanceof IVariableBinding) || ((IVariableBinding) variableBinding).isField()) {
+			return false;
+		}
+		
+		final ITypeBinding variableTypeBinding= coveringName.resolveTypeBinding();
 		// we operate only on boolean variable
-		final IVariableBinding variableBinding= (IVariableBinding) vdf.getName().resolveBinding();
-		final ITypeBinding variableTypeBinding= vdf.getName().resolveTypeBinding();
 		if (variableTypeBinding != ast.resolveWellKnownType("boolean")) { //$NON-NLS-1$
 			return false;
-		}
-		// find linked nodes
-		final MethodDeclaration method= ASTResolving.findParentMethodDeclaration(covering);
-		SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(method, variableBinding);
-		// check that there are no assignments for this variable
-		for (int i= 0; i < linkedNodes.length; i++) {
-			SimpleName name= linkedNodes[i];
-			if (name.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY) {
-				return false;
-			}
 		}
 		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
 		}
+		// find linked nodes
+		final MethodDeclaration method= ASTResolving.findParentMethodDeclaration(covering);
+		SimpleName[] linkedNodes= LinkedNodeFinder.findByBinding(method, variableBinding);
 		//
 		final ASTRewrite rewrite= ASTRewrite.create(ast);
-		// replace initializer for variable
-		rewrite.replace(vdf.getInitializer(), getInversedBooleanExpression(ast, rewrite, vdf.getInitializer()), null);
 		// create proposal
 		String label= CorrectionMessages.getString("AdvancedQuickAssistProcessor.inverseBooleanVariable"); //$NON-NLS-1$
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
@@ -1725,28 +1716,44 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite,
 			1,
 			image);
-		// add positions for variable declaration
-		ITrackedNodePosition nameTrack= rewrite.track(vdf.getName());
-		proposal.addLinkedPosition(nameTrack, true, KEY_NAME);
-		proposal.setEndPosition(nameTrack);
+		// prepare new variable identifier
+		String oldIdentifier= coveringName.getIdentifier();
+		String newIdentifier= CorrectionMessages.getFormattedString("AdvancedQuickAssistProcessor.negatedVariableName", Character.toUpperCase(oldIdentifier.charAt(0)) + oldIdentifier.substring(1)); //$NON-NLS-1$
 		// iterate over linked nodes and replace variable references with negated reference
 		for (int i= 0; i < linkedNodes.length; i++) {
 			SimpleName name= linkedNodes[i];
+			// prepare new name with new identifier
+			SimpleName newName= ast.newSimpleName(newIdentifier);
+			proposal.addLinkedPosition(rewrite.track(newName), name == coveringName, KEY_NAME);
+			proposal.addLinkedPositionProposal(KEY_NAME, newIdentifier, null);
+			proposal.addLinkedPositionProposal(KEY_NAME, oldIdentifier, null);
+			//
 			StructuralPropertyDescriptor location= name.getLocationInParent();
-			if (location == VariableDeclarationFragment.NAME_PROPERTY) {
-				continue;
-			}
-			if ((name.getParent() instanceof PrefixExpression)
+			if (location == Assignment.LEFT_HAND_SIDE_PROPERTY) {
+				// replace assigned expression
+				Assignment assignment= (Assignment) name.getParent();
+				Expression expression= assignment.getRightHandSide();
+				rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+				// set new name
+				rewrite.replace(name, newName, null);
+			} else if (location == VariableDeclarationFragment.NAME_PROPERTY) {
+				// replace initializer for variable
+				VariableDeclarationFragment vdf= (VariableDeclarationFragment) name.getParent();
+				Expression expression= vdf.getInitializer();
+				if (expression != null) {
+					rewrite.replace(expression, getInversedBooleanExpression(ast, rewrite, expression), null);
+				}
+				// set new name
+				rewrite.replace(name, newName, null);
+			} else if ((name.getParent() instanceof PrefixExpression)
 				&& (((PrefixExpression) name.getParent()).getOperator() == PrefixExpression.Operator.NOT)) {
-				rewrite.replace(name.getParent(), name, null);
-				proposal.addLinkedPosition(rewrite.track(name), false, KEY_NAME);
+				rewrite.replace(name.getParent(), newName, null);
+				proposal.addLinkedPosition(rewrite.track(newName), false, KEY_NAME);
 			} else {
 				PrefixExpression expression= ast.newPrefixExpression();
 				expression.setOperator(PrefixExpression.Operator.NOT);
-				Expression nameCopy= (Expression) rewrite.createMoveTarget(name);
-				expression.setOperand(nameCopy);
+				expression.setOperand(newName);
 				rewrite.replace(name, expression, null);
-				proposal.addLinkedPosition(rewrite.track(nameCopy), false, KEY_NAME);
 			}
 		}
 		// add correction proposal
