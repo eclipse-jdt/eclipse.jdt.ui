@@ -365,6 +365,7 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 				isSubtype= marker.isSubtypeOf(annotationPreference.getMarkerType());
 				severity= (Integer)marker.getAttribute(IMarker.SEVERITY);
 			} catch (CoreException ex) {
+				JavaPlugin.log(ex);
 				return null;
 			}
 			if (isSubtype && (severity == null || severity.intValue() == annotationPreference.getSeverity()))
