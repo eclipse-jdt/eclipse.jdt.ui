@@ -80,7 +80,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			SWTEventHelper.pressKeyChar(display, FIND);
 			
 			// Switch to Replace field			
-			SWTEventHelper.pressKeyChar(display, SWT.TAB);
+			SWTEventHelper.pressKeyCode(display, SWT.TAB);
 
 			// Fill Replace field			
 			SWTEventHelper.pressKeyChar(display, REPLACE);
@@ -95,7 +95,7 @@ public abstract class AbstractJavaReplaceAllTest extends TextPerformanceTestCase
 			performanceMeter.stop();
 			
 			// Close Find/Replace dialog
-			SWTEventHelper.pressKeyChar(display, SWT.ESC);
+			SWTEventHelper.pressKeyCode(display, SWT.ESC);
 			
 			DisplayHelper helper= new DisplayHelper() {
 				public boolean condition() {
