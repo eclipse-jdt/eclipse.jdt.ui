@@ -380,10 +380,8 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 		assertNumberOf("proposals", proposals.size(), 1);
 		assertCorrectLabels(proposals);
-		
-		CorrectPackageDeclarationProposal curr= (CorrectPackageDeclarationProposal) proposals.get(0);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) curr;
+			
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();				
 		buf= new StringBuffer();
 		buf.append("package test1;\n");

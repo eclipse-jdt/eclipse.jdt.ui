@@ -1417,7 +1417,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			ASTNode placeHolder= rewrite.createCopy((ASTNode) arg1.arguments().get(0));
 			
-			rewrite.markAsReplaced((ASTNode) invocation.getExpression(), placeHolder);
+			rewrite.markAsReplaced(invocation.getExpression(), placeHolder);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1538,7 +1538,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ExpressionStatement statement= (ExpressionStatement) statements.get(1);
 			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 
-			Name qualifier= (Name) invocation.getQualifier();
+			Name qualifier= invocation.getQualifier();
 			rewrite.markAsRemoved(qualifier);
 			
 			Name placeHolder= (Name) rewrite.createCopy(qualifier);
@@ -1559,9 +1559,9 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			MethodInvocation innerArg= (MethodInvocation) arg1.arguments().get(0);
 			
-			ASTNode placeHolder= rewrite.createCopy((ASTNode) innerArg.getExpression());
+			ASTNode placeHolder= rewrite.createCopy(innerArg.getExpression());
 			
-			rewrite.markAsReplaced((ASTNode) invocation.getQualifier(), placeHolder);
+			rewrite.markAsReplaced(invocation.getQualifier(), placeHolder);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);

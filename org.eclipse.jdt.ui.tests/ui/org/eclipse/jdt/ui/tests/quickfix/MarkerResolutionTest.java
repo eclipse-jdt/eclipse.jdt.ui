@@ -92,7 +92,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 
 
 	private IMarker createMarker(ICompilationUnit cu, int line, int offset, int len) throws CoreException, BadLocationException {
-		IFile file= (IFile) ((ICompilationUnit) cu).getResource();
+		IFile file= (IFile) cu.getResource();
 		IMarker marker= file.createMarker("org.eclipse.jdt.ui.tests.testmarker");
 		marker.setAttribute(IMarker.LOCATION, cu.getElementName());
 		marker.setAttribute(IMarker.MESSAGE, "Test marker");

@@ -656,7 +656,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			Name name= ast.newName(new String[] { "java", "util" });
 			rewrite.markAsReplaced(imp.getName(), name);
 			
-			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
+			ImportDeclaration modifedNode= ast.newImportDeclaration();
 			modifedNode.setOnDemand(true);
 			
 			rewrite.markAsModified(imp, modifedNode);
@@ -664,7 +664,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		{ // change to single import
 			ImportDeclaration imp= (ImportDeclaration) imports.get(2);
 			
-			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
+			ImportDeclaration modifedNode= ast.newImportDeclaration();
 			modifedNode.setOnDemand(false);
 			
 			rewrite.markAsModified(imp, modifedNode);
