@@ -92,13 +92,6 @@ public class ASTResolving {
 			InfixExpression infix= (InfixExpression) parent;
 			InfixExpression.Operator op= infix.getOperator();
 			if (node.equals(infix.getLeftOperand())) {
-				// xx == expression
-				if (op == InfixExpression.Operator.INSTANCEOF) {
-					ASTNode left= infix.getRightOperand();
-					if (left instanceof SimpleName) {
-						return ASTNodes.getTypeBinding(((SimpleName) left));
-					}
-				}
 				return infix.getRightOperand().resolveTypeBinding();
 			}
 			// expression == xx
