@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.nls;
 
+import org.eclipse.jface.text.Document;
+
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
@@ -22,7 +24,7 @@ public class SimpleLineReaderTest extends TestCase {
 	}
 	
     public void testSimpleLineReader() throws Exception {
-        SimpleLineReader reader = new SimpleLineReader("aha\noho\r\n\r\n\n");         
+        SimpleLineReader reader = new SimpleLineReader(new Document("aha\noho\r\n\r\n\n"));         
         assertEquals("aha\n", reader.readLine()); 
         assertEquals("oho\r\n", reader.readLine()); 
         assertEquals("\r\n", reader.readLine()); 
@@ -31,41 +33,49 @@ public class SimpleLineReaderTest extends TestCase {
     }
     
     public void testSimpleLineReaderWithEmptyString() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader(""); 
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("")); 
         assertEquals(null, simpleLineReader.readLine());
     }    
     
     public void testSimpleLineReaderWithEscapedLF() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader("a\nb\\nc\n");
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\nb\\nc\n"));
         assertEquals("a\n", simpleLineReader.readLine()); 
         assertEquals("b\\nc\n", simpleLineReader.readLine());
         assertEquals(null, simpleLineReader.readLine());
     }
     
     public void testSimpleLineReaderWithEscapedCR() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader("a\nb\\rc\r");
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\nb\\rc\r"));
         assertEquals("a\n", simpleLineReader.readLine()); 
         assertEquals("b\\rc\r", simpleLineReader.readLine());
         assertEquals(null, simpleLineReader.readLine());
     }
     
     public void testSimpleLineReaderWithCR() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader("a\rb\r");
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\rb\r"));
         assertEquals("a\r", simpleLineReader.readLine()); 
         assertEquals("b\r", simpleLineReader.readLine());
         assertEquals(null, simpleLineReader.readLine());
     }
 
     public void testSimpleLineReaderWithoutNL() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader("="); 
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("=")); 
         assertEquals("=", simpleLineReader.readLine()); 
         assertEquals(null, simpleLineReader.readLine());
     }
     
     public void testSimpleLineReaderWithMissingNL() {
-        SimpleLineReader simpleLineReader = new SimpleLineReader("a\rb");
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("a\rb"));
         assertEquals("a\r", simpleLineReader.readLine()); 
         assertEquals("b", simpleLineReader.readLine());
         assertEquals(null, simpleLineReader.readLine());
     }
+    
+    public void testSimpleLineReaderWithLineContinue1() {
+        SimpleLineReader simpleLineReader = new SimpleLineReader(new Document("aaa\\\nbbb\nccc\n"));
+        assertEquals("aaa\\\nbbb\n", simpleLineReader.readLine()); 
+        assertEquals("ccc\n", simpleLineReader.readLine());
+        assertEquals(null, simpleLineReader.readLine());
+    }
+    
 }
