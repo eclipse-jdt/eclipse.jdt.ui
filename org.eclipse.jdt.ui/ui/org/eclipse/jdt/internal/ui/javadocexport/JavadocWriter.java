@@ -7,7 +7,9 @@ package org.eclipse.jdt.internal.ui.javadocexport;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -18,18 +20,26 @@ import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.Serializer;
 import org.apache.xml.serialize.SerializerFactory;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.jface.util.Assert;
 
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavadocWriter {
 	protected OutputStream fOutputStream;
-
+	private IJavaProject fProject;
 	/**
 	 * Create a JavadocWriter on the given output stream.
 	 * It is the client's responsibility to close the output stream.
@@ -48,7 +58,7 @@ public class JavadocWriter {
 	 * @exception IOException	if writing to the underlying stream fails
 	 */
 	
-	public void writeXML(JavadocOptionsManager store) throws IOException {
+	public void writeXML(JavadocOptionsManager store) throws IOException, CoreException {
 		
 			DocumentBuilder docBuilder= null;
 			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
@@ -65,9 +75,9 @@ public class JavadocWriter {
 			document.appendChild(project);
 			
 			try {
-				IJavaProject proj= store.getJavaProject();
-				if(proj!=null) {
-					project.setAttribute("name", proj.getCorrespondingResource().getName()); //$NON-NLS-1$
+				fProject= store.getJavaProject();
+				if(fProject!=null) {
+					project.setAttribute("name", fProject.getCorrespondingResource().getName()); //$NON-NLS-1$
 				} else project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(DOMException e) {
 				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -86,7 +96,7 @@ public class JavadocWriter {
 			if (!store.fromStandard())
 				xmlWriteDoclet(store, document, xmlJavadocDesc);
 			else
-				xmlWriteJavadocStandardParams(store, xmlJavadocDesc);
+				xmlWriteJavadocStandardParams(store, document,xmlJavadocDesc);
 
 			// Write the document to the stream
 			OutputFormat format= new OutputFormat();
@@ -97,9 +107,9 @@ public class JavadocWriter {
 		
 	}
 
-	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Element xmlJavadocDesc) throws DOMException {
+	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Document document ,Element xmlJavadocDesc) throws DOMException, CoreException {
 
-		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination());
+		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination(store.getJavaProject()));
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
 		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$
@@ -110,7 +120,7 @@ public class JavadocWriter {
 		xmlJavadocDesc.setAttribute(store.VERSION, booleanToString(store.getBoolean("version"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.NODEPRECATEDLIST, booleanToString(store.getBoolean("nodeprecatedlist"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.NODEPRECATED, booleanToString(store.getBoolean("nodeprecated"))); //$NON-NLS-1$
-		xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toPackageList(store.getPackagenames()));
+		xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toPackageList(store.getSourceElements()));
 		xmlJavadocDesc.setAttribute(store.SOURCEPATH, store.getSourcepath());
 		xmlJavadocDesc.setAttribute(store.CLASSPATH, store.getClasspath());
 		String str= store.getOverview();
@@ -128,12 +138,24 @@ public class JavadocWriter {
 		str= store.getAdditionalParams();
 		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
+			
+		if (fProject != null) { //it should never equal null
+			String hrefs = store.getLinks(fProject);
+			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";");
+			while (tokenizer.hasMoreElements()) {
+				String href = (String) tokenizer.nextElement();
+				Element links = document.createElement("link"); //$NON-NLS-1$
+				xmlJavadocDesc.appendChild(links);
+				links.setAttribute(store.HREF, href);
+			}
+		}
+		
 
 	}
 
-	private void xmlWriteDoclet(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException {
+	private void xmlWriteDoclet(JavadocOptionsManager store, Document document, Element xmlJavadocDesc) throws DOMException, CoreException {
 
-		xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toPackageList(store.getPackagenames()));
+		xmlJavadocDesc.setAttribute(store.PACKAGENAMES, toPackageList(store.getSourceElements()));
 		xmlJavadocDesc.setAttribute(store.SOURCEPATH, store.getSourcepath());
 		xmlJavadocDesc.setAttribute(store.CLASSPATH, store.getClasspath());
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
@@ -159,18 +181,19 @@ public class JavadocWriter {
 	 * 
 	 * @exception IOException
 	 */
-	private String toPackageList(List packagenames) {
-		int i;
+	private String toPackageList(IJavaElement[] sourceElements) throws JavaModelException {
 		StringBuffer buf= new StringBuffer();
-		String[] strs= (String[]) packagenames.toArray(new String[packagenames.size()]);
-		for (i = 0; i < strs.length-1; i++) {
-			String pack = strs[i];
-			buf.append(pack);
-			buf.append(","); //$NON-NLS-1$
+		for (int i= 0; i < sourceElements.length; i++) {
+			if (i > 0) {
+				buf.append(","); //$NON-NLS-1$
+			}
+			IJavaElement curr= sourceElements[i];
+			if (curr instanceof IPackageFragment) {
+				buf.append(curr.getElementName());
+			} else {
+				buf.append(curr.getUnderlyingResource().getLocation().toOSString());
+			}	
 		}
-		//this should never happen
-		if(strs.length > 0)
-			buf.append(strs[i]);
 		return buf.toString();
 	}
 	

@@ -1,0 +1,42 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.internal.ui.javadocexport;
+
+import java.net.URL;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
+
+
+public class JavadocLinkDialogLabelProvider extends JavaUILabelProvider {
+
+	public String getText(Object element) {
+		String text = super.getText(element);
+		if ((element instanceof IJavaProject)
+			|| (element instanceof IPackageFragmentRoot)) {
+
+			String doc = "";
+			try {
+				URL url = JavaDocLocations.getJavadocBaseLocation((IJavaElement) element);
+				if (url != null) {
+					doc = url.toExternalForm();
+					return text + " - " + doc;
+				}
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+
+		}
+		return text;
+
+	}
+
+}
