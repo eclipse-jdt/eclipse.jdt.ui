@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.core.runtime.preferences.InstanceScope;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.RGB;
 
@@ -2999,7 +3001,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 80);
 		
 		store.setDefault(PreferenceConstants.FORMATTER_PROFILE, ProfileManager.JAVA_PROFILE);
-		ProfileStore.checkCurrentOptionsVersion();
+		ProfileStore.checkCurrentOptionsVersion(new InstanceScope());
 		
 		// mark occurrences
 		store.setDefault(PreferenceConstants.EDITOR_MARK_OCCURRENCES, false);

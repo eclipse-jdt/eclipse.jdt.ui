@@ -18,6 +18,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -451,7 +452,7 @@ public class CodingStyleConfigurationBlock {
 	}
 	
 	public void performOk() {
-		fProfileManager.commitChanges();
+		fProfileManager.commitChanges(new InstanceScope());
 	}
 	
 	public void performDefaults() {

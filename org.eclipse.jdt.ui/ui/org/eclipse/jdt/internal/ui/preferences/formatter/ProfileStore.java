@@ -49,9 +49,12 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -368,9 +371,10 @@ public class ProfileStore {
 		return element;
 	}
 	
-	public static void checkCurrentOptionsVersion() {
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
-		int version= store.getInt(PREF_FORMATTER_PROFILES_VERSION);
+	public static void checkCurrentOptionsVersion(IScopeContext context) {
+		
+		IEclipsePreferences uiPreferences= context.getNode(JavaUI.ID_PLUGIN);
+		int version= uiPreferences.getInt(PREF_FORMATTER_PROFILES_VERSION, 0);
 		if (version >= ProfileVersioner.CURRENT_VERSION) {
 			return; // is up to date
 		}
@@ -380,10 +384,10 @@ public class ProfileStore {
 				ProfileManager manager= new ProfileManager(profiles);
 				Profile selected= manager.getSelected();
 				if (selected instanceof CustomProfile) {
-					manager.commitChanges(); // updates JavaCore options
+					manager.commitChanges(context); // updates JavaCore options
 				}
 			}
-			store.setValue(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
+			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}

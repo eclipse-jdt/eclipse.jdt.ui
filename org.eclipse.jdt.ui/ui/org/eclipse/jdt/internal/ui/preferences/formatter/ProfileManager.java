@@ -14,17 +14,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
+
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
@@ -298,32 +301,34 @@ public class ProfileManager extends Observable {
 	 * Update all formatter settings with the settings of the specified profile. 
 	 * @param profile The profilde to write to the preference store
 	 */
-	private void writeToPreferenceStore(Profile profile) {
-	
-		final Hashtable actualOptions= JavaCore.getOptions();
+	private void writeToPreferenceStore(Profile profile, IScopeContext context) {
 		final Map profileOptions= profile.getSettings();
 		
-		boolean hasChanges= false;
+		IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
 		
 		for (final Iterator keyIter = fCoreKeys.iterator(); keyIter.hasNext(); ) {
 			final String key= (String) keyIter.next();
-			final String oldVal= (String) actualOptions.get(key);
+			final String oldVal= corePrefs.get(key, null);
 			final String val= (String) profileOptions.get(key);
 			if (!val.equals(oldVal)) {
-				hasChanges= true;
-				actualOptions.put(key, val);
+				corePrefs.put(key, val);
 			}
 		}
 		
-		if (hasChanges) {
-			JavaCore.setOptions(actualOptions);
+		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
+		
+		for (final Iterator keyIter = fUIKeys.iterator(); keyIter.hasNext(); ) {
+			final String key= (String) keyIter.next();
+			final String oldVal= uiPrefs.get(key, null);
+			final String val= (String) profileOptions.get(key);
+			if (!val.equals(oldVal)) {
+				uiPrefs.put(key, val);
+			}
 		}
 		
-		new CommentFormattingContext().mapToStore(profile.getSettings(), getUIPreferenceStore());
-		
-		final String oldProfile= getUIPreferenceStore().getString(PROFILE_KEY);
+		final String oldProfile= uiPrefs.get(PROFILE_KEY, null);
 		if (!profile.getID().equals(oldProfile)) {
-			getUIPreferenceStore().setValue(PROFILE_KEY, profile.getID());
+			uiPrefs.put(PROFILE_KEY, profile.getID());
 		}
 	}
 	
@@ -416,9 +421,9 @@ public class ProfileManager extends Observable {
 	 * Activate the selected profile, update all necessary options in
 	 * preferences and save profiles to disk.
 	 */
-	public void commitChanges() {
+	public void commitChanges(IScopeContext scopeContext) {
 		if (fSelected != null) {
-			writeToPreferenceStore(fSelected);
+			writeToPreferenceStore(fSelected, scopeContext);
 		}
 	}
 	
