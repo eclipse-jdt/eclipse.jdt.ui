@@ -759,7 +759,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_STRING);
 		presenter.setInformationProvider(provider, IJavaPartitions.JAVA_CHARACTER);
-		presenter.setSizeConstraints(20, 20, true, false);
+		presenter.setSizeConstraints(50, 20, true, false);
 		presenter.setRestoreInformationControlBounds(getSettings("outline_presenter_bounds"), true, true); //$NON-NLS-1$
 		return presenter;
 	}
