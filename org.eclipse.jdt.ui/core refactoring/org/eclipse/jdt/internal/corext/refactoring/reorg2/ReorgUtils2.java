@@ -537,7 +537,8 @@ public class ReorgUtils2 {
 		Set javaElementSet= new HashSet(Arrays.asList(javaElements));	
 		Set result= new HashSet();
 		for (int i= 0; i < resources.length; i++) {
-			Assert.isNotNull(resources[i]);
+			if (resources[i] == null)
+				continue;
 			IJavaElement element= JavaCore.create(resources[i]);
 			if (element == null || ! element.exists() || ! javaElementSet.contains(element))
 				result.add(resources[i]);
