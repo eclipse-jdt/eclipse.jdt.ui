@@ -111,6 +111,7 @@ public class JavadocOptionsManager {
 	public final static String TITLE= "doctitle";
 	public final String NAME= "name";
 	public final String PATH= "path";
+	private final String FROMSTANDARD= "fromStandard";
 	
 	public JavadocOptionsManager(IDialogSettings settings, IWorkspaceRoot root, ISelection selection) {
 		this(null, settings, root, selection);	
@@ -161,12 +162,16 @@ public class JavadocOptionsManager {
 		if (fAccess == null)
 			fAccess= PRIVATE;
 
-		fFromStandard= false;
+		//this is defaulted to false.
+		fFromStandard= settings.getBoolean(FROMSTANDARD);
+			
+		//doclet is loaded even if the standard doclet is being used
 		fDocletpath= settings.get(DOCLETPATH);
 		fDocletname= settings.get(DOCLETNAME);
 		if (fDocletpath == null || fDocletname == null) {
 			fFromStandard= true;
-			fDocletname= fDocletname= "";
+			fDocletpath= "";
+			fDocletname= "";
 		}
 
 		//load a destination even if a custom doclet is being used
@@ -203,7 +208,7 @@ public class JavadocOptionsManager {
 		fPackages= new ArrayList();
 		IStructuredSelection selection= getValidSelection(sel);
 		fPackages= selection.toList();
-		fAccess= PRIVATE;
+		fAccess= PUBLIC;
 
 		
 		if (fProject == null) {
@@ -527,11 +532,12 @@ public class JavadocOptionsManager {
 
 		IDialogSettings settings= new DialogSettings("javadoc");
 
-		if (!fFromStandard) {
-			settings.put(DOCLETNAME, fDocletname);
-			settings.put(DOCLETPATH, fDocletpath);
-		} else
-			settings.put(DESTINATION, fDestination);
+		settings.put(FROMSTANDARD, fFromStandard);
+		
+		settings.put(DOCLETNAME, fDocletname);
+		settings.put(DOCLETPATH, fDocletpath);
+		
+		settings.put(DESTINATION, fDestination);
 		settings.put(VISIBILITY, fAccess);
 
 		settings.put(AUTHOR, fAuthor);

@@ -305,40 +305,45 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		switch (VALIDATE) {
 			case STYLESHEETSTATUS :
 				fStyleSheetStatus = new StatusInfo();
-				path = new Path(fStyleSheetText.getText());
-				file = new File(fStyleSheetText.getText());
-				ext = path.getFileExtension();
-				if ((file == null) || !file.exists()) {
-					fStyleSheetStatus.setError("Stylesheet path not found.");
-				} else if ((ext == null) || !ext.equalsIgnoreCase("css")) {
-					fStyleSheetStatus.setError("Stylesheet must be a css document.");
+				if (fStyleSheetButton.getSelection()) {
+					path = new Path(fStyleSheetText.getText());
+					file = new File(fStyleSheetText.getText());
+					ext = path.getFileExtension();
+					if ((file == null) || !file.exists()) {
+						fStyleSheetStatus.setError("Stylesheet path not found.");
+					} else if ((ext == null) || !ext.equalsIgnoreCase("css")) {
+						fStyleSheetStatus.setError("Stylesheet must be a css document.");
+					}
 				}
 				break;
 
 			case OVERVIEWSTATUS :
 				fOverviewStatus = new StatusInfo();
-				path = new Path(fOverViewText.getText());
-				file = path.toFile();
-				ext = path.getFileExtension();
-				if ((file == null) || !file.exists()) {
-					fOverviewStatus.setError("Overview path not found.");
-				} else if ((ext == null) || !ext.equalsIgnoreCase("html")) {
-					fOverviewStatus.setError("Overview must be an html document.");
+				if (fOverViewButton.getSelection()) {
+					path = new Path(fOverViewText.getText());
+					file = path.toFile();
+					ext = path.getFileExtension();
+					if ((file == null) || !file.exists()) {
+						fOverviewStatus.setError("Overview path not found.");
+					} else if ((ext == null) || !ext.equalsIgnoreCase("html")) {
+						fOverviewStatus.setError("Overview must be an html document.");
+					}
 				}
 				break;
 			case ANTSTATUS :
 				fAntStatus = new StatusInfo();
-				path = new Path(fAntText.getText());
-				ext = path.getFileExtension();
-				IPath antSeg = path.removeLastSegments(1);
+				if (fAntButton.getSelection()) {
+					path = new Path(fAntText.getText());
+					ext = path.getFileExtension();
+					IPath antSeg = path.removeLastSegments(1);
 
-				if ((!antSeg.isValidPath(antSeg.toOSString()))
-					|| (ext == null)
-					|| !(ext.equalsIgnoreCase("xml")))
-					fAntStatus.setError("Not a valid Ant file name.");
-				else if (path.toFile().exists())
-					fAntStatus.setWarning(
-						"The generated ant file will overwrite the existing ant file.");
+					if ((!antSeg.isValidPath(antSeg.toOSString()))
+						|| (ext == null)
+						|| !(ext.equalsIgnoreCase("xml")))
+						fAntStatus.setError("Not a valid Ant file name.");
+					else if (path.toFile().exists())
+						fAntStatus.setWarning("The generated ant file will overwrite the existing ant file.");
+				}
 				break;
 		}
 

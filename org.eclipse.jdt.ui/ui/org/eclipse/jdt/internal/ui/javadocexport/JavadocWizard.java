@@ -76,16 +76,14 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		setWindowTitle("Generate Javadoc");
 
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-
-		//@Added
-		//--
+		
 		fRoot= ResourcesPlugin.getWorkspace().getRoot();
 		fXmlJavadocFile= xmlJavadocFile;
 
-		//--
 		fCurrentProject= null;
 		fWriteCustom= false;
 		fFromAnt= (xmlJavadocFile != null);
+		
 	}
 
 	/*
@@ -146,24 +144,21 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 					buf.append(' ');
 				}
 
-				IProcess iprocess= DebugPlugin.newProcess(process, "Javadoc Generation");
-				iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, buf.toString());
-
-				IProcess[] iProcesses= new IProcess[] { iprocess };
-
 				IDebugEventSetListener listener= new JavadocDebugEventListener();
 				DebugPlugin.getDefault().addDebugEventListener(listener);
 				
 				ILaunchConfigurationWorkingCopy wc= null;
-			//	fConfig= null;
 				try {
 					ILaunchConfigurationType lcType= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
 					String name= "Javadoc Export Wizard";// + System.currentTimeMillis();
 					wc= lcType.newInstance(null, name);
 					wc.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String) null);
-					//fConfig= wc.doSave();
-
-					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null, iProcesses, null);
+					wc.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+					
+					ILaunch newLaunch= new Launch(wc, ILaunchManager.RUN_MODE, null);
+					IProcess iprocess= DebugPlugin.newProcess(newLaunch, process, "Javadoc Generation");
+					iprocess.setAttribute(JavaRuntime.ATTR_CMDLINE, buf.toString());
+	
 					DebugPlugin.getDefault().getLaunchManager().addLaunch(newLaunch);
 
 				} catch (CoreException e) {
@@ -221,7 +216,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				URL url= indexFile.toFile().toURL();
 				OpenExternalJavadocAction.openInBrowser(url, getShell());
 			} catch (MalformedURLException e) {
-				JavaPlugin.logErrorMessage(e.getMessage());
+				JavaPlugin.log(e);
 			}
 		}
 	}	
@@ -234,6 +229,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 						if (!fWriteCustom) {
 							refresh(fDestination); //If destination of javadoc is in workspace then refresh workspace
 							spawnInBrowser();
+							
 						}
 					} finally {
 						DebugPlugin.getDefault().removeDebugEventListener(this);

@@ -364,6 +364,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			} else {
 				fStandardButton.setSelection(true);
 				fDestinationText.setText(fStore.getDestination());
+				fDocletText.setText(fStore.getDocletPath());
+				fDocletTypeText.setText(fStore.getDocletName());
 				fDocletText.setEnabled(false);
 				fDocletLabel.setEnabled(false);
 				fDocletTypeText.setEnabled(false);
