@@ -581,12 +581,12 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 
 	public void testFail92() throws Exception {
-		System.out.println("\nRenameTypeTest::" + getName() + " disabled (needs fixing)");
+		printTestDisabledMessage("needs fixing");
 		//helper1();
 	}
 
 	public void testFail93() throws Exception {
-		System.out.println("\nRenameTypeTest::" + getName() + " disabled (needs fixing)");
+		printTestDisabledMessage("needs fixing");
 		//helper1();
 	}
 	
