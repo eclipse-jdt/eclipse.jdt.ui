@@ -28,7 +28,9 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactor
 
 public class RenameCompilationUnitRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
 
-	private String fNewName;
+	private static final String JAVA_CU_SUFFIX= ".java";
+	
+	private String fNewName; //without the trailing .java
 	private RenameTypeRefactoring fRenameTypeRefactoring;
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
@@ -46,9 +48,9 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		if (parent.getElementType() != IJavaElement.PACKAGE_FRAGMENT)
 			return fCu; //??
 		IPackageFragment pack= (IPackageFragment)parent;
-		if (JavaConventions.validateCompilationUnitName(fNewName).getSeverity() == IStatus.ERROR)
+		if (JavaConventions.validateCompilationUnitName(getNewCuName()).getSeverity() == IStatus.ERROR)
 			return fCu; //??
-		return pack.getCompilationUnit(fNewName);
+		return pack.getCompilationUnit(getNewCuName());
 	}
 	
 	/* non java-doc
@@ -64,13 +66,13 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 
 	/* non java-doc
 	 * @see IRenameRefactoring#setNewName(String)
-	 * @param newName 'java' must be included
+	 * @param newName 'java' must not be included
 	 */
 	public void setNewName(String newName) {
 		Assert.isNotNull(newName);
 		fNewName= newName;
 		if (fWillRenameType)
-			fRenameTypeRefactoring.setNewName(removeFileNameExtension(newName));
+			fRenameTypeRefactoring.setNewName(newName);
 	}
 	
 	/* non java-doc
@@ -85,10 +87,10 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	 */
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkCompilationUnitName(newName);
+		RefactoringStatus result= Checks.checkCompilationUnitName(newName + JAVA_CU_SUFFIX);
 		if (fWillRenameType)
-			result.merge(fRenameTypeRefactoring.checkNewName(removeFileNameExtension(newName)));
-		if (Checks.isAlreadyNamed(fCu, newName))
+			result.merge(fRenameTypeRefactoring.checkNewName(newName));
+		if (Checks.isAlreadyNamed(fCu, newName + JAVA_CU_SUFFIX))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameCompilationUnitRefactoring.same_name"));	 //$NON-NLS-1$
 		return result;
 	}
@@ -97,7 +99,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	 * @see IRenameRefactoring#getCurrentName()
 	 */
 	public String getCurrentName() {
-		return fCu.getElementName();
+		return getSimpleCUName();
 	}
 	
 	/* non java-doc
@@ -105,7 +107,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.name",  //$NON-NLS-1$
-															new String[]{fCu.getElementName(), fNewName});
+															new String[]{fCu.getElementName(), getNewCuName()});
 	}
 
 	/*
@@ -239,7 +241,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 				RefactoringStatus result1= new RefactoringStatus();
 				
 				RefactoringStatus result2= new RefactoringStatus();
-				result2.merge(Checks.checkCompilationUnitNewName(fCu, fNewName));
+				result2.merge(Checks.checkCompilationUnitNewName(fCu, getNewCuName()));
 				if (result2.hasFatalError())
 					result1.addError(RefactoringCoreMessages.getFormattedString("RenameCompilationUnitRefactoring.not_parsed_1", fCu.getElementName())); //$NON-NLS-1$
 				else 
@@ -250,7 +252,7 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 			if (fWillRenameType)
 				return fRenameTypeRefactoring.checkInput(pm);
 			else
-				return Checks.checkCompilationUnitNewName(fCu, removeFileNameExtension(fNewName));
+				return Checks.checkCompilationUnitNewName(fCu, fNewName);
 		} finally{
 			pm.done();
 		}		
@@ -297,6 +299,10 @@ public class RenameCompilationUnitRefactoring extends Refactoring implements IRe
 		if (fWillRenameType)
 			return fRenameTypeRefactoring.createChange(pm);
 	
-		return new RenameCompilationUnitChange(fCu, fNewName);
+		return new RenameCompilationUnitChange(fCu, getNewCuName());
+	}
+	
+	private String getNewCuName(){
+		return fNewName + JAVA_CU_SUFFIX;
 	}
 }
