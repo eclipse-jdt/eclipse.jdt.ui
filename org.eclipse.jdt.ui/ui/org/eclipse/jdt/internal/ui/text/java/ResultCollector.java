@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.java;
   
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -32,23 +33,26 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
- * Bin to collect the proposal of the infrastructure on code assist in a java text.
+ * Java implementation of <code>CompletionRequestor</code>.
+ * 
+ * @since 3.1
  */
 public class ResultCollector extends CompletionRequestor {
 	
@@ -57,14 +61,8 @@ public class ResultCollector extends CompletionRequestor {
 	private final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
 	private final static char[] VAR_TRIGGER= new char[] { '\t', ' ', '=', ';', '.' };
 
-	protected IJavaProject fJavaProject;
-	protected ICompilationUnit fCompilationUnit; // set when imports can be added
-	protected int fCodeAssistOffset;
-	protected int fContextOffset;
-	protected ITextViewer fTextViewer;
-	
-	private ArrayList fFields=
-		new ArrayList(),
+	private final List 
+		fFields= new ArrayList(),
 		fKeywords= new ArrayList(10), 
 		fLabels= new ArrayList(10),
 		fMethods= new ArrayList(),
@@ -73,17 +71,22 @@ public class ResultCollector extends CompletionRequestor {
 		fTypes= new ArrayList(),
 		fVariables= new ArrayList();
 
-	private IProblem fLastProblem;	
-	private ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
-	private ArrayList[] fResults = new ArrayList[] {
+	private final List[] fResults = new List[] {
 		fPackages, fLabels, fModifiers, fKeywords, fTypes, fMethods, fFields, fVariables
 	};
 	
-	private Set fSuggestedMethodNames= new HashSet();
+	private final Set fSuggestedMethodNames= new HashSet();
+	private final ImageDescriptorRegistry fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	
+	private IJavaProject fJavaProject;
+	private ICompilationUnit fCompilationUnit; // set when imports can be added
+	private int fCodeAssistOffset;
+	private int fContextOffset;
+	private ITextViewer fTextViewer;
 	private int fUserReplacementLength;
-
+	private IProblem fLastProblem;	
+	
 	/*
 	 * Is eating code assist enabled or disabled? PR #3666
 	 * When eating is enabled, JavaCompletionProposal must be revisited: PR #5533
@@ -183,58 +186,74 @@ public class ResultCollector extends CompletionRequestor {
 		fVariables.add(proposal);
 	}
 	
-	protected String getParameterSignature(char[][] parameterTypeNames, char[][] parameterNames) {
-		StringBuffer buf = new StringBuffer();
-		if (parameterTypeNames != null) {
-			for (int i = 0; i < parameterTypeNames.length; i++) {
-				if (i > 0) {
-					buf.append(',');
-					buf.append(' ');
-				}
-				buf.append(parameterTypeNames[i]);
-				if (parameterNames != null && parameterNames[i] != null) {
-					buf.append(' ');
-					buf.append(parameterNames[i]);
-				}
-			}
-		}
-		return buf.toString();
+	/**
+	 * Accepts a completion description and tries to create a proposal that can
+	 * be displayed to the user.
+	 *  
+	 * @param methodProposal the completion proposal of type METHOD_REF.
+	 */
+	private final void acceptMethodProposal(CompletionProposal methodProposal) {
+		IJavaCompletionProposal proposal= createMethodProposal(methodProposal);
+		if (proposal != null)
+			fMethods.add(proposal);
 	}
 	
-	protected void internalAcceptMethod(CompletionProposal method) {
-		String rawDeclaringType= extractTypeFQN(method);
+	/**
+	 * Creates a completion proposal (UI) given a completion proposal of type
+	 * <code>CompletionProposal.METHOD_REF</code> (core).
+	 * 
+	 * @param methodProposal the method proposal to accept
+	 * @return a newly created proposal, or <code>null</code> if none should
+	 *         be added
+	 */
+	protected IJavaCompletionProposal createMethodProposal(CompletionProposal methodProposal) {
+		String rawDeclaringType= extractTypeFQN(methodProposal);
 		if (TypeFilter.isFiltered(rawDeclaringType))
-			return;
+			return null;
 		
-		String parameterList= createUnboundedParameterList(method);
-		JavaCompletionProposal proposal= createMethodCallCompletion(method, parameterList);
-		proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, method));
+		String parameterList= createUnboundedParameterList(methodProposal);
+		JavaCompletionProposal proposal= createMethodCallCompletion(methodProposal, parameterList);
+		proposal.setProposalInfo(new MethodProposalInfo(fJavaProject, methodProposal));
 
-		char[] completionName= method.getCompletion();
-		boolean hasParameters= Signature.getParameterCount(SignatureUtil.fix83600(method.getSignature())) > 0;
+		char[] completionName= methodProposal.getCompletion();
+		boolean hasParameters= Signature.getParameterCount(methodProposal.getSignature()) > 0;
 		if (hasParameters) {
-			ProposalContextInformation contextInformation= new ProposalContextInformation();
-			contextInformation.setInformationDisplayString(parameterList);
-			contextInformation.setImage(proposal.getImage());
-			contextInformation.setContextDisplayString(proposal.getDisplayString());
-			contextInformation.setContextInformationPosition(completionName.length == 0 ? fContextOffset : -1);
-
+			ProposalContextInformation contextInformation= createContextInformation(parameterList, proposal, completionName);
 			proposal.setContextInformation(contextInformation);
-		}
-	
-		proposal.setTriggerCharacters(hasParameters ? METHOD_WITH_ARGUMENTS_TRIGGERS : METHOD_TRIGGERS);
 		
-		if (hasParameters && completionName.length > 0) {
-			// set the cursor before the closing bracket
-			proposal.setCursorPosition(completionName.length - 1);
+			proposal.setTriggerCharacters(METHOD_WITH_ARGUMENTS_TRIGGERS);
+			
+			if (completionName.length > 0) {
+				// set the cursor before the closing bracket
+				proposal.setCursorPosition(completionName.length - 1);
+			}
+		} else {
+			proposal.setTriggerCharacters(METHOD_TRIGGERS);
 		}
 		
-		fMethods.add(proposal);	
+		return proposal;
 	}
 
-	private String extractTypeFQN(CompletionProposal method) {
-		char[] declaringTypeSignature= method.getDeclarationSignature();
+	private ProposalContextInformation createContextInformation(String parameterList, JavaCompletionProposal proposal, char[] completionName) {
+		ProposalContextInformation contextInformation= new ProposalContextInformation();
+		contextInformation.setInformationDisplayString(parameterList);
+		contextInformation.setImage(proposal.getImage());
+		contextInformation.setContextDisplayString(proposal.getDisplayString());
+		contextInformation.setContextInformationPosition(completionName.length == 0 ? fContextOffset : -1);
+		return contextInformation;
+	}
+
+	/**
+	 * Extracts the fully qualified name of the declaring type of a method
+	 * reference.
+	 * 
+	 * @param methodProposal the proposed method
+	 * @return the qualified name of the declaring type
+	 */
+	private String extractTypeFQN(CompletionProposal methodProposal) {
+		char[] declaringTypeSignature= methodProposal.getDeclarationSignature();
 		// special methods may not have a declaring type: methods defined on arrays etc.
+		// TODO remove when bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
 		if (declaringTypeSignature == null)
 			return "java.lang.Object"; //$NON-NLS-1$
 		return SignatureUtil.stripSignatureToFQN(String.valueOf(declaringTypeSignature));
@@ -256,12 +275,18 @@ public class ResultCollector extends CompletionRequestor {
 		char[][] parameterNames= methodProposal.findParameterNames(null);
 		char[][] parameterTypes= Signature.getParameterTypes(signature);
 		for (int i= 0; i < parameterTypes.length; i++) {
-			parameterTypes[i]= computeTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
+			parameterTypes[i]= createTypeDisplayName(SignatureUtil.getLowerBound(parameterTypes[i]));
 		}
 		return getParameterSignature(parameterTypes, parameterNames);
 	}
 
-	private char[] computeTypeDisplayName(char[] typeSignature) {
+	/**
+	 * Returns a visual representation of a java type passed in as type signature.
+	 * 
+	 * @param typeSignature the type signature to create a display name for
+	 * @return the display name for <code>typeSignature</code>
+	 */
+	private char[] createTypeDisplayName(char[] typeSignature) {
 		char[] displayName= Signature.getSimpleName(Signature.toCharArray(typeSignature));
 		// XXX see https://bugs.eclipse.org/bugs/show_bug.cgi?id=84675
 		boolean useShortGenerics= false;
@@ -280,14 +305,46 @@ public class ResultCollector extends CompletionRequestor {
 				}
 			} while (pos >= 0);
 			return buf.toString().toCharArray();
-		} else {
-			return displayName;
 		}
+		return displayName;
 	}
 
+	/**
+	 * Creates a display string of a parameter list (without the parentheses) for the given
+	 * parameter types and names.
+	 * 
+	 * @param parameterTypes the parameter types
+	 * @param parameterNames the parameter names
+	 * @return the display string of the parameter list defined by the passed arguments
+	 */
+	private final String getParameterSignature(char[][] parameterTypes, char[][] parameterNames) {
+		StringBuffer buf = new StringBuffer();
+		if (parameterTypes != null) {
+			for (int i = 0; i < parameterTypes.length; i++) {
+				if (i > 0) {
+					buf.append(',');
+					buf.append(' ');
+				}
+				buf.append(parameterTypes[i]);
+				if (parameterNames != null && parameterNames[i] != null) {
+					buf.append(' ');
+					buf.append(parameterNames[i]);
+				}
+			}
+		}
+		return buf.toString();
+	}
+	
+	/**
+	 * Creates an <code>IJavaCompletionProposal</code> for a proposed method reference.
+	 * TODO remove reference to internal class
+	 * @param methodProposal the proposal describing the method to be inserted
+	 * @param parameterList the display string for the methods parameter list
+	 * @return a completion proposal that describes how the proposal should be displayed to the user
+	 */
 	protected JavaCompletionProposal createMethodCallCompletion(CompletionProposal methodProposal, String parameterList) {
-		ImageDescriptor descriptor= createMemberDescriptor(methodProposal.getFlags());
-		String displayName= createMethodDisplayString(methodProposal, parameterList).toString();
+		ImageDescriptor descriptor= createMethodImageDescriptor(methodProposal.getFlags());
+		String displayName= createMethodDisplayString(methodProposal, parameterList);
 		String completion= String.valueOf(methodProposal.getCompletion());
 		int start= methodProposal.getReplaceStart();
 		int end= methodProposal.getReplaceEnd();
@@ -296,26 +353,62 @@ public class ResultCollector extends CompletionRequestor {
 		return createCompletion(start, end, completion, descriptor, displayName, relevance);
 	}
 
-	protected final ImageDescriptor createMemberDescriptor(int modifiers) {
+	/**
+	 * Creates and returns a decorated image descriptor for a method.
+	 * 
+	 * @param modifiers the modifiers, see {@link Flags}
+	 * @return the created imaged descriptor
+	 */
+	protected final ImageDescriptor createMethodImageDescriptor(int modifiers) {
 		ImageDescriptor desc= JavaElementImageProvider.getMethodImageDescriptor(false, modifiers);
-
-		if (Flags.isDeprecated(modifiers))
-		 	desc= getDeprecatedDescriptor(desc);
-
-		if (Flags.isStatic(modifiers))
-			desc= getStaticDescriptor(desc);
-		
-		return desc;
+		return decorateImageDescriptor(desc, modifiers);
 	}
 	
-	protected final StringBuffer createMethodDisplayString(CompletionProposal methodProposal, String parameterList) {
+	/**
+	 * Returns a version of <code>descriptor</code> decorated according to
+	 * the passed <code>modifier</code> flags.
+	 *  
+	 * @param descriptor the image descriptor to decorate
+	 * @param flags the modifier flags
+	 * @return an image descriptor for a method proposal
+	 * @see Flags
+	 */
+	protected final ImageDescriptor decorateImageDescriptor(ImageDescriptor descriptor, int flags) {
+		int adornments= 0;
+		
+		if (Flags.isDeprecated(flags))
+			adornments |= JavaElementImageDescriptor.DEPRECATED;
+	 	
+		if (Flags.isStatic(flags))
+			adornments |= JavaElementImageDescriptor.STATIC;
+	
+		if (Flags.isFinal(flags))
+			adornments |= JavaElementImageDescriptor.FINAL;
+		
+		if (Flags.isSynchronized(flags))
+			adornments |= JavaElementImageDescriptor.SYNCHRONIZED;
+		
+		if (Flags.isAbstract(flags))
+			adornments |= JavaElementImageDescriptor.ABSTRACT;
+		
+		return new JavaElementImageDescriptor(descriptor, adornments, JavaElementImageProvider.SMALL_SIZE);
+	}
+	
+	/**
+	 * Creates a display label for the given method proposal.
+	 * 
+	 * @param methodProposal the method proposal to display
+	 * @param parameterList the already computed parameter list
+	 * @return the display label for the given method proposal
+	 */
+	protected final String createMethodDisplayString(CompletionProposal methodProposal, String parameterList) {
 		StringBuffer nameBuffer= new StringBuffer();
 		nameBuffer.append(methodProposal.getName());
 		nameBuffer.append('(');
 		nameBuffer.append(parameterList);
 		nameBuffer.append(")  "); //$NON-NLS-1$
 		
-		char[] returnType= computeTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
+		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
 		nameBuffer.append(returnType);
 
 		String declaringType= extractTypeFQN(methodProposal);
@@ -323,7 +416,7 @@ public class ResultCollector extends CompletionRequestor {
 		nameBuffer.append(" - "); //$NON-NLS-1$
 		nameBuffer.append(declaringType);
 
-		return nameBuffer;
+		return nameBuffer.toString();
 	}
 	
 
@@ -439,7 +532,7 @@ public class ResultCollector extends CompletionRequestor {
 		JavaCompletionProposal[] result= new JavaCompletionProposal[totLen];
 		int k= 0;
 		for (int i= 0; i < fResults.length; i++) {
-			ArrayList curr= fResults[i];
+			List curr= fResults[i];
 			int currLen= curr.size();
 			for (int j= 0; j < currLen; j++) {
 				JavaCompletionProposal proposal= (JavaCompletionProposal) curr.get(j);
@@ -604,8 +697,30 @@ public class ResultCollector extends CompletionRequestor {
 		return length;
 	}
 	
-	protected Image getImage(ImageDescriptor descriptor) {
+	protected final Image getImage(ImageDescriptor descriptor) {
 		return (descriptor == null) ? null : fRegistry.get(descriptor);
+	}
+	
+	protected void internalAcceptAnnotationAttributeReference(CompletionProposal proposal) {
+		String displayString= createAnnotationAttributeDisplayString(proposal).toString();
+		ImageDescriptor descriptor= createMethodImageDescriptor(proposal.getFlags());
+		String completion= String.valueOf(proposal.getCompletion());
+		fMethods.add(new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal.getReplaceStart(), proposal.getReplaceEnd()), getImage(descriptor), displayString, proposal.getRelevance(), fTextViewer));
+	}
+	
+	private StringBuffer createAnnotationAttributeDisplayString(CompletionProposal attributeProposal) {
+		StringBuffer nameBuffer= new StringBuffer();
+		nameBuffer.append(attributeProposal.getName()).append("  "); //$NON-NLS-1$
+		
+		char[] attributeType= createTypeDisplayName(SignatureUtil.getUpperBound(SignatureUtil.fix83600(attributeProposal.getSignature())));
+		nameBuffer.append(attributeType);
+
+		String declaringType= extractTypeFQN(attributeProposal);
+		declaringType= Signature.getSimpleName(declaringType);
+		nameBuffer.append(" - "); //$NON-NLS-1$
+		nameBuffer.append(declaringType);
+
+		return nameBuffer;
 	}
 	
 	/**
@@ -696,10 +811,10 @@ public class ResultCollector extends CompletionRequestor {
 									.getReplaceEnd(), proposal.getRelevance());
 					break;
 				case CompletionProposal.METHOD_REF:
-					internalAcceptMethod(proposal);
+					acceptMethodProposal(proposal);
 					break;
 				case CompletionProposal.METHOD_NAME_REFERENCE:
-					internalAcceptMethod(proposal);
+					acceptMethodProposal(proposal);
 					break;
 				case CompletionProposal.METHOD_DECLARATION:
 					internalAcceptMethodDeclaration(Signature.getSignatureQualifier(proposal.getDeclarationSignature()), Signature.getSignatureSimpleName(proposal.getDeclarationSignature()), proposal
@@ -746,28 +861,6 @@ public class ResultCollector extends CompletionRequestor {
 		}
 	}	
 	
-	protected void internalAcceptAnnotationAttributeReference(CompletionProposal proposal) {
-		String displayString= createAnnotationAttributeDisplayString(proposal).toString();
-		ImageDescriptor descriptor= createMemberDescriptor(proposal.getFlags());
-		String completion= String.valueOf(proposal.getCompletion());
-		fMethods.add(new JavaCompletionProposal(completion, proposal.getReplaceStart(), getLength(proposal.getReplaceStart(), proposal.getReplaceEnd()), getImage(descriptor), displayString, proposal.getRelevance(), fTextViewer));
-	}
-	
-	private StringBuffer createAnnotationAttributeDisplayString(CompletionProposal attributeProposal) {
-		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(attributeProposal.getName()).append("  "); //$NON-NLS-1$
-		
-		char[] attributeType= computeTypeDisplayName(SignatureUtil.getUpperBound(SignatureUtil.fix83600(attributeProposal.getSignature())));
-		nameBuffer.append(attributeType);
-
-		String declaringType= extractTypeFQN(attributeProposal);
-		declaringType= Signature.getSimpleName(declaringType);
-		nameBuffer.append(" - "); //$NON-NLS-1$
-		nameBuffer.append(declaringType);
-
-		return nameBuffer;
-	}
-	
 	private char[][] getParameterPackages(char[] methodSignature) {
 		char[][] parameterQualifiedTypes = Signature.getParameterTypes(methodSignature);
 		int length = parameterQualifiedTypes == null ? 0 : parameterQualifiedTypes.length;
@@ -808,5 +901,40 @@ public class ResultCollector extends CompletionRequestor {
 	public void completionFailure(IProblem problem) {
 		fLastProblem= problem;
 	}
+
+	/**
+	 * Returns <code>true</code> if generic proposals should be allowed,
+	 * <code>false</code> if not. Note that even though code (in a library)
+	 * may be referenced that uses generics, it is still possible that the
+	 * current source does not allow generics.
+	 * 
+	 * @return <code>true</code> if the generic proposals should be allowed,
+	 *         <code>false</code> if not
+	 * @since 3.1
+	 */
+	protected boolean proposeGenerics() {
+		String sourceVersion;
+		if (fJavaProject != null)
+			sourceVersion= fJavaProject.getOption(JavaCore.COMPILER_SOURCE, true);
+		else
+			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
 	
+		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0; 
+	}
+	
+	protected final int getCodeAssistOffset() {
+		return fCodeAssistOffset;
+	}
+	protected final ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
+	}
+	protected final int getContextOffset() {
+		return fContextOffset;
+	}
+	protected final IJavaProject getJavaProject() {
+		return fJavaProject;
+	}
+	protected final ITextViewer getTextViewer() {
+		return fTextViewer;
+	}
 }

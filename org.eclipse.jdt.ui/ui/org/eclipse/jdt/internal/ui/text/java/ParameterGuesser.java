@@ -276,7 +276,7 @@ public class ParameterGuesser {
 			int flags= 0;
 			
 			if (Flags.isDeprecated(modifiers))
-				flags |= JavaElementImageDescriptor.WARNING;
+				flags |= JavaElementImageDescriptor.DEPRECATED;
 		 	
 			if (Flags.isStatic(modifiers))
 				flags |= JavaElementImageDescriptor.STATIC;
@@ -295,8 +295,8 @@ public class ParameterGuesser {
 		}
 	}
 	
-	private static Map fgPrimitiveAssignments;
-	private static Map fgAutounbox;
+	private static final Map PRIMITIVE_ASSIGNMENTS;
+	private static final Map AUTOUNBOX;
 	
 	static {
 		HashMap primitiveAssignments= new HashMap();
@@ -310,7 +310,7 @@ public class ParameterGuesser {
 		primitiveAssignments.put("float", Collections.unmodifiableSet(new HashSet(Arrays.asList(new String[] {"float", "long", "int", "short", "char", "byte"})))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
 		primitiveAssignments.put("double", Collections.unmodifiableSet(new HashSet(Arrays.asList(new String[] {"double", "float", "long", "int", "short", "char", "byte"})))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$
 		primitiveAssignments.put("primitive number", Collections.unmodifiableSet(new HashSet(Arrays.asList(new String[] {"double", "float", "long", "int", "short", "byte"})))); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$
-		fgPrimitiveAssignments= Collections.unmodifiableMap(primitiveAssignments);
+		PRIMITIVE_ASSIGNMENTS= Collections.unmodifiableMap(primitiveAssignments);
 
 		HashMap autounbox= new HashMap();
 		autounbox.put("java.lang.Boolean", "boolean"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -322,10 +322,19 @@ public class ParameterGuesser {
 		autounbox.put("java.lang.Float", "float"); //$NON-NLS-1$ //$NON-NLS-2$
 		autounbox.put("java.lang.Double", "double"); //$NON-NLS-1$ //$NON-NLS-2$
 		autounbox.put("java.lang.Number", "primitive number"); // dummy for reverse assignment //$NON-NLS-1$ //$NON-NLS-2$
-		fgAutounbox= Collections.unmodifiableMap(autounbox);
-
+		AUTOUNBOX= Collections.unmodifiableMap(autounbox);
 	}
 	
+	private static final boolean isPrimitiveAssignable(String lhs, String rhs) {
+		Set targets= (Set) PRIMITIVE_ASSIGNMENTS.get(lhs);
+		return targets != null && targets.contains(rhs);
+	}
+
+	private static final String getAutoUnboxedType(String type) {
+		String primitive= (String) AUTOUNBOX.get(type);
+		return primitive; 
+	}
+
 	/** The compilation unit we are computing the completion for */
 	private final ICompilationUnit fCompilationUnit;
 	/** The code assist offset. */
@@ -605,16 +614,6 @@ public class ParameterGuesser {
 		return false;
 	}
 	
-	private boolean isPrimitiveAssignable(String lhs, String rhs) {
-		Set targets= (Set) fgPrimitiveAssignments.get(lhs);
-		return targets != null && targets.contains(rhs);
-	}
-
-	private String getAutoUnboxedType(String type) {
-		String primitive= (String) fgAutounbox.get(type);
-		return primitive; 
-	}
-
 	/**
 	 * Returns true if variable is assignable to a type, false otherwise.
 	 */

@@ -69,6 +69,23 @@ public final class MethodProposalInfo extends ProposalInfo {
 	}
 	
 	/**
+	 * Gets the text for this proposal info formatted as HTML, or
+	 * <code>null</code> if no text is available.
+	 * 
+	 * @return the additional info text
+	 */	
+	public String getInfo() {
+		try {
+			return extractJavadoc(getMember());
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
+
+	/**
 	 * Returns the member for described by the receiver, resolving the
 	 * corresponding type and member if necessary.
 	 * 
@@ -94,7 +111,9 @@ public final class MethodProposalInfo extends ProposalInfo {
 	protected final IMember resolveMember() throws JavaModelException {
 		char[] declarationSignature= fProposal.getDeclarationSignature();
 		String typeName;
-		if (declarationSignature == null) // for synthetic methods on arrays
+		// for synthetic methods on arrays, declaration signatures may be null
+		// TODO remove when https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
+		if (declarationSignature == null)
 			typeName= "java.lang.Object"; //$NON-NLS-1$
 		else
 			typeName= SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature));
@@ -113,21 +132,6 @@ public final class MethodProposalInfo extends ProposalInfo {
 		return null;
 	}
 	
-	/**
-	 * Gets the text for this proposal info formatted as HTML, or
-	 * <code>null</code> if no text is available.
-	 */	
-	public String getInfo() {
-		try {
-			return extractJavadoc(getMember());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
-		}
-		return null;
-	}
-
 	/**
 	 * Extracts the javadoc for the given <code>IMember</code> and returns it
 	 * as HTML.

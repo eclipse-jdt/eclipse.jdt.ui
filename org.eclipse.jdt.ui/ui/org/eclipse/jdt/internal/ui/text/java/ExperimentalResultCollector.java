@@ -27,6 +27,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ExperimentalResultCollector extends ResultCollector {
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createMethodCallCompletion(org.eclipse.jdt.core.CompletionProposal, java.lang.String)
+	 */
 	protected JavaCompletionProposal createMethodCallCompletion(CompletionProposal methodProposal, String parameterList) {
 		char[] completion= methodProposal.getCompletion();
 		// super class' behavior if this is not a normal completion or has no
@@ -34,7 +37,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 		if ((completion.length == 0) || ((completion.length == 1) && completion[0] == ')') || parameterList.length() == 0)
 			return super.createMethodCallCompletion(methodProposal, parameterList);
 
-		ImageDescriptor descriptor= createMemberDescriptor(methodProposal.getFlags());
+		ImageDescriptor descriptor= createMethodImageDescriptor(methodProposal.getFlags());
 		Image image= getImage(descriptor);
 		String displayName= createMethodDisplayString(methodProposal, parameterList).toString();
 		int start= methodProposal.getReplaceStart();
@@ -45,16 +48,20 @@ public class ExperimentalResultCollector extends ResultCollector {
 		char[][] parameterNames= methodProposal.findParameterNames(null);
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
-			return new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, fTextViewer, relevance, parameterNames, fCodeAssistOffset, fCompilationUnit);
-		} else {
-			ExperimentalProposal experimental= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, fTextViewer, relevance);
-			return experimental;
-		}
-
+		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
+			return new ParameterGuessingProposal(name, signature, start, end - start, image, displayName, getTextViewer(), relevance, parameterNames, getCodeAssistOffset(), getCompilationUnit());
+		
+		ExperimentalProposal experimental= new ExperimentalProposal(name, signature, parameterNames, start, end - start, image, displayName, getTextViewer(), relevance);
+		return experimental;
 	}
 	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createTypeCompletion(org.eclipse.jdt.core.CompletionProposal)
+	 */
 	protected JavaCompletionProposal createTypeCompletion(CompletionProposal typeProposal) {
+		if (!proposeGenerics())
+			return super.createTypeCompletion(typeProposal);
+		
 		char[] signature= typeProposal.getSignature();
 		char[] packageName= Signature.getSignatureQualifier(signature); 
 		char[] typeName= Signature.getSignatureSimpleName(signature);
@@ -65,7 +72,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 		if (completion.length > 0 && completion[completion.length - 1] == ';')
 			return proposal;
 		
-		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(proposal.getReplacementString(), fCompilationUnit, typeProposal.getReplaceStart(), typeProposal.getReplaceEnd() - typeProposal.getReplaceStart(), proposal.getImage(), proposal.getDisplayString(), fTextViewer, proposal.getRelevance(), typeProposal.getSignature(), String.valueOf(typeName), String.valueOf(packageName));
+		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(proposal.getReplacementString(), getCompilationUnit(), typeProposal.getReplaceStart(), typeProposal.getReplaceEnd() - typeProposal.getReplaceStart(), proposal.getImage(), proposal.getDisplayString(), getTextViewer(), proposal.getRelevance(), typeProposal.getSignature(), String.valueOf(typeName), String.valueOf(packageName));
 		newProposal.setProposalInfo(proposal.getProposalInfo());
 		return newProposal;
 	}
