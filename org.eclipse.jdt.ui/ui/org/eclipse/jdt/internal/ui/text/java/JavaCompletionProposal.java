@@ -124,7 +124,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 	/**
 	 * Sets the context information.
-	 * @param contentInformation The context information associated with this proposal
+	 * @param contextInformation The context information associated with this proposal
 	 */
 	public void setContextInformation(IContextInformation contextInformation) {
 		fContextInformation= contextInformation;
@@ -141,7 +141,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	
 	/**
 	 * Sets the proposal info.
-	 * @param additionalProposalInfo The additional information associated with this proposal or <code>null</code>
+	 * @param proposalInfo The additional information associated with this proposal or <code>null</code>
 	 */
 	public void setProposalInfo(ProposalInfo proposalInfo) {
 		fProposalInfo= proposalInfo;
