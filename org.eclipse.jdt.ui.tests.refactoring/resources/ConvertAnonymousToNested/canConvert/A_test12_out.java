@@ -1,6 +1,6 @@
 package p;
 class A{
-	private static final class Inner extends A {
+	private final class Inner extends A {
 		int k;
 		private final int u;
 

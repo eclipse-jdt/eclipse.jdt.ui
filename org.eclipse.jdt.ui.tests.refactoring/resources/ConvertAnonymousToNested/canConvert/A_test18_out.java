@@ -1,12 +1,13 @@
 package p;
 class A{
 	private final class Inner extends A {
-		int k;
 		private final int u;
-
-		public Inner(int u) {
-			this.u = u;
-			k= u;
+		private Inner(int u) {
+			super();
+			this.u= u;
+		}
+		void g(){
+			int uj= u;
 		}
 	}
 	void f(){

@@ -1,7 +1,7 @@
 package p;
 //private, static, final
 class A{
-	private static final class Inner extends A {
+	private final class Inner extends A {
 	}
 	void f(){
 		new Inner();
