@@ -25,6 +25,7 @@ import org.eclipse.swt.events.ShellListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
@@ -99,6 +100,7 @@ public class JavaReconciler extends MonoReconciler {
 		private Control fControl;
 		
 		public ActivationListener(Control control) {
+			Assert.isNotNull(control);
 			fControl= control;
 		}
 
@@ -114,7 +116,8 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellDeactivated(ShellEvent e) {
-			setJavaModelChanged(false);
+			if (!fControl.isDisposed() && fControl.isVisible())
+				setJavaModelChanged(false);
 		}
 	}
 	
