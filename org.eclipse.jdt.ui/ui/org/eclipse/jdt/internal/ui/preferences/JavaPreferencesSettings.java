@@ -19,7 +19,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class JavaPreferencesSettings  {
@@ -27,11 +26,11 @@ public class JavaPreferencesSettings  {
 	
 	public static CodeGenerationSettings getCodeGenerationSettings(IJavaProject project) {
 		CodeGenerationSettings res= new CodeGenerationSettings();
-		res.createComments= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.CODEGEN_ADD_COMMENTS)).booleanValue();
-		res.useKeywordThis= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.CODEGEN_KEYWORD_THIS)).booleanValue();
+		res.createComments= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_ADD_COMMENTS, project)).booleanValue();
+		res.useKeywordThis= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_KEYWORD_THIS, project)).booleanValue();
 		res.importOrder= getImportOrderPreference(project);
 		res.importThreshold= getImportNumberThreshold(project);
-		res.importIgnoreLowercase= Boolean.valueOf(StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE)).booleanValue();
+		res.importIgnoreLowercase= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
 		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
 		return res;
 	}
@@ -44,7 +43,7 @@ public class JavaPreferencesSettings  {
 	}
 
 	public static int getImportNumberThreshold(IJavaProject project) {
-		String thresholdStr= StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
+		String thresholdStr= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
 		try {
 			int threshold= Integer.parseInt(thresholdStr);
 			if (threshold < 0) {
@@ -57,7 +56,7 @@ public class JavaPreferencesSettings  {
 	}
 
 	public static String[] getImportOrderPreference(IJavaProject project) {
-		String str= StubUtility.getPreferenceInScope(project, PreferenceConstants.ORGIMPORTS_IMPORTORDER);
+		String str= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
 		if (str != null) {
 			return unpackList(str, ";"); //$NON-NLS-1$
 		}

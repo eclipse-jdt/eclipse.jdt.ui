@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
@@ -23,6 +25,7 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
@@ -3150,6 +3153,30 @@ public class PreferenceConstants {
 	 */
 	public static IClasspathEntry[] getDefaultJRELibrary() {
 		return NewJavaProjectPreferencePage.getDefaultJRELibrary();
+	}
+
+	/**
+	 * Returns the value for the given key in the given context.
+	 * @param key The preference key
+	 * @param project The current context or <code>null</code> if no context is available and the
+	 * workspace setting should be taken. Note that passing <code>null</code> should
+	 * be avoided.
+	 * @return Returns the current value for the string.
+	 * @since 3.1
+	 */
+	public static String getPreference(String key, IJavaProject project) {
+		String val;
+		if (project != null) {
+			val= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN).get(key, null);
+			if (val != null) {
+				return val;
+			}
+		}
+		val= new InstanceScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
+		if (val != null) {
+			return val;
+		}
+		return new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(key, null);
 	}
 }
 
