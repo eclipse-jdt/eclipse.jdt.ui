@@ -472,7 +472,7 @@ public class DeleteTest extends RefactoringTest{
 
 	public void testDeleteWithinCu16() throws Exception{
 		if (true) {
-			printTestDisabledMessage("testDeleteWithinCu16 desaibled for bug#55221");		
+			printTestDisabledMessage("testDeleteWithinCu16 disabled for bug#55221");		
 			return;
 		}
 		
