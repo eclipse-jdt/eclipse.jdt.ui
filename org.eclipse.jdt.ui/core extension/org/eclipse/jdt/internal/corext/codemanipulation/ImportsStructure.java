@@ -873,7 +873,7 @@ public final class ImportsStructure implements IImportsStructure {
 				if (types.length > 0) {
 					return Math.min(types[0].getSourceRange().getOffset(), region.getOffset());
 				}
-				return range.getOffset() + range.getLength();
+				return region.getOffset();
 			}
 		}
 		return 0;
