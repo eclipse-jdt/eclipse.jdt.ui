@@ -17,13 +17,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.TableCursor;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -33,9 +32,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
-import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ICellModifier;
@@ -93,8 +90,12 @@ public class ChangeParametersControl extends Composite {
 				return info.getNewTypeName();
 			if (columnIndex == NEWNAME_PROP)
 				return info.getNewName();
-			if (columnIndex == DEFAULT_PROP)
-				return info.getDefaultValue();
+			if (columnIndex == DEFAULT_PROP) {
+			    if (info.isAdded())
+			        return info.getDefaultValue();
+			    else
+			        return "-";
+			}
 			Assert.isTrue(false);
 			return ""; //$NON-NLS-1$
 		}
@@ -162,7 +163,6 @@ public class ChangeParametersControl extends Composite {
 	private Button fAddButton;
 	private Button fRemoveButton;
 	private List fParameterInfos;
-	private TableCursor fTableCursor; 
 
 	/**
 	 * @param label no label is created if <code>label</code> is <code>null</code>.
@@ -198,11 +198,6 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setInput(fParameterInfos);
 		if (fParameterInfos.size() > 0)
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
-			
-		//XXX workaround for bug 24798	
-		if (canEditTableCells() && getTableItemCount() != 0) {
-			showTableCursor(true);
-		}	
 	}
 
 	// ---- Parameter table -----------------------------------------------------------------------------------
@@ -244,6 +239,15 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 
+		table.addTraverseListener(new TraverseListener() {
+			public void keyTraversed(TraverseEvent e) {
+				if (e.detail == SWT.TRAVERSE_RETURN && e.stateMask == SWT.NONE) {
+					editColumnOrNextPossible(0);
+					e.doit= false;
+				}
+			}
+		});
+
 		if (canEditTableCells()){
 			addCellEditors();
 		}	
@@ -252,65 +256,41 @@ public class ChangeParametersControl extends Composite {
     private boolean canEditTableCells() {
         return fCanChangeParameterNames || fCanChangeTypesOfOldParameters;
     }
-
-	private void addTableCursor(final Table table) {
-		fTableCursor = new TableCursor(table, SWT.NONE);
-		fTableCursor.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fTableViewer.setSelection(new StructuredSelection(fTableCursor.getRow().getData()));
-			}
-			public void widgetDefaultSelected(SelectionEvent e){
-				ChangeParametersControl.this.editFirstSelected();
-			}
-		});	
-		fTableCursor.addMouseListener(new MouseAdapter(){
-			public void mouseDoubleClick(MouseEvent e) {
-				ChangeParametersControl.this.editFirstSelected();
-			}
-			public void mouseDown(MouseEvent e) {
-				ChangeParametersControl.this.editFirstSelected();
-			}
-		});
-		// Hide the TableCursor when the user hits the "CTRL" or "SHIFT" key.
-		// This alows the user to select multiple items in the table.
-		fTableCursor.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				if (	e.keyCode == SWT.MOD1 || 
-				    	e.keyCode == SWT.MOD2 || 
-				    (e.stateMask & SWT.MOD1) != 0 || 
-				    (e.stateMask & SWT.MOD2) != 0) {
-						setTableCursorVisible(false);
-				}
-			}
-		});
-		// Show the TableCursor when the user releases the "SHIFT" or "CTRL" key.
-		// This signals the end of the multiple selection task.
-		table.addKeyListener(new KeyAdapter() {
-			public void keyReleased(KeyEvent e) {
-				if (e.keyCode == SWT.MOD1 	&& (e.stateMask & SWT.MOD2) 	!= 0) return;
-				if (e.keyCode == SWT.MOD2 	&& (e.stateMask & SWT.MOD1) 	!= 0) return;
-				if (e.keyCode != SWT.MOD1 	&& (e.stateMask & SWT.MOD1) 	!= 0) return;
-				if (e.keyCode != SWT.MOD2 	&& (e.stateMask & SWT.MOD2) 	!= 0) return;
-				if (table.getSelectionCount() != 1) return;
-				if (fTableCursor == null) return;
-				 
-				TableItem[] selection = table.getSelection();
-				TableItem row = (selection.length == 0) ? table.getItem(table.getTopIndex()) : selection[0];
-				table.showItem(row);
-				fTableCursor.setSelection(row, 0);
-				setTableCursorVisible(true);
-				fTableCursor.setFocus();
-			}
-		});
-	}
 	
-	private void editFirstSelected(){
-		ParameterInfo[]	selected= getSelectedItems();
+	private void editColumnOrNextPossible(int column){
+		ParameterInfo[]	selected= getSelectedElements();
 		if (selected.length != 1)
 			return;
-		fTableViewer.editElement(selected[0], fTableCursor.getColumn());
+		int nextColumn= column;
+		do {
+			fTableViewer.editElement(selected[0], nextColumn);
+			if (fTableViewer.isCellEditorActive())
+				return;
+			nextColumn= nextColumn(nextColumn);
+		} while (nextColumn != column);
 	}
-
+	
+	private void editColumnOrPrevPossible(int column){
+		ParameterInfo[]	selected= getSelectedElements();
+		if (selected.length != 1)
+			return;
+		int prevColumn= column;
+		do {
+			fTableViewer.editElement(selected[0], prevColumn);
+			if (fTableViewer.isCellEditorActive())
+			    return;
+			prevColumn= prevColumn(prevColumn);
+		} while (prevColumn != column);
+	}
+	
+	private int nextColumn(int column) {
+		return (column >= getTable().getColumnCount() - 1) ? 0 : column + 1;
+	}
+	
+	private int prevColumn(int column) {
+		return (column <= 0) ? getTable().getColumnCount() - 1 : column - 1;
+	}
+	
 	private void addColumnLayoutData(TableLayoutComposite layouter) {
 		if (fCanAddParameters){
 			layouter.addColumnData(new ColumnWeightData(33, true));
@@ -322,7 +302,7 @@ public class ChangeParametersControl extends Composite {
 		}	
 	}
 
-	private ParameterInfo[] getSelectedItems() {
+	private ParameterInfo[] getSelectedElements() {
 		ISelection selection= fTableViewer.getSelection();
 		if (selection == null)
 			return new ParameterInfo[0];
@@ -393,6 +373,10 @@ public class ChangeParametersControl extends Composite {
 		return fTableViewer.getTable();
 	}
 	
+	private int getTableSelectionIndex() {
+	    return getTable().getSelectionIndex();
+	}
+	
 	private Button createEditButton(Composite buttonComposite) {
 		Button button= new Button(buttonComposite, SWT.PUSH);
 		button.setText(RefactoringMessages.getString("ChangeParametersControl.buttons.edit")); //$NON-NLS-1$
@@ -400,32 +384,16 @@ public class ChangeParametersControl extends Composite {
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				ISelection selection= fTableViewer.getSelection();
 				try {
-					ParameterInfo[] selected= getSelectedItems();
+					ParameterInfo[] selected= getSelectedElements();
 					Assert.isTrue(selected.length == 1);
 					ParameterInfo parameterInfo= selected[0];
-					int column= getTableCursorColumn();
-					int row= getTableCursorRow();
-					showTableCursor(false);
 					ParameterEditDialog dialog= new ParameterEditDialog(getShell(), parameterInfo, fCanChangeTypesOfOldParameters);
-					if (dialog.open() == IDialogConstants.CANCEL_ID) {
-						fTableViewer.setSelection(selection);
-						adjustTableCursor(column, row);
-						return;
-					}
+					dialog.open();
 					fListener.parameterChanged(parameterInfo);
 					fTableViewer.update(parameterInfo, PROPERTIES);
-					adjustTableCursor(column, row);
 				} finally {
-					fTableViewer.refresh();
-					fTableViewer.setSelection(selection);
-				}
-			}
-			private void adjustTableCursor(int column, int row) {
-				if (column >= 0 && row >= 0) {
-					showTableCursor(true);
-					setTableCursorSelection(row, column);
+					fTableViewer.getControl().setFocus();
 				}
 			}
 		});
@@ -447,9 +415,7 @@ public class ChangeParametersControl extends Composite {
 				int row= getTableItemCount() - 1;
 				getTable().setSelection(row);
 				updateButtonsEnabledState();
-				showTableCursor(true);
-				setTableCursorSelection(row, 0);
-				editFirstSelected();
+				editColumnOrNextPossible(0);
 			}
 		});	
 		return button;
@@ -463,7 +429,7 @@ public class ChangeParametersControl extends Composite {
 		button.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				int index= getTable().getSelectionIndices()[0];
-				ParameterInfo[] selected= getSelectedItems();
+				ParameterInfo[] selected= getSelectedElements();
 				for (int i= 0; i < selected.length; i++) {
 					if (selected[i].isAdded())
 						fParameterInfos.remove(selected[i]);
@@ -476,14 +442,9 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.refresh();
 				fTableViewer.getControl().setFocus();
 				int itemCount= getTableItemCount();
-				if (itemCount != 0) {
-					if (index >= itemCount)
-						index= itemCount - 1;
+				if (itemCount != 0 && index >= itemCount) {
+					index= itemCount - 1;
 					getTable().setSelection(index);
-					setTableCursorSelection(index, 0);
-					showTableCursor(true);
-				} else {
-					showTableCursor(false); 
 				}
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
@@ -502,16 +463,9 @@ public class ChangeParametersControl extends Composite {
 				ISelection savedSelection= fTableViewer.getSelection();
 				if (savedSelection == null)
 					return;
-				ParameterInfo[] selection= getSelectedItems();
+				ParameterInfo[] selection= getSelectedElements();
 				if (selection.length == 0)
 					return;
-
-				int column= getTableCursorColumn();
-				Object element= null;
-				int r=  getTableCursorRow();
-				if (r >= 0) {
-					element= fTableViewer.getElementAt(r);
-				}
 					
 				if (up) {
 					moveUp(selection);
@@ -519,58 +473,12 @@ public class ChangeParametersControl extends Composite {
 					moveDown(selection);
 				}
 				fTableViewer.refresh();
-				fTableViewer.getControl().setFocus();
 				fTableViewer.setSelection(savedSelection);
 				fListener.parameterListChanged();
-				Widget item= fTableViewer.testFindItem(element);
-				int row= 0;
-				if (item instanceof TableItem) {
-					row= getTable().indexOf((TableItem)item);
-					if (row < 0)
-						row= 0;
-				}
-				setTableCursorSelection(row, column);
+				fTableViewer.getControl().setFocus();
 			}
 		});
 		return button;
-	}
-	
-	private void showTableCursor(boolean show) {
-		if (show) {
-			if (fTableCursor == null || fTableCursor.isDisposed())
-				addTableCursor(fTableViewer.getTable());
-			fTableCursor.setVisible(true);
-		} else {
-			if (fTableCursor != null && !fTableCursor.isDisposed()) {
-				fTableCursor.setVisible(false);
-				fTableCursor.dispose();
-			}
-			fTableCursor= null;
-		}
-	}
-	
-	private void setTableCursorSelection(int row, int column) {
-		if (fTableCursor != null && !fTableCursor.isDisposed())
-			fTableCursor.setSelection(row, column);
-	}
-	
-	private void setTableCursorVisible(boolean visible) {
-		if (fTableCursor != null && !fTableCursor.isDisposed())
-			fTableCursor.setVisible(visible);
-	}
-	
-	private int getTableCursorColumn() {
-		if (fTableCursor != null && !fTableCursor.isDisposed())
-			return fTableCursor.getColumn();
-		return -1;
-	}
-	
-	private int getTableCursorRow() {
-		if (fTableCursor != null && !fTableCursor.isDisposed()) {
-			TableItem item= fTableCursor.getRow();
-			return getTable().indexOf(item);
-		}
-		return -1;
 	}
 	
 	//---- editing -----------------------------------------------------------------------------------------------
@@ -581,7 +489,72 @@ public class ChangeParametersControl extends Composite {
 		editors[TYPE_PROP]= new TextCellEditor(getTable());
 		editors[NEWNAME_PROP]= new TextCellEditor(getTable());
 		editors[DEFAULT_PROP]= new TextCellEditor(getTable());
+		
+		for (int i = 0; i < editors.length; i++) {
+			final int editorColumn= i;
+			final CellEditor editor = editors[i];
+			// support tabbing between columns while editing:
+			editor.getControl().addTraverseListener(new TraverseListener() {
+				public void keyTraversed(TraverseEvent e) {
+					switch (e.detail) {
+						case SWT.TRAVERSE_TAB_NEXT :
+							editColumnOrNextPossible(nextColumn(editorColumn));
+							e.doit= false;
+							break;
 
+						case SWT.TRAVERSE_TAB_PREVIOUS :
+							editColumnOrPrevPossible(prevColumn(editorColumn));
+							e.doit= false;
+							break;
+						
+						case SWT.TRAVERSE_ESCAPE :
+							fTableViewer.cancelEditing();
+							e.doit= false;
+							break;
+							
+						default :
+							break;
+					}
+				}
+			});
+			// support switching rows while editing:
+			editor.getControl().addKeyListener(new KeyAdapter() {
+				public void keyPressed(KeyEvent e) {
+					if (e.stateMask == SWT.MOD1 || e.stateMask == SWT.MOD2) {
+						if (e.keyCode == SWT.ARROW_UP || e.keyCode == SWT.ARROW_DOWN) {
+						    // allow starting multi-selection even if in edit mode
+							editor.deactivate();
+							e.doit= false;
+							return;
+						}
+					}
+					
+					if (e.stateMask != SWT.NONE)
+						return;
+					
+					switch (e.keyCode) {
+					case SWT.ARROW_DOWN :
+						e.doit= false;
+						int nextRow= getTableSelectionIndex() + 1;
+						if (nextRow >= getTableItemCount())
+							break;
+						getTable().setSelection(nextRow);
+						editColumnOrPrevPossible(editorColumn);
+						break;
+						
+					case SWT.ARROW_UP :
+						e.doit= false;
+						int prevRow= getTableSelectionIndex() - 1;
+						if (prevRow < 0)
+							break;
+						getTable().setSelection(prevRow);
+						editColumnOrPrevPossible(editorColumn);
+						break;
+					}
+				}
+			});
+		}
+		
 		fTableViewer.setCellEditors(editors);
 		fTableViewer.setColumnProperties(PROPERTIES);
 		fTableViewer.setCellModifier(new ParametersCellModifier());

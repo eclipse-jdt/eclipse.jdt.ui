@@ -15,6 +15,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -142,6 +144,12 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			TabItem itemEx= new TabItem(folder, SWT.NONE);
 			itemEx.setText(RefactoringMessages.getString("ChangeSignatureInputPage.exceptions")); //$NON-NLS-1$
 			itemEx.setControl(createExceptionsTableControl(folder));
+
+			folder.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					((TabItem) e.item).getControl().setFocus();
+				}
+			});
 		}
 	
 		private Control createParameterTableControl(Composite composite) {
