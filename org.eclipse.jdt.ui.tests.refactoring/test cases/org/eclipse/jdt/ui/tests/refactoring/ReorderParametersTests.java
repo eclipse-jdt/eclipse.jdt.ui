@@ -238,6 +238,26 @@ public class ReorderParametersTests extends RefactoringTest {
 		int[] newIndices= {0};
 		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.ERROR);
 	}
+
+	public void testFailAdd3() throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"int"};
+		String[] newDefaultValues= {"not good"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.FATAL);
+	}
+
+	public void testFailAdd4() throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"x"};
+		String[] newTypes= {"not a type"};
+		String[] newDefaultValues= {"0"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		helperAddFail(signature, newParamInfo, newIndices, RefactoringStatus.FATAL);
+	}
 	
 	//---------
 	public void test0() throws Exception{
