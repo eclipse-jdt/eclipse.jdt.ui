@@ -32,6 +32,7 @@ public class RefactoringPreferencePage extends FieldEditorPreferencePage impleme
 		
 	public RefactoringPreferencePage() {
 		super(GRID);
+		setDescription(RefactoringMessages.getString("RefactoringPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 	}
 			

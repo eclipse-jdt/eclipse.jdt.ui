@@ -309,6 +309,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		
 	public JUnitPreferencePage() {
 		super();
+		setDescription(JUnitMessages.getString("JUnitPreferencePage.description")); //$NON-NLS-1$
 		setPreferenceStore(JUnitPlugin.getDefault().getPreferenceStore());
 	}
 
