@@ -264,6 +264,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			srcelements= fFoldersList.getElements();
 		}
 		boolean changeDone= false;
+		CPListElement lastSourceFolder= null;
 		// backwards, as entries will be deleted
 		for (int i= cpelements.size() - 1; i >= 0 ; i--) {
 			CPListElement cpe= (CPListElement)cpelements.get(i);
@@ -273,13 +274,19 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 				if (!srcelements.remove(cpe)) {
 					cpelements.remove(i);
 					changeDone= true;
-				}	
+				} else if (lastSourceFolder == null) {
+					lastSourceFolder= cpe;
+				}
 			}
 		}
-		for (int i= 0; i < srcelements.size(); i++) {
-			cpelements.add(srcelements.get(i));
+
+		if (!srcelements.isEmpty()) {
+			int insertIndex= (lastSourceFolder == null) ? 0 : cpelements.indexOf(lastSourceFolder) + 1;
+			cpelements.addAll(insertIndex, srcelements);
+			changeDone= true;
 		}
-		if (changeDone || (srcelements.size() > 0)) {
+
+		if (changeDone) {
 			fClassPathList.setElements(cpelements);
 		}
 	}
