@@ -139,6 +139,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 */
 	private String fLaunchMode;
 	private ILaunch fLastLaunch= null;
+	
+	/**
+	 * Actions
+	 */
+	private Action fRerunLastTestAction;
+	
 	/**
 	 * The client side of the remote test runner
 	 */
@@ -152,6 +158,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	
 	Image fOriginalViewImage= null;
 	IElementChangedListener fDirtyListener= null;
+	
 	
 	private class StopAction extends Action{
 		public StopAction() {
@@ -274,8 +281,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	 */
 	public void testRunEnded(long elapsedTime){
 		fExecutedTests--;
-		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", elapsedTimeAsString(elapsedTime)); //$NON-NLS-1$
-		postInfo(msg);
+		String[] keys= {elapsedTimeAsString(elapsedTime), String.valueOf(fErrors), String.valueOf(fFailures)};
+		String msg= JUnitMessages.getFormattedString("TestRunnerViewPart.message.finish", keys); //$NON-NLS-1$
+		if (hasErrorsOrFailures())
+			postError(msg);
+		else
+			postInfo(msg);
 		postAsyncRunnable(new Runnable() {				
 			public void run() {
 				if(isDisposed()) 
@@ -294,11 +305,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 	}
 
 	private void updateViewIcon() {
-		if (fErrors+fFailures > 0) 
+		if (hasErrorsOrFailures()) 
 			fViewImage= fTestRunFailIcon;
 		else 
 			fViewImage= fTestRunOKIcon;
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);	
+	}
+
+	private boolean hasErrorsOrFailures() {
+		return fErrors+fFailures > 0;
 	}
 
 	private String elapsedTimeAsString(long runTime) {
@@ -760,8 +775,10 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 
 		IActionBars actionBars= getViewSite().getActionBars();
 		IToolBarManager toolBar= actionBars.getToolBarManager();
+		fRerunLastTestAction= new RerunLastAction();
+		fRerunLastTestAction.setActionDefinitionId("org.eclipse.jdt.junit.reruntest");
 		toolBar.add(new StopAction());
-		toolBar.add(new RerunLastAction());
+		toolBar.add(fRerunLastTestAction);
 
 		actionBars.updateActionBars();
 		
@@ -777,6 +794,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener2, I
 		fOriginalViewImage= getTitleImage();
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
+		getSite().getKeyBindingService().registerAction(fRerunLastTestAction);
 	}
 
 	private IStatusLineManager getStatusLine() {

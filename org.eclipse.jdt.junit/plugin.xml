@@ -206,5 +206,12 @@
          </perspective>
       </shortcut>
    </extension>
-
+	<extension 
+		point="org.eclipse.ui.actionDefinitions">
+		<actionDefinition
+			id="org.eclipse.jdt.junit.reruntest"
+			name= "Rerun Last Test"
+			description="Rerun the last JUnit test"
+		/>
+	</extension>
 </plugin>
