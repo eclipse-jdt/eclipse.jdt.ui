@@ -47,7 +47,8 @@ public class ASTChildConstantsGenerator extends TestCase {
 	
 	public static TypeFilter fgListFilter= new NodeTypeFilter(List.class);
 	public static TypeFilter fgASTFilter= new NodeTypeFilter(ASTNode.class);
-	public static TypeFilter fgPrimitiveFilter= new PrimitiveTypeFilter();
+	public static TypeFilter fgListAndASTFilter=  new PrimitiveTypeFilter(true);
+	public static TypeFilter fgPrimitiveFilter= new PrimitiveTypeFilter(false);
 	public static TypeFilter fgNoFilter= new TypeFilter();
 	
 	public static class TypeFilter {
@@ -69,11 +70,15 @@ public class ASTChildConstantsGenerator extends TestCase {
 	}
 	
 	public static class PrimitiveTypeFilter extends TypeFilter {
-		public PrimitiveTypeFilter() {
+
+		private boolean fInvert;
+
+		public PrimitiveTypeFilter(boolean b) {
+			fInvert= b;
 		}
 		
 		public boolean accept(Class returnType) {
-			return returnType.isPrimitive();
+			return fInvert ^ (!LIST.equals(returnType.getName()) && !ASTNode.class.isAssignableFrom(returnType));
 		}
 	}	
 	
@@ -100,7 +105,29 @@ public class ASTChildConstantsGenerator extends TestCase {
 			return fCollator.compare(name1, name2);
 		}
 
+	}
+	
+	public class MethodTypeComparer implements Comparator {
+
+		private Collator fCollator= Collator.getInstance();
+		
+		public int compare(Object o1, Object o2) {
+			Method m1= (Method)o1;
+			Method m2= (Method)o2;
+			boolean isList1= LIST.equals(m1.getReturnType().getName());
+			boolean isList2= LIST.equals(m2.getReturnType().getName());
+			if (isList1 && !isList2) {
+				return 1;
+			} else if (!isList1 && isList2) {
+				return -1;
+			}
+			String name1= m1.getName();
+			String name2= m2.getName();		
+			return fCollator.compare(name1, name2);
+		}
+
 	}	
+	
 	private static final Class THIS= ASTChildConstantsGenerator.class;
 
 	private IJavaProject fJProject1;
@@ -149,18 +176,23 @@ public class ASTChildConstantsGenerator extends TestCase {
 	
 	
 	public void createGeneratedCU() throws Exception {
+		
+		Class[] astClases= getASTClasses();
+		Arrays.sort(astClases, new ClassNameComparer());
+		
 		StringBuffer buf= new StringBuffer();
 		buf.append("package org.eclipse.jdt.internal.corext.dom;\n\n");
 		buf.append("import java.util.List;");
 		buf.append("import org.eclipse.jdt.core.dom.*;\n\n");
 		buf.append("public class ASTNodeConstants {\n");
 		
-		createPropertyList(buf);
-		createPropertyValidator(buf);
-		createIsListTest(buf);
-		createListAccessor(buf);
-		createNodeAccessor(buf);
-		createPrimitiveAttibutesAccessor(buf);
+		createPropertyList(astClases, buf);
+		createPropertyValidator(astClases, buf);
+		createIsListTest(astClases, buf);
+		createListAccessor(astClases, buf);
+		createNodeAccessor(astClases, buf);
+		createPrimitiveAttibutesAccessor(astClases, buf);
+		createGetNodeProperty(astClases, buf);
 		
 		buf.append("}");
 		
@@ -176,8 +208,8 @@ public class ASTChildConstantsGenerator extends TestCase {
 	
 
 
-	public void createPropertyList(StringBuffer buf) throws Exception {
-		HashMap properties= getPropertyList();
+	public void createPropertyList(Class[] astClases, StringBuffer buf) throws Exception {
+		HashMap properties= getPropertyList(astClases);
 		
 		Object[] objects= properties.keySet().toArray();
 		Arrays.sort(objects, Collator.getInstance());
@@ -203,10 +235,10 @@ public class ASTChildConstantsGenerator extends TestCase {
 		}
 	}
 
-	public void createPropertyValidator(StringBuffer buf) throws Exception {
-		HashMap classes= createClassList();
+	public void createPropertyValidator(Class[] astClases, StringBuffer buf) throws Exception {
+		HashMap classes= createClassList(astClases);
 		
-		buf.append("public static boolean hasChildPropery(ASTNode node, int property) {");	
+		buf.append("public static boolean hasChildProperty(ASTNode node, int property) {");	
 		buf.append("switch (node.getNodeType()) {");	
 		
 		Object[] objects= classes.keySet().toArray();
@@ -239,26 +271,29 @@ public class ASTChildConstantsGenerator extends TestCase {
 		}
 		buf.append("}");	
 		buf.append("return false;");
-		buf.append("}");
+		buf.append("}\n\n");
 	}
 	
-	public void createIsListTest(StringBuffer buf) throws Exception {
+	public void createIsListTest(Class[] astClases, StringBuffer buf) throws Exception {
 		
 		HashSet listProperties= new HashSet();
 		HashSet otherProperties= new HashSet();
-		
-		Class[] astClases= getASTClasses();
-		
+				
 		for (int i= 0; i < astClases.length; i++) {
 			Class cl= astClases[i];
 			Method[] properties= getProperties(cl);
 			for (int k= 0; k < properties.length; k++) {
 				Method curr= properties[k];
+				Class ret= curr.getReturnType();
+
 				String name= toConstantName(getPropertyName(curr));
-				if (!LIST.equals(curr.getReturnType().getName())) {
+				if (!LIST.equals(ret.getName())) {
 					otherProperties.add(name);
 					if (listProperties.contains(name)) {
 						System.out.println("Property is list and non-list: " + name);
+					}
+					if (!fgASTFilter.accept(ret) && !fgPrimitiveFilter.accept(ret)) {
+						System.out.println("Property has unknown return type: " + ret.getName());
 					}
 				} else {
 					listProperties.add(name);
@@ -281,15 +316,13 @@ public class ASTChildConstantsGenerator extends TestCase {
 		buf.append("return true;");
 		buf.append("}");	
 		buf.append("return false;");
-		buf.append("}");
+		buf.append("}\n\n");
 	}
 	
 	
-	public void createListAccessor(StringBuffer buf) throws Exception {
-		Class[] astClases= getASTClasses();
-		Arrays.sort(astClases, new ClassNameComparer());
+	public void createListAccessor(Class[] astClases, StringBuffer buf) throws Exception {
 
-		buf.append("public static List getListPropery(ASTNode node, int property) {");	
+		buf.append("public static List getNodeChildList(ASTNode node, int property) {");	
 		buf.append("switch (node.getNodeType()) {");	
 
 		for (int i= 0; i < astClases.length; i++) {
@@ -325,13 +358,16 @@ public class ASTChildConstantsGenerator extends TestCase {
 		buf.append("}");	
 		buf.append("throw new IllegalArgumentException();");
 		buf.append("}");
+		
+		buf.append("public static ASTNode getNodeChild(ASTNode node, int property, int index) {");	
+		buf.append("return (ASTNode) getNodeChildList(node, property).get(index);");
+		buf.append("}\n\n");
+		
 	}
 	
-	public void createNodeAccessor(StringBuffer buf) throws Exception {
-		Class[] astClases= getASTClasses();
-		Arrays.sort(astClases, new ClassNameComparer());
+	public void createNodeAccessor(Class[] astClases, StringBuffer buf) throws Exception {
 
-		buf.append("public static ASTNode getNodePropery(ASTNode node, int property) {");	
+		buf.append("public static ASTNode getNodeChild(ASTNode node, int property) {");	
 		buf.append("switch (node.getNodeType()) {");	
 
 		for (int i= 0; i < astClases.length; i++) {
@@ -366,14 +402,12 @@ public class ASTChildConstantsGenerator extends TestCase {
 		}
 		buf.append("}");	
 		buf.append("throw new IllegalArgumentException();");
-		buf.append("}");
+		buf.append("}\n\n");
 	}
 	
-	public void createPrimitiveAttibutesAccessor(StringBuffer buf) throws Exception {
-		Class[] astClases= getASTClasses();
-		Arrays.sort(astClases, new ClassNameComparer());
+	public void createPrimitiveAttibutesAccessor(Class[] astClases, StringBuffer buf) throws Exception {
 
-		buf.append("public static Object getAttributePropery(ASTNode node, int property) {");	
+		buf.append("public static Object getNodeAttribute(ASTNode node, int property) {");	
 		buf.append("switch (node.getNodeType()) {");	
 
 		for (int i= 0; i < astClases.length; i++) {
@@ -389,13 +423,7 @@ public class ASTChildConstantsGenerator extends TestCase {
 					String name= getPropertyName(properties[0]);
 	
 					buf.append("if (property == " + toConstantName(name) + ") {");
-					buf.append("return ");
-					if ("int".equals(properties[0].getReturnType().getName())) {
-						buf.append("new Integer(((");
-					} else {
-						buf.append("new Boolean(((");
-					}
-					buf.append(className + ") node)." + properties[0].getName() + "());");
+					appendWrapped(buf, className, properties[0]);		
 					buf.append("}");
 					buf.append("break;");
 				} else {
@@ -403,16 +431,11 @@ public class ASTChildConstantsGenerator extends TestCase {
 					
 					buf.append("switch (property) {");
 					for (int k= 0; k < nProperties; k++) {
-						String name= getPropertyName(properties[k]);
 						
+						Method meth= properties[k];
+						String name= getPropertyName(meth);
 						buf.append("case " + toConstantName(name) + ":");
-						buf.append("return ");
-						if ("int".equals(properties[k].getReturnType().getName())) {
-							buf.append("new Integer(((");
-						} else {
-							buf.append("new Boolean(((");
-						}
-						buf.append(className + ") node)." + properties[k].getName() + "());");		
+						appendWrapped(buf, className, meth);		
 					}
 					buf.append("}");
 					buf.append("break;");
@@ -421,13 +444,87 @@ public class ASTChildConstantsGenerator extends TestCase {
 		}
 		buf.append("}");	
 		buf.append("throw new IllegalArgumentException();");
-		buf.append("}");
-	}	
+		buf.append("}\n\n");
+	}
 	
 	
-	private HashMap getPropertyList() {
-		Class[] astClases= getASTClasses();
+	
+	
+	private void appendWrapped(StringBuffer buf, String className, Method meth) {
+		buf.append("return ");
+		String val= "((" + className + ") node)." + meth.getName() + "()";
 		
+		String retType= meth.getReturnType().getName();
+		if ("int".equals(retType)) {
+			buf.append("new Integer(");
+			buf.append(val);
+			buf.append(")");
+		} else if ("boolean".equals(retType)){
+			buf.append("new Boolean(");
+			buf.append(val);
+			buf.append(")");
+		} else {
+			buf.append(val);
+		}
+		buf.append(";");
+	}
+
+	public void createGetNodeProperty(Class[] astClases, StringBuffer buf) throws Exception {
+
+
+		buf.append("public static int getNodeProperty(ASTNode node) {");
+		buf.append("ASTNode parent=node.getParent();");
+		buf.append("if (parent == null) {");
+		buf.append("throw new IllegalArgumentException();");
+		buf.append("}");
+		
+		buf.append("switch (parent.getNodeType()) {");
+
+		MethodTypeComparer comparer= new MethodTypeComparer();
+		
+		for (int i= 0; i < astClases.length; i++) {
+			Class curr= astClases[i];
+			Method[] properties= getProperties(curr, fgListAndASTFilter);
+			
+			int nProperties= properties.length;
+			if (nProperties != 0) {
+				String className= Signature.getSimpleName(curr.getName());
+				buf.append("case ASTNode." + toConstantName(className) + ":");
+				String varName= "((" + className + ") parent)";
+				if (nProperties > 2) {
+					varName= toVariableName(className);
+					buf.append(className);
+					buf.append(" ");
+					buf.append(varName);
+					buf.append("=(");
+					buf.append(className);
+					buf.append(")parent;");
+				}
+				Arrays.sort(properties, comparer);
+				for (int k= 0; k < properties.length; k++) {
+					Method meth= properties[k];
+					if (k != properties.length - 1) {
+						buf.append("if (").append(varName).append(".");
+						buf.append(meth.getName());
+						if (LIST.equals(meth.getReturnType().getName())) {
+							buf.append("().contains(node))"); 
+						} else {
+							buf.append("() == node)"); 
+						}
+					}
+					buf.append("return ");
+					buf.append(toConstantName(getPropertyName(meth)));
+					buf.append(";");
+				}
+			}
+		}
+		buf.append("}");	
+		buf.append("throw new IllegalArgumentException();");
+		buf.append("}\n\n");
+	}		
+	
+	
+	private HashMap getPropertyList(Class[] astClases) {
 		HashMap result= new HashMap();
 		for (int i= 0; i < astClases.length; i++) {
 			Class cl= astClases[i];
@@ -441,9 +538,7 @@ public class ASTChildConstantsGenerator extends TestCase {
 		return result;
 	}
 	
-	private HashMap createClassList() {
-		Class[] astClases= getASTClasses();
-		
+	private HashMap createClassList(Class[] astClases) {
 		HashMap result= new HashMap();
 		for (int i= 0; i < astClases.length; i++) {
 			Class cl= astClases[i];
@@ -548,6 +643,10 @@ public class ASTChildConstantsGenerator extends TestCase {
 			buf.append(Character.toUpperCase(ch));
 		}
 		return buf.toString();
+	}
+	
+	private static String toVariableName(String string) {
+		return Character.toLowerCase(string.charAt(0)) + string.substring(1);
 	}
 	
 }
