@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
@@ -299,13 +300,31 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private boolean isContained(ITypeBinding curr, ITypeBinding[] list) {
 			for (int i = 0; i < list.length; i++) {
-				if (curr.equals(list[i])) {
+				if (curr == list[i]) {
 					return true;
 				}
 			}
 			return false;
 		}
 		
+		private boolean isInSuperTypes(ITypeBinding typeBinding, ITypeBinding declaring) {
+			ITypeBinding superClass= declaring.getSuperclass();
+			while (superClass != null) {
+				if (isContained(typeBinding, superClass.getDeclaredTypes())) {
+					return true; // inner type of super type
+				}
+				ITypeBinding[] bindings= declaring.getInterfaces();
+				for (int i= 0; i < bindings.length; i++) {
+					ITypeBinding curr= bindings[i];
+					if (isContained(typeBinding, curr.getDeclaredTypes())) {
+						return true; // inner type of super interface
+					}
+					isInSuperTypes(typeBinding, curr);
+				}
+				superClass= superClass.getSuperclass();
+			}
+			return false;
+		}		
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
 			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
@@ -315,11 +334,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			if (Modifier.isPrivate(modifiers)) {
 				return false; // imports for privates are not required
 			}
-			TypeDeclaration currType= (TypeDeclaration) ASTNodes.getParent(ref, ASTNode.TYPE_DECLARATION);
-			if (currType == null || currType.resolveBinding() == null) {
+			ITypeBinding currTypeBinding= ASTResolving.getBindingOfParentType(ref);
+			if (currTypeBinding == null) {
 				return false; // not in a type
 			}
-			ITypeBinding currTypeBinding= currType.resolveBinding();
 			if (!Modifier.isPublic(modifiers)) {
 				if (!currTypeBinding.getPackage().getName().equals(typeBinding.getPackage().getName())) {
 					return false; // not visible
@@ -332,20 +350,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 					if (isContained(typeBinding, declaring.getDeclaredTypes())) {
 						return false; // inner type of the declaring type
 					}
-					ITypeBinding superClass= declaring.getSuperclass();
-					while (superClass != null) {
-						if (isContained(typeBinding, superClass.getDeclaredTypes())) {
-							return false; // inner type of super type
-						}
-						superClass= superClass.getSuperclass();
-					}					
+					if (isInSuperTypes(typeBinding, declaring)) {
+						return false;
+					}		
 					declaring= declaring.getDeclaringClass();
 				}
 			}
 			return true;				
 		}
-		
-		
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.
