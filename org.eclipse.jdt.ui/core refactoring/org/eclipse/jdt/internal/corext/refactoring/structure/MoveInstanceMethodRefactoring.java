@@ -50,6 +50,7 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		public boolean isParameter();
 	}
 	
+	private final IMethod fMethod;
 	private final ICompilationUnit fCU;
 	private final int fSelectionStart, fSelectionLength;
 	private CodeGenerationSettings fCodeGenerationSettings;
@@ -63,10 +64,11 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 	public static MoveInstanceMethodRefactoring create(IMethod method, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {		
 		if (! isAvailable(method))	
 			return null;
-		return new MoveInstanceMethodRefactoring(method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
+		return new MoveInstanceMethodRefactoring(method, method.getCompilationUnit(), method.getNameRange().getOffset(), method.getNameRange().getLength(), codeGenerationSettings);
 	}
 	
-	private MoveInstanceMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings) {
+	private MoveInstanceMethodRefactoring(IMethod method, ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings) {
+		fMethod= method;
 		fCU= cu;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
@@ -115,6 +117,10 @@ public class MoveInstanceMethodRefactoring extends Refactoring {
 		status.merge(RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.getString("MoveInstanceMethodRefactoring.method_declaration"), null, null, RefactoringStatusCodes.METHOD_NOT_SELECTED)); //$NON-NLS-1$
 		return null;
 	} 
+	
+	public IMethod getMethodToMove() {
+		return fMethod;
+	}
 	
 	public String getNewMethodName() {
 		return fMover.getNewMethodName();

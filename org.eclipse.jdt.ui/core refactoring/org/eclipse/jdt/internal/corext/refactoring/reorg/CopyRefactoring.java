@@ -79,6 +79,14 @@ public final class CopyRefactoring extends Refactoring{
 		return new ParentChecker(fCopyPolicy.getResources(), fCopyPolicy.getJavaElements()).getCommonParent();
 	}
 	
+	public IJavaElement[] getJavaElements() {
+		return fCopyPolicy.getJavaElements();
+	}
+
+	public IResource[] getResources() {
+		return fCopyPolicy.getResources();
+	}
+
 	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException{
 		return fCopyPolicy.setDestination(destination);
 	}

@@ -76,6 +76,14 @@ public class ReorgMoveWizard extends RefactoringWizard{
 			return getMoveRefactoring().getCommonParentForInputElements();
 		}
 		
+		protected IJavaElement[] getJavaElements() {
+			return getMoveRefactoring().getJavaElements();
+		}
+
+		protected IResource[] getResources() {
+			return getMoveRefactoring().getResources();
+		}
+
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */

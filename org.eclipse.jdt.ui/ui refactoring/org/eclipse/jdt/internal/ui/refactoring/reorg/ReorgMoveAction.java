@@ -14,6 +14,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -71,6 +72,13 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		}
 	}
 	
+	/*
+	  * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+	  */
+	 public void selectionChanged(ITextSelection selection) {
+		 //do nothing, this happens too often
+	 }
+
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		return MoveRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}

@@ -78,6 +78,14 @@ public class MoveRefactoring extends Refactoring implements IQualifiedNameUpdati
 		return new ParentChecker(fMovePolicy.getResources(), fMovePolicy.getJavaElements()).getCommonParent();
 	}
 	
+	public IJavaElement[] getJavaElements() {
+		return fMovePolicy.getJavaElements();
+	}
+	
+	public IResource[] getResources() {
+		return fMovePolicy.getResources();
+	}
+
 	public RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException{
 		return fMovePolicy.setDestination(destination);
 	}

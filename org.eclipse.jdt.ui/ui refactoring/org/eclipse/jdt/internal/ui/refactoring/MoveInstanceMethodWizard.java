@@ -11,21 +11,21 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.swt.widgets.TableColumn;
-import org.eclipse.swt.widgets.Text;
-
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
@@ -37,22 +37,18 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
-
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.help.WorkbenchHelp;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring.INewReceiver;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class MoveInstanceMethodWizard extends RefactoringWizard {
 
@@ -134,6 +130,8 @@ public class MoveInstanceMethodWizard extends RefactoringWizard {
 		}
 		private static final String PAGE_NAME= "MOVE_INSTANCE_METHOD_INPUT_PAGE";  //$NON-NLS-1$
 		private static final int ROW_COUNT= 7;
+		private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
+				| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES;
 	
 		public MoveInstanceMethodInputPage() {
 			super(PAGE_NAME, true);
@@ -189,7 +187,10 @@ public class MoveInstanceMethodWizard extends RefactoringWizard {
 
 		private void createNewReceiverList(Composite result) {
 			Label label= new Label(result, SWT.SINGLE);
-			label.setText(RefactoringMessages.getString("MoveInstanceMethodInputPage.New_receiver")); //$NON-NLS-1$
+			IMethod method= getMoveRefactoring().getMethodToMove();
+			label.setText(RefactoringMessages.getFormattedString(
+					"MoveInstanceMethodInputPage.New_receiver", //$NON-NLS-1$
+					JavaElementLabels.getElementLabel(method, LABEL_FLAGS)));
 			GridData gd0= new GridData();
 			gd0.horizontalSpan= 2;
 			label.setLayoutData(gd0);

@@ -213,18 +213,12 @@ class ReorgPolicyFactory {
 		private IResource fResourceDestination;
 		private IJavaElement fJavaElementDestination;
 			
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.ICopyPolicy#setDestination(org.eclipse.core.resources.IResource)
-		 */
 		public final RefactoringStatus setDestination(IResource destination) throws JavaModelException {
 			Assert.isNotNull(destination);
 			resetDestinations();
 			fResourceDestination= destination;
 			return verifyDestination(destination);
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.refactoring.reorg2.ICopyPolicy#setDestination(org.eclipse.jdt.core.IJavaElement)
-		 */
 		public final RefactoringStatus setDestination(IJavaElement destination) throws JavaModelException {
 			Assert.isNotNull(destination);
 			resetDestinations();

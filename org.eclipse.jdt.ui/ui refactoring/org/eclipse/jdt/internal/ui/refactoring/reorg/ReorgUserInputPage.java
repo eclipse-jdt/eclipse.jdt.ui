@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
@@ -26,6 +27,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -34,11 +36,14 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{
+	private static final int LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT
+			| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.F_PRE_TYPE_SIGNATURE;
 	private TreeViewer fViewer;
 	public ReorgUserInputPage(String pageName) {
 		super(pageName, true);			
@@ -55,9 +60,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		Object initialSelection= getInitiallySelectedElement();
 		verifyDestination(initialSelection, true);
 
-		Label label= new Label(result, SWT.NONE);
-		label.setText(ReorgMessages.getString("ReorgUserInputPage.0")); //$NON-NLS-1$
-		label.setLayoutData(new GridData());
+		addLabel(result);
 		
 		fViewer= createViewer(result);
 		fViewer.setSelection(new StructuredSelection(initialSelection), true);
@@ -67,6 +70,30 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 			}
 		});
 		Dialog.applyDialogFont(result);
+	}
+	
+	private void addLabel(Composite parent) {
+		Label label= new Label(parent, SWT.NONE);
+		String text;
+		int resources= getResources().length;
+		int javaElements= getJavaElements().length;
+
+		if (resources == 0 && javaElements == 1) {
+			text= ReorgMessages.getFormattedString(
+					"ReorgUserInputPage.select_destination_single", //$NON-NLS-1$
+					JavaElementLabels.getElementLabel(getJavaElements()[0], LABEL_FLAGS));
+		} else if (resources == 1 && javaElements == 0) {
+			text= ReorgMessages.getFormattedString(
+					"ReorgUserInputPage.select_destination_single", //$NON-NLS-1$
+					getResources()[0].getName());
+		} else {
+			text= ReorgMessages.getFormattedString(
+					"ReorgUserInputPage.select_destination_multi", //$NON-NLS-1$
+					String.valueOf(resources + javaElements));
+		}
+
+		label.setText(text);
+		label.setLayoutData(new GridData());
 	}
 	
 	private void viewerSelectionChanged(SelectionChangedEvent event) {
@@ -81,6 +108,9 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 	
 	protected abstract RefactoringStatus verifyDestination(Object selected) throws JavaModelException;
 	
+	protected abstract IResource[] getResources();
+	protected abstract IJavaElement[] getJavaElements();
+
 	private final void verifyDestination(Object selected, boolean initialVerification) {
 		try {
 			RefactoringStatus status= verifyDestination(selected);

@@ -57,6 +57,14 @@ public class ReorgCopyWizard extends RefactoringWizard {
 			return getCopyRefactoring().getCommonParentForInputElements();
 		}
 
+		protected IJavaElement[] getJavaElements() {
+			return getCopyRefactoring().getJavaElements();
+		}
+
+		protected IResource[] getResources() {
+			return getCopyRefactoring().getResources();
+		}
+
 		protected RefactoringStatus verifyDestination(Object selected) throws JavaModelException{
 			if (selected instanceof IJavaElement)
 				return getCopyRefactoring().setDestination((IJavaElement)selected);
