@@ -513,6 +513,7 @@ public class PackagesView extends JavaBrowsingPart{
 
 		// add the selection information from old viewer
 		fWrappedViewer.setViewerInput(object);
+		fWrappedViewer.getControl().setFocus();
 		fWrappedViewer.setSelection(selection, true);
 
 		// dispose old viewer
