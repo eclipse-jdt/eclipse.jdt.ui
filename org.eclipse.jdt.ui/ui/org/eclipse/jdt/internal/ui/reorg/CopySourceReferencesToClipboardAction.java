@@ -44,7 +44,7 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 		
 	private static Object[] createClipboardInput(ISourceReference[] refs) throws JavaModelException {
 		TypedSource[] typedSources= convertToTypedSourceArray(refs);
-		return new Object[] { convertToInputForTextTransfer(typedSources), typedSources, getResourcesForPrimaryTypes(refs)};
+		return new Object[] { convertToInputForTextTransfer(typedSources), typedSources, getResourcesForMainTypes(refs)};
 	}
 	private static Transfer[] createTransfers() {
 		return new Transfer[] { TextTransfer.getInstance(), TypedSourceTransfer.getInstance(), ResourceTransfer.getInstance()};
@@ -67,35 +67,50 @@ class CopySourceReferencesToClipboardAction extends SourceReferenceAction {
 		return elems;
 	}
 	
-	private static IResource[] getResourcesForPrimaryTypes(ISourceReference[] refs){
-		IType[] primaryTypes= getPrimaryTypes(refs);
+	private static IResource[] getResourcesForMainTypes(ISourceReference[] refs){
+		IType[] mainTypes= getMainTypes(refs);
 		List resources= new ArrayList();
-		for (int i= 0; i < primaryTypes.length; i++) {
-			IResource resource= getResource(primaryTypes[i]);
+		for (int i= 0; i < mainTypes.length; i++) {
+			IResource resource= getResource(mainTypes[i]);
 			if (resource != null)
 				resources.add(resource);
 		}
 		return (IResource[]) resources.toArray(new IResource[resources.size()]);
 	}
 	
-	private static IType[] getPrimaryTypes(ISourceReference[] refs){
-		List primaryTypes= new ArrayList();
+	private static IType[] getMainTypes(ISourceReference[] refs){
+		List mainTypes= new ArrayList();
 		for (int i= 0; i < refs.length; i++) {
-			if (isPrimaryType(refs[i]))
-				primaryTypes.add(refs[i]);
+			if (isMainType(refs[i]))
+				mainTypes.add(refs[i]);
 		}
-		return (IType[]) primaryTypes.toArray(new IType[primaryTypes.size()]);
+		return (IType[]) mainTypes.toArray(new IType[mainTypes.size()]);
 	}
 	
-	private static boolean isPrimaryType(ISourceReference ref){
+	private static boolean isMainType(ISourceReference ref){
 		if (! (ref  instanceof IType))
 			return false;
 		if (! ref.exists())	
 			return false;
-		IType type= (IType)ref;
+		IType type= (IType)ref;	
+		
 		if (type.getDeclaringType() != null)
 			return false;
+		
+		try {
+			return isPrimaryType(type) || isCuOnlyType(type);
+		} catch(JavaModelException e) {
+			JavaPlugin.log(e);//cannot show a dialog here
+			return false;
+		}
+	}
+	
+	private static boolean isPrimaryType(IType type){
 		return type.getElementName().equals(Signature.getQualifier(type.getCompilationUnit().getElementName()));
+	}
+	
+	private static boolean isCuOnlyType(IType type) throws JavaModelException{
+		return (type.getCompilationUnit().getTypes().length == 1);
 	}
 	
 	private static IResource getResource(IType type){
