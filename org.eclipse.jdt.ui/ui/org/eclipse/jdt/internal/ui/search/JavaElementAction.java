@@ -78,7 +78,7 @@ public abstract class JavaElementAction extends Action {
 			case IJavaElement.COMPILATION_UNIT:
 				return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:
-				return findType((IClassFile)o, silent);			
+				return findType((IClassFile)o);			
 		}
 		return o;
 	}
@@ -92,7 +92,7 @@ public abstract class JavaElementAction extends Action {
 	}
 	protected IJavaElement getJavaElement(ISelection selection, boolean silent) {
 		if (selection instanceof ITextSelection)
-			return getJavaElement((ITextSelection) selection, silent);
+			return getJavaElement((ITextSelection) selection);
 		else
 			if (selection instanceof IStructuredSelection)
 				return getJavaElement((IStructuredSelection) selection, silent);
@@ -122,7 +122,7 @@ public abstract class JavaElementAction extends Action {
 			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-	private IJavaElement getJavaElement(ITextSelection selection, boolean silent) {
+	private IJavaElement getJavaElement(ITextSelection selection) {
 		IEditorPart editorPart= JavaPlugin.getActivePage().getActiveEditor();
 
 		if (editorPart == null)
@@ -235,7 +235,7 @@ public abstract class JavaElementAction extends Action {
 		}
 		return null;
 	}
-	protected IJavaElement findType(IClassFile cf, boolean silent) {
+	protected IJavaElement findType(IClassFile cf) {
 		IType mainType;
 		try {					
 			mainType= cf.getType();
