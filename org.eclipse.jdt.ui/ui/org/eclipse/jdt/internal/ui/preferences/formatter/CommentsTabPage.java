@@ -82,7 +82,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		" * @param a The first parameter. For an optimum result, this should be an odd number\n" + //$NON-NLS-1$
 		" * between 0 and 100.\n" + //$NON-NLS-1$
 		" * @param b The second parameter.\n" + //$NON-NLS-1$
-		" * @result The result of the foo operation, usually within 0 and 1000.\n" + //$NON-NLS-1$
+		" * @return The result of the foo operation, usually within 0 and 1000.\n" + //$NON-NLS-1$
 		" */" + //$NON-NLS-1$
 		" int foo(int a, int b);" + //$NON-NLS-1$
 		"}"; //$NON-NLS-1$

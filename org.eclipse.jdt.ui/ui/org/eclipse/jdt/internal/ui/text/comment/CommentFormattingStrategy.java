@@ -112,8 +112,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition position= (TypedPosition)fPartitions.removeFirst();
 		
 		if (document != null && position != null) {
-			final boolean format= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT) == IPreferenceStore.TRUE;
-			final boolean header= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER) == IPreferenceStore.TRUE;
+			final boolean format= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMAT).equals(IPreferenceStore.TRUE);
+			final boolean header= getPreferences().get(PreferenceConstants.FORMATTER_COMMENT_FORMATHEADER).equals(IPreferenceStore.TRUE);
 			final boolean tabs= getPreferences().get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR).equals(JavaCore.TAB);
 			
 			final int offset= position.getOffset();
