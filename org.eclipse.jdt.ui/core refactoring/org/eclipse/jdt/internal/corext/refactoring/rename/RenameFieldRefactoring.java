@@ -170,7 +170,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * @return Error message or <code>null</code> if getter can be renamed.	 */
 	public String canEnableGetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return null;
+			return getGetter() == null ? "": null;
+			
 		IMethod getter= getGetter();
 		if (getter == null) 
 			return "";	
@@ -186,7 +187,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 */
 	public String canEnableSetterRenaming() throws JavaModelException{
 		if (fField.getDeclaringType().isInterface())
-			return null;
+			return getSetter() == null ? "": null;
+			
 		IMethod setter= getSetter();
 		if (setter == null) 
 			return "";	
@@ -555,7 +557,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		
 			addOccurrences(new SubProgressMonitor(pm, 1), manager);
 		
-			if (getRenameGetter())
+			if (getGetter() != null && fRenameGetter)
 				addGetterOccurrences(new SubProgressMonitor(pm, 1), manager);
 			else
 				pm.worked(1);

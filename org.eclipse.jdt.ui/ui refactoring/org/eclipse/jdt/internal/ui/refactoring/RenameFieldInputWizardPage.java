@@ -88,7 +88,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			return constructDisabledGetterRenamingLabel(defaultLabel);
 		try {
 			IMethod	getter= getRenameFieldRefactoring().getGetter();
-			if (! getter.exists())
+			if (getter == null || ! getter.exists())
 				return defaultLabel;
 			String getterSig= JavaElementUtil.createMethodSignature(getter);
 			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_getter_to", new String[]{getterSig, createNewGetterName()}); //$NON-NLS-1$
@@ -104,7 +104,7 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 			return constructDisabledSetterRenamingLabel(defaultLabel);
 		try {
 			IMethod	setter= getRenameFieldRefactoring().getSetter();
-			if (! setter.exists())
+			if (setter == null || ! setter.exists())
 				return defaultLabel;
 			String setterSig= JavaElementUtil.createMethodSignature(setter);
 			return RefactoringMessages.getFormattedString("RenameFiledInputWizardPage.rename_setter_to", new String[]{setterSig, createNewSetterName()});//$NON-NLS-1$
@@ -114,10 +114,14 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 		}
 	}
 	private String constructDisabledSetterRenamingLabel(String defaultLabel) {
+		if (fSetterRenamingErrorMessage.equals(""))
+			return defaultLabel;
 		return MessageFormat.format("{0} ({1})", new String[]{defaultLabel, fSetterRenamingErrorMessage});
 	}
 	
 	private String constructDisabledGetterRenamingLabel(String defaultLabel) {
+		if (fGetterRenamingErrorMessage.equals(""))
+			return defaultLabel;
 		return MessageFormat.format("{0} ({1})", new String[]{defaultLabel, fGetterRenamingErrorMessage});
 	}
 	
