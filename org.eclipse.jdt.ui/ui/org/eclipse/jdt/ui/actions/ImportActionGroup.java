@@ -40,7 +40,7 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
  * This class may be instantiated; it is not intended to be subclassed.
  * </p>
  * 
- * @sine 2.0
+ * @since 2.0
  */
 public class ImportActionGroup extends ActionGroup {
 
