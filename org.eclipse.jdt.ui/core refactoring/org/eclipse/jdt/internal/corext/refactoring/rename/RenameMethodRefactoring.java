@@ -185,8 +185,6 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	public final RefactoringStatus checkNewName(String newName) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkMethodName(newName);
-		result.merge(checkIfConstructorName(fMethod, newName));
-					
 		if (Checks.isAlreadyNamed(fMethod, newName))
 			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
 		return result;
