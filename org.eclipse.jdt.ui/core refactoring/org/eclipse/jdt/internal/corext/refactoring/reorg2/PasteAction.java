@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg2;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -90,19 +91,23 @@ public class PasteAction extends SelectionDispatchAction{
 		List elements= selection.toList();
 		IResource[] resources= ReorgUtils2.getResources(elements);
 		IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
-		IPaster paster= createEnabledPaster(javaElements, resources, availableDataTypes);
-		return paster != null && paster.canEnable(javaElements, resources, availableDataTypes);
+		IPaster paster= createEnabledPaster(availableDataTypes);
+		return paster != null && paster.canPasteOn(javaElements, resources);
 	}
 	
-	private IPaster createEnabledPaster(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableDataTypes) throws JavaModelException {
+	private IPaster createEnabledPaster(TransferData[] availableDataTypes) throws JavaModelException {
 		IPaster paster;
 		
 		paster= new ProjectPaster();
-		if (paster.canEnable(javaElements, resources, availableDataTypes))
+		if (paster.canEnable(availableDataTypes)) 
 			return paster;
 		
+		paster= new JavaElementAndResourcePaster();
+		if (paster.canEnable(availableDataTypes)) 
+			return paster;
+
 		paster= new FilePaster();
-		if (paster.canEnable(javaElements, resources, availableDataTypes))
+		if (paster.canEnable(availableDataTypes)) 
 			return paster;
 			
 		return null;
@@ -133,20 +138,36 @@ public class PasteAction extends SelectionDispatchAction{
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils2.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils2.getJavaElements(elements);
-			IPaster paster= createEnabledPaster(javaElements, resources, availableTypes);
-			if (paster != null)
+			IPaster paster= createEnabledPaster(availableTypes);
+			if (paster != null && paster.canPasteOn(javaElements, resources))
 				paster.paste(javaElements, resources, availableTypes);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch(InvocationTargetException e) {
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+		} catch (InterruptedException e) {
+			//ok
 		}
 	}
 
-    private interface IPaster{
-    	public abstract void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException;
-    	public abstract boolean canEnable(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes)  throws JavaModelException;
-    }
+	private interface IPaster{
+		public abstract void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
+		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
+		public abstract boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources)  throws JavaModelException;
+	}
     
     private class ProjectPaster implements IPaster{
+    	
+    	public boolean canEnable(TransferData[] availableDataTypes) {
+			boolean resourceTransfer= isAvailable(ResourceTransfer.getInstance(), availableDataTypes);
+			boolean javaElementTransfer= isAvailable(JavaElementTransfer.getInstance(), availableDataTypes);
+			if (! javaElementTransfer)
+				return canPasteSimpleProjects(availableDataTypes);
+			if (! resourceTransfer)
+				return canPasteJavaProjects(availableDataTypes);
+			return canPasteJavaProjects(availableDataTypes) && canPasteSimpleProjects(availableDataTypes);
+    	}
+    	
 		public void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) {
 			pasteProjects(availableTypes);
 		}
@@ -173,14 +194,8 @@ public class PasteAction extends SelectionDispatchAction{
 			return (IProject[]) result.toArray(new IProject[result.size()]);
 		}
 
-		public boolean canEnable(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableDataTypes) {
-			boolean resourceTransfer= isAvailable(ResourceTransfer.getInstance(), availableDataTypes);
-			boolean javaElementTransfer= isAvailable(JavaElementTransfer.getInstance(), availableDataTypes);
-			if (! javaElementTransfer)
-				return canPasteSimpleProjects(availableDataTypes);
-			if (! resourceTransfer)
-				return canPasteJavaProjects(availableDataTypes);
-			return canPasteJavaProjects(availableDataTypes) && canPasteSimpleProjects(availableDataTypes);
+		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources) {
+			return true;//ignores the selected element
 		}
 		
 		private boolean canPasteJavaProjects(TransferData[] availableDataTypes) {
@@ -200,6 +215,7 @@ public class PasteAction extends SelectionDispatchAction{
 			return true;
 		}
     }
+    
     private class FilePaster  implements IPaster{
 		public void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException {
 			String[] fileData= getClipboardFiles(availableTypes);
@@ -223,13 +239,15 @@ public class PasteAction extends SelectionDispatchAction{
 				return getCommonParent(javaElements, resources);
 		}
 
-		public boolean canEnable(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableDataTypes) throws JavaModelException {
-			if (! isAvailable(FileTransfer.getInstance(), availableDataTypes))
-				return false;
+		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources) throws JavaModelException {
 			Object target= getTarget(javaElements, resources);
 			return target != null && canPasteFilesOn(getAsContainer(target));
 		}
-		
+
+		public boolean canEnable(TransferData[] availableDataTypes) throws JavaModelException {
+			return ! isAvailable(FileTransfer.getInstance(), availableDataTypes);
+		}
+				
 		private boolean canPasteFilesOn(Object target) throws JavaModelException {
 			boolean isPackageFragment= target instanceof IPackageFragment;
 			boolean isJavaProject= target instanceof IJavaProject;
@@ -264,6 +282,59 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 		private Object getCommonParent(IJavaElement[] javaElements, IResource[] resources) {
 			return new ParentChecker(resources, javaElements).getCommonParent();		
+		}
+    }
+    private class JavaElementAndResourcePaster implements IPaster {
+
+		private TransferData[] fAvailableTypes;
+
+		public void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
+			IResource[] clipboardResources= getClipboardResources(availableTypes);
+			if (clipboardResources == null) 
+				clipboardResources= new IResource[0];
+			IJavaElement[] clipboardJavaElements= getClipboardJavaElements(availableTypes);
+			if (clipboardJavaElements == null) 
+				clipboardJavaElements= new IJavaElement[0];
+
+			Object destination= getTarget(javaElements, resources);
+			if (destination instanceof IJavaElement)
+				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination).run(getShell());
+			else if (destination instanceof IResource)
+				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination).run(getShell());
+		}
+
+		private Object getTarget(IJavaElement[] javaElements, IResource[] resources) {
+			if (javaElements.length + resources.length == 1){
+				if (javaElements.length == 1)
+					return javaElements[0];
+				else
+					return resources[0];
+			} else				
+				return getCommonParent(javaElements, resources);
+		}
+		
+		private Object getCommonParent(IJavaElement[] javaElements, IResource[] resources) {
+			return new ParentChecker(resources, javaElements).getCommonParent();		
+		}
+
+		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources) throws JavaModelException {
+			IResource[] clipboardResources= getClipboardResources(fAvailableTypes);
+			if (clipboardResources == null) 
+				clipboardResources= new IResource[0];
+			IJavaElement[] clipboardJavaElements= getClipboardJavaElements(fAvailableTypes);
+			if (clipboardJavaElements == null) 
+				clipboardJavaElements= new IJavaElement[0];
+			Object destination= getTarget(javaElements, resources);
+			if (destination instanceof IJavaElement)
+				return ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination) != null;
+			if (destination instanceof IResource)
+				return ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination) != null;
+			return false;
+		}
+		
+		public boolean canEnable(TransferData[] availableTypes) {
+			fAvailableTypes= availableTypes;
+			return isAvailable(JavaElementTransfer.getInstance(), availableTypes) || isAvailable(ResourceTransfer.getInstance(), availableTypes);
 		}
     }
 }
