@@ -1545,33 +1545,36 @@ public class ImportOrganizeTest extends CoreTests {
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
 		ICompilationUnit unit= pack1.getCompilationUnit("A.java");
 		ICompilationUnit wc= (ICompilationUnit) unit.getWorkingCopy(null, JavaUI.getBufferFactory(), null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("    public Object foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		wc.getBuffer().setContents(buf.toString());
-		
-		String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
-		int threshold= 99;
-
-		ImportsStructure importsStructure= new ImportsStructure(wc, order, threshold, true);
-		importsStructure.addImport("java.util.HashMap");
-		importsStructure.create(false, null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("\n");		
-		buf.append("public class A {\n");
-		buf.append("    public Object foo() {\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		
-		assertEqualStringIgnoreDelim(wc.getSource(), buf.toString());
-
+		try {
+			StringBuffer buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("public class A {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			wc.getBuffer().setContents(buf.toString());
+			
+			String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
+			int threshold= 99;
+	
+			ImportsStructure importsStructure= new ImportsStructure(wc, order, threshold, true);
+			importsStructure.addImport("java.util.HashMap");
+			importsStructure.create(false, null);
+	
+			buf= new StringBuffer();
+			buf.append("package test1;\n");
+			buf.append("\n");
+			buf.append("import java.util.HashMap;\n");
+			buf.append("\n");		
+			buf.append("public class A {\n");
+			buf.append("    public Object foo() {\n");
+			buf.append("    }\n");
+			buf.append("}\n");	
+			
+			assertEqualStringIgnoreDelim(wc.getSource(), buf.toString());
+		} finally {
+			wc.destroy();
+		}
 	}
 	
 	public void testOrganizeImportOnRange() throws Exception {
