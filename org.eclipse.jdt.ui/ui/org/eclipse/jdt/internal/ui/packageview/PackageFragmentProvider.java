@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -417,29 +416,9 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 					});
 				}
 				return;
-
-			} else if (kind == IJavaElementDelta.CHANGED) {
-
-				postRunnable(new Runnable() {
-					public void run() {
-						Control ctrl = fViewer.getControl();
-						if (ctrl != null && !ctrl.isDisposed()) {
-							if (!fFoldPackages)
-								fViewer.refresh(element);
-							else refreshGrandParent(element);
-						}
-					}
-				});
-				return;
-			}
-
+			} 
 		}
-
-		IJavaElementDelta[] affectedChildren = delta.getAffectedChildren();
-		processAffectedChildren(affectedChildren);
-
 	}
-
 
 	// XXX: needs to be revisited - might be a performance issue
 	private void refreshGrandParent(final IJavaElement element) {
@@ -474,14 +453,6 @@ public class PackageFragmentProvider implements  IPropertyChangeListener, ITreeC
 		if (IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH.equals(root.getElementName()))
 			return true;
 		return false;
-	}
-
-	protected void processAffectedChildren(IJavaElementDelta[] affectedChildren) {
-		for (int i= 0; i < affectedChildren.length; i++) {
-			if (!(affectedChildren[i] instanceof ICompilationUnit)) {
-				processDelta(affectedChildren[i]);
-			}
-		}
 	}
 	
 	private void postRunnable(final Runnable r) {
