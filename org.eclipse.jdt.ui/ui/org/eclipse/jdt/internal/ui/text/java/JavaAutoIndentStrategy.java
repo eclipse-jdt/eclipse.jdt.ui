@@ -223,7 +223,7 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		return System.getProperty("line.separator"); //$NON-NLS-1$
 	}
 	
-	protected void pasteText(IDocument document, DocumentCommand command) {
+	protected void smartPaste(IDocument document, DocumentCommand command) {
 
 		String lineDelimiter= getLineDelimiter(document);
 		
@@ -489,6 +489,6 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		else if (c.text.length() == 1)
 			smartIndentAfterBlockDelimiter(d, c);
 		else if (c.text.length() > 1 && getPreferenceStore().getBoolean(CompilationUnitEditor.SMART_PASTE))
-			pasteText(d, c);
+			smartPaste(d, c);
 	}
 }
