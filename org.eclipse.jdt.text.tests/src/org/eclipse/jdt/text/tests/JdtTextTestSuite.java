@@ -11,10 +11,10 @@
 
 package org.eclipse.jdt.text.tests;
 
-import org.eclipse.jdt.text.tests.comments.CommentsTestSuite;
-import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 import junit.framework.Test;
 import junit.framework.TestSuite;
+import org.eclipse.jdt.text.tests.comments.CommentsTestSuite;
+import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 
 
 /**
@@ -38,6 +38,7 @@ public class JdtTextTestSuite {
 		suite.addTest(SmartSemicolonAutoEditStrategyTest.suite());
 		suite.addTest(JavaLineSegmentationTest.suite());
 		suite.addTest(JavaPartitionerTest.suite());
+		suite.addTest(PropertiesFilePartitionerTest.suite());
 		suite.addTest(PartitionTokenScannerTest.suite());
 		suite.addTest(StringsTest.suite());
 		suite.addTest(MarkOccurrenceTest.suite());
