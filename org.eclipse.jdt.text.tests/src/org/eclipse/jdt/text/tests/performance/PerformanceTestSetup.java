@@ -38,16 +38,23 @@ import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 public class PerformanceTestSetup extends TestSetup {
 
-	private static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
+	public static final String PERSPECTIVE= "org.eclipse.jdt.ui.JavaPerspective";
 
 	public static final String PROJECT= "org.eclipse.swt";
 	
 	private static final String PROJECT_ZIP= "/testResources/org.eclipse.swt-R3_0.zip";
 
 	private static final String INTRO_VIEW= "org.eclipse.ui.internal.introview";
+
+	private boolean fSetPerspective;
 	
 	public PerformanceTestSetup(Test test) {
+		this(test, true);
+	}
+	
+	public PerformanceTestSetup(Test test, boolean setPerspective) {
 		super(test);
+		fSetPerspective= setPerspective;
 	}
 
 	/*
@@ -62,7 +69,8 @@ public class PerformanceTestSetup extends TestSetup {
 		if (viewReference != null)
 			activePage.hideView(viewReference);
 		
-		workbench.showPerspective(PERSPECTIVE, activeWindow);
+		if (fSetPerspective)
+			EditorTestHelper.showPerspective(PERSPECTIVE);
 		
 		if (!projectExists(PROJECT)) {
 			boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
@@ -79,7 +87,7 @@ public class PerformanceTestSetup extends TestSetup {
 	 * @see junit.extensions.TestSetup#tearDown()
 	 */
 	protected void tearDown() throws Exception {
-		// do nothing, the set up workspace will be used by the open editor tests
+		// do nothing, the set up workspace will be used by other tests (see test.xml)
 	}
 	
 	private void setUpProject() throws IOException, ZipException, CoreException {

@@ -35,34 +35,35 @@
 
   <!-- This target defines the performance tests that need to be run. -->
   <target name="performance-suite">
-    <property name="jdt-text-performance-folder" 
-              value="${eclipse-home}/jdt_text_performance_folder"/>
+    <property name="jdt-text-performance-folder" value="${eclipse-home}/jdt_text_performance_folder"/>
     <delete dir="${jdt-text-performance-folder}" quiet="true"/>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" value="org.eclipse.jdt.text.tests.performance.OpenJavaEditorTest"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.PerformanceTestSuite2"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
       <property name="classname" value="org.eclipse.jdt.text.tests.performance.OpenTextEditorTest"/>
     </ant>
+    
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
       <property name="vmargs" value="-Xms250M -Xmx250M"/>
       <property name="data-dir" value="${jdt-text-performance-folder}"/>
       <property name="plugin-name" value="${plugin-name}"/>
-      <property name="classname" 
-                value="org.eclipse.jdt.text.tests.performance.EventDrivenTestSuite"/>
+      <property name="classname" value="org.eclipse.jdt.text.tests.performance.EventDrivenTestSuite"/>
     </ant>
   </target>
 

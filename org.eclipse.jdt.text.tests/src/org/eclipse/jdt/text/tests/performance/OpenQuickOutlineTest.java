@@ -71,8 +71,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 	
 	protected void tearDown() throws Exception {
 		super.tearDown();
-		for (int i= 0, n= getWarmUpRuns() + getMeasuredRuns(); i < n; i++)
-			ResourceTestHelper.delete(PATH + ORIG_NAME + i + ".java");
+		ResourceTestHelper.delete(PATH + ORIG_NAME, ".java", getWarmUpRuns() + getMeasuredRuns());
 		if (fWasOutlineViewShown)
 			EditorTestHelper.showView(OUTLINE_VIEW);
 		fFirstMeter.dispose();

@@ -33,11 +33,13 @@ import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewReference;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.WorkbenchException;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.IDocumentProvider;
@@ -296,5 +298,11 @@ public class EditorTestHelper {
 
 	private static boolean isActive(Accessor backgroundThreadAccessor) {
 		return ((Boolean) backgroundThreadAccessor.invoke("isActive", new Object[0])).booleanValue();
+	}
+
+	public static void showPerspective(String perspective) throws WorkbenchException {
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
+		workbench.showPerspective(perspective, activeWindow);
 	}
 }

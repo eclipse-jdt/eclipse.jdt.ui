@@ -80,6 +80,11 @@ public class ResourceTestHelper {
 		getFile(file).delete(true, null);
 	}
 
+	public static void delete(String prefix, String suffix, int n) throws CoreException {
+		for (int i= 0; i < n; i++)
+			delete(prefix + i + suffix);
+	}
+
 	public static IFile findFile(String pathStr) {
 		IFile file= getFile(pathStr);
 		Assert.assertTrue(file != null && file.exists());

@@ -17,16 +17,14 @@ import junit.framework.TestSuite;
 /**
  * @since 3.1
  */
-public class AllPerformanceTestSuite extends TestSuite {
+public class PerformanceTestSuite2 extends TestSuite {
 
 	public static Test suite() {
-		return new AllPerformanceTestSuite();
+		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new PerformanceTestSuite2()));
 	}
 	
-	public AllPerformanceTestSuite() {
-		addTest(PerformanceTestSuite.suite());
-		addTest(PerformanceTestSuite2.suite());
-		addTest(OpenTextEditorTest.suite());
-		addTest(EventDrivenTestSuite.suite());
+	public PerformanceTestSuite2() {
+		addTest(OpenJavaEditorTest.suite());
+		addTest(new OpenTextEditorTest.Setup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 	}
 }

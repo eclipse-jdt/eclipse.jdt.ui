@@ -24,8 +24,6 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 	
 	public PerformanceTestSuite() {
-		addTest(new OpenJavaEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
-		addTest(new OpenTextEditorTestSetup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 		addTest(RevertTextEditorTest.suite());
 		addTest(RevertJavaEditorTest.suite());
 		addTest(ToggleCommentTest.suite());
@@ -33,5 +31,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(UndoTextEditorTest.suite());
 		addTest(OpenQuickOutlineTest.suite());
 		addTest(OpenJavaEditorStressTest.suite());
+		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite())); // the actual test runs in its own workbench (see test.xml)
 	}
 }

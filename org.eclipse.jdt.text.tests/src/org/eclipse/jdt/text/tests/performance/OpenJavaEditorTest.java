@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -32,21 +33,45 @@ import org.eclipse.test.performance.PerformanceMeter;
  */
 public class OpenJavaEditorTest extends OpenEditorTest {
 
+	public static class Setup extends TestSetup {
+
+		public Setup(Test test) {
+			super(test);
+		}
+
+		protected void setUp() throws Exception {
+			ResourceTestHelper.replicate(PREFIX + FILE_SUFFIX, PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS, FILE_PREFIX, FILE_PREFIX, ResourceTestHelper.SKIP_IF_EXISTS);
+		}
+	}
+
+	public static class TearDown extends TestSetup {
+
+		public TearDown(Test test) {
+			super(test);
+		}
+
+		protected void tearDown() throws Exception {
+			ResourceTestHelper.delete(PREFIX, FILE_SUFFIX, WARM_UP_RUNS + MEASURED_RUNS);
+		}
+	}
+
 	private static final Class THIS= OpenJavaEditorTest.class;
 
 	private static final String SHORT_NAME_FIRST_RUN= "Open Java editor (first in session)";
 
 	private static final String SHORT_NAME_WARM_RUN= "Open Java editor (reopen)";
 
-	public static final int WARM_UP_RUNS= 10;
+	private static final int WARM_UP_RUNS= 10;
 	
-	public static final int MEASURED_RUNS= 5;
+	private static final int MEASURED_RUNS= 5;
 	
-	public static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
+	private static final String PATH= "/Eclipse SWT/win32/org/eclipse/swt/graphics/";
 	
-	public static final String FILE_PREFIX= "TextLayout";
+	private static final String FILE_PREFIX= "TextLayout";
 	
-	public static final String FILE_SUFFIX= ".java";
+	private static final String PREFIX= "/" + PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX;
+	
+	private static final String FILE_SUFFIX= ".java";
 	
 	public OpenJavaEditorTest() {
 		super();
@@ -62,7 +87,7 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 		suite.addTest(new OpenJavaEditorTest("testOpenFirstEditor"));
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor1"));
 		suite.addTest(new OpenJavaEditorTest("testOpenJavaEditor2"));
-		return new CloseWorkbenchDecorator(new PerformanceTestSetup(new OpenJavaEditorTestSetup(suite)));
+		return new PerformanceTestSetup(new Setup(new TearDown(suite)));
 	}
 	
 	/*
@@ -85,17 +110,17 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 
 	public void testOpenFirstEditor() throws Exception {
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME_FIRST_RUN, Dimension.ELAPSED_PROCESS); 
-		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX + FILE_SUFFIX) }, performanceMeter);
+		measureOpenInEditor(new IFile[] { ResourceTestHelper.findFile(PREFIX + FILE_SUFFIX) }, performanceMeter);
 	}
 	
 	public void testOpenJavaEditor1() throws Exception {
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter());
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), createPerformanceMeter());
+		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter());
+		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), createPerformanceMeter());
 	}
 	
 	public void testOpenJavaEditor2() throws Exception {
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter());
+		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, 0, getWarmUpRuns()), Performance.getDefault().getNullPerformanceMeter());
 		PerformanceMeter performanceMeter= createPerformanceMeterForGlobalSummary(SHORT_NAME_WARM_RUN, Dimension.ELAPSED_PROCESS); 
-		measureOpenInEditor(ResourceTestHelper.findFiles(PerformanceTestSetup.PROJECT + PATH + FILE_PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter);
+		measureOpenInEditor(ResourceTestHelper.findFiles(PREFIX, FILE_SUFFIX, getWarmUpRuns(), getMeasuredRuns()), performanceMeter);
 	}
 }
