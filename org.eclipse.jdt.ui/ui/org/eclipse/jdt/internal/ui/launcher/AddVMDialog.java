@@ -20,7 +20,7 @@ public class AddVMDialog extends StatusDialog {
 	protected StringButtonDialogField fSystemLibrary;
 	protected StringButtonDialogField fSystemLibrarySource;
 	
-	protected Button fUseCustomLibrary;
+	protected Button fUseDefaultLibrary;
 	
 	protected IStatus[] fStati;
 		
@@ -53,7 +53,7 @@ public class AddVMDialog extends StatusDialog {
 			public void dialogFieldChanged(DialogField field) {
 				fStati[1]= validateJDKLocation();
 				updateStatusLine();
-				if ((fStati[1] == null || fStati[1].isOK()) && !fUseCustomLibrary.getSelection()) {
+				if ((fStati[1] == null || fStati[1].isOK()) && !isCustomLibraryUsed()) {
 					updateLibraryFieldDefaults();
 				}
 			}
@@ -147,17 +147,17 @@ public class AddVMDialog extends StatusDialog {
 		gd.horizontalSpan= 3;
 		l.setLayoutData(gd);
 		
-		fUseCustomLibrary= new Button(parent, SWT.CHECK);
-		fUseCustomLibrary.setText("Use custom library");
+		fUseDefaultLibrary= new Button(parent, SWT.CHECK);
+		fUseDefaultLibrary.setText("Use default library");
 		gd= new MGridData();
 		gd.horizontalSpan=3;
-		fUseCustomLibrary.setLayoutData(gd);
-		fUseCustomLibrary.addListener(SWT.Selection, new Listener() {
+		fUseDefaultLibrary.setLayoutData(gd);
+		fUseDefaultLibrary.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event evt) {
-				if (fUseCustomLibrary.getSelection()) {
-					useCustomSystemLibrary();
-				} else {
+				if (fUseDefaultLibrary.getSelection()) {
 					useDefaultSystemLibrary();
+				} else {
+					useCustomSystemLibrary();
 				}
 			}
 		});
@@ -196,7 +196,7 @@ public class AddVMDialog extends StatusDialog {
 		fVMName.setText("");
 		fJDKRoot.setText("");
 		fDebuggerTimeout.setText("3000");
-		fUseCustomLibrary.setSelection(false);
+		fUseDefaultLibrary.setSelection(true);
 		useDefaultSystemLibrary();
 	}
 	
@@ -302,7 +302,7 @@ public class AddVMDialog extends StatusDialog {
 	}
 	
 	protected boolean isCustomLibraryUsed() {
-		return fUseCustomLibrary.getSelection();
+		return !fUseDefaultLibrary.getSelection();
 	}
 	
 	protected IStatus validateSystemLibrarySource() {
@@ -405,7 +405,7 @@ public class AddVMDialog extends StatusDialog {
 		vm.setInstallLocation(new File(fJDKRoot.getText()));
 		vm.setName(fVMName.getText());
 		vm.setDebuggerTimeout(getTimeout());
-		if (fUseCustomLibrary.getSelection()) {
+		if (isCustomLibraryUsed()) {
 			File systemLibrary= new File(fSystemLibrary.getText());
 			File source= new File(fSystemLibrarySource.getText());
 			String pathString= determinePackagePrefix(source);
