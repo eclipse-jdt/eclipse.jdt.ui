@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+
 /**
  * Extends a  TableViewer to allow more performance when showing error ticks.
  * A <code>ProblemItemMapper</code> is contained that maps all items in
@@ -154,12 +156,16 @@ public class ProblemTableViewer extends TableViewer implements IProblemChangedLi
 					if (element instanceof IJavaElement) {
 						IJavaElement je= convertToValidElement((IJavaElement)element);
 						if (je != null)
-							element= je;
+							elementsToSelect.add(je);
 					}
-					elementsToSelect.add(element);
 				}
-				newSelection= new StructuredSelection(elementsToSelect);
-				setSelection(newSelection);
+				if (!elementsToSelect.isEmpty()) {
+					List alreadySelected= SelectionUtil.toList(newSelection);
+					if (alreadySelected != null && !alreadySelected.isEmpty())
+						elementsToSelect.addAll(SelectionUtil.toList(newSelection));
+					newSelection= new StructuredSelection(elementsToSelect);
+					setSelection(newSelection);
+				}
 			}
 		}
 		super.handleInvalidSelection(invalidSelection, newSelection);
@@ -173,20 +179,24 @@ public class ProblemTableViewer extends TableViewer implements IProblemChangedLi
 	 */
 	private IJavaElement convertToValidElement(IJavaElement je) {
 		ICompilationUnit cu= (ICompilationUnit)je.getAncestor(IJavaElement.COMPILATION_UNIT);
+		IJavaElement convertedJE= null;
 		if (cu == null)
 			return null;
 
 		if (cu.isWorkingCopy())
-			return cu.getOriginal(je);
+			convertedJE= cu.getOriginal(je);
 		else {
 			IWorkingCopy wc= (IWorkingCopy)cu.findSharedWorkingCopy();
 			if (wc != null) {
 				IJavaElement[] matches= wc.findElements(je);
 				if (matches.length > 0)
-					return matches[0];
+					convertedJE= matches[0];
 			}
 		}
-		return null;
+		if (convertedJE != null && convertedJE.exists())
+			return convertedJE;
+		else
+			return null;
 	}
 
 	/**
