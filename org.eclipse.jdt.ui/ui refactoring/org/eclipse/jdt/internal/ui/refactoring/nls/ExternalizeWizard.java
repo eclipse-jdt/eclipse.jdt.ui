@@ -4,10 +4,13 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring.nls;
 
+import org.eclipse.jface.wizard.IWizardContainer;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 
 public class ExternalizeWizard extends RefactoringWizard {
 
@@ -38,5 +41,17 @@ public class ExternalizeWizard extends RefactoringWizard {
 	protected boolean checkActivationOnOpen() {
 		return true;
 	}
+	
+	/*
+	 * @see IWizard#setContainer(IWizardContainer)
+	 */
+	public void setContainer(IWizardContainer wizardContainer) {
+		super.setContainer(wizardContainer);
+		if (wizardContainer instanceof RefactoringWizardDialog){
+			RefactoringWizardDialog dialog= (RefactoringWizardDialog)wizardContainer;
+			dialog.setMakeNextButtonDefault(true);
+		}
+	}
+
 }
 
