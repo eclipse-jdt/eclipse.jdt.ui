@@ -56,6 +56,16 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 		createButton(parent, ADD_ID, NewWizardMessages.getString("SuperInterfaceSelectionDialog.addButton.label"), true); //$NON-NLS-1$
 		super.createButtonsForButtonBar(parent);
 	}
+	
+	/*(non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#handleShellCloseEvent()
+	 */
+	protected void handleShellCloseEvent() {
+		super.handleShellCloseEvent();
+
+		//Handle the closing of the shell by selecting the close icon
+		fList.setElements(fOldContent);
+	}	
 
 	/*
 	 * @see Dialog#cancelPressed
