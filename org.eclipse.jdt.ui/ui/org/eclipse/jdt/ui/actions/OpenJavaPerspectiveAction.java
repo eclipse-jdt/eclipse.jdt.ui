@@ -19,9 +19,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.WorkbenchException;
+import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.JavaCore;
-
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -37,6 +37,7 @@ public class OpenJavaPerspectiveAction extends Action {
 	 * Create a new <code></code>.
 	 */
 	public OpenJavaPerspectiveAction() {
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_JAVA_PERSPECTIVE_ACTION);
 	}
 
 	public void run() {

@@ -21,6 +21,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -33,6 +34,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
@@ -80,6 +83,7 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("SurroundWithTryCatchAction.label")); //$NON-NLS-1$);
 		fEditor= editor;
 		setEnabled(checkEditor());
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SURROUND_WITH_TRY_CATCH_ACTION);
 	}
 
 	protected void run(ITextSelection selection) {

@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -20,6 +21,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -47,6 +49,7 @@ public class PullUpAction extends SelectionDispatchAction{
 	public PullUpAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RefactoringGroup.pull_Up_label"));//$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.PULL_UP_ACTION);
 	}
 
 	/*
@@ -120,8 +123,7 @@ public class PullUpAction extends SelectionDispatchAction{
 
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.pull_up"); //$NON-NLS-1$
-		//FIX ME: wrong
-		String helpId= "HELPID"; //$NON-NLS-1$
+		String helpId= IJavaHelpContextIds.PULL_UP_ERROR_WIZARD_PAGE;
 		return new PullUpWizard(fRefactoring, title, helpId);
 	}
 		

@@ -48,6 +48,8 @@ import org.eclipse.jface.viewers.TextCellEditor;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -56,6 +58,8 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -95,6 +99,7 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		updateSignaturePreview();
 		
 		setControl(composite);
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MODIFY_PARAMETERS_WIZARD_PAGE);
 	}
 
 	private void createParameterTableComposite(Composite composite) {

@@ -12,10 +12,12 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -41,6 +43,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site) {
 		super(site, SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.label"), new Class[] {IField.class} ); //$NON-NLS-1$
 		setToolTipText(SearchMessages.getString("Search.FindWriteReferencesInWorkingSetAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**
@@ -51,6 +54,7 @@ public class FindWriteReferencesInWorkingSetAction extends FindReferencesInWorki
 	 */
 	public FindWriteReferencesInWorkingSetAction(IWorkbenchSite site, IWorkingSet[] workingSets) {
 		super(site, workingSets, new Class[] {IField.class});
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_WRITE_REFERENCES_IN_WORKING_SET_ACTION);
 	}
 
 	/**

@@ -53,6 +53,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
 import org.eclipse.search.ui.ISearchPage;
@@ -81,6 +82,8 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
@@ -289,7 +292,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 
 		setControl(result);
 
-		//		WorkbenchHelp.setHelp(result, new Object[] { INLSHelpContextIds.SEARCH_PAGE });
+		WorkbenchHelp.setHelp(result, IJavaHelpContextIds.NLS_SEARCH_PAGE);	
 	}
 	/**
 	 * Creates the control for the wrapper class

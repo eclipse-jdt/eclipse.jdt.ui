@@ -30,12 +30,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -59,6 +61,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("RefreshAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("RefreshAction.toolTip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.REFRESH_ACTION);
 	}
 	
 	/* (non-Javadoc)

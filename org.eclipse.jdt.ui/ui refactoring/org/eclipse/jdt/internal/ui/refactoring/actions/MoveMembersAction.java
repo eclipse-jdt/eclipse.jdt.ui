@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -124,8 +125,7 @@ public class MoveMembersAction extends SelectionDispatchAction{
 
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.move_Members"); //$NON-NLS-1$
-		//FIX ME: wrong
-		String helpId= "HELPID"; //$NON-NLS-1$
+		String helpId= IJavaHelpContextIds.MOVE_MEMBERS_ERROR_WIZARD_PAGE;
 		return new MoveMembersWizard(fRefactoring, title, helpId);
 	}
 	

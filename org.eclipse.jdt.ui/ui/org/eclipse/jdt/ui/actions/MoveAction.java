@@ -7,6 +7,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
@@ -18,6 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
@@ -36,12 +38,14 @@ public class MoveAction extends SelectionDispatchAction{
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
 		fMoveMembersAction= new MoveMembersAction(site);
 		fJdtMoveAction= new JdtMoveAction(site);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 	
 	public MoveAction(CompilationUnitEditor editor) {
 		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("MoveAction.text")); //$NON-NLS-1$
 		fMoveMembersAction= new MoveMembersAction(editor);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}	
 
 	/*

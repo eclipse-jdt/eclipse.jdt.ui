@@ -2,6 +2,8 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -27,6 +29,7 @@ public class InlineTempAction extends SelectionDispatchAction {
 		fEditor= editor;
 		fDialogMessageTitle= RefactoringMessages.getString("InlineTempAction.inline_temp");//$NON-NLS-1$
 		setEnabled(getCompilationUnit() != null);
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_TEMP_ACTION);
 	}
 
 	/* (non-Javadoc)

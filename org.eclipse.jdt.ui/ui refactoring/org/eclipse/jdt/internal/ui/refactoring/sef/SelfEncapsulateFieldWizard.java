@@ -12,7 +12,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	
 	public SelfEncapsulateFieldWizard(SelfEncapsulateFieldRefactoring refactoring) {
-		super(refactoring, RefactoringMessages.getString("SelfEncapsulateField.sef"), IJavaHelpContextIds.SEF_WIZARD_PAGE); //$NON-NLS-1$
+		super(refactoring, RefactoringMessages.getString("SelfEncapsulateField.sef"), IJavaHelpContextIds.SEF_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 	}
 
 	protected void addUserInputPages() {

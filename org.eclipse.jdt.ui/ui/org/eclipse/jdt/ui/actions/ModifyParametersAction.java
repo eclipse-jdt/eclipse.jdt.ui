@@ -6,6 +6,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -43,6 +44,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	public ModifyParametersAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RefactoringGroup.modify_Parameters_label"));//$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MODIFY_PARAMETERS_ACTION);
 	}
 	
 	/*
@@ -112,8 +114,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 
 	private RefactoringWizard createWizard(){
 		String title= RefactoringMessages.getString("RefactoringGroup.modify_method_parameters"); //$NON-NLS-1$
-		//FIX ME: wrong
-		String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
+		String helpId= IJavaHelpContextIds.MODIFY_PARAMETERS_ERROR_WIZARD_PAGE;
 		return new ModifyParametersWizard(fRefactoring, title, helpId);
 	}
 	

@@ -7,8 +7,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
@@ -26,6 +28,7 @@ public class RenameAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("RenameAction.text")); //$NON-NLS-1$
 		fRenameJavaElement= new RenameJavaElementAction(site);
 		fRenameJavaElement.setText(getText());
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.RENAME_ACTION);
 	}
 	
 	public RenameAction(CompilationUnitEditor editor) {

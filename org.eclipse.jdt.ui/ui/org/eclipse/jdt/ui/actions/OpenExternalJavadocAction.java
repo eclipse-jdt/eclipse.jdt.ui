@@ -24,6 +24,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -31,6 +32,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -71,6 +74,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OpenExternalJavadocAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenExternalJavadocAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenExternalJavadocAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
 	}
 	
 	/**

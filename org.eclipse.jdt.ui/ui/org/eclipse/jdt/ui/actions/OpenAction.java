@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -38,6 +39,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -74,6 +77,7 @@ public class OpenAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OpenAction.label")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenAction.tooltip")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenAction.description")); //$NON-NLS-1$		
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_ACTION);
 	}
 	
 	/**

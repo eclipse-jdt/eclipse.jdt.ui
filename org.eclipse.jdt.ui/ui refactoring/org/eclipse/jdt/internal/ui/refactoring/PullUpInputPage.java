@@ -61,6 +61,8 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -194,7 +196,6 @@ public class PullUpInputPage extends UserInputWizardPage {
 	private Label fContextLabel;
 	private Set fMarkedMethods; //Set of IMethods
 	public static final String PAGE_NAME= "PullUpMethodsInputPage"; //$NON-NLS-1$
-	private static final String fgHelpContextID= "HELP CONTEXT"; //$NON-NLS-1$
 	
 	public PullUpInputPage() {
 		super(PAGE_NAME, true);
@@ -213,8 +214,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		createButtonComposite(superComposite);
 		setControl(superComposite);
 		
-		///FIX ME: wrong
-		WorkbenchHelp.setHelp(getControl(), fgHelpContextID);			
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PULL_UP_WIZARD_PAGE);			
 	}
 
 	private void createButtonComposite(Composite superComposite) {

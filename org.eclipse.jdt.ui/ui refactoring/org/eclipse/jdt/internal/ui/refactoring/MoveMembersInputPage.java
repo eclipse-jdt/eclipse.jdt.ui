@@ -17,6 +17,8 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -28,6 +30,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -104,6 +108,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		});
 		
 		setControl(composite);
+		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 	}
 	
 	protected boolean performFinish() {

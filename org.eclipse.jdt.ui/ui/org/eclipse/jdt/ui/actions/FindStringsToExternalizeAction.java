@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -60,6 +61,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSLine;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSScanner;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
@@ -90,6 +92,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.getString("FindStringsToExternalizeAction.label")); //$NON-NLS-1$
 		fElements= new NonNLSElement[0];
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_STRINGS_TO_EXTERNALIZE_ACTION);
 	}
 		
 	/* (non-Javadoc)
@@ -411,6 +414,15 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 			};
 		}
 		
+		/*
+		 * @see org.eclipse.jface.window.Window#configureShell(Shell)
+		 */
+		protected void configureShell(Shell newShell) {
+			super.configureShell(newShell);
+			WorkbenchHelp.setHelp(newShell, IJavaHelpContextIds.NONNLS_DIALOG);		
+		}
+
+
 	}
 		
 	private static class NonNLSElement{

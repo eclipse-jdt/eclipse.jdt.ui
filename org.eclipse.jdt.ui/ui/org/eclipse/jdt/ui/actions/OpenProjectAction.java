@@ -35,9 +35,11 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
@@ -64,6 +66,7 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 		Assert.isNotNull(site);
 		fSite= site;
 		setEnabled(hasCloseProjects());
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);
 	}
 	
 	/*

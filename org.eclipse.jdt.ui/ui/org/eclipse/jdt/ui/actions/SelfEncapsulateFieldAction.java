@@ -15,6 +15,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -22,6 +23,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
@@ -55,6 +58,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	public SelfEncapsulateFieldAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("SelfEncapsulateFieldAction.label")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SELF_ENCAPSULATE_ACTION);
 	}
 	
 	/**

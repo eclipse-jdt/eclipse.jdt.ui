@@ -9,6 +9,7 @@ import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
@@ -17,8 +18,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(Refactoring refactoring) {
-		//XXX needs help context
-		super(refactoring, NLSUIMessages.getString("wizard.name"), "HELP_CONTEXT"); //$NON-NLS-2$ //$NON-NLS-1$
+		super(refactoring, NLSUIMessages.getString("wizard.name"), IJavaHelpContextIds.EXTERNALIZE_ERROR_WIZARD_PAGE); //$NON-NLS-2$ //$NON-NLS-1$
 		setWindowTitle(NLSUIMessages.getString("wizard.name"));//$NON-NLS-1$
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
 	}

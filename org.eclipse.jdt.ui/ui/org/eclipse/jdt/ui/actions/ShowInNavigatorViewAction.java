@@ -24,6 +24,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ISetSelectionTarget;
 import org.eclipse.ui.views.navigator.ResourceNavigator;
 
@@ -36,6 +37,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
@@ -67,6 +69,7 @@ public class ShowInNavigatorViewAction extends SelectionDispatchAction {
 	public ShowInNavigatorViewAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("ShowInNavigatorView.label")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.SHOW_IN_NAVIGATOR_VIEW_ACTION);
 	}
 
 	/**

@@ -10,10 +10,14 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
@@ -48,7 +52,7 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 		addDeclareFinalCheckbox(result, layouter);
 		addSeparator(result, layouter);
 		addLabel(result, layouter);
-		//WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, fHelpContextID));		
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_TEMP_WIZARD_PAGE);		
 	}
 	
 	private void addReplaceAllCheckbox(Composite result, RowLayouter layouter) {

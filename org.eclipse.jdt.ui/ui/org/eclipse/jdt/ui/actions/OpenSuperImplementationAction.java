@@ -22,6 +22,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
@@ -32,6 +33,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
@@ -66,6 +69,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		setText(ActionMessages.getString("OpenSuperImplementationAction.label")); //$NON-NLS-1$
 		setDescription(ActionMessages.getString("OpenSuperImplementationAction.description")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("OpenSuperImplementationAction.tooltip")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.OPEN_SUPER_IMPLEMENTATION_ACTION);
 	}
 	
 	/**
