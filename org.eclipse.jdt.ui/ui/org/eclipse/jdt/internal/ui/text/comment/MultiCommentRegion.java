@@ -83,9 +83,6 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		if (previous != null) {
 
-			if (previous.hasAttribute(COMMENT_ROOT))
-				return true;
-
 			if (index != 0 && (blank || previous.hasAttribute(COMMENT_BLANKLINE) || next.hasAttribute(COMMENT_PARAMETER) || next.hasAttribute(COMMENT_ROOT) || next.hasAttribute(COMMENT_SEPARATOR) || next.hasAttribute(COMMENT_NEWLINE) || previous.hasAttribute(COMMENT_BREAK) || previous.hasAttribute(COMMENT_SEPARATOR)))
 				return false;
 

@@ -279,4 +279,28 @@ public class JavaDocTestCase extends CommentTestCase {
 		String result= testFormat(input);
 		assertEquals(expected, result);
 	}
+	
+	/**
+	 * [formatting] javadoc formatter removes blank lines between empty javadoc tags (xdoclet fails)
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=68577
+	 */
+	public void testLineBreaksBetweenEmptyJavaDocTags1() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false");
+		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
+	
+	/**
+	 * [formatting] javadoc formatter removes blank lines between empty javadoc tags (xdoclet fails)
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=68577
+	 */
+	public void testLineBreaksBetweenEmptyJavaDocTags2() {
+		setUserOption(PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, "false");
+		String input= PREFIX + DELIMITER + INFIX + "@custom1" + DELIMITER + INFIX + "@custom2" + DELIMITER + POSTFIX;
+		String expected= input;
+		String result= testFormat(input);
+		assertEquals(expected, result);
+	}
 }
