@@ -222,7 +222,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 	private IPackageFragment fCurrPackage;
 	
-	private IType fCurrEnclosingType;	
+	private IType fCurrEnclosingType;
+	private IType fCurrType;
 	private StringDialogField fTypeNameDialogField;
 	
 	private StringButtonDialogField fSuperClassDialogField;
@@ -727,6 +728,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			fSuperClassStatus= superClassChanged();
 			fSuperInterfacesStatus= superInterfacesChanged();
 		}
+		if (fCurrType != null) {
+			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrType);
+		} else if (fCurrPackage != null) {
+			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrPackage);
+		} else {
+			fSuperClassCompletionProcessor.setExtendsCompletionContext(null);
+		}
 	}
 	
 	// ---- set / get ----------------
@@ -1060,7 +1068,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			fCurrPackage= root.getPackageFragment(packName);
-			fSuperClassCompletionProcessor.setExtendsCompletionContext(fCurrPackage);
 		} else {
 			status.setError(""); //$NON-NLS-1$
 		}
@@ -1160,6 +1167,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected IStatus typeNameChanged() {
 		StatusInfo status= new StatusInfo();
+		fCurrType= null;
 		String typeName= getTypeName();
 		// must not be empty
 		if (typeName.length() == 0) {
@@ -1184,6 +1192,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IPackageFragment pack= getPackageFragment();
 			if (pack != null) {
 				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
+				fCurrType= cu.getType(typeName);
 				IResource resource= cu.getResource();
 
 				if (resource.exists()) {
@@ -1199,8 +1208,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		} else {
 			IType type= getEnclosingType();
 			if (type != null) {
-				IType member= type.getType(typeName);
-				if (member.exists()) {
+				fCurrType= type.getType(typeName);
+				if (fCurrType.exists()) {
 					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}

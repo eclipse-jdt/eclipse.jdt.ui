@@ -15,7 +15,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -31,9 +33,6 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	 * The main type of this class will be filtered out from the proposals list.
 	 */
 	public static final String DUMMY_CU_NAME= DUMMY_CLASS_NAME + ".java"; //$NON-NLS-1$
-	
-	private static final String CU_START= "public class " + DUMMY_CLASS_NAME + " { ";  //$NON-NLS-1$ //$NON-NLS-2$
-	private static final String CU_END= " }"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a <code>JavaTypeCompletionProcessor</code>.
@@ -52,21 +51,43 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	public void setPackageFragment(IPackageFragment packageFragment) {
 		//TODO: Some callers have a better completion context and should include imports
 		// and nested classes of their declaring CU in WC's source.
-		if (packageFragment == null)
+		if (packageFragment == null) {
 			setCompletionContext(null, null, null);
-		else
-			setCompletionContext(packageFragment.getCompilationUnit(DUMMY_CU_NAME), CU_START, CU_END);
+		} else {
+			String before= "public class " + DUMMY_CLASS_NAME + " { ";  //$NON-NLS-1$//$NON-NLS-2$
+			String after= " }"; //$NON-NLS-1$
+			setCompletionContext(packageFragment.getCompilationUnit(DUMMY_CU_NAME), before, after);
+		}
 	}
 	
-	public void setExtendsCompletionContext(IPackageFragment packageFragment) {
-		ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
-		setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " extends ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+	public void setExtendsCompletionContext(IJavaElement javaElement) {
+		if (javaElement instanceof IPackageFragment) {
+			IPackageFragment packageFragment= (IPackageFragment) javaElement;
+			ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
+			setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " extends ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		} else if (javaElement instanceof IType) {
+			// pattern: public class OuterType { public class Type extends /*caret*/  {} }
+			IType type= (IType) javaElement;
+			String before= "public class " + type.getElementName() + " extends "; //$NON-NLS-1$ //$NON-NLS-2$
+			String after= " {}"; //$NON-NLS-1$
+			IJavaElement parent= type.getParent();
+			while (parent instanceof IType) {
+				type= (IType) parent;
+				before+= "public class " + type.getElementName() + " {"; //$NON-NLS-1$ //$NON-NLS-2$
+				after+= "}"; //$NON-NLS-1$
+				parent= type.getParent();
+			}
+			ICompilationUnit cu= type.getCompilationUnit();
+			setCompletionContext(cu, before, after);
+		} else {
+			setCompletionContext(null, null, null);
+		}
 	}
 
-	public void setImplementsCompletionContext(IPackageFragment packageFragment) {
-		ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
-		setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " implements ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
-	}
+//	public void setImplementsCompletionContext(IPackageFragment packageFragment) {
+//		ICompilationUnit cu= packageFragment.getCompilationUnit(DUMMY_CU_NAME);
+//		setCompletionContext(cu, "public class " + DUMMY_CLASS_NAME + " implements ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+//	}
 	
 	protected static class TypeCompletionRequestor extends CUPositionCompletionRequestor {
 		private static final String VOID= "void"; //$NON-NLS-1$
