@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -231,13 +233,13 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private boolean isUsedInExplicitConstructorCall() throws JavaModelException{
-		//FIX ME
-		
-//		ASTNode[] parents= getParentsOfSelectedNode();
-//		for (int i= parents.length - 1; i >= 0; i--) {
-//			if (parents[i] instanceof ExplicitConstructorCall)
-//				return true;
-//		}
+		ASTNode[] parents= getParentsOfSelectedNode();
+		for (int i= parents.length - 1; i >= 0; i--) {
+			if (parents[i] instanceof ConstructorInvocation)
+				return true;
+			if (parents[i] instanceof SuperConstructorInvocation)
+				return true;
+		}
 		return false;
 	}
 	
