@@ -924,6 +924,9 @@ public class PackageExplorerPart extends ViewPart
 
 		if (frameList.getCurrentIndex() > 0) {
 			TreeFrame currentFrame = (TreeFrame) frameList.getCurrentFrame();
+			// don't persist the working set model as the current frame
+			if (currentFrame.getInput() instanceof WorkingSetModel)
+				return;
 			IMemento frameMemento = memento.createChild(TAG_CURRENT_FRAME);
 			currentFrame.saveState(frameMemento);
 		}
