@@ -16,6 +16,9 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -27,6 +30,7 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.preference.PreferencePage;
 
 import org.eclipse.ui.IWorkbench;
@@ -57,6 +61,17 @@ WorkInProgressPreferencePage
 	private List fCheckBoxes;
 	private List fRadioButtons;
 	private List fTextControls;
+	
+	/** Color editor for choosing line number ruler colors. */
+	private ColorEditor fColorEditor;
+	/** List containing the colors for the diff line number ruler. */
+	private org.eclipse.swt.widgets.List fColorList;
+	/** Preferences keys and label text for the color list */
+	final static String[][] fColorModels= new String[][] {
+		{PreferencesMessages.getString(PREFIX + "editor.changedLineColor"), PreferenceConstants.LINE_NUMBER_CHANGED_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString(PREFIX + "editor.addedLineColor"), PreferenceConstants.LINE_NUMBER_ADDED_COLOR}, //$NON-NLS-1$
+		{PreferencesMessages.getString(PREFIX + "editor.deletedLineColor"), PreferenceConstants.LINE_NUMBER_DELETED_COLOR}, //$NON-NLS-1$
+	};
 	
 	/**
 	 * creates a new preference page.
@@ -104,7 +119,7 @@ WorkInProgressPreferencePage
 		Group group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
+		group.setText(PreferencesMessages.getString(PREFIX + "smartTyping")); //$NON-NLS-1$
 		
 		addCheckBox(group, PreferencesMessages.getString(PREFIX + "overwriteMode"), PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE); //$NON-NLS-1$
 		createSpacer(group, 1);
@@ -117,6 +132,91 @@ WorkInProgressPreferencePage
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "smartTyping.smartOpeningBrace"), PreferenceConstants.EDITOR_SMART_OPENING_BRACE); //$NON-NLS-1$
 		fSmartTypingItems.add(button);
+		
+		/* line change bar */
+		group= new Group(result, SWT.NONE);
+		group.setLayout(new GridLayout());
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setText(PreferencesMessages.getString(PREFIX + "editor")); //$NON-NLS-1$
+		
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "editor.lineChangeRuler"), PreferenceConstants.LINE_NUMBER_RULER_QUICK_DIFF); //$NON-NLS-1$
+		Label l= new Label(group, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		l.setLayoutData(gd);
+	
+		l= new Label(group, SWT.LEFT);
+		l.setText(PreferencesMessages.getString(PREFIX + "editor.appearanceOptions")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		l.setLayoutData(gd);
+	
+		Composite editorComposite= new Composite(group, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		editorComposite.setLayout(layout);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd.horizontalSpan= 2;
+		editorComposite.setLayoutData(gd);		
+	
+		fColorList= new org.eclipse.swt.widgets.List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(3);
+		fColorList.setLayoutData(gd);
+				
+		Composite stylesComposite= new Composite(editorComposite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		stylesComposite.setLayout(layout);
+		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+	
+		l= new Label(stylesComposite, SWT.LEFT);
+		l.setText(PreferencesMessages.getString("JavaEditorPreferencePage.color")); //$NON-NLS-1$
+		gd= new GridData();
+		gd.horizontalAlignment= GridData.BEGINNING;
+		l.setLayoutData(gd);
+	
+		fColorEditor= new ColorEditor(stylesComposite);
+		Button foregroundColorButton= fColorEditor.getButton();
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		foregroundColorButton.setLayoutData(gd);
+	
+		for (int i= 0; i < fColorModels.length; i++)
+			fColorList.add(fColorModels[i][0]);
+		fColorList.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (fColorList != null && !fColorList.isDisposed()) {
+					fColorList.select(0);
+					handleListSelection();
+				}
+			}
+		});
+				
+		fColorList.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				handleListSelection();
+			}
+		});
+		foregroundColorButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				int i= fColorList.getSelectionIndex();
+				String key= fColorModels[i][1];
+		
+				PreferenceConverter.setValue(getPreferenceStore(), key, fColorEditor.getColorValue());
+			}
+		});
 		
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
@@ -132,8 +232,18 @@ WorkInProgressPreferencePage
 		
 		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "quickassist.option"), PreferenceConstants.APPEARANCE_QUICKASSIST_LIGHTBULB); //$NON-NLS-1$ //$NON-NLS-2$
 
-
 		return result;
+	}
+	
+ 
+	/**
+	 * Handles selection in the color list for the diff line number ruler.
+	 */
+	void handleListSelection() {
+		int i= fColorList.getSelectionIndex();
+		String key= fColorModels[i][1];
+		RGB rgb= PreferenceConverter.getColor(getPreferenceStore(), key);
+		fColorEditor.setColorValue(rgb);
 	}
 
 	/*
@@ -176,6 +286,12 @@ WorkInProgressPreferencePage
 			String key= (String) text.getData();
 			text.setText(store.getDefaultString(key));
 		}
+		// color table
+		store.setToDefault(PreferenceConstants.LINE_NUMBER_CHANGED_COLOR);
+		store.setToDefault(PreferenceConstants.LINE_NUMBER_ADDED_COLOR);
+		store.setToDefault(PreferenceConstants.LINE_NUMBER_DELETED_COLOR);
+		handleListSelection();
+		
 		super.performDefaults();
 	}
 

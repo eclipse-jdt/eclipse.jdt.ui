@@ -90,6 +90,7 @@ import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.IVerticalRulerColumn;
+import org.eclipse.jface.text.source.LineNumberChangeRulerColumn;
 import org.eclipse.jface.text.source.LineNumberRulerColumn;
 import org.eclipse.jface.text.source.OverviewRuler;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -170,6 +171,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNe
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
+import org.eclipse.jdt.internal.ui.text.JavaChangeHover;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.util.JavaUIHelp;
@@ -1794,14 +1796,22 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				return;
 			}
 			
+			if (isLineNumberRulerVisible() && PreferenceConstants.LINE_NUMBER_RULER_QUICK_DIFF.equals(property)) {
+				hideLineNumberRuler();
+				showLineNumberRuler();
+			}
+				
 			if (fLineNumberRulerColumn != null &&
 						(LINE_NUMBER_COLOR.equals(property) || 
 						PREFERENCE_COLOR_BACKGROUND_SYSTEM_DEFAULT.equals(property)  ||
-						PREFERENCE_COLOR_BACKGROUND.equals(property))) {
+						PREFERENCE_COLOR_BACKGROUND.equals(property) ||
+						PreferenceConstants.LINE_NUMBER_CHANGED_COLOR.equals(property) ||
+						PreferenceConstants.LINE_NUMBER_ADDED_COLOR.equals(property) ||
+						PreferenceConstants.LINE_NUMBER_DELETED_COLOR.equals(property))) {
 					
 					initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 			}
-				
+			
 			if (isJavaEditorHoverProperty(property))
 				updateHoverBehavior();
 			
@@ -2040,6 +2050,51 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			rulerColumn.setBackground(manager.getColor(rgb));
 			
+			if (rulerColumn instanceof LineNumberChangeRulerColumn) {
+				LineNumberChangeRulerColumn changeColumn= (LineNumberChangeRulerColumn)rulerColumn;
+
+				ISourceViewer v= getSourceViewer();
+				if (v != null && v.getAnnotationModel() != null) {
+					changeColumn.setModel(v.getAnnotationModel());
+				}
+				
+				rgb= null;
+				// change color
+				if (!store.getBoolean(PreferenceConstants.LINE_NUMBER_CHANGED_COLOR)) {
+					if (store.contains(PreferenceConstants.LINE_NUMBER_CHANGED_COLOR)) {
+						if (store.isDefault(PreferenceConstants.LINE_NUMBER_CHANGED_COLOR))
+							rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.LINE_NUMBER_CHANGED_COLOR);
+						else
+							rgb= PreferenceConverter.getColor(store, PreferenceConstants.LINE_NUMBER_CHANGED_COLOR);
+					}
+				}
+				changeColumn.setChangedColor(manager.getColor(rgb));
+				
+				rgb= null;
+				// addition color
+				if (!store.getBoolean(PreferenceConstants.LINE_NUMBER_ADDED_COLOR)) {
+					if (store.contains(PreferenceConstants.LINE_NUMBER_ADDED_COLOR)) {
+						if (store.isDefault(PreferenceConstants.LINE_NUMBER_ADDED_COLOR))
+							rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.LINE_NUMBER_ADDED_COLOR);
+						else
+							rgb= PreferenceConverter.getColor(store, PreferenceConstants.LINE_NUMBER_ADDED_COLOR);
+					}
+				}
+				changeColumn.setAddedColor(manager.getColor(rgb));
+				
+				rgb= null;
+				// deletion indicator color
+				if (!store.getBoolean(PreferenceConstants.LINE_NUMBER_DELETED_COLOR)) {
+					if (store.contains(PreferenceConstants.LINE_NUMBER_DELETED_COLOR)) {
+						if (store.isDefault(PreferenceConstants.LINE_NUMBER_DELETED_COLOR))
+							rgb= PreferenceConverter.getDefaultColor(store, PreferenceConstants.LINE_NUMBER_DELETED_COLOR);
+						else
+							rgb= PreferenceConverter.getColor(store, PreferenceConstants.LINE_NUMBER_DELETED_COLOR);
+					}
+				}
+				changeColumn.setDeletedColor(manager.getColor(rgb));
+			}
+
 			rulerColumn.redraw();
 		}
 	}
@@ -2048,7 +2103,13 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Creates a new line number ruler column that is appropriately initialized.
 	 */
 	protected IVerticalRulerColumn createLineNumberRulerColumn() {
-		fLineNumberRulerColumn= new LineNumberRulerColumn();
+		if (getPreferenceStore().getBoolean(PreferenceConstants.LINE_NUMBER_RULER_QUICK_DIFF)) {
+			LineNumberChangeRulerColumn column= new LineNumberChangeRulerColumn();
+			column.setHover(new JavaChangeHover());
+			fLineNumberRulerColumn= column;
+		} else {
+			fLineNumberRulerColumn= new LineNumberRulerColumn();
+		}
 		initializeLineNumberRulerColumn(fLineNumberRulerColumn);
 		return fLineNumberRulerColumn;
 	}
