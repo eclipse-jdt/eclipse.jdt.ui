@@ -24,7 +24,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
-	private static final boolean RUN_CONSTRUCTOR_TEST = false;
+	private static final boolean RUN_CONSTRUCTOR_TEST = true;
 
 	public ChangeSignatureTests(String name) {
 		super(name);
@@ -475,10 +475,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 			printTestDisabledMessage("disabled for constructors for now");
 			return;
 		}
-		if (true){
-			printTestDisabledMessage("Bug 24230");
-			return;
-		}	
+//		if (true){
+//			printTestDisabledMessage("Bug 24230");
+//			return;
+//		}	
 		String[] signature= {"I", "I"};
 		ParameterInfo[] newParamInfo= null;
 		int[] newIndices= null;
