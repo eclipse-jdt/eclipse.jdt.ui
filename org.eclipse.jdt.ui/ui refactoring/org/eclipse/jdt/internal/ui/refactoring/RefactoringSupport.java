@@ -73,6 +73,11 @@ public class RefactoringSupport {
 		}
 
 		public boolean canRename(Object element) throws JavaModelException{
+			// TODO This is a workaround to create the right refactoring when renaming a virtual method.
+			// This should be moved to a factory with a call back in 2.2
+			if (fRefactoring instanceof RenameMethodRefactoring && element instanceof IMethod) {
+				fRefactoring= ((RenameMethodRefactoring)fRefactoring).clone((IMethod)element);
+			}
 			boolean canRename= lightCheck().isOK();
 			 if (!canRename)	
 			 	fRefactoring= null;

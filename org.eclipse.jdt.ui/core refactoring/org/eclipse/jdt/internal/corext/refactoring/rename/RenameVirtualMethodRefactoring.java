@@ -24,6 +24,12 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		super(method);
 	}
 	
+	public RenameMethodRefactoring clone(IMethod method) {
+		RenameMethodRefactoring result= new RenameVirtualMethodRefactoring(method);
+		setData(result);
+		return result;
+	}
+	
 	//------------ preconditions -------------
 	
 	/* non java-doc
