@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -29,6 +28,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
@@ -43,8 +43,6 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.IWizardContainer;
 import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.jface.wizard.ProgressMonitorPart;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -76,9 +74,30 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 	private static final Image WARNING= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_WARNING);
 	private static final Image ERROR= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
 	
-	private static class MessageBox extends CLabel {
+	private static class MessageBox extends Composite {
+		private Label fImage;
+		private Label fText;
 		public MessageBox(Composite parent, int style) {
 			super(parent, style);
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
+			setLayout(layout);
+			fImage= new Label(this, SWT.NONE);
+			fImage.setImage(INFO);
+			Point size= fImage.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			GridData gd= new GridData();
+			gd.verticalAlignment= SWT.TOP;			
+			gd.widthHint= size.x;
+			gd.heightHint= size.y;
+			fImage.setLayoutData(gd);
+			fImage.setImage(null);
+			fText= new Label(this, SWT.WRAP);
+			fText.setText("\n\n"); //$NON-NLS-1$
+			size= fText.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+			gd= new GridData(GridData.FILL_HORIZONTAL);
+			gd.heightHint= size.y;
+			gd.verticalAlignment= SWT.TOP;			
+			fText.setLayoutData(gd);
 		}
 		public void setMessage(IWizardPage page) {
 			String msg= page.getErrorMessage();
@@ -103,10 +122,10 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			}
 			if (msg == null)
 				msg= ""; //$NON-NLS-1$
-			setText(msg);
+			fText.setText(msg);
 			if (image == null && msg.length() > 0)
 				image= INFO;
-			setImage(image);
+			fImage.setImage(image);
 		}
 	}
 	
