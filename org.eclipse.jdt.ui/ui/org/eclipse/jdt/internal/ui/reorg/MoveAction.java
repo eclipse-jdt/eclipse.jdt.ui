@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.CreateChangeOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
@@ -82,9 +83,7 @@ public class MoveAction extends ReorgDestinationAction {
 	 * see @ReorgDestinationAction#createRefactoring
 	 */
 	ReorgRefactoring createRefactoring(List elements){
-		IDocumentProvider documentProvider= JavaPlugin.getDefault().getCompilationUnitDocumentProvider();
-		ITextBufferChangeCreator changeCreator= new DocumentTextBufferChangeCreator(documentProvider);
-		return new MoveRefactoring(elements, changeCreator);
+		return new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
 	ElementTreeSelectionDialog createDestinationSelectionDialog(Shell parent, ILabelProvider labelProvider, JavaElementContentProvider cp, ReorgRefactoring refactoring){

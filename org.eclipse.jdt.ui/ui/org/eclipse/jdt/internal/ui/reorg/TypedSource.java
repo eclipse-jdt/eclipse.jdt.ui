@@ -1,11 +1,11 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceSourceRangeComputer;
 
 /**
  * A tuple used to keep source of  an element and its type.
