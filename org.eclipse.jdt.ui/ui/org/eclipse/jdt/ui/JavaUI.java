@@ -105,6 +105,14 @@ public final class JavaUI {
 	 * @since 2.0
 	 */
 	public static final String ID_CODING_ACTION_SET= "org.eclipse.jdt.ui.CodingActionSet"; //$NON-NLS-1$
+
+	/**
+	 * The id of the Java Search action set
+	 * (value <code>org.eclipse.jdt.ui.JavaSearchActionSet"</code>).
+	 * 
+	 * @since 2.0
+	 */
+	public static final String ID_JAVA_SEARCH_ACTION_SET= "org.eclipse.jdt.ui.JavaSearchActionSet";
 	
 	/**
 	 * The editor part id of the editor that presents Java compilation units
