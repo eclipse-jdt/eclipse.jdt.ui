@@ -238,6 +238,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			return result;
 		return fSettings.getBoolean(GENERATE_JAVADOC);
 	}
+	
 	private void setGenerateJavadoc(boolean value) {
 		fSettings.put(GENERATE_JAVADOC, value);
 		fRefactoring.setGenerateJavadoc(value);
