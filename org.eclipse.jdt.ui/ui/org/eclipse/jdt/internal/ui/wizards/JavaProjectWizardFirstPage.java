@@ -64,7 +64,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 		protected final Text fNameField;
 
-		public NameGroup(Composite composite) {
+		public NameGroup(Composite composite, String initialName) {
 			final Composite nameComposite= new Composite(composite, SWT.NONE);
 			nameComposite.setFont(composite.getFont());
 			nameComposite.setLayout(initGridLayout(new GridLayout(2, false), false));
@@ -92,7 +92,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				}
 			});
 
-			setChanged();
+			setName(initialName);
 		}
 		
 		protected void fireEvent() {
@@ -107,6 +107,12 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		public void setFocus() {
 			fNameField.setFocus();
 		}
+		
+		public void setName(String name) {
+			fNameField.setText(name);
+			fireEvent();
+		}
+		
 	}
 
 	/**
@@ -427,12 +433,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 	}
 
-	protected NameGroup fNameGroup;
-	protected LocationGroup fLocationGroup;
-	protected LayoutGroup fLayoutGroup;
-	protected DetectGroup fDetectGroup;
-	protected Validator fValidator;
+	private NameGroup fNameGroup;
+	private LocationGroup fLocationGroup;
+	private LayoutGroup fLayoutGroup;
+	private DetectGroup fDetectGroup;
+	private Validator fValidator;
 
+	private String fInitialName;
 	
 	private static final String PAGE_NAME= NewWizardMessages.getString("JavaProjectWizardFirstPage.page.pageName"); //$NON-NLS-1$
 
@@ -444,6 +451,14 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		setPageComplete(false);
 		setTitle(NewWizardMessages.getString("JavaProjectWizardFirstPage.page.title")); //$NON-NLS-1$
 		setDescription(NewWizardMessages.getString("JavaProjectWizardFirstPage.page.description")); //$NON-NLS-1$
+		fInitialName= ""; //$NON-NLS-1$
+	}
+	
+	public void setName(String name) {
+		fInitialName= name;
+		if (fNameGroup != null) {
+			fNameGroup.setName(name);
+		}
 	}
 
 	public void createControl(Composite parent) {
@@ -455,7 +470,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		// create UI elements
-		fNameGroup= new NameGroup(composite);
+		fNameGroup= new NameGroup(composite, fInitialName);
 		fLocationGroup= new LocationGroup(composite);
 		fLayoutGroup= new LayoutGroup(composite);
 		fDetectGroup= new DetectGroup(composite);
