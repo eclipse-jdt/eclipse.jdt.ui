@@ -20,11 +20,6 @@
 			jarfile="${dest}/junitsupport.jar"
 			basedir="bin"
 		/>
-
-		<jar 
-			jarfile="./junitsupport.jar"
-			basedir="bin"
-		/> 
 				
 		<jar 		
 			jarfile="${dest}/junitsupportsrc.jar"
