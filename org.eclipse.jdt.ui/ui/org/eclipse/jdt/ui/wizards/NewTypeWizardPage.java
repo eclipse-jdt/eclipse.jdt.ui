@@ -969,7 +969,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			return status;
 		}
 		try {
-			IType type= root.getJavaProject().findType(enclName);
+			IType type= findType(root.getJavaProject(), enclName);
 			if (type == null) {
 				status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
 				return status;
@@ -1032,7 +1032,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IPackageFragment pack= getPackageFragment();
 			if (pack != null) {
 				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
-				if (cu.exists()) {
+				if (cu.getResource().exists()) {
 					status.setError(NewWizardMessages.getString("NewTypeWizardPage.error.TypeNameExists")); //$NON-NLS-1$
 					return status;
 				}
@@ -1109,6 +1109,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	private IType resolveSuperTypeName(IJavaProject jproject, String sclassName) throws JavaModelException {
+		if (!jproject.exists()) {
+			return null;
+		}
 		IType type= null;
 		if (isEnclosingTypeSelected()) {
 			// search in the context of the enclosing type
@@ -1138,7 +1141,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		return type;
-	}		
+	}
+	
+	private IType findType(IJavaProject project, String typeName) throws JavaModelException {
+		if (project.exists()) {
+			return project.findType(typeName);
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * Hook method that gets called when the list of super interface has changed. The method 
@@ -1161,7 +1172,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			for (int i= 0; i < nElements; i++) {
 				String intfname= (String)elements.get(i);
 				try {
-					IType type= root.getJavaProject().findType(intfname);
+					IType type= findType(root.getJavaProject(), intfname);
 					if (type == null) {
 						status.setWarning(NewWizardMessages.getFormattedString("NewTypeWizardPage.warning.InterfaceNotExists", intfname)); //$NON-NLS-1$
 						return status;
@@ -1259,7 +1270,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (root == null) {
 			return null;
 		}	
-
+		
 		IJavaElement[] elements= new IJavaElement[] { root.getJavaProject() };
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 
@@ -1664,10 +1675,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		ArrayList newMethods= new ArrayList();
-		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(monitor);
+		ITypeHierarchy hierarchy= null;
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
 		if (doConstructors) {
+			hierarchy= type.newSupertypeHierarchy(monitor);
 			IType superclass= hierarchy.getSuperclass(type);
 			if (superclass != null) {
 				String[] constructors= StubUtility.evalConstructors(type, superclass, settings, imports.getImportsStructure());
@@ -1680,6 +1692,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 		if (doUnimplementedMethods) {
+			if (hierarchy == null) {
+				hierarchy= type.newSupertypeHierarchy(monitor);
+			}			
 			String[] unimplemented= StubUtility.evalUnimplementedMethods(type, hierarchy, false, settings, null, imports.getImportsStructure());
 			if (unimplemented != null) {
 				for (int i= 0; i < unimplemented.length; i++) {

@@ -114,18 +114,20 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 				if (jproject != null) {
 					try {
 						initRoot= null;
-						IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
-						for (int i= 0; i < roots.length; i++) {
-							if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-								initRoot= roots[i];
-								break;
-							}
+						if (jproject.exists()) {
+							IPackageFragmentRoot[] roots= jproject.getPackageFragmentRoots();
+							for (int i= 0; i < roots.length; i++) {
+								if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
+									initRoot= roots[i];
+									break;
+								}
+							}							
 						}
 					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus());
+						JavaPlugin.log(e);
 					}
 					if (initRoot == null) {
-						initRoot= jproject.getPackageFragmentRoot(""); //$NON-NLS-1$
+						initRoot= jproject.getPackageFragmentRoot(jproject.getResource());
 					}
 				}
 			}
@@ -287,7 +289,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					try {
 						if (!proj.hasNature(JavaCore.NATURE_ID)) {
 							if (resType == IResource.PROJECT) {
-								status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
+								status.setError(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
 							} else {
 								status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotInAJavaProject")); //$NON-NLS-1$
 							}
@@ -378,7 +380,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	 * not be changed by the user. If <code>true</code> the field is editable
 	 */ 
 	public void setPackageFragmentRoot(IPackageFragmentRoot root, boolean canBeModified) {
-		fCurrRoot= ((root != null) && root.exists()) ? root : null;
+		fCurrRoot= root;
 		String str= (root == null) ? "" : root.getPath().makeRelative().toString(); //$NON-NLS-1$
 		fContainerDialogField.setText(str);
 		fContainerDialogField.setEnabled(canBeModified);
