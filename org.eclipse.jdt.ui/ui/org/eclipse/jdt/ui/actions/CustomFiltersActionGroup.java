@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.filters.FilterMessages;
 import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
 
 /**
- * Action group to add the filter action to a view part's toolbar
+ * Action group to add the filter action to a view part's tool bar
  * menu.
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -153,7 +153,6 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private static final int MAX_FILTER_MENU_ENTRIES= 3;
 	private static final String RECENT_FILTERS_GROUP_NAME= "recentFiltersGroup"; //$NON-NLS-1$
 
-	private IViewPart fPart;
 	private StructuredViewer fViewer;
 
 	private NamePatternFilter fPatternFilter;
@@ -189,6 +188,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	private String[] fFilterIdsUsedInLastViewMenu;
 	private HashMap fFilterDescriptorMap;
+	private String fTargetId;
 	
 	/**
 	 * Creates a new <code>CustomFiltersActionGroup</code>.
@@ -197,9 +197,19 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 * @param viewer	the viewer to be filtered
 	 */
 	public CustomFiltersActionGroup(IViewPart part, StructuredViewer viewer) {
-		Assert.isNotNull(part);
+		this(part.getViewSite().getId(), viewer);
+	}
+
+	/**
+	 * Creates a new <code>CustomFiltersActionGroup</code>.
+	 * 
+	 * @param part		the view part that owns this action group
+	 * @param viewer	the viewer to be filtered
+	 */
+	public CustomFiltersActionGroup(String ownerId, StructuredViewer viewer) {
+		Assert.isNotNull(ownerId);
 		Assert.isNotNull(viewer);
-		fPart= part;
+		fTargetId= ownerId;
 		fViewer= viewer;
 
 		fLRUFilterIdsStack= new Stack();
@@ -209,7 +219,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		
 		installFilters();
 	}
-
+	
 	/*
 	 * Method declared on ActionGroup.
 	 */
@@ -331,7 +341,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private void fillToolBar(IToolBarManager tooBar) {
 	}
 
-	private void fillViewMenu(IMenuManager viewMenu) {
+	public void fillViewMenu(IMenuManager viewMenu) {
 		/*
 		 * Don't change the separator group name.
 		 * Using this name ensures that other filters
@@ -394,8 +404,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fUserDefinedPatterns= new String[0];
 		fUserDefinedPatternsEnabled= false;
 
-		String viewId= fPart.getViewSite().getId();		
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(viewId);
+		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
 		fFilterDescriptorMap= new HashMap(filterDescs.length);
 		fEnabledFilterIds= new HashMap(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
@@ -444,8 +453,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		}
 		
 		// Install the filters
-		String viewId= fPart.getViewSite().getId();
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(viewId);
+		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
 			// just to double check - id should denote a custom filter anyway
@@ -467,11 +475,10 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private String[] getUserAndBuiltInPatterns() {
-		String viewId= fPart.getViewSite().getId();
 		List patterns= new ArrayList(fUserDefinedPatterns.length);
 		if (areUserDefinedPatternsEnabled())
 			patterns.addAll(Arrays.asList(fUserDefinedPatterns));
-		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(viewId);
+		FilterDescriptor[] filterDescs= FilterDescriptor.getFilterDescriptors(fTargetId);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
 			boolean isPatternFilter= filterDescs[i].isPatternFilter();
@@ -544,7 +551,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 	
 	private String getPreferenceKey(String tag) {
-		return "CustomFiltersActionGroup." + fPart.getViewSite().getId() + '.' + tag; //$NON-NLS-1$
+		return "CustomFiltersActionGroup." + fTargetId + '.' + tag; //$NON-NLS-1$
 	}
 
 	// ---------- view instance persistency ----------
@@ -673,7 +680,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		if (!areUserDefinedPatternsEnabled())
 			return;
 		List userDefinedPatterns= new ArrayList(Arrays.asList(fUserDefinedPatterns));
-		FilterDescriptor[] filters= FilterDescriptor.getFilterDescriptors(fPart.getViewSite().getId());
+		FilterDescriptor[] filters= FilterDescriptor.getFilterDescriptors(fTargetId);
 
 		for (int i= 0; i < filters.length; i++) {
 			if (filters[i].isPatternFilter()) {
@@ -694,8 +701,8 @@ public class CustomFiltersActionGroup extends ActionGroup {
 
 	private void openDialog() {
 		CustomFiltersDialog dialog= new CustomFiltersDialog(
-			fPart.getViewSite().getShell(),
-			fPart.getViewSite().getId(),
+			fViewer.getControl().getShell(),
+			fTargetId,
 			areUserDefinedPatternsEnabled(),
 			fUserDefinedPatterns,
 			getEnabledFilterIds());
