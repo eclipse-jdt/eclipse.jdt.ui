@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Iterator;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -36,7 +38,8 @@ public class JavaPluginImages {
 	}
 	
 	// The plugin registry
-	private final static ImageRegistry IMAGE_REGISTRY= new ImageRegistry();
+	private static ImageRegistry fgImageRegistry= null;
+	private static HashMap fgAvoidSWTErrorMap= null;
 
 	/*
 	 * Available cached Images in the Java plugin image registry.
@@ -303,7 +306,7 @@ public class JavaPluginImages {
 	 * @return the image managed under the given key
 	 */ 
 	public static Image get(String key) {
-		return IMAGE_REGISTRY.get(key);
+		return getImageRegistry().get(key);
 	}
 	
 	/**
@@ -326,7 +329,15 @@ public class JavaPluginImages {
 	 * Helper method to access the image registry from the JavaPlugin class.
 	 */
 	/* package */ static ImageRegistry getImageRegistry() {
-		return IMAGE_REGISTRY;
+		if (fgImageRegistry == null) {
+			fgImageRegistry= new ImageRegistry();
+			for (Iterator iter= fgAvoidSWTErrorMap.keySet().iterator(); iter.hasNext();) {
+				String key= (String) iter.next();
+				fgImageRegistry.put(key, (ImageDescriptor) fgAvoidSWTErrorMap.get(key));
+			}
+			fgAvoidSWTErrorMap= null;
+		}
+		return fgImageRegistry;
 	}
 
 	//---- Helper methods to access icons on the file system --------------------------------------
@@ -353,7 +364,13 @@ public class JavaPluginImages {
 	private static ImageDescriptor createManaged(String prefix, String name) {
 		try {
 			ImageDescriptor result= ImageDescriptor.createFromURL(makeIconFileURL(prefix, name.substring(NAME_PREFIX_LENGTH)));
-			IMAGE_REGISTRY.put(name, result);
+			if (fgAvoidSWTErrorMap == null) {
+				fgAvoidSWTErrorMap= new HashMap();
+			}
+			fgAvoidSWTErrorMap.put(name, result);
+			if (fgImageRegistry != null) {
+				JavaPlugin.logErrorMessage("Image registry already defined");
+			}
 			return result;
 		} catch (MalformedURLException e) {
 			return ImageDescriptor.getMissingImageDescriptor();

@@ -248,35 +248,35 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return getWorkbench().getActiveWorkbenchWindow().getActivePage();
 	}
 		
-	public CompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
+	public synchronized CompilationUnitDocumentProvider getCompilationUnitDocumentProvider() {
 		if (fCompilationUnitDocumentProvider == null)
 			fCompilationUnitDocumentProvider= new CompilationUnitDocumentProvider();
 		return fCompilationUnitDocumentProvider;
 	}
 	
-	public ClassFileDocumentProvider getClassFileDocumentProvider() {
+	public synchronized ClassFileDocumentProvider getClassFileDocumentProvider() {
 		if (fClassFileDocumentProvider == null)
 			fClassFileDocumentProvider= new ClassFileDocumentProvider();
 		return fClassFileDocumentProvider;
 	}
 
-	public IWorkingCopyManager getWorkingCopyManager() {
+	public synchronized IWorkingCopyManager getWorkingCopyManager() {
 		return getCompilationUnitDocumentProvider();
 	}
 	
-	public ProblemMarkerManager getProblemMarkerManager() {
+	public synchronized ProblemMarkerManager getProblemMarkerManager() {
 		if (fProblemMarkerManager == null)
 			fProblemMarkerManager= new ProblemMarkerManager();
 		return fProblemMarkerManager;
 	}	
 	
-	public JavaTextTools getJavaTextTools() {
+	public synchronized JavaTextTools getJavaTextTools() {
 		if (fJavaTextTools == null)
 			fJavaTextTools= new JavaTextTools(getPreferenceStore());
 		return fJavaTextTools;
 	}
 	
-	public MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
+	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
 		if (fMembersOrderPreferenceCache == null)
 			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
 		return fMembersOrderPreferenceCache;
@@ -311,7 +311,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		PreferenceConstants.initializeDefaultValues(store);
 	}
 	
-	private ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
+	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
 		if (fImageDescriptorRegistry == null)
 			fImageDescriptorRegistry= new ImageDescriptorRegistry();
 		return fImageDescriptorRegistry;
