@@ -14,7 +14,7 @@ public class LineBreakingReader {
 		fGC= gc;
 		fMaxWidth= maxLineWidth;
 		fOffset= 0;		fLine= null;		fLineBreakIterator= BreakIterator.getLineInstance();
-	}	
+	}		public boolean isFormattedLine() {		return fLine != null;	}
 		/**	 * Reads the next line. The lengths of the line will not exceed the gived maximum	 * width.	 */
 	public String readLine() throws IOException {
 		if (fLine == null) {
