@@ -1621,6 +1621,86 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		clearRewrite(rewrite);
 	}
 	
+	public void testIfStatement6() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            System.beep();\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            System.beep();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		AST ast= astRoot.getAST();
+				
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		Block block= methodDecl.getBody();
+		List statements= block.statements();
+		assertTrue("Number of statements not 2", statements.size() == 2);
+
+		{ // replace then statement by a try statement
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry);			
+		}
+		{ // replace then statement by a try statement
+			IfStatement ifStatement= (IfStatement) statements.get(1);
+	
+			TryStatement newTry= ast.newTryStatement();
+			newTry.getBody().statements().add(ast.newReturnStatement());
+			CatchClause newCatchClause= ast.newCatchClause();
+			SingleVariableDeclaration varDecl= ast.newSingleVariableDeclaration();
+			varDecl.setType(ast.newSimpleType(ast.newSimpleName("Exception")));
+			varDecl.setName(ast.newSimpleName("e"));
+			newCatchClause.setException(varDecl);
+			newTry.catchClauses().add(newCatchClause);
+			
+			rewrite.markAsReplaced(ifStatement.getThenStatement(), newTry);	
+		}
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");
+		buf.append("        if (i == 0)\n");
+		buf.append("            try {\n");
+		buf.append("                return;\n");
+		buf.append("            } catch (Exception e) {\n");
+		buf.append("            }\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}
+	
+	
 	
 	public void testIfStatementReplaceElse1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
