@@ -58,8 +58,8 @@ public class JavaElementImageProvider {
 	public final static int LIGHT_TYPE_ICONS= 0x4;	
 
 	/**
-	 * Use the 'empty packages' image for packages with subpackags
-	 * but no Java Elements.
+	 * Use the package image for packages with subpackages
+	 * with resources but no Java Elements.
 	 */	
 	public final static int ALWAYS_PACKAGE_ICON= 0x8;
 
@@ -268,9 +268,9 @@ public class JavaElementImageProvider {
 		} catch(JavaModelException e) {
 			return DESC_OBJ_FOLDER;
 		}
-		if(doesNotContainJavaElements && (fragment.getNonJavaResources().length >0)) {
+		if(doesNotContainJavaElements && (fragment.getNonJavaResources().length > 0)) {
 			if (fragment.hasSubpackages() && useAlwaysPackageIcon(renderFlags))
-				return JavaPluginImages.DESC_OBJS_EMPTY_PACKAGE;
+				return JavaPluginImages.DESC_OBJS_PACKAGE;
 			else 
 				return DESC_OBJ_FOLDER;
 		 } else if (doesNotContainJavaElements)
