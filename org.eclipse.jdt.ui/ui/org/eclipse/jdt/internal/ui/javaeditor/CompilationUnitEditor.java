@@ -486,6 +486,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public final static String CLOSE_JAVADOCS= "closeJavaDocs"; //$NON-NLS-1$
 	/** Preference key for automatically adding javadoc tags */
 	public final static String ADD_JAVADOC_TAGS= "addJavaDocTags"; //$NON-NLS-1$
+	/** Preference key for automatically formatting javadocs */
+	public final static String FORMAT_JAVADOCS= "formatJavaDocs"; //$NON-NLS-1$
 
 	
 	/** The editor's save policy */
