@@ -35,7 +35,40 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -86,16 +119,24 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private TextChangeManager fChangeManager;
 	private String fEnclosingInstanceFieldName;
 	private boolean fMarkInstanceFieldAsFinal;
+	private boolean fCreateInstanceField;
 	private String fNewSourceOfInputType;
+	private CompilationUnit fDeclaringCuNode;
+	private final boolean fIsInstanceFieldCreationPossible;
+	private final boolean fIsInstanceFieldCreationMandatory;
 	
-	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
+	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
 		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
 		fImportEditManager= new ImportEditManager(codeGenerationSettings);
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
-		fMarkInstanceFieldAsFinal= true; //defualt
+		fMarkInstanceFieldAsFinal= true; //default
+		fDeclaringCuNode= AST.parseCompilationUnit(getDeclaringCu(), true);
+		fIsInstanceFieldCreationPossible= !JdtFlags.isStatic(type);
+		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
+		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 	}
 
 	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException{
@@ -105,7 +146,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 	
 	public static boolean isAvailable(IType type) throws JavaModelException{
-		return (Checks.isAvailable(type) && ! Checks.isTopLevel(type));
+		return Checks.isAvailable(type) && ! Checks.isTopLevel(type);
 	}
 	
 	public boolean isInstanceFieldMarkedFinal(){
@@ -114,6 +155,24 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	
 	public void setMarkInstanceFieldAsFinal(boolean mark){
 		fMarkInstanceFieldAsFinal= mark;
+	}
+
+	public boolean isCreatingInstanceFieldPossible(){
+		return fIsInstanceFieldCreationPossible;
+	}
+
+	public boolean isCreatingInstanceFieldMandatory(){
+		return fIsInstanceFieldCreationMandatory;
+	}
+	
+	public boolean getCreateInstanceField(){
+		return fCreateInstanceField;
+	}
+	
+	public void setCreateInstanceField(boolean create){
+		Assert.isTrue(fIsInstanceFieldCreationPossible);
+		Assert.isTrue(! fIsInstanceFieldCreationMandatory);
+		fCreateInstanceField= create;
 	}
 	
 	private String getInitialNameForEnclosingInstanceField() {
@@ -287,20 +346,26 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (isInputTypeStatic()){
 			constructorReferences= new HashMap(0);
 			pm.worked(1);
-		} else
+		} else {
 			constructorReferences= createConstructorReferencesMapping(new SubProgressMonitor(pm, 1));
-		ICompilationUnit declaringCu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
+		}
+		ICompilationUnit declaringCu= getDeclaringCu();
 		for (Iterator iter= getMergedSet(typeReferences.keySet(), constructorReferences.keySet()).iterator(); iter.hasNext();) {
 			ICompilationUnit processedCu= (ICompilationUnit) iter.next();
 			ASTRewrite rewrite= createRewrite(typeReferences, constructorReferences, declaringCu, processedCu, false);
 			if(processedCu.equals(declaringCu)) {	
 				fNewSourceOfInputType= getNewSourceForInputType(processedCu, rewrite);	
+				rewrite.removeModifications();
 				rewrite= createRewrite(typeReferences, constructorReferences, declaringCu, processedCu, true);
 			}
 			addTextEditFromRewrite(manager, processedCu, rewrite);
 		}
 		pm.done();
 		return manager;
+	}
+	
+	private ICompilationUnit getDeclaringCu() {
+		return WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
 	}
 
 	private String getNewSourceForInputType(ICompilationUnit processedCu, ASTRewrite rewrite) throws CoreException, JavaModelException {
@@ -314,16 +379,17 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private ASTRewrite createRewrite(Map typeReferences, Map constructorReferences, ICompilationUnit declaringCu, ICompilationUnit processedCu, boolean removeTypeDeclaration) throws CoreException {
-		CompilationUnit cuNode= AST.parseCompilationUnit(processedCu, true);
+		CompilationUnit cuNode= getAST(processedCu);
 		ASTRewrite rewrite= new ASTRewrite(cuNode);
 		if (processedCu.equals(declaringCu)){
 			TypeDeclaration td= findTypeDeclaration(fType, cuNode);
 			if (! removeTypeDeclaration && ! isInputTypeStatic()){
-				if (JavaElementUtil.getAllConstructors(fType).length == 0)
-					addConstructor(td, rewrite);
-				else
+				if (typeHasNoConstructors())
+					createConstructor(td, rewrite, fCreateInstanceField);
+				else if (fCreateInstanceField)
 					modifyConstructors(td, rewrite);
-				addEnclosingInstanceDeclaration(td, rewrite);
+				if (fCreateInstanceField)
+					addEnclosingInstanceDeclaration(td, rewrite);
 			}
 			modifyAccessesToMembersFromEnclosingInstance(td, rewrite);
 			if (removeTypeDeclaration)
@@ -342,6 +408,71 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return rewrite;
 	}
 	
+	private CompilationUnit getAST(ICompilationUnit processedCu) {		
+		if (processedCu.equals(getDeclaringCu()))
+			return fDeclaringCuNode;
+		return AST.parseCompilationUnit(processedCu, true);
+	}
+
+	private boolean typeHasNoConstructors() throws JavaModelException {
+		return JavaElementUtil.getAllConstructors(fType).length == 0;
+	}
+	
+	private boolean isInstanceFieldCreationMandatory() {
+		TypeDeclaration td= findTypeDeclaration(fType, fDeclaringCuNode);
+		MemberAccessNodeCollector collector= new MemberAccessNodeCollector(getEnclosingType());
+		td.accept(collector);
+		return containsNonStatic(collector.getFieldAccesses()) || containsNonStatic(collector.getMethodInvocations()) || containsNonStatic(collector.getSimpleFieldNames());
+	}
+
+	private static boolean containsNonStatic(SimpleName[] fieldNames) {
+		for (int i= 0; i < fieldNames.length; i++) {
+			if (! isStaticFieldName(fieldNames[i]))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean containsNonStatic(MethodInvocation[] invocations) {
+		for (int i= 0; i < invocations.length; i++) {
+			if (! isStatic(invocations[i]))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean containsNonStatic(FieldAccess[] accesses) {
+		for (int i= 0; i < accesses.length; i++) {
+			if (! isStatic(accesses[i]))
+				return true;
+		}
+		return false;
+	}
+
+	private static boolean isStatic(MethodInvocation invocation) {
+		IMethodBinding methodBinding= invocation.resolveMethodBinding();
+		if (methodBinding == null)
+			return false;
+		return JdtFlags.isStatic(methodBinding);
+	}
+
+	private static boolean isStatic(FieldAccess access) {
+		IVariableBinding fieldBinding= access.resolveFieldBinding();
+		if (fieldBinding == null)
+			return false;
+		return JdtFlags.isStatic(fieldBinding);
+	}
+
+	private static boolean isStaticFieldName(SimpleName name) {
+		IBinding binding= name.resolveBinding();
+		if (! (binding instanceof IVariableBinding))
+			return false;
+		IVariableBinding variableBinding= (IVariableBinding)binding;
+		if (! variableBinding.isField())
+			return false;
+		return JdtFlags.isStatic(variableBinding);			
+	}
+
 	private static TypeDeclaration findTypeDeclaration(IType type, CompilationUnit cuNode) {
 		List types= getDeclaringTypes(type);
 		types.add(type);
@@ -425,7 +556,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private TextEdit getRewriteTextEdit(ICompilationUnit cu, ASTRewrite rewrite) throws JavaModelException {
 		TextBuffer textBuffer= TextBuffer.create(cu.getBuffer().getContents());
 		TextEdit resultingEdit= new MultiTextEdit();
-		rewrite.rewriteNode(textBuffer, resultingEdit, null);
+		rewrite.rewriteNode(textBuffer, resultingEdit);
 		if (fImportEditManager.hasImportEditFor(cu))
 			resultingEdit.add(fImportEditManager.getImportEdit(cu));
 		return resultingEdit;
@@ -532,11 +663,11 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			MethodDeclaration decl= constructorNodes[i];
 			Assert.isTrue(decl.isConstructor());
 			addParameterToConstructor(rewrite, decl);
-			setEnclosingInstanceFieldInConstrucotr(rewrite, decl);
+			setEnclosingInstanceFieldInConstructor(rewrite, decl);
 		}
 	}
 
-	private void setEnclosingInstanceFieldInConstrucotr(ASTRewrite rewrite, MethodDeclaration decl) throws JavaModelException {
+	private void setEnclosingInstanceFieldInConstructor(ASTRewrite rewrite, MethodDeclaration decl) throws JavaModelException {
 		Block body= decl.getBody();
 		List statements= body.statements();
 		AST ast= decl.getAST();
@@ -576,29 +707,46 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		rewrite.markAsInserted(param);
 	}
 
-	private void addConstructor(TypeDeclaration declaration, ASTRewrite rewrite) throws CoreException {
-		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(format(getNewConstructorSource(), 0), ASTRewrite.METHOD_DECLARATION);
+	private void createConstructor(TypeDeclaration declaration, ASTRewrite rewrite, boolean addRefToEnclosing) throws CoreException {
+		BodyDeclaration newConst= (BodyDeclaration)rewrite.createPlaceholder(format(getNewConstructorSource(addRefToEnclosing), 0), ASTRewrite.METHOD_DECLARATION);
 		declaration.bodyDeclarations().add(0, newConst);
 		rewrite.markAsInserted(newConst);
 	}
 
-	private String getNewConstructorSource() throws CoreException {
+	private String getNewConstructorSource(boolean addRefToEnclosing) throws CoreException {
 		String lineDelimiter= getLineSeperator();
-		String constructorBody= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), true, createEnclosingInstanceInitialization(), lineDelimiter);
+		String bodyStatement= createNewConstructorBodyStatement(addRefToEnclosing);
+		if (addRefToEnclosing)
+			bodyStatement= createEnclosingInstanceInitialization();
+		String constructorBody= CodeGeneration.getMethodBodyContent(fType.getCompilationUnit(), fType.getElementName(), fType.getElementName(), true, bodyStatement, lineDelimiter);
 		if (constructorBody == null)
 			constructorBody= ""; //$NON-NLS-1$
-		return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
-			lineDelimiter + constructorBody + lineDelimiter + '}';
+		if (addRefToEnclosing)
+			return getNewConstructorComment() + fType.getElementName() + '(' + createDeclarationForEnclosingInstanceConstructorParameter() + "){" +  //$NON-NLS-1$
+				lineDelimiter + constructorBody + lineDelimiter + '}';
+		else
+			return getNewConstructorComment() + fType.getElementName() +  "(){" + lineDelimiter + constructorBody + lineDelimiter + '}';//$NON-NLS-1$
+	}
+
+	private String createNewConstructorBodyStatement(boolean addRefToEnclosing) throws JavaModelException {
+		if (addRefToEnclosing)
+			return createEnclosingInstanceInitialization();
+		else return "";
 	}
 
 	private String getNewConstructorComment() throws CoreException {
-		if (fCodeGenerationSettings.createComments){
-			String comment= CodeGeneration.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), new String[]{getTypeOfEnclosingInstanceField()}, new String[0], null, null, getLineSeperator());
-			if (comment == null)
-				return ""; //$NON-NLS-1$
-			return comment + getLineSeperator();
-		}else
+		if (! fCodeGenerationSettings.createComments)
 			return "";//$NON-NLS-1$
+		String comment= CodeGeneration.getMethodComment(getInputTypeCu(), fType.getElementName(), fType.getElementName(), getNewConstructorParameterNames(), new String[0], null, null, getLineSeperator());
+		if (comment == null)
+			return ""; //$NON-NLS-1$
+		return comment + getLineSeperator();
+	}
+
+	private String[] getNewConstructorParameterNames() {
+		if (! fCreateInstanceField)
+			return new String[0];
+		return new String[]{getTypeOfEnclosingInstanceField()};
 	}
 
 	private void addEnclosingInstanceDeclaration(TypeDeclaration type, ASTRewrite rewrite) throws JavaModelException{
@@ -976,16 +1124,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	}
 
 	private static IVariableBinding resolveFieldBinding(FieldAccess fieldAccess) {
-		return resolveFieldBinding(fieldAccess.getName());
+		return fieldAccess.resolveFieldBinding();
 	}
 
-	private static IVariableBinding resolveFieldBinding(SimpleName simpleName) {
-		IBinding binding= simpleName.resolveBinding();
-		if (binding instanceof IVariableBinding)
-			return (IVariableBinding)binding;
-		return null;
-	}
-	
 	private String format(String src, int indentationLevel){
 		return ToolFactory.createDefaultCodeFormatter(null).format(src, indentationLevel, null, getLineSeperator());
 	}
@@ -1020,23 +1161,18 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		
 		public boolean visit(MethodInvocation node) {
 			ITypeBinding declaringClassBinding= MoveInnerToTopRefactoring.getDeclaringTypeBinding(node);
-			if (declaringClassBinding != null) {
-				if (MoveInnerToTopRefactoring.isCorrespondingTypeBinding(declaringClassBinding, fType)){
-					fMethodAccesses.add(node);
-					return false;
-				}	
-			}		
+			if (declaringClassBinding != null && MoveInnerToTopRefactoring.isCorrespondingTypeBinding(declaringClassBinding, fType)) 
+				fMethodAccesses.add(node);
+			//method invocations can be nested in one another, we have to go on
 			return super.visit(node);
 		}
 		
 		public boolean visit(FieldAccess node) {
 			ITypeBinding declaringClassBinding= MoveInnerToTopRefactoring.getDeclaringTypeBinding(node);
-			if (declaringClassBinding != null){
-				if (MoveInnerToTopRefactoring.isCorrespondingTypeBinding(declaringClassBinding, fType)){
-					fFieldAccesses.add(node);
-					return false;
-				}	
-			}	
+			if (declaringClassBinding != null && MoveInnerToTopRefactoring.isCorrespondingTypeBinding(declaringClassBinding, fType)) {
+				fFieldAccesses.add(node);
+				return false;
+			}
 			return super.visit(node);
 		}
 
@@ -1046,11 +1182,9 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			IBinding binding= node.resolveBinding();
 			if (binding instanceof IVariableBinding){
 				IVariableBinding vb= (IVariableBinding)binding;
-				if (vb.isField()){
-					if (MoveInnerToTopRefactoring.isCorrespondingTypeBinding(vb.getDeclaringClass(), fType)){
-						fSimpleNames.add(node);
-						return false;
-					}
+				if (vb.isField() && MoveInnerToTopRefactoring.isCorrespondingTypeBinding(vb.getDeclaringClass(), fType)) {
+					fSimpleNames.add(node);
+					return false;
 				}
 			}
 			return super.visit(node);
