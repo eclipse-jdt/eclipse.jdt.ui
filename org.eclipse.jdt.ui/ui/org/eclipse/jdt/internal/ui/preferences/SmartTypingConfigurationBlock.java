@@ -12,6 +12,7 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -224,7 +225,7 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 		link.setLayoutData(gd);
 		
 		final IPreferenceStore combinedStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
-		combinedStore.addPropertyChangeListener(new IPropertyChangeListener() {
+		final IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
 			private boolean fHasRun= false;
 			public void propertyChange(PropertyChangeEvent event) {
 				if (fHasRun)
@@ -234,7 +235,6 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 				String property= event.getProperty();
 				if (DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR.equals(property)
 						|| DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE.equals(property)) {
-					combinedStore.removePropertyChangeListener(this);
 					fHasRun= true;
 					link.dispose();
 					createMessage(composite);
@@ -242,6 +242,12 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 					composite.layout();
 				}
 			}
+		};
+		combinedStore.addPropertyChangeListener(propertyChangeListener);
+		link.addDisposeListener(new DisposeListener() {
+				public void widgetDisposed(org.eclipse.swt.events.DisposeEvent e) {
+					combinedStore.removePropertyChangeListener(propertyChangeListener);
+				}
 		});
 	}
 	
