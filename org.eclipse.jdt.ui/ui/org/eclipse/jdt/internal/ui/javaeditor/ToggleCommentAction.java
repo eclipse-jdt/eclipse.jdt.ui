@@ -17,6 +17,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jface.text.BadLocationException;
@@ -24,9 +25,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -78,14 +80,14 @@ public final class ToggleCommentAction extends TextEditorAction {
 		else
 			operationCode= ITextOperationTarget.PREFIX;
 		
-		if (!fOperationTarget.canDoOperation(operationCode))
-			// FIXME: Report to the user
+		Shell shell= editor.getSite().getShell();
+		if (!fOperationTarget.canDoOperation(operationCode)) {
+			if (shell != null)
+				MessageDialog.openError(shell, JavaEditorMessages.getString("ToggleComment.error.title"), JavaEditorMessages.getString("ToggleComment.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
+		}
 		
 		Display display= null;
-		
-		IWorkbenchPartSite site= editor.getSite();
-		Shell shell= site.getShell();
 		if (shell != null && !shell.isDisposed()) 
 			display= shell.getDisplay();
 	
@@ -97,8 +99,10 @@ public final class ToggleCommentAction extends TextEditorAction {
 	}
 	
 	/**
-	 * FIXME: comment + params
-	 * @return <code>true</code> if all selected lines are single-line commented
+	 * Is the given selection single-line commented?
+	 *
+	 * @param selection Selection to check
+	 * @return <code>true</code> iff all selected lines are single-line commented
 	 */
 	private boolean isSelectionCommented(ISelection selection) {
 		if (!(selection instanceof ITextSelection))
@@ -119,8 +123,8 @@ public final class ToggleCommentAction extends TextEditorAction {
 					if (index >= 0 && s.substring(0, index).trim().length() == 0)
 						continue OUTER;
 				} catch (BadLocationException e) {
-					// FIXME: Report to log
 					// should not happen
+					JavaPlugin.log(e);
 				}
 			}
 			return false;
