@@ -393,7 +393,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			
 			private void updateCodeView(StyledText styledText, IClassFile classFile) {
 				String content= null;
-				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS | IClassFileReader.SUPER_INTERFACES;
+				int flags= IClassFileReader.FIELD_INFOS | IClassFileReader.METHOD_INFOS | IClassFileReader.SUPER_INTERFACES | IClassFileReader.METHOD_BODIES;
 				IClassFileReader classFileReader= ToolFactory.createDefaultClassFileReader(classFile, flags);					
 				if (classFileReader != null) {
 					IClassFileDisassembler disassembler= ToolFactory.createDefaultClassFileDisassembler();
