@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+
+   <description>
+      Update site for AST View
+   </description>
+   <feature url="features/org.eclipse.jdt.astview.feature_1.0.0.jar" id="org.eclipse.jdt.astview.feature" version="1.0.0">
+      <category name="ast-view"/>
+   </feature>
+   <category-def name="ast-view" label="AST View">
+      <description>
+         Optional AST View
+      </description>
+   </category-def>
+</site>
