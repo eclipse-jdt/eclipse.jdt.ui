@@ -288,4 +288,4 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		return fAntButton.getSelection();
 	}
 
-} //JavadocSpecificsWizardPage
+}

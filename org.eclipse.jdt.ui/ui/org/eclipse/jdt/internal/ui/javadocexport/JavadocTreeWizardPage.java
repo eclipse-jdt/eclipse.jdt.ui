@@ -665,4 +665,4 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		return super.getNextPage();
 	}
 
-} //end Class
+}
