@@ -91,6 +91,10 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		
 		String[] bootpath = getBootpath(configuration);
 		runConfig.setBootClassPath(bootpath);
+		String[][] bootpathInfo = getBootpathExt(configuration);
+		runConfig.setPrependBootClassPath(bootpathInfo[0]);
+		runConfig.setMainBootClassPath(bootpathInfo[1]);
+		runConfig.setAppendBootClassPath(bootpathInfo[2]);
 		
 		return runConfig;
 	}
