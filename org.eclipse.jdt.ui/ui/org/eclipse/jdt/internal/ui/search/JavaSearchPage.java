@@ -9,11 +9,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -73,6 +71,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
@@ -148,7 +147,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
 				scopeDescription= SearchMessages.getString("SelectionScope"); //$NON-NLS-1$
-				scope= getSelectedResourcesScope();
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getSelection());
 				break;
 			case ISearchPageContainer.WORKING_SET_SCOPE:
 				IWorkingSet workingSet= getContainer().getSelectedWorkingSet();
@@ -156,7 +155,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				if (workingSet == null)
 					return false;
 				scopeDescription= SearchMessages.getFormattedString("WorkingSetScope", new String[] {workingSet.getName()}); //$NON-NLS-1$
-				scope= SearchEngine.createJavaSearchScope(getContainer().getSelectedWorkingSet().getResources());
+				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSet());
 		}		
 		
 		JavaSearchResultCollector collector= new JavaSearchResultCollector();
@@ -685,23 +684,5 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				return page.getActiveEditor();
 		}
 		return null;
-	}
-
-	private IJavaSearchScope getSelectedResourcesScope() {
-		ArrayList resources= new ArrayList(10);
-		if (!getSelection().isEmpty() && getSelection() instanceof IStructuredSelection) {
-			Iterator iter= ((IStructuredSelection)getSelection()).iterator();
-			while (iter.hasNext()) {
-				Object selection= iter.next();
-				if (selection instanceof IResource)
-					resources.add(selection);
-				else if (selection instanceof IAdaptable) {
-					IResource resource= (IResource)((IAdaptable)selection).getAdapter(IResource.class);
-					if (resource != null)
-						resources.add(resource);
-				}
-			}
-		}
-		return SearchEngine.createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]));
 	}
 }

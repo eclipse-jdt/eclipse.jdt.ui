@@ -12,7 +12,6 @@ import org.eclipse.search.ui.SearchUI;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -36,7 +35,7 @@ public class FindReferencesInWorkingSetAction extends FindReferencesAction {
 
 
 	private IJavaSearchScope getScope(IWorkingSet workingSet) throws JavaModelException {
-		return SearchEngine.createJavaSearchScope(workingSet.getResources());
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSet);
 	}
 
 	private String getScopeDescription(IWorkingSet workingSet) {

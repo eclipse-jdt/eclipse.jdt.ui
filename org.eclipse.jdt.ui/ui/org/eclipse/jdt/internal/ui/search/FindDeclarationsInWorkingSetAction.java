@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -43,7 +42,7 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 
 
 	private IJavaSearchScope getScope(IWorkingSet workingSet) throws JavaModelException {
-		return SearchEngine.createJavaSearchScope(workingSet.getResources());
+		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSet);
 	}
 
 	private String getScopeDescription(IWorkingSet workingSet) {
