@@ -155,6 +155,8 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		
 		fCreateNonJavadocComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateNonJavadocComments.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.see_comment.label"));				 //$NON-NLS-1$
+		
+		fCreateJavaDocComments.attachDialogField(fCreateNonJavadocComments);
 	
 		fCreateFileComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateFileComments.setLabelText(PreferencesMessages.getString("CodeGenerationPreferencePage.file_comment.label"));				 //$NON-NLS-1$
@@ -211,6 +213,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		javaDocGroup.setText(PreferencesMessages.getString("CodeGenerationPreferencePage.comments.label")); //$NON-NLS-1$
 		fCreateJavaDocComments.doFillIntoGrid(javaDocGroup, 2);
 		fCreateNonJavadocComments.doFillIntoGrid(javaDocGroup, 2);
+		LayoutUtil.setHorizontalIndent(fCreateNonJavadocComments.getSelectionButton(null), horizontalIndent);
 		fCreateFileComments.doFillIntoGrid(javaDocGroup, 2);
 		
 		Group getterSetterGroup= new Group(result, SWT.NONE);
