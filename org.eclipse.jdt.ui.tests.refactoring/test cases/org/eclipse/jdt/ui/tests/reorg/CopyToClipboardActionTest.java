@@ -10,16 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.reorg;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
 import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.ui.part.ResourceTransfer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,6 +40,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
@@ -36,6 +50,8 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyToClipboardAction;
 
 
 public class CopyToClipboardActionTest extends RefactoringTest{
+
+	private ILabelProvider fLabelProvider;
 
 	private static final Class clazz= CopyToClipboardActionTest.class;
 
@@ -76,7 +92,10 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		
 		faTxt= createFile((IFolder)getPackageP().getUnderlyingResource(), "a.txt");
 		fOlder= createFolder(MySetup.getProject().getProject(), "fOlder");
-
+		
+		fLabelProvider= new JavaElementLabelProvider(	JavaElementLabelProvider.SHOW_VARIABLE + 
+														JavaElementLabelProvider.SHOW_PARAMETERS + 
+														JavaElementLabelProvider.SHOW_TYPE);
 		assertTrue("A.java does not exist", fCuA.exists());
 		assertTrue("B.java does not exist", fCuB.exists());
 		assertTrue("q does not exist", fPackageQ.exists());
@@ -88,6 +107,7 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 	protected void tearDown() throws Exception {
 		super.tearDown();
 		fClipboard.dispose();
+		fLabelProvider.dispose();
 		delete(fCuA);
 		delete(fCuB);
 		delete(fPackageQ_R);
@@ -132,16 +152,136 @@ public class CopyToClipboardActionTest extends RefactoringTest{
 		}
 	}
 	
-	private static void checkEnabled(Object[] elements){
-		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements));
+	private void checkEnabled(Object[] elements){
+		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be enabled", copyAction.isEnabled());
+		copyAction.run();
+		checkClipboard(elements);
 	}
 
-	private static void checkDisabled(Object[] elements){
-		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements));
+	private void checkDisabled(Object[] elements){
+		CopyToClipboardAction copyAction= new CopyToClipboardAction(new MockWorkbenchSite(elements), fClipboard, null);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("action should be disabled", ! copyAction.isEnabled());
+	}
+
+	private void checkClipboard(Object[] elementsCopied) {
+		String[] clipboardFiles= getClipboardFiles();
+		IResource[] clipboardResources= getClipboardResources();
+		String clipboardText= getClipboardText();
+		IJavaElement[] clipboardJavaElements= getClipboardJavaElements();
+	
+		IResource[] resourcesCopied= getResources(elementsCopied);
+		IJavaElement[] javaElementsCopied= getJavaElements(elementsCopied);
+		
+		assertEquals("names", computeExpectedNames(resourcesCopied, javaElementsCopied), clipboardText);
+		checkFiles(resourcesCopied, javaElementsCopied, clipboardFiles);
+		checkElements(resourcesCopied, clipboardResources);
+//		checkElements(javaElementsCopied, clipboardJavaElements);
+	}
+	
+	private String computeExpectedNames(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied) {
+		StringBuffer buff= new StringBuffer();
+		for (int i= 0; i < resourcesCopied.length; i++) {
+			if (i>0)
+				buff.append('\n');
+			buff.append(getName(resourcesCopied[i]));
+		}
+		for (int i= 0; i < javaElementsCopied.length; i++) {
+			if (resourcesCopied.length > 0 || i > 0)
+				buff.append('\n');
+			buff.append(getName(javaElementsCopied[i]));
+		}
+		return buff.toString();
+	}
+
+	private String getName(IResource resource){
+		return fLabelProvider.getText(resource);
+	}
+	private String getName(IJavaElement javaElement){
+		return fLabelProvider.getText(javaElement);
+	}
+
+	private static void checkElements(Object[] copied, Object[] retreivedFromClipboard) {
+		assertEquals("different number of elements", copied.length, retreivedFromClipboard.length);
+		sortByHashCode(copied);
+		sortByHashCode(retreivedFromClipboard);
+		for (int i= 0; i < retreivedFromClipboard.length; i++) {
+			assertTrue("different: copied " + getName(copied[i]) + " retreived: " + getName(retreivedFromClipboard[i]) , copied[i].equals(retreivedFromClipboard[i]));
+		}
+	}
+
+	private static String getName(Object object) {
+		if (object instanceof IJavaElement)
+			return ((IJavaElement)object).getElementName();
+		if (object instanceof IResource)
+			return ((IResource)object).getName();
+		return object == null ? null : object.toString();
+	}
+
+	private static void sortByHashCode(Object[] copied) {
+		Arrays.sort(copied, new Comparator(){
+			public int compare(Object arg0, Object arg1) {
+				return arg0.hashCode() - arg1.hashCode();
+			}
+		});
+	}
+
+	private static void checkFiles(IResource[] resourcesCopied, IJavaElement[] javaElementsCopied, String[] clipboardFiles) {
+		int expected= 0;
+		expected += resourcesCopied.length;
+		expected += countResources(javaElementsCopied);
+		assertEquals("different number of files in clipboard", expected, clipboardFiles.length);
+	}
+
+	private static int countResources(IJavaElement[] javaElementsCopied) {
+		int count= 0;
+		for (int i= 0; i < javaElementsCopied.length; i++) {
+			IJavaElement element= javaElementsCopied[i];
+			if (element instanceof ICompilationUnit || null == element.getAncestor(IJavaElement.COMPILATION_UNIT))
+				count++;
+		}
+		return count;
+	}
+
+	private static IResource[] getResources(Object[] elements) {
+		List resources= new ArrayList(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			if (element instanceof IResource)
+				resources.add(element);			
+		}
+		return (IResource[]) resources.toArray(new IResource[resources.size()]);
+	}
+
+	private static IJavaElement[] getJavaElements(Object[] elements) {
+		List resources= new ArrayList(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			if (element instanceof IJavaElement)
+				resources.add(element);			
+		}
+		return (IJavaElement[]) resources.toArray(new IJavaElement[resources.size()]);
+	}
+
+	private IJavaElement[] getClipboardJavaElements() {
+		//TODO implement me
+		return new IJavaElement[0];
+	}
+
+	private String[] getClipboardFiles() {
+		String[] files= (String[])fClipboard.getContents(FileTransfer.getInstance());
+		return files == null ? new String[0]: files;
+	}
+	
+	private IResource[] getClipboardResources() {
+		IResource[] resources= (IResource[])fClipboard.getContents(ResourceTransfer.getInstance());
+		return resources == null ? new IResource[0]: resources; 
+	}
+
+	private String getClipboardText() {
+		return (String)fClipboard.getContents(TextTransfer.getInstance());
 	}
 	
 	///---------tests
