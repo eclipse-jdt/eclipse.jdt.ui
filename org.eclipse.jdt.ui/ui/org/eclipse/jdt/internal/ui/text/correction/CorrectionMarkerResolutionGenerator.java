@@ -15,6 +15,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
+import org.eclipse.ui.IMarkerResolutionGenerator2;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -29,7 +30,7 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
 
 /**
   */
-public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator {
+public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGenerator, IMarkerResolutionGenerator2 {
 
 	public static class CorrectionMarkerResolution implements IMarkerResolution {
 	
@@ -72,6 +73,14 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	public CorrectionMarkerResolutionGenerator() {
 		super();
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.IMarkerResolutionGenerator2#hasResolutions(org.eclipse.core.resources.IMarker)
+	 */
+	public boolean hasResolutions(IMarker marker) {
+		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
+		return JavaCorrectionProcessor.hasCorrections(id);
+	}	
 
 	/* (non-Javadoc)
 	 * @see IMarkerResolutionGenerator#getResolutions(IMarker)
@@ -135,4 +144,6 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		}
 		return null;
 	}
+
+
 }
