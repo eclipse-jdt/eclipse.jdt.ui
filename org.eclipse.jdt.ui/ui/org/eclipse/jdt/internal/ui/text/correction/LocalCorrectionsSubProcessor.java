@@ -377,13 +377,18 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}	
 		ASTNode typeNode= null;
+		ITypeBinding binding= null;
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
-			typeNode= selectedNode.getParent();
+			TypeDeclaration typeDecl= (TypeDeclaration) selectedNode.getParent();
+			binding= typeDecl.resolveBinding();
+			typeNode= typeDecl;
 		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {
 			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
-			typeNode= creation.getAnonymousClassDeclaration();				
+			AnonymousClassDeclaration anonymDecl= creation.getAnonymousClassDeclaration();
+			binding= anonymDecl.resolveBinding();
+			typeNode= anonymDecl;
 		}
-		if (typeNode != null) {
+		if (typeNode != null && binding != null) {
 			UnimplementedMethodsCompletionProposal proposal= new UnimplementedMethodsCompletionProposal(cu, typeNode, 10);
 			proposals.add(proposal);
 		}
