@@ -195,7 +195,7 @@ public class AugmentRawContainerClientsRefactoring extends Refactoring {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
 			ConstraintVariable2 element= elementCv.getElementVariable();
 			if (element instanceof VariableVariable2) {
-				//TODO: don't change twice (as lement variable and as type variable
+				//TODO: don't change twice (as element variable and as type variable
 //				String variableBindingKey= ((VariableVariable2) element).getVariableBindingKey();
 //				ASTNode node= compilationUnit.findDeclaringNode(variableBindingKey);
 //				if (node instanceof VariableDeclarationFragment) {

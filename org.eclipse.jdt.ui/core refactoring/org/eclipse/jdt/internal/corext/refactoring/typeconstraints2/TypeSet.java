@@ -57,18 +57,12 @@ public abstract class TypeSet {
 		}
 		
 		private TypeSet commonLowerBound(SingleTypeSet other) {
-			//see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
+			//TODO: see also org.eclipse.jdt.internal.compiler.lookup.Scope.lowerUpperBound(types);
 			//and org.eclipse.jdt.internal.compiler.lookup.Scope.mostSpecificCommonType(types)
-			
-			throw new IllegalStateException(this + " != " + other); //$NON-NLS-1$
-//			// first try superclasses:
-//			ArrayList superclasses= new ArrayList();
-//			ITypeBinding superclass= fTypeBinding.getSuperclass();
-//			while (superclass != null) {
-//				superclasses.add(superclass);
-//				superclass= superclass.getSuperclass();
-//			}
-//			return null;
+			//TODO: should either not collapse sets here or support multiple lower bounds
+			ITypeBinding msct= TypeBindings.mostSpecificCommonType(new ITypeBinding[] {fTypeBinding, other.fTypeBinding});
+			return new SingleTypeSet(msct);
+//			throw new IllegalStateException(this + " != " + other); //$NON-NLS-1$
 		}
 
 		public ITypeBinding chooseSingleType() {

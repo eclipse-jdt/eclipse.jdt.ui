@@ -19,11 +19,14 @@ public abstract class SpecialMethod {
 
 	protected final ITypeBinding fTypeBinding;
 	protected final String fName;
+	protected final ITypeBinding fReturnType;
 	protected final ITypeBinding[] fParameterTypes;
 
-	public SpecialMethod(ITypeBinding typeBinding, String name, ITypeBinding[] argumentTypes) {
+
+	public SpecialMethod(ITypeBinding typeBinding, String name, ITypeBinding returnType, ITypeBinding[] argumentTypes) {
 		fTypeBinding= typeBinding;
 		fName= name;
+		fReturnType= returnType;
 		fParameterTypes= argumentTypes;
 	}
 

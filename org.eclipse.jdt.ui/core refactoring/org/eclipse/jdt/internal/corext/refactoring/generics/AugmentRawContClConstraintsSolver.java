@@ -93,11 +93,11 @@ public class AugmentRawContClConstraintsSolver {
 		}
 	}
 
-	public static void setTypeEstimate(ConstraintVariable2 cv, TypeSet typeSet) {
+	private static void setTypeEstimate(ConstraintVariable2 cv, TypeSet typeSet) {
 		cv.setData(TYPE_ESTIMATE, typeSet);
 	}
 
-	public static TypeSet getTypeEstimate(ConstraintVariable2 cv) {
+	private static TypeSet getTypeEstimate(ConstraintVariable2 cv) {
 		return (TypeSet) cv.getData(TYPE_ESTIMATE);
 	}
 	

@@ -17,6 +17,7 @@ import java.util.List;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -128,6 +129,26 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 		//TODO: other implicit conversions: numeric promotion, autoboxing?
 		
 		setConstraintVariable(node, left); // type of assignement is type of 'left'
+	}
+	
+	public void endVisit(CastExpression node) {
+		Expression expression= node.getExpression();
+		ConstraintVariable2 expressionCv= getConstraintVariable(expression);
+		if (! (expressionCv instanceof CollectionElementVariable2))
+			return;
+		
+		Type type= node.getType();
+		ConstraintVariable2 typeCv= getConstraintVariable(type);
+		
+		//TODO: can this be loosened when we remove casts?
+		setConstraintVariable(node, typeCv);
+		
+		boolean eitherIsIntf= type.resolveBinding().isInterface() || expression.resolveTypeBinding().isInterface();
+		if (eitherIsIntf)
+			return;
+		
+		//TODO: preserve up- and down-castedness!
+		
 	}
 	
 	public boolean visit(CatchClause node) {
@@ -375,6 +396,7 @@ public class AugmentRawContClConstraintCreator extends HierarchicalASTVisitor {
 	 * @return the {@link ConstraintVariable2} associated with the node, or <code>null</code>
 	 */
 	protected ConstraintVariable2 getConstraintVariable(ASTNode node) {
+		//TODO: make static?
 		return (ConstraintVariable2) node.getProperty(CV_PROP);
 	}
 	

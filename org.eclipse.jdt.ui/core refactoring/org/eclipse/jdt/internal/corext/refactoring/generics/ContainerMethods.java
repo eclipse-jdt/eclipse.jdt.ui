@@ -51,35 +51,68 @@ public class ContainerMethods {
 	}
 
 	private void initialize() {
-		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionType(), "add", new ITypeBinding[] {fTCFactory.getObjectType()}) {
+		initCollectionAdd();
+		initListGet();
+	}
+	
+	private void initCollectionAdd() {
+		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionType(), "add", null, new ITypeBinding[] {fTCFactory.getObjectType()}) {
 			public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
-				AugmentRawContainerClientsTCModel tcFactory= constraintCreator.getTCFactory();
+				AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
 				
 				Expression receiver= invocation.getExpression();
 				//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
 				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) constraintCreator.getConstraintVariable(receiver);
 				Expression arg0= (Expression) invocation.arguments().get(0);
 				ConstraintVariable2 arg0Cv= constraintCreator.getConstraintVariable(arg0);
-				ConstraintVariable2 elementCv= tcFactory.makeElementVariable(expressionCv);
+				ConstraintVariable2 elementCv= tcModel.makeElementVariable(expressionCv);
 				// [arg0] <= Elem(receiver)
-				tcFactory.createSubtypeConstraint(arg0Cv, elementCv);
+				tcModel.createSubtypeConstraint(arg0Cv, elementCv);
+/*
+		new MethodEntry("java.util.Collection", "add", new String[]{"java.lang.Object"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			public ITypeConstraint[] generateConstraintsFor(MethodInvocation inv, GenericizeConstraintCreator gcc) {
+				if (DEBUG) System.out.println("Encountered a call to Collection.add" + formatArgs(inv.arguments())); //$NON-NLS-1$
+				Expression	rcvr= inv.getExpression();
+				Expression	arg0= (Expression) inv.arguments().get(0);
+
+				return gcc.getConstraintFactory().createSubtypeConstraint(
+						// [arg0] <= Elem(rcvr)
+						gcc.getConstraintVariableFactory().makeExpressionOrTypeVariable(arg0, gcc.getContext()),
+						gcc.getGenericizeVariableFactory().createElementVariable(rcvr, gcc.getContext(), gcc.getConstraintFactory()));
+			}
+		};
+*/
 			}
 		});
-		
-//		new MethodEntry("java.util.Collection", "add", new String[]{"java.lang.Object"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-//			public ITypeConstraint[] generateConstraintsFor(MethodInvocation inv, GenericizeConstraintCreator gcc) {
-//				if (DEBUG) System.out.println("Encountered a call to Collection.add" + formatArgs(inv.arguments())); //$NON-NLS-1$
-//				Expression	rcvr= inv.getExpression();
-//				Expression	arg0= (Expression) inv.arguments().get(0);
-//
-//				return gcc.getConstraintFactory().createSubtypeConstraint(
-//						// [arg0] <= Elem(rcvr)
-//						gcc.getConstraintVariableFactory().makeExpressionOrTypeVariable(arg0, gcc.getContext()),
-//						gcc.getGenericizeVariableFactory().createElementVariable(rcvr, gcc.getContext(), gcc.getConstraintFactory()));
-//			}
-//		};
 	}
-	
+
+	private void initListGet() {
+		addSpecialMethod(new SpecialMethod(fTCFactory.getCollectionType(), "get", fTCFactory.getObjectType(), new ITypeBinding[] {fTCFactory.getPrimitiveIntType()}) {
+			public void generateConstraintsFor(MethodInvocation invocation, AugmentRawContClConstraintCreator constraintCreator) {
+				AugmentRawContainerClientsTCModel tcModel= constraintCreator.getTCFactory();
+				
+				Expression receiver= invocation.getExpression();
+				//TODO: expression can be null when visiting a non-special method in a subclass of a container type.
+				TypeConstraintVariable2 expressionCv= (TypeConstraintVariable2) constraintCreator.getConstraintVariable(receiver);
+				ConstraintVariable2 elementCv= tcModel.makeElementVariable(expressionCv);
+				// [retVal] =^= Elem(receiver)
+				constraintCreator.setConstraintVariable(invocation, elementCv);
+/*
+		new MethodEntry("java.util.List", "get", new String[]{"int"}) { //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			public ITypeConstraint[] generateConstraintsFor(MethodInvocation inv, GenericizeConstraintCreator gcc) {
+				if (DEBUG) System.out.println("Encountered a call to List.get" + formatArgs(inv.arguments())); //$NON-NLS-1$
+				Expression	rcvr= inv.getExpression();
+
+				return gcc.getConstraintFactory().createEqualsConstraint( // [rcvr.get()] == Elem(rcvr)
+						gcc.getConstraintVariableFactory().makeExpressionOrTypeVariable(inv, gcc.getContext()),
+						gcc.getGenericizeVariableFactory().createElementVariable(rcvr, gcc.getContext(), gcc.getConstraintFactory()));
+			}
+		};
+*/
+			}
+		});
+	}
+
 	private void addSpecialMethod(SpecialMethod specialMethod) {
 		String key= specialMethod.fName + '.' + specialMethod.fParameterTypes.length;
 		fContainerMethods.put(key, specialMethod);

@@ -92,8 +92,7 @@ public class AugmentRawContainerClientsTCModel {
 	
 	protected final ITypeBinding fCollection;
 	protected final ITypeBinding fObject;
-
-//	private ITypeBinding fCollectionBinding;
+	protected final ITypeBinding fPrimitiveInt;
 
 	public AugmentRawContainerClientsTCModel(IJavaProject project) {
 		fTypeConstraints= new CustomHashtable(new TypeConstraintComparer());
@@ -119,6 +118,7 @@ public class AugmentRawContainerClientsTCModel {
 		//TODO: make sure this is in the compiler loop!
 		fCollection= collectionBinding;
 		fObject= unit.getAST().resolveWellKnownType("java.lang.Object");
+		fPrimitiveInt= unit.getAST().resolveWellKnownType("int");
 	}
 	
 	/**
@@ -173,6 +173,10 @@ public class AugmentRawContainerClientsTCModel {
 		return fObject;
 	}
 	
+	public ITypeBinding getPrimitiveIntType() {
+		return fPrimitiveInt;
+	}
+
 	/**
 	 * @param cv
 	 * @return a List of ITypeConstraint2s where cv is used
