@@ -786,7 +786,7 @@ public class LocalCorrectionsSubProcessor {
 			qualifier= imports.addImport(declaringClass);
 		} else {
 			ITypeBinding currType= Bindings.getBindingOfParentType(name);
-			if (Bindings.isSuperType(currType, declaringClass)) {
+			if (Bindings.isSuperType(declaringClass, currType)) {
 				qualifier= "this"; //$NON-NLS-1$
 			} else {
 				String outer= imports.addImport(declaringClass);

@@ -2931,6 +2931,50 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 	
+	public void testUnqualifiedFieldAccess_bug50960() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    private int count;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        count= 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends F {\n");
+		buf.append("    private int count;\n");
+		buf.append("    public E(int i) {\n");
+		buf.append("        this.count= 1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+	
 	
 	public void testHidingVariable1() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
