@@ -134,6 +134,7 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		 * known at this point, so we pass the wizard and then, once the dialog
 		 * is open, we will have access to its shell.
 		 */
+		processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 		processor.setReorgQueries(new ReorgQueries(wizard));
 		new RefactoringStarter().activate(refactoring, wizard, getShell(), 
 			RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), //$NON-NLS-1$ 

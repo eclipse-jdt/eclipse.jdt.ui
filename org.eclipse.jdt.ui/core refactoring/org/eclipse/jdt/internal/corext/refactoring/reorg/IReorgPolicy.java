@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -57,5 +58,7 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRef
 	static interface IMovePolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor pm) throws JavaModelException;
 		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException;
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);
+		public boolean isTextualMove();
 	}
 }

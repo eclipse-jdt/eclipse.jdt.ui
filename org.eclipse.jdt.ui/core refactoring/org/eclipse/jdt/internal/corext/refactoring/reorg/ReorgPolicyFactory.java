@@ -1425,7 +1425,14 @@ class ReorgPolicyFactory {
 		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {
 			if (! ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(getJavaElements(), getResources(), reorgQueries))
 				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
-		}		
+		}
+		
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries) {
+			return null;
+		}
+		public boolean isTextualMove() {
+			return false;
+		}
 	}
 	
 	private static class MovePackagesPolicy extends PackagesReorgPolicy implements IMovePolicy{
@@ -1531,7 +1538,14 @@ class ReorgPolicyFactory {
 		private void confirmMovingReadOnly(IReorgQueries reorgQueries) throws CoreException {
 			if (! ReadOnlyResourceFinder.confirmMoveOfReadOnlyElements(getJavaElements(), getResources(), reorgQueries))
 				throw new OperationCanceledException(); //saying 'no' to this one is like cancelling the whole operation
-		}		
+		}
+		
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries) {
+			return null;
+		}
+		public boolean isTextualMove() {
+			return false;
+		}
 	}
 	
 	private static class MoveFilesFoldersAndCusPolicy extends FilesFoldersAndCusReorgPolicy implements IMovePolicy{
@@ -1871,6 +1885,13 @@ class ReorgPolicyFactory {
 			Assert.isNotNull(patterns);
 			fFilePatterns= patterns;
 		}
+		
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries) {
+			return createQueries.createNewPackageQuery();
+		}
+		public boolean isTextualMove() {
+			return false;
+		}
 	}
 	
 	private static class MoveSubCuElementsPolicy extends SubCuElementReorgPolicy implements IMovePolicy{
@@ -1942,6 +1963,13 @@ class ReorgPolicyFactory {
 		public IFile[] getAllModifiedFiles() {
 			return ReorgUtils.getFiles(new IResource[]{ReorgUtils.getResource(getSourceCu()), ReorgUtils.getResource(getDestinationCu())});
 		}
+		
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries) {
+			return null;
+		}
+		public boolean isTextualMove() {
+			return true;
+		}
 	}
 		
 	private static class NoMovePolicy extends ReorgPolicy implements IMovePolicy{
@@ -1968,6 +1996,12 @@ class ReorgPolicyFactory {
 		}
 		public IJavaElement[] getJavaElements() {
 			return new IJavaElement[0];
+		}
+		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries) {
+			return null;
+		}
+		public boolean isTextualMove() {
+			return true;
 		}
 	}
 	

@@ -25,8 +25,10 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery.ICreatedTarget;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -39,15 +41,15 @@ public class ReorgMoveWizard extends RefactoringWizard {
 
 	public ReorgMoveWizard(MoveRefactoring ref) {
 		super(ref, DIALOG_BASED_UESR_INTERFACE | computeHasPreviewPage(ref));
-		if (canUpdateReferences(ref))
-			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
-		else
+		if (isTextualMove(ref))
 			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.textual_move")); //$NON-NLS-1$
+		else
+			setDefaultPageTitle(ReorgMessages.getString("ReorgMoveWizard.3")); //$NON-NLS-1$
 	}
 	
-	private static boolean canUpdateReferences(MoveRefactoring ref) {
+	private static boolean isTextualMove(MoveRefactoring ref) {
 		JavaMoveProcessor moveProcessor= (JavaMoveProcessor) ref.getAdapter(JavaMoveProcessor.class);
-		return moveProcessor.canUpdateReferences();
+		return moveProcessor.isTextualMove();
 	}
 
 	private static int computeHasPreviewPage(MoveRefactoring refactoring) {
@@ -70,6 +72,8 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		private Button fReferenceCheckbox;
 		private Button fQualifiedNameCheckbox;
 		private QualifiedNameComponent fQualifiedNameComponent;
+		
+		private Object fDestination;
 		
 		public MoveInputPage() {
 			super(PAGE_NAME);
@@ -112,6 +116,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			else refactoringStatus= RefactoringStatus.createFatalErrorStatus(ReorgMessages.getString("ReorgMoveWizard.4")); //$NON-NLS-1$
 			
 			updateUIStatus();
+			fDestination= selected;
 			return refactoringStatus;
 		}
 	
@@ -188,7 +193,8 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		public void createControl(Composite parent) {
 			Composite result;
 			
-			if (! getJavaMoveProcessor().hasDestinationSet()) {
+			boolean showDestinationTree= ! getJavaMoveProcessor().hasDestinationSet();
+			if (showDestinationTree) {
 				super.createControl(parent);
 				result= (Composite)super.getControl();
 			} else  {
@@ -198,14 +204,53 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				result.setLayout(new GridLayout());
 				Dialog.applyDialogFont(result);
 			}
-			addUpdateReferenceComponent(result);
-			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+			if (showDestinationTree && getJavaMoveProcessor().getCreateTargetQuery() != null) {
+				addUpdateArea(result);
+			} else {
+				addUpdateReferenceComponent(result);
+				addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
+			}
 			setControl(result);
 			Dialog.applyDialogFont(result);
 		}
-
+		
+		protected void addUpdateArea(Composite parent) {
+			Composite firstLine= new Composite(parent, SWT.NONE);
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= layout.marginWidth= 0;
+			firstLine.setLayout(layout);
+			firstLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			
+			if (getJavaMoveProcessor().canUpdateReferences()) {
+				addUpdateReferenceComponent(firstLine);
+				addUpdateQualifiedNameComponent(parent, layout.marginWidth);
+			} else if (getJavaMoveProcessor().canUpdateQualifiedNames()) {
+				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
+			} else {
+				Composite filler= new Composite(firstLine, SWT.NONE);
+				filler.setLayoutData(new GridData(GridData.FILL_BOTH));
+			}
+			
+			Button newButton= new Button(firstLine, SWT.PUSH);
+			newButton.setText("&New ...");
+			newButton.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING));
+			
+			newButton.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					doNewButtonPressed();
+				}
+			});
+		}
+		
 		private boolean canUpdateReferences() {
 			return getJavaMoveProcessor().canUpdateReferences();
+		}
+
+		private void doNewButtonPressed() {
+			ICreateTargetQuery createTargetQuery= getJavaMoveProcessor().getCreateTargetQuery();
+			ICreatedTarget newElement= createTargetQuery.getCreatedTarget(fDestination);
+			if (newElement != null)
+				addElementToTree(newElement.getNewElement(), newElement.getParentOfNew());
 		}
 	}
 }

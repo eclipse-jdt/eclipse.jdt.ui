@@ -140,6 +140,10 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		treeViewer.setSorter(new JavaElementSorter());
 		treeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
 		return treeViewer;
-	}		
-
+	}
+	
+	protected void addElementToTree(Object newElement, Object parentElement) {
+		fViewer.refresh(parentElement);
+		fViewer.setSelection(new StructuredSelection(newElement), true);
+	}
 }

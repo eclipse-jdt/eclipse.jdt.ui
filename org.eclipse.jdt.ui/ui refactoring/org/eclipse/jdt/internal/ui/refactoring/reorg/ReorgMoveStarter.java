@@ -73,6 +73,7 @@ public class ReorgMoveStarter {
 			MoveRefactoring ref= new MoveRefactoring(fMoveProcessor);
 			if (fMoveProcessor.hasAllInputSet()) {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
+				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(parent));
 				new RefactoringExecutionHelper(ref, RefactoringCore.getConditionCheckingFailedSeverity(), true, parent, context).perform();
 			} else  {
@@ -81,6 +82,7 @@ public class ReorgMoveStarter {
 				 * We want to get the shell from the refactoring dialog but it's not known at this point, 
 				 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
 				 */
+				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 				fMoveProcessor.setReorgQueries(new ReorgQueries(wizard));
 				new RefactoringStarter().activate(ref, wizard, parent, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 			}

@@ -50,6 +50,7 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 	
 	private IReorgQueries fReorgQueries;
 	private IMovePolicy fMovePolicy;
+	private ICreateTargetQueries fCreateTargetQueries;
 	private boolean fWasCanceled;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
@@ -259,5 +260,19 @@ public class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUp
 	}
 	public boolean hasDestinationSet() {
 		return fMovePolicy.getJavaElementDestination() != null || fMovePolicy.getResourceDestination() != null;
+	}
+	
+	public void setCreateTargetQueries(ICreateTargetQueries queries){
+		Assert.isNotNull(queries);
+		fCreateTargetQueries= queries;
+	}
+	/**
+	 * @return the create target queries, or <code>null</code> if creating new targets is not supported
+	 */
+	public ICreateTargetQuery getCreateTargetQuery() {
+		return fMovePolicy.getCreateTargetQuery(fCreateTargetQueries);
+	}
+	public boolean isTextualMove() {
+		return fMovePolicy.isTextualMove();
 	}
 }
