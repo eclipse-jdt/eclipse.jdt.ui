@@ -505,9 +505,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		CompilationUnit cuNode= new RefactoringASTParser(AST.JLS3).parse(fType.getCompilationUnit(), false);
 		cuNode.accept(new ASTVisitor(){
 			
-			// TODO account for enums and annotations
-			
-			public boolean visit(TypeDeclaration node){
+			public boolean visit(TypeDeclaration node){ // enums and annotations can't be local
 				if (node.getStartPosition() <= typeRange.getOffset())
 					return true;
 				if (node.getStartPosition() > typeRange.getOffset() + typeRange.getLength())
