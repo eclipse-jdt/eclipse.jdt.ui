@@ -21,6 +21,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+
 public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
@@ -88,7 +90,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -117,7 +119,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -152,7 +154,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -247,7 +249,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature));
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -256,7 +258,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature));
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(classA.getMethod("m", signature), JavaPreferencesSettings.getCodeGenerationSettings());
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -277,7 +279,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method);
+		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, null, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -344,6 +346,39 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
 	}	
 	
+	public void testFailDoAll6()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"Certificate"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		int expectedSeverity= RefactoringStatus.ERROR;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}	
+
+	public void testFailDoAll7()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"Fred"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+		
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		int expectedSeverity= RefactoringStatus.ERROR;
+		helperDoAllFail("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, permutation, newVisibility, deletedIndices, expectedSeverity);
+	}	
 	
 	//---------
 	public void test0() throws Exception{
@@ -940,6 +975,40 @@ public class ChangeSignatureTests extends RefactoringTest {
 		int newVisibility= Modifier.NONE;
 		String newReturnTypeName= null;
 		helperDoAll("A", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll53()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"HashSet"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}
+
+	public void testAll54()throws Exception{
+		String[] signature= {"I"};
+		String[] newNames= {"a"};
+		String[] newTypes= {"List"};
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= {0};
+
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {0};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.NONE;
+		String newReturnTypeName= null;
+		helperDoAll("m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
 }
