@@ -14,12 +14,16 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -27,6 +31,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -41,7 +47,6 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewVariableCompletionProposal extends CUCorrectionProposal {
@@ -106,17 +111,19 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 	private static class AddParameterEdit extends SimpleTextEdit {
 		private String fContent;
 		private ASTNode fAstRoot;
+		private ICompilationUnit fCompilationUnit;
 
-		public AddParameterEdit(ASTNode astRoot, String content) {
+		public AddParameterEdit(ICompilationUnit cu, ASTNode astRoot, String content) {
 			fAstRoot= astRoot;
 			fContent= content;
+			fCompilationUnit= cu;
 		}
 		
 		/* non Java-doc
 		 * @see TextEdit#getCopy
 		 */
 		public TextEdit copy() {
-			return new AddParameterEdit(fAstRoot, fContent);
+			return new AddParameterEdit(fCompilationUnit, fAstRoot, fContent);
 		}
 		
 		/* non Java-doc
@@ -143,7 +150,19 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 					insertString= ", " + fContent; //$NON-NLS-1$
 				} else {
 					SimpleName name= declaration.getName();
-					offset= name.getStartPosition() + name.getLength() - 1;
+					try {
+						IScanner scanner= ASTResolving.createScanner(fCompilationUnit, name.getStartPosition());
+						int nextNoken= scanner.getNextToken();
+						while (nextNoken != ITerminalSymbols.TokenNameLPAREN) {
+							nextNoken= scanner.getNextToken();
+							if (nextNoken == ITerminalSymbols.TokenNameEOF) {
+								throw new CoreException(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, "Unexpected EOF while scanning", null)); //$NON-NLS-1$
+							}
+						}
+						offset= scanner.getCurrentTokenEndPosition() + 1;
+					} catch (InvalidInputException e) {
+						throw new CoreException(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, "Exception while scanning", e)); //$NON-NLS-1$
+					}					
 					insertString= fContent;
 				}
 			}
@@ -196,7 +215,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 			changeElement.addTextEdit("field", createFieldEdit(content, settings.tabWidth)); //$NON-NLS-1$
 		} else if (fVariableKind == PARAM) {
 			// new parameter
-			changeElement.addTextEdit("parameter", new AddParameterEdit(fNode, content)); //$NON-NLS-1$
+			changeElement.addTextEdit("parameter", new AddParameterEdit(cu, fNode, content)); //$NON-NLS-1$
 		}
 	}
 	

@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -9,6 +10,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -148,13 +152,31 @@ public class LocalCorrectionsSubProcessor {
 			
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
 			SimpleName name= methodDecl.getName();
+					
 			int pos= name.getStartPosition() + name.getLength();
+			
 			StringBuffer insertString= new StringBuffer();
 			if (methodDecl.thrownExceptions().isEmpty()) {
 				insertString.append(" throws "); //$NON-NLS-1$
+				try {
+					IScanner scanner= ASTResolving.createScanner(cu, name.getStartPosition());
+					int nextNoken= scanner.getNextToken();
+					while (nextNoken != ITerminalSymbols.TokenNameRPAREN) {
+						nextNoken= scanner.getNextToken();
+						if (nextNoken == ITerminalSymbols.TokenNameEOF) {
+							return;
+						}
+					}
+					pos= scanner.getCurrentTokenEndPosition() + 1;
+				} catch (InvalidInputException e) {
+					return;
+				}
 			} else {
 				insertString.append(", "); //$NON-NLS-1$
-			}
+				List thrownExceptions= methodDecl.thrownExceptions();
+				ASTNode last= (ASTNode) thrownExceptions.get(thrownExceptions.size() - 1);
+				pos= last.getStartPosition() + last.getLength();
+			}			
 			insertString.append(Signature.getSimpleName(uncaughtName));
 			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
