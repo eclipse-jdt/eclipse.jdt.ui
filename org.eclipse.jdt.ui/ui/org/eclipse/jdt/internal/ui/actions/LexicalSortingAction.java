@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.browsing;
+package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.swt.custom.BusyIndicator;
 
@@ -22,17 +22,18 @@ import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
 
 /*
  * XXX: This class should become part of the MemberFilterActionGroup
  *      which should be renamed to MemberActionsGroup
  */
-class LexicalSortingAction extends Action {
+public class LexicalSortingAction extends Action {
 	private JavaElementSorter fSorter= new JavaElementSorter();
 	private StructuredViewer fViewer;
 	private String fPreferenceKey;
 
-	LexicalSortingAction(StructuredViewer viewer, String id) {
+	public LexicalSortingAction(StructuredViewer viewer, String id) {
 		super();
 		fViewer= viewer;
 		fPreferenceKey= "LexicalSortingAction." + id + ".isChecked"; //$NON-NLS-1$ //$NON-NLS-2$
