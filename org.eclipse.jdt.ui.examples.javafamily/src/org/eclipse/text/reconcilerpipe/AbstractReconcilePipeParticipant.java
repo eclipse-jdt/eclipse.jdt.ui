@@ -82,9 +82,9 @@ public abstract class AbstractReconcilePipeParticipant implements IReconcilePipe
 		if (!isLastParticipant()) {
 			fNextParticipant.setInputModel(getModel());
 			IReconcileResult[] nextResult= fNextParticipant.reconcile(partition);
-			result= merge(result, nextResult);
-		}
-		return convertToInputModel(result);
+			return merge(result, convertToInputModel(nextResult));
+		} else
+			return result;
 	}
 
 	/*
@@ -95,11 +95,20 @@ public abstract class AbstractReconcilePipeParticipant implements IReconcilePipe
 		if (!isLastParticipant()) {
 			fNextParticipant.setInputModel(getModel());
 			IReconcileResult[] nextResult= fNextParticipant.reconcile(dirtyRegion, subRegion);
-			return merge(result, nextResult);
-		}
-		return convertToInputModel(result);
+			return merge(result, convertToInputModel(nextResult));
+		} else
+			return result;
 	}
 
+	
+	/**
+	 * Reconciles the model of this reconcile pipe participant. The
+	 * result is based on the input model.
+	 * 
+	 * @param dirtyRegion the document region which has been changed
+	 * @param subRegion the sub region in the dirty region which should be reconciled
+	 * @return an array with reconcile results 
+	 */
 	abstract protected IReconcileResult[] reconcileModel(DirtyRegion dirtyRegion, IRegion subRegion);
 
 	protected IReconcileResult[] convertToInputModel(IReconcileResult[] inputResults) {

@@ -11,12 +11,15 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
 
 import org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant;
@@ -27,19 +30,172 @@ import org.eclipse.text.reconcilerpipe.TextModelAdapter;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.core.BufferManager;
+
 
 /**
  * This reconcile pipe participant has a Java source document as 
  * input model and maintains a Java working copy as its model.
- *
+ * <p>
+ * FIXME: We do not destroy the temporary working copy at the end.
+ *         There are two ways to fix this:
+ *         1. destroy it after each reconcile call ==> no internal model anylonger
+ * 		   2. add life-cycle to reconcile pipe participants (at least dispose/destroy)
+ * </p>
  * @since 3.0
  */
 public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipant {
+
+	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
+
+		/*
+		 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
+		 */
+		public IBuffer createBuffer(ICompilationUnit workingCopy) {
+			// FIXME: Don't know how to get a buffer without using internal API.
+			return new BufferManager().createBuffer(workingCopy);
+		}
+	}
+
+	private static class ProblemAdapter extends AnnotationAdapter  {
+		
+		private IProblem fProblem;
+		private Position fPosition;
+		
+		ProblemAdapter(IProblem problem)  {
+			fProblem= problem;
+		}
+
+		public Position getPosition()  {
+			if (fPosition == null)
+				fPosition= createPositionFromProblem();
+			return fPosition;
+		}
+
+		public IAnnotationExtension createAnnotation() {
+			int start= fProblem.getSourceStart();
+			if (start < 0)
+				return null;
+				
+			int length= fProblem.getSourceEnd() - fProblem.getSourceStart() + 1;
+			if (length < 0)
+				return null;
+
+			int type= TemporaryAnnotation.NONE;
+			if (fProblem.isError())
+				type= TemporaryAnnotation.ERROR;
+			else if (fProblem.isWarning())
+				type= TemporaryAnnotation.WARNING;
+				
+			return new TemporaryAnnotation(type, fProblem.getMessage(), fProblem.getID());
+		}
+		
+		private Position createPositionFromProblem() {
+			int start= fProblem.getSourceStart();
+			if (start < 0)
+				return null;
+				
+			int length= fProblem.getSourceEnd() - fProblem.getSourceStart() + 1;
+			if (length < 0)
+				return null;
+				
+			return new Position(start, length);
+		}
+	}
+
+	private class ProblemRequestor implements IProblemRequestor  {
+		
+		private List fCollectedProblems;
+		private boolean fIsActive= false;
+		private boolean fIsRunning= false;
+	
+		/*
+		 * @see IProblemRequestor#beginReporting()
+		 */
+		public void beginReporting() {
+			fIsRunning= true;
+			fCollectedProblems= new ArrayList();
+		}
+		
+		/*
+		 * @see IProblemRequestor#acceptProblem(IProblem)
+		 */
+		public void acceptProblem(IProblem problem) {
+			if (isActive())
+				fCollectedProblems.add(problem);
+		}
+	
+		/*
+		 * @see IProblemRequestor#endReporting()
+		 */
+		public void endReporting() {
+			fIsRunning= false;
+
+// WAS:
+//			if (!isActive())
+//				return;
+//				
+//			if (isCanceled())
+//				return;
+		}
+		
+		public IReconcileResult[] getReconcileResult() {
+			Assert.isTrue(!fIsRunning);
+
+			int size= fCollectedProblems.size();
+			IReconcileResult[] result= new IReconcileResult[size];
+
+			for (int i= 0; i < size; i++)
+				result[i]= new ProblemAdapter((IProblem)fCollectedProblems.get(i));
+			
+			return result;
+		}
+		
+		/*
+		 * @see IProblemRequestor#isActive()
+		 */
+		public boolean isActive() {
+			return fIsActive && fCollectedProblems != null && !isCanceled();
+		}
+		
+		/**
+		 * Sets the active state of this problem requestor.
+		 * 
+		 * @param isActive the state of this problem requestor
+		 */
+		public void setIsActive(boolean isActive) {
+			if (fIsActive != isActive) {
+				fIsActive= isActive;
+				if (fIsActive)
+					startCollectingProblems();
+				else
+					stopCollectingProblems();
+			}
+		}
+
+		/**
+		 * Tells this annotation model to collect temporary problems from now on.
+		 */
+		private void startCollectingProblems() {
+			fCollectedProblems= new ArrayList();
+		}
+
+		/**
+		 * Tells this annotation model to no longer collect temporary problems.
+		 */
+		private void stopCollectingProblems() {
+		}
+	};
 
 	/**
 	 * Adapts an <code>ICompilationUnit</code> to the <code>ITextModel</code> interface.
@@ -58,14 +214,17 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	}
 
 	private CompilationUnitAdapter fWorkingCopy;
+	private ProblemRequestor fProblemRequestor;
+	private WorkingCopyOwner fTemporaryWorkingCopyOwner;
 
 	/**
 	 * Creates the last reconcile participant of the pipe.
 	 */
 	public JavaReconcilePipeParticipant(IFile jspFile) {
 		Assert.isNotNull(jspFile);
+		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
 		try {
-			fWorkingCopy= new CompilationUnitAdapter(createNewWorkingCopy(jspFile));
+			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
 			// XXX Auto-generated catch block
 			e.printStackTrace();
@@ -79,8 +238,9 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	public JavaReconcilePipeParticipant(IReconcilePipeParticipant participant, IFile jspFile) {
 		super(participant);
 		Assert.isNotNull(jspFile);
+		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
 		try {
-			fWorkingCopy= new CompilationUnitAdapter(createNewWorkingCopy(jspFile));
+			fWorkingCopy= new CompilationUnitAdapter(createTemporaryWorkingCopy(jspFile));
 		} catch (JavaModelException e) {
 			// XXX Auto-generated catch block
 			e.printStackTrace();
@@ -113,13 +273,17 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 
 		try {
 			synchronized (cu) {
+				fProblemRequestor.setIsActive(true);
+				cu.makeConsistent(getProgressMonitor());
 				cu.reconcile(true, getProgressMonitor());
 			}
-		} catch (JavaModelException e1) {
-			e1.printStackTrace();
+		} catch (JavaModelException ex) {
+			ex.printStackTrace();
+		} finally  {
+			fProblemRequestor.setIsActive(false);
 		}
 
-		return null;
+		return fProblemRequestor.getReconcileResult();
 	}
 
 	/*
@@ -132,37 +296,53 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	/*
 	 * @see org.eclipse.jdt.internal.corext.util.WorkingCopyUtil#getNewWorkingCopy
 	 */
-	private ICompilationUnit createNewWorkingCopy(IFile jspFile) throws JavaModelException {
-		IPackageFragment packageFragment;
-		IContainer parent= jspFile.getParent();
-		if (parent.getType() == IResource.FOLDER) {
-			packageFragment= (IPackageFragment)JavaCore.create(parent);
-		} else {
-			// project since it cannot be the workspace root
-			IJavaProject jProject= (IJavaProject)JavaCore.create(parent);
+	private ICompilationUnit createTemporaryWorkingCopy(IFile jspFile) throws JavaModelException {
 
-			if (!jProject.exists())  {
-				System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project");
-				return null;
-			}
-				
-			IPackageFragmentRoot[] packageFragmentRoots= jProject.getPackageFragmentRoots();
-			IPackageFragmentRoot packageFragmentRoot= null;
-			int i= 0;
-			while (i < packageFragmentRoots.length) {
-				if (!packageFragmentRoots[i].isArchive() && !packageFragmentRoots[i].isExternal()) {
-					packageFragmentRoot= packageFragmentRoots[i];
-					break;
+		IContainer parent= jspFile.getParent();
+		IPackageFragment packageFragment= null;
+		IJavaElement je= JavaCore.create(parent);
+
+		switch (je.getElementType()) {
+			case IJavaElement.PACKAGE_FRAGMENT:
+				je= je.getParent();
+				// fall through
+
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot)je;
+				packageFragment= packageFragmentRoot.getPackageFragment(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH);
+				break;
+
+			case IJavaElement.JAVA_PROJECT:
+				IJavaProject jProject= (IJavaProject)je;
+	
+				if (!jProject.exists())  {
+					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project");
+					return null;
 				}
-				i++;
-			}
-			if (packageFragmentRoot == null) {
-				System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project with source package fragment root");
+					
+				packageFragmentRoot= null;
+				IPackageFragmentRoot[] packageFragmentRoots= jProject.getPackageFragmentRoots();
+				int i= 0;
+				while (i < packageFragmentRoots.length) {
+					if (!packageFragmentRoots[i].isArchive() && !packageFragmentRoots[i].isExternal()) {
+						packageFragmentRoot= packageFragmentRoots[i];
+						break;
+					}
+					i++;
+				}
+				if (packageFragmentRoot == null) {
+					System.out.println("Abort reconciling: cannot create working copy: JSP is not in a Java project with source package fragment root");
+					return null;
+				}
+				packageFragment= packageFragmentRoot.getPackageFragment(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH);
+				break;
+
+			default :
 				return null;
-			}
-			packageFragment= packageFragmentRoot.getPackageFragment("temp");
 		}
 		
-		return (ICompilationUnit)packageFragment.getCompilationUnit("Demo.java").getWorkingCopy();
+		fProblemRequestor= new ProblemRequestor();
+		
+		return (ICompilationUnit)packageFragment.getCompilationUnit("Demo.java").getWorkingCopy(fTemporaryWorkingCopyOwner, fProblemRequestor, getProgressMonitor());
 	}
 }

@@ -12,6 +12,7 @@ package org.eclipse.jsp;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.ArrayList;
 
 /**
  * @author weinand
@@ -20,13 +21,19 @@ public class JspTranslator extends AbstractJspParser {
 	
 	boolean DEBUG= false;
 	boolean fIgnoreHTML= true;
+
+	boolean fInUseBean;
 	
 	StringBuffer fDeclarations= new StringBuffer();
 	StringBuffer fContent= new StringBuffer();
 	StringBuffer fLocalDeclarations= new StringBuffer();
-	boolean fInUseBean;
 	String fId;
 	String fClass;
+	
+	private ArrayList fContentLines;
+	private ArrayList fDeclarationLines;
+	private ArrayList fLocalDeclarationLines;
+	private int[] fSmap;
 	
 	
 	public JspTranslator() {
@@ -59,6 +66,7 @@ public class JspTranslator extends AbstractJspParser {
 		if (fInUseBean) {
 			if (fId != null && fClass != null) {
 				fLocalDeclarations.append(fClass + " " + fId + "= new " + fClass + "();\n");
+				fLocalDeclarationLines.add(new Integer(fLines));
 
 				System.out.println("  jsp_typeRef/" + fClass);
 
@@ -74,37 +82,62 @@ public class JspTranslator extends AbstractJspParser {
 		}
 	}
 	
-	protected void java(char c, String java) {
-		switch (c) {
-		case '!':
-			fDeclarations.append(java + "\n");
-			break;
-		default:
-			fContent.append(java + "\n");
-			break;
-		}
-	}
-	
-	protected void text(String t) {
+	protected void java(char ch, String java, int line) {
 		int i= 0;
 		StringBuffer out= new StringBuffer();
-		while (i < t.length()) {
-			char c= t.charAt(i++);
+		while (i < java.length()) {
+			char c= java.charAt(i++);
 			if (c == '\n') {
-				fContent.append("    System.out.println(\"" + out.toString() + "\");\n");
+				if (ch == '!')  {
+					fDeclarations.append(out.toString() + "\n");
+					fDeclarationLines.add(new Integer(line++));
+				} else  {
+					fContent.append(out.toString() + "\n");
+					fContentLines.add(new Integer(line++));
+				}
 				out.setLength(0);
 			} else {
 				out.append(c);	
 			}
 		}
-		if (out.length() > 0)
-			fContent.append("    System.out.print(\"" + out.toString() + "\");\n");
+		if (out.length() > 0)  {
+			if (ch == '!')  {
+				fDeclarations.append(out.toString() + "\n");
+				fDeclarationLines.add(new Integer(line));
+			} else  {
+				fContent.append(out.toString() + "\n");
+				fContentLines.add(new Integer(line));
+			}
+		}
+	}
+	
+	protected void text(String t, int line) {
+		int i= 0;
+		StringBuffer out= new StringBuffer();
+		while (i < t.length()) {
+			char c= t.charAt(i++);
+			if (c == '\n') {
+				fContent.append("    System.out.println(\"" + out.toString() + "\");  //$NON-NLS-1$\n");
+				fContentLines.add(new Integer(line++));
+				out.setLength(0);
+			} else {
+				out.append(c);	
+			}
+		}
+		if (out.length() > 0)  {
+			fContent.append("    System.out.print(\"" + out.toString() + "\");  //$NON-NLS-1$\n");
+			fContentLines.add(new Integer(line));
+		}
 	}
 	
 	private void resetTranslator() {
 		fDeclarations.setLength(0);
 		fContent.setLength(0);
 		fLocalDeclarations.setLength(0);
+		
+		fLocalDeclarationLines= new ArrayList();
+		fContentLines= new ArrayList();
+		fDeclarationLines= new ArrayList();
 	}
 
 	public String createJava(Reader reader, String name) throws IOException {
@@ -114,20 +147,61 @@ public class JspTranslator extends AbstractJspParser {
 		resetTranslator();
 		parse(reader);
 
+		int lineCount= 2 + fDeclarationLines.size() + 1 + 1 + fLocalDeclarationLines.size() + fContentLines.size() + 3;
+		fSmap= new int[lineCount];
+		int line= 0;
+		fSmap[line++]= 1;
+
 		buffer.append("public class " + name + " {\n\n");
+		fSmap[line++]= 1;
+		fSmap[line++]= 1;
 
 		buffer.append(fDeclarations.toString() + "\n");
+		System.out.println(fDeclarations.toString());
+		for (int i= 0; i < fDeclarationLines.size(); i++)  {
+			fSmap[line++]= ((Integer)fDeclarationLines.get(i)).intValue();
+			System.out.println("" + ((Integer)fDeclarationLines.get(i)).intValue());
+		}
+		fSmap[line]= fSmap[line - 1] + 1;
+		line++;
 
 		buffer.append("  public void out() {\n");
+		fSmap[line]= fSmap[line - 1] + 1;
+		line++;
 		
-		if (fLocalDeclarations.length() > 0)
+		if (fLocalDeclarations.length() > 0)  {
 			buffer.append(fLocalDeclarations.toString());
+			System.out.println(fLocalDeclarations);
+			for (int i= 0; i < fLocalDeclarationLines.size(); i++) {
+				System.out.println("" + ((Integer)fLocalDeclarationLines.get(i)).intValue());
+				fSmap[line++]= ((Integer)fLocalDeclarationLines.get(i)).intValue();
+			}
+		}
 		
 		buffer.append(fContent.toString());
+		System.out.println(fContent);
+		for (int i= 0; i < fContentLines.size(); i++)  {
+			fSmap[line++]= ((Integer)fContentLines.get(i)).intValue();
+			System.out.println("" + ((Integer)fContentLines.get(i)).intValue());
+		}
 
 		buffer.append("  }\n");
+		fSmap[line]= fSmap[line - 1];
+
+		line++;
+		
 		buffer.append("}\n");
+		fSmap[line]= fSmap[line - 2];
+		
+		for (int i= 0; i < fSmap.length; i++)
+			System.out.println("" + i + " -> " + fSmap[i]);
+		
+		System.out.println(buffer.toString());
 		
 		return buffer.toString();
+	}
+	
+	public int[] getSmap()  {
+		return fSmap;
 	}
 }

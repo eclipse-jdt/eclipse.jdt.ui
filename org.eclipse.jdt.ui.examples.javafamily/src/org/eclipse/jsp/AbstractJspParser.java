@@ -19,6 +19,7 @@ public abstract class AbstractJspParser {
 	private boolean fHasUnread;
 	private int fUnread;
 	private int fPos;
+	protected int fLines= 1;
 	
 	AbstractJspParser() {
 	}
@@ -29,7 +30,18 @@ public abstract class AbstractJspParser {
 			fHasUnread= false;
 			return fUnread;
 		}
-		return fReader.read();
+
+		int ch= fReader.read();
+
+		if (ch == '\n') // LF
+			fLines++;
+		else if (ch == '\r')  { // CR
+			int nextCh= getc();
+			if (nextCh != '\n')
+				fLines++;
+			return nextCh;
+		}
+		return ch;
 	}
 	
 	private void ungetc(int c) {
@@ -98,12 +110,13 @@ public abstract class AbstractJspParser {
 
 	private void parseJava(char type) throws IOException {
 		StringBuffer sb= new StringBuffer();
+		int line= fLines;
 		while (true) {
 			int c = getc();
 			if (c == '%') {
 				c= getc();
 				if (c == '>') {
-					java(type, sb.toString());
+					java(type, sb.toString(), line);
 					return;
 				}
 			}
@@ -111,7 +124,7 @@ public abstract class AbstractJspParser {
 		}
 	}
 	
-	protected void java(char tagType, String contents) {
+	protected void java(char tagType, String contents, int line) {
 	}
 
 	private void parseAttributes(int pos, String s) {
@@ -199,14 +212,15 @@ public abstract class AbstractJspParser {
 	protected void endTag(boolean end) {
 	}
 	
-	protected void text(String t) {
+	protected void text(String t, int line) {
 	}
 	
 	void parse(Reader reader) throws IOException {
 		int c;
 		StringBuffer buffer= new StringBuffer();
 		fPos= 0;
-		
+		fLines= 1;
+		int line= fLines;
 		fReader= reader;	
 
 		while (true) {
@@ -214,15 +228,16 @@ public abstract class AbstractJspParser {
 			switch (c) {
 			case -1:
 				if (buffer.length() > 0)
-					text(buffer.toString());
+					text(buffer.toString(), line);
 				return;
 			case '<':
 				c= getc();
 				if (c == '%') {
 					// flush buffer
 					if (buffer.length() > 0) {
-						text(buffer.toString());
+						text(buffer.toString(), line);
 						buffer.setLength(0);
+						line= fLines;
 					}
 					c= getc();
 					switch (c) {
