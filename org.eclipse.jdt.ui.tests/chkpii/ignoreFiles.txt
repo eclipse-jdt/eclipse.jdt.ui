@@ -27,6 +27,8 @@ Eclipse*JDT*Builds\*
 Eclipse*JDT*Builds/*
 org.eclipse.jdt.launching.j9/*
 org.eclipse.jdt.launching.j9\*
+org.eclipse.jdt.ui.tests.refactoring\resources\*
+org.eclipse.jdt.ui.tests.refactoring/resources/*
 platform-search-home/*
 platform-search-home\*
 jdt-ui-home/*
