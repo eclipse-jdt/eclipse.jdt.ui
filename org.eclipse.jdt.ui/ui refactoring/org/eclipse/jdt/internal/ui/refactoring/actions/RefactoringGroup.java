@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.refactoring.cus.MoveCompilationUnitRefactoring;
 import org.eclipse.jdt.core.refactoring.cus.RenameCompilationUnitRefactoring;import org.eclipse.jdt.core.refactoring.fields.RenameNonPrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.fields.RenamePrivateFieldRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameMethodInInterfaceRefactoring;
-import org.eclipse.jdt.core.refactoring.methods.RenamePrivateMethodRefactoring;
+import org.eclipse.jdt.core.refactoring.methods.RenameParametersRefactoring;import org.eclipse.jdt.core.refactoring.methods.RenamePrivateMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameStaticMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.methods.RenameVirtualMethodRefactoring;
 import org.eclipse.jdt.core.refactoring.packages.RenamePackageRefactoring;
@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.ui.refactoring.AbstractOpenRefactoringWizardActi
 import org.eclipse.jdt.internal.ui.refactoring.MoveCompilationUnitWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringResources;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.refactoring.undo.RedoRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.undo.UndoRefactoringAction;
@@ -108,6 +108,7 @@ public class RefactoringGroup extends ContextMenuGroup {
 		ITextBufferChangeCreator changeCreator= new DocumentTextBufferChangeCreator(documentProvider);
 		
 		openWizardActions= new AbstractOpenRefactoringWizardAction[]{
+			createRenameParametersAction(provider, changeCreator),
 			createRenameMethodInClassAction(provider, changeCreator),
 			createRenamePrivateMethodAction(provider, changeCreator),
 			createRenameStaticMethodAction(provider, changeCreator),
@@ -123,6 +124,19 @@ public class RefactoringGroup extends ContextMenuGroup {
 	}
 	
 	// -------------------- method refactorings ----------------------
+	
+	private AbstractOpenRefactoringWizardAction createRenameParametersAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
+		String label= RefactoringResources.getResourceString("Refactoring.RenameParameters.label");
+		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
+			protected Wizard createWizard() {
+				return new RenameParametersWizard("Rename Method Parameters");
+			}
+			protected Refactoring createNewRefactoringInstance(Object obj){
+				return new RenameParametersRefactoring(changeCreator, (IMethod)obj);
+			}
+		};
+	}
+	
 	private AbstractOpenRefactoringWizardAction createRenameMethodInClassAction(ISelectionProvider provider, final ITextBufferChangeCreator changeCreator) {
 		String label= RefactoringResources.getResourceString("Refactoring.RenameMethod.label");
 		return new AbstractOpenRefactoringWizardAction(provider, label, IMethod.class) {
