@@ -158,7 +158,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		Composite othersComposite= createOthersTabContent(folder);
 
 		TabItem item= new TabItem(folder, SWT.NONE);
-		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.tabtitle"));
+		item.setText(PreferencesMessages.getString("CompilerConfigurationBlock.problems.tabtitle")); //$NON-NLS-1$
 		item.setControl(problemsComposite);
 
 		item= new TabItem(folder, SWT.NONE);
