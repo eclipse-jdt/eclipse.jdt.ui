@@ -224,8 +224,9 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 			} else {
 				int nextPartitionPos= nextPartitionOrLineEnd(document, line, offset, partitioning);
 				insertPos= startOfWhitespaceBeforeOffset(text, nextPartitionPos);
+				// if there is a semi present, return its location as alreadyPresent() will take it out this way.
 				if (insertPos > 0 && text.charAt(insertPos - 1) == character)
-					insertPos= offset;
+					insertPos= insertPos - 1;
 			}
 			
 		} else {
