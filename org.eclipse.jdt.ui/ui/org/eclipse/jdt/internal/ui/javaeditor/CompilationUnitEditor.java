@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
  */
 
 
+import java.beans.PropertyChangeListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -23,23 +24,20 @@ import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Preferences.IPropertyChangeListener;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -51,6 +49,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
@@ -73,22 +72,22 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.dialogs.SaveAsDialog;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
-import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.tasklist.TaskList;
+import sun.security.krb5.internal.x;
+import sun.security.krb5.internal.crypto.t;
 
+import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
@@ -98,6 +97,7 @@ import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -113,6 +113,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionSourceViewer;
 import org.eclipse.jdt.internal.ui.text.java.IReconcilingParticipant;
+
 
 
 /**
@@ -315,6 +316,28 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			super.setDocument(document, annotationModel, visibleRegionOffset, visibleRegionLength);
 			fOverviewRuler.setModel(annotationModel);
 		}
+		
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
+		public void updateIndentationPrefixes() {
+			SourceViewerConfiguration configuration= getSourceViewerConfiguration();
+			String[] types= configuration.getConfiguredContentTypes(this);
+			for (int i= 0; i < types.length; i++) {
+				String[] prefixes= configuration.getIndentPrefixes(this, types[i]);
+				if (prefixes != null && prefixes.length > 0)
+					setIndentPrefixes(prefixes, types[i]);
+			}
+		}
+		
+		/*
+		 * @see IWidgetTokenOwner#requestWidgetToken(IWidgetTokenKeeper)
+		 */
+		public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19445
+			IHelp help= WorkbenchHelp.getHelpSupport();
+			if (help != null && help.isContextHelpDisplayed())
+				return false;
+			return super.requestWidgetToken(requester);
+		}
 	};
 	
 	static class TabConverter implements ITextConverter {
@@ -404,8 +427,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	
 	/* Preference key for code formatter tab size */
 	private final static String CODE_FORMATTER_TAB_SIZE= JavaCore.FORMATTER_TAB_SIZE;
-	/* Preference key for code formatter tab character */
-	private final static String CODE_FORMATTER_TAB_CHAR= JavaCore.FORMATTER_TAB_CHAR;
 	/** Preference key for matching brackets */
 	public final static String MATCHING_BRACKETS=  "matchingBrackets"; //$NON-NLS-1$
 	/** Preference key for matching brackets color */
@@ -421,7 +442,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	/** Preference key for print margin ruler column */
 	public final static String PRINT_MARGIN_COLUMN= "printMarginColumn"; //$NON-NLS-1$
 	/** Preference key for inserting spaces rather than tabs */
-	public final static String SPACES_FOR_TABS= "spacesForTabs"; //$NON-NLS-1$
+	public final static String SPACES_FOR_TABS= JavaSourceViewerConfiguration.SPACES_FOR_TABS;
 	/** Preference key for problem indication */
 	public final static String PROBLEM_INDICATION= "problemIndication"; //$NON-NLS-1$
 	/** Preference key for problem highlight color */
@@ -820,65 +841,29 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		return true;
 	}
 	
-	/*
-	 * 1GF7WG9: ITPJUI:ALL - EXCEPTION: "Save As..." always fails
+	/**
+	 * The compilation unit editor implementation of this  <code>AbstractTextEditor</code>
+	 * method asks the user for the workspace path of a file resource and saves the document
+	 * there. See http://dev.eclipse.org/bugs/show_bug.cgi?id=6295
 	 */
-	protected IPackageFragment getPackage(IWorkspaceRoot root, IPath path) {
-				
-		if (path.segmentCount() == 1) {
-			
-			IProject project= root.getProject(path.toString());
-			if (project != null) {
-				IJavaProject jProject= JavaCore.create(project);
-				if (jProject != null) {
-					try {
-						IJavaElement element= jProject.findElement(new Path("")); //$NON-NLS-1$
-						if (element instanceof IPackageFragment) {
-							IPackageFragment fragment= (IPackageFragment) element;
-							IJavaElement parent= fragment.getParent();
-							if (parent instanceof IPackageFragmentRoot) {
-								IPackageFragmentRoot pRoot= (IPackageFragmentRoot) parent;
-								if ( !pRoot.isArchive() && !pRoot.isExternal() && path.equals(pRoot.getPath()))
-									return fragment;
-							}
-						}
-					} catch (JavaModelException x) {
-						// ignore
-					}
-				}
-			}
-			
-			return null;
-			
-		} else if (path.segmentCount() > 1) {
-		
-			IFolder folder= root.getFolder(path);
-			IJavaElement element= JavaCore.create(folder);
-			if (element instanceof IPackageFragment)
-				return (IPackageFragment) element;
-		}
-		
-		return null;
-	}
-	
-	/*
-	 * 1GEUSSR: ITPUI:ALL - User should never loose changes made in the editors.
-	 * Changed behavior to make sure that if called inside a regular save (because
-	 * of deletion of input element) there is a way to report back to the caller.
-	 */	
 	protected void performSaveAs(IProgressMonitor progressMonitor) {
 		
 		Shell shell= getSite().getShell();
 		
 		SaveAsDialog dialog= new SaveAsDialog(shell);
+		dialog.create();
+		
 		IEditorInput input = getEditorInput();
 		
-		IFile original= null;
-		if (input instanceof IFileEditorInput)
-			original= ((IFileEditorInput) input).getFile();
-			
+		IFile original= (input instanceof IFileEditorInput) ? ((IFileEditorInput) input).getFile() : null;
 		if (original != null)
 			dialog.setOriginalFile(original);
+			
+		IDocumentProvider provider= getDocumentProvider();
+		if (provider.isDeleted(input) && original != null) {
+			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() });
+			dialog.setMessage(message, IMessageProvider.WARNING);
+		}
 			
 		if (dialog.open() == Dialog.CANCEL) {
 			if (progressMonitor != null)
@@ -893,68 +878,12 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			return;
 		}
 			
-		filePath= filePath.removeTrailingSeparator();
-		final String fileName= filePath.lastSegment();
-		IPath folderPath= filePath.removeLastSegments(1);
-		if (folderPath == null) {
-			if (progressMonitor != null)
-				progressMonitor.setCanceled(true);			
-			return;
-		}
-		
-		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		
-		/*
-		 * 1GF7WG9: ITPJUI:ALL - EXCEPTION: "Save As..." always fails
-		 */
-		final IPackageFragment fragment= getPackage(root, folderPath);
-		IFile file= root.getFile(filePath);
-		
-		/*
-		 * Fix for http://dev.eclipse.org/bugs/show_bug.cgi?id=8873
-		 * Problem caused by http://dev.eclipse.org/bugs/show_bug.cgi?id=9351
-		 * Will be removed if #9351 is solved.
-		 */
-		if (original != null && original.equals(file) && original.exists()) {
-			doSave(progressMonitor);
-			return;
-		}
-		/* end of fix */
-		
-		final FileEditorInput newInput= new FileEditorInput(file);
-		final boolean originalExists= original.exists();
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IFile file= workspace.getRoot().getFile(filePath);
+		final IEditorInput newInput= new FileEditorInput(file);
 		
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(final IProgressMonitor monitor) throws CoreException {
-				
-				if (fragment != null && originalExists) {
-						
-					// copy to another package
-					IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-					ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
-					
-					/*
-					 * 1GJXY0L: ITPJUI:WINNT - NPE during save As in Java editor
-					 * Introduced null check, just go on in the null case
-					 */
-					if (unit != null) {
-						/* 
-						 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
-						 * Changed false to true.
-						 */
-						unit.copy(fragment, null, fileName, true, monitor);
-						return;
-					}
-						
-				}
-				
-				// if (fragment == null) then copy to a directory which is not a package
-				// if (unit == null) copy the file that is not a compilation unit
-				
-				/* 
-				 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
-				 * Changed false to true.
-				 */
 				getDocumentProvider().saveDocument(monitor, newInput, getDocumentProvider().getDocument(getEditorInput()), true);
 			}
 		};
@@ -962,20 +891,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		boolean success= false;
 		try {
 			
-			if (fragment == null)
-				getDocumentProvider().aboutToChange(newInput);
-			
+			getDocumentProvider().aboutToChange(newInput);
 			new ProgressMonitorDialog(shell).run(false, true, op);
-			setInput(newInput);
 			success= true;
 			
 		} catch (InterruptedException x) {
 		} catch (InvocationTargetException x) {
 			
-			/* 
-			 * 1GF5YOX: ITPJUI:ALL - Save of delete file claims it's still there
-			 * Missing resources.
-			 */						
 			Throwable t= x.getTargetException();
 			if (t instanceof CoreException) {
 				CoreException cx= (CoreException) t;
@@ -983,15 +905,15 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			} else {
 				MessageDialog.openError(shell, JavaEditorMessages.getString("CompilationUnitEditor.error.saving.title3"), JavaEditorMessages.getString("CompilationUnitEditor.error.saving.message3") + t.getMessage()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			
+						
 		} finally {
-			
-			if (fragment == null)
-				getDocumentProvider().changed(newInput);
-				
-			if (progressMonitor != null)
-				progressMonitor.setCanceled(!success);
+			getDocumentProvider().changed(newInput);
+			if (success)
+				setInput(newInput);
 		}
+		
+		if (progressMonitor != null)
+			progressMonitor.setCanceled(!success);
 	}
 	
 	/*
@@ -1115,6 +1037,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			fTabConverter.setNumberOfSpacesPerTab(getTabSize());
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 			asv.addTextConverter(fTabConverter);
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
+			asv.updateIndentationPrefixes();
 		}
 	}
 	
@@ -1122,6 +1046,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		if (fTabConverter != null) {
 			AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
 			asv.removeTextConverter(fTabConverter);
+			// http://dev.eclipse.org/bugs/show_bug.cgi?id=19270
+			asv.updateIndentationPrefixes();
 			fTabConverter= null;
 		}
 	}
@@ -1322,19 +1248,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 * @param event the property change event
 	 */
 	protected void handlePreferencePropertyChanged(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
-
 		AdaptedSourceViewer asv= (AdaptedSourceViewer) getSourceViewer();
-
 		if (asv != null) {
-
 			String p= event.getProperty();					
-
-			if (CODE_FORMATTER_TAB_SIZE.equals(p) || CODE_FORMATTER_TAB_CHAR.equals(p)) {
-			    SourceViewerConfiguration configuration= getSourceViewerConfiguration();
-				String[] types= configuration.getConfiguredContentTypes(asv);					
-				for (int i= 0; i < types.length; i++)
-				    asv.setIndentPrefixes(configuration.getIndentPrefixes(asv, types[i]), types[i]);
-				    
+			if (CODE_FORMATTER_TAB_SIZE.equals(p)) {
+				asv.updateIndentationPrefixes();
 				if (fTabConverter != null)
 					fTabConverter.setNumberOfSpacesPerTab(getTabSize());
 			}
@@ -1346,11 +1264,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected boolean affectsTextPresentation(PropertyChangeEvent event) {
 		String p= event.getProperty();
-		
-		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || 
-									CURRENT_LINE_COLOR.equals(p) ||
-									PROBLEM_INDICATION_COLOR.equals(p);
-									
+		boolean affects=MATCHING_BRACKETS_COLOR.equals(p) || CURRENT_LINE_COLOR.equals(p) || PROBLEM_INDICATION_COLOR.equals(p);
 		return affects ? affects : super.affectsTextPresentation(event);
 	}
 	
