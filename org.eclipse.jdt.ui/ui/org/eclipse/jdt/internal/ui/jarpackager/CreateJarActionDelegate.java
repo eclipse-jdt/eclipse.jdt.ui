@@ -116,7 +116,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 				addToStatus(readStatus, jarPackage, message, ex);
 				return null;
 		} finally {
-			if ((jarPackage == null || jarPackage.logWarnings()) && reader != null)
+			if (reader != null)
 				// AddWarnings
 				readStatus.addAll(reader.getStatus());
 			try {
@@ -133,13 +133,9 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
 	protected void addToStatus(MultiStatus multiStatus, JarPackageData jarPackage, String defaultMessage, CoreException ex) {
 		IStatus status= ex.getStatus();
-		int severity= status.getSeverity();
-		if (jarPackage == null ||  severity == IStatus.INFO || (severity == IStatus.ERROR && jarPackage.logErrors()) || (severity == IStatus.WARNING && jarPackage.logWarnings())) {
-			String message= ex.getLocalizedMessage();
-			if (message == null || message.length() < 1) {
-				status= new Status(status.getSeverity(), status.getPlugin(), status.getCode(), defaultMessage, ex);
-			}		
-			multiStatus.add(status);
-		}
+		String message= ex.getLocalizedMessage();
+		if (message == null || message.length() < 1)
+			status= new Status(status.getSeverity(), status.getPlugin(), status.getCode(), defaultMessage, ex);
+		multiStatus.add(status);
 	}
 }

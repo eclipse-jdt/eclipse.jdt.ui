@@ -110,8 +110,6 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		options.setAttribute("compress", "" + jarPackage.isCompressed()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("exportErrors", "" + jarPackage.areErrorsExported()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("exportWarnings", "" + jarPackage.exportWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
-		options.setAttribute("logErrors", "" + jarPackage.logErrors()); //$NON-NLS-2$ //$NON-NLS-1$
-		options.setAttribute("logWarnings", "" + jarPackage.logWarnings()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("saveDescription", "" + jarPackage.isDescriptionSaved()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("descriptionLocation", jarPackage.getDescriptionLocation().toString()); //$NON-NLS-1$
 		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$

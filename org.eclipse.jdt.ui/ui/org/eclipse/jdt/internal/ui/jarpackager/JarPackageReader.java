@@ -130,8 +130,6 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setCompress(getBooleanAttribute(element, "compress")); //$NON-NLS-1$
 			jarPackage.setExportErrors(getBooleanAttribute(element, "exportErrors")); //$NON-NLS-1$
 			jarPackage.setExportWarnings(getBooleanAttribute(element, "exportWarnings")); //$NON-NLS-1$
-			jarPackage.setLogErrors(getBooleanAttribute(element, "logErrors")); //$NON-NLS-1$
-			jarPackage.setLogWarnings(getBooleanAttribute(element, "logWarnings")); //$NON-NLS-1$
 			jarPackage.setSaveDescription(getBooleanAttribute(element, "saveDescription")); //$NON-NLS-1$
 			jarPackage.setUseSourceFolderHierarchy(getBooleanAttribute(element, "useSourceFolders", false)); //$NON-NLS-1$
 			jarPackage.setDescriptionLocation(new Path(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$

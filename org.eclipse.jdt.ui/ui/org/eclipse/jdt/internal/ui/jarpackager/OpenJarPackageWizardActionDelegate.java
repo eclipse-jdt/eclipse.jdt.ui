@@ -52,7 +52,7 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 			MessageDialog.openError(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.title"), JarPackagerMessages.getString("OpenJarPackageWizardDelegate.error.openJarPackager.message") + errorDetail); //$NON-NLS-2$ //$NON-NLS-1$
 			return;
 		}
-		if (jarPackage.logWarnings() && fReader != null && !fReader.getStatus().isOK())
+		if (fReader != null && !fReader.getStatus().isOK())
 			ProblemDialog.open(parent, JarPackagerMessages.getString("OpenJarPackageWizardDelegate.jarDescriptionReaderWarnings.title"), null, fReader.getStatus()); //$NON-NLS-1$
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
