@@ -151,6 +151,7 @@ public class JavaElementImageProvider {
 		try {			
 			switch (element.getElementType()) {	
 				case IJavaElement.INITIALIZER:
+					return JavaPluginImages.DESC_MISC_PRIVATE; // 23479
 				case IJavaElement.METHOD:
 					IMember member= (IMember) element;
 					return getMethodImageDescriptor(member.getDeclaringType().isInterface(), member.getFlags());				
