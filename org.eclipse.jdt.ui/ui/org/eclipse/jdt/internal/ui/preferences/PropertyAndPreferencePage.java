@@ -20,6 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.Dialog;
@@ -71,8 +72,8 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	protected Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		GridLayout layout= new GridLayout();
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
+		//layout.marginHeight= 0;
+		//layout.marginWidth= 0;
 		layout.numColumns= 2;
 		composite.setLayout(layout);
 		
@@ -109,11 +110,12 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 				}
 				
 			});
-			
-
+			Label horizontalLine= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+			horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 		}
-			
-		GridData data= new GridData(GridData.FILL, GridData.FILL, !isProjectPreferencePage(), true);
+
+		
+		GridData data= new GridData(GridData.FILL, GridData.FILL, true, true);
 		data.horizontalSpan= 2;
 		data.heightHint= 0;
 		

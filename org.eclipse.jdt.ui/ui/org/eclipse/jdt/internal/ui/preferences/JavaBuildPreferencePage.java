@@ -25,8 +25,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage"; //$NON-NLS-1$
-
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.JavaBuildPreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage"; //$NON-NLS-1$
+	
 	private JavaBuildConfigurationBlock fConfigurationBlock;
 
 	public JavaBuildPreferencePage() {
@@ -61,7 +62,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 	
 	protected void openWorkspacePreferences() {
 		JavaBuildPreferencePage page= new JavaBuildPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 	
 	/* (non-Javadoc)

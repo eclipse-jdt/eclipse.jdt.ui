@@ -11,88 +11,97 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 
-import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
-import org.eclipse.jface.preference.PreferencePage;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
-import org.eclipse.jdt.internal.ui.preferences.formatter.CodingStyleConfigurationBlock;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
 
 /*
  * The page to configure the code formatter options.
  */
-public class CodeFormatterPreferencePage extends PreferencePage implements IWorkbenchPreferencePage, IStatusChangeListener {
+public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 
-	private CodingStyleConfigurationBlock fNewConfigurationBlock;
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeFormatterPreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage"; //$NON-NLS-1$
 	
+	private CodeFormatterConfigurationBlock fConfigurationBlock;
+
 	public CodeFormatterPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		// only used when page is shown programatically
-		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		 //$NON-NLS-1$
 		setDescription(PreferencesMessages.getString("CodeFormatterPreferencePage.description")); //$NON-NLS-1$
 		
-		fNewConfigurationBlock= new CodingStyleConfigurationBlock();
-	}
-	
-
-	/*
-	 * @see IWorkbenchPreferencePage#init(org.eclipse.ui.IWorkbench)
-	 */	
-	public void init(IWorkbench workbench) {
+		// only used when page is shown programatically
+		setTitle(PreferencesMessages.getString("CodeFormatterPreferencePage.title"));		 //$NON-NLS-1$
 	}
 
-	/*
-	 * @see PreferencePage#createControl(Composite)
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
+		fConfigurationBlock= new CodeFormatterConfigurationBlock(getProject());
+		
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);
 	}
-	
 
-	/*
-	 * @see PreferencePage#createContents(Composite)
-	 */
-	protected Control createContents(Composite parent) {
-		
-		final Composite composite= fNewConfigurationBlock.createContents(parent);
-		applyDialogFont(composite);
-		return composite;
+	protected Control createPreferenceContent(Composite composite) {
+		return fConfigurationBlock.createContents(composite);
 	}
 	
-	/*
-	 * @see IPreferencePage#performOk()
+	protected boolean hasProjectSpecificOptions() {
+		return fConfigurationBlock.hasProjectSpecificOptions();
+	}
+	
+	protected void openWorkspacePreferences() {
+		CodeStylePreferencePage page= new CodeStylePreferencePage();
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.DialogPage#dispose()
+	 */
+	public void dispose() {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.dispose();
+		}
+		super.dispose();
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
+	 */
+	protected void performDefaults() {
+		super.performDefaults();
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.performDefaults();
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		fNewConfigurationBlock.performOk();
+		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
+			return false;
+		}	
 		return super.performOk();
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jface.preference.PreferencePage#performDefaults()
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#setElement(org.eclipse.core.runtime.IAdaptable)
 	 */
-	protected void performDefaults() {
-		fNewConfigurationBlock.performDefaults();
-		super.performDefaults();
+	public void setElement(IAdaptable element) {
+		super.setElement(element);
+		setDescription(null); // no description for property page
 	}
-		
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
-	 */
-	public void statusChanged(IStatus status) {
-		setValid(!status.matches(IStatus.ERROR));
-		StatusUtil.applyToStatusLine(this, status);		
-	}
+
 }
 
 

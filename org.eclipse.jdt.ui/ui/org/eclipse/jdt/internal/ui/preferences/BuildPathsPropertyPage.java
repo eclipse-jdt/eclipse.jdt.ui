@@ -45,7 +45,8 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  * Property page for configuring the Java build path
  */
 public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
-		
+	
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage"; //$NON-NLS-1$
 		
 	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final String INDEX= "pageIndex"; //$NON-NLS-1$

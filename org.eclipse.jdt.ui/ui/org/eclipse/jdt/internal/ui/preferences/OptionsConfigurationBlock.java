@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ProjectScope;
@@ -116,6 +118,10 @@ public abstract class OptionsConfigurationBlock {
 		 */
 		public String toString() {
 			return fQualifier + '/' + fKey;
+		}
+
+		public String getQualifier() {
+			return fQualifier;
 		}
 
 	}
@@ -566,6 +572,7 @@ public abstract class OptionsConfigurationBlock {
 		
 		MockupPreferenceStore store= JavaPlugin.getDefault().getMockupPreferenceStore();			
 		Key[] allKeys= fAllKeys;
+		ArrayList modifiedNodes= new ArrayList();
 		for (int i= 0; i < allKeys.length; i++) {
 			Key key= allKeys[i];
 			String oldVal= key.getStoredValue(currContext);
@@ -585,7 +592,17 @@ public abstract class OptionsConfigurationBlock {
 					}
 				}
 			}
+			modifiedNodes.add(key.getQualifier());
 		}
+		for (int i= 0; i < modifiedNodes.size(); i++) {
+			try {
+				String curr= (String) modifiedNodes.get(i);
+				currContext.getNode(curr).flush();
+			} catch (BackingStoreException e) {
+				JavaPlugin.log(e);
+			}
+		}		
+
 		if (doBuild) {
 			boolean res= doFullBuild();
 			if (!res) {

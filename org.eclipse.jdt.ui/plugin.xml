@@ -428,9 +428,31 @@
    </extension>
    <extension
          point="org.eclipse.ui.propertyPages">
+ <!--
       <page
             objectClass="org.eclipse.core.resources.IProject"
-            name="%buildPathPageName"
+            name="%javaCategoryPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaCategoryPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaCategoryPropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%javaCategoryPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavaCategoryPropertyPage"
+            id="org.eclipse.jdt.ui.propertyPages.JavaCategoryPropertyPage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+-->
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%buildPathPageName"        
             class="org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage"
             id="org.eclipse.jdt.ui.propertyPages.BuildPathsPropertyPage">
          <filter
@@ -450,9 +472,73 @@
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
+            name="%codeStylePageName"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%codeStylePageName"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeStylePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%importOrganizePageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ImportOrganizePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%importOrganizePageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ImportOrganizePreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+            <page
+            objectClass="org.eclipse.core.resources.IProject"
+            name="%codeFormatterPageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%codeFormatterPageName"
+            category="org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"
+            class="org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.CodeFormatterPreferencePage">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>   
+      <page
+            objectClass="org.eclipse.core.resources.IProject"
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage">
+            id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -462,7 +548,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%compliancePageName"
             class="org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage"
-            id="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage">
+            id="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -472,8 +558,8 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%problemSeveritiesPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -483,8 +569,8 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%problemSeveritiesPageName"
             class="org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPropertyPage">
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -494,7 +580,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%javadocProblemsPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
          <filter
                name="nature"
@@ -505,7 +591,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%javadocProblemsPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocProblemsPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavadocProblemsPreferencePage">
          <filter
                name="nature"
@@ -516,7 +602,7 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%builderPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
          <filter
                name="nature"
@@ -527,7 +613,7 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%builderPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavaBuildPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
             id="org.eclipse.jdt.ui.propertyPages.JavaBuildPreferencePage">
          <filter
                name="nature"
@@ -539,8 +625,8 @@
             objectClass="org.eclipse.core.resources.IProject"
             name="%todoPageName"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.TodoTaskPreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -550,8 +636,8 @@
             objectClass="org.eclipse.jdt.core.IJavaProject"
             name="%todoPageName"
             class="org.eclipse.jdt.internal.ui.preferences.TodoTaskPreferencePage"
-            category="org.eclipse.jdt.ui.propertyPages.CompliancePropertyPage"
-            id="org.eclipse.jdt.ui.propertyPages.TodoTaskPropertyPage">
+            category="org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"
+            id="org.eclipse.jdt.ui.propertyPages.TodoTaskPreferencePage">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -572,9 +658,19 @@
       </page>
       <page
             objectClass="org.eclipse.core.resources.IProject"
-            name="%javadocLocationPageName"
+            name="%projectJavadocLocationPageName"
             class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
             id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage1">
+         <filter
+               name="nature"
+               value="org.eclipse.jdt.core.javanature">
+         </filter>
+      </page>
+      <page
+            objectClass="org.eclipse.jdt.core.IJavaProject"
+            name="%projectJavadocLocationPageName"
+            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
+            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage4">
          <filter
                name="nature"
                value="org.eclipse.jdt.core.javanature">
@@ -593,16 +689,7 @@
             class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
             id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage3">
       </page>
-      <page
-            objectClass="org.eclipse.jdt.core.IJavaProject"
-            name="%javadocLocationPageName"
-            class="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage"
-            id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage4">
-         <filter
-               name="nature"
-               value="org.eclipse.jdt.core.javanature">
-         </filter>
-      </page>
+
    </extension>
    <extension
          point="org.eclipse.ui.elementFactories">

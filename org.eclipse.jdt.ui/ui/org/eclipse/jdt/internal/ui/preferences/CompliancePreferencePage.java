@@ -25,8 +25,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class CompliancePreferencePage extends PropertyAndPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.CompliancePreferencePage"; //$NON-NLS-1$
-
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CompliancePreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CompliancePreferencePage"; //$NON-NLS-1$
+	
 	private ComplianceConfigurationBlock fConfigurationBlock;
 
 	public CompliancePreferencePage() {
@@ -61,7 +62,7 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 	
 	protected void openWorkspacePreferences() {
 		CompliancePreferencePage page= new CompliancePreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 	
 	/* (non-Javadoc)

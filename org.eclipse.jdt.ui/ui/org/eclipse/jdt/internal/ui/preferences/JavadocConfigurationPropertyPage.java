@@ -47,6 +47,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
  */
 public class JavadocConfigurationPropertyPage extends PropertyPage implements IStatusChangeListener {
 
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.JavadocConfigurationPropertyPage"; //$NON-NLS-1$
+
+	
 	private JavadocConfigurationBlock fJavadocConfigurationBlock;
 	private boolean fIsValidElement;
 

@@ -326,8 +326,8 @@ public class ProfileStore {
 			
 			for(final Iterator iter= profiles.iterator(); iter.hasNext();) {
 				final Profile profile= (Profile)iter.next();
-				if (profile instanceof CustomProfile) {
-					final Element profileElement= createProfileElement((CustomProfile)profile, document);
+				if (profile.isProfileToSave()) {
+					final Element profileElement= createProfileElement(profile, document);
 					rootElement.appendChild(profileElement);
 				}
 			}
@@ -349,7 +349,7 @@ public class ProfileStore {
 	 * Create a new profile element in the specified document. The profile is not added
 	 * to the document by this method. 
 	 */
-	private static Element createProfileElement(CustomProfile profile, Document document) {
+	private static Element createProfileElement(Profile profile, Document document) {
 		final Element element= document.createElement(XML_NODE_PROFILE);
 		element.setAttribute(XML_ATTRIBUTE_NAME, profile.getName());
 		element.setAttribute(XML_ATTRIBUTE_VERSION, Integer.toString(profile.getVersion()));
@@ -381,7 +381,7 @@ public class ProfileStore {
 		try {
 			List profiles= ProfileStore.readProfiles();
 			if (profiles != null && !profiles.isEmpty()) {
-				ProfileManager manager= new ProfileManager(profiles);
+				ProfileManager manager= new ProfileManager(profiles, context);
 				Profile selected= manager.getSelected();
 				if (selected instanceof CustomProfile) {
 					manager.commitChanges(context); // updates JavaCore options

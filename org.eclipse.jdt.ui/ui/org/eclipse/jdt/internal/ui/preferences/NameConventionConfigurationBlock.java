@@ -274,7 +274,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 
 		public void dialogFieldChanged(DialogField field) {
-			validateSettings(field);
+			updateModel(field);
 		}	
 	}
 		
@@ -308,7 +308,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		};
 		
 		fNameConventionList.setTableColumns(new ListDialogField.ColumnsDescription(data, columnsHeaders, true));
-		unpackEntries();
+
 		if (fNameConventionList.getSize() > 0) {
 			fNameConventionList.selectFirstElement();
 		} else {
@@ -318,17 +318,16 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fExceptionName= new StringDialogField();
 		fExceptionName.setDialogFieldListener(adapter);
 		fExceptionName.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.exceptionname.label")); //$NON-NLS-1$
-		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
 		
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=38879
-		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
+		fUseKeywordThisBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fUseKeywordThisBox.setDialogFieldListener(adapter);
 		fUseKeywordThisBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.keywordthis.label")); //$NON-NLS-1$
-		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
 		
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=39044
-		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);		
+		fUseIsForBooleanGettersBox= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
+		fUseIsForBooleanGettersBox.setDialogFieldListener(adapter);
 		fUseIsForBooleanGettersBox.setLabelText(PreferencesMessages.getString("NameConventionConfigurationBlock.isforbooleangetters.label")); //$NON-NLS-1$
-		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));		
+		
+		updateControls();
 	}
 	
 	private static Key[] getAllKeys() {
@@ -371,31 +370,55 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		
 		return composite;
 	}
+		
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
+	 */
+	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		// no validation here
+	}
 	
-	protected void validateSettings(DialogField field) {
-		if (field == fExceptionName) {
+	protected final void updateModel(DialogField field) {
+		if (field == fNameConventionList) {
+			for (int i= 0; i < fNameConventionList.getSize(); i++) {
+				NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getElement(i);
+				setValue(entry.suffixkey, entry.suffix);
+				setValue(entry.prefixkey, entry.prefix);
+			}
+		} else if (field == fExceptionName) {
 			String name= fExceptionName.getText();
+			
+			setValue(PREF_EXCEPTION_NAME, name);
+			
+			// validation
 			IStatus status = JavaConventions.validateIdentifier(name);
 			if (!status.isOK()) {
 				fContext.statusChanged(status);
 			} else {
 				fContext.statusChanged(new StatusInfo());
 			}
+		} else if (field == fUseKeywordThisBox) {
+			setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
+		} else if (field == fUseIsForBooleanGettersBox) {
+			setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
 		}
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(java.lang.String, java.lang.String)
-	 */
-	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
-		// no validation
-	}	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#updateControls()
 	 */
 	protected void updateControls() {
-		unpackEntries();
+		ArrayList list= new ArrayList(4);
+		createEntry(list, PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES, FIELD);
+		createEntry(list, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES, STATIC);
+		createEntry(list, PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, ARGUMENT);
+		createEntry(list, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES, LOCAL);
+		fNameConventionList.setElements(list);
+		
+		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
+		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
+		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));
 	}	
 		
 	/* (non-Javadoc)
@@ -423,24 +446,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		}
 		return value;
 	}
-	
-	private void unpackEntries() {
-		ArrayList list= new ArrayList(4);
-		createEntry(list, PREF_FIELD_PREFIXES, PREF_FIELD_SUFFIXES,  FIELD);
-		createEntry(list, PREF_STATIC_FIELD_PREFIXES, PREF_STATIC_FIELD_SUFFIXES, STATIC);
-		createEntry(list, PREF_ARGUMENT_PREFIXES, PREF_ARGUMENT_SUFFIXES, ARGUMENT);
-		createEntry(list, PREF_LOCAL_PREFIXES, PREF_LOCAL_SUFFIXES, LOCAL);
-		fNameConventionList.setElements(list);
-	}
-	
-	private void packEntries() {
-		for (int i= 0; i < fNameConventionList.getSize(); i++) {
-			NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getElement(i);
-			setValue(entry.suffixkey, entry.suffix);
-			setValue(entry.prefixkey, entry.prefix);
-		}
-	}
-		
+			
 	private void doEditButtonPressed() {
 		NameConventionEntry entry= (NameConventionEntry) fNameConventionList.getSelectedElements().get(0);
 
@@ -467,30 +473,10 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		NameConventionInputDialog dialog= new NameConventionInputDialog(getShell(), title, message, entry);
 		if (dialog.open() == Window.OK) {
 			fNameConventionList.replaceElement(entry, dialog.getResult());
+			updateModel(fNameConventionList);
 		}
 	}		
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performDefaults()
-	 */
-	public void performDefaults() {
-		super.performDefaults();
-		fExceptionName.setText(getValue(PREF_EXCEPTION_NAME));
-		fUseKeywordThisBox.setSelection(getBooleanValue(PREF_KEYWORD_THIS));
-		fUseIsForBooleanGettersBox.setSelection(getBooleanValue(PREF_IS_FOR_GETTERS));
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
-	 */
-	public boolean performOk(boolean enabled) {
-		setValue(PREF_EXCEPTION_NAME, fExceptionName.getText());
-		setValue(PREF_KEYWORD_THIS, fUseKeywordThisBox.isSelected());
-		setValue(PREF_IS_FOR_GETTERS, fUseIsForBooleanGettersBox.isSelected());
-				
-		packEntries();
-		return super.performOk(enabled);
-	}
 
 }
 

@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.SharedProfile;
 
 /**
  * The dialog to create a new profile. 
@@ -80,7 +81,9 @@ public class RenameProfileDialog extends StatusDialog {
 		gd = new GridData( GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
 		fNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fNameText.setText(fProfile.getName());
+		if (fProfile instanceof SharedProfile) {
+			fNameText.setText(fProfile.getName());
+		}
 		fNameText.setSelection(0, fProfile.getName().length());
 		fNameText.setLayoutData(gd);
 		fNameText.addModifyListener( new ModifyListener() {
@@ -125,7 +128,7 @@ public class RenameProfileDialog extends StatusDialog {
 	protected void okPressed() {
 		if (!getStatus().isOK()) 
 			return;
-		fProfile.setName(fNameText.getText());
+		fProfile.rename(fNameText.getText());
 		super.okPressed();
 	}
 }

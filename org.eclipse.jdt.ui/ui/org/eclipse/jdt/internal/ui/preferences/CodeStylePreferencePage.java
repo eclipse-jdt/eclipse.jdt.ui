@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
-import org.eclipse.core.runtime.IStatus;
-
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -20,15 +18,15 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /*
  * The page to configure the naming style options.
  */
 public class CodeStylePreferencePage extends PropertyAndPreferencePage implements IWorkbenchPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"; //$NON-NLS-1$
-
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.CodeStylePreferencePage"; //$NON-NLS-1$
+	
 	private NameConventionConfigurationBlock fConfigurationBlock;
 
 	public CodeStylePreferencePage() {
@@ -43,12 +41,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		IStatusChangeListener listener= new IStatusChangeListener() {
-			public void statusChanged(IStatus status) {
-				setPreferenceContentStatus(status);
-			}
-		};		
-		fConfigurationBlock= new NameConventionConfigurationBlock(listener, getProject());
+		fConfigurationBlock= new NameConventionConfigurationBlock(getNewStatusChangedListener(), getProject());
 		
 		super.createControl(parent);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CODE_MANIPULATION_PREFERENCE_PAGE);
@@ -64,7 +57,7 @@ public class CodeStylePreferencePage extends PropertyAndPreferencePage implement
 	
 	protected void openWorkspacePreferences() {
 		CodeStylePreferencePage page= new CodeStylePreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 	
 	/* (non-Javadoc)

@@ -25,7 +25,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 
-	public static final String ID= "org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage"; //$NON-NLS-1$
+	public static final String PREF_ID= "org.eclipse.jdt.ui.preferences.ProblemSeveritiesPreferencePage"; //$NON-NLS-1$
+	public static final String PROP_ID= "org.eclipse.jdt.ui.propertyPages.ProblemSeveritiesPreferencePage"; //$NON-NLS-1$
 
 	private ProblemSeveritiesConfigurationBlock fConfigurationBlock;
 
@@ -61,7 +62,7 @@ public class ProblemSeveritiesPreferencePage extends PropertyAndPreferencePage {
 	
 	protected void openWorkspacePreferences() {
 		ProblemSeveritiesPreferencePage page= new ProblemSeveritiesPreferencePage();
-		PreferencePageSupport.showPreferencePage(getShell(), ID, page);
+		PreferencePageSupport.showPreferencePage(getShell(), PREF_ID, page);
 	}
 	
 	/* (non-Javadoc)

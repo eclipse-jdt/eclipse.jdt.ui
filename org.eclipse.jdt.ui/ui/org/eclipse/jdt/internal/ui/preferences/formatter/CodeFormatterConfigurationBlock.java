@@ -17,7 +17,10 @@ import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
@@ -33,7 +36,6 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -51,10 +53,10 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
  * The code formatter preference page. 
  */
 
-public class CodingStyleConfigurationBlock {
+public class CodeFormatterConfigurationBlock {
     
-    private static final String PREF_LASTLOADPATH= JavaUI.ID_PLUGIN + ".codeformatter.loadpath"; //$NON-NLS-1$
-	private static final String PREF_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".codeformatter.savepath"; //$NON-NLS-1$
+    private static final String DIALOGSTORE_LASTLOADPATH= JavaUI.ID_PLUGIN + ".codeformatter.loadpath"; //$NON-NLS-1$
+	private static final String DIALOGSTORE_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".codeformatter.savepath"; //$NON-NLS-1$
 	
 	
 	private class StoreUpdater implements Observer {
@@ -199,7 +201,7 @@ public class CodingStyleConfigurationBlock {
 			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.dialog.title")); //$NON-NLS-1$
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
 			
-			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(PREF_LASTSAVEPATH);
+			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LASTSAVEPATH);
 			if (lastPath != null) {
 				dialog.setFilterPath(lastPath);
 			}
@@ -207,7 +209,7 @@ public class CodingStyleConfigurationBlock {
 			if (path == null) 
 				return;
 			
-			JavaPlugin.getDefault().getDialogSettings().put(PREF_LASTSAVEPATH, dialog.getFilterPath());
+			JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LASTSAVEPATH, dialog.getFilterPath());
 			
 			final File file= new File(path);
 			if (file.exists() && !MessageDialog.openQuestion(fComposite.getShell(), FormatterMessages.getString("CodingStyleConfigurationBlock.save_profile.overwrite.title"), FormatterMessages.getFormattedString("CodingStyleConfigurationBlock.save_profile.overwrite.message", path))) { //$NON-NLS-1$ //$NON-NLS-2$
@@ -229,14 +231,14 @@ public class CodingStyleConfigurationBlock {
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.OPEN);
 			dialog.setText(FormatterMessages.getString("CodingStyleConfigurationBlock.load_profile.dialog.title")); //$NON-NLS-1$
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
-			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(PREF_LASTLOADPATH);
+			final String lastPath= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LASTLOADPATH);
 			if (lastPath != null) {
 				dialog.setFilterPath(lastPath);
 			}
 			final String path= dialog.open();
 			if (path == null) 
 				return;
-			JavaPlugin.getDefault().getDialogSettings().put(PREF_LASTLOADPATH, dialog.getFilterPath());
+			JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LASTLOADPATH, dialog.getFilterPath());
 			
 			final File file= new File(path);
 			Collection profiles= null;
@@ -330,11 +332,12 @@ public class CodingStyleConfigurationBlock {
 	protected CompilationUnitPreview fJavaPreview;
 	private PixelConverter fPixConv;
 
+	private IScopeContext fCurrContext;
 	
 	/**
-	 * Create a new <code>CodeFormatterPreferencePage</code>.
+	 * Create a new <code>CodeFormatterConfigurationBlock</code>.
 	 */
-	public CodingStyleConfigurationBlock() {
+	public CodeFormatterConfigurationBlock(IProject project) {
 		List profiles= null;
 		try {
 		    profiles= ProfileStore.readProfiles();
@@ -345,7 +348,13 @@ public class CodingStyleConfigurationBlock {
 		if (profiles == null) 
 		    profiles= new ArrayList();
 		
-		fProfileManager= new ProfileManager(profiles);
+		if (project != null) {
+			fCurrContext= new ProjectScope(project);
+		} else {
+			fCurrContext= new InstanceScope();
+		}
+		
+		fProfileManager= new ProfileManager(profiles, fCurrContext);
 
 		new StoreUpdater();
 	}
@@ -447,12 +456,20 @@ public class CodingStyleConfigurationBlock {
 		fJavaPreview.getControl().setLayoutData(gd);
 	}
 
-	protected IPreferenceStore doGetPreferenceStore() {
-		return JavaPlugin.getDefault().getPreferenceStore();
+	public final boolean hasProjectSpecificOptions() {
+		if (fCurrContext.getName() != ProjectScope.SCOPE) {
+			return false;
+		}
+		return fProfileManager.hasProjectSpecificSettings(fCurrContext);
 	}
 	
-	public void performOk() {
-		fProfileManager.commitChanges(new InstanceScope());
+	public boolean performOk(boolean enabled) {
+		if (enabled) {
+			fProfileManager.commitChanges(fCurrContext);
+		} else {
+			fProfileManager.clearAllSettings(fCurrContext);
+		}
+		return true;
 	}
 	
 	public void performDefaults() {
@@ -464,6 +481,9 @@ public class CodingStyleConfigurationBlock {
 				fProfileManager.setSelected(profile);
 			}
 		}
+	}
+	
+	public void dispose() {
 	}
 	
 
