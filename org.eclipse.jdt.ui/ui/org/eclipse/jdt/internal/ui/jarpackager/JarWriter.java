@@ -131,7 +131,8 @@ public class JarWriter {
 			fJarOutputStream.putNextEntry(newEntry);
 			fJarOutputStream.write(contents);
 		} finally  {
-			fJarOutputStream.closeEntry();
+			// Commented out, see: 1GFKT4A: ITPJUI:WINNT - NPE exporting duplicate files
+			// fJarOutputStream.closeEntry();
 		}
 	}
 }
