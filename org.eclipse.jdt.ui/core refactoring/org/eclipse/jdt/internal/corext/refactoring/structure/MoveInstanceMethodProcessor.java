@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.RangeMarker;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.text.edits.TextEditProcessor;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -26,17 +32,20 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.RangeMarker;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
-import org.eclipse.text.edits.TextEditProcessor;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -125,15 +134,6 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 /**
  * Refactoring processor to move instance methods.
@@ -979,6 +979,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 
 	/** The name of the new target */
 	private String fTargetName;
+
+	/** Does the move method need a target node? */
+	private boolean fTargetNode= true;
 
 	/** The target type */
 	private IType fTargetType= null;
@@ -2513,6 +2516,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Does the moved method need a target node?
+	 * 
+	 * @return <code>true</code> if it needs a target node, <code>false</code> otherwise
+	 */
+	public final boolean needsTargetNode() {
+		return fTargetNode;
+	}
+
+	/**
 	 * Determines whether the delegator has to be deprecated.
 	 * 
 	 * @param deprecate <code>true</code> if the delegator has to be deprecated, <code>false</code> otherwise
@@ -2564,6 +2576,18 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		Assert.isNotNull(target);
 		fTarget= target;
 		fTargetType= null;
+		try {
+			final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+			if (declaration != null) {
+				final AstNodeFinder finder= new ThisReferenceFinder();
+				declaration.accept(finder);
+				fTargetNode= !finder.getResult().isEmpty();
+				return;
+			}
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		fTargetNode= true;
 	}
 
 	/**

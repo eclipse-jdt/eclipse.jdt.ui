@@ -38,17 +38,21 @@ import org.eclipse.jface.viewers.TableViewer;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -57,10 +61,6 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 /**
  * Refactoring wizard for the 'move instance method' refactoring.
@@ -89,6 +89,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 		/** The target name text field */
 		protected Text fTargetNameField= null;
+
+		/** The target name label */
+		protected Label fTargetNameLabel= null;
 
 		/** The current target name status */
 		protected RefactoringStatus fTargetNameStatus= new RefactoringStatus();
@@ -146,7 +149,6 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			viewer.setInput(candidateTargets);
 			final IVariableBinding[] possibleTargets= fProcessor.getPossibleTargets();
 			viewer.setSelection(new StructuredSelection(new Object[] { possibleTargets[0]}));
-			fProcessor.setTarget(possibleTargets[0]);
 
 			viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
@@ -158,7 +160,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 						boolean success= false;
 						for (int index= 0; index < targets.length; index++) {
 							if (Bindings.equals(target, targets[index])) {
-								fProcessor.setTarget(target);
+								handleTargetChanged(target);
 								success= true;
 								break;
 							}
@@ -194,9 +196,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 				}
 			});
 
-			label= new Label(control, SWT.SINGLE);
-			label.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Target_name")); //$NON-NLS-1$
-			label.setLayoutData(new GridData());
+			fTargetNameLabel= new Label(control, SWT.SINGLE);
+			fTargetNameLabel.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Target_name")); //$NON-NLS-1$
+			fTargetNameLabel.setLayoutData(new GridData());
 
 			fTargetNameField= new Text(control, SWT.SINGLE | SWT.BORDER);
 			final String name= fProcessor.getTargetName();
@@ -266,6 +268,8 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			fProcessor.setRemoveDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
 			fProcessor.setDeprecated(DEFAULT_DEPRECATE_DELEGATOR_SETTING);
 
+			handleTargetChanged(possibleTargets[0]);
+
 			Dialog.applyDialogFont(control);
 			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 		}
@@ -282,6 +286,18 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 				setPageComplete(false);
 			else
 				setPageComplete(status);
+		}
+
+		/**
+		 * Handles the target changed event.
+		 * 
+		 * @param target the changed target
+		 */
+		protected final void handleTargetChanged(final IVariableBinding target) {
+			Assert.isNotNull(target);
+			fProcessor.setTarget(target);
+			fTargetNameField.setEnabled(fProcessor.needsTargetNode());
+			fTargetNameLabel.setEnabled(fProcessor.needsTargetNode());
 		}
 	}
 
