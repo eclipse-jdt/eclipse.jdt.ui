@@ -89,7 +89,7 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 
 		ref.setClassName(className);
 		ref.setDeclareFinal(makeFinal);
-		ref.setDeclareStatic(makeStatic);
+//		ref.setDeclareStatic(makeStatic);///XXX remove the parameter
 		ref.setVisibility(visibility);
 		
 		if (preconditionResult == null)
@@ -198,6 +198,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 	
 	public void test17() throws Exception{
 		helper1(6, 16, 6, 19, true, true, "Inner", Modifier.PRIVATE);
+	}
+
+	public void test18() throws Exception{
+		helper1(5, 15, 5, 17, true, true, "Inner", Modifier.PRIVATE);
 	}
 
 }
