@@ -136,6 +136,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, search);
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
+		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, new ShowInPackageViewAction());
 		
 		addAction(menu, "Inspect"); //$NON-NLS-1$
 		addAction(menu, "Display"); //$NON-NLS-1$
@@ -155,7 +156,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));	//$NON-NLS-1$
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
-		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page)); //$NON-NLS-1$
+		page.setAction("ShowInPackageView", new ShowInPackageViewAction()); //$NON-NLS-1$
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page)); //$NON-NLS-1$
 		page.setAction("AddWatchpoint", new AddWatchpointAction(page)); // $NON-NLS-1$
 		StructuredSelectionProvider selectionProvider= StructuredSelectionProvider.createFrom(page);

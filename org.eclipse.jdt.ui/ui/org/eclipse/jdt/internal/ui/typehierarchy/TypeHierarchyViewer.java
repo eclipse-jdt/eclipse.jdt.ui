@@ -79,7 +79,7 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 				fOpen.run();
 			}
 		});
-		fShowInPackageViewAction= new ShowInPackageViewAction(part.getSite(), this);
+		fShowInPackageViewAction= new ShowInPackageViewAction();
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new NewGroup(), new GenerateGroup()
 		};		
@@ -103,8 +103,9 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
-		if (fShowInPackageViewAction.canOperateOn())
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackageViewAction);
+		// XXX need to decide when to contribute the Show in PackagesView action
+		// if (fShowInPackageViewAction.canOperateOn())
+		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackageViewAction);
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

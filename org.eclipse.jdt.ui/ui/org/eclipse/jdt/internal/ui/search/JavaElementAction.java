@@ -123,7 +123,7 @@ public abstract class JavaElementAction extends Action {
 			return getJavaElement(selection.getFirstElement(), silent);
 		return null;
 	}
-	private IJavaElement getJavaElement(ITextSelection selection) {
+	protected IJavaElement getJavaElement(ITextSelection selection) {
 		IWorkbenchPage wbPage= JavaPlugin.getActivePage();
 		if (wbPage == null)
 			return null;
