@@ -19,10 +19,12 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.text.Assert;
 
@@ -34,7 +36,6 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
-import org.eclipse.ltk.internal.ui.refactoring.UIPerformChangeOperation;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
@@ -66,7 +67,7 @@ public class RefactoringExecutionHelper {
 				}
 				fChange= fRefactoring.createChange(new SubProgressMonitor(pm, 2, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 				fChange.initializeValidationData(new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
-				fPerformChangeOperation= new UIPerformChangeOperation(fChange);
+				fPerformChangeOperation= RefactoringUI.createUIAwareChangeOperation(fChange);
 				fPerformChangeOperation.setUndoManager(RefactoringCore.getUndoManager(), fRefactoring.getName());
 				fPerformChangeOperation.run(new SubProgressMonitor(pm, 4, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
 			} finally {
@@ -88,12 +89,21 @@ public class RefactoringExecutionHelper {
 	}
 	
 	public void perform() throws InterruptedException, InvocationTargetException {
+		Assert.isTrue(Display.getCurrent() != null);
 		RefactoringSaveHelper saveHelper= new RefactoringSaveHelper();
 		if (fNeedsSavedEditors && !saveHelper.saveEditors(fParent))
 			throw new InterruptedException();
 		Operation op= new Operation();
 		try{
 			fExecContext.run(false, false, new WorkbenchRunnableAdapter(op));
+			RefactoringStatus validationStatus= op.fPerformChangeOperation.getValidationStatus();
+			if (validationStatus != null && validationStatus.hasFatalError()) {
+				MessageDialog.openError(fParent, fRefactoring.getName(), 
+					RefactoringMessages.getFormattedString(
+						"RefactoringExecutionHelper.cannot_execute", //$NON-NLS-1$
+						validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
+				return;
+			}
 		} catch (InvocationTargetException e) {
 			Throwable inner= e.getTargetException();
 			PerformChangeOperation pco= op.fPerformChangeOperation;

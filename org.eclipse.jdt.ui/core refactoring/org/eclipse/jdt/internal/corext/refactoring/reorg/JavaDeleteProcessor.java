@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -357,10 +358,13 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 			TextChangeManager manager= new TextChangeManager();
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
+			IFile[] classPathFiles= getClassPathFiles();
 			if (checker != null) {
 				checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
+				checker.addFiles(classPathFiles);
 			} else {
 				result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits())));
+				result.merge(Checks.validateModifiesFiles(classPathFiles));
 			}
 			return result;
 		} catch (OperationCanceledException e) {
@@ -495,6 +499,20 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 		ParentChecker parentUtil= new ParentChecker(fResources, fJavaElements);
 		parentUtil.removeElementsWithAncestorsOnList(true);
 		fJavaElements= parentUtil.getJavaElements();
+	}
+	
+	private IFile[] getClassPathFiles() {
+		List result= new ArrayList();
+		for (int i= 0; i < fJavaElements.length; i++) {
+			IJavaElement element= fJavaElements[i];
+			if (element instanceof IPackageFragmentRoot) {
+				IProject project= element.getJavaProject().getProject();
+				IFile classPathFile= project.getFile(".classpath"); //$NON-NLS-1$
+				if (classPathFile.exists())
+					result.add(classPathFile);
+			}
+		}
+		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {

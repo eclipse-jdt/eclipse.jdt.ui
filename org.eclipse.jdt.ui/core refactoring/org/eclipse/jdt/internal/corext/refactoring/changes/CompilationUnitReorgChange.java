@@ -48,10 +48,7 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 		fNewPackageHandle= newPackageHandle;
 		fCuHandle= cuHandle;
 	}
-	
-	/* non java-doc
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try{
@@ -63,9 +60,6 @@ abstract class CompilationUnitReorgChange extends JDTChange {
 	
 	abstract Change doPerformReorg(IProgressMonitor pm) throws JavaModelException;
 	
-	/*
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getCu();
 	}

@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFromClasspathChange extends JDTChange {
 
@@ -44,9 +45,11 @@ public class DeleteFromClasspathChange extends JDTChange {
 		fProjectHandle= project.getHandleIdentifier();
 	}
 	
-	/* non java-doc
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		// we have checked the .classpath file in the delete change.
+		return super.isValid(pm, true, true);
+	}
+	
 	public Change perform(IProgressMonitor pm)	throws CoreException {
 		pm.beginTask(getName(), 1);
 		try{
@@ -97,16 +100,10 @@ public class DeleteFromClasspathChange extends JDTChange {
 		return (IJavaProject)JavaCore.create(fProjectHandle);
 	}
 	
-	/* non java-doc
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("DeleteFromClassPathChange.remove") + getJavaProject().getElementName(); //$NON-NLS-1$
 	}
 
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getJavaProject();
 	}

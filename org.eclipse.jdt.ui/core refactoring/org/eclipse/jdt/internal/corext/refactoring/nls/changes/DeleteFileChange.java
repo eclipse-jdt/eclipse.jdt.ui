@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFileChange extends JDTChange {
 
@@ -39,9 +40,10 @@ public class DeleteFileChange extends JDTChange {
 		fPath= file.getFullPath().removeFirstSegments(ResourcesPlugin.getWorkspace().getRoot().getFullPath().segmentCount());
 	}
 	
-	/*
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		return new RefactoringStatus();
+	}
+	
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(NLSChangesMessages.getString("deleteFile.deleting_resource"), 1); //$NON-NLS-1$
@@ -50,7 +52,7 @@ public class DeleteFileChange extends JDTChange {
 			Assert.isTrue(file.exists());
 			Assert.isTrue(!file.isReadOnly());
 			fSource= getSource(file);
-			file.delete(true, false, pm);
+			file.delete(true, true, pm);
 			return new CreateFileChange(fPath, fSource);
 		} finally {
 			pm.done();
@@ -89,19 +91,12 @@ public class DeleteFileChange extends JDTChange {
 		return sb.toString();
 	}
 
-	/*
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return NLSChangesMessages.getString("deleteFile.Delete_File"); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
-		return null;
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
-
 }
 

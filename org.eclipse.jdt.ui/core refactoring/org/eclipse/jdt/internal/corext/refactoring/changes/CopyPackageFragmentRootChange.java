@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChange {
 
@@ -29,20 +30,17 @@ public class CopyPackageFragmentRootChange extends PackageFragmentRootReorgChang
 		super(root, destination, newNameQuery, updateClasspathQuery);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.changes.PackageFragmentRootReorgChange#doPerform(org.eclipse.core.runtime.IPath, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		return new RefactoringStatus();
+	}
+	
 	protected Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException {
 		getRoot().copy(destinationPath, getResourceUpdateFlags(), getUpdateModelFlags(true), null, pm);
 		return null;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
-	 */
 	public String getName() {
 		String[] keys= {getRoot().getElementName(), getDestinationProject().getName()};
 		return RefactoringCoreMessages.getFormattedString("CopyPackageFragmentRootChange.copy", keys); //$NON-NLS-1$
 	}
-
 }

@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CreateFileChange extends JDTChange {
 
@@ -62,9 +63,10 @@ public class CreateFileChange extends JDTChange {
 		return fPath;
 	}	
 	
-	/*
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		return new RefactoringStatus();
+	}
+	
 	public Change perform(IProgressMonitor pm)	throws CoreException {
 
 		InputStream is= null;
@@ -120,9 +122,6 @@ public class CreateFileChange extends JDTChange {
 		}
 	}
 	
-	/*
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		if (fName == null)
 			return NLSChangesMessages.getString("createFile.Create_file") + fPath.toString(); //$NON-NLS-1$
@@ -130,26 +129,14 @@ public class CreateFileChange extends JDTChange {
 			return fName;
 	}
 
-	/*
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
-		return null;
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 
-	/*
-	 * Gets the source
-	 * @return Returns a String
-	 */
 	protected String getSource() {
 		return fSource;
 	}
 
-
-	/*
-	 * Sets the name
-	 * @param name The name to set
-	 */
 	public void setName(String name) {
 		fName = name;
 	}

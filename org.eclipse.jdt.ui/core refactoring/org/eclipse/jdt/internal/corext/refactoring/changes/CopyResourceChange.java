@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CopyResourceChange extends ResourceReorgChange {
 	
@@ -27,17 +28,15 @@ public class CopyResourceChange extends ResourceReorgChange {
 		super(res, dest, newNameQuery);
 	}
 	
-	/* non java-doc
-	 * @see ResourceReorgChange#doPerform(IPath, IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, true);
+	}
+	
 	protected Change doPerformReorg(IPath path, IProgressMonitor pm) throws CoreException{
 		getResource().copy(path, getReorgFlags(), pm);
 		return null;
 	}
 	
-	/* non java-doc
-	 * @see IChange#getUndoChange()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("CopyResourceString.copy", //$NON-NLS-1$
 			new String[]{getResource().getFullPath().toString(), getDestination().getName()});

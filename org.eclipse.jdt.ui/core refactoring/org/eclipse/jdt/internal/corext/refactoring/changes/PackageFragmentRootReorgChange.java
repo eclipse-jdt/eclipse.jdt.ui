@@ -45,9 +45,6 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 
-	/* non java-doc
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
 	public final Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 2);
 		try {
@@ -60,9 +57,6 @@ abstract class PackageFragmentRootReorgChange extends JDTChange {
 
 	protected abstract Change doPerformReorg(IPath destinationPath, IProgressMonitor pm) throws JavaModelException;
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getRoot();
 	}

@@ -1727,7 +1727,7 @@ class ReorgPolicyFactory {
 			Set result= new HashSet();
 			result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
-			if (getDestinationAsPackageFragment() != null)
+			if (getDestinationAsPackageFragment() != null && getUpdateReferences())
 				result.addAll(Arrays.asList(ResourceUtil.getFiles(getCus())));
 			return (IFile[]) result.toArray(new IFile[result.size()]);
 		}

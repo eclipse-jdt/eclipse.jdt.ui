@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeleteFolderChange extends AbstractDeleteChange {
 	
@@ -41,23 +42,18 @@ public class DeleteFolderChange extends AbstractDeleteChange {
 		return ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
 	}
 
-	/* non java-doc
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("DeleteFolderChange.0", fPath.lastSegment()); //$NON-NLS-1$
 	}
 	
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getFolder(fPath);
 	}
 
-	/* non java-doc
-	 * @see DeleteChange#doDelete(IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, true);
+	}
+
 	protected void doDelete(IProgressMonitor pm) throws CoreException{
 		IFolder folder= getFolder(fPath);
 		Assert.isTrue(folder.exists());

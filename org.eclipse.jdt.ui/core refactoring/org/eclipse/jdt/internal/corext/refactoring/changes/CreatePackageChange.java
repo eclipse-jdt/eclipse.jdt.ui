@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CreatePackageChange extends JDTChange {
 	
@@ -30,9 +31,10 @@ public class CreatePackageChange extends JDTChange {
 		fPackageFragment= pack;
 	}
 
-	/*
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		return new RefactoringStatus();
+	}
+	
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.getString("CreatePackageChange.Creating_package"), 1); //$NON-NLS-1$
@@ -50,18 +52,11 @@ public class CreatePackageChange extends JDTChange {
 		}
 	}
 
-	/*
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("CreatePackageChange.Create_package"); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return fPackageFragment;
 	}
-
 }

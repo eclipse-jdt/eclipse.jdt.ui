@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class CopyPackageChange extends PackageReorgChange {
 	
@@ -26,14 +27,15 @@ public class CopyPackageChange extends PackageReorgChange {
 		super(pack, dest, nameQuery);
 	}
 	
+	public RefactoringStatus isValid(IProgressMonitor pm) {
+		return new RefactoringStatus();
+	}
+	
 	protected Change doPerformReorg(IProgressMonitor pm) throws JavaModelException{
 		getPackage().copy(getDestination(), null, getNewName(), true, pm);
 		return null;
 	}
 	
-	/* non java-doc
-	 * @see IChange#getUndoChange()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getFormattedString("CopyPackageChange.copy", //$NON-NLS-1$
 			new String[]{ getPackage().getElementName(), getDestination().getElementName()});

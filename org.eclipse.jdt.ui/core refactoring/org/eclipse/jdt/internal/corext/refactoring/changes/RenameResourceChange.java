@@ -20,6 +20,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Represents a change that renames a given resource
@@ -50,7 +51,11 @@ public class RenameResourceChange extends JDTChange {
 		return ResourcesPlugin.getWorkspace().getRoot().findMember(fResourcePath);
 	}
 
-	/**
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, true);
+	}
+	
+	/*
 	 * to avoid the exception senders should check if a resource with the new name
 	 * already exists
 	 */
@@ -77,7 +82,7 @@ public class RenameResourceChange extends JDTChange {
 			return IResource.NONE;
 	}
 
-	/**
+	/*
 	 * changes resource names /s/p/A.java renamed to B.java becomes /s/p/B.java
 	 */
 	public static IPath renamedResourcePath(IPath path, String newName) {

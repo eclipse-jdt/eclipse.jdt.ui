@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IPackageFragmentRootManipulationQuery;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 	
@@ -37,17 +38,11 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 		fUpdateClasspathQuery= updateClasspathQuery;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getName()
-	 */
 	public String getName() {
 		String[] keys= {getRoot().getElementName()};
 		return RefactoringCoreMessages.getFormattedString("DeletePackageFragmentRootChange.delete", keys); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getRoot();
 	}
@@ -56,9 +51,10 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 		return (IPackageFragmentRoot)JavaCore.create(fHandle);
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.changes.AbstractDeleteChange#doDelete(org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext, org.eclipse.core.runtime.IProgressMonitor)
-	 */
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		return super.isValid(pm, false, true);
+	}
+
 	protected void doDelete(IProgressMonitor pm) throws CoreException {
 		if (! confirmDeleteIfReferenced())
 			return;
@@ -77,5 +73,4 @@ public class DeletePackageFragmentRootChange extends AbstractDeleteChange{
 			return true;
 		return fUpdateClasspathQuery.confirmManipulation(getRoot(), referencingProjects);
 	}
-
 }

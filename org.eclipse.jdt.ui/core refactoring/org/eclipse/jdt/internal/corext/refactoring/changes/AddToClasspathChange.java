@@ -14,9 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.NullChange;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +27,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class AddToClasspathChange extends JDTChange {
 	
@@ -57,10 +57,12 @@ public class AddToClasspathChange extends JDTChange {
 	public AddToClasspathChange(IJavaProject project, int entryKind, IPath path, IPath sourceAttachmentPath, IPath sourceAttachmentRootPath){
 		this(project, createNewClasspathEntry(entryKind, path, sourceAttachmentPath, sourceAttachmentRootPath));
 	}
+
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
+		// .classpath file will be handled by JDT/Core.
+		return super.isValid(pm, true, true);
+	}
 	
-	/* non java-doc
-	 * @see IChange#perform(ChangeContext, IProgressMonitor)
-	 */
 	public Change perform(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(getName(), 1);
 		try {
@@ -116,17 +118,11 @@ public class AddToClasspathChange extends JDTChange {
 		return fProjectHandle;
 	}
 
-	/* non java-doc
-	 * @see IChange#getName()
-	 */
 	public String getName() {
 		return RefactoringCoreMessages.getString("AddToClasspathChange.add") + getJavaProject().getElementName(); //$NON-NLS-1$
  
 	}
 
-	/* non java-doc
-	 * @see IChange#getModifiedLanguageElement()
-	 */
 	public Object getModifiedElement() {
 		return getJavaProject();
 	}
@@ -134,6 +130,5 @@ public class AddToClasspathChange extends JDTChange {
 	public IClasspathEntry getClasspathEntry() {
 		return fEntryToAdd;
 	}
-	
 }
 

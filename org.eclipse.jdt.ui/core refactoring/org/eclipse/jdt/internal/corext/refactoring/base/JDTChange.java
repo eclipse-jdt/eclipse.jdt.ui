@@ -39,10 +39,6 @@ public abstract class JDTChange extends Change {
 		// stack on resource modifications.
 	}
 
-	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
-		return isValid(pm, true, true);
-	}
-	
 	protected RefactoringStatus isValid(IProgressMonitor pm, boolean checkReadOnly, boolean checkDirty) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
@@ -82,10 +78,12 @@ public abstract class JDTChange extends Change {
 	protected static void checkIfDirty(RefactoringStatus status, IResource resource) {
 		if (resource instanceof IFile) {
 			IFile file= (IFile)resource;
-			ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-			ITextFileBuffer buffer= manager.getTextFileBuffer(file.getFullPath());
-			if (buffer != null && buffer.isDirty()) {
-				status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString())); //$NON-NLS-1$
+			if (file.exists()) {
+				ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
+				ITextFileBuffer buffer= manager.getTextFileBuffer(file.getFullPath());
+				if (buffer != null && buffer.isDirty()) {
+					status.addFatalError(RefactoringCoreMessages.getFormattedString("Change.is_unsaved", file.getFullPath().toString())); //$NON-NLS-1$
+				}
 			}
 		}
 	}
@@ -98,7 +96,7 @@ public abstract class JDTChange extends Change {
 			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
 		}
 		if (element instanceof IAdaptable) {
-			return (IResource) ((IAdaptable)element).getAdapter(IResource.class);
+			return (IResource)((IAdaptable)element).getAdapter(IResource.class);
 		}
 		return null;
 	}	
