@@ -60,6 +60,10 @@ public class UseSupertypeInputPage extends UserInputWizardPage{
 		checkbox.addSelectionListener(new SelectionAdapter(){
 			public void widgetSelected(SelectionEvent e) {
 				getUseSupertypeRefactoring().setUseSupertypeInInstanceOf(checkbox.getSelection());
+				setMessage(MESSAGE);
+				setPageComplete(true);
+				fFileCount.clear();
+				fTableViewer.refresh();
 			}
 		});
 		
@@ -82,12 +86,11 @@ public class UseSupertypeInputPage extends UserInputWizardPage{
 				if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){
 					setMessage("No updates possible for the selected supertype", DialogPage.INFORMATION);
 					setPageComplete(false);
-					fTableViewer.refresh();
 				} else {
 					setMessage(MESSAGE);
 					setPageComplete(true);
-					fTableViewer.refresh();
 				}
+				fTableViewer.refresh();
 			}
 		});
 		try {
