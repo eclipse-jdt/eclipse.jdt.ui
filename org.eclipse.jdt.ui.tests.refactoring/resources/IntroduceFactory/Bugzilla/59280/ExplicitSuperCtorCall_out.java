@@ -5,7 +5,7 @@ public class ExplicitSuperCtorCall {
 		return new ExplicitSuperCtorCall();
 	}
 
-	protected ExplicitSuperCtorCall/*]*/() {
+	protected /*[*/ExplicitSuperCtorCall/*]*/() {
 	}
 }
 

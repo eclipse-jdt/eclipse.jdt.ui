@@ -3,7 +3,7 @@ package p;
 public class ProtectConstructor2_in {
 	private int		fX, fY;
 
-	private ProtectConstructor2_in/*]*/(int x, int y) {
+	private /*[*/ProtectConstructor2_in/*]*/(int x, int y) {
 		fX= x;
 		fY= y;
 	}

@@ -7,6 +7,6 @@ public class ArgTypeImport {
 		return new ArgTypeImport(v);
 	}
 
-	private ArgTypeImport/*]*/(Vector v) {
+	private /*[*/ArgTypeImport/*]*/(Vector v) {
 	}
 }

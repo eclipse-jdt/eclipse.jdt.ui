@@ -1,7 +1,7 @@
 package p;
 
 public class ImplicitSuperCtorCall {
-	protected ImplicitSuperCtorCall/*]*/() {
+	protected /*[*/ImplicitSuperCtorCall/*]*/() {
 	}
 	public static void main(String[] args) {
 		System.out.println("Hello world");

@@ -5,7 +5,7 @@ public class A {
         field= 10;
     }
     
-    protected A/*]*/() {
+    protected /*[*/A/*]*/() {
         
     }
     

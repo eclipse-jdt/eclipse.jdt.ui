@@ -53,6 +53,11 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
 	}
+	
+	/* see https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316 */
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
 
 	/**
 	 * Produces a test file name based on the name of this JUnit testcase.
