@@ -46,7 +46,8 @@ public class MySetup extends TestSetup {
 	}
 	
 	protected void tearDown() throws Exception {
-		fgPackageP.delete(true, null);
+		if (fgPackageP.exists())
+			fgPackageP.delete(true, null);
 		JavaProjectHelper.removeSourceContainer(fgJavaTestProject, CONTAINER);
 		JavaProjectHelper.delete(fgJavaTestProject);
 		super.tearDown();
