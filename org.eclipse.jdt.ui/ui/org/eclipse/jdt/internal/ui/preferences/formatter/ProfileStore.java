@@ -241,7 +241,7 @@ public class ProfileStore {
 	
 	/**
 	 * Read the available profiles from the internal XML file and return them
-	 * as collection.
+	 * as collection or <code>null</code> if the file is not a profile file.
 	 */
 	public static List readProfilesFromFile(File file) throws CoreException {
 		try {
@@ -257,7 +257,7 @@ public class ProfileStore {
 	}
 	
 	/**
-	 * Load profiles from a XML stream and add them to a map.
+	 * Load profiles from a XML stream and add them to a map or <code>null</code> if the source is not a profile store.
 	 */
 	private static List readProfilesFromStream(InputSource inputSource) throws CoreException {
 		
