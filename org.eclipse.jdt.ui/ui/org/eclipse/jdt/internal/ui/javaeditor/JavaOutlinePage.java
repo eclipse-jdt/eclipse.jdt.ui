@@ -376,8 +376,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				}
 				
 				/**
-				 * Investigates the given element change event and if affected incrementally
-				 * updates the outline.
+				 * Investigates the given element change event and if affected
+				 * incrementally updates the Java outline.
+				 * 
+				 * @param delta the Java element delta used to reconcile the Java outline
 				 */
 				public void reconcile(IJavaElementDelta delta) {
 					fReorderedMembers= false;
@@ -781,6 +783,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		
 			/**
 			 * Constructs a new action.
+			 * 
+			 * @param outlinePage the Java outline page
 			 */
 			public ToggleLinkingAction(JavaOutlinePage outlinePage) {
 				boolean isLinkingEnabled= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE);
@@ -1061,7 +1065,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fOutlineViewer.addPostSelectionChangedListener(updater);
 		}
 		// Custom filter group
-		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer);
+		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer); //$NON-NLS-1$
 
 		registerToolbarActions(bars);
 				
@@ -1076,6 +1080,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();
 			fMemberFilterActionGroup= null;
+		}
+		
+		if (fCustomFiltersActionGroup != null) {
+			fCustomFiltersActionGroup.dispose();
+			fCustomFiltersActionGroup= null;
 		}
 			
 			
@@ -1150,8 +1159,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		return (IAction) fActions.get(actionID);
 	}
 
-	/**
-	 * Answer the property defined by key.
+	/*
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
 	 */
 	public Object getAdapter(Class key) {
 		if (key == IShowInSource.class) {
@@ -1175,6 +1184,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	/**
 	 * Convenience method to add the action installed under the given actionID to the
 	 * specified group of the menu.
+	 * 
+	 * @param menu		the menu manager
+	 * @param group		the group to which to add the action
+	 * @param actionID	the ID of the new action
 	 */
 	protected void addAction(IMenuManager menu, String group, String actionID) {
 		IAction action= getAction(actionID);
@@ -1211,6 +1224,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	
 	/**
 	 * Checks whether a given Java element is an inner type.
+	 * 
+	 * @param element the java element
+	 * @return <code>true</code> iff the given element is an inner type
 	 */
 	private boolean isInnerType(IJavaElement element) {
 		
@@ -1232,6 +1248,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	
 	/**
 	 * Returns the <code>IShowInSource</code> for this view.
+	 * 
+	 * @return the {@link IShowInSource}
 	 */
 	protected IShowInSource getShowInSource() {
 		return new IShowInSource() {
@@ -1245,6 +1263,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	/**
 	 * Returns the <code>IShowInTarget</code> for this view.
+	 * 
+	 * @return the {@link IShowInTarget}
 	 */
 	protected IShowInTarget getShowInTarget() {
 		return new IShowInTarget() {
