@@ -172,7 +172,11 @@ public class Binding extends ASTAttribute {
 				IJavaElement javaElement= fBinding.getJavaElement();
 				res.add(new JavaElement(this, javaElement));
 			} catch (RuntimeException e) {
-				String msg= e.getMessage() == null ? e.getClass().getName() : e.getMessage();
+				String msg;
+				if (e.getMessage() == null)
+					msg= e.getClass().getName();
+				else
+					msg= e.getClass().getName() + ": " + e.getMessage(); //$NON-NLS-1$
 				res.add(new Error(this, "!!! java element: " + msg)); //$NON-NLS-1$
 			}
 			return res.toArray();
