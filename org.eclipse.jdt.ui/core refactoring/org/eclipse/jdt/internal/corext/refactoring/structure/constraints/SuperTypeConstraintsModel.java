@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVa
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ImmutableTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.SubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
@@ -182,6 +182,12 @@ public final class SuperTypeConstraintsModel {
 	/** The set of constraint variables (element type: <code>ConstraintVariable2</code>) */
 	private final HashedSet fConstraintVariables= new HashedSet();
 
+	/** Should covariance for return types be used? */
+	private boolean fCovariance= true;
+
+	/** The covariant type constraints (element type: <code>CovariantTypeConstraint</code>) */
+	private final Collection fCovariantTypeConstraints= new ArrayList();
+
 	/** The subtype to replace */
 	private final TType fSubType;
 
@@ -224,6 +230,24 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates a subtype constraint.
+	 * 
+	 * @param descendant the descendant type constraint variable
+	 * @param ancestor the ancestor type constraint variable
+	 */
+	public final void createCovariantTypeConstraint(final ConstraintVariable2 descendant, final ConstraintVariable2 ancestor) {
+		Assert.isNotNull(descendant);
+		Assert.isNotNull(ancestor);
+		final ITypeConstraint2 constraint= new CovariantTypeConstraint(descendant, ancestor);
+		if (!fTypeConstraints.contains(constraint)) {
+			fTypeConstraints.add(constraint);
+			fCovariantTypeConstraints.add(constraint);
+			setVariableUsage(descendant, constraint);
+			setVariableUsage(ancestor, constraint);
+		}
+	}
+
+	/**
 	 * Creates a declaring type variable.
 	 * <p>
 	 * A declaring type variable stands for a type where something has been declared.
@@ -234,7 +258,7 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final ConstraintVariable2 createDeclaringTypeVariable(final ITypeBinding type) {
 		Assert.isNotNull(type);
-		return (ConstraintVariable2) fConstraintVariables.addExisting(new PlainTypeVariable2(fEnvironment.create(type)));
+		return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
 	}
 
 	/**
@@ -243,7 +267,7 @@ public final class SuperTypeConstraintsModel {
 	 * @param left the left typeconstraint variable
 	 * @param right the right typeconstraint variable
 	 */
-	public final void createEqualsConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
+	public final void createEqualityConstraint(final ConstraintVariable2 left, final ConstraintVariable2 right) {
 		if (left != null && right != null) {
 			final TypeEquivalenceSet first= left.getTypeEquivalenceSet();
 			final TypeEquivalenceSet second= right.getTypeEquivalenceSet();
@@ -287,6 +311,19 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates an immutable type variable.
+	 * 
+	 * @param type the type binding
+	 * @return the created plain type variable
+	 */
+	public final ConstraintVariable2 createImmutableTypeVariable(final ITypeBinding type) {
+		Assert.isNotNull(type);
+		if (isConstrainedType(type))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new ImmutableTypeVariable2(fEnvironment.create(type)));
+		return null;
+	}
+
+	/**
 	 * Creates an independent type variable.
 	 * <p>
 	 * An independant type variable stands for an arbitrary type.
@@ -317,25 +354,9 @@ public final class SuperTypeConstraintsModel {
 			if (method.getDeclaringClass().isFromSource())
 				variable= new ParameterTypeVariable2(fEnvironment.create(binding), index, method);
 			else
-				variable= new PlainTypeVariable2(fEnvironment.create(method.getParameterTypes()[index]));
+				variable= new ImmutableTypeVariable2(fEnvironment.create(method.getParameterTypes()[index]));
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
-		return null;
-	}
-
-	/**
-	 * Creates a plain type variable.
-	 * <p>
-	 * A plain type variable stands for an immutable type.
-	 * </p>
-	 * 
-	 * @param type the type binding
-	 * @return the created plain type variable
-	 */
-	public final ConstraintVariable2 createPlainTypeVariable(final ITypeBinding type) {
-		Assert.isNotNull(type);
-		if (isConstrainedType(type))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new PlainTypeVariable2(fEnvironment.create(type)));
 		return null;
 	}
 
@@ -354,7 +375,7 @@ public final class SuperTypeConstraintsModel {
 				if (method.getDeclaringClass().isFromSource())
 					variable= new ReturnTypeVariable2(fEnvironment.create(binding), method);
 				else
-					variable= new PlainTypeVariable2(fEnvironment.create(binding));
+					variable= new ImmutableTypeVariable2(fEnvironment.create(binding));
 				return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 			}
 		}
@@ -393,7 +414,7 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
-	 * Creates a variable variable.
+	 * Creates a variable type variable.
 	 * 
 	 * @param binding the variable binding
 	 * @return the created variable variable
@@ -406,11 +427,11 @@ public final class SuperTypeConstraintsModel {
 			if (binding.isField()) {
 				final ITypeBinding declaring= binding.getDeclaringClass();
 				if (!declaring.isFromSource())
-					variable= new PlainTypeVariable2(fEnvironment.create(type));
+					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
 			} else {
 				final IMethodBinding declaring= binding.getDeclaringMethod();
 				if (declaring != null && !declaring.getDeclaringClass().isFromSource())
-					variable= new PlainTypeVariable2(fEnvironment.create(type));
+					variable= new ImmutableTypeVariable2(fEnvironment.create(type));
 			}
 			if (variable == null)
 				variable= new VariableVariable2(fEnvironment.create(type), binding);
@@ -453,5 +474,34 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final TType getSuperType() {
 		return fSuperType;
+	}
+
+	/**
+	 * Returns the type constraints of this model.
+	 * 
+	 * @return the type constraints (element type: <code>ITypeConstraint2</code>)
+	 */
+	public final Collection getTypeConstraints() {
+		return Collections.unmodifiableCollection(fTypeConstraints);
+	}
+
+	/**
+	 * Returns whether covariance is used for return types.
+	 * 
+	 * @return <code>true</code> if covariance is used, <code>false</code> otherwise
+	 */
+	public final boolean isUsingCovariance() {
+		return fCovariance;
+	}
+
+	/**
+	 * Determines whether covariance should be used for return types.
+	 * <p>
+	 * This method must be called before solving the constraint model
+	 * 
+	 * @param covariance <code>true</code> to use covariance, <code>false</code> otherwise
+	 */
+	public final void setUseCovariance(final boolean covariance) {
+		fCovariance= covariance;
 	}
 }
