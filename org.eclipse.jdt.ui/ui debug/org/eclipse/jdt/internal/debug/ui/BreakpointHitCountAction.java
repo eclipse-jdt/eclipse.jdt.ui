@@ -1,10 +1,10 @@
-package org.eclipse.jdt.internal.debug.ui;
-
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
- 
+
+package org.eclipse.jdt.internal.debug.ui;
+
 import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
