@@ -892,21 +892,19 @@ JavaStructureDiffViewerCreator
 		<action id="MoveAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
 			label="%Refactoring.moveAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate">
-		</action>
+			class="org.eclipse.jdt.internal.ui.refactoring.actions.MoveActionDelegate"/>
 		<action id="ModifyParametersAction"
-			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-			label="%Refactoring.modifyParametersAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersActionDelegate">
-		</action>
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.modifyParametersAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$ModifyParameters" />
 		<action id="RenameAction"
 			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
 			label="%Refactoring.renameAction.label"
 			class="org.eclipse.jdt.internal.ui.refactoring.actions.RenameActionDelegate"/>
 		<action id="PullUpAction"
-			menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
-			label="%Refactoring.pullUpAction.label"
-			class="org.eclipse.jdt.internal.ui.refactoring.actions.PullUpActionDelegate"/>	
+      		menubarPath="org.eclipse.jdt.ui.refactoring.menu/reorgGroup"
+      		label="%Refactoring.pullUpAction.label"
+			class="org.eclipse.jdt.internal.ui.actions.ActionDelegates$PullUp" />
 		
 		<!-- coding group  -->	
 		<action id="ExtractMethodAction"
