@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /*
- * The page for configuring name conventions
+ * The page to configure name conventions
  */
 public class NameConventionConfigurationBlock extends OptionsConfigurationBlock {
 
@@ -339,13 +339,13 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		return null; // no build required
 	}
 	
-	private void createEntry(List list, String suffixKey, String prefixKey, int kind) {
+	private void createEntry(List list, String prefixKey, String suffixKey, int kind) {
 		NameConventionEntry entry= new NameConventionEntry();
 		entry.kind= kind;
 		entry.suffixkey= suffixKey;
 		entry.prefixkey= prefixKey;	
-		entry.prefix= (String) fWorkingValues.get(suffixKey);
-		entry.suffix= (String) fWorkingValues.get(prefixKey);
+		entry.suffix= (String) fWorkingValues.get(suffixKey);
+		entry.prefix= (String) fWorkingValues.get(prefixKey);
 		list.add(entry);
 	}
 	
@@ -394,6 +394,14 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			fNameConventionList.replaceElement(entry, dialog.getResult());
 		}
 	}		
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#performOk(boolean)
+	 */
+	public boolean performOk(boolean enabled) {
+		packEntries();
+		return super.performOk(enabled);
+	}
 
 }
 
