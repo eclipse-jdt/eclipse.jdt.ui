@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -557,8 +558,12 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
 		 */
 		public boolean consumes(SemanticToken token) {
-			ASTNode parent= token.getNode().getParent();
-			return parent != null && parent.getNodeType() == ASTNode.VARIABLE_DECLARATION_FRAGMENT;
+			SimpleName node= token.getNode();
+			if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+				ASTNode grandParent= node.getParent().getParent();
+				return grandParent != null ? grandParent.getNodeType() != ASTNode.FIELD_DECLARATION : false;
+			}
+			return false;
 		}
 	}
 
