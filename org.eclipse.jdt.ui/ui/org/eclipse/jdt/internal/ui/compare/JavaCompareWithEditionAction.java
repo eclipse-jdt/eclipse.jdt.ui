@@ -38,8 +38,8 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 	
 	public void run(IAction action) {
 		
-		String errorTitle= CompareMessages.getString("ReplaceFromHistory.title"); //$NON-NLS-1$
-		String errorMessage= CompareMessages.getString("ReplaceFromHistory.internalErrorMessage"); //$NON-NLS-1$
+		String errorTitle= CompareMessages.getString("CompareWithHistory.title"); //$NON-NLS-1$
+		String errorMessage= CompareMessages.getString("CompareWithHistory.internalErrorMessage"); //$NON-NLS-1$
 		
 		Shell shell= JavaPlugin.getActiveWorkbenchShell();
 		// shell can be null; as a result error dialogs won't be parented
@@ -47,8 +47,8 @@ public class JavaCompareWithEditionAction extends JavaHistoryAction {
 		ISelection selection= getSelection();
 		IMember input= getEditionElement(selection);
 		if (input == null) {
-			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openInformation(shell, errorTitle, errorMessage);
+			String invalidSelectionMessage= CompareMessages.getString("CompareWithHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
 			return;
 		}
 		

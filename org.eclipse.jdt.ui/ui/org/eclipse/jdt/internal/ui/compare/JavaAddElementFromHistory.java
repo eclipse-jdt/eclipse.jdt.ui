@@ -94,7 +94,8 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		}
 		
 		if (parent == null || cu == null) {
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			String invalidSelectionMessage= CompareMessages.getString("AddFromHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
 			return;
 		}
 		

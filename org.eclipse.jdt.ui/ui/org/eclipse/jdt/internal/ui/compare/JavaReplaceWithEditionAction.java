@@ -71,8 +71,8 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 		ISelection selection= getSelection();
 		IMember input= getEditionElement(selection);
 		if (input == null) {
-			// shouldn't happen because Action should not be enabled in the first place
-			MessageDialog.openError(shell, errorTitle, errorMessage);
+			String invalidSelectionMessage= CompareMessages.getString("ReplaceFromHistory.invalidSelectionMessage"); //$NON-NLS-1$
+			MessageDialog.openInformation(shell, errorTitle, invalidSelectionMessage);
 			return;
 		}
 		
