@@ -30,7 +30,11 @@ import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
+import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -48,6 +52,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -109,6 +114,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private EditorInputAdapterFactory fEditorInputAdapterFactory;
 	private ResourceAdapterFactory fResourceAdapterFactory;
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
+	private IPropertyChangeListener fFontPropertyChangeListener;
 	
 	
 	public static JavaPlugin getDefault() {
@@ -178,9 +184,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		}
 		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
-	}
-	
-	public static String getPluginId() {
+	}	public static String getPluginId() {
 		return getDefault().getDescriptor().getUniqueIdentifier();
 	}
 
@@ -229,6 +233,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public void startup() throws CoreException {
 		super.startup();
 		registerAdapters();
+		
+		/*
+		 * Backward compatibility: set the Java editor font in this plug-in's
+		 * preference store to let older versions access it. Since 2.1 the
+		 * Java editor font is managed by the workbench font preference page.
+		 */
+		fFontPropertyChangeListener= new IPropertyChangeListener() {
+			public void propertyChange(PropertyChangeEvent event) {
+				if (PreferenceConstants.EDITOR_TEXT_FONT.equals(event.getProperty()))
+					PreferenceConverter.setValue(getPreferenceStore(), JFaceResources.TEXT_FONT, JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT).getFontData());
+			}
+		};
+		JFaceResources.getFontRegistry().addListener(fFontPropertyChangeListener);
 	}
 		
 	/* (non - Javadoc)
@@ -261,6 +278,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		
 		JavaDocLocations.shutdownJavadocLocations();
+		
+		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
 	}
 	
 	private IWorkbenchPage internalGetActivePage() {
