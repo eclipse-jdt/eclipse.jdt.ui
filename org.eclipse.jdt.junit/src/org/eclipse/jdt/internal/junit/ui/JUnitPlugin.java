@@ -126,7 +126,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/*
 	 * @see ILaunchListener#launchAdded(ILaunch)
 	 */
-	public void launchAdded(ILaunch launch) {
+	public void launchAdded(final ILaunch launch) {
 		ILauncher launcher=launch.getLauncher();
 		IType launchedType= null;
 		int port= -1;
@@ -151,11 +151,22 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 				}
 			}	
 		}
-		if (launchedType != null) 
-			connectTestRunner(launch, launchedType, port);
+		if (launchedType != null) {
+			final int finalPort= port;
+			final IType finalType= launchedType;
+			getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					connectTestRunner(launch, finalType, finalPort);
+				}
+			});		
+		}	
 	}
 
 	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
+		IWorkbench workbench= getWorkbench();
+		if (workbench == null)
+			return;
+			
 		IWorkbenchWindow window= getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= window.getActivePage();
 		TestRunnerViewPart testRunner= null;

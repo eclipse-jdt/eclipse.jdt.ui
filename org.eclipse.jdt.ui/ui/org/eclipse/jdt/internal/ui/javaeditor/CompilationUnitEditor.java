@@ -107,7 +107,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.actions.SurroundWithTryCatchAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteAction;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
-import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
+
 
 /**
  * Java specific text editor.
@@ -149,7 +150,20 @@ public class CompilationUnitEditor extends JavaEditor {
 			
 			super.doOperation(operation);
 		}
-		
+	
+		public boolean canDoOperation(int operation) {
+			
+			if (getTextWidget() == null)
+				return false;
+	
+			switch (operation) {
+				case SHIFT_RIGHT:
+				case SHIFT_LEFT:
+					return isEditable() && fIndentChars != null && isBlockSelected();
+			}
+			
+			return super.canDoOperation(operation);
+		}	
 		public void insertTextConverter(ITextConverter textConverter, int index) {
 			throw new UnsupportedOperationException();
 		}

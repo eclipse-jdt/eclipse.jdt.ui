@@ -85,7 +85,7 @@ public class JUnitArgumentsTab extends JUnitLaunchConfigurationTab {
 		fWorkingDirText.setLayoutData(gd);
 		fWorkingDirText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				refreshStatus();
+				getLaunchConfigurationDialog();
 			}
 		});
 		
@@ -108,7 +108,7 @@ public class JUnitArgumentsTab extends JUnitLaunchConfigurationTab {
 		fVMArgumentsText.setLayoutData(gd);	
 		fVMArgumentsText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent evt) {
-				refreshStatus();
+				getLaunchConfigurationDialog();
 			}
 		});	
 		
@@ -177,15 +177,6 @@ public class JUnitArgumentsTab extends JUnitLaunchConfigurationTab {
 		}		
 	}
 	
-	/**
-	 * Convenience method to get the shell.  It is important that the shell be the one 
-	 * associated with the launch configuration dialog, and not the active workbench
-	 * window.
-	 */
-	private Shell getShell() {
-		return fWorkingDirLabel.getShell();
-	}
-
 	/**
 	 * @see ILaunchConfigurationTab#isPageComplete()
 	 */
