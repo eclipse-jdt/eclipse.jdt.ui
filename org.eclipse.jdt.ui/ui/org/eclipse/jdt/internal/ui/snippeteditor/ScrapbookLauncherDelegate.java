@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaLineBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.launcher.JavaApplicationLauncherDelegate;
@@ -47,7 +48,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate implements IDebugEventListener {
 	
-	IBreakpoint fMagicBreakpoint;
+	IJavaLineBreakpoint fMagicBreakpoint;
 	DebugException fDebugException;
 	
 	HashMap fScrapbookToVMs = new HashMap(10);
@@ -168,11 +169,16 @@ public class ScrapbookLauncherDelegate extends JavaApplicationLauncherDelegate i
 		return false;
 	}
 
+	/**
+	 * Creates an "invisible" breakpoint by using a run-to-line
+	 * breakpoint without a hit count. 
+	 */
 	IBreakpoint createMagicBreakpoint(IType type) {
 		try {
-			fMagicBreakpoint= JDIDebugModel.createSnippetSupportLineBreakpoint(type, 54, -1, -1, 0);
+			fMagicBreakpoint= JDIDebugModel.createRunToLineBreakpoint(type, 54, -1, -1);
+			fMagicBreakpoint.setHitCount(0);
 			return fMagicBreakpoint;
-		} catch (DebugException e) {
+		} catch (CoreException e) {
 			e.printStackTrace();
 		}
 		return null;
