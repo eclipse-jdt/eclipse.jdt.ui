@@ -19,10 +19,12 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -52,9 +54,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.part.IPageSite;
+import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-public class JavaSearchResultPage extends AbstractTextSearchViewPage {
+public class JavaSearchResultPage extends AbstractTextSearchViewPage implements IAdaptable {
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
 	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
@@ -76,6 +79,13 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 	
 	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
+	
+	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES };
+	private static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
+		public String[] getShowInTargetIds() {
+			return SHOW_IN_TARGETS;
+		}
+	};
 	
 	private JavaSearchEditorOpener fEditorOpener= new JavaSearchEditorOpener();
 
@@ -558,4 +568,15 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage {
 		}
 		return count;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
+	 */
+	public Object getAdapter(Class adapter) {
+		if (IShowInTargetList.class.equals(adapter)) {
+			return SHOW_IN_TARGET_LIST;
+		}
+		return null;
+	}
+	
 }
