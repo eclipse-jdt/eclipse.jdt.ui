@@ -3044,7 +3044,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 	 * @param annotationPosition the position of the found annotation
 	 * @return the found annotation
 	 */
-	private Annotation getNextAnnotation(final int offset, final int length, boolean forward, Position annotationPosition) {
+	private Annotation getNextAnnotation(int offset, int length, boolean forward, Position annotationPosition) {
 		
 		Annotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
@@ -3054,7 +3054,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		
 		IDocument document= getDocumentProvider().getDocument(getEditorInput());
 		int endOfDocument= document.getLength(); 
-		int distance= Integer.MAX_VALUE;
+		int distance= 0;
 		
 		IAnnotationAccess access= getAnnotationAccess();
 		
@@ -3076,35 +3076,31 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 			if (p == null)
 				continue;
 			
-			if (forward && p.offset == offset || !forward && p.offset + p.getLength() == offset + length) {// || p.includes(offset)) {
-				if (containingAnnotation == null || (forward && p.length >= containingAnnotationPosition.length || !forward && p.length >= containingAnnotationPosition.length)) { 
-					containingAnnotation= a;
-					containingAnnotationPosition= p;
-					currentAnnotation= p.length == length;
-				}
-			} else {
+			if (!(p.includes(offset) || (p.getLength() == 0 && offset == p.offset))) {
+				
 				int currentDistance= 0;
 				
 				if (forward) {
 					currentDistance= p.getOffset() - offset;
 					if (currentDistance < 0)
-						currentDistance= endOfDocument + currentDistance;
-					
-					if (currentDistance < distance || currentDistance == distance && p.length < nextAnnotationPosition.length) {
-						distance= currentDistance;
-						nextAnnotation= a;
-						nextAnnotationPosition= p;
-					}
+						currentDistance= endOfDocument - offset + p.getOffset();
 				} else {
-					currentDistance= offset + length - (p.getOffset() + p.length);
+					currentDistance= offset - p.getOffset();
 					if (currentDistance < 0)
-						currentDistance= endOfDocument + currentDistance;
-					
-					if (currentDistance < distance || currentDistance == distance && p.length < nextAnnotationPosition.length) {
-						distance= currentDistance;
-						nextAnnotation= a;
-						nextAnnotationPosition= p;
-					}
+						currentDistance= offset + endOfDocument - p.getOffset();
+				}						
+										
+				if (nextAnnotation == null || currentDistance < distance) {
+					distance= currentDistance;
+					nextAnnotation= a;
+					nextAnnotationPosition= p;
+				}
+			} else {
+				if (containingAnnotationPosition == null || containingAnnotationPosition.length > p.length) {
+					containingAnnotation= a;
+					containingAnnotationPosition= p;
+					if (length == p.length)
+						currentAnnotation= true;
 				}
 			}
 		}
