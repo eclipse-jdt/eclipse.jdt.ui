@@ -67,15 +67,15 @@ public class OpenActionUtil {
 	 * Shows a dialog for resolving an ambigous java element.
 	 * Utility method that can be called by subclassers.
 	 */
-	public static IJavaElement selectJavaElement(List elements, Shell shell, String title, String message) {
+	public static IJavaElement selectJavaElement(IJavaElement[] elements, Shell shell, String title, String message) {
 		
-		int nResults= elements.size();
+		int nResults= elements.length;
 		
 		if (nResults == 0)
 			return null;
 		
 		if (nResults == 1)
-			return (IJavaElement) elements.get(0);
+			return elements[0];
 		
 		int flags= JavaElementLabelProvider.SHOW_DEFAULT
 						| JavaElementLabelProvider.SHOW_QUALIFIED
@@ -84,7 +84,7 @@ public class OpenActionUtil {
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
 		dialog.setTitle(title);
 		dialog.setMessage(message);
-		dialog.setElements(elements.toArray());
+		dialog.setElements(elements);
 		
 		if (dialog.open() == dialog.OK) {
 			Object[] selection= dialog.getResult();

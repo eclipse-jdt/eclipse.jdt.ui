@@ -133,7 +133,7 @@ public class SelectionConverter {
 			return null;
 		IJavaElement candidate= elements[0];
 		if (elements.length > 1) {
-			candidate= OpenActionUtil.selectJavaElement(Arrays.asList(elements), shell, title, message);
+			candidate= OpenActionUtil.selectJavaElement(elements, shell, title, message);
 		}
 		return candidate;
 	}
@@ -162,7 +162,7 @@ public class SelectionConverter {
 			return null;
 		IJavaElement candidate= elements[0];
 		if (elements.length > 1) {
-			candidate= OpenActionUtil.selectJavaElement(Arrays.asList(elements), shell, title, message);
+			candidate= OpenActionUtil.selectJavaElement(elements, shell, title, message);
 		}
 		return candidate;
 	}
