@@ -215,7 +215,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyLif
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInput);
 			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), PREFIX_CREATE_ERROR);
+				ExceptionHandler.log(e, JavaPlugin.getResourceBundle(), PREFIX_CREATE_ERROR);
 				clearInput();
 				return;
 			}
