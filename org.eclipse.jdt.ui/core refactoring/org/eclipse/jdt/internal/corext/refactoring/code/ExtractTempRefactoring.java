@@ -59,14 +59,17 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TryStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -605,13 +608,26 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 
 	private TextEdit createImportEditIfNeeded(TextBuffer buffer) throws CoreException {
-		ITypeBinding type= getSelectedExpression().getAssociatedExpression().resolveTypeBinding();
+		final Expression expression= getSelectedExpression().getAssociatedExpression();
+		if (expression instanceof ClassInstanceCreation) {
+			final ClassInstanceCreation creation= (ClassInstanceCreation) expression;
+			final Type type= creation.getType();
+			if (type.isQualifiedType())
+				return null;
+			if (type instanceof SimpleType && ((SimpleType) type).getName().isQualifiedName())
+				return null;
+			if (type instanceof ParameterizedType) {
+				final Type raw= ((ParameterizedType) type).getType();
+				if (raw instanceof SimpleType && ((SimpleType) raw).getName().isQualifiedName())
+					return null;
+			}
+		}
+		final ITypeBinding type= expression.resolveTypeBinding();
 		if (type.isPrimitive())
 			return null;
 		if (type.isArray() && type.getElementType().isPrimitive())	
 			return null;
-			
-		ImportRewrite rewrite= new ImportRewrite(fCu);
+		final ImportRewrite rewrite= new ImportRewrite(fCu);
 		rewrite.addImport(type);
 		if (rewrite.isEmpty())
 			return null;
