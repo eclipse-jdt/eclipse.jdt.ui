@@ -300,10 +300,13 @@ public class JavaElementSorter extends ViewerSorter {
 	private String getNonJavaElementLabel(Viewer viewer, Object element) {
 		// try to use the workbench adapter for non - java resources or if not available, use the viewers label provider
 
-		IWorkbenchAdapter adapter= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
-		if (adapter != null) {
-			return adapter.getLabel(element);
-		} else if (viewer instanceof ContentViewer) {
+		if (element instanceof IAdaptable) {
+			IWorkbenchAdapter adapter= (IWorkbenchAdapter) ((IAdaptable) element).getAdapter(IWorkbenchAdapter.class);
+			if (adapter != null) {
+				return adapter.getLabel(element);
+			}
+		}
+		if (viewer instanceof ContentViewer) {
 			IBaseLabelProvider prov = ((ContentViewer) viewer).getLabelProvider();
 			if (prov instanceof ILabelProvider) {
 				return ((ILabelProvider) prov).getText(element);
