@@ -18,6 +18,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
@@ -88,8 +89,12 @@ public class ViewActionGroup extends ActionGroup {
 	}
 
 	public void fillFilters(StructuredViewer viewer) {
-		if (fMode == SHOW_PROJECTS)
-			viewer.addFilter(fFilterActionGroup.getWorkingSetFilter());
+		ViewerFilter workingSetFilter= fFilterActionGroup.getWorkingSetFilter();
+		if (showProjects()) {
+			viewer.addFilter(workingSetFilter);
+		} else if (showWorkingSets()) {
+			viewer.removeFilter(workingSetFilter);
+		}
 	}
 	
 	public void setMode(int mode) {
@@ -120,11 +125,11 @@ public class ViewActionGroup extends ActionGroup {
 		fFilterActionGroup.saveState(memento);
 	}
 	
-	public boolean showProjects() {
+	private boolean showProjects() {
 		return fMode == SHOW_PROJECTS;
 	}
 	
-	public boolean showWorkingSets() {
+	private boolean showWorkingSets() {
 		return fMode == SHOW_WORKING_SETS;
 	}
 }

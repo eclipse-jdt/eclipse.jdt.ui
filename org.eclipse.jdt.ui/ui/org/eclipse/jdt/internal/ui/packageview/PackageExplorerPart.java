@@ -1675,6 +1675,7 @@ public class PackageExplorerPart extends ViewPart
 			fViewer.setInput(null);
 			setProviders();
 			setSorter();
+			fActionSet.getWorkingSetActionGroup().fillFilters(fViewer);
 			fViewer.setInput(findInputElement());
 			fViewer.setSelection(selection, true);
 		} finally {
