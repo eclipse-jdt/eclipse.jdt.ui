@@ -232,7 +232,7 @@ public class ChangeParametersControl extends Composite {
 		}	
 		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.GRAB_HORIZONTAL);
-		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
+		gd.heightHint= table.getHeaderHeight() + table.getGridLineWidth() * (ROW_COUNT + 1) + table.getItemHeight() * ROW_COUNT;
 		gd.widthHint= 40;
 		layouter.setLayoutData(gd);
 
@@ -346,15 +346,30 @@ public class ChangeParametersControl extends Composite {
 		gl.marginWidth= 0;
 		buttonComposite.setLayout(gl);
 
-		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
-		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
+		if(fCanAddParameters)
+			fAddButton= createAddButton(buttonComposite);	
+
 		if (fCanChangeParameterNames)
 			fEditButton= createEditButton(buttonComposite);
+		
+		if (buttonComposite.getChildren().length != 0)
+			addSpacer(buttonComposite);
+
+		fUpButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_up"), true); //$NON-NLS-1$
+		fDownButton= createButton(buttonComposite, RefactoringMessages.getString("ChangeParametersControl.buttons.move_down"), false); //$NON-NLS-1$
+
 		if(fCanAddParameters){
-			fAddButton= createAddButton(buttonComposite);	
+			addSpacer(buttonComposite);
 			fRemoveButton= createRemoveButton(buttonComposite);
-		}	
+		}
 		updateButtonsEnabledState();
+	}
+
+	private void addSpacer(Composite parent) {
+		Label label= new Label(parent, SWT.NONE);
+		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.heightHint= 5;
+		label.setLayoutData(gd);
 	}
 
 	private void updateButtonsEnabledState() {
