@@ -187,7 +187,7 @@ public class ChangeParametersControl extends Composite {
 		GridData labelGd= new GridData();
 		labelGd.horizontalSpan= 2;
 		tableLabel.setLayoutData(labelGd);
-		tableLabel.setText(label); //$NON-NLS-1$
+		tableLabel.setText(label);
 
 		createParameterList(this);
 		createButtonComposite(this);
@@ -199,6 +199,10 @@ public class ChangeParametersControl extends Composite {
 		fTableViewer.setInput(fParameterInfos);
 		if (fParameterInfos.size() > 0)
 			fTableViewer.setSelection(new StructuredSelection(fParameterInfos.get(0)));
+		if (fTableCursor != null && getTableItemCount() == 0){
+			fTableCursor.dispose();
+			fTableCursor= null;
+		}	
 	}
 
 	// ---- Parameter table -----------------------------------------------------------------------------------
@@ -240,11 +244,15 @@ public class ChangeParametersControl extends Composite {
 			}
 		});
 
-		if (fCanChangeParameterNames){
+		if (canEditTableCells()){
 			addCellEditors();
 			addTableCursor(table);
 		}	
 	}
+
+    private boolean canEditTableCells() {
+        return fCanChangeParameterNames || fCanChangeTypesOfOldParameters;
+    }
 
 	private void addTableCursor(final Table table) {
 		fTableCursor = new TableCursor(table, SWT.NONE);
@@ -272,7 +280,7 @@ public class ChangeParametersControl extends Composite {
 				    	e.keyCode == SWT.SHIFT || 
 				    (e.stateMask & SWT.CONTROL) != 0 || 
 				    (e.stateMask & SWT.SHIFT) != 0) {
-						fTableCursor.setVisible(false);
+						ChangeParametersControl.this.showTableCursor(false);
 				}
 			}
 		});
@@ -290,7 +298,7 @@ public class ChangeParametersControl extends Composite {
 				TableItem row = (selection.length == 0) ? table.getItem(table.getTopIndex()) : selection[0];
 				table.showItem(row);
 				fTableCursor.setSelection(row, 0);
-				fTableCursor.setVisible(true);
+				ChangeParametersControl.this.showTableCursor(true);
 				fTableCursor.setFocus();
 			}
 		});
@@ -417,7 +425,7 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.getControl().setFocus();
 				getTable().setSelection(getTableItemCount() - 1);
 				updateButtonsEnabledState();
-				fTableCursor.setVisible(false);
+				ChangeParametersControl.this.showTableCursor(false);
 			}
 		});	
 		return button;
@@ -452,7 +460,7 @@ public class ChangeParametersControl extends Composite {
 				}
 				fListener.parameterListChanged();
 				updateButtonsEnabledState();
-				fTableCursor.setVisible(false);
+				ChangeParametersControl.this.showTableCursor(false);
 			}
 		});	
 		return button;
@@ -482,10 +490,15 @@ public class ChangeParametersControl extends Composite {
 				fTableViewer.setSelection(savedSelection);
 				fListener.parameterListChanged();
 				
-				fTableCursor.setVisible(false);
+				ChangeParametersControl.this.showTableCursor(false);
 			}
 		});
 		return button;
+	}
+	
+	private void showTableCursor(boolean show){
+		if (fTableCursor != null)
+			fTableCursor.setVisible(show);
 	}
 
 	//---- editing -----------------------------------------------------------------------------------------------
