@@ -182,7 +182,7 @@ public class JarPackagerUtil {
 		return false;
 	}
 	
-	private static boolean contains(List resources, IFile file) {
+	static boolean contains(List resources, IFile file) {
 		if (resources == null || file == null)
 			return false;
 			
