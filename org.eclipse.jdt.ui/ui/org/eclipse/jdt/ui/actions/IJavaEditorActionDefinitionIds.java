@@ -502,4 +502,11 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.toggle.text.hover"</code>).
 	 */
 	public static final String TOGGLE_TEXT_HOVER= "org.eclipse.jdt.ui.edit.text.java.toggle.text.hover"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> implementors in project action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.project"</code>).
+	 */
+	public static final String SEARCH_IMPLEMENTORS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.seach.implementors.in.project"; //$NON-NLS-1$
+	
 }

@@ -1459,6 +1459,12 @@
       			allowLabelUpdate="true"
 				definitionId="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 				retarget="true" />	
+			<action id="org.eclipse.jdt.ui.actions.ImplementorsInProject"
+    	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
+      			label="%InProject.label"
+      			allowLabelUpdate="true"
+				definitionId="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"
+				retarget="true" />	
 			<action id="org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"
     	  		menubarPath="org.eclipse.search.menu/implementorsSubMenu/group1"
       			label="%InWorkspace.label"
@@ -2918,6 +2924,19 @@
 	
 	<command
 		category="org.eclipse.search.ui.category.search"
+		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"
+		name= "%ActionDefinition.implementorsInProject.name"
+		description="%ActionDefinition.implementorsInProject.description"
+	/>
+	<keyBinding
+		string=""
+		scope="org.eclipse.ui.globalScope"
+		command="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"
+		configuration="org.eclipse.ui.defaultAcceleratorConfiguration"
+	/>
+
+	<command
+		category="org.eclipse.search.ui.category.search"
 		id="org.eclipse.jdt.ui.edit.text.java.search.implementors.in.working.set"
 		name= "%ActionDefinition.implementorsInWorkingSet.name"
 		description="%ActionDefinition.implementorsInWorkingSet.description"
@@ -3265,7 +3284,7 @@
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourcePropertyTester"/>
 </extension>
 
-<extension point="org.eclipse.jdt.ui.propertyTesters">          
+<extension point="org.eclipse.jdt.ui.propertyTesters">     
   <propertyTester
      id="org.eclipse.jdt.IFilePropertyTester"
      type="org.eclipse.core.resources.IFile"

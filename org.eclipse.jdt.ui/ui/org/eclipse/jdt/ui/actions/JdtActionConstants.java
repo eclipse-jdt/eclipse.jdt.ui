@@ -407,6 +407,12 @@ public class JdtActionConstants {
 	public static final String FIND_IMPLEMENTORS_IN_WORKSPACE= "org.eclipse.jdt.ui.actions.ImplementorsInWorkspace"; //$NON-NLS-1$
 
 	/**
+	 * Search menu: name of standard Find Implementors in Project global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.ImplementorsInProject"</code>).
+	 */
+	public static final String FIND_IMPLEMENTORS_IN_PROJECT= "org.eclipse.jdt.ui.actions.ImplementorsInProject"; //$NON-NLS-1$
+
+	/**
 	 * Search menu: name of standard Find Implementors in Working Set global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.ImplementorsInWorkingSet"</code>).
 	 */
@@ -454,5 +460,5 @@ public class JdtActionConstants {
 	 * 
 	 * @since 2.1
 	 */
-	public static final String FIND_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.actions.OccurrencesInFile"; //$NON-NLS-1$
+	public static final String FIND_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.actions.OccurrencesInFile"; //$NON-NLS-1$	
 }

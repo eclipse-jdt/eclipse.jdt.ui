@@ -53,6 +53,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private String fGroupId;
 
 	private FindImplementorsAction fFindImplementorsAction;
+	private FindImplementorsInProjectAction fFindImplementorsInProjectAction;
 	private FindImplementorsInWorkingSetAction fFindImplementorsInWorkingSetAction;
 
 	/**
@@ -67,12 +68,14 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fGroupId= IContextMenuConstants.GROUP_SEARCH;
 
 		fFindImplementorsAction= new FindImplementorsAction(site);
+		fFindImplementorsInProjectAction= new FindImplementorsInProjectAction(site);
 		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(site);
 
 		// register the actions as selection listeners
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		registerAction(fFindImplementorsAction, provider, selection);
+		registerAction(fFindImplementorsInProjectAction, provider, selection);
 		registerAction(fFindImplementorsInWorkingSetAction, provider, selection);
 	}
 
@@ -88,6 +91,10 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		fFindImplementorsAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKSPACE);
 		fEditor.setAction("SearchImplementorsInWorkspace", fFindImplementorsAction); //$NON-NLS-1$
 
+		fFindImplementorsInProjectAction= new FindImplementorsInProjectAction(fEditor);
+		fFindImplementorsInProjectAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_PROJECT);
+		fEditor.setAction("SearchImplementorsInProject", fFindImplementorsInProjectAction); //$NON-NLS-1$
+
 		fFindImplementorsInWorkingSetAction= new FindImplementorsInWorkingSetAction(fEditor);
 		fFindImplementorsInWorkingSetAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.SEARCH_IMPLEMENTORS_IN_WORKING_SET);
 		fEditor.setAction("SearchImplementorsInWorkingSet", fFindImplementorsInWorkingSetAction); //$NON-NLS-1$
@@ -101,6 +108,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private FindAction[] getActions(ISelection sel) {
 		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(fFindImplementorsAction);
+		actions.add(fFindImplementorsInProjectAction);
 		actions.add(fFindImplementorsInWorkingSetAction);
 			
 		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
@@ -151,10 +159,12 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		if (provider != null) {
 			disposeAction(fFindImplementorsAction, provider);
+			disposeAction(fFindImplementorsInProjectAction, provider);
 			disposeAction(fFindImplementorsInWorkingSetAction, provider);
 		}
 		super.dispose();
 		fFindImplementorsAction= null;
+		fFindImplementorsInProjectAction= null;
 		fFindImplementorsInWorkingSetAction= null;
 		updateGlobalActionHandlers();
 	}
@@ -162,6 +172,7 @@ public class ImplementorsSearchGroup extends ActionGroup  {
 	private void updateGlobalActionHandlers() {
 		if (fActionBars != null) {
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKSPACE, fFindImplementorsAction);
+			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_PROJECT, fFindImplementorsInProjectAction);
 			fActionBars.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENTORS_IN_WORKING_SET, fFindImplementorsInWorkingSetAction);
 		}
 	}
