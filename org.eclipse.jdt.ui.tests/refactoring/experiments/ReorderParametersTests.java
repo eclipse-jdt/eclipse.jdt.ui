@@ -1,4 +1,4 @@
-package org.eclipse.jdt.refactoring.tests;
+package experiments;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -7,9 +7,9 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.refactoring.tests.MySetup;
+import org.eclipse.jdt.refactoring.tests.RefactoringTest;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-
-import experiments.ReorderParametersRefactoring;
 
 public class ReorderParametersTests extends RefactoringTest {
 	

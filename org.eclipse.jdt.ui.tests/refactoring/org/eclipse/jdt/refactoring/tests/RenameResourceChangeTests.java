@@ -1,6 +1,7 @@
 package org.eclipse.jdt.refactoring.tests;
 
-import java.io.*;
+import java.io.InputStream;
+import java.io.StringBufferInputStream;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -8,7 +9,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
-import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
 public class RenameResourceChangeTests extends RefactoringTest {

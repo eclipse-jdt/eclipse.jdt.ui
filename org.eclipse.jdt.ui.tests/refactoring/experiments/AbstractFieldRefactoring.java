@@ -72,10 +72,6 @@ public class AbstractFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		return new RefactoringStatus();
-	}
-
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		return new NullChange();
 	}
@@ -174,5 +170,13 @@ public class AbstractFieldRefactoring extends Refactoring {
 		return Character.toLowerCase(s.charAt(0)) + 
 			   (s.length() == 1 ? "": s.substring(1));	
 	}
+	/**
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm)
+		throws JavaModelException {
+		return null;
+	}
+
 }
 

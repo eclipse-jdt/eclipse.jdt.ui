@@ -9,11 +9,8 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.internal.core.refactoring.Checks;
-import org.eclipse.jdt.testplugin.JavaTestSetup;
+import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.testplugin.*;
 
 public class PathTransformationTests extends TestCase {
 	
@@ -44,10 +41,10 @@ public class PathTransformationTests extends TestCase {
 	private void  check(String path, String oldName, String newName){
 		IPath pOld= createIPath(path + "/" + oldName);
 		String extension= "";
-		if (oldName.lastIndexOf(".") != -1)
-			extension= oldName.substring(oldName.lastIndexOf("."));
+		//if (oldName.lastIndexOf(".") != -1)
+		//	extension= oldName.substring(oldName.lastIndexOf("."));
 		IPath pNew= createIPath(path + "/" + newName + extension);
-		IPath newPath= Checks.renamedResourcePath(pOld, newName);
+		IPath newPath= RenameResourceChange.renamedResourcePath(pOld, newName);
 		
 		assertEquals(pNew.toString(), newPath.toString());
 	}
@@ -55,15 +52,15 @@ public class PathTransformationTests extends TestCase {
 /************/
 	
 	public void test0(){
-		check("/s/p", "A.java", "B");
+		check("/s/p", "A.java", "B.java");
 	}
 	
 	public void test1(){
-		check("/s/p", "A.java", "A");
+		check("/s/p", "A.java", "A.java");
 	}		
 
 	public void test2(){
-		check("/s/p", "A.txt", "B");
+		check("/s/p", "A.txt", "B.txt");
 	}		
 	
 	public void test3(){
@@ -71,31 +68,31 @@ public class PathTransformationTests extends TestCase {
 	}		
 	
 	public void test4(){
-		check("/s/p/p", "A.java", "B");
+		check("/s/p/p", "A.java", "B.java");
 	}
 	
 	public void test5(){
-		check("/s/p/p", "A.java", "A");
+		check("/s/p/p", "A.java", "A.java");
 	}		
 
 	public void test6(){
-		check("/s/p/p", "A.txt", "B");
+		check("/s/p/p", "A.txt", "B.txt");
 	}		
 	
 	public void test7(){
-		check("/s", "A", "B");
+		check("/s", "A", "B.java");
 	}		
 	
 	public void test8(){
-		check("/s", "A.java", "B");
+		check("/s", "A.java", "B.java");
 	}
 	
 	public void test9(){
-		check("/s", "A.java", "A");
+		check("/s", "A.java", "A.java");
 	}		
 
 	public void test10(){
-		check("/s", "A.txt", "B");
+		check("/s", "A.txt", "B.txt");
 	}		
 	
 	public void test11(){
@@ -103,15 +100,15 @@ public class PathTransformationTests extends TestCase {
 	}			
 	
 	public void test12(){
-		check("", "A.java", "B");
+		check("", "A.java", "B.java");
 	}
 	
 	public void test13(){
-		check("", "A.java", "A");
+		check("", "A.java", "A.java");
 	}		
 
 	public void test14(){
-		check("", "A.txt", "B");
+		check("", "A.txt", "B.txt");
 	}		
 	
 	public void test15(){

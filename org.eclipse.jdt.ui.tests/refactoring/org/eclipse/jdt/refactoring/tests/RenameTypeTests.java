@@ -14,8 +14,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.internal.core.refactoring.rename.*;
+
 
 public class RenameTypeTests extends RefactoringTest {
 	

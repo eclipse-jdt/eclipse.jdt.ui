@@ -12,7 +12,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameFieldRefactoring;
 import org.eclipse.jdt.refactoring.tests.infra.TestExceptionHandler;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 

@@ -11,8 +11,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.core.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.core.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenamePackageRefactoring;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.internal.core.refactoring.rename.*;
+
 
 public class RenamePackageTests extends RefactoringTest {
 	

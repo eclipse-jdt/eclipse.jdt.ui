@@ -4,7 +4,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.internal.core.refactoring.packageroots.RenameSourceFolderChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 

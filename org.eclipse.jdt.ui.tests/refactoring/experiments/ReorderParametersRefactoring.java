@@ -21,12 +21,12 @@ import org.eclipse.jdt.internal.core.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.core.refactoring.SearchResult;
 import org.eclipse.jdt.internal.core.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.methods.MethodRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
-public class ReorderParametersRefactoring extends MethodRefactoring {
+public class ReorderParametersRefactoring extends Refactoring {
 	
 	private String[] fNewParameterNames;
 	private String[] fOldParameterNames;
@@ -35,9 +35,12 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private SearchResultGroup[] fOccurrences;
+	private IMethod fMethod;
 	
 	public ReorderParametersRefactoring(ITextBufferChangeCreator changeCreator, IMethod method) {
-		super(method);
+		Assert.isNotNull(method);
+		Assert.isNotNull(changeCreator);
+		fMethod= method;
 		setOldParameterNames();
 		fTextBufferChangeCreator= changeCreator;
 	}
@@ -56,10 +59,10 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	}
 	
 	private void setOldParameterNames(){
-		if (getMethod().isBinary()) 
+		if (fMethod.isBinary()) 
 			return;
 		try{
-			fOldParameterNames= getMethod().getParameterNames();
+			fOldParameterNames= fMethod.getParameterNames();
 		} catch (JavaModelException e){
 			//ignore
 		}	
@@ -118,7 +121,7 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 			result.addFatalError("The order specified is the same as the current one.");
 			return result;
 		}	
-		if (Flags.isNative(getMethod().getFlags()))
+		if (Flags.isNative(fMethod.getFlags()))
 			result.addError("Reordering parameters in a native method will cause UnsatisfiedLinkError on runtime");
 				
 		result.merge(checkExpressionsInMethodInvocation());	
@@ -126,10 +129,10 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	}
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAvailability(getMethod()));
+		result.merge(checkAvailability(fMethod));
 
 		///XXX
-		if (Flags.isPrivate(getMethod().getFlags()))
+		if (Flags.isPrivate(fMethod.getFlags()))
 			result.addFatalError("only private for now");
 
 		if (fOldParameterNames == null || fOldParameterNames.length < 2)
@@ -141,8 +144,8 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	/**
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		return Checks.checkIfCuBroken(getMethod());
+	public RefactoringStatus checkActivation() throws JavaModelException {
+		return Checks.checkIfCuBroken(fMethod);
 	}
 
 	//XXX 
@@ -165,7 +168,7 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		ITextBufferChange builder= fTextBufferChangeCreator.create("reorder parameters", getMethod().getCompilationUnit());
+		ITextBufferChange builder= fTextBufferChangeCreator.create("reorder parameters", fMethod.getCompilationUnit());
 		List regionArrays= getRegionArrays();
 		pm.beginTask("creating change", regionArrays.size());
 		for (Iterator iter= regionArrays.iterator(); iter.hasNext() ;){
@@ -184,7 +187,7 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	 * returns a List of TextRegion[]
 	 */
 	private List getRegionArrays() throws JavaModelException{
-		return new ReorderParameterMoveFinder().findParameterRegions(fOccurrences[0].getSearchResults(), getMethod().getCompilationUnit());
+		return new ReorderParameterMoveFinder().findParameterRegions(fOccurrences[0].getSearchResults(), fMethod.getCompilationUnit());
 	}
 
 	private IJavaSearchScope createRefactoringScope()  throws JavaModelException{
@@ -206,9 +209,17 @@ public class ReorderParametersRefactoring extends MethodRefactoring {
 	
 	private ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 1); //$NON-NLS-1$
-		ISearchPattern pattern= SearchEngine.createSearchPattern(getMethod(), IJavaSearchConstants.ALL_OCCURRENCES);
+		ISearchPattern pattern= SearchEngine.createSearchPattern(fMethod, IJavaSearchConstants.ALL_OCCURRENCES);
 		pm.done();
 		return pattern;
 	}
+	/**
+	 * @see Refactoring#checkActivation(IProgressMonitor)
+	 */
+	public RefactoringStatus checkActivation(IProgressMonitor pm)
+		throws JavaModelException {
+		return null;
+	}
+
 }
 
