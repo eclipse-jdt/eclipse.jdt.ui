@@ -283,7 +283,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private boolean isInSuperTypes(ITypeBinding typeBinding, ITypeBinding declaring) {
 			ITypeBinding superClass= declaring.getSuperclass();
-			while (superClass != null) {
+			while (superClass != null && superClass != typeBinding) {
 				if (isContained(typeBinding, superClass.getDeclaredTypes())) {
 					return true; // inner type of super type
 				}
