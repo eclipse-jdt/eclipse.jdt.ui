@@ -578,14 +578,16 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	
 	private boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) throws CoreException {
 		Statement statement= ASTResolving.findParentStatement(node);
-		
-		int selectionStart= context.getSelectionOffset();
-		int selectionEnd= context.getSelectionOffset() + context.getSelectionLength();
+		if (statement == null) {
+			return false;
+		}
 		
 		int childProperty= -1;
 		ASTNode child= null;
 		switch (statement.getNodeType()) {
 			case ASTNode.IF_STATEMENT:
+				int selectionStart= context.getSelectionOffset();
+				int selectionEnd= context.getSelectionOffset() + context.getSelectionLength();
 				ASTNode then= ((IfStatement) statement).getThenStatement();
 				if (selectionEnd <= then.getStartPosition() + then.getLength()) {
 					if (!(then instanceof Block)) {
