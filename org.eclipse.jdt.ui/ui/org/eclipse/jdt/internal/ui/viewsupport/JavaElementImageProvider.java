@@ -257,8 +257,10 @@ public class JavaElementImageProvider {
 			Assert.isTrue(false, JavaUIMessages.getString("JavaImageLabelprovider.assert.wrongImage")); //$NON-NLS-1$
 			return null; //$NON-NLS-1$
 		
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+		} catch (JavaModelException e) {
+			if (!e.isDoesNotExist()) {
+				JavaPlugin.log(e);
+			}
 			return JavaPluginImages.DESC_OBJS_GHOST;
 		}
 	}
