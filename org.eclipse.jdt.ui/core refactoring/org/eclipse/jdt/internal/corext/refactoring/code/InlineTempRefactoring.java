@@ -277,8 +277,6 @@ public class InlineTempRefactoring extends Refactoring {
 			return false;	
 		if (expression instanceof Assignment)//for estetic reasons
 			return false;	
-		if (expression instanceof CastExpression)
-			return false;	
 		return true;		
     }
 	

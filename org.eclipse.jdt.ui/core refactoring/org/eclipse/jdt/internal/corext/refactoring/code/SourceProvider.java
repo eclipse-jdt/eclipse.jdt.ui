@@ -131,6 +131,14 @@ public class SourceProvider {
 		return fCUnit;
 	}
 	
+	public boolean needsReturnedExpressionParenthesis() {
+		ASTNode last= getLastStatement();
+		if (last instanceof ReturnStatement) {
+			return ASTNodes.needsParenthesis(((ReturnStatement)last).getExpression());
+		}
+		return false;
+	}
+	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
 		List result= new ArrayList(1);
 		

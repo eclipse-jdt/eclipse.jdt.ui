@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -222,11 +223,18 @@ public class CallInliner {
 				} else {
 					node= null;
 				}
+			} else if (fTargetNode instanceof Expression) {
+				node= fRewriter.createPlaceholder(block, ASTRewrite.EXPRESSION);
+				if (needsParenthesis()) {
+					ParenthesizedExpression pExp= fTargetNode.getAST().newParenthesizedExpression();
+					pExp.setExpression((Expression)node);
+					node= pExp;
+				}
 			} else {
-				node= fRewriter.createPlaceholder(
-					block, 
-					fTargetNode instanceof Expression ? ASTRewrite.EXPRESSION : ASTRewrite.STATEMENT);
+				node= fRewriter.createPlaceholder(block, ASTRewrite.STATEMENT);
 			}
+			
+			// Now replace the target node with the source node
 			if (node != null) {
 				if (fTargetNode == null) {
 					fRewriter.markAsInserted(node);
@@ -243,6 +251,14 @@ public class CallInliner {
 		MultiTextEdit result= new MultiTextEdit();
 		fRewriter.rewriteNode(fBuffer, result, null);
 		return result;
+	}
+
+	private boolean needsParenthesis() {
+		if (!fSourceProvider.needsReturnedExpressionParenthesis())
+			return false;
+		ASTNode parent= fTargetNode.getParent();
+		int type= parent.getNodeType();
+		return type == ASTNode.METHOD_INVOCATION || (parent instanceof Expression && type != ASTNode.ASSIGNMENT);
 	}
 	
 	public void performed() {

@@ -211,10 +211,10 @@ public class ASTNodes {
 	}
 	
 	public static boolean needsParenthesis(Expression expression) {
-		return expression instanceof InfixExpression ||
-			expression instanceof ConditionalExpression ||
-			expression instanceof PrefixExpression ||
-			expression instanceof PostfixExpression;
+		int type= expression.getNodeType();
+		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||
+			type == ASTNode.PREFIX_EXPRESSION || type == ASTNode.POSTFIX_EXPRESSION ||
+			type == ASTNode.CAST_EXPRESSION;
 	}
 	
 	public static ASTNode getParent(ASTNode node, Class parentClass) {
