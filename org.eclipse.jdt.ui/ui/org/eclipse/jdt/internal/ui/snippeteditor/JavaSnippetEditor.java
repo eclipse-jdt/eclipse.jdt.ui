@@ -468,10 +468,15 @@ public class JavaSnippetEditor extends AbstractTextEditor implements IDebugEvent
 		IDocument document = getSourceViewer().getDocument();
 		String delimiter = document.getLegalLineDelimiters()[0];
 		int insertionPoint = fSnippetStart;
+		try {
+			insertionPoint = document.getLineOffset(document.getLineOfOffset(fSnippetStart));
+		} catch (BadLocationException ble) {
+		}
+		int firstInsertionPoint = insertionPoint;
 		for (int i = 0; i < problems.length; i++) {
 			insertionPoint = showOneProblem(document, problems[i], insertionPoint, delimiter);
 		}
-		selectAndReveal(fSnippetStart, insertionPoint - fSnippetStart);
+		selectAndReveal(firstInsertionPoint, insertionPoint - firstInsertionPoint);
 		fSnippetStart = insertionPoint;
 	}
 
