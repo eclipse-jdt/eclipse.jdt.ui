@@ -5,6 +5,8 @@
 
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -20,15 +22,16 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	private String fInitialValue;
 	private Text fTextField;	
 	
-	public static final String PAGE_NAME= "TextInputPage"; //$NON-NLS-1$
+	public static final String PAGE_NAME= "TextInputPage";//$NON-NLS-1$
+	private String fOriginalMessage; 
 	
 	/**
 	 * Creates a new text input page.
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
 	 */
-	public TextInputWizardPage(boolean isLastUserPage) {
-		this(isLastUserPage, ""); //$NON-NLS-1$
+	public TextInputWizardPage(String message, boolean isLastUserPage) {
+		this(message, isLastUserPage, ""); //$NON-NLS-1$
 	}
 	
 	/**
@@ -37,10 +40,12 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialSetting the initialSetting.
 	 */
-	public TextInputWizardPage(boolean isLastUserPage, String initialValue) {
+	public TextInputWizardPage(String message, boolean isLastUserPage, String initialValue) {
 		super(PAGE_NAME, isLastUserPage);
 		Assert.isNotNull(initialValue);
+		setMessage(message);
 		fInitialValue= initialValue;
+		fOriginalMessage= message;
 	}
 	
 	/**
@@ -117,23 +122,42 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 		if (! isEmptyInputValid() && text.equals("")){ //$NON-NLS-1$
 			setPageComplete(false);
 			setErrorMessage(null);
+			restoreMessage();
 			return;
 		}
 		if ((! isInitialInputValid()) && text.equals(fInitialValue)){
 			setPageComplete(false);
 			setErrorMessage(null);
+			restoreMessage();
 			return;
 		}
 		
 		RefactoringStatus status= validateTextField(text);
 		getRefactoringWizard().setStatus(status);
-		if (status != null && status.hasFatalError()) {
-			setPageComplete(false);
-			setErrorMessage(status.getFirstMessage(RefactoringStatus.FATAL));
-		} else {
-			setPageComplete(true);	
-			setErrorMessage(null);
-		}	
+		
+		switch(status.getSeverity()){
+			case RefactoringStatus.FATAL: 
+						setPageComplete(false);
+						setErrorMessage(status.getFirstMessage(status.getSeverity()));	
+						break;
+			case RefactoringStatus.ERROR:
+			case RefactoringStatus.WARNING:
+						setPageComplete(true);
+						setMessage(status.getFirstMessage(status.getSeverity()), IStatus.WARNING);	
+						break;
+			case RefactoringStatus.INFO:
+						setPageComplete(true);
+						setMessage(status.getFirstMessage(status.getSeverity()), IStatus.INFO);	
+						break;
+			default: 						
+						setPageComplete(true);
+						setErrorMessage(null);
+						restoreMessage();
+		}
+	}
+	
+	private void restoreMessage(){
+		setMessage(fOriginalMessage);
 	}
 	
 	/* (non-Javadoc)

@@ -39,13 +39,13 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages(){
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		setPageTitle(getPageTitle());
-		createInputPage(initialSetting).setImageDescriptor(fInputPageImageDescriptor);
-		createInputPage(initialSetting).setMessage(fPageMessage);
-		addPage(createInputPage(initialSetting));
+		RenameInputWizardPage inputPage= createInputPage(fPageMessage, initialSetting);
+		inputPage.setImageDescriptor(fInputPageImageDescriptor);
+		addPage(inputPage);
 	}
 
-	protected RenameInputWizardPage createInputPage(String initialSetting) {
-		return new RenameInputWizardPage(fPageContextHelpId, true, initialSetting) {
+	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
+		return new RenameInputWizardPage(message, fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}	

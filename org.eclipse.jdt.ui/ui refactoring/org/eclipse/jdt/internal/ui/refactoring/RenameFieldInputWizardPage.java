@@ -21,8 +21,8 @@ public class RenameFieldInputWizardPage extends RenameInputWizardPage {
 	private Button fRenameGetter;
 	private Button fRenameSetter;
 	
-	public RenameFieldInputWizardPage(String contextHelpId, String initialValue) {
-		super(contextHelpId, true, initialValue);
+	public RenameFieldInputWizardPage(String message, String contextHelpId, String initialValue) {
+		super(message, contextHelpId, true, initialValue);
 	}
 
 	/* non java-doc

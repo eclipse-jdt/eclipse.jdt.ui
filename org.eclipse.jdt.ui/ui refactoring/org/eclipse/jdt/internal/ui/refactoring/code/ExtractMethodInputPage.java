@@ -37,10 +37,10 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 	private ExtractMethodRefactoring fRefactoring;
 	private Label fPreview;
 	private IDialogSettings fSettings;
+	private static final String MESSAGE = RefactoringMessages.getString("ExtractMethodInputPage.description");//$NON-NLS-1$
 
 	public ExtractMethodInputPage() {
-		super(true);
-		setDescription(RefactoringMessages.getString("ExtractMethodInputPage.description")); //$NON-NLS-1$
+		super(MESSAGE, true);
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
 

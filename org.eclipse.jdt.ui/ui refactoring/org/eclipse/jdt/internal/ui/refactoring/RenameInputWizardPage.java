@@ -31,8 +31,8 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	 * @param isLastUserPage <code>true</code> if this page is the wizard's last
 	 *  user input page. Otherwise <code>false</code>.
 	 */
-	public RenameInputWizardPage(String contextHelpId, boolean isLastUserPage) {
-		super(isLastUserPage);
+	public RenameInputWizardPage(String message, String contextHelpId, boolean isLastUserPage) {
+		super(message, isLastUserPage);
 		fHelpContextID= contextHelpId;
 	}
 	
@@ -42,8 +42,8 @@ public class RenameInputWizardPage extends TextInputWizardPage{
 	 *  user input page. Otherwise <code>false</code>.
 	 * @param initialSetting the initialSetting.
 	 */
-	public RenameInputWizardPage(String contextHelpId, boolean isLastUserPage, String initialValue) {
-		super(isLastUserPage, initialValue);
+	public RenameInputWizardPage(String message, String contextHelpId, boolean isLastUserPage, String initialValue) {
+		super(message, isLastUserPage, initialValue);
 		fHelpContextID= contextHelpId;
 	}
 	

@@ -12,8 +12,8 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 	/* non java-doc
 	 * @see RenameRefactoringWizard#createInputPage
 	 */ 
-	protected RenameInputWizardPage createInputPage(String initialSetting) {
-		return new RenameFieldInputWizardPage(getPageContextHelpId(), initialSetting) {
+	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
+		return new RenameFieldInputWizardPage(message, getPageContextHelpId(), initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				RefactoringStatus result= validateNewName(text);
 				updateGetterSetterLabels();

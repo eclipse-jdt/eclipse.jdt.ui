@@ -35,10 +35,10 @@ public class ExtractInterfaceInputPage extends TextInputWizardPage {
 
 	private Button fReplaceAllCheckbox;
 	private CheckboxTableViewer fTableViewer;
+	private static final String MESSAGE = "Select the name for the new interface and select the members that will be declared in the interface.";
 
 	public ExtractInterfaceInputPage() {
-		super(true);
-		setMessage("Select the name for the new interface and select the members that will be declared in the interface.");
+		super(MESSAGE, true);
 	}
 
 	public void createControl(Composite parent) {

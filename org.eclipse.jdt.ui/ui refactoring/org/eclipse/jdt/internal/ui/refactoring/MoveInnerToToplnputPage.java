@@ -17,10 +17,10 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefac
 public class MoveInnerToToplnputPage extends TextInputWizardPage{
 
 	private final boolean fIsInitialInputValid;
+	private static final String MESSAGE = "Specify a name for the field that will be used to access the enclosing instance";
 	
 	public MoveInnerToToplnputPage(String initialValue) {
-		super(true, initialValue);
-		setMessage("Specify a name for the field that will be used to access the enclosing instance");
+		super(MESSAGE, true, initialValue);
 		fIsInitialInputValid= ! ("".equals(initialValue));
 	}
 

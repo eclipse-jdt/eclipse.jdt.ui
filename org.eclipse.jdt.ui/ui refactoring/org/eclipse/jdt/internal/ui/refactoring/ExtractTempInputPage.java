@@ -24,11 +24,11 @@ public class ExtractTempInputPage extends TextInputWizardPage {
 
 	private Label fLabel;
 	private final boolean fInitialValid;
+	private static final String MESSAGE = RefactoringMessages.getString("ExtractTempInputPage.enter_name");//$NON-NLS-1$
 	
 	public ExtractTempInputPage(String initialValue) {
-		super(true, initialValue);
+		super(MESSAGE, true, initialValue);
 		fInitialValid= ! ("".equals(initialValue));
-		setMessage(RefactoringMessages.getString("ExtractTempInputPage.enter_name")); //$NON-NLS-1$
 	}
 
 	public void createControl(Composite parent) {
