@@ -84,14 +84,32 @@ public class JavaIndenter {
 	 *         if it cannot be determined
 	 */
 	public StringBuffer getReferenceIndentation(int offset) {
-		
-		int unit= findReferencePosition(offset, true);
+		return getReferenceIndentation(offset, false);
+	}
+	
+	/**
+	 * Computes the indentation at the reference point of <code>position</code>.
+	 * 
+	 * @param offset the offset in the document
+	 * @param assumeOpeningBrace <code>true</code> if an opening brace should be assumed
+	 * @return a String which reflects the indentation at the line in which the
+	 *         reference position to <code>offset</code> resides, or <code>null</code>
+	 *         if it cannot be determined
+	 */
+	private StringBuffer getReferenceIndentation(int offset, boolean assumeOpeningBrace) {
+
+		int unit;
+		if (assumeOpeningBrace)
+			unit= findReferencePosition(offset, Symbols.TokenLBRACE);
+		else
+			unit= findReferencePosition(offset, peekChar(offset));
 		
 		// if we were unable to find anything, return null
 		if (unit == JavaHeuristicScanner.NOT_FOUND)
 			return null;
 		
 		return getLeadingWhitespace(unit);
+		
 	}
 	
 	/**
@@ -103,8 +121,21 @@ public class JavaIndenter {
 	 *         determined
 	 */
 	public StringBuffer computeIndentation(int offset) {
+		return computeIndentation(offset, false);
+	}
+	
+	/**
+	 * Computes the indentation at <code>offset</code>.
+	 * 
+	 * @param offset the offset in the document
+	 * @param assumeOpeningBrace <code>true</code> if an opening brace should be assumed
+	 * @return a String which reflects the correct indentation for the line in
+	 *         which offset resides, or <code>null</code> if it cannot be
+	 *         determined
+	 */
+	public StringBuffer computeIndentation(int offset, boolean assumeOpeningBrace) {
 		
-		StringBuffer indent= getReferenceIndentation(offset);
+		StringBuffer indent= getReferenceIndentation(offset, assumeOpeningBrace);
 		
 		// handle special alignment
 		if (fAlign != JavaHeuristicScanner.NOT_FOUND) {
@@ -265,7 +296,27 @@ public class JavaIndenter {
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
 	public int findReferencePosition(int offset) {
-		return findReferencePosition(offset, false);
+		return findReferencePosition(offset, peekChar(offset));
+	}
+	
+	/**
+	 * Peeks the next char in the document that comes after <code>offset</code>
+	 * on the same line as <code>offset</code>.
+	 * 
+	 * @param offset the offset into document
+	 * @return the token symbol of the next element, or TokenEOF if there is none
+	 */
+	private int peekChar(int offset) {
+		if (offset < fDocument.getLength()) {
+			try {
+				IRegion line= fDocument.getLineInformationOfOffset(offset);
+				int lineOffset= line.getOffset();
+				int next= fScanner.nextToken(offset, lineOffset + line.getLength());
+				return next;
+			} catch (BadLocationException e) {
+			}
+		}
+		return Symbols.TokenEOF;
 	}
 	
 	/**
@@ -290,63 +341,59 @@ public class JavaIndenter {
 	 * </ul>
 	 * 
 	 * @param offset the offset for which the reference is computed
-	 * @param peekNextChar whether to take the next character (closing
-	 *        brace etc.) on the same line as <code>offset</code> into account
-	 * 		  and handle indentation accordingly
+	 * @param nextChar the next character to assume in the document
 	 * @return the reference statement relative to which <code>offset</code>
 	 *         should be indented, or {@link JavaHeuristicScanner#NOT_FOUND}
 	 */
-	public int findReferencePosition(int offset, boolean peekNextChar) {
+	public int findReferencePosition(int offset, int nextChar) {
 		boolean danglingElse= false;
 		boolean unindent= false;
 		boolean matchBrace= false;
 		boolean matchParen= false;
 		boolean matchCase= false;
 		
-			// account for unindenation characters already typed in, but after position
-			// if they are on a line by themselves, the indentation gets adjusted
-			// accordingly
-			//
-			// also account for a dangling else 
-		if (peekNextChar) {
-			if (offset < fDocument.getLength()) {
-				try {
-					IRegion line= fDocument.getLineInformationOfOffset(offset);
-					int lineOffset= line.getOffset();
-					int next= fScanner.nextToken(offset, lineOffset + line.getLength());
-					int prevPos= Math.max(offset - 1, 0);
-					boolean isFirstTokenOnLine= fDocument.get(lineOffset, prevPos + 1 - lineOffset).trim().length() == 0;
-					switch (next) {
-						case Symbols.TokenEOF:
-						case Symbols.TokenELSE:
-							danglingElse= true;
-							break;
-						case Symbols.TokenCASE:
-						case Symbols.TokenDEFAULT:
-							if (isFirstTokenOnLine)
-								matchCase= true;
-							break;
-						case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
-							if (fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND))
-								unindent= true;
-							if (fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND) == Symbols.TokenCOLON)
-								unindent= true;
-							break;
-						case Symbols.TokenRBRACE: // closing braces get unindented
-							if (isFirstTokenOnLine)
-								matchBrace= true;
-							break;
-						case Symbols.TokenRPAREN:
-							if (isFirstTokenOnLine)
-								matchParen= true;
-							break;
+		// account for unindenation characters already typed in, but after position
+		// if they are on a line by themselves, the indentation gets adjusted
+		// accordingly
+		//
+		// also account for a dangling else 
+		if (offset < fDocument.getLength()) {
+			try {
+				IRegion line= fDocument.getLineInformationOfOffset(offset);
+				int lineOffset= line.getOffset();
+				int prevPos= Math.max(offset - 1, 0);
+				boolean isFirstTokenOnLine= fDocument.get(lineOffset, prevPos + 1 - lineOffset).trim().length() == 0;
+				int prevToken= fScanner.previousToken(prevPos, JavaHeuristicScanner.UNBOUND);
+				switch (nextChar) {
+					case Symbols.TokenEOF:
+					case Symbols.TokenELSE:
+						danglingElse= true;
+						break;
+					case Symbols.TokenCASE:
+					case Symbols.TokenDEFAULT:
+						if (isFirstTokenOnLine)
+							matchCase= true;
+						break;
+					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
+						if (fScanner.isBracelessBlockStart(prevPos, JavaHeuristicScanner.UNBOUND))
+							unindent= true;
+						if (prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET)
+							unindent= true;
+						break;
+					case Symbols.TokenRBRACE: // closing braces get unindented
+						if (isFirstTokenOnLine)
+							matchBrace= true;
+						break;
+					case Symbols.TokenRPAREN:
+						if (isFirstTokenOnLine)
+							matchParen= true;
+						break;
 					}
-				} catch (BadLocationException e) {
-				}
-			} else {
-				// assume an else could come if we are at the end of file
-				danglingElse= true; 
+			} catch (BadLocationException e) {
 			}
+		} else {
+			// assume an else could come if we are at the end of file
+			danglingElse= true; 
 		}
 		
 		int ref= findReferencePosition(offset, danglingElse, matchBrace, matchParen, matchCase);
@@ -383,18 +430,28 @@ public class JavaIndenter {
 		
 		// forward cases
 		// an unindentation happens sometimes if the next token is special, namely on braces, parens and case labels
-		// align braces
+		// align braces, but handle the case where we align with the method declaration start instead of
+		// the opening brace.
 		if (matchBrace) {
-			if (skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE))
+			if (skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE)) {
+				try {
+					// align with the opening brace that is on a line by its own
+					int lineOffset= fDocument.getLineOffset(fLine);
+					if (lineOffset <= fPosition && fDocument.get(lineOffset, fPosition - lineOffset).trim().length() == 0)
+						return fPosition;
+				} catch (BadLocationException e) {
+					// concurrent modification - walk default path
+				}
+				// if the opening brace is not on the start of the line, skip to the start
 				return skipToStatementStart(true, true);
-			else {
+			} else {
 				// if we can't find the matching brace, the heuristic is to unindent
 				// by one against the normal position
 				int pos= findReferencePosition(offset, danglingElse, false, matchParen, matchCase);
 				fIndent--;
 				return pos;
 			}
-			}
+		}
 		
 		// align parenthesis'
 		if (matchParen) {

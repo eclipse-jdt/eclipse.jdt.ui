@@ -234,15 +234,12 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 			// only shift if the last java line is further up and is a braceless block candidate
 			if (lastLine < line) {
 			
-				if (scanner.isBracelessBlockStart(pos + 1, JavaHeuristicScanner.UNBOUND)) {
-					// if the last line was a braceless block candidate, we have indented 
-					// after the new line. This has to be undone as we *are* starting a block
-					// on the new line
-					StringBuffer replace= new StringBuffer(getIndentOfLine(d, lastLine));
-					c.length += replace.length();
-					replace.append(c.text);
+				JavaIndenter indenter= new JavaIndenter(d, scanner);
+				StringBuffer indent= indenter.computeIndentation(p, true);
+				if (indent != null) {
+					c.text= indent.append(c.text).toString();
+					c.length= indent.length();
 					c.offset= lineOffset;
-					c.text= replace.toString();
 				}
 			}
 			
