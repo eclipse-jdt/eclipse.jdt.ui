@@ -1885,7 +1885,7 @@ class ReorgPolicyFactory {
 				return superStatus;
 				
 			Object commonParent= new ParentChecker(new IResource[0], getJavaElements()).getCommonParent();
-			if (destination.equals(commonParent) || destination.getParent().equals(commonParent))
+			if (destination.equals(commonParent) || Arrays.asList(getJavaElements()).contains(destination))
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("ReorgPolicyFactory.element2parent")); //$NON-NLS-1$
 			return superStatus;
 		}
