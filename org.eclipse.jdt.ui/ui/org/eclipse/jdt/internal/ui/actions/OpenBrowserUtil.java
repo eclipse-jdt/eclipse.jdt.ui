@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.net.URL;
 
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
@@ -26,7 +27,11 @@ public class OpenBrowserUtil {
 	public static void open(final URL url, final Shell shell, final String dialogTitle) {
 		IHelp help= WorkbenchHelp.getHelpSupport();
 		if (help != null) {
-			WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
+			BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
+				public void run() {
+					WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
+				}
+			});			
 		} else {
 			showMessage(shell, dialogTitle, ActionMessages.getString("OpenBrowserUtil.help_not_available"), false); //$NON-NLS-1$
 		}
