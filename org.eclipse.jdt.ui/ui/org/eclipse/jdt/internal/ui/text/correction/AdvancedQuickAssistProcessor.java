@@ -509,14 +509,41 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 					while (expression instanceof ParenthesizedExpression) {
 						expression = ((ParenthesizedExpression) expression).getExpression();
 					}
+					// check for this and parent precedences
 					int expressionPrecedence = getExpressionPrecedence(expression);
 					if (!(parenthesizedExpression.getParent() instanceof Expression)) {
 						return;
 					}
-					int parentPrecedence = getExpressionPrecedence((Expression) parenthesizedExpression.getParent());
+					Expression parentExpression = (Expression) parenthesizedExpression.getParent();
+					int parentPrecedence = getExpressionPrecedence(parentExpression);
 					if ((expressionPrecedence > parentPrecedence)
 							&& !(parenthesizedExpression.getParent() instanceof ParenthesizedExpression)) {
 						return;
+					}
+					// check for case when precedences for expression and parent are same
+					if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
+						InfixExpression parentInfix = (InfixExpression) parentExpression;
+						Operator parentOperator = parentInfix.getOperator();
+						// check for PLUS with String
+						if (parentOperator == InfixExpression.Operator.PLUS) {
+							if (isStringExpression(parentInfix.getLeftOperand())
+								|| isStringExpression(parentInfix.getRightOperand())) {
+								return;
+							}
+							for (Iterator J = parentInfix.extendedOperands().iterator(); J.hasNext();) {
+								Expression operand = (Expression) J.next();
+								if (isStringExpression(operand)) {
+									return;
+								}
+							}
+						}
+						// check for /, %, -
+						if ((parentOperator == InfixExpression.Operator.DIVIDE)
+							|| (parentOperator == InfixExpression.Operator.REMAINDER)
+							|| parentOperator == InfixExpression.Operator.MINUS) {
+							if (parentInfix.getLeftOperand() != parenthesizedExpression)
+								return;
+						}
 					}
 					// remove parenthesis around expression
 					rewrite.replace(parenthesizedExpression, expression, null);
@@ -537,6 +564,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				rewrite, 1, image);
 		resultingCollections.add(proposal);
 		return true;
+	}
+	private static boolean isStringExpression(Expression expression) {
+		ITypeBinding binding = expression.resolveTypeBinding();
+		return binding.getQualifiedName().equals("java.lang.String"); //$NON-NLS-1$
 	}
 	private static int getExpressionPrecedence(Expression expression) {
 		if (expression instanceof PostfixExpression) {
