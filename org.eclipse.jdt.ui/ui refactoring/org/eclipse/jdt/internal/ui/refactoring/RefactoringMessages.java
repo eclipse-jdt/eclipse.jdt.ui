@@ -25,6 +25,14 @@ public class RefactoringMessages {
 		}
 	}
 	
+	public static String[] getStrings(String keys[]) {
+		String[] result= new String[keys.length];
+		for (int i= 0; i < keys.length; i++) {
+			result[i]= getString(keys[i]);
+		}
+		return result;
+	}
+	
 	public static String getFormattedString(String key, String arg) {
 		try{
 			return MessageFormat.format(fgResourceBundle.getString(key), new String[] { arg });

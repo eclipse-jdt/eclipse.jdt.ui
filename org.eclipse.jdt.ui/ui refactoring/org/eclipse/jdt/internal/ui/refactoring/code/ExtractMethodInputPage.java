@@ -57,11 +57,17 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		layout.numColumns= 4; layout.marginWidth= 0;
 		group.setLayout(layout);
 		
-		String[] labels= new String[] {"public", "default", "protected", "private" }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+		String[] labels= RefactoringMessages.getStrings( new String[] {
+			"ExtractMethodInputPage.public", //$NON-NLS-1$
+			"ExtractMethodInputPage.default", //$NON-NLS-1$
+			"ExtractMethodInputPage.protected", //$NON-NLS-1$
+			"ExtractMethodInputPage.private" //$NON-NLS-1$
+		});
+		String[] data= new String[] {"public", "", "protected", "private" }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		for (int i= 0; i < labels.length; i++) {
 			Button radio= new Button(group, SWT.RADIO);
 			radio.setText(labels[i]);
-			radio.setData(labels[i]);
+			radio.setData(data[i]);
 			if (i == 2)
 				radio.setSelection(true);
 			radio.addSelectionListener(new SelectionAdapter() {
