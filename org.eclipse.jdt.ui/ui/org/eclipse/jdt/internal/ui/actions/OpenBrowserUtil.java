@@ -38,7 +38,7 @@ public class OpenBrowserUtil {
 		if (help != null) {
 			BusyIndicator.showWhile(shell.getDisplay(), new Runnable() {
 				public void run() {
-					WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm());
+					WorkbenchHelp.getHelpSupport().displayHelpResource(url.toExternalForm() + "?noframes=true"); //$NON-NLS-1$
 				}
 			});			
 		} else {

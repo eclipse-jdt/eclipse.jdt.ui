@@ -118,7 +118,7 @@ public class JavadocHelpContext implements IContext {
 					}
 				}
 				if (url != null) {
-					IHelpResource javaResource= new JavaUIHelpResource(element, url.toExternalForm());
+					IHelpResource javaResource= new JavaUIHelpResource(element, url.toExternalForm() + "?noframes=true" ); //$NON-NLS-1$
 					helpResources.add(javaResource);
 				}
 			}
