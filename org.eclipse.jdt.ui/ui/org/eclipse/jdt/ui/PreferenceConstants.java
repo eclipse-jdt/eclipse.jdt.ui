@@ -538,7 +538,7 @@ public class PreferenceConstants {
 	 * @see JavaUI
 	 * @since 3.0
 	 */
-	public static String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
+	public static final String EDITOR_SHOW_TEXT_HOVER_AFFORDANCE= "PreferenceConstants.EDITOR_SHOW_TEXT_HOVER_AFFORDANCE"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that defines the key for the hover modifiers.
@@ -565,7 +565,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 2.1
 	 */
-	public static String ID_BESTMATCH_HOVER= "org.eclipse.jdt.ui.BestMatchHover"; //$NON-NLS-1$
+	public static final String ID_BESTMATCH_HOVER= "org.eclipse.jdt.ui.BestMatchHover"; //$NON-NLS-1$
 
 	/**
 	 * The id of the source code hover contributed for extension point
@@ -573,7 +573,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 2.1
 	 */
-	public static String ID_SOURCE_HOVER= "org.eclipse.jdt.ui.JavaSourceHover"; //$NON-NLS-1$
+	public static final String ID_SOURCE_HOVER= "org.eclipse.jdt.ui.JavaSourceHover"; //$NON-NLS-1$
 
 	/**
 	 * The id of the javadoc hover contributed for extension point
@@ -581,7 +581,7 @@ public class PreferenceConstants {
 	 *
 	 * @since 2.1
 	 */
-	public static String ID_JAVADOC_HOVER= "org.eclipse.jdt.ui.JavadocHover"; //$NON-NLS-1$
+	public static final String ID_JAVADOC_HOVER= "org.eclipse.jdt.ui.JavadocHover"; //$NON-NLS-1$
 
 	/**
 	 * The id of the problem hover contributed for extension point
@@ -590,7 +590,7 @@ public class PreferenceConstants {
 	 * @since 2.1
 	 * @deprecated as of 3.0, this hover is no longer available
 	 */
-	public static String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
+	public static final String ID_PROBLEM_HOVER= "org.eclipse.jdt.ui.ProblemHover"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls whether bracket matching highlighting is turned on or off.
@@ -2328,9 +2328,71 @@ public class PreferenceConstants {
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * 
 	 * @since 3.0
 	 */
 	public final static String CODEASSIST_PREFIX_COMPLETION= "content_assist_prefix_completion"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls whether folding is enabled in the Java editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_ENABLED= "editor_folding_enabled"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that stores the configured folding provider.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_PROVIDER= "editor_folding_provider"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference that stores the value for Javadoc folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_JAVADOC= "editor_folding_default_javadoc"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for inner type folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_INNERTYPES= "editor_folding_default_innertypes"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for method folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_METHODS= "editor_folding_default_methods"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that stores the value for imports folding for the default folding provider.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_FOLDING_IMPORTS= "editor_folding_default_imports"; //$NON-NLS-1$
+
 
 		
 	/**
@@ -2573,14 +2635,20 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
 		store.setDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST, false);
 		
+		// folding
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_ENABLED, false);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_PROVIDER, "org.eclipse.jdt.ui.text.defaultFoldingProvider"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_JAVADOC, false);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_INNERTYPES, true);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_METHODS, false);
+		store.setDefault(PreferenceConstants.EDITOR_FOLDING_IMPORTS, true);
+		
 		// override default extended text editor prefs
 		store.setDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, true);
 		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);
 		SemanticHighlightings.initDefaults(store);
-
-		
 
 		// do more complicated stuff
 		NewJavaProjectPreferencePage.initDefaults(store);	

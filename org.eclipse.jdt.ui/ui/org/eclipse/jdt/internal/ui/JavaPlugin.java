@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.preferences.MockupPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.ChainedPreferenceStore;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
+import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
@@ -104,6 +105,7 @@ import org.osgi.framework.BundleContext;
  * of the plug-in such as document providers and find-replace-dialogs.
  */
 public class JavaPlugin extends AbstractUIPlugin {
+	
 	/** @deprecated Will stay true */
 	public static final boolean USE_WORKING_COPY_OWNERS= true;
 	/**
@@ -197,6 +199,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private IPreferenceStore fCombinedPreferenceStore;
+	
+	/**
+	 * The extension point registry for the <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code>
+	 * extension point.
+	 * 
+	 * @since 3.0
+	 */
+	private JavaFoldingStructureProviderRegistry fFoldingStructureProviderRegistry;
 
 	
 	public static JavaPlugin getDefault() {
@@ -752,5 +762,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fCombinedPreferenceStore == null)
 			fCombinedPreferenceStore= new ChainedPreferenceStore(new IPreferenceStore[] { getPreferenceStore(), new PreferencesAdapter(JavaCore.getPlugin().getPluginPreferences()) });
 		return fCombinedPreferenceStore;
+	}
+	
+	/**
+	 * Returns the registry of the extensions to the <code>org.eclipse.jdt.ui.javaFoldingStructureProvider</code>
+	 * extension point.
+	 * 
+	 * @return the registry of contributed <code>IJavaFoldingStructureProvider</code>
+	 * @since 3.0
+	 */
+	public synchronized JavaFoldingStructureProviderRegistry getFoldingStructureProviderRegistry() {
+		if (fFoldingStructureProviderRegistry == null)
+			fFoldingStructureProviderRegistry= new JavaFoldingStructureProviderRegistry();
+		return fFoldingStructureProviderRegistry;
 	}
 }

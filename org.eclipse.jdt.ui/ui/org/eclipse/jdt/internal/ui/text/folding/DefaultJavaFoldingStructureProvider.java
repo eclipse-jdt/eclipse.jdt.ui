@@ -8,13 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.javaeditor;
+package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -29,6 +31,7 @@ import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.texteditor.IDocumentProvider;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IElementChangedListener;
@@ -46,15 +49,22 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 
 /**
  * Updates the projection model of a class file or compilation unit.
+ *
  * @since 3.0
  */
-public class JavaProjectionModelUpdater implements IProjectionListener {
+public class DefaultJavaFoldingStructureProvider implements IProjectionListener, IJavaFoldingStructureProvider {
 	
 	private static class JavaProjectionAnnotation extends ProjectionAnnotation {
 		
@@ -125,25 +135,26 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 	
 	private IDocument fCachedDocument;
 	
-	private JavaEditor fEditor;
+	private ITextEditor fEditor;
 	private ProjectionViewer fViewer;
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
 	
 	private boolean fAllowCollapsing= false;
 	private boolean fCollapseJavadoc= false;
-	private boolean fCollapseInportContainer= true;
+	private boolean fCollapseImportContainer= true;
 	private boolean fCollapseInnerTypes= true;
 	private boolean fCollapseMethods= false;
 	
-	public JavaProjectionModelUpdater() {
+	public DefaultJavaFoldingStructureProvider() {
 	}
 	
-	public void install(JavaEditor editor, ProjectionViewer viewer) {
-		fEditor= editor;
-		fViewer= viewer;
-		fViewer.addProjectionListener(this);
-		projectionEnabled();
+	public void install(ITextEditor editor, ProjectionViewer viewer) {
+		if (editor instanceof JavaEditor) {
+			fEditor= editor;
+			fViewer= viewer;
+			fViewer.addProjectionListener(this);
+		}
 	}
 	
 	public void uninstall() {
@@ -186,6 +197,8 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 		if (!isInstalled())
 			return;
 		
+		initializePreferences();
+		
 		try {
 			
 			IDocumentProvider provider= fEditor.getDocumentProvider();
@@ -200,17 +213,27 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 				fInput= editorInput.getClassFile();
 			}
 			
-			ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
-			if (model != null) {
-				Map additions= computeAdditions((IParent) fInput);
-				model.removeAllAnnotations();
-				model.replaceAnnotations(null, additions);
+			if (fInput != null) {
+				ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
+				if (model != null) {
+					Map additions= computeAdditions((IParent) fInput);
+					model.removeAllAnnotations();
+					model.replaceAnnotations(null, additions);
+				}
 			}
 			
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= false;
 		}
+	}
+
+	private void initializePreferences() {
+		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+		fCollapseInnerTypes= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_INNERTYPES);
+		fCollapseImportContainer= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_IMPORTS);
+		fCollapseJavadoc= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_JAVADOC);
+		fCollapseMethods= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_METHODS);
 	}
 
 	private Map computeAdditions(IParent parent) {
@@ -226,10 +249,7 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement element= elements[i];
 			
-			try {
-				computeAdditions(element, map);
-			} catch (JavaModelException x) {
-			}
+			computeAdditions(element, map);
 			
 			if (element instanceof IParent) {
 				IParent parent= (IParent) element;
@@ -238,7 +258,7 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 		}
 	}
 
-	private void computeAdditions(IJavaElement element, Map map) throws JavaModelException {
+	private void computeAdditions(IJavaElement element, Map map) {
 		
 		boolean createProjection= false;
 		
@@ -246,7 +266,7 @@ public class JavaProjectionModelUpdater implements IProjectionListener {
 		switch (element.getElementType()) {
 			
 			case IJavaElement.IMPORT_CONTAINER:
-				collapse= fAllowCollapsing && fCollapseInportContainer;
+				collapse= fAllowCollapsing && fCollapseImportContainer;
 				createProjection= true;
 				break;
 			case IJavaElement.TYPE:

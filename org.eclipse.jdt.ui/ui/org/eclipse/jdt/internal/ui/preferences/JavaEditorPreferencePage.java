@@ -149,6 +149,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private OverlayPreferenceStore fOverlayStore;
 	private JavaEditorHoverConfigurationBlock fJavaEditorHoverConfigurationBlock;
 	private MarkOccurrencesConfigurationBlock fOccurrencesConfigurationBlock;
+	private FoldingConfigurationBlock fFoldingConfigurationBlock;
 	
 	/**
 	 * Quick diff preferences. 
@@ -1383,6 +1384,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
 		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
+		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
 		
 		fOverlayStore.load();
 		fOverlayStore.start();
@@ -1431,6 +1433,12 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			}
 		});
 		item.setControl(fQuickDiffBlock.createControl(folder));
+		
+		if (Boolean.getBoolean("org.eclipse.jdt.internal.ui.projection")) { //$NON-NLS-1$
+			item= new TabItem(folder, SWT.NONE);
+			item.setText("&Folding");
+			item.setControl(fFoldingConfigurationBlock.createControl(folder));
+		}
 		
 		initialize();
 		
@@ -1488,6 +1496,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		fQuickDiffBlock.initialize();
 		fOccurrencesConfigurationBlock.initialize();
+		fFoldingConfigurationBlock.initialize();
 	}
 	
 	private void initializeFields() {
@@ -1585,6 +1594,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaEditorHoverConfigurationBlock.performOk();
 		fOccurrencesConfigurationBlock.performOk();
 		fQuickDiffBlock.performOk();
+		fFoldingConfigurationBlock.performOk();
 		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
@@ -1608,6 +1618,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fJavaEditorHoverConfigurationBlock.performDefaults();
 		fOccurrencesConfigurationBlock.performDefaults();
 		fQuickDiffBlock.performDefaults();
+		fFoldingConfigurationBlock.performDefaults();
 
 		super.performDefaults();
 
@@ -1618,6 +1629,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 * @see DialogPage#dispose()
 	 */
 	public void dispose() {
+		
+		fFoldingConfigurationBlock.dispose();
 		
 		if (fOverlayStore != null) {
 			fOverlayStore.stop();
