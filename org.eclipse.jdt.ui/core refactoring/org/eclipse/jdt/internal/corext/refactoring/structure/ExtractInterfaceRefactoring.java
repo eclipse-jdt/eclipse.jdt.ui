@@ -25,12 +25,10 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -183,14 +181,25 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private String createInterfaceMethodDeclarationsSource(IMethod iMethod) throws JavaModelException {
 		MethodDeclaration methodDeclaration= getMethodDeclarationNode(iMethod, false);
 		if (methodDeclaration == null)
-			return ""; //???
-		Block body= methodDeclaration.getBody();
-		
-		if (body == null)
-			return iMethod.getSource();
-		StringBuffer methodSourceBuffer= new StringBuffer(iMethod.getSource());
-		int declarationRelativeBodyOffset= body.getStartPosition() - methodDeclaration.getStartPosition();
-		return methodSourceBuffer.replace(declarationRelativeBodyOffset, iMethod.getSource().length(), ";").toString();//$NON-NLS-1$
+			return ""; 
+
+		String methodDeclarationSource= iMethod.getSource().substring(getDeclarationRelativeStartPosition(methodDeclaration), getDeclarationRelativeEndPosition(methodDeclaration));
+		if (methodDeclaration.getBody() == null)
+			return methodDeclarationSource;
+		else
+			return methodDeclarationSource + ";";
+	}
+
+	private static int getDeclarationRelativeStartPosition(MethodDeclaration methodDeclaration) {
+		//without modifiers	
+		return methodDeclaration.getReturnType().getStartPosition() - methodDeclaration.getStartPosition();
+	}
+	
+	private static int getDeclarationRelativeEndPosition(MethodDeclaration methodDeclaration) {
+		if (methodDeclaration.getBody() == null)
+			return methodDeclaration.getStartPosition() + methodDeclaration.getLength() - methodDeclaration.getStartPosition();
+		else
+			return methodDeclaration.getBody().getStartPosition() - methodDeclaration.getStartPosition();
 	}
 
 	private MethodDeclaration getMethodDeclarationNode(IMethod iMethod, boolean resolveBindings) throws JavaModelException{
@@ -207,9 +216,9 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		for (int i= 0; i < typesUsed.length; i++) {
 			ITypeBinding binding= typesUsed[i];
 			if (binding != null && ! binding.isPrimitive()){
-				buff.append("import ");
+				buff.append("import ");//$NON-NLS-1$
 				buff.append(Bindings.getFullyQualifiedImportName(binding));
-				buff.append(";");
+				buff.append(";");//$NON-NLS-1$
 			}	
 		}
 		return buff.toString();
@@ -230,6 +239,7 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	
 	//set of ITypeBindings
 	private Set getTypesUsedInDeclaration(IField iField) {
+		//XXX
 		return new HashSet(0);
 	}
 
@@ -239,22 +249,17 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 		if (methodDeclaration == null)
 			return new HashSet(0);
 		Set result= new HashSet();	
-		ITypeBinding returnTypeBinding= methodDeclaration.getReturnType().resolveBinding();
-		result.add(returnTypeBinding);
+		result.add(methodDeclaration.getReturnType().resolveBinding());
 			
 		for (Iterator iter= methodDeclaration.parameters().iterator(); iter.hasNext();) {
-			SingleVariableDeclaration varDeclaration= (SingleVariableDeclaration) iter.next();
-			result.add(varDeclaration.getType().resolveBinding()); 
+			result.add(((SingleVariableDeclaration) iter.next()).getType().resolveBinding()); 
 		}
 		
 		for (Iterator iter= methodDeclaration.thrownExceptions().iterator(); iter.hasNext();) {
-			Name exceptionName= (Name) iter.next();
-			result.add(exceptionName.resolveTypeBinding());
+			result.add(((Name) iter.next()).resolveTypeBinding());
 		}
-			
 		return result;
 	}
-
 
 	private String createPackageDeclarationSource() {
 		return "package " + getInputClassPackage().getElementName() + ";";//$NON-NLS-2$ //$NON-NLS-1$
@@ -270,15 +275,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 
 	private static String getTemplate(String name, int pos, ICompilationUnit newCu) throws CoreException {
 		Template[] templates= Templates.getInstance().getTemplates(name);
-		if (templates.length > 0) {
-			String template= JavaContext.evaluateTemplate(templates[0], newCu, pos);
-			if (template != null) {
-				return template;
-			}
-		}
-		return ""; //$NON-NLS-1$
+		if (templates.length == 0)
+			return ""; //$NON-NLS-1$	
+		String template= JavaContext.evaluateTemplate(templates[0], newCu, pos);
+		if (template == null)
+			return ""; //$NON-NLS-1$
+		return template;
 	}
-
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
 		try{
