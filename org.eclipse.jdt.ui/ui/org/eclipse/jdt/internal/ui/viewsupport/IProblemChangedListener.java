@@ -13,11 +13,13 @@ import org.eclipse.core.resources.IResource;
 public interface IProblemChangedListener {
 	
 	/**
+	 * Called when problems changed. This call is posted in an aynch exec, therefore passed
+	 * resources must not exist.
 	 * @param changedElements  A set with elements of type <code>IResource</code> that
 	 * describe the resources that had an problem change.
-	 * @param isMarkerChnage If set to <code>true</code>, the change was a marker change, if
-	 * <code>false</code>, the change came from an annotation model change.
+	 * @param isMarkerChange If set to <code>true</code>, the change was a marker change, if
+	 * <code>false</code>, the change came from an annotation model modification.
 	 */
-	void problemsChanged(IResource[] changedResources, boolean isMarkerChnage);
+	void problemsChanged(IResource[] changedResources, boolean isMarkerChange);
 	
 }

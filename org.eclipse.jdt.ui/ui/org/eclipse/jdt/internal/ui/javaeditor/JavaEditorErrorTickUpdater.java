@@ -1,83 +1,72 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.text.source.IAnnotationModelListener;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 
 /**
- * The <code>JavaEditorErrorTickUpdater</code> will register as a AnnotationModelListener
- * on the annotation model of a Java Editor and update the title images when the annotation
+ * The <code>JavaEditorErrorTickUpdater</code> will register as a IProblemChangedListener
+ * to listen on problem changes of the editor's input. It updates the title images when the annotation
  * model changed.
  */
-public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
+public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 
 	private JavaEditor fJavaEditor;
-	private IAnnotationModel fAnnotationModel;
 	private JavaUILabelProvider fLabelProvider;
 
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
-		fJavaEditor= editor;
 		Assert.isNotNull(editor);
+		fJavaEditor= editor;
+		fLabelProvider=  new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getDecorators(true, null));
+		
+		JavaPlugin.getDefault().getProblemMarkerManager().addListener(this);
 	}
-
-	/**
-	 * Defines the annotation model to listen to. To be called when the
-	 * annotation model changes.
-	 * @param model The new annotation model or <code>null</code>
-	 * to uninstall.
+	
+	/* (non-Javadoc)
+	 * @see IProblemChangedListener#problemsChanged(IResource[], boolean)
 	 */
-	public void setAnnotationModel(IAnnotationModel model) {
-		if (fAnnotationModel != null) {
-			fAnnotationModel.removeAnnotationModelListener(this);
-		}
-				
-		if (model != null) {
-			if (fLabelProvider == null) {
-				fLabelProvider= new JavaUILabelProvider(0, JavaElementImageProvider.SMALL_ICONS, JavaUILabelProvider.getDecorators(true, null));
-			}
-			fAnnotationModel=model;
-			fAnnotationModel.addAnnotationModelListener(this);
-			modelChanged(fAnnotationModel);
-		} else {
-			if (fLabelProvider != null) {
-				fLabelProvider.dispose();
-			}
-			fLabelProvider= null;
-			fAnnotationModel= null;
-		}	
-	}
-			
-	/*
-	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
-	 */
-	public void modelChanged(IAnnotationModel model) {
-		Image titleImage= fJavaEditor.getTitleImage();
-		if (titleImage == null) {
+	public void problemsChanged(IResource[] changedResources, boolean isMarkerChange) {
+		if (isMarkerChange) {
 			return;
 		}
 		IEditorInput input= fJavaEditor.getEditorInput();
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
-			if (fLabelProvider != null && jelement != null) {
-				Image newImage= fLabelProvider.getImage(jelement);
-				if (titleImage != newImage) {
-					updatedTitleImage(newImage);
+			if (jelement != null) {
+				IResource resource= jelement.getResource();
+				for (int i = 0; i < changedResources.length; i++) {
+					if (changedResources[i].equals(resource)) {
+						updateEditorImage(jelement);
+					}
 				}
 			}
 		}
+	}	
+			
+	public void updateEditorImage(IJavaElement jelement) {
+		Image titleImage= fJavaEditor.getTitleImage();
+		if (titleImage == null) {
+			return;
+		}
+		Image newImage= fLabelProvider.getImage(jelement);
+		if (titleImage != newImage) {
+			postImageChange(newImage);
+		}
 	}
 	
-	private void updatedTitleImage(final Image newImage) {
+	private void postImageChange(final Image newImage) {
 		Shell shell= fJavaEditor.getEditorSite().getShell();
 		if (shell != null && !shell.isDisposed()) {
 			shell.getDisplay().syncExec(new Runnable() {
@@ -88,6 +77,12 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		}
 	}	
 	
+	public void dispose() {
+		fLabelProvider.dispose();
+		JavaPlugin.getDefault().getProblemMarkerManager().removeListener(this);
+	}
+
+
 }
 
 

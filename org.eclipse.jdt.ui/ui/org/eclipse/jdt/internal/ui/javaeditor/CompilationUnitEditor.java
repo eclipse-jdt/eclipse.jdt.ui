@@ -941,7 +941,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	protected void doSetInput(IEditorInput input) throws CoreException {
 		super.doSetInput(input);
-		fJavaEditorErrorTickUpdater.setAnnotationModel(getDocumentProvider().getAnnotationModel(input));
 		configureTabConverter();
 	}
 	
@@ -1099,7 +1098,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	 */
 	public void dispose() {
 		if (fJavaEditorErrorTickUpdater != null) {
-			fJavaEditorErrorTickUpdater.setAnnotationModel(null);
+			fJavaEditorErrorTickUpdater.dispose();
 			fJavaEditorErrorTickUpdater= null;
 		}
 		
