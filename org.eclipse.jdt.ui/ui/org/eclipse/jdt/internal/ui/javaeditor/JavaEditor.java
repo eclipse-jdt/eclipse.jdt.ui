@@ -136,9 +136,9 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		new JavaSearchGroup(false).fill(menu, ITextEditorActionConstants.GROUP_FIND, isTextSelectionEmpty());
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowJavaDoc");
+		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "ShowInPackageView");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenExternalJavadoc");
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, new ShowInPackageViewAction());
 	}			
 	
 	/**
@@ -151,9 +151,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		page.addSelectionChangedListener(this);
 		setOutlinePageInput(page, getEditorInput());
 		
-		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));	//$NON-NLS-1$
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page)); //$NON-NLS-1$
-		page.setAction("ShowInPackageView", new ShowInPackageViewAction()); //$NON-NLS-1$
 		return page;
 	}
 	
@@ -349,7 +347,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
 		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$
 		setAction("OpenExternalJavadoc", new OpenExternalJavadocAction(provider)); //$NON-NLS-1$
-
+		setAction("ShowInPackageView", new ShowInPackageViewAction(provider)); //$NON-NLS-1$
 	}
 	
 	private boolean isTextSelectionEmpty() {

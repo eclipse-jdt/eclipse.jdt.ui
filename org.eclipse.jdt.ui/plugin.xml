@@ -396,6 +396,19 @@
 			class="org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction"
 			enablesFor="1">
 		</action>
+	</objectContribution>
+	
+	<objectContribution
+		id="org.eclipse.jdt.ui.actions.ShowInPackageViewAction"
+		objectClass="org.eclipse.jdt.core.IJavaElement">
+		<action
+			id="org.eclipse.jdt.ui.actions.ShowInPackageViewAction"
+			label="%ShowInPackageViewAction.label"
+			tooltip="%ShowInPackageViewAction.tooltip"
+			menubarPath="group.open"
+			class="org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction"
+			enablesFor="1">
+		</action>
 	</objectContribution>	
 	
 </extension>

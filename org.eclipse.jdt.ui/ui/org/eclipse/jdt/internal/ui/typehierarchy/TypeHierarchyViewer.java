@@ -17,7 +17,6 @@ import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.IWorkbenchPart;
@@ -32,16 +31,13 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
-import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
-import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
 public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 	
 	private OpenJavaElementAction fOpen;
-	private ShowInPackageViewAction fShowInPackageViewAction;
 	private ContextMenuGroup[] fStandardGroups;
 			
 	public TypeHierarchyViewer(Composite parent, IContentProvider contentProvider, ILabelProvider lprovider, IWorkbenchPart part) {
@@ -73,7 +69,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 				fOpen.run();
 			}
 		});
-		fShowInPackageViewAction= new ShowInPackageViewAction();
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new NewGroup(), new GenerateGroup()
 		};		
@@ -99,9 +94,6 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer {
 		if (fOpen.canActionBeAdded()) {
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
 		}
-		// XXX need to decide when to contribute the Show in PackagesView action
-		// if (fShowInPackageViewAction.canOperateOn())
-		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackageViewAction);
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

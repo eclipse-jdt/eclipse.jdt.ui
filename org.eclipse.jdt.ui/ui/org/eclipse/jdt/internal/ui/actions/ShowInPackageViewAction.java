@@ -5,143 +5,155 @@
 package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IObjectActionDelegate;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IUpdate;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.JavaUI;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
-import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-import org.eclipse.jdt.internal.ui.search.JavaElementAction;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.util.SelectionUtil;
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+
 /**
- * Tries to reveal the selected element in the package navigator 
- * view.
+ * On a selected member; opens the Javadoc in an external browser (if existing)
  */
-public class ShowInPackageViewAction extends JavaElementAction {
-
-	private ISelectionProvider fSelectionProvider;
-
+public class ShowInPackageViewAction extends Action implements IUpdate, IObjectActionDelegate {
+	private StructuredSelectionProvider fSelectionProvider;
+	
+	/**
+	 * Use only for IWorkbenchWindowActionDelegates!
+	 */ 
 	public ShowInPackageViewAction() {
-		super(JavaUIMessages.getString("ShowInPackageViewAction.label"), new Class[] {IJavaElement.class} ); //$NON-NLS-1$
+		this(null);
+	}
+	
+	public ShowInPackageViewAction(StructuredSelectionProvider provider) {
+		super(JavaUIMessages.getString("ShowInPackageViewAction.label")); //$NON-NLS-1$
 		setDescription(JavaUIMessages.getString("ShowInPackageViewAction.description")); //$NON-NLS-1$
 		setToolTipText(JavaUIMessages.getString("ShowInPackageViewAction.tooltip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this,	new Object[] { IJavaHelpContextIds.SHOW_IN_PACKAGEVIEW_ACTION });	
-	
+		fSelectionProvider= provider;
 	}
-
-	/*
-	 * @see JavaElementAction#run(IJavaElement)
-	 */
-	public void run(IJavaElement o) {
-		IJavaElement element= null;
-		if (o instanceof IPackageDeclaration)
-			element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.PACKAGE_FRAGMENT);
+	
+	public void update() {
+		setEnabled(canOperateOn());
+	}
+	
+	private boolean canOperateOn() {
+		if (fSelectionProvider != null) {
+			IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_GET_EDITOR_INPUT);
+			return selection.size() == 1;
+		}
+		return false;
+	}
+	
+	private Object getSelectedElement() throws JavaModelException {
+		if (fSelectionProvider == null) {
+			return null;
+		}
 		
-		else if (o instanceof IImportDeclaration) {
-			try {
-				IImportDeclaration declaration= (IImportDeclaration) o;
-				String containerName;
+		IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_DO_CODERESOLVE | StructuredSelectionProvider.FLAGS_GET_EDITOR_INPUT);
+		if (selection.size() != 1)
+			return null;
+		
+		Object obj= selection.getFirstElement();
+		if (!(obj instanceof IJavaElement)) {
+			return obj;
+		}
+		IJavaElement elem= (IJavaElement) obj;
+		switch (elem.getElementType()) {
+			case IJavaElement.PACKAGE_DECLARATION:
+				// select package fragment
+				elem= JavaModelUtil.getPackageFragmentRoot(elem);
+				break;
+			case IJavaElement.IMPORT_DECLARATION:
+				// select referenced element: package fragment or cu/classfile of referenced type
+				IImportDeclaration declaration= (IImportDeclaration) elem;
 				if (declaration.isOnDemand()) {
-					String importName= declaration.getElementName();
-					containerName= importName.substring(0, importName.length() - 2);
+					elem= JavaModelUtil.findTypeContainer(elem.getJavaProject(), Signature.getQualifier(elem.getElementName()));
 				} else {
-					containerName= declaration.getElementName();
+					elem= JavaModelUtil.findType(elem.getJavaProject(), elem.getElementName());
 				}
-				element= JavaModelUtil.findTypeContainer(declaration.getJavaProject(), containerName);
-			} catch (JavaModelException e) {
-				ExceptionHandler.handle(e, JavaUIMessages.getString("ShowInPackageViewAction.errorTitle"), JavaUIMessages.getString("ShowInPackageViewAction.errorMessage")); //$NON-NLS-2$ //$NON-NLS-1$
-			}
-			if (element instanceof IType) {
-				IJavaElement temp= JavaModelUtil.findParentOfKind(element, IJavaElement.COMPILATION_UNIT);
-				if (temp == null)
-					temp= JavaModelUtil.findParentOfKind(element, IJavaElement.CLASS_FILE);
-					
-				element= temp;
-			}
+				if (elem instanceof IType) {
+					elem= (IJavaElement) JavaModelUtil.getOpenable(elem);
+				}
+				break;
+			case IJavaElement.IMPORT_CONTAINER:
+			case IJavaElement.TYPE:
+			case IJavaElement.METHOD:
+			case IJavaElement.FIELD:
+			case IJavaElement.INITIALIZER:
+				// select parent cu/classfile
+				elem= (IJavaElement) JavaModelUtil.getOpenable(elem);
+				break;
+			case IJavaElement.JAVA_MODEL:
+				elem= null;
+				break;
+			default:
 		}
-		else if (o instanceof IType) {
-			ICompilationUnit cu= (ICompilationUnit)JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				if (cu.isWorkingCopy())
-					element= cu.getOriginalElement();
-				else
-					element= cu;
-			}
-			else {
-				element= JavaModelUtil.findParentOfKind((IJavaElement)o, IJavaElement.CLASS_FILE);
-			}
-		}
-		else if (o instanceof IMember){
-			element= (IJavaElement)JavaModelUtil.getOpenable(o);
-		}
-		if (element != null) {
-			showInPackagesView(element);
-			return;
-		}	
-		//XXX revisit need a standard way to give the user this feedback
-		JavaPlugin.getActiveWorkbenchShell().getDisplay().beep();	
-	}
-
-	protected void showInPackagesView(Object element) {
-		PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
-		if (view != null) {
-			view.selectReveal(new StructuredSelection(element));
-			return;
-		}
-	}
-	
-	private Object getEditorInput() {
-		IEditorPart part= JavaPlugin.getDefault().getActivePage().getActiveEditor();
-		if (part != null) {
-			IEditorInput input= part.getEditorInput();
-			if (input instanceof IClassFileEditorInput)
-				return ((IClassFileEditorInput)input).getClassFile();
-			if (input instanceof IFileEditorInput) {
-				IFile file= ((IFileEditorInput)input).getFile();
-				return JavaCore.create(file);
+		if (elem instanceof ICompilationUnit) {
+			ICompilationUnit cu= (ICompilationUnit) elem;
+			if (cu.isWorkingCopy()) {
+				elem= cu.getOriginalElement();
 			}
 		}
-		return null;
+		return elem;
 	}
 		
-	/*
-	 * @see JavaElementAction#getJavaElement(ITextSelection)
-	 */
-	protected IJavaElement getJavaElement(ITextSelection selection) {
-		if (selection.getLength() == 0) {
-			Object input= getEditorInput();
-			if (input != null)
-				showInPackagesView(input);
-			return RETURN_WITHOUT_BEEP;
+				
+	public void run() {
+		try {
+			Object element= getSelectedElement();
+			if (element == null) {
+				return;
+			}
+			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
+			if (view != null) {
+				view.selectReveal(new StructuredSelection(element));
+				return;
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			String title= JavaUIMessages.getString("ShowInPackageViewAction.error.title");
+			String message= JavaUIMessages.getString("ShowInPackageViewAction.error.message");
+			ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(), title, message, e.getStatus());
 		}
-		return super.getJavaElement(selection);
 	}
-
+	/*
+	 * @see IActionDelegate#run(IAction)
+	 */
+	public void run(IAction action) {
+		run();
+	}
+	/*
+	 * @see IActionDelegate#selectionChanged(IAction, ISelection)
+	 */
+	public void selectionChanged(IAction action, ISelection selection) {
+	}
+	/*
+	 * @see IObjectActionDelegate#setActivePart(IAction, IWorkbenchPart)
+	 */
+	public void setActivePart(IAction action, IWorkbenchPart targetPart) {
+		setEnabled(!JavaUI.ID_PACKAGES.equals(targetPart.getSite().getId())); // does not work yet
+		
+		fSelectionProvider= StructuredSelectionProvider.createFrom(targetPart.getSite().getWorkbenchWindow().getSelectionService());		
+	}
+	
 }

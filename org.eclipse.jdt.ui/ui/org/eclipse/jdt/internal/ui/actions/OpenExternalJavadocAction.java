@@ -61,7 +61,11 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 	}
 	
 	private boolean canOperateOn() {
-		return getDocumentedElement() != null;	
+		if (fSelectionProvider != null) {
+			IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_GET_EDITOR_INPUT);
+			return selection.size() == 1;
+		}
+		return false;
 	}
 	
 	private IJavaElement getDocumentedElement() {
@@ -69,7 +73,7 @@ public class OpenExternalJavadocAction extends Action implements IUpdate, IObjec
 			return null;
 		}
 		
-		IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_DO_CODERESOLVE);
+		IStructuredSelection selection= fSelectionProvider.getSelection(StructuredSelectionProvider.FLAGS_DO_CODERESOLVE | StructuredSelectionProvider.FLAGS_GET_EDITOR_INPUT);
 		if (selection.size() != 1)
 			return null;
 		

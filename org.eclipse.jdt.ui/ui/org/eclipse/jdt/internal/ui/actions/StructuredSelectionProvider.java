@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
@@ -32,6 +34,7 @@ public abstract class StructuredSelectionProvider {
 	
 	public static int FLAGS_DO_CODERESOLVE= 1;
 	public static int FLAGS_DO_ELEMENT_AT_OFFSET= 2;
+	public static int FLAGS_GET_EDITOR_INPUT= 4;
 
 	private static abstract class Adapter extends StructuredSelectionProvider {
 		private ITextSelection fLastTextSelection;
@@ -40,54 +43,53 @@ public abstract class StructuredSelectionProvider {
 		private Adapter() {
 		}
 		
-		protected IStructuredSelection asStructuredSelection(ITextSelection selection, int flags) {
+		protected IStructuredSelection asStructuredSelection(ITextSelection selection, int flags) throws CoreException {
 			IEditorPart editor= JavaPlugin.getActivePage().getActiveEditor();
 			if (editor == null)
 				return StructuredSelection.EMPTY;
 			return asStructuredSelection(selection, editor, flags);				
 		}
 		
-		protected IStructuredSelection asStructuredSelection(ITextSelection selection, IEditorPart editor, int flags) {
+		protected IStructuredSelection asStructuredSelection(ITextSelection selection, IEditorPart editor, int flags) throws CoreException {
 			if ((flags & FLAGS_DO_CODERESOLVE) != 0) {
-				if (selection.getLength() == 0)
-					return StructuredSelection.EMPTY;				
-				IStructuredSelection result= considerCache(selection);
-				if (result != null)
-					return result;
+				if (selection.getLength() != 0) {		
+					IStructuredSelection result= considerCache(selection);
+					if (result != null)
+						return result;
 					
-				IJavaElement assist= getEditorInput(editor);
-				if (assist instanceof ICodeAssist) {
-					try {
+					IJavaElement assist= getEditorInput(editor);
+					if (assist instanceof ICodeAssist) {
 						IJavaElement[] elements= ((ICodeAssist)assist).codeSelect(selection.getOffset(), selection.getLength());
 						result= new StructuredSelection(elements);
 						cacheResult(selection, result);
-						return result;						
-					} catch (JavaModelException e) {
-						JavaPlugin.log(e);
+						return result;
+					}				
+				}
+			}
+			if ((flags & FLAGS_DO_ELEMENT_AT_OFFSET) != 0) {
+				IJavaElement assist= getEditorInput(editor);
+				if (assist instanceof ICompilationUnit) {
+					ICompilationUnit cu= (ICompilationUnit) assist;
+					if (cu.isWorkingCopy()) {
+						synchronized (cu) {
+							cu.reconcile();
+						}
+					}
+					IJavaElement ref= ((ICompilationUnit)assist).getElementAt(selection.getOffset());
+					if (ref != null) {
+						return new StructuredSelection(ref);
+					}
+				} else if (assist instanceof IClassFile) {
+					IJavaElement ref= ((IClassFile)assist).getElementAt(selection.getOffset());
+					if (ref != null) {
+						return new StructuredSelection(ref);
 					}
 				}
-			} else if ((flags & FLAGS_DO_ELEMENT_AT_OFFSET) != 0) {
-				try {
-					IJavaElement assist= getEditorInput(editor);
-					if (assist instanceof ICompilationUnit) {
-						ICompilationUnit cu= (ICompilationUnit) assist;
-						if (cu.isWorkingCopy()) {
-							synchronized (cu) {
-								cu.reconcile();
-							}
-						}
-						IJavaElement ref= ((ICompilationUnit)assist).getElementAt(selection.getOffset());
-						if (ref != null) {
-							return new StructuredSelection(ref);
-						}
-					} else if (assist instanceof IClassFile) {
-						IJavaElement ref= ((IClassFile)assist).getElementAt(selection.getOffset());
-						if (ref != null) {
-							return new StructuredSelection(ref);
-						}
-					}
-				} catch (JavaModelException e) {
-					JavaPlugin.log(e);
+			}
+			if ((flags & FLAGS_GET_EDITOR_INPUT) != 0) {
+				IJavaElement assist= getEditorInput(editor);
+				if (assist != null) {
+					return new StructuredSelection(assist);
 				}
 			}
 			return StructuredSelection.EMPTY;
@@ -123,11 +125,15 @@ public abstract class StructuredSelectionProvider {
 			Assert.isNotNull(fProvider);
 		}
 		public IStructuredSelection getSelection(int flags) {
-			ISelection result= fProvider.getSelection();
-			if (result instanceof IStructuredSelection)
-				return (IStructuredSelection)result;
-			if (result instanceof ITextSelection && fProvider instanceof IEditorPart)
-				return asStructuredSelection((ITextSelection)result, (IEditorPart)fProvider, flags);
+			try {
+				ISelection result= fProvider.getSelection();
+				if (result instanceof IStructuredSelection)
+					return (IStructuredSelection)result;
+				if (result instanceof ITextSelection && fProvider instanceof IEditorPart)
+					return asStructuredSelection((ITextSelection)result, (IEditorPart)fProvider, flags);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 			return StructuredSelection.EMPTY;
 		}
 	}
@@ -140,11 +146,15 @@ public abstract class StructuredSelectionProvider {
 			Assert.isNotNull(fService);
 		}
 		public IStructuredSelection getSelection(int flags) {
-			ISelection result= fService.getSelection();
-			if (result instanceof IStructuredSelection)
-				return (IStructuredSelection)result;
-			if (result instanceof ITextSelection)
-				return asStructuredSelection((ITextSelection)result, flags);
+			try {
+				ISelection result= fService.getSelection();
+				if (result instanceof IStructuredSelection)
+					return (IStructuredSelection)result;
+				if (result instanceof ITextSelection)
+					return asStructuredSelection((ITextSelection)result, flags);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 			return StructuredSelection.EMPTY;
 		}
 	}
@@ -162,7 +172,7 @@ public abstract class StructuredSelectionProvider {
 	 * Returns the current selection. Does not return <code>null</code>, but the empty selection
 	 * in case no selected element could be found.
 	 * @param flags Defines how text selections should be processed. FLAGS_DO_CODERESOLVE or
-	 * FLAGS_DO_ELEMENT_AT_OFFSET are valid options.
+	 * FLAGS_DO_ELEMENT_AT_OFFSET,  FLAGS_GET_EDITOR_INPUT are valid options.
 	 */
 	public abstract IStructuredSelection getSelection(int flags);
 
