@@ -14,6 +14,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -22,7 +23,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.codemanipulation.NameProposer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -62,13 +62,10 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private boolean fUpdateComments;
 	private boolean fUpdateStrings;
 	
-	private final String[] fPrefixes;
-	private final String[] fSuffixes;
-	
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 	
-	public RenameFieldRefactoring(IField field, String[] prefixes, String[] suffixes){
+	public RenameFieldRefactoring(IField field){
 		Assert.isTrue(field.exists());
 		fField= field;
 		fNewName= fField.getElementName();
@@ -77,8 +74,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fUpdateComments= false;
 		fUpdateStrings= false;
 		
-		fPrefixes= prefixes;
-		fSuffixes= suffixes;
 		fRenameGetter= false;
 		fRenameSetter= false;
 	}
@@ -214,25 +209,21 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	public IMethod getGetter() throws JavaModelException{
-		return GetterSetterUtil.getGetter(fField, fPrefixes, fSuffixes);
+		return GetterSetterUtil.getGetter(fField);
 	}
 	
 	public IMethod getSetter() throws JavaModelException{
-		return GetterSetterUtil.getSetter(fField, fPrefixes, fSuffixes);
+		return GetterSetterUtil.getSetter(fField);
 	}
 
 	public String getNewGetterName() throws JavaModelException {
-		return getNameProposer().proposeGetterName(fNewName, isBoolean(fField));
+		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), isBoolean(fField), null);
 	}
 
 	public String getNewSetterName() throws JavaModelException {
-		return getNameProposer().proposeSetterName(fNewName, isBoolean(fField));
+		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), null);
 	}
 
-	private NameProposer getNameProposer() {
-		return new NameProposer(fPrefixes, fSuffixes);
-	}
-		
 	private static boolean isBoolean(IField field) throws JavaModelException{
 		return Signature.SIG_BOOLEAN.equals(field.getTypeSignature());
 	}
