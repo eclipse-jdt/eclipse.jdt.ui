@@ -158,12 +158,12 @@ public class InlineTempTests extends RefactoringTest {
 	}	
 	
 	public void test14() throws Exception{
-		printTestDisabledMessage("incorrect for multiple declarations");		
+		printTestDisabledMessage("regression for bug 11664");		
 //		helper1(4, 13, 4, 14);
 	}	
 	
 	public void test15() throws Exception{
-		printTestDisabledMessage("incorrect for multiple declarations");		
+		printTestDisabledMessage("regression for bug 11664");		
 //		helper1(4, 19, 4, 20);
 	}	
 	
