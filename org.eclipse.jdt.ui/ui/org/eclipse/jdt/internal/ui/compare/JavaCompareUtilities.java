@@ -113,6 +113,10 @@ class JavaCompareUtilities {
 		return JavaPluginImages.DESC_OBJS_ENUM;
 	}
 
+	static ImageDescriptor getAnnotationImageDescriptor() {
+		return JavaPluginImages.DESC_OBJS_ANNOTATION;
+	}
+
 	static ImageDescriptor getImageDescriptor(IMember element) {
 		int t= element.getElementType();
 		if (t == IJavaElement.TYPE) {
@@ -189,6 +193,7 @@ class JavaCompareUtilities {
 		case JavaNode.CLASS:
 		case JavaNode.INTERFACE:
 		case JavaNode.ENUM:
+		case JavaNode.ANNOTATION:
 			sb.append(JavaElement.JEM_TYPE);
 			sb.append(name);
 			break;

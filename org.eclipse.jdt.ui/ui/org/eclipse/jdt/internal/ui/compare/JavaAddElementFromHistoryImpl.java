@@ -25,15 +25,17 @@ import org.eclipse.core.runtime.*;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.*;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -126,7 +128,6 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			
 			// configure EditionSelectionDialog and let user select an edition
 			ITypedElement target= new JavaTextBufferNode(file, buffer, inEditor);
-
 			ITypedElement[] editions= buildEditions(target, file);
 											
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
@@ -142,10 +143,8 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 				cu2= ((IMember)parent).getCompilationUnit();
 			
 			CompilationUnit root= parsePartialCompilationUnit(cu2);
-			OldASTRewrite rewriter= new OldASTRewrite(root);
-			List list= null;
-			int pos= getIndex(root, input, list);
-							
+			ASTRewrite rewriter= ASTRewrite.create(root.getAST());
+			
 			ITypedElement[] results= d.getSelection();
 			for (int i= 0; i < results.length; i++) {
 				
@@ -153,33 +152,42 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 				ASTNode newNode= createASTNode(rewriter, results[i], buffer.getLineDelimiter());
 				if (newNode == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
-					return;					
+					return;	
 				}
 				
 				// now determine where to put the new node
 				if (newNode instanceof PackageDeclaration) {
-				    root.setPackage((PackageDeclaration) newNode);
+				    rewriter.set(root, CompilationUnit.PACKAGE_PROPERTY, newNode, null);
+				    
 				} else if (newNode instanceof ImportDeclaration) {
-				    root.imports().add(newNode);
-				} else {
-				    if (list == null) {
-						list= getContainerList(parent, root);
-						if (list == null) {
-							MessageDialog.openError(shell, errorTitle, errorMessage);
-							return;					
+					ListRewrite lw= rewriter.getListRewrite(root, CompilationUnit.IMPORTS_PROPERTY);
+					lw.insertFirst(newNode, null);
+					
+				} else {	// class, interface, enum, annotation, method, field
+					
+					if (parent instanceof ICompilationUnit) {	// top level
+						ListRewrite lw= rewriter.getListRewrite(root, CompilationUnit.TYPES_PROPERTY);
+						int index= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, root.types());
+						lw.insertAt(newNode, index, null);
+						
+					} else if (parent instanceof IType) {
+						ASTNode declaration= getBodyContainer(root, (IType)parent);
+						if (declaration instanceof TypeDeclaration || declaration instanceof AnnotationTypeDeclaration) {
+							List container= ASTNodes.getBodyDeclarations(declaration);
+							int index= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, container);
+							ListRewrite lw= rewriter.getListRewrite(declaration, ASTNodes.getBodyDeclarationsProperty(declaration));
+							lw.insertAt(newNode, index, null);
+						} else if (declaration instanceof EnumDeclaration) {
+							List container= ((EnumDeclaration)declaration).enumConstants();
+							int index= ASTNodes.getInsertionIndex((FieldDeclaration)newNode, container);
+							ListRewrite lw= rewriter.getListRewrite(declaration, EnumDeclaration.ENUM_CONSTANTS_PROPERTY);
+							lw.insertAt(newNode, index, null);
 						}
-				    }
-					if (pos < 0 || pos >= list.size()) {
-						if (newNode instanceof BodyDeclaration) {
-							pos= ASTNodes.getInsertionIndex((BodyDeclaration)newNode, list);
-							list.add(pos, newNode);
-						} else
-							list.add(newNode);
-					} else
-						list.add(pos+1, newNode);
+					} else {
+						System.err.println("JavaAddElementFromHistoryImpl1: unkown container " + parent);
+					}
+					
 				}
-				
-				rewriter.markAsInserted(newNode);
 			}
 			
 			applyChanges(rewriter, buffer, shell, inEditor);
@@ -208,7 +216,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 	 * @return a ASTNode or null
 	 * @throws CoreException
 	 */
-	private ASTNode createASTNode(OldASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
+	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
 		if (element instanceof IStreamContentAccessor) {
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
 			if (content != null) {
@@ -220,33 +228,6 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 				}
 			}
 		}
-		return null;
-	}
-	
-	/**
-	 * Finds the corresponding ASTNode for the given container and returns 
-	 * its list of children. This list can be used to add a new child nodes to the container.
-	 * @param container the container for which to return the children list
-	 * @param root the AST
-	 * @return list of children or null
-	 * @throws JavaModelException
-	 */
-	private List getContainerList(IParent container, CompilationUnit root) throws JavaModelException {
-		
-		if (container instanceof ICompilationUnit)
-			return root.types();
-			
-		if (container instanceof IType) {
-			ISourceRange sourceRange= ((IType)container).getNameRange();
-			ASTNode n= NodeFinder.perform(root, sourceRange);
-			if (n != null) {
-				BodyDeclaration parentNode= (BodyDeclaration)ASTNodes.getParent(n, BodyDeclaration.class);
-				if (parentNode != null)
-					return ((TypeDeclaration)parentNode).bodyDeclarations();
-			}
-			return null;
-		}
-			
 		return null;
 	}
 	
@@ -266,6 +247,12 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			case JavaNode.CLASS:
 			case JavaNode.INTERFACE:
 				return ASTNode.TYPE_DECLARATION;
+				
+			case JavaNode.ENUM:
+				return ASTNode.ENUM_DECLARATION;
+				
+			case JavaNode.ANNOTATION:
+				return ASTNode.ANNOTATION_TYPE_DECLARATION;
 				
 			case JavaNode.CONSTRUCTOR:
 			case JavaNode.METHOD:
@@ -288,28 +275,6 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		return -1;
 	}
 
-	/**
-	 * Returns the index of the given node within its container.
-	 * If node is null -1 is returned.
-	 * @param node
-	 * @return the index of the given node or -1 if the node couldn't be found
-	 */
-	private int getIndex(CompilationUnit root, IMember node, List container) throws JavaModelException {
-		
-		if (node != null) {
-			ISourceRange sourceRange= node.getNameRange();
-			ASTNode n= NodeFinder.perform(root, sourceRange);
-			if (n != null) {
-				MethodDeclaration parentNode= (MethodDeclaration)ASTNodes.getParent(n, MethodDeclaration.class);
-				if (parentNode != null)
-					return container.indexOf(parentNode);
-			}
-		}
-		
-		// NeedWork: not yet implemented
-		return -1;
-	}
-		
 	protected boolean isEnabled(ISelection selection) {
 		
 		if (selection.isEmpty()) {

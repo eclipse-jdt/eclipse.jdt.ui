@@ -18,26 +18,26 @@ import org.eclipse.compare.HistoryItem;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
-
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 
 
@@ -115,13 +115,35 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 				}
 				
 				CompilationUnit root= parsePartialCompilationUnit(input.getCompilationUnit());
-				BodyDeclaration node= (BodyDeclaration)ASTNodes.getParent(NodeFinder.perform(root, input.getNameRange()), BodyDeclaration.class);
+				
+				
+				final ISourceRange nameRange= input.getNameRange();
+				// workaround for bug in getNameRange(): for AnnotationMembers length is negative
+				ISourceRange myRange= new ISourceRange() {
+					public int getLength() {
+						int l= nameRange.getLength();
+						if (l < 0)
+							l= 1;
+						return l;
+					}
+					public int getOffset() {
+						return nameRange.getOffset();
+					}					
+				};
+				ASTNode node2= NodeFinder.perform(root, myRange);
+				ASTNode node= ASTNodes.getParent(node2, BodyDeclaration.class);
+				if (node == null)
+					node= ASTNodes.getParent(node2, AnnotationTypeDeclaration.class);
+				if (node == null)
+					node= ASTNodes.getParent(node2, EnumDeclaration.class);
+				
+				//ASTNode node= getBodyContainer(root, input);
 				if (node == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
 				}
 				
-				OldASTRewrite rewriter= new OldASTRewrite(root);
+				ASTRewrite rewriter= ASTRewrite.create(root.getAST());
 				rewriter.replace(node, rewriter.createStringPlaceholder(newContent, node.getNodeType()), null);
 				
 				if (inEditor) {

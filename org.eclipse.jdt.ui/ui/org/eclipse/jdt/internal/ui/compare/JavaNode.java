@@ -34,10 +34,11 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 	public static final int INTERFACE= 4;
 	public static final int CLASS= 5;
 	public static final int ENUM= 6;
-	public static final int FIELD= 7;
-	public static final int INIT= 8;
-	public static final int CONSTRUCTOR= 9;
-	public static final int METHOD= 10;
+	public static final int ANNOTATION= 7;
+	public static final int FIELD= 8;
+	public static final int INIT= 9;
+	public static final int CONSTRUCTOR= 10;
+	public static final int METHOD= 11;
 
 	private int fInitializerCount= 1;
 	private boolean fIsEditable;
@@ -172,6 +173,9 @@ class JavaNode extends DocumentRangeNode implements ITypedElement {
 			break;					
 		case ENUM:
 			id= JavaCompareUtilities.getEnumImageDescriptor();
+			break;
+		case ANNOTATION:
+			id= JavaCompareUtilities.getAnnotationImageDescriptor();
 			break;
 		}
 		return JavaPlugin.getImageDescriptorRegistry().get(id);

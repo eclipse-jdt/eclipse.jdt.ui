@@ -15,6 +15,8 @@ import java.util.Stack;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
@@ -27,6 +29,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+
 
 class JavaParseTreeBuilder extends ASTVisitor {
 
@@ -79,6 +82,24 @@ class JavaParseTreeBuilder extends ASTVisitor {
     public void endVisit(EnumDeclaration node) {
         pop();
     }
+    
+	public boolean visit(AnnotationTypeDeclaration node) {
+		push(JavaNode.ANNOTATION, node.getName().toString(), node.getStartPosition(), node.getLength());
+        return true;
+	}
+	
+	public void endVisit(AnnotationTypeDeclaration node) {
+		pop();
+	}
+
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+        push(JavaNode.METHOD, getSignature(node), node.getStartPosition(), node.getLength());
+        return true;
+	}
+	
+	public void endVisit(AnnotationTypeMemberDeclaration node) {
+		pop();
+	}
 
     public boolean visit(MethodDeclaration node) {
         String signature= getSignature(node);
@@ -133,7 +154,7 @@ class JavaParseTreeBuilder extends ASTVisitor {
     public void endVisit(EnumConstantDeclaration node) {
         pop();
     }
-
+    
     // private stuff
 
     /**
@@ -201,6 +222,14 @@ class JavaParseTreeBuilder extends ASTVisitor {
                 first= false;
             }
         }
+        buffer.append(')');
+        return buffer.toString();
+    }
+
+    private String getSignature(AnnotationTypeMemberDeclaration node) {
+        StringBuffer buffer= new StringBuffer();
+        buffer.append(node.getName().toString());
+        buffer.append('(');
         buffer.append(')');
         return buffer.toString();
     }

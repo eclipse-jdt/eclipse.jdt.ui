@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.compare.HistoryItem;
 import org.eclipse.compare.ITypedElement;
@@ -28,11 +29,16 @@ import org.eclipse.core.resources.IFileState;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -40,6 +46,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -53,7 +63,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import org.eclipse.jdt.internal.corext.dom.OldASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -140,6 +150,17 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return input;
 	}
 	
+	final ASTNode getBodyContainer(CompilationUnit root, IMember parent) throws JavaModelException {
+		ISourceRange sourceRange= parent.getNameRange();
+		ASTNode parentNode= NodeFinder.perform(root, sourceRange);
+		do {
+			if (parentNode instanceof TypeDeclaration || parentNode instanceof EnumDeclaration || parentNode instanceof AnnotationTypeDeclaration)
+				return parentNode;
+			parentNode= parentNode.getParent();
+		} while (parentNode != null);
+		return null;
+	}
+	
 	/**
 	 * Returns true if the given file is open in an editor.
 	 */
@@ -192,17 +213,32 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		return true;
 	}
 	
-	void applyChanges(OldASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor) throws CoreException, InvocationTargetException, InterruptedException {
+	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor)
+							throws CoreException, InvocationTargetException, InterruptedException {
 
+		final IDocument document= buffer.getDocument();
+		
 		MultiTextEdit edit= new MultiTextEdit();
-		rewriter.rewriteNode(buffer, edit);
-										
-		IProgressMonitor nullProgressMonitor= new NullProgressMonitor();
-				
-		TextBufferEditor editor= new TextBufferEditor(buffer);
-		editor.add(edit);
-		editor.performEdits(nullProgressMonitor);
-				
+		try {
+			TextEdit res= rewriter.rewriteAST(document, null);
+			edit.addChildren(res.removeChildren());
+		} catch (IllegalArgumentException e) {
+			JavaPlugin.log(e);
+		}
+			
+		DocumentRewriteSession session= null;
+		try {
+			if (document instanceof IDocumentExtension4)
+				session= ((IDocumentExtension4)document).startRewriteSession(DocumentRewriteSessionType.UNRESTRICTED);
+			
+			TextBufferEditor editor= new TextBufferEditor(buffer);
+			editor.add(edit);
+			editor.performEdits(new NullProgressMonitor());
+		} finally {
+			if (session != null)
+				((IDocumentExtension4)document).stopRewriteSession(session);
+		}
+		
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
@@ -213,10 +249,9 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			}
 		};
 
-
 		if (inEditor) {
 			// we don't show progress
-			r.run(nullProgressMonitor);
+			r.run(new NullProgressMonitor());
 		} else {
 			PlatformUI.getWorkbench().getProgressService().run(true, false, r);
 		}

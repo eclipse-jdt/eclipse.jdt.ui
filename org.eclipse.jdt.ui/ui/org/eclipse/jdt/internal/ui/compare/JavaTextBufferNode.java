@@ -100,6 +100,12 @@ class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor
 			case JavaNode.INTERFACE:
 				return ASTNode.TYPE_DECLARATION;
 				
+			case JavaNode.ENUM:
+				return ASTNode.ENUM_DECLARATION;
+				
+			case JavaNode.ANNOTATION:
+				return ASTNode.ANNOTATION_TYPE_DECLARATION;
+				
 			case JavaNode.CONSTRUCTOR:
 			case JavaNode.METHOD:
 				return ASTNode.METHOD_DECLARATION;
@@ -120,5 +126,4 @@ class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor
 		}
 		return -1;
 	}
-
 }
