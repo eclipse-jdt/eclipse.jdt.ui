@@ -16,8 +16,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
@@ -46,6 +44,7 @@ import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
@@ -134,28 +133,24 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	public Control getControl(Composite parent) {
 		PixelConverter converter= new PixelConverter(parent);
-		
 		Composite composite= new Composite(parent, SWT.NONE);
 		
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;		
-		composite.setLayout(layout);
-		
-		Control control= fFoldersList.getListControl(composite);
-		GridData gd= new GridData(GridData.FILL_BOTH);
-		gd.widthHint= converter.convertWidthInCharsToPixels(50);
-		gd.heightHint= converter.convertWidthInCharsToPixels(15);
-		gd.grabExcessHorizontalSpace= true;
-		control.setLayoutData(gd);
-		
-		control= fFoldersList.getButtonBox(composite);
-		gd= new GridData(GridData.VERTICAL_ALIGN_FILL + GridData.HORIZONTAL_ALIGN_FILL);
-		control.setLayoutData(gd);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fFoldersList, fUseFolderOutputs }, true);
+		LayoutUtil.setHorizontalGrabbing(fFoldersList.getTreeControl(null));
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fFoldersList.setButtonsMinWidth(buttonBarWidth);
-		
-		fUseFolderOutputs.doFillIntoGrid(composite, 2);
+//		
+//		
+//		
+//		GridLayout layout= new GridLayout();
+//		layout.numColumns= 2;		
+//		composite.setLayout(layout);
+//
+//		fFoldersList.doFillIntoGrid(composite, 3);
+//		LayoutUtil.setHorizontalSpan(fFoldersList.getLabelControl(null), 2);
+//		
+//		fUseFolderOutputs.doFillIntoGrid(composite, 2);
 			
 		fSWTControl= composite;
 		

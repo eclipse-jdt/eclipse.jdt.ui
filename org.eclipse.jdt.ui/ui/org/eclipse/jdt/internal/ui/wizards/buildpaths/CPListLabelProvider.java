@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.io.File;
 import java.net.URL;
 
 import org.eclipse.core.resources.IFile;
@@ -114,7 +113,7 @@ class CPListLabelProvider extends LabelProvider {
 			if (patterns != null && patterns.length > 0) {
 				for (int i= 0; i < patterns.length; i++) {
 					if (i > 0) {
-						buf.append(File.pathSeparatorChar);
+						buf.append("; ");
 					}
 					buf.append(patterns[i].toString());
 				}

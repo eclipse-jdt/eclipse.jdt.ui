@@ -76,10 +76,9 @@ public class ExclusionPatternDialog extends StatusDialog {
 
 		fExclusionPatternList= new ListDialogField(adapter, buttonLabels, new ExclusionPatternLabelProvider());
 		fExclusionPatternList.setDialogFieldListener(adapter);
-		fExclusionPatternList.setLabelText(label); //$NON-NLS-1$
-		fExclusionPatternList.setRemoveButtonIndex(IDX_REMOVE); //$NON-NLS-1$
-
-		fExclusionPatternList.enableButton(IDX_EDIT, false); // edit
+		fExclusionPatternList.setLabelText(label);
+		fExclusionPatternList.setRemoveButtonIndex(IDX_REMOVE);
+		fExclusionPatternList.enableButton(IDX_EDIT, false);
 	
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		
@@ -91,9 +90,7 @@ public class ExclusionPatternDialog extends StatusDialog {
 	
 	protected Control createDialogArea(Composite parent) {
 		Composite composite= (Composite)super.createDialogArea(parent);
-		
-		int widthHint= convertWidthInCharsToPixels(60);
-		
+
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
@@ -129,19 +126,22 @@ public class ExclusionPatternDialog extends StatusDialog {
 	}
 	
 	private void editEntry() {
+		
 		List selElements= fExclusionPatternList.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;
 		}
+		List existing= fExclusionPatternList.getElements();
 		IPath entry= (IPath) selElements.get(0);
-		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), entry, fCurrElement);
+		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), entry, existing, fCurrElement);
 		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
 			fExclusionPatternList.replaceElement(entry, dialog.getExclusionPattern());
 		}
 	}
 	
 	private void addEntry() {
-		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), null, fCurrElement);
+		List existing= fExclusionPatternList.getElements();
+		ExclusionPatternEntryDialog dialog= new ExclusionPatternEntryDialog(getShell(), null, existing, fCurrElement);
 		if (dialog.open() == ExclusionPatternEntryDialog.OK) {
 			fExclusionPatternList.addElement(dialog.getExclusionPattern());
 		}

@@ -110,7 +110,7 @@ public class ClasspathContainerWizard extends Wizard {
 				containerPage= pageDesc.createPage();
 			} catch (CoreException e) {
 				handlePageCreationFailed(e);
-				return null;
+				containerPage= null;
 			}
 		}
 

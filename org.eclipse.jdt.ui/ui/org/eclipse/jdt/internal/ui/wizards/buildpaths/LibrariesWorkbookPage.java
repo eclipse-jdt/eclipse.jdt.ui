@@ -149,8 +149,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		Composite composite= new Composite(parent, SWT.NONE);
 			
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true, SWT.DEFAULT, SWT.DEFAULT);
-		LayoutUtil.setHorizontalGrabbing(fLibrariesList.getListControl(null));
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fLibrariesList }, true);
+		LayoutUtil.setHorizontalGrabbing(fLibrariesList.getTreeControl(null));
 		
 		int buttonBarWidth= converter.convertWidthInCharsToPixels(24);
 		fLibrariesList.setButtonsMinWidth(buttonBarWidth);
@@ -344,6 +344,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
+			CPListElementAttribute attrib= (CPListElementAttribute) elem;
+			if (attrib.getKey().equals(CPListElement.JAVADOC)) {
+				return true;
+			}
 			return ((CPListElementAttribute) elem).getParent().getParentContainer() == null;
 		}
 		return false;

@@ -2,6 +2,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import org.eclipse.core.resources.IContainer;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -19,6 +23,8 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.NewFolderDialog;
 
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+
 /**
   */
 public class FolderSelectionDialog extends ElementTreeSelectionDialog implements ISelectionChangedListener {
@@ -27,27 +33,34 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 	private Button fNewFolderButton;
 	private IContainer fSelectedContainer;
 
-	/**
-	 * Constructor for FolderSelectionDialog.
-	 * @param parent
-	 * @param labelProvider
-	 * @param contentProvider
-	 */
 	public FolderSelectionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider) {
 		super(parent, labelProvider, contentProvider);
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
+	 * @see org.eclipse.jface.dialogs.Dialog#createDialogArea(org.eclipse.swt.widgets.Composite)
 	 */
-	protected void createButtonsForButtonBar(Composite parent) {
-		fNewFolderButton= createButton(parent, NEW_ID, "New Folder...", false);	
-		super.createButtonsForButtonBar(parent);
+	protected Control createDialogArea(Composite parent) {
+		Composite result= (Composite)super.createDialogArea(parent);
+		
+		getTreeViewer().addSelectionChangedListener(this);
+		
+		Button button = new Button(result, SWT.PUSH);
+		button.setText(NewWizardMessages.getString("FolderSelectionDialog.button"));
+		button.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				newFolderButtonPressed();
+			}
+		});
+		button.setFont(parent.getFont());
+		GridData data= new GridData();
+		data.heightHint = convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
+		button.setLayoutData(data);
+		fNewFolderButton= button;
+		
+		return result;
 	}
-	
-	/**
-	 * Method updateNewFolderButtonState.
-	 */
+
 	private void updateNewFolderButtonState() {
 		IStructuredSelection selection= (IStructuredSelection) getTreeViewer().getSelection();
 		fSelectedContainer= null;
@@ -60,31 +73,15 @@ public class FolderSelectionDialog extends ElementTreeSelectionDialog implements
 		fNewFolderButton.setEnabled(fSelectedContainer != null);
 	}	
 	
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.dialogs.Dialog#buttonPressed(int)
-	 */
-	protected void buttonPressed(int buttonId) {
-		if (buttonId == NEW_ID && fSelectedContainer != null) {
-			NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
-			if (dialog.open() == NewFolderDialog.OK) {
-				TreeViewer treeViewer= getTreeViewer();
-				treeViewer.refresh(fSelectedContainer);
-				Object createdFolder= dialog.getResult()[0];
-				treeViewer.reveal(createdFolder);
-				treeViewer.setSelection(new StructuredSelection(createdFolder));
-			}
+	protected void newFolderButtonPressed() {
+		NewFolderDialog dialog= new NewFolderDialog(getShell(), fSelectedContainer);
+		if (dialog.open() == NewFolderDialog.OK) {
+			TreeViewer treeViewer= getTreeViewer();
+			treeViewer.refresh(fSelectedContainer);
+			Object createdFolder= dialog.getResult()[0];
+			treeViewer.reveal(createdFolder);
+			treeViewer.setSelection(new StructuredSelection(createdFolder));
 		}
-		super.buttonPressed(buttonId);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.window.Window#createContents(org.eclipse.swt.widgets.Composite)
-	 */
-	protected Control createContents(Composite parent) {
-		Control control= super.createContents(parent);
-		getTreeViewer().addSelectionChangedListener(this);
-		return control;
 	}
 	
 	/* (non-Javadoc)
