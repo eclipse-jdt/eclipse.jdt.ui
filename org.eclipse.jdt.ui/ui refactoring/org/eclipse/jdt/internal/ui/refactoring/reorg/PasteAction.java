@@ -117,17 +117,32 @@ public class PasteAction extends SelectionDispatchAction{
 	}
 
 	private IResource[] getClipboardResources(TransferData[] availableDataTypes) {
-		if (isAvailable(ResourceTransfer.getInstance(), availableDataTypes))
-			return (IResource[])fClipboard.getContents(ResourceTransfer.getInstance());
+		Transfer transfer= ResourceTransfer.getInstance();
+		if (isAvailable(transfer, availableDataTypes)) {
+			return (IResource[])getContents(fClipboard, transfer, getShell());
+		}
 		return null;
 	}
 
 	private IJavaElement[] getClipboardJavaElements(TransferData[] availableDataTypes) {
-		if (isAvailable(JavaElementTransfer.getInstance(), availableDataTypes))
-			return (IJavaElement[])fClipboard.getContents(JavaElementTransfer.getInstance());
+		Transfer transfer= JavaElementTransfer.getInstance();
+		if (isAvailable(transfer, availableDataTypes)) {
+			return (IJavaElement[])getContents(fClipboard, transfer, getShell());
+		}
 		return null;
 	}
-
+	
+	private static Object getContents(final Clipboard clipboard, final Transfer transfer, Shell shell) {
+		//see bug 33028 for explanation why we need this
+		final Object[] result= new Object[1];
+		shell.getDisplay().syncExec(new Runnable() {
+			public void run() {
+				result[0]= clipboard.getContents(transfer);
+			}
+		});
+		return result[0];
+	}
+	
 	private static boolean isAvailable(Transfer transfer, TransferData[] availableDataTypes) {
 		for (int i= 0; i < availableDataTypes.length; i++) {
 			if (transfer.isSupportedType(availableDataTypes[i])) return true;
@@ -279,8 +294,10 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 		
 		private String[] getClipboardFiles(TransferData[] availableDataTypes) {
-			if (isAvailable(FileTransfer.getInstance(), availableDataTypes))
-				return (String[])fClipboard.getContents(FileTransfer.getInstance());
+			Transfer transfer= FileTransfer.getInstance();
+			if (isAvailable(transfer, availableDataTypes)) {
+				return (String[])getContents(fClipboard, transfer, getShell());
+			}
 			return null;
 		}
 		private Object getCommonParent(IJavaElement[] javaElements, IResource[] resources) {
