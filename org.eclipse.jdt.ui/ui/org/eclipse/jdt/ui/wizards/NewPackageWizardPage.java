@@ -116,12 +116,28 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 		createContainerControls(composite, nColumns);
 		createPackageControls(composite, nColumns);
 		
-		fPackageDialogField.postSetFocusOnDialogField(parent.getDisplay());
-		
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGE_WIZARD_PAGE);
 	}
 	
+	/*
+	 * @see WizardPage#becomesVisible
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			setFocus();
+		}
+		super.setVisible(visible);
+	}
+	
+	/**
+	 * Sets the focus on the package name.
+	 */		
+	protected void setFocus() {
+		fPackageDialogField.setFocus();
+	}
+	
+
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
 		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());

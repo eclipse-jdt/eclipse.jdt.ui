@@ -145,9 +145,19 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		
 		setControl(composite);
 			
-		setFocus();
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_CLASS_WIZARD_PAGE);	
 	}
+	
+	/*
+	 * @see WizardPage#becomesVisible
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			setFocus();
+		}
+		super.setVisible(visible);
+	}
+		
 	
 	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		Control labelControl= fMethodStubsButtons.getLabelControl(composite);

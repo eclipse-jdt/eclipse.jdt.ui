@@ -180,7 +180,6 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				
 		fProjectField.doFillIntoGrid(composite, 3);	
 		fRootDialogField.doFillIntoGrid(composite, 3);
-		fRootDialogField.setFocus();
 		
 		int maxFieldWidth= convertWidthInCharsToPixels(40);
 		LayoutUtil.setWidthHint(fProjectField.getTextControl(null), maxFieldWidth);
@@ -189,6 +188,16 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 			
 		setControl(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);		
+	}
+	
+	/*
+	 * @see IDialogPage#setVisible(boolean)
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			fRootDialogField.setFocus();
+		}
+		super.setVisible(visible);
 	}	
 		
 	// -------- ContainerFieldAdapter --------

@@ -104,8 +104,17 @@ public class NewInterfaceWizardPage extends NewTypeWizardPage {
 						
 		setControl(composite);
 		
-		setFocus();
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.NEW_INTERFACE_WIZARD_PAGE);		
 	}
+
+	/*
+	 * @see WizardPage#becomesVisible
+	 */
+	public void setVisible(boolean visible) {
+		if (visible) {
+			setFocus();
+		}
+		super.setVisible(visible);
+	}	
 	
 }
