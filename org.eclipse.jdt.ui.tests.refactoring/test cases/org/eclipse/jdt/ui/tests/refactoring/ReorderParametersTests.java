@@ -8,7 +8,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 
 public class ReorderParametersTests extends RefactoringTest {
 	
@@ -58,7 +58,7 @@ public class ReorderParametersTests extends RefactoringTest {
 		//DebugUtils.dump("cu" + cu.getSource());
 		IType classA= getType(cu, "A");
 		//DebugUtils.dump("classA" + classA);
-		ModifyParametersrRefactoring ref= new ModifyParametersrRefactoring(classA.getMethod("m", signature));
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
 		ref.setNewParameterOrder(newOrder);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -76,7 +76,7 @@ public class ReorderParametersTests extends RefactoringTest {
 	
 	private void helper2(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ModifyParametersrRefactoring ref= new ModifyParametersrRefactoring(classA.getMethod("m", signature));
+		ModifyParametersRefactoring ref= new ModifyParametersRefactoring(classA.getMethod("m", signature));
 		ref.setNewParameterOrder(newOrder);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		

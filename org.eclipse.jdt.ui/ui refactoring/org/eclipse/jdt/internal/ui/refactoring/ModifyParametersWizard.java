@@ -1,10 +1,10 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 
 public class ModifyParametersWizard extends RefactoringWizard {
 
-	public ModifyParametersWizard(ModifyParametersrRefactoring ref, String pageTitle, String errorPageContextHelpId) {
+	public ModifyParametersWizard(ModifyParametersRefactoring ref, String pageTitle, String errorPageContextHelpId) {
 		super(ref, pageTitle, errorPageContextHelpId);
 	}
 

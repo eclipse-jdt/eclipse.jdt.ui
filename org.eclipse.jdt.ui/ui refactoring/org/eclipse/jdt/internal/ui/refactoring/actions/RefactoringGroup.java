@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
@@ -71,16 +71,16 @@ public class RefactoringGroup extends ContextMenuGroup {
 		String label= "M&odify Parameters...";
 		return new OpenRefactoringWizardAction(label, selectionProvider, IMethod.class) {
 			protected Refactoring createNewRefactoringInstance(Object obj){
-				return new ModifyParametersrRefactoring((IMethod)obj);
+				return new ModifyParametersRefactoring((IMethod)obj);
 			}
 			boolean canActivateRefactoring(Refactoring refactoring)  throws JavaModelException{
-				return ((ModifyParametersrRefactoring)refactoring).checkPreactivation().isOK();
+				return ((ModifyParametersRefactoring)refactoring).checkPreactivation().isOK();
 			}
 			protected RefactoringWizard createWizard(Refactoring ref){
 				String title= "Modify Method Parameters";
 				//FIX ME: wrong
 				String helpId= IJavaHelpContextIds.RENAME_PARAMS_ERROR_WIZARD_PAGE;
-				return new ModifyParametersWizard((ModifyParametersrRefactoring)ref, title, helpId);
+				return new ModifyParametersWizard((ModifyParametersRefactoring)ref, title, helpId);
 			}
 		};
 	}

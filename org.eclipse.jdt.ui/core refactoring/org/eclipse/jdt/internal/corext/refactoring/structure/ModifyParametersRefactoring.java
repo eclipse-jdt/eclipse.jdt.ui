@@ -17,18 +17,18 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactori
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
-public class ModifyParametersrRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
+public class ModifyParametersRefactoring extends Refactoring implements IMultiRenameRefactoring, IReferenceUpdatingRefactoring{
 	
 	private RenameParametersRefactoring fRenameParameters;
 	private ReorderParametersRefactoring fReorderParameters;
 
-	public ModifyParametersrRefactoring(IMethod method){
+	public ModifyParametersRefactoring(IMethod method){
 		fRenameParameters= new RenameParametersRefactoring(method);
 		fReorderParameters= new ReorderParametersRefactoring(method);
 	}
 
 	public String getName() {
-		return "Restructure Parameters";
+		return "Modify Parameters";
 	}
 	
 	public String[] getNewParameterOrder() {

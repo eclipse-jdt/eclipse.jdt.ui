@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersrRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ModifyParametersRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -309,8 +309,8 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 		return array;
 	}
 	
-	private ModifyParametersrRefactoring getModifyParametersRefactoring(){
-		return	(ModifyParametersrRefactoring)getRefactoring();
+	private ModifyParametersRefactoring getModifyParametersRefactoring(){
+		return	(ModifyParametersRefactoring)getRefactoring();
 	}
 	
 	private Map getNewParameterNames(){
@@ -408,9 +408,9 @@ public class ModifyParametersInputPage extends UserInputWizardPage {
 	
 	private static class ParameterInfoListSorter extends ViewerSorter{
 		
-		private ModifyParametersrRefactoring fRefactoring;
+		private ModifyParametersRefactoring fRefactoring;
 		
-		ParameterInfoListSorter(ModifyParametersrRefactoring ref){
+		ParameterInfoListSorter(ModifyParametersRefactoring ref){
 			fRefactoring= ref;
 		}
 		
