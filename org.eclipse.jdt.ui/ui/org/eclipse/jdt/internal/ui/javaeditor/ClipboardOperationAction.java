@@ -34,7 +34,6 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextOperationTarget;
@@ -334,21 +333,16 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	}
 	
 	private void setClipboardContents(Clipboard clipboard, Object[] datas, Transfer[] transfers) {
-		final int MAX_REPEAT_COUNT= 10;
-		int repeatCount= 0;
-		do {
-			try {
-				clipboard.setContents(datas, transfers);
-				return; // success
-			} catch (SWTError e) {
-				if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD || repeatCount >= MAX_REPEAT_COUNT) {
-					throw e;
-				}
+		try {
+			clipboard.setContents(datas, transfers);
+			return; // success
+		} catch (SWTError e) {
+			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) {
+				throw e;
 			}
-			repeatCount++;
-		} while (MessageDialog.openQuestion(getShell(), JavaEditorMessages.getString("ClipboardOperationAction.error.title"), JavaEditorMessages.getString("ClipboardOperationAction.error.message"))); //$NON-NLS-1$ //$NON-NLS-2$
+			// silently fail.  see e.g. bug 65975
+		}
 	}
-
 	
 	
 	private boolean isNonTrivialSelection(ITextSelection selection) {
