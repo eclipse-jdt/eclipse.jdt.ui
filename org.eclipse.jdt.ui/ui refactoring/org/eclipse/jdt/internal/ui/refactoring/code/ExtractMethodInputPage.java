@@ -100,10 +100,15 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		layouter.perform(label);
 		
 		label= new Label(result, SWT.NONE);
+		GridData gd= new GridData();
+		gd.verticalAlignment= GridData.BEGINNING;
+		label.setLayoutData(gd);
 		label.setText(RefactoringMessages.getString("ExtractMethodInputPage.signature_preview")); //$NON-NLS-1$
 		
-		fPreview= new Label(result, SWT.NONE);
-		fPreview.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fPreview= new Label(result, SWT.WRAP);
+		gd= new GridData(GridData.FILL_BOTH);
+		gd.widthHint= convertWidthInCharsToPixels(50);
+		fPreview.setLayoutData(gd);
 		
 		layouter.perform(label, fPreview, 1);
 		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.EXTRACT_METHOD_WIZARD_PAGE);		
