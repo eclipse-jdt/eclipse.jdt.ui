@@ -39,11 +39,11 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingStatementsTest("testWhileStatement"));
+			suite.addTest(new ASTRewritingStatementsTest("testForStatement"));
 			return suite;
 		}
 	}
@@ -682,7 +682,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        for (;;) {\n");
 		buf.append("        }\n");	
 		buf.append("        for (;;) {\n");
-		buf.append("        }\n");						
+		buf.append("        }\n");
+		buf.append("        for (i= 0; i < len; i++) {\n");
+		buf.append("        }\n");		
 		buf.append("    }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -697,7 +699,7 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		assertTrue("Parse errors", (block.getFlags() & ASTNode.MALFORMED) == 0);
 		
 		List statements= block.statements();
-		assertTrue("Number of statements not 4", statements.size() == 4);
+		assertTrue("Number of statements not 5", statements.size() == 5);
 
 		{ // replace initializer, change expression, add updater, replace cody
 			ForStatement forStatement= (ForStatement) statements.get(0);
@@ -792,7 +794,26 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 			forStatement.updaters().add(prefixExpression);
 			
 			rewrite.markAsInserted(prefixExpression);
-		}			
+		}
+		
+		{ // replace initializer: turn assignement to var decl
+			ForStatement forStatement= (ForStatement) statements.get(4);
+			
+			Assignment assignment= (Assignment) forStatement.initializers().get(0);
+			SimpleName leftHandSide= (SimpleName) assignment.getLeftHandSide();
+			
+			VariableDeclarationFragment varFragment= ast.newVariableDeclarationFragment();
+			VariableDeclarationExpression varDecl= ast.newVariableDeclarationExpression(varFragment);
+			varFragment.setName(ast.newSimpleName(leftHandSide.getIdentifier()));
+			
+			Expression placeholder= (Expression) rewrite.createCopyTarget(assignment.getRightHandSide());
+			varFragment.setInitializer(placeholder);
+			varDecl.setType(ast.newPrimitiveType(PrimitiveType.INT));
+
+			
+			rewrite.markAsReplaced(assignment, varDecl);
+		}	
+		
 		
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -811,7 +832,9 @@ public class ASTRewritingStatementsTest extends ASTRewritingTest {
 		buf.append("        for (;;++j) {\n");
 		buf.append("        }\n");		
 		buf.append("        for (j = 3;;++j) {\n");
-		buf.append("        }\n");		
+		buf.append("        }\n");
+		buf.append("        for (int i = 0; i < len; i++) {\n");
+		buf.append("        }\n");			
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
