@@ -4,6 +4,7 @@ public class TestLocalReferenceUnused {
 	public void main() {
 		int i= 10;
 		/*]*/foo(i);/*[*/
+		int x= 7;
 	}
 	
 	public void foo(int x) {

@@ -291,17 +291,19 @@ public abstract class FlowInfo {
 	}
 	
 	/**
-	 * Checks whether the given local variable binding has the given access mode
+	 * Checks whether the given local variable binding has the given access
+	 * mode.
 	 * 
 	 * @return <code>true</code> if the binding has the given access mode. 
 	 * 	<code>False</code> otherwise
 	 */
 	public boolean hasAccessMode(FlowContext context, IVariableBinding local, int mode) {
-		if (fAccessModes == null && (mode & UNUSED) != 0)
+		boolean unusedMode= (mode & UNUSED) != 0;
+		if (fAccessModes == null && unusedMode)
 			return true;
 		int index= context.getIndexFromLocal(local);
 		if (index == -1)
-			return false;
+			return unusedMode;
 		return (fAccessModes[index] & mode) != 0;
 	}
 	
@@ -313,7 +315,7 @@ public abstract class FlowInfo {
 			return UNUSED;
 		int index= context.getIndexFromLocal(local);
 		if (index == -1)
-			return UNKNOWN;
+			return UNUSED;
 		return fAccessModes[index];
 	}
 	

@@ -207,7 +207,7 @@ public class CallInliner {
 		for (int i= 0; i < arguments.size(); i++) {
 			Expression expression= (Expression)arguments.get(i);
 			ParameterData parameter= fSourceProvider.getParameterData(i);
-			if ((ASTNodes.isLiteral(expression) && parameter.isReadOnly()) || canInline(expression)) {
+			if (canInline(expression, parameter)) {
 				realArguments[i]= getContent(expression);
 			} else {
 				String name= fInvocationScope.createName(parameter.getName());
@@ -345,6 +345,12 @@ public class CallInliner {
 		return decl;
 	}
 
+	private boolean canInline(Expression actualParameter, ParameterData formalParameter) {
+		if (canInline(actualParameter))
+			return true;
+		return formalParameter.isReadOnly() && ASTNodes.isLiteral(actualParameter);
+	}
+	
 	private boolean canInline(Expression expression) {
 		if (expression instanceof Name) {
 			IBinding binding= ((Name)expression).resolveBinding();
