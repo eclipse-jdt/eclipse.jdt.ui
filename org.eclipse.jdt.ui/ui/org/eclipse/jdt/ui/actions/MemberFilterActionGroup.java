@@ -249,7 +249,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	public void contributeToViewMenu(IMenuManager menu) {
 		if (!fInViewMenu)
 			return;
-		final String filters= "filters";
+		final String filters= "filters"; //$NON-NLS-1$
 		if (menu.find(filters) != null) {
 			menu.prependToGroup(filters, fFilterActions[0]); // fields
 			menu.prependToGroup(filters, fFilterActions[1]); // static
