@@ -10,6 +10,8 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
@@ -36,6 +38,9 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 
 	//void perform(ISourceReference[] elements) throws CoreException {
 	protected void perform() throws CoreException {
+		if (!confirmDelete())
+			return;
+			
 		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess()); //IFile -> List of ISourceReference (elements from that file)
 		
 		List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
@@ -153,5 +158,13 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		}
 		return true;
 	}	
+	
+	private boolean confirmDelete() {
+		String title= ReorgMessages.getString("deleteAction.confirm.title"); //$NON-NLS-1$
+		String label= ReorgMessages.getString("deleteAction.confirm.message"); //$NON-NLS-1$
+		Shell parent= JavaPlugin.getActiveWorkbenchShell();
+		return MessageDialog.openQuestion(parent, title, label);
+	}
+	
 }
 
