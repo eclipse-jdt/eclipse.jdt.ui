@@ -139,6 +139,8 @@ public final class ASTProvider {
 		 * @see org.eclipse.ui.IWindowListener#windowClosed(org.eclipse.ui.IWorkbenchWindow)
 		 */
 		public void windowClosed(IWorkbenchWindow window) {
+			if (fActiveEditor != null && fActiveEditor.getSite() != null && window == fActiveEditor.getSite().getWorkbenchWindow()) 
+				activeJavaEditorChanged(null);
 			window.getPartService().removePartListener(this);
 		}
 
