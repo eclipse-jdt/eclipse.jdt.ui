@@ -132,6 +132,9 @@ public class HTML2TextReader extends SubstitutionTextReader {
 
 	private String html2Text(String html) {
 		
+		if (html == null || html.length() == 0)
+			return EMPTY_STRING;
+		
 		String tag= html;
 		if ('/' == tag.charAt(0))
 			tag= tag.substring(1);
@@ -243,7 +246,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 				break;
 			}
 		} while (true);
-		 
+
 		return html2Text(buf.toString());
 	}
 
