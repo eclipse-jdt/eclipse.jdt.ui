@@ -60,10 +60,7 @@ public class CodeTemplateBlock {
 	private class CodeTemplateAdapter implements ITreeListAdapter, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
-		private CodeTemplates fTemplates;
-
 		public CodeTemplateAdapter(CodeTemplates templates) {
-			fTemplates= templates;
 		}		
 
 		public void customButtonPressed(TreeListDialogField field, int index) {
