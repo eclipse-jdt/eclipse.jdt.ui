@@ -172,7 +172,7 @@ public final class NodeInfoStore {
 			case ASTNode.PACKAGE_DECLARATION :
 				return ast.newPackageDeclaration();
 			case ASTNode.PARAMETERIZED_TYPE :
-				return ast.newParameterizedType(ast.newSimpleName("id")); //$NON-NLS-1$
+				return ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName("id"))); //$NON-NLS-1$
 			case ASTNode.PARENTHESIZED_EXPRESSION :
 				return ast.newParenthesizedExpression();
 			case ASTNode.POSTFIX_EXPRESSION :
