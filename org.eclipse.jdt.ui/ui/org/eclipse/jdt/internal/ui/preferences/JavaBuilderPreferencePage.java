@@ -198,7 +198,13 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 		String[] filters= getFilters(text);
 		for (int i= 0; i < filters.length; i++) {
 			String fileName= filters[i].replace('*', 'x');
-			IStatus status= workspace.validateName(fileName, IResource.FILE);
+			int resourceType= IResource.FILE;
+			int lastCharacter= fileName.length() - 1;
+			if (fileName.charAt(lastCharacter) == '/') {
+				fileName= fileName.substring(0, lastCharacter);
+				resourceType= IResource.FOLDER;
+			}
+			IStatus status= workspace.validateName(fileName, resourceType);
 			if (status.matches(IStatus.ERROR)) {
 				String message= JavaUIMessages.getFormattedString("JavaBuilderPreferencePage.filter.invalidsegment.error", status.getMessage()); //$NON-NLS-1$
 				return new StatusInfo(IStatus.ERROR, message);
