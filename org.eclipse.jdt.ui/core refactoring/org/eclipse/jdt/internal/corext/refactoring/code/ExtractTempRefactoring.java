@@ -15,10 +15,14 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.DoStatement;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -125,6 +129,9 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (getSelectedExpression() == null)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
 		
+		if (! isSelectionUsedAsExpression()) //XXX should enable at some point
+			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
+			
 		if (analyzeSelection().getExpressionTypeBinding() == null)
 			return RefactoringStatus.createFatalErrorStatus("An expression must be selected to activate this refactoring.");
 		
@@ -164,6 +171,28 @@ public class ExtractTempRefactoring extends Refactoring {
 		}	
 	}
 
+	private boolean isSelectionUsedAsExpression() throws JavaModelException {		
+		Expression expression= getSelectedExpression();
+		Selection selection= Selection.createFromStartEnd(ASTUtil.getSourceStart(expression), ASTUtil.getSourceEnd(expression));
+		NewSelectionAnalyzer selAnalyzer= new NewSelectionAnalyzer(new ExtendedBuffer(fCu.getBuffer()), selection);
+		fAST.accept(selAnalyzer);
+		AstNode[] parents= selAnalyzer.getParents();
+		for (int i= parents.length - 1 ; i >= 0 ; i--) {
+			if (parents[i] instanceof Expression)
+				return true;
+			if (parents[i] instanceof LocalDeclaration)
+				return true;
+			if ((parents[i] instanceof Statement)){
+				 if (parents[i] instanceof Block)
+				 	continue;
+				  if (parents[i] instanceof TypeDeclaration)
+				 	continue;
+				 return true;
+			}	 
+		}	
+		return false;		
+	}
+	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {		
 		try{
 			pm.beginTask("Preparing preview", 3);	
