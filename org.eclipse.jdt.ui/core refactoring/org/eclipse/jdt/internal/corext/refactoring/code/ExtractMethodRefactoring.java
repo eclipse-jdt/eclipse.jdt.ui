@@ -441,7 +441,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 			TextEditGroup description= new TextEditGroup(RefactoringCoreMessages.getFormattedString("ExtractMethodRefactoring.substitute_with_call", fMethodName)); //$NON-NLS-1$
 			result.addTextEditGroup(description);
 			
-			StatementRewrite.create(fRewriter, selectedNodes).replace(createCallNodes(null), description);
+			new StatementRewrite(fRewriter, selectedNodes).replace(createCallNodes(null), description);
 			
 			replaceDuplicates(result);
 		
