@@ -46,7 +46,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	}
 	
 	public static Test suite() {
-		if (false) {
+		if (true) {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
@@ -180,9 +180,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			assertTrue("Number of dimension expressions not 0", dimensions.size() == 0);
 			
 			NumberLiteral literal= ast.newNumberLiteral("10");
-			dimensions.add(literal);
 			
-			rewrite.markAsInserted(literal);
+			rewrite.getListRewrite(arrayCreation, ASTNodeConstants.DIMENSIONS).insertLast(literal, null);
 		}
 		{	// remove all dimension except one, no dimension expression
 			// insert the initializer: formatter problems
@@ -209,12 +208,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			assertTrue("Number of dimension expressions not 1", dimensions.size() == 1);
 			
 			NumberLiteral literal1= ast.newNumberLiteral("10");
-			dimensions.add(literal1);
-			rewrite.markAsInserted(literal1);
-			
+			rewrite.getListRewrite(arrayCreation, ASTNodeConstants.DIMENSIONS).insertLast(literal1, null);
+
 			NumberLiteral literal2= ast.newNumberLiteral("11");
-			dimensions.add(literal2);
-			rewrite.markAsInserted(literal2);
+			rewrite.getListRewrite(arrayCreation, ASTNodeConstants.DIMENSIONS).insertLast(literal2, null);
+
 		}
 		{	// add 2 empty dimensions
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(4);
@@ -236,8 +234,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) dimensions.get(0), literal1);
 			
 			NumberLiteral literal2= ast.newNumberLiteral("11");
-			dimensions.add(literal2);
-			rewrite.markAsInserted(literal2);			
+			rewrite.getListRewrite(arrayCreation, ASTNodeConstants.DIMENSIONS).insertLast(literal2, null);
+
 		}			
 				
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -307,12 +305,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			assertTrue("Number of initializer expressions not 3", expressions.size() == 3);
 
 			NumberLiteral literal1= ast.newNumberLiteral("10");
-			expressions.add(1, literal1);
-			rewrite.markAsInserted(literal1);
+			rewrite.getListRewrite(initializer, ASTNodeConstants.EXPRESSIONS).insertAfter(literal1, (ASTNode) expressions.get(0), null);
 			
 			NumberLiteral literal2= ast.newNumberLiteral("11");
-			expressions.add(literal2);
-			rewrite.markAsInserted(literal2);
+			rewrite.getListRewrite(initializer, ASTNodeConstants.EXPRESSIONS).insertLast(literal2, null);
+
 		}		
 		{	// replace first and last initializer expression
 			ArrayCreation arrayCreation= (ArrayCreation) args.get(2);
@@ -647,18 +644,14 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SimpleName newName= ast.newSimpleName("NewInner");
 			rewrite.markAsReplaced(creation.getName(), newName);
 			
-			List arguments= creation.arguments();
-			
 			StringLiteral stringLiteral1= ast.newStringLiteral();
 			stringLiteral1.setLiteralValue("Hello");
-			arguments.add(stringLiteral1);
-			rewrite.markAsInserted(stringLiteral1);
+			rewrite.getListRewrite(creation, ASTNodeConstants.ARGUMENTS).insertLast(stringLiteral1, null);
+
 			
 			StringLiteral stringLiteral2= ast.newStringLiteral();
 			stringLiteral2.setLiteralValue("World");
-			arguments.add(stringLiteral2);
-			rewrite.markAsInserted(stringLiteral2);
-
+			rewrite.getListRewrite(creation, ASTNodeConstants.ARGUMENTS).insertLast(stringLiteral2, null);
 			
 			assertTrue("Has anonym class decl", creation.getAnonymousClassDeclaration() == null);
 			
@@ -666,8 +659,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			MethodDeclaration anonymMethDecl= createNewMethod(ast, "newMethod", false);
 			anonymDecl.bodyDeclarations().add(anonymMethDecl);
 			
-			creation.setAnonymousClassDeclaration(anonymDecl);
-			rewrite.markAsInserted(anonymDecl);			
+			rewrite.markAsInsert(creation, ASTNodeConstants.ANONYMOUS_CLASS_DECLARATION, anonymDecl, null);			
 
 		}
 		{ // add expression, remove argument, remove anonym decl 
@@ -677,9 +669,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			assertTrue("Has expression", creation.getExpression() == null);
 			
 			SimpleName newExpression= ast.newSimpleName("x");
-			creation.setExpression(newExpression);
-			
-			rewrite.markAsInserted(newExpression);
+			rewrite.markAsInsert(creation, ASTNodeConstants.EXPRESSION, newExpression, null);			
+
 			
 			List arguments= creation.arguments();
 			assertTrue("Must have 1 argument", arguments.size() == 1);
@@ -874,9 +865,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced((ASTNode) extendedOperands.get(1), newOp1);
 			
 			SimpleName newOp2= ast.newSimpleName("n");
-			rewrite.markAsInserted(newOp2);
-			
-			extendedOperands.add(newOp2);
+			rewrite.getListRewrite(expr, ASTNodeConstants.EXTENDED_OPERANDS).insertLast(newOp2, null);
+
 		}
 		
 		{ // change operand
@@ -992,9 +982,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			rewrite.markAsReplaced(invocation.getName(), name);
 			
 			ASTNode arg= ast.newNumberLiteral("1");
-			rewrite.markAsInserted(arg);
-			
-			invocation.arguments().add(arg);
+			rewrite.getListRewrite(invocation, ASTNodeConstants.ARGUMENTS).insertLast(arg, null);
+
 		}
 		{ // insert expression, delete params
 			ExpressionStatement stmt= (ExpressionStatement) statements.get(1);
@@ -1003,9 +992,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			MethodInvocation leftInvocation= (MethodInvocation) invocation.getExpression();
 			
 			SimpleName newExpression= ast.newSimpleName("x");
-			rewrite.markAsInserted(newExpression);
-			
-			leftInvocation.setExpression(newExpression);
+			rewrite.markAsInsert(leftInvocation, ASTNodeConstants.EXPRESSION, newExpression, null);
 			
 			List args= leftInvocation.arguments();
 			rewrite.markAsRemoved((ASTNode) args.get(0));
@@ -1017,10 +1004,9 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			
 			ASTNode placeHolder= rewrite.createCopy(invocation.getExpression());
 			
-			rewrite.markAsRemoved(invocation.getExpression());
-			rewrite.markAsInserted(placeHolder);
-			
-			invocation.arguments().add(placeHolder);
+			rewrite.markAsRemoved(invocation, ASTNodeConstants.EXPRESSION, null);
+
+			rewrite.getListRewrite(invocation, ASTNodeConstants.ARGUMENTS).insertLast(placeHolder, null);
 		}
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
@@ -1373,14 +1359,11 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SuperConstructorInvocation invocation= (SuperConstructorInvocation) methodDecl.getBody().statements().get(0);
 
 			SimpleName newExpression= ast.newSimpleName("x");
-			rewrite.markAsInserted(newExpression);
-			invocation.setExpression(newExpression);
-			
-			
+			rewrite.markAsInsert(invocation, ASTNodeConstants.EXPRESSION, newExpression, null);
+
 			ASTNode arg= ast.newNumberLiteral("1");
-			rewrite.markAsInserted(arg);
-			
-			invocation.arguments().add(arg);		
+			rewrite.getListRewrite(invocation, ASTNodeConstants.ARGUMENTS).insertLast(arg, null);
+
 		}
 		{ // remove expression, replace argument with argument of expression
 			MethodDeclaration methodDecl= (MethodDeclaration) bodyDeclarations.get(1);
@@ -1458,9 +1441,8 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SuperFieldAccess rightFieldAccess= (SuperFieldAccess) assignment.getRightHandSide();
 			
 			SimpleName newQualifier= ast.newSimpleName("X");
-			rewrite.markAsInserted(newQualifier);
-			leftFieldAccess.setQualifier(newQualifier);
-			
+			rewrite.markAsInsert(leftFieldAccess, ASTNodeConstants.QUALIFIER, newQualifier, null);
+
 			SimpleName newName= ast.newSimpleName("y");
 			rewrite.markAsReplaced(leftFieldAccess.getName(), newName);
 
@@ -1512,14 +1494,10 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			SuperMethodInvocation invocation= (SuperMethodInvocation) statement.getExpression();
 
 			SimpleName newExpression= ast.newSimpleName("X");
-			rewrite.markAsInserted(newExpression);
-			invocation.setQualifier(newExpression);
-			
+			rewrite.markAsInsert(invocation, ASTNodeConstants.QUALIFIER, newExpression, null);
 			
 			ASTNode arg= ast.newNumberLiteral("1");
-			rewrite.markAsInserted(arg);
-			
-			invocation.arguments().add(arg);		
+			rewrite.getListRewrite(invocation, ASTNodeConstants.ARGUMENTS).insertLast(arg, null);
 		}
 		{ // remove qualifier, replace argument with argument of expression
 			ExpressionStatement statement= (ExpressionStatement) statements.get(1);
@@ -1599,8 +1577,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 			ThisExpression thisExpression= (ThisExpression) returnStatement.getExpression();
 
 			SimpleName newExpression= ast.newSimpleName("X");
-			rewrite.markAsInserted(newExpression);
-			thisExpression.setQualifier(newExpression);
+			rewrite.markAsInsert(thisExpression, ASTNodeConstants.QUALIFIER, newExpression, null);
 		}
 		{ // remove qualifier
 			ReturnStatement returnStatement= (ReturnStatement) statements.get(1);
