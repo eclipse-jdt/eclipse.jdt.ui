@@ -4,30 +4,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ILabelProvider;
-
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.test.harness.DialogCheck;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestPluginLauncher;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaElementContentProvider;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.codemanipulation.CodeManipulationMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
@@ -37,9 +19,20 @@ import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.launcher.AddExceptionDialog;
 import org.eclipse.jdt.internal.ui.packageview.PackageViewerSorter;
 import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestPluginLauncher;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementContentProvider;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.test.harness.DialogCheck;
 
 public class DialogsTest extends TestCase {
 	
@@ -78,10 +71,10 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.delete(jproject);
 	}
 	
-	private TypeRef[] getRefs(ArrayList list, int off, int len) {
-		TypeRef[] res= new TypeRef[len];
+	private TypeInfo[] getRefs(ArrayList list, int off, int len) {
+		TypeInfo[] res= new TypeInfo[len];
 		for (int i= 0; i < len; i++) {
-			res[i]= (TypeRef) list.get(off + i);
+			res[i]= (TypeInfo) list.get(off + i);
 		}
 		return res;
 	}
@@ -91,7 +84,7 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
 		JavaProjectHelper.addRTJar(jproject);
 
-		ILabelProvider labelProvider= new TypeRefLabelProvider(TypeRefLabelProvider.SHOW_FULLYQUALIFIED);
+		ILabelProvider labelProvider= new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED);
 
 		ArrayList list= new ArrayList(200);
 		IProject project= jproject.getProject();
@@ -106,7 +99,7 @@ public class DialogsTest extends TestCase {
 		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
 	
 		assert(list.size() > 15);
-		TypeRef[][] refs= new TypeRef[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
+		TypeInfo[][] refs= new TypeInfo[][] { getRefs(list, 0, 3), getRefs(list, 4, 6), getRefs(list, 10, 5) };
 		dialog.setElements(refs);
 		dialog.setInitialSelections(new String[refs.length]);
 		

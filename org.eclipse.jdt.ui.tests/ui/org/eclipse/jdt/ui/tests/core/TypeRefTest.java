@@ -31,8 +31,8 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 
-import org.eclipse.jdt.internal.ui.util.TypeRef;
-import org.eclipse.jdt.internal.ui.util.TypeRefRequestor;
+import org.eclipse.jdt.internal.ui.util.TypeInfo;
+import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class TypeRefTest extends TestCase {
 	
@@ -93,7 +93,7 @@ public class TypeRefTest extends TestCase {
 
 		IResource[] resources= new IResource[] {fJProject1.getJavaProject().getProject()};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
-		ITypeNameRequestor requestor= new TypeRefRequestor(result);
+		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
@@ -116,7 +116,7 @@ public class TypeRefTest extends TestCase {
 		findTypeRef(result, "junit.util.Version");
 		System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
-			TypeRef ref= (TypeRef) result.get(i);
+			TypeInfo ref= (TypeInfo) result.get(i);
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
 				assertTrue("Could not be resolved: " + ref.toString(), false);
@@ -130,7 +130,7 @@ public class TypeRefTest extends TestCase {
 	
 	private void findTypeRef(List refs, String fullname) {
 		for (int i= 0; i <refs.size(); i++) {
-			TypeRef curr= (TypeRef) refs.get(i);
+			TypeInfo curr= (TypeInfo) refs.get(i);
 			if (fullname.equals(curr.getFullyQualifiedName())) {
 				return;
 			}
@@ -150,7 +150,7 @@ public class TypeRefTest extends TestCase {
 		
 		IResource[] resources= new IResource[] {fJProject1.getProject()};
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(resources);
-		ITypeNameRequestor requestor= new TypeRefRequestor(result);
+		ITypeNameRequestor requestor= new TypeInfoRequestor(result);
 		SearchEngine engine= new SearchEngine();
 
 		engine.searchAllTypeNames(
@@ -167,7 +167,7 @@ public class TypeRefTest extends TestCase {
 
 		System.out.println("Elements found: " + result.size());
 		for (int i= 0; i < result.size(); i++) {
-			TypeRef ref= (TypeRef) result.get(i);
+			TypeInfo ref= (TypeInfo) result.get(i);
 			System.out.println(ref.getTypeName());
 			IType resolvedType= ref.resolveType(scope);
 			if (resolvedType == null) {
