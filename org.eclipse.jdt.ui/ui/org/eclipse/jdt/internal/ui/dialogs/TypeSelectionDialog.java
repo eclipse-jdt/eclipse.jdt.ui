@@ -81,10 +81,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 		}
 		
 		private String adjustPattern(String pattern) {
-			if (pattern.length() == 0)
-				return pattern;			
-			int pos= pattern.indexOf('*');
-			if (pos == -1)
+			if (pattern.length() != 0 && pattern.indexOf('*') == -1 && pattern.indexOf('?') == -1)
 				return pattern + '*';
 			else
 				return pattern;
