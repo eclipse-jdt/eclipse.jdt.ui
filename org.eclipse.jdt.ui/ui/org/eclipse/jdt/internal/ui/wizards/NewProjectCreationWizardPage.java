@@ -35,7 +35,7 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 	private WizardNewProjectCreationPage fMainPage;
 
 	private IPath fCurrProjectLocation;
-	private IProject fCurrProject;	
+	private IProject fCurrProject;
 
 	/**
 	 * Constructor for NewProjectCreationWizardPage.
@@ -44,7 +44,6 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 		super();
 		fMainPage= mainPage;
 		fCurrProjectLocation= null;
-		fCurrProject= null;
 	}
 	
 	/* (non-Javadoc)
@@ -122,6 +121,22 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 			monitor.done();
 		}
 	}
+	
+	/**
+	 * Called from the wizard on finish.
+	 */
+	public void performFinish(IProgressMonitor monitor) throws CoreException, InterruptedException {
+		try {
+			monitor.beginTask(NewWizardMessages.getString("NewProjectCreationWizardPage.createproject.desc"), 3);				 //$NON-NLS-1$
+			if (fCurrProject == null) {
+				updateProject(new SubProgressMonitor(monitor, 1));
+			}
+			configureJavaProject(new SubProgressMonitor(monitor, 2));
+		} finally {
+			monitor.done();
+		}
+	}
+	
 		
 	/**
 	 * Called from the wizard on cancel.
