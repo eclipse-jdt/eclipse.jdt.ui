@@ -9,20 +9,14 @@ import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 public class Bindings {
 	
@@ -145,6 +139,25 @@ public class Bindings {
 		} else {
 			return ast.newSimpleType(ast.newName(Bindings.getAllNameComponents(binding)));
 		}
+	}
+
+	/**
+	 * Checks whether	the passed type binding is a runtime exception.
+	 * 
+	 * @return <code>true</code> if the passed type binding is a runtime exception;
+	 * 	otherwise <code>false</code> is returned
+	 */
+	public static boolean isRuntimeException(ITypeBinding thrownException, AST ast) {
+		if (thrownException == null || thrownException.isPrimitive())
+			return false;
+		
+		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException"); //$NON-NLS-1$
+		while (thrownException != null) {
+			if (runTimeException == thrownException)
+				return true;
+			thrownException= thrownException.getSuperclass();
+		}
+		return false;
 	}
 	
 	/**

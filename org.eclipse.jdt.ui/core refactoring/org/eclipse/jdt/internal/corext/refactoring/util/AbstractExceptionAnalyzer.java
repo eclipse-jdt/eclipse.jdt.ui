@@ -74,6 +74,8 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		}
 		if (node.getFinally() != null)
 			node.getFinally().accept(this);
+			
+		// return false. We have visited the body by ourselves.	
 		return false;
 	}
 	
@@ -88,19 +90,6 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 	protected void addException(ITypeBinding exception) {
 		if (!fCurrentExceptions.contains(exception))
 			fCurrentExceptions.add(exception);
-	}
-	
-	protected boolean isRuntimeException(ITypeBinding thrownException, AST ast) {
-		if (thrownException == null || thrownException.isPrimitive())
-			return false;
-		
-		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException"); //$NON-NLS-1$
-		while (thrownException != null) {
-			if (runTimeException == thrownException)
-				return true;
-			thrownException= thrownException.getSuperclass();
-		}
-		return false;
 	}
 	
 	protected List getCurrentExceptions() {

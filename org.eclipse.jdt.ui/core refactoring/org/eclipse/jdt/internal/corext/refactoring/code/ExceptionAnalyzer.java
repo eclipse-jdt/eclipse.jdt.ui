@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ThrowStatement;
 
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
 
 /* package */ class ExceptionAnalyzer extends AbstractExceptionAnalyzer {
@@ -37,11 +38,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
 		if (exception == null)		// Safety net for null bindings when compiling fails.
-			return false;
+			return true;
 		
-		if (isRuntimeException(exception, node.getAST()) && !methodThrowsException(exception))
-			return false;
-			
 		addException(exception);
 		return true;
 	}
@@ -56,17 +54,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	
 	private boolean handleExceptions(IMethodBinding binding) {
 		if (binding == null)
-			return false;
+			return true;
 		addExceptions(binding.getExceptionTypes());
 		return true;
-	}
-	
-	private boolean methodThrowsException(ITypeBinding exception) {
-		ITypeBinding[] methodExceptions = fEnclosingMethod.resolveBinding().getExceptionTypes();
-		for (int i= 0; i < methodExceptions.length; i++) {
-			if (exception == methodExceptions[i])
-				return true;
-		}
-		return false;
-	}
+	}	
 }

@@ -81,7 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 	private IVariableBinding[] fCallerLocals;
 	private IVariableBinding fReturnLocal;
 	
-	private ITypeBinding[] fExceptions;
+	private ITypeBinding[] fAllExceptions;
 	private ITypeBinding fExpressionBinding;	
 	
 	public ExtractMethodAnalyzer(ICompilationUnit unit, Selection selection) throws JavaModelException {
@@ -369,12 +369,21 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
 	//---- Exceptions -----------------------------------------------------------------------------------------
 	
-	public ITypeBinding[] getExceptions() {
-		return fExceptions;
+	public ITypeBinding[] getExceptions(boolean includeRuntimeExceptions, AST ast) {
+		if (includeRuntimeExceptions)
+			return fAllExceptions;
+		List result= new ArrayList(fAllExceptions.length);
+		for (int i= 0; i < fAllExceptions.length; i++) {
+			ITypeBinding exception= fAllExceptions[i];
+			if (!includeRuntimeExceptions && Bindings.isRuntimeException(exception, ast))
+				continue;
+			result.add(exception);
+		}
+		return (ITypeBinding[]) result.toArray(new ITypeBinding[result.size()]);
 	}
 	
 	private void computeExceptions() {
-		fExceptions= ExceptionAnalyzer.perform(fEnclosingMethod, getSelectedNodes());
+		fAllExceptions= ExceptionAnalyzer.perform(fEnclosingMethod, getSelectedNodes());
 	}
 	
 	//---- Special visitor methods ---------------------------------------------------------------------------

@@ -18,10 +18,13 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 public class ExtractMethodWizard extends RefactoringWizard {
 	
+	/* package */ static final String DIALOG_SETTING_SECTION= "ExtractMethodWizard"; //$NON-NLS-1$
+	
 	public ExtractMethodWizard(ExtractMethodRefactoring ref){
 		super(ref, RefactoringMessages.getString("ExtractMethodWizard.extract_method"),  //$NON-NLS-1$
 					IJavaHelpContextIds.EXTRACT_METHOD_ERROR_WIZARD_PAGE); //$NON-NLS-1$
 		setExpandFirstNode(true);
+		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 	}
 
 	public IChange createChange(){

@@ -62,9 +62,11 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private int fTabWidth;
 	private boolean fCallOnDeclarationLine= true;
 	
+	private AST fAST;
 	private ExtractMethodAnalyzer fAnalyzer;
 	private String fVisibility;
 	private String fMethodName;
+	private boolean fThrowRuntimeExceptions;
 	private int fMethodFlags= Modifier.PROTECTED;
 
 	private static final String EMPTY= ""; //$NON-NLS-1$
@@ -163,6 +165,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 				return result;
 			
 			CompilationUnit root= AST.parseCompilationUnit(fCUnit, true);
+			fAST= root.getAST();
 			root.accept(createVisitor());
 			
 			result.merge(fAnalyzer.checkActivation());
@@ -231,6 +234,16 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	/**
+	 * Sets whether the new method signature throws runtime exceptions.
+	 * 
+	 * @param throwsRuntimeExceptions flag indicating if the new method
+	 * 	throws runtime exceptions
+	 */
+	public void setThrowRuntimeExceptions(boolean throwRuntimeExceptions) {
+		fThrowRuntimeExceptions= throwRuntimeExceptions;
+	}
+	
+	/**
 	 * Checks if the refactoring can work on the values provided by the refactoring
 	 * client. The client defined value for the extract method refactoring is the 
 	 * new method name.
@@ -287,7 +300,7 @@ public class ExtractMethodRefactoring extends Refactoring {
 		final int insertPosition= methodStart + method.getLength();
 		final int methodEnd= insertPosition - 1;
 
-		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
 			fImportEdit.addImport(Bindings.getFullyQualifiedImportName(exception));
@@ -563,9 +576,10 @@ public class ExtractMethodRefactoring extends Refactoring {
 	}
 	
 	private void appendThrownExceptions(StringBuffer buffer) {
-		ITypeBinding[] exceptions= fAnalyzer.getExceptions();
+		ITypeBinding[] exceptions= fAnalyzer.getExceptions(fThrowRuntimeExceptions, fAST);
 		if (exceptions.length == 0)
 			return;
+			
 		buffer.append(" throws "); //$NON-NLS-1$
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];

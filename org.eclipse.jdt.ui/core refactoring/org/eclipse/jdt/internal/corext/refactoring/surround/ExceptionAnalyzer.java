@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.dom.ThrowStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyzer;
 
@@ -64,8 +65,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 
 	public boolean visit(ThrowStatement node) {
 		ITypeBinding exception= node.getExpression().resolveTypeBinding();
-		if (!isSelected(node) || exception == null || isRuntimeException(exception, node.getAST())) // Safety net for null bindings when compiling fails.
-			return false;
+		if (!isSelected(node) || exception == null || Bindings.isRuntimeException(exception, node.getAST())) // Safety net for null bindings when compiling fails.
+			return true;
 		
 		addException(exception);
 		return true;
@@ -85,11 +86,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.AbstractExceptionAnalyze
 	
 	private boolean handleExceptions(IMethodBinding binding, AST ast) {
 		if (binding == null)
-			return false;
+			return true;
 		ITypeBinding[] exceptions= binding.getExceptionTypes();
 		for (int i= 0; i < exceptions.length; i++) {
 			ITypeBinding exception= exceptions[i];
-			if (!isRuntimeException(exception, ast))
+			if (!Bindings.isRuntimeException(exception, ast))
 				addException(exception);
 		}
 		return true;

@@ -5,20 +5,25 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.code;
 
-import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;import org.eclipse.jdt.internal.ui.util.RowLayouter;
+import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Text;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.corext.refactoring.code.ExtractMethodRefactoring;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;import org.eclipse.jdt.internal.ui.util.RowLayouter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class ExtractMethodInputPage extends TextInputWizardPage {
 
+	private static final String THROW_RUNTIME_EXCEPTIONS= "ThrowRuntimeExceptions"; //$NON-NLS-1$
+
 	private ExtractMethodRefactoring fRefactoring;
 	private Label fPreview;
+	private IDialogSettings fSettings;
 
 	public ExtractMethodInputPage() {
 		super(true);
 		setDescription(RefactoringMessages.getString("ExtractMethodInputPage.description")); //$NON-NLS-1$
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_CU);
 	}
-	
+
 	protected void textModified(String text) {
 		super.textModified(text);
 		updatePreview(text);
@@ -32,6 +37,7 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 	
 	public void createControl(Composite parent) {
 		fRefactoring= (ExtractMethodRefactoring)getRefactoring();
+		loadSettings();
 		
 		Composite result= new Composite(parent, SWT.NONE);
 		setControl(result);
@@ -79,6 +85,16 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		}
 		layouter.perform(label, group, 1);
 		
+		Button checkBox= new Button(result, SWT.CHECK);
+		checkBox.setText(RefactoringMessages.getString("ExtractMethodInputPage.throwRuntimeExceptions")); //$NON-NLS-1$
+		checkBox.setSelection(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
+		checkBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setRethrowRuntimeException(((Button)e.widget).getSelection());
+			}
+		});
+		layouter.perform(checkBox);
+		
 		label= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		layouter.perform(label);
@@ -102,6 +118,12 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 		updatePreview(getText());
 	}
 	
+	private void setRethrowRuntimeException(boolean value) {
+		fSettings.put(THROW_RUNTIME_EXCEPTIONS, value);
+		fRefactoring.setThrowRuntimeExceptions(value);
+		updatePreview(getText());
+	}
+	
 	private void updatePreview(String text) {
 		if (fPreview == null)
 			return;
@@ -111,4 +133,13 @@ public class ExtractMethodInputPage extends TextInputWizardPage {
 			
 		fPreview.setText(fRefactoring.getSignature(text));
 	}
+	
+	private void loadSettings() {
+		fSettings= getDialogSettings().getSection(ExtractMethodWizard.DIALOG_SETTING_SECTION);
+		if (fSettings == null) {
+			fSettings= getDialogSettings().addNewSection(ExtractMethodWizard.DIALOG_SETTING_SECTION);
+			fSettings.put(THROW_RUNTIME_EXCEPTIONS, false);
+		}
+		fRefactoring.setThrowRuntimeExceptions(fSettings.getBoolean(THROW_RUNTIME_EXCEPTIONS));
+	}	
 }
