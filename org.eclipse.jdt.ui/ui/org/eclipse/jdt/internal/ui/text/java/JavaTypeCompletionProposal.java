@@ -84,7 +84,8 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	}
 	
 	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-		if (impStructure != null && fFullyQualifiedTypeName != null && getReplacementString().startsWith(fFullyQualifiedTypeName)) {
+		// avoid adding imports when inside imports container
+		if (impStructure != null && fFullyQualifiedTypeName != null && getReplacementString().startsWith(fFullyQualifiedTypeName) && !getReplacementString().endsWith(";")) { //$NON-NLS-1$
 			IType[] types= impStructure.getCompilationUnit().getTypes();
 			if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
 				// ignore positions above type.
@@ -110,13 +111,14 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 				impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
 			}
 			
-			if (updateReplacementString(document, trigger, offset, impStructure)) {
+			boolean importAdded= updateReplacementString(document, trigger, offset, impStructure);
+			if (importAdded) {
 				setCursorPosition(getReplacementString().length());
 			}
 			
 			super.apply(document, trigger, offset);
 			
-			if (impStructure != null) {
+			if (importAdded) {
 				int oldLen= document.getLength();
 				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);

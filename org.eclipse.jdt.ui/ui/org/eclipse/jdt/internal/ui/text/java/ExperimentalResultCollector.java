@@ -58,8 +58,13 @@ public class ExperimentalResultCollector extends ResultCollector {
 		char[] signature= typeProposal.getSignature();
 		char[] packageName= Signature.getSignatureQualifier(signature); 
 		char[] typeName= Signature.getSignatureSimpleName(signature);
+		char[] completion= typeProposal.getCompletion();
 
 		JavaCompletionProposal proposal= super.createTypeCompletion(typeProposal);
+		// don't add parameters for import-completions
+		if (completion.length > 0 && completion[completion.length - 1] == ';')
+			return proposal;
+		
 		JavaCompletionProposal newProposal= new GenericJavaTypeProposal(proposal.getReplacementString(), fCompilationUnit, typeProposal.getReplaceStart(), typeProposal.getReplaceEnd() - typeProposal.getReplaceStart(), proposal.getImage(), proposal.getDisplayString(), fTextViewer, proposal.getRelevance(), typeProposal.getSignature(), String.valueOf(typeName), String.valueOf(packageName));
 		newProposal.setProposalInfo(proposal.getProposalInfo());
 		return newProposal;
