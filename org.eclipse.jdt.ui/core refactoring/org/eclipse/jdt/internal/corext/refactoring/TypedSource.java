@@ -28,7 +28,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
@@ -148,17 +150,22 @@ public class TypedSource {
 		return (TypedSource[]) result.toArray(new TypedSource[result.size()]);
 	}
 
-	private static String getFieldSource(IField field, ICompilationUnit cu, CompilationUnit cuNode) throws CoreException {
-		VariableDeclarationFragment declarationFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, cuNode);
-		FieldDeclaration declaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, cuNode);
-		if (declaration.fragments().size() == 1)
-			return getSourceOfDeclararationNode(field, cu, cuNode);
+	private static String getFieldSource(IField field, ICompilationUnit unit, CompilationUnit node) throws CoreException {
 		StringBuffer buff= new StringBuffer();
-		IBuffer buffer= cu.getBuffer();
-		int firstFragmentOffset= ((ASTNode)declaration.fragments().get(0)).getStartPosition();
-		buff.append(buffer.getText(declaration.getStartPosition(), firstFragmentOffset - declaration.getStartPosition()));
-		buff.append(buffer.getText(declarationFragment.getStartPosition(), declarationFragment.getLength()));
-		buff.append(";"); //$NON-NLS-1$
+		IBuffer buffer= unit.getBuffer();
+		BodyDeclaration bodyDeclaration= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration(field, node);
+		if (bodyDeclaration instanceof FieldDeclaration) {
+			VariableDeclarationFragment declarationFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, node);
+			FieldDeclaration declaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, node);
+			if (declaration.fragments().size() == 1)
+				return getSourceOfDeclararationNode(field, unit, node);
+			buff.append(buffer.getText(declaration.getStartPosition(), ((ASTNode) declaration.fragments().get(0)).getStartPosition() - declaration.getStartPosition()));
+			buff.append(buffer.getText(declarationFragment.getStartPosition(), declarationFragment.getLength()));
+			buff.append(";"); //$NON-NLS-1$
+		} else if (bodyDeclaration instanceof EnumConstantDeclaration) {
+			EnumConstantDeclaration declaration= (EnumConstantDeclaration) bodyDeclaration;
+			buff.append(buffer.getText(declaration.getStartPosition(), declaration.getLength()));
+		}
 		return buff.toString();
 	}
 

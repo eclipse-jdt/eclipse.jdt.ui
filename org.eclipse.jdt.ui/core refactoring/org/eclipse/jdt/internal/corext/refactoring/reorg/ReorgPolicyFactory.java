@@ -36,6 +36,9 @@ import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -79,10 +82,12 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -113,12 +118,15 @@ import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 class ReorgPolicyFactory {
 	private ReorgPolicyFactory() {
@@ -598,10 +606,10 @@ class ReorgPolicyFactory {
 			}
 		}
 
-		protected void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
+		protected void copyToDestination(IJavaElement element, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws CoreException {
 			switch(element.getElementType()){
 				case IJavaElement.FIELD: 
-					copyFieldToDestination((IField)element, rewrite, sourceCuNode, destinationCuNode);
+					copyMemberToDestination(rewrite, destinationCuNode, createNewFieldDeclarationNode(((IField)element), rewrite, sourceCuNode));
 					break;
 				case IJavaElement.IMPORT_CONTAINER:
 					copyImportsToDestination((IImportContainer)element, rewrite, sourceCuNode, destinationCuNode);
@@ -626,25 +634,44 @@ class ReorgPolicyFactory {
 			}
 		}
 
-		private void copyFieldToDestination(IField field, ASTRewrite targetRewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
-			//cannot copy the whole field declaration - it can contain more than 1 field
-			FieldDeclaration copiedNode= createNewFieldDeclarationNode(field, targetRewrite.getAST(), sourceCuNode);
-			copyMemberToDestination(targetRewrite, destinationCuNode, copiedNode);
-		}
-
-		private FieldDeclaration createNewFieldDeclarationNode(IField field, AST targetAst, CompilationUnit sourceCuNode) throws JavaModelException {
-			FieldDeclaration fieldDeclaration= ASTNodeSearchUtil.getFieldDeclarationNode(field, sourceCuNode);
-			if (fieldDeclaration.fragments().size() == 1)
-				return (FieldDeclaration) ASTNode.copySubtree(targetAst, fieldDeclaration);
-			VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
-			VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
-			FieldDeclaration newFieldDeclaration= targetAst.newFieldDeclaration(copiedFragment);
-			// TODO insert copy of source buffer
-			if (fieldDeclaration.getJavadoc() != null)
-				newFieldDeclaration.setJavadoc((Javadoc) ASTNode.copySubtree(targetAst, fieldDeclaration.getJavadoc()));
-			newFieldDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, fieldDeclaration.getModifiers()));
-			newFieldDeclaration.setType((Type) ASTNode.copySubtree(targetAst, fieldDeclaration.getType()));
-			return newFieldDeclaration;
+		private BodyDeclaration createNewFieldDeclarationNode(IField field, ASTRewrite rewrite, CompilationUnit sourceCuNode) throws CoreException {
+			AST targetAst= rewrite.getAST();
+			ITextFileBuffer buffer= null;
+			BodyDeclaration newDeclaration= null;
+			ICompilationUnit unit= RefactoringASTParser.getCompilationUnit(sourceCuNode);
+			try {
+				buffer= RefactoringFileBuffers.acquire(unit);
+				IDocument document= buffer.getDocument();
+				BodyDeclaration bodyDeclaration= ASTNodeSearchUtil.getFieldOrEnumConstantDeclaration(field, sourceCuNode);
+				if (bodyDeclaration instanceof FieldDeclaration) {
+					FieldDeclaration fieldDeclaration= (FieldDeclaration) bodyDeclaration;
+					if (fieldDeclaration.fragments().size() == 1)
+						return (FieldDeclaration) ASTNode.copySubtree(targetAst, fieldDeclaration);
+					VariableDeclarationFragment originalFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, sourceCuNode);
+					VariableDeclarationFragment copiedFragment= (VariableDeclarationFragment) ASTNode.copySubtree(targetAst, originalFragment);
+					newDeclaration= targetAst.newFieldDeclaration(copiedFragment);
+					((FieldDeclaration) newDeclaration).setType((Type) ASTNode.copySubtree(targetAst, fieldDeclaration.getType()));
+				} else if (bodyDeclaration instanceof EnumConstantDeclaration) {
+					EnumConstantDeclaration constantDeclaration= (EnumConstantDeclaration) bodyDeclaration;
+					EnumConstantDeclaration newConstDeclaration= targetAst.newEnumConstantDeclaration();
+					newConstDeclaration.setName((SimpleName) ASTNode.copySubtree(targetAst, constantDeclaration.getName()));
+					AnonymousClassDeclaration anonymousDeclaration= constantDeclaration.getAnonymousClassDeclaration();
+					if (anonymousDeclaration != null)
+						newConstDeclaration.setAnonymousClassDeclaration((AnonymousClassDeclaration) rewrite.createStringPlaceholder(document.get(anonymousDeclaration.getStartPosition(), anonymousDeclaration.getLength()), ASTNode.ANONYMOUS_CLASS_DECLARATION));
+					newDeclaration= newConstDeclaration;
+				} else
+					Assert.isTrue(false);
+				newDeclaration.modifiers().addAll(ASTNodeFactory.newModifiers(targetAst, bodyDeclaration.getModifiers()));
+				Javadoc javadoc= bodyDeclaration.getJavadoc();
+				if (javadoc != null)
+					newDeclaration.setJavadoc((Javadoc) rewrite.createStringPlaceholder(document.get(javadoc.getStartPosition(), javadoc.getLength()), ASTNode.JAVADOC));
+			} catch (BadLocationException exception) {
+				JavaPlugin.log(exception);
+			} finally {
+				if (buffer != null)
+					RefactoringFileBuffers.release(unit);
+			}
+			return newDeclaration;
 		}
 
 		private void copyImportsToDestination(IImportContainer container, ASTRewrite rewrite, CompilationUnit sourceCuNode, CompilationUnit destinationCuNode) throws JavaModelException {
