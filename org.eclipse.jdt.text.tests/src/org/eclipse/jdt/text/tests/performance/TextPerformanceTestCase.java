@@ -21,13 +21,13 @@ import junit.framework.TestCase;
 public class TextPerformanceTestCase extends TestCase {
 
 	/** <code>true</code> iff the default number of runs should be used */
-	private static final boolean USE_DEFAULT_RUNS= true;
+	private static final boolean USE_DEFAULT_RUNS= false;
 	
 	/** default number of warm-up runs */
-	private static final int DEFAULT_WARM_UP_RUNS= 0;
+	private static final int DEFAULT_WARM_UP_RUNS= 1;
 	
 	/** default number of measured runs */
-	private static final int DEFAULT_MEASURED_RUNS= 1;
+	private static final int DEFAULT_MEASURED_RUNS= 2;
 	
 	/** custom number of warm-up runs */
 	private int fCustomWarmUpRuns= -1;
