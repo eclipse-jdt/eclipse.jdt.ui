@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringAction;
 public class RenameSupport {
 
 	private RenameRefactoring fRefactoring;
-	private IJavaElement fElement;
 	private RefactoringStatus fPreCheckStatus;
 	
 	/**
@@ -150,7 +149,6 @@ public class RenameSupport {
 	private RenameSupport(IJavaElement element, String newName, int flags) throws CoreException {
 		fRefactoring= new RenameRefactoring(element);
 		initialize(fRefactoring, newName, flags);
-		fElement= element;
 	}
 
 	/**
