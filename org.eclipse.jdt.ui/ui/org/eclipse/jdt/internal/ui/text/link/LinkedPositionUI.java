@@ -26,6 +26,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -46,7 +47,6 @@ import org.eclipse.jface.text.TextEvent;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 /**
  * A user interface for <code>LinkedPositionManager</code>, using <code>ITextViewer</code>.
  */
-public class LinkedPositionUI implements LinkedPositionListener,
+public class LinkedPositionUI implements ILinkedPositionListener,
 	ITextInputListener, ITextListener, ModifyListener, VerifyListener, VerifyKeyListener, PaintListener, IPropertyChangeListener, ShellListener {
 
 	/**
@@ -87,12 +87,15 @@ public class LinkedPositionUI implements LinkedPositionListener,
 	private static final int DOCUMENT_CHANGED= 4;	// document has changed
 	public static final int UPDATE_CARET= 8;		// update caret
 
-	private static final String CARET_POSITION= "LinkedPositionUI.caret.position"; //$NON-NLS-1$
-	private static final IPositionUpdater fgUpdater= new DefaultPositionUpdater(CARET_POSITION);
 	private static final IPreferenceStore fgStore= JavaPlugin.getDefault().getPreferenceStore();
+	private static final String CARET_POSITION_PREFIX= "LinkedPositionUI.caret.position"; //$NON-NLS-1$
+	private static int fgCounter= 0;
+	
 	
 	private final ITextViewer fViewer;
-	private final LinkedPositionManager fManager;	
+	private final LinkedPositionManager fManager;
+	private final IPositionUpdater fUpdater;
+	private final String fPositionCategoryName;
 	private Color fFrameColor;
 
 	private int fFinalCaretOffset= -1; // no final caret offset
@@ -121,6 +124,9 @@ public class LinkedPositionUI implements LinkedPositionListener,
 		
 		fViewer= viewer;
 		fManager= manager;
+		
+		fPositionCategoryName= CARET_POSITION_PREFIX + (fgCounter++);
+		fUpdater= new DefaultPositionUpdater(fPositionCategoryName);
 		
 		fManager.setLinkedPositionListener(this);
 
@@ -225,12 +231,12 @@ public class LinkedPositionUI implements LinkedPositionListener,
 
 		// track final caret
 		IDocument document= fViewer.getDocument();
-		document.addPositionCategory(CARET_POSITION);
-		document.addPositionUpdater(fgUpdater);
+		document.addPositionCategory(fPositionCategoryName);
+		document.addPositionUpdater(fUpdater);
 
 		try {
 			if (fFinalCaretOffset != -1)
-				document.addPosition(CARET_POSITION, new Position(fFinalCaretOffset));
+				document.addPosition(fPositionCategoryName, new Position(fFinalCaretOffset));
 		} catch (BadLocationException e) {
 			handleException(fViewer.getTextWidget().getShell(), e);
 
@@ -336,7 +342,7 @@ public class LinkedPositionUI implements LinkedPositionListener,
 				((flags & DOCUMENT_CHANGED) == 0) &&
 				((flags & UPDATE_CARET) != 0))
 			{
-				Position[] positions= document.getPositions(CARET_POSITION);
+				Position[] positions= document.getPositions(fPositionCategoryName);
 				if ((positions != null) && (positions.length != 0)) {
 					
 					if (fViewer instanceof ITextViewerExtension3) {
@@ -354,8 +360,8 @@ public class LinkedPositionUI implements LinkedPositionListener,
 				}
 			}
 
-			document.removePositionUpdater(fgUpdater);
-			document.removePositionCategory(CARET_POSITION);
+			document.removePositionUpdater(fUpdater);
+			document.removePositionCategory(fPositionCategoryName);
 			
 			if (fExitListener != null)
 				fExitListener.exit(

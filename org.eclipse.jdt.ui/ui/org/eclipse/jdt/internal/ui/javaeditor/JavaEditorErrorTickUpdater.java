@@ -2,10 +2,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.text.Assert;
+
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorInput;
 

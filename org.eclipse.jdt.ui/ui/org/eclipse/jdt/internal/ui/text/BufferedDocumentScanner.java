@@ -5,10 +5,10 @@ package org.eclipse.jdt.internal.ui.text;
  * All Rights Reserved.
  */
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.ICharacterScanner;
-import org.eclipse.jface.util.Assert;
 
 
 

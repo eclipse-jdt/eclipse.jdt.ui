@@ -1926,6 +1926,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 */
 	public void createPartControl(Composite parent) {
 		super.createPartControl(parent);
+		
+		fSourceViewerDecorationSupport.install(getPreferenceStore());
 
 		IInformationControlCreator informationControlCreator= new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
@@ -1939,7 +1941,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		fInformationPresenter.setSizeConstraints(60, 10, true, true);		
 		fInformationPresenter.install(getSourceViewer());
 	}
-
+	
 	protected void showOverviewRuler() {
 		if (fOverviewRuler != null) {
 			if (getSourceViewer() instanceof ISourceViewerExtension) {
@@ -1975,9 +1977,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		fSourceViewerDecorationSupport.setCursorLinePainterPreferenceKeys(CURRENT_LINE, CURRENT_LINE_COLOR);
 		fSourceViewerDecorationSupport.setMarginPainterPreferenceKeys(PRINT_MARGIN, PRINT_MARGIN_COLOR, PRINT_MARGIN_COLUMN);
-		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);
-		
-		fSourceViewerDecorationSupport.install(getPreferenceStore());
+		fSourceViewerDecorationSupport.setMatchingCharacterPainterPreferenceKeys(MATCHING_BRACKETS, MATCHING_BRACKETS_COLOR);		
 	}
 	
 	/**

@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DocumentCommand;
@@ -27,7 +28,6 @@ import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -98,30 +98,42 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		}
 	}
 
-	private static final String LINKED_POSITION= "LinkedPositionManager.linked.position"; //$NON-NLS-1$
+	private static final String LINKED_POSITION_PREFIX= "LinkedPositionManager.linked.position"; //$NON-NLS-1$
 	private static final Comparator fgPositionComparator= new PositionComparator();
 	private static final Map fgActiveManagers= new HashMap();
+	private static int fgCounter= 0;
 		
 	private IDocument fDocument;
-	
-	private LinkedPositionListener fListener;
+	private ILinkedPositionListener fListener;
+	private String fPositionCategoryName;
 
+
+	/**
+	 * Creates a <code>LinkedPositionManager</code> for a <code>IDocument</code>.
+	 * 
+	 * @param document the document to use with linked positions.
+	 * @param canCoexist <code>true</code> if this manager can coexist with an already existing one
+	 */
+	public LinkedPositionManager(IDocument document, boolean canCoexist) {
+		Assert.isNotNull(document);
+		fDocument= document;
+		fPositionCategoryName= LINKED_POSITION_PREFIX + (fgCounter++);
+		install(canCoexist);
+	}
+	
 	/**
 	 * Creates a <code>LinkedPositionManager</code> for a <code>IDocument</code>.
 	 * 
 	 * @param document the document to use with linked positions.
 	 */
 	public LinkedPositionManager(IDocument document) {
-		Assert.isNotNull(document);
-		
-		fDocument= document;		
-		install();
+		this(document, false);
 	}
-
+	
 	/**
 	 * Sets a listener to notify changes of current linked position.
 	 */
-	public void setLinkedPositionListener(LinkedPositionListener listener) {
+	public void setLinkedPositionListener(ILinkedPositionListener listener) {
 		fListener= listener;	
 	}
 	
@@ -154,7 +166,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 			throw new BadLocationException(LinkedPositionMessages.getString(("LinkedPositionManager.error.contains.line.delimiters"))); //$NON-NLS-1$
 
 		try {
-			fDocument.addPosition(LINKED_POSITION, new TypedPosition(offset, length, type));
+			fDocument.addPosition(fPositionCategoryName, new TypedPosition(offset, length, type));
 		} catch (BadPositionCategoryException e) {
 			JavaPlugin.log(e);
 			Assert.isTrue(false);
@@ -167,15 +179,17 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 	public static boolean hasActiveManager(IDocument document) {
 		return fgActiveManagers.get(document) != null;
 	}
-
-	private void install() {
-		LinkedPositionManager manager= (LinkedPositionManager) fgActiveManagers.get(fDocument);
-		if (manager != null)
-			manager.leave(true);		
-
-		fgActiveManagers.put(fDocument, this);
+	
+	private void install(boolean canCoexist) {
 		
-		fDocument.addPositionCategory(LINKED_POSITION);
+		if (!canCoexist){
+			LinkedPositionManager manager= (LinkedPositionManager) fgActiveManagers.get(fDocument);
+			if (manager != null)
+				manager.leave(true);	
+		}
+		
+		fgActiveManagers.put(fDocument, this);
+		fDocument.addPositionCategory(fPositionCategoryName);
 		fDocument.addPositionUpdater(this);		
 		fDocument.addDocumentListener(this);
 	}	
@@ -197,7 +211,7 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 				}
 			}		
 			
-			fDocument.removePositionCategory(LINKED_POSITION);
+			fDocument.removePositionCategory(fPositionCategoryName);
 
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
@@ -295,9 +309,9 @@ public class LinkedPositionManager implements IDocumentListener, IPositionUpdate
 		return lastPosition;
 	}
 
-	private static Position[] getPositions(IDocument document) {
+	private Position[] getPositions(IDocument document) {
 		try {
-			Position[] positions= document.getPositions(LINKED_POSITION);
+			Position[] positions= document.getPositions(fPositionCategoryName);
 			Arrays.sort(positions, fgPositionComparator);
 			return positions;
 

@@ -16,6 +16,8 @@ import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.text.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -37,7 +39,6 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 

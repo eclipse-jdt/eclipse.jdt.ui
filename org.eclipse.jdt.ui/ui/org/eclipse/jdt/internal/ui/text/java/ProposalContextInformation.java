@@ -8,10 +8,9 @@ package org.eclipse.jdt.internal.ui.text.java;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
-
-import org.eclipse.jface.util.Assert;
 
 
 /**

@@ -17,6 +17,7 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Stack;
 
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.custom.VerifyKeyListener;
@@ -102,6 +103,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+
 
 
 /**
@@ -333,9 +335,13 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private static class ExitPolicy implements LinkedPositionUI.ExitPolicy {
 		
 		final char fExitCharacter;
+		final Stack fStack;
+		final int fSize;
 		
-		public ExitPolicy(char exitCharacter) {
+		public ExitPolicy(char exitCharacter, Stack stack) {
 			fExitCharacter= exitCharacter;
+			fStack= stack;
+			fSize= fStack.size();
 		}
 
 		/*
@@ -344,13 +350,16 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		public ExitFlags doExit(LinkedPositionManager manager, VerifyEvent event, int offset, int length) {
 			
 			if (event.character == fExitCharacter) {
-				if (manager.anyPositionIncludes(offset, length))
-					return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
-				else
-					return new ExitFlags(LinkedPositionUI.COMMIT, true);
-			}	
+				
+				if (fSize == fStack.size()) {
+					if (manager.anyPositionIncludes(offset, length))
+						return new ExitFlags(LinkedPositionUI.COMMIT| LinkedPositionUI.UPDATE_CARET, false);
+					else
+						return new ExitFlags(LinkedPositionUI.COMMIT, true);
+				}
+			}
 			
-			switch (event.character) {			
+			switch (event.character) {	
 			case '\b':
 				if (manager.getFirstPosition().length == 0)
 					return new ExitFlags(0, false);
@@ -368,13 +377,18 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 	};
 	
+	private static class BracketLevel {
+		int fOffset;
+		int fLength;
+		LinkedPositionManager fManager;
+		LinkedPositionUI fEditor;
+	};
+	
 	private class BracketInserter implements VerifyKeyListener, LinkedPositionUI.ExitListener {
 		
 		private boolean fCloseBrackets= true;
 		private boolean fCloseStrings= true;
-		
-		private int fOffset;
-		private int fLength;
+		private Stack fBracketLevelStack= new Stack();
 
 		public void setCloseBracketsEnabled(boolean enabled) {
 			fCloseBrackets= enabled;
@@ -439,7 +453,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 
 			if (!event.doit)
 				return;
-
+				
 			final ISourceViewer sourceViewer= getSourceViewer();
 			IDocument document= sourceViewer.getDocument();
 
@@ -482,20 +496,25 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					buffer.append(closingCharacter);
 
 					document.replace(offset, length, buffer.toString());
+					
+					
+					BracketLevel level= new BracketLevel();
+					fBracketLevelStack.push(level);
+					
+					level.fManager= new LinkedPositionManager(document, fBracketLevelStack.size() > 1);
+					level.fManager.addPosition(offset + 1, 0);
 
-					LinkedPositionManager manager= new LinkedPositionManager(document);
-					manager.addPosition(offset + 1, 0);
-
-					fOffset= offset;
-					fLength= 2;
+					level.fOffset= offset;
+					level.fLength= 2;
 			
-					LinkedPositionUI editor= new LinkedPositionUI(sourceViewer, manager);
-					editor.setCancelListener(this);
-					editor.setExitPolicy(new ExitPolicy(closingCharacter));
-					editor.setFinalCaretOffset(offset + 2);
-					editor.enter();
-
-					IRegion newSelection= editor.getSelectedRegion();
+					level.fEditor= new LinkedPositionUI(sourceViewer, level.fManager);
+					level.fEditor.setCancelListener(this);
+					level.fEditor.setExitPolicy(new ExitPolicy(closingCharacter, fBracketLevelStack));
+					level.fEditor.setFinalCaretOffset(offset + 2);
+					level.fEditor.enter();
+					
+					
+					IRegion newSelection= level.fEditor.getSelectedRegion();
 					sourceViewer.setSelectedRange(newSelection.getOffset(), newSelection.getLength());
 	
 					event.doit= false;
@@ -510,14 +529,19 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitListener#exit(boolean)
 		 */
 		public void exit(boolean accept) {
+			
+			BracketLevel level= (BracketLevel) fBracketLevelStack.pop();
+
 			if (accept)
 				return;
 
 			// remove brackets
 			try {
+								
 				final ISourceViewer sourceViewer= getSourceViewer();
-				IDocument document= sourceViewer.getDocument();
-				document.replace(fOffset, fLength, null);
+				IDocument document= sourceViewer.getDocument();	
+				document.replace(level.fOffset, level.fLength, null);
+				
 			} catch (BadLocationException e) {
 			}
 		}
