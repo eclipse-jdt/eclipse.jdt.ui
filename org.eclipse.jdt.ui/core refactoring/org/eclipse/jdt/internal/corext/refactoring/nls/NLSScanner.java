@@ -51,6 +51,7 @@ public class NLSScanner {
 		int currentLineNr= -1;
 		int previousLineNr= -1;
 		NLSLine currentLine= null;
+		int nlsElementIndex= 0;
 		
 		while (token != ITerminalSymbols.TokenNameEOF) {
 			switch (token) {
@@ -60,9 +61,15 @@ public class NLSScanner {
 						currentLine= new NLSLine(currentLineNr - 1);
 						lines.add(currentLine);
 						previousLineNr= currentLineNr;
+						nlsElementIndex= 0;
 					}
 					String value= new String(scanner.getCurrentTokenSource());
-					currentLine.add(new NLSElement(value, scanner.getCurrentTokenStartPosition(), scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition()));
+					currentLine.add(
+					        new NLSElement(
+					                value, 
+					                scanner.getCurrentTokenStartPosition(), 
+					                scanner.getCurrentTokenEndPosition() + 1 - scanner.getCurrentTokenStartPosition(),
+					                nlsElementIndex++));
 					break;
 				case ITerminalSymbols.TokenNameCOMMENT_LINE:
 					if (currentLineNr != scanner.getLineNumber(scanner.getCurrentTokenStartPosition()))

@@ -32,7 +32,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 	}
 
 	/**
-	 * @see RefactoringWizard#addUserInputPages
+	 * @see RefactoringWizard#addUserInputPages()
 	 */
 	protected void addUserInputPages() {
 

@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.nls;
 
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
 import org.eclipse.jdt.internal.corext.refactoring.nls.KeyValuePair;
 import org.eclipse.jdt.internal.corext.refactoring.nls.PropertyFileDocumentModell;
 import org.eclipse.jface.text.Document;
+import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
-
-import junit.framework.TestCase;
-import junit.framework.TestSuite;
 
 public class PropertyFileDocumentModellTest extends TestCase {
 
@@ -88,22 +89,87 @@ public class PropertyFileDocumentModellTest extends TestCase {
         assertEquals(20, insertEdit.getOffset());        
     }    
     
-    public void testInsertIntoDocWithDifferentSeperationChar() {
-        String props = 
+    public void testInsertIntoDocWithDifferentSeperationChar() throws Exception {
+        Document props = new Document( 
             "org.eclipse.1:value\n" +
-            "org.eclipse.3 value\n";
-        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document(props));
+            "org.eclipse.3 value\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
         
         InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.2", "value"));
+        insertEdit.apply(props);
         
-        assertEquals("org.eclipse.2=value\n", insertEdit.getText());
-        assertEquals(20, insertEdit.getOffset());
-        assertEquals("value\n", modell.getProperty("org.eclipse.3"));
+        assertEquals(
+    			"org.eclipse.1:value\n" +
+                "org.eclipse.2=value\n" +
+                "org.eclipse.3 value\n",
+				props.get());
     }
+    
+    public void testInserAfterUniCode() throws Exception {
+        Document doc = new Document( 
+            "org.eclipse.1=\\u00ea\n" +
+            "org.eclipse.3=value3\n");
+        PropertyFileDocumentModell modell = new PropertyFileDocumentModell(doc);
+        
+        InsertEdit insertEdit = modell.insert(new KeyValuePair("org.eclipse.2", "value2"));
+        
+        insertEdit.apply(doc);
+        
+        assertEquals(
+        		"org.eclipse.1=\\u00ea\n" +
+        		"org.eclipse.2=value2\n" +
+            	"org.eclipse.3=value3\n",
+				doc.get());
+    }  
+    
+    public void testRemovingOfKey() throws Exception {
+    	Document props = new Document(
+            "org.eclipse.1=value1\n" +
+            "org.eclipse.2=value2\n" +
+            "org.eclipse.3=value3\n");
+    	PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+    	
+    	DeleteEdit deleteEdit = modell.remove("org.eclipse.2");
+    	deleteEdit.apply(props);
+    	
+    	assertEquals(
+    			"org.eclipse.1=value1\n" +
+                "org.eclipse.3=value3\n",
+				props.get());
+    }
+    
+    public void testRemovingOfLastKey() throws Exception {
+    	Document props = new Document(
+            "org.eclipse.1=value1\n" +
+            "org.eclipse.2=value2\n" +
+            "org.eclipse.3=value3\n");
+    	PropertyFileDocumentModell modell = new PropertyFileDocumentModell(props);
+    	
+    	DeleteEdit deleteEdit = modell.remove("org.eclipse.3");
+    	deleteEdit.apply(props);
+    	
+    	assertEquals(
+    			"org.eclipse.1=value1\n" +
+                "org.eclipse.2=value2\n",
+				props.get());
+    }    
     
     public void testEscapingOfComments() {
         PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document());        
         InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "value!please escape"));
         assertEquals("key=value\\!please escape\n", insertEdit.getText());
+    }
+    
+    public void testEscapingOfLineBreaks() {
+    	PropertyFileDocumentModell modell = 
+    		new PropertyFileDocumentModell(new Document());
+    	InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "value1\nvalue2"));
+    	assertEquals("key=value1\\nvalue2\n", insertEdit.getText());    	
+    }
+    
+    public void testEscapingOfUniCode() {
+    	PropertyFileDocumentModell modell = new PropertyFileDocumentModell(new Document());        
+        InsertEdit insertEdit = modell.insert(new KeyValuePair("key", "\u00ea"));
+        assertEquals("key=\\u00EA\n", insertEdit.getText());
     }
 }

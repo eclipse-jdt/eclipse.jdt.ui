@@ -48,12 +48,16 @@ public class NLSElement {
 	
 	/** Position of the // $NON_NLS_*$ tag */
 	private TextRegion fTagPosition;
+    
+	/** Index of the Element in an NLSLine */
+	private int fIndex;
 	
 	/**
 	 * Creates a new NLS element for the given string and position.
 	 */
-	public NLSElement(String value, int start, int length) {
+	public NLSElement(String value, int start, int length, int index) {
 		fValue= value;
+		fIndex= index;
 		Assert.isNotNull(fValue);
 		fPosition= new NLSTextRegion(start, length);
 	}
@@ -106,6 +110,10 @@ public class NLSElement {
 	
 	public static String createTagText(int index){
 		return TAG_PREFIX + index + TAG_POSTFIX;
+	}
+	
+	public String getTagText() {
+		return TAG_PREFIX + (fIndex + 1) + TAG_POSTFIX;
 	}
 
 	/* (Non-Javadoc)

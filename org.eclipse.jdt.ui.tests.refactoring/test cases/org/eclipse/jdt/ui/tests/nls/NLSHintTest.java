@@ -84,8 +84,51 @@ public class NLSHintTest extends TestCase {
         NLSHint hint = new NLSHint(nlsHolder.getLines(), cu);
         assertEquals(null, hint.getMessageClass());    	
     }
+    
+    /**
+     * nlsed-String must be an argument of method.
+     */
+    public void testNoAccessorClassHint1() throws Exception {
+    	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+    	String klazz = 
+    		"package test;\n" +
+    		"public class Test {" +
+			"	private String str=\"whateverKey\".toString();//$NON-NLS-1$\n" +
+			"}\n";
+    	ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHint hint = new NLSHint(nlsHolder.getLines(), cu);
+        assertEquals(null, hint.getMessageClass());    	
+    }
+       
+    /**
+     * method has no necessary static modifier. 
+     */
+    public void testNoAccessorClassHint2() throws Exception {
+    	IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
+    	String klazz = 
+    		"package test;\n" +
+    		"public class Test {" +
+			"	private String str=new Wrong().meth(\"whatever\");//$NON-NLS-1$\n" +
+			"}\n";
+    	
+    	String klazz2 =
+    		"package test;\n" +
+			"public class Wrong {\n" +
+			"	public void meth(String str) {};\n" +
+			"}\n";
+    	ICompilationUnit cu= pack.createCompilationUnit("Wrong.java", klazz2, false, null);
+    	cu= pack.createCompilationUnit("Test.java", klazz, false, null);
+    	
+        NLSHolder nlsHolder = NLSHolder.create(cu);
+        NLSHint hint = new NLSHint(nlsHolder.getLines(), cu);
+        assertEquals(null, hint.getMessageClass());    	
+    }
 
-    public void testNoMessageClassHint() throws Exception {
+    /**
+     * accessor class does not exist.
+     */
+    public void testNoAccessorClassHint3() throws Exception {
         IPackageFragment pack = fSourceFolder.createPackageFragment("test", false, null);
         String klazz = "package test;\n" + TEST_KLAZZ;
         ICompilationUnit cu= pack.createCompilationUnit("Test.java", klazz, false, null);

@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -110,7 +111,8 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			NLSUIMessages.getString("wizardPage2.accessor.dialog.emtpyMessage"), //$NON-NLS-1$
 			cu, root, updateListener, hint.getMessageClassPackage());
 
-		fAccessorClassName= createStringField(NLSUIMessages.getString("wizardPage2.className")); //$NON-NLS-1$
+		fAccessorClassName= createStringButtonField(NLSUIMessages.getString("wizardPage2.className"),
+		        NLSUIMessages.getString("wizardPage2.browse6"), createAccessorFileBrowseAdapter()); //$NON-NLS-1$
 		fSubstitutionPattern= createStringField(NLSUIMessages.getString("wizardPage2.substitutionPattern")); //$NON-NLS-1$
 
 		fResourceBundlePackage= new SourceFirstPackageSelectionDialogField(
@@ -243,6 +245,22 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 				fResourceBundleFile.setText(selectedFile.getName());
 		}
 	}
+	
+    protected void browseForAccessorClass() {
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
+		dialog.setIgnoreCase(false);
+		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Accessor_Selection")); //$NON-NLS-1$
+		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_accessor_file")); //$NON-NLS-1$
+		dialog.setElements(createAccessorListInput());
+		dialog.setFilter(fAccessorClassName.getText());
+		if (dialog.open() == Window.OK) {
+			IType selectedType= (IType)dialog.getFirstResult();
+			if (selectedType != null)
+				fAccessorClassName.setText(selectedType.getElementName());
+		}
+
+        
+    }
 
 	private Object[] createFileListInput() {
 		try {
@@ -255,6 +273,29 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			for (int i= 0; i < nonjava.length; i++) {
 				if (isPropertyFile(nonjava[i]))
 					result.add(nonjava[i]);
+			}
+			return result.toArray();
+
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, NLSUIMessages.getString("wizardPage2.externalizing"), NLSUIMessages //$NON-NLS-1$
+				.getString("wizardPage2.exception")); //$NON-NLS-1$
+			return new Object[0];
+		}
+	}
+	
+	private Object[] createAccessorListInput() {
+		try {
+
+			IPackageFragment fPkgFragment= fAccessorPackage.getSelected();
+			if (fPkgFragment == null)
+				return new Object[0];
+			List result= new ArrayList(1);
+			ICompilationUnit[] elements= fPkgFragment.getCompilationUnits();
+			for (int i= 0; i < elements.length; i++) {
+			    IType type= elements[i].findPrimaryType();
+				if ((type != null) && !type.isInterface()) {
+					result.add(type);
+				}
 			}
 			return result.toArray();
 
@@ -467,6 +508,15 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 
 			public void changeControlPressed(DialogField field) {
 				browseForPropertyFile();
+			}
+		};
+	}
+	
+	private IStringButtonAdapter createAccessorFileBrowseAdapter() {
+		return new IStringButtonAdapter() {
+
+			public void changeControlPressed(DialogField field) {
+				browseForAccessorClass();
 			}
 		};
 	}

@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSMessages;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -63,6 +64,12 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
         // add parameters parameter by parameter
         NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
+        NLSSubstitution[] subs = refac.getSubstitutions();        
+        for (int i = 0; i < subs.length; i++) {
+            subs[i].setState(NLSSubstitution.EXTERNALIZED);
+            subs[i].generateKey(subs, "");
+        }       
+        
         check(refac);
 
         refac.setAccessorPackage(fAccessorPackage);
@@ -180,6 +187,11 @@ public class NlsRefactoringCheckFinalConditionsTest extends TestCase {
 
     private NLSRefactoring prepareRefac(ICompilationUnit cu) {
         NLSRefactoring refac = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
+        NLSSubstitution[] subs = refac.getSubstitutions();
+        for (int i = 0; i < subs.length; i++) {
+            subs[i].setState(NLSSubstitution.EXTERNALIZED);
+            subs[i].generateKey(subs, "");
+        }  
         fillInValues(refac);
         return refac;
     }

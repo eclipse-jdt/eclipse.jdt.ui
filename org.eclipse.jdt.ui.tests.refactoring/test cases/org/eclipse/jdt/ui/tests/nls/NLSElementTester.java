@@ -41,7 +41,7 @@ public class NLSElementTester extends TestCase{
 		fOff= 3;
 		fLen= 5;
 		fVal= "test"; //$NON-NLS-1$
-		fEl= new NLSElement(fVal, fOff, fLen);
+		fEl= new NLSElement(fVal, fOff, fLen, 0);
 	}
 	
 	protected void tearDown(){

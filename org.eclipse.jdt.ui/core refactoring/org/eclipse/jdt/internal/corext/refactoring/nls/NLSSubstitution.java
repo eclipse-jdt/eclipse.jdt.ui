@@ -13,45 +13,156 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class NLSSubstitution {
-	
-	public static final int TRANSLATE= 0;
-	public static final int NEVER_TRANSLATE= 1;
-	public static final int SKIP= 2;
+	public static final int EXTERNALIZED= 0;
+	public static final int IGNORED= 1;
+	public static final int INTERNALIZED= 2;
 
-	public static final int DEFAULT= TRANSLATE;
+	public static final int DEFAULT= EXTERNALIZED;
 	public static final int STATE_COUNT= 3;
 	
-	public String key;
-	public NLSElement value;
-	public int task;
+	public String fKey;
+	public String fValue;
+	public NLSElement fNLSElement;
+	public int fState;
 	public boolean putToPropertyFile= true;
-	
-	public NLSSubstitution(NLSSubstitution el){
-		this.key= el.key;
-		this.value= el.value;
-		this.task= el.task;
+    private int fOldState;
+    private AccessorClassInfo fAccessorClassInfo;
+
+    // TODO: makes things easier...
+    private static String fPrefix;
+    
+    public NLSSubstitution(int state, String value, NLSElement element) {        
+		fNLSElement= element;
+		fValue = value;
+		fState= state;
+		fOldState = state;
+		Assert.isTrue(state == EXTERNALIZED || state == IGNORED || state == INTERNALIZED);
+	}
+    
+	public NLSSubstitution(int state, String key, String value, NLSElement element, AccessorClassInfo accessorClassInfo) {
+	    this(state, value, element);
+	    if (state != EXTERNALIZED) {
+	        throw new IllegalArgumentException("Set to INTERNALIZE/IGNORED State with different Constructor");	        
+	    }
+	    fKey = key;	    
+	    fAccessorClassInfo = accessorClassInfo;
 	}
 	
-	public NLSSubstitution(String key, NLSElement element, int task) {
-		this.key= key;
-		this.value= element;
-		this.task= task;
-		Assert.isTrue(task == TRANSLATE || task == NEVER_TRANSLATE || task == SKIP);
-	}
-	
+	//util
 	public static int countItems(NLSSubstitution[] elems, int task){
-		Assert.isTrue(task == NLSSubstitution.TRANSLATE 
-				   || task == NLSSubstitution.NEVER_TRANSLATE 
-				   || task == NLSSubstitution.SKIP);
+		Assert.isTrue(task == NLSSubstitution.EXTERNALIZED 
+				   || task == NLSSubstitution.IGNORED 
+				   || task == NLSSubstitution.INTERNALIZED);
 		int result= 0;
 		for (int i= 0; i < elems.length; i++){
-			if (elems[i].task == task)
+			if (elems[i].fState == task)
 				result++;
 		}	
 		return result;   
 	}
   
 	public String getKeyWithPrefix(String prefix) {
-		return prefix + key;
+	    return prefix + fKey;	
 	}
+	
+    public String getKey() {
+        return fKey;
+    }
+    
+    public void setKey(String key) {
+        this.fKey = key;
+    }    
+    
+    public void setValue(String value) {
+        this.fValue = value;
+    }
+    
+    public String getValue() {
+        return fValue;
+    }
+    
+    public int getState() {
+        return fState;
+    }
+    
+    public void setState(int state) {
+        this.fState = state;
+    }
+    
+    public boolean hasChanged() {     
+        return !(fState == fOldState);
+    }
+
+    public int getOldState() {
+        return fOldState;
+    }
+    
+    public AccessorClassInfo getAccessorClassInfo() {
+        return fAccessorClassInfo;
+    }
+    
+    public void setPrefix(String prefix) {
+        fPrefix = prefix;
+    }
+    
+    public boolean hasDuplicateKey(NLSSubstitution[] substitutions, String prefix) {
+        if (fState == EXTERNALIZED) {
+            String key;
+            if (hasChanged()) {
+                key = prefix + fKey;                
+            } else {
+                key = fKey;
+            }
+            int counter = 0;
+            for (int i = 0; i < substitutions.length; i++) {
+                NLSSubstitution substitution = substitutions[i];
+                                
+                if (substitution.getState() == EXTERNALIZED) {
+                    if (substitution.hasChanged()) {
+                        if (substitution.getKeyWithPrefix(prefix).equals(key)) {
+                            counter++;
+                        }
+                    } else {
+                        if (substitution.getKey().equals(key)) {
+                            counter++;
+                        }                    
+                    }
+                }
+            }
+            if (counter > 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public void generateKey(NLSSubstitution[] substitutions, String keyPrefix) {
+    	if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasChanged())) {    		
+    		int counter = 0;
+    		fKey = createKey(counter);
+    		while(true) {
+    			int i;
+    			for (i = 0; i < substitutions.length; i++) {
+    				NLSSubstitution substitution = substitutions[i];
+    				if ((substitution == this) || (substitution.fState != EXTERNALIZED)) continue;
+    				if (substitution.hasChanged()) {
+    					if (substitution.getKey().equals(fKey)) {
+        					fKey = createKey(counter++);
+        					break;
+        				}
+    				} else {
+    					if (substitution.getKey().equals(getKeyWithPrefix(keyPrefix))) {
+    						fKey = createKey(counter++);
+    						break;
+    					}
+    				}
+    			}
+    			if (i == substitutions.length) return;
+    		}
+    	}
+    }
+    
+    private String createKey(int counter) {
+    	return String.valueOf(counter);
+    }
 }

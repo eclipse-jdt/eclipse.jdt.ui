@@ -32,6 +32,8 @@ public class AllTests {
         suite.addTest(NLSHintTest.allTests());
         suite.addTest(PropertyFileDocumentModellTest.suite());
         suite.addTest(SimpleLineReaderTest.suite());
+        suite.addTest(NLSHolderTest.suite());
+        suite.addTest(NLSSubstitutionTest.suite());
 
         return suite;
 	}

@@ -18,6 +18,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -43,6 +44,8 @@ class AccessorClass {
 	private final IPath fAccessorPath;
 	private final IPath fResourceBundlePath;
 	private final IPackageFragment fAccessorPackage;
+	
+	private static String lineDelim = System.getProperty("line.separator", "\n");
 
 	private AccessorClass(ICompilationUnit cu, String accessorClassname, CodeGenerationSettings codeGenerationSettings,
 		IPath accessorPath, IPackageFragment accessorPackage, IPath resourceBundlePath) {
@@ -73,9 +76,9 @@ class AccessorClass {
 		try {
 			newCu= WorkingCopyUtil.getNewWorkingCopy(fAccessorPackage, fAccessorPath.lastSegment());
 
-			String comment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, NLSRefactoring.fgLineDelimiter);
+			String comment= CodeGeneration.getTypeComment(newCu, fAccessorClassName, lineDelim);
 			newCu.getBuffer().setContents(
-				CodeGeneration.getCompilationUnitContent(newCu, comment, createClass(), NLSRefactoring.fgLineDelimiter));
+				CodeGeneration.getCompilationUnitContent(newCu, comment, createClass(), lineDelim));
 			addImportsToAccessorCu(newCu, pm);
 			return newCu.getSource();
 		} finally {
@@ -94,7 +97,7 @@ class AccessorClass {
 	}
 
 	private String createClass() throws CoreException {
-		String ld= NLSRefactoring.fgLineDelimiter; //want shorter name
+		String ld= lineDelim; //want shorter name
 		return "public class " + fAccessorClassName + " {" //$NON-NLS-2$ //$NON-NLS-1$
 			+ "private static final String " + NLSRefactoring.BUNDLE_NAME + " = \"" + getResourceBundleName() + "\";" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			+ NLSElement.createTagText(1) + ld + ld 
@@ -108,26 +111,26 @@ class AccessorClass {
 	}
 
 	private String createGetStringMethod() throws CoreException {
-		String bodyStatement= new StringBuffer().append("try {").append(NLSRefactoring.fgLineDelimiter) //$NON-NLS-1$
+		String bodyStatement= new StringBuffer().append("try {").append(lineDelim) //$NON-NLS-1$
 			.append("return ") //$NON-NLS-1$
-			.append(getResourceBundleConstantName()).append(".getString(key);").append(NLSRefactoring.fgLineDelimiter) //$NON-NLS-1$
-			.append("} catch (MissingResourceException e) {").append(NLSRefactoring.fgLineDelimiter) //$NON-NLS-1$
-			.append("return '!' + key + '!';").append(NLSRefactoring.fgLineDelimiter) //$NON-NLS-1$
+			.append(getResourceBundleConstantName()).append(".getString(key);").append(lineDelim) //$NON-NLS-1$
+			.append("} catch (MissingResourceException e) {").append(lineDelim) //$NON-NLS-1$
+			.append("return '!' + key + '!';").append(lineDelim) //$NON-NLS-1$
 			.append("}").toString(); //$NON-NLS-1$
 
 		String methodBody= CodeGeneration.getMethodBodyContent(fCu, fAccessorClassName, 
 			"getString", false, bodyStatement, //$NON-NLS-1$
-			NLSRefactoring.fgLineDelimiter); 
+			lineDelim); 
 		if (methodBody == null) {
 			methodBody= ""; //$NON-NLS-1$
 		}
 		return "public static String getString(String key) {" //$NON-NLS-1$
-			+ NLSRefactoring.fgLineDelimiter + methodBody + NLSRefactoring.fgLineDelimiter + '}';
+			+ lineDelim + methodBody + lineDelim + '}';
 	}
 
-	private String createConstructor() throws CoreException {
+	private String createConstructor() {
 		return "private " + fAccessorClassName + "(){" + //$NON-NLS-2$//$NON-NLS-1$
-				NLSRefactoring.fgLineDelimiter + '}';
+				lineDelim + '}';
 	}
 
 	/* Currently not used.
@@ -136,12 +139,12 @@ class AccessorClass {
 			String comment= CodeGeneration.getMethodComment(fCu, fAccessorClassName, "getString", //$NON-NLS-1$
 				new String[]{"key"}, //$NON-NLS-1$
 				new String[0], "QString;", //$NON-NLS-1$
-				null, NLSRefactoring.fgLineDelimiter);
+				null, lineDelim);
 			if (comment == null) {
 				return "";//$NON-NLS-1$
 			}
 
-			return comment + NLSRefactoring.fgLineDelimiter;
+			return comment + lineDelim;
 		} else {
 			return "";//$NON-NLS-1$
 		}
@@ -164,7 +167,7 @@ class AccessorClass {
 			if (el instanceof IPackageFragment) {
 				IPackageFragment p= (IPackageFragment)el;
 				return p.getElementName() + '.' + getPropertyFileNameWithoutExtension();
-			} else if (el instanceof IPackageFragmentRoot) {
+			} else if ((el instanceof IPackageFragmentRoot) || (el instanceof IJavaProject)) {
 				return getPropertyFileNameWithoutExtension();
 			}
 		}

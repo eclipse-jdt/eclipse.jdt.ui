@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.nls.NLSSubstitution;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
@@ -124,7 +125,13 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
     
     private NLSRefactoring createDefaultNls(ICompilationUnit cu) {
         NLSRefactoring nls = NLSRefactoring.create(cu, fHelper.fCodeGenerationSettings);
+        // this is done by the ui
         
+        NLSSubstitution[] substitutions = nls.getSubstitutions();
+        
+        substitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        substitutions[0].generateKey(substitutions, "");
+                
         nls.setAccessorPackage(fHelper.getPackageFragment("/TestSetupProject/src1/p")); //$NON-NLS-1$
         nls.setPropertyFilePath(fHelper.getFile("/TestSetupProject/src2/p/test.properties").getFullPath()); //$NON-NLS-1$
         nls.setAccessorClassName("Messages"); //$NON-NLS-1$
