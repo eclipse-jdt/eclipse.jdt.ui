@@ -128,7 +128,7 @@ public class MoveInnerToTopAction extends SelectionDispatchAction {
 	}
 
 	private boolean shouldAcceptElement(IType type) {
-		if (type == null)
+		if (type == null || ! type.exists())
 			return false;
 		try{
 			fRefactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings());

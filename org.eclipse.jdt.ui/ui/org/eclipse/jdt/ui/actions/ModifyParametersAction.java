@@ -147,6 +147,9 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 	}
 
 	private boolean shouldAcceptElement(IMethod method) {
+		if (method == null || ! method.exists())
+			return false;
+		
 		try{
 			fRefactoring= new ModifyParametersRefactoring(method);
 			return fRefactoring.checkPreactivation().isOK();
