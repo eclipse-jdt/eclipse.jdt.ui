@@ -311,7 +311,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(layout);
 
-		int heightHint= converter.convertHeightInCharsToPixels(5);
+		int heightHint= converter.convertHeightInCharsToPixels(7);
 
 		fNameConventionList.doFillIntoGrid(composite, 3);
 		LayoutUtil.setHorizontalSpan(fNameConventionList.getLabelControl(null), 2);
