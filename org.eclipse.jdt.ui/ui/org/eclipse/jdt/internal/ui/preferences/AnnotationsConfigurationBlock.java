@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * 
  * @since 3.0
  */
-public class AnnotationsConfigurationBlock {
+public class AnnotationsConfigurationBlock implements IPreferenceConfigurationBlock {
 	
 	private OverlayPreferenceStore fStore;
 	private ColorEditor fAnnotationForegroundColorEditor;
@@ -113,7 +113,7 @@ public class AnnotationsConfigurationBlock {
 		return keys;
 	}
 
-	Control createContents(Composite parent) {
+	public Control createControl(Composite parent) {
 		
 		PixelConverter pixelConverter= new PixelConverter(parent);
 
@@ -302,17 +302,15 @@ public class AnnotationsConfigurationBlock {
 	/*
 	 * @see PreferencePage#performOk()
 	 */
-	public boolean performOk() {
+	public void performOk() {
 //		restoreFromPreferences();
 //		initializeFields();
-		
-		return true;
 	}
 	
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */
-	protected void performDefaults() {
+	public void performDefaults() {
 		
 		fStore.loadDefaults();
 		handleAnnotationListSelection();
@@ -364,7 +362,7 @@ public class AnnotationsConfigurationBlock {
 		}
 	}
 	
-	void initialize() {
+	public void initialize() {
 		
 		for (int i= 0; i < fAnnotationColorListModel.length; i++)
 			fAnnotationList.add(fAnnotationColorListModel[i][0]);
@@ -437,5 +435,12 @@ public class AnnotationsConfigurationBlock {
 		if (fStatus == null)
 			fStatus= new StatusInfo();
 		return new StatusInfo();
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
+	 * @since 3.0
+	 */
+	public void dispose() {
 	}
 }

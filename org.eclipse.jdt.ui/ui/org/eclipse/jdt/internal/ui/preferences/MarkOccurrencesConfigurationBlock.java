@@ -33,7 +33,6 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
@@ -41,7 +40,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
  * 
  * @since 2.1
  */
-class MarkOccurrencesConfigurationBlock {
+class MarkOccurrencesConfigurationBlock implements IPreferenceConfigurationBlock {
 
 	private OverlayPreferenceStore fStore;
 	
@@ -64,14 +63,11 @@ class MarkOccurrencesConfigurationBlock {
 	 */
 	private ArrayList fMasterSlaveListeners= new ArrayList();
 	
-	private JavaEditorPreferencePage fMainPreferencePage;
-
 	private StatusInfo fStatus;
 
 	public MarkOccurrencesConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
 		Assert.isNotNull(mainPreferencePage);
 		Assert.isNotNull(store);
-		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
 		
 		fStore.addKeys(createOverlayStoreKeys());
@@ -189,7 +185,7 @@ class MarkOccurrencesConfigurationBlock {
 		control.setLayoutData(gridData);		
 	}
 
-	void initialize() {
+	public void initialize() {
 		initializeFields();
 	}
 
@@ -211,10 +207,10 @@ class MarkOccurrencesConfigurationBlock {
         
 	}
 
-	void performOk() {
+	public void performOk() {
 	}
 
-	void performDefaults() {
+	public void performDefaults() {
 		restoreFromPreferences();
 		initializeFields();
 	}
@@ -229,13 +225,10 @@ class MarkOccurrencesConfigurationBlock {
 		return fStatus;
 	}
 
-	// don't delete might be used later
-	private void updateStatus() {
-		if (fStatus.isOK())
-			fMainPreferencePage.updateStatus(fStatus);
-		else {
-			fMainPreferencePage.setValid(false);
-			StatusUtil.applyToStatusLine(fMainPreferencePage, fStatus);
-		}
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
+	 * @since 3.0
+	 */
+	public void dispose() {
 	}
 }

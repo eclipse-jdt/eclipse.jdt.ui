@@ -44,7 +44,7 @@ import org.eclipse.ui.texteditor.quickdiff.ReferenceProviderDescriptor;
  * 
  * @since 3.0
  */
-class QuickdiffConfigurationBlock {
+class QuickdiffConfigurationBlock implements IPreferenceConfigurationBlock {
 	
 	private IPreferenceStore fStore;
 	
@@ -366,5 +366,14 @@ class QuickdiffConfigurationBlock {
 			quickdiffOverviewRuler |= fStore.getBoolean(fQuickDiffModel[i][1]);
 		}
 		fQuickDiffOverviewRulerCheckBox.setSelection(quickdiffOverviewRuler);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.preferences.IPreferenceConfigurationBlock#dispose()
+	 * @since 3.0
+	 */
+	public void dispose() {
+		// XXX Auto-generated method stub
+		
 	}
 }

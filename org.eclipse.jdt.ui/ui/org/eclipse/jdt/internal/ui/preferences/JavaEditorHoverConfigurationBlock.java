@@ -95,10 +95,8 @@ class JavaEditorHoverConfigurationBlock {
 	};
 	
 
-	public JavaEditorHoverConfigurationBlock(JavaEditorPreferencePage mainPreferencePage, OverlayPreferenceStore store) {
-		Assert.isNotNull(mainPreferencePage);
+	public JavaEditorHoverConfigurationBlock(OverlayPreferenceStore store) {
 		Assert.isNotNull(store);
-		fMainPreferencePage= mainPreferencePage;
 		fStore= store;
 		fStore.addKeys(createOverlayStoreKeys());
 	}
@@ -472,5 +470,12 @@ class JavaEditorHoverConfigurationBlock {
 		gd.horizontalSpan= 2;
 		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
 		filler.setLayoutData(gd);
+	}
+	
+	/*
+	 * @see DialogPage#dispose()
+	 */
+	public void dispose() {
+		// nothing to dispose
 	}
 }

@@ -1086,7 +1086,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		initializeDefaultColors();
 		
-		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(this, fOverlayStore);
+		fJavaEditorHoverConfigurationBlock= new JavaEditorHoverConfigurationBlock(fOverlayStore);
 		fOccurrencesConfigurationBlock= new MarkOccurrencesConfigurationBlock(this, fOverlayStore);
 		fFoldingConfigurationBlock= new FoldingConfigurationBlock(fOverlayStore);
 		fAnnotationsConfigurationBlock= new AnnotationsConfigurationBlock(fOverlayStore);
