@@ -17,17 +17,20 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IResource;
-
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IBuffer;
@@ -42,7 +45,6 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
@@ -63,9 +65,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class MoveCuUpdateCreator {
 	
@@ -133,7 +132,7 @@ public class MoveCuUpdateCreator {
 			pm.beginTask("", 3);  //$NON-NLS-1$
 		  	pm.subTask(RefactoringCoreMessages.getFormattedString("MoveCuUpdateCreator.searching", movedUnit.getElementName())); //$NON-NLS-1$
 		  	
-			if (isDestinationAnotherFragmentOfSamePackage(movedUnit)){
+			if (isInAnotherFragmentOfSamePackage(movedUnit, fDestination)){
 				pm.worked(3);
 				return;
 			}
@@ -285,10 +284,6 @@ public class MoveCuUpdateCreator {
 		return false; 
 	}
 
-	private boolean isDestinationAnotherFragmentOfSamePackage(ICompilationUnit movedUnit) {
-		return isInAnotherFragmentOfSamePackage(movedUnit, fDestination);
-	}
-
 	private boolean isReferenceInAnotherFragmentOfSamePackage(ICompilationUnit referencingCu, ICompilationUnit movedUnit) {
 		if (referencingCu == null)
 			return false;
@@ -304,19 +299,12 @@ public class MoveCuUpdateCreator {
 		IPackageFragment cuPack= (IPackageFragment) cu.getParent();
 		return ! cuPack.equals(pack) && JavaModelUtil.isSamePackage(cuPack, pack);
 	}
-	
-	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		IJavaSearchScope scope= RefactoringScopeFactory.create(unit);
-		SearchPattern pattern= createSearchPattern(unit);
-		return RefactoringSearchEngine.search(pattern, scope, new Collector(getPackage(unit)), new SubProgressMonitor(pm, 1), status);
-	}
 
-	private static IPackageFragment getPackage(ICompilationUnit cu){
-		return (IPackageFragment)cu.getParent();
-	}
-	
-	private static SearchPattern createSearchPattern(ICompilationUnit cu) throws JavaModelException{
-		return RefactoringSearchEngine.createOrPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
+	private static SearchResultGroup[] getReferences(ICompilationUnit unit, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		final SearchPattern pattern= RefactoringSearchEngine.createOrPattern(unit.getTypes(), IJavaSearchConstants.REFERENCES);
+		if (pattern != null)
+			return RefactoringSearchEngine.search(pattern, RefactoringScopeFactory.create(unit), new Collector(((IPackageFragment) unit.getParent())), new SubProgressMonitor(pm, 1), status);
+		return new SearchResultGroup[] {};
 	}
 
 	private final static class Collector extends CollectingSearchRequestor {
