@@ -7,13 +7,6 @@
     vendor-name = "Object Technology International, Inc."
     class="org.eclipse.jdt.internal.ui.JavaPlugin">
 
-
-<!-- =========================================================================== -->
-<!-- The Java Plugin                                                             -->
-<!-- {purpose goes here}                                                         -->
-<!-- =========================================================================== -->
-
-
 <requires> 
   <import plugin="org.eclipse.ui"/>
   <import plugin="org.eclipse.core.resources"/>
@@ -70,6 +63,10 @@
 	<perspectiveExtension 
 		targetID="org.eclipse.debug.ui.DebugPerspective">
 		<perspectiveShortcut id="org.eclipse.jdt.ui.JavaPerspective"/>
+	</perspectiveExtension>
+	<perspectiveExtension 
+		targetID="org.eclipse.debug.ui.DebugPerspective">
+		<actionSet id="org.eclipse.jdt.ui.JavaActionSet"/>
 	</perspectiveExtension>
     <perspectiveExtension 
     	targetID="org.eclipse.debug.ui.DebugPerspective"> 
