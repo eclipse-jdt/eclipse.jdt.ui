@@ -1088,7 +1088,7 @@ public class JavadocOptionsManager {
 			IVMInstallType jreType= jreTypes[i];
 			IVMInstall[] installs= jreType.getVMInstalls();
 			for (int k= 0; k < installs.length; k++) {
-				File res= getCommand(installs[i]);
+				File res= getCommand(installs[k]);
 				if (res != null) {
 					return res;
 				}
