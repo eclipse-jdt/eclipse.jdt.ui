@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -390,7 +390,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
                 VariableDeclarationFragment fragment= fragments[j];
                 if (fFieldName.equals(fragment.getName().getIdentifier())){
                 	//cannot conflict with more than 1 name
-                	Context context= JavaSourceContext.create(fCu, fragment);
+                	Context context= JavaStatusContext.create(fCu, fragment);
                 	return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.Name_conflict_with_field"), context); //$NON-NLS-1$
                 }
             }

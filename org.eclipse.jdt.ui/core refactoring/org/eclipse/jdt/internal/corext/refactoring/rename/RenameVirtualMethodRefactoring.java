@@ -20,7 +20,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -90,7 +90,7 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 
 			IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), getMethod(), getNewName());
 			if (hierarchyMethod != null){
-				Context context= JavaSourceContext.create(hierarchyMethod);
+				Context context= JavaStatusContext.create(hierarchyMethod);
 				result.addError(RefactoringCoreMessages.getFormattedString("RenameVirtualMethodRefactoring.hierarchy_declares1", getNewName()), context); //$NON-NLS-1$
 			}	
 

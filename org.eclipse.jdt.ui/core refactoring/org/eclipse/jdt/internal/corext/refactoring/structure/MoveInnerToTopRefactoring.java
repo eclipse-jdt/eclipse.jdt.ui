@@ -92,7 +92,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -198,7 +198,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		if (fType.getField(name).exists()){
 			Object[] keys= new String[]{name, fType.getElementName()};
 			String msg= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.already_declared", keys); //$NON-NLS-1$
-			result.addError(msg, JavaSourceContext.create(fType.getField(name)));
+			result.addError(msg, JavaStatusContext.create(fType.getField(name)));
 		}	
 		return result;	
 	}
@@ -273,7 +273,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (fEnclosingInstanceFieldName.equals(param.getName().getIdentifier())){
 					String msg= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.name_used", new String[]{param.getName().getIdentifier(), fType.getElementName()}); //$NON-NLS-1$
-					result.addError(msg, JavaSourceContext.create(getInputTypeCu(), param));
+					result.addError(msg, JavaStatusContext.create(getInputTypeCu(), param));
 				}
 			}
 		}

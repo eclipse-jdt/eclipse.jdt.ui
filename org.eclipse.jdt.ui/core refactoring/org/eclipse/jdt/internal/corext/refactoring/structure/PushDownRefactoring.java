@@ -65,7 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -512,7 +512,7 @@ public class PushDownRefactoring extends Refactoring {
 				IMember referencingMember= (IMember)element;	
 				Object[] keys= {label, createLabel(referencingMember)};
 				String msg= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.referenced", keys); //$NON-NLS-1$
-				result.addError(msg, JavaSourceContext.create(referencingMember));
+				result.addError(msg, JavaStatusContext.create(referencingMember));
 			}
 		}
 		pm.done();
@@ -555,7 +555,7 @@ public class PushDownRefactoring extends Refactoring {
 				IType type= accessedTypes[j];
 				if (! canBeAccessedFrom(type, targetClass)){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.type_not_accessible", new String[]{createTypeLabel(type), createTypeLabel(targetClass)}); //$NON-NLS-1$
-					result.addError(message, JavaSourceContext.create(type));
+					result.addError(message, JavaStatusContext.create(type));
 				}	
 			}
 		}
@@ -576,7 +576,7 @@ public class PushDownRefactoring extends Refactoring {
 										canBeAccessedFrom(field, targetClass);
 				if (! isAccessible){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.field_not_accessible", new String[]{createFieldLabel(field), createTypeLabel(targetClass)}); //$NON-NLS-1$
-					result.addError(message, JavaSourceContext.create(field));
+					result.addError(message, JavaStatusContext.create(field));
 				} 
 			}
 		}
@@ -597,7 +597,7 @@ public class PushDownRefactoring extends Refactoring {
 									   pushedDownList.contains(method);
 				if (! isAccessible){
 					String message= RefactoringCoreMessages.getFormattedString("PushDownRefactoring.method_not_accessible", new String[]{createMethodLabel(method), createTypeLabel(targetClass)}); //$NON-NLS-1$
-					result.addError(message, JavaSourceContext.create(method));
+					result.addError(message, JavaStatusContext.create(method));
 				}
 			}
 		}
@@ -681,7 +681,7 @@ public class PushDownRefactoring extends Refactoring {
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
 				if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)){
-					Context context= JavaSourceContext.create(cu, node);
+					Context context= JavaStatusContext.create(cu, node);
 					result.addError(msg, context);
 				}
 			}

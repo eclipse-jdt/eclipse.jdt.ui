@@ -49,7 +49,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -245,7 +245,7 @@ public class Checks {
 			if (JdtFlags.isNative(methods[i])){
 				String msg= RefactoringCoreMessages.getFormattedString("Checks.method_native",  //$NON-NLS-1$
 								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
-				result.addError(msg, JavaSourceContext.create(methods[i])); 
+				result.addError(msg, JavaStatusContext.create(methods[i])); 
 			}				
 		}
 		return result;
@@ -264,7 +264,7 @@ public class Checks {
 		if (method != null) 
 			result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.exists",  //$NON-NLS-1$
 				new Object[] {methodName, type.getName()}),
-				JavaSourceContext.create(method, scope));
+				JavaStatusContext.create(method, scope));
 		return result;
 	}
 	
@@ -295,11 +295,11 @@ public class Checks {
 			if (returnTypeClash) {
 				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.returnTypeClash", //$NON-NLS-1$
 					new Object[] {methodName, dc.getName()}),
-					JavaSourceContext.create(method, scope));
+					JavaStatusContext.create(method, scope));
 			} else {
 				result.addError(RefactoringCoreMessages.getFormattedString("Checks.methodName.overrides", //$NON-NLS-1$
 					new Object[] {methodName, dc.getName()}),
-					JavaSourceContext.create(method, scope));
+					JavaStatusContext.create(method, scope));
 			}
 		}
 		return result;

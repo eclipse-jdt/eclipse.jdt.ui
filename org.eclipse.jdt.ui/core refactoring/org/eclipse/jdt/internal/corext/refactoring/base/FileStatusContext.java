@@ -10,54 +10,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.jdt.core.ISourceRange;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A file context can be used to annotate a </code>RefactoringStatusEntry<code> with
  * detailed information about an error detected in an <code>IFile</code>.
  */
-public class FileContext extends Context {
+public class FileStatusContext extends Context {
 
 	private IFile fFile;
 	private ISourceRange fSourceRange;
 
-	private FileContext(IFile file, ISourceRange range) {
+	/**
+	 * Creates an status entry context for the given file and source range
+	 * 
+	 * @param file the file that has caused the error. Must not be <code>
+	 *  null</code>
+	 * @param range the source range of the error inside the given file or
+	 *  <code>null</code> if now source range is known
+	 */
+	public FileStatusContext(IFile file, ISourceRange range) {
+		Assert.isNotNull(file);
 		fFile= file;
 		fSourceRange= range;
 	}
 
-	/**
-	 * Creates an status entry context for the given file and source range
-	 * 
-	 * @param file the file that has caused the error
-	 * @param range the source range of the error inside the given file
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
-	 * 	context cannot be created
-	 */
-	public static Context create(IFile file, ISourceRange range) {
-		if (file == null)
-			return NULL_CONTEXT;
-		return new FileContext(file, range);
-	}
-	
-	/**
-	 * Creates an status entry context for the given file and source range
-	 * 
-	 * @param resource the resource that has caused the error
-	 * @param range the source range of the error inside the given file
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
-	 * 	context cannot be created
-	 */
-	public static Context create(IResource resource, ISourceRange range) {
-		if (resource instanceof IFile)
-			return create((IFile)resource, range);
-		return NULL_CONTEXT;
-	}
-	
 	/**
 	 * Returns the context's file.
 	 * 

@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -243,7 +243,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				continue;
 			String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.native", //$NON-NLS-1$
 				JavaElementUtil.createMethodSignature((IMethod)fMembers[i]));
-			result.addWarning(message, JavaSourceContext.create(fMembers[i]));
+			result.addWarning(message, JavaStatusContext.create(fMembers[i]));
 			pm.worked(1);
 		}
 		pm.done();
@@ -257,7 +257,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			//XXX issues too many warnings - should check references to moved members
 			if (! isVisibleFrom(fMembers[i], fMembers[i].getDeclaringType(), fDestinationType)){
 				String message= createNonAccessibleMemberMessage(fMembers[i], fMembers[i].getDeclaringType(), true);
-				result.addWarning(message, JavaSourceContext.create(fMembers[i]));
+				result.addWarning(message, JavaStatusContext.create(fMembers[i]));
 			}	
 			pm.worked(1);
 		}
@@ -348,7 +348,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				continue;
 			if (! isVisibleFrom(accessedMethods[i], fDestinationType, accessedMethods[i].getDeclaringType())){
 				String msg= createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType, false);
-				result.addWarning(msg, JavaSourceContext.create(accessedMethods[i]));
+				result.addWarning(msg, JavaStatusContext.create(accessedMethods[i]));
 			}	
 		}
 		return result;
@@ -365,7 +365,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				continue;
 			if (! isVisibleFrom(accessedTypes[i], fDestinationType, accessedTypes[i].getDeclaringType())){
 				String msg= createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType, false);
-				result.addWarning(msg, JavaSourceContext.create(accessedTypes[i]));
+				result.addWarning(msg, JavaStatusContext.create(accessedTypes[i]));
 			}	
 		}
 		return result;
@@ -382,7 +382,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 				continue;
 			if (! isVisibleFrom(accessedFields[i], fDestinationType, accessedFields[i].getDeclaringType())){
 				String msg= createNonAccessibleMemberMessage(accessedFields[i], fDestinationType, false);
-				result.addWarning(msg, JavaSourceContext.create(accessedFields[i]));
+				result.addWarning(msg, JavaStatusContext.create(accessedFields[i]));
 			}	
 		}
 		return result;

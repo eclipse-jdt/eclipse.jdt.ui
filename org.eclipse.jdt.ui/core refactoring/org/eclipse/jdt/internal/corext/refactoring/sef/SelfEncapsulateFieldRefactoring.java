@@ -57,7 +57,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -325,7 +325,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (messages.length != 0) {
 			result.addError(RefactoringCoreMessages.getFormattedString(
 				"SelfEncapsulateField.compiler_errors_update", //$NON-NLS-1$
-				element.getElementName()), JavaSourceContext.create(element));
+				element.getElementName()), JavaStatusContext.create(element));
 		}
 		return true;
 	}

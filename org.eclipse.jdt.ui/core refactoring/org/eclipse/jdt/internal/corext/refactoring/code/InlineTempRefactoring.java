@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -201,7 +201,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int start= assignmentFinder.getFirstAssignment().getStartPosition();
 		int length= assignmentFinder.getFirstAssignment().getLength();
 		ISourceRange range= new SourceRange(start, length);
-		Context context= JavaSourceContext.create(fCu, range);	
+		Context context= JavaStatusContext.create(fCu, range);	
 		String message= RefactoringCoreMessages.getFormattedString("InlineTempRefactoring.assigned_more_once", getTempName());//$NON-NLS-1$
 		return RefactoringStatus.createFatalErrorStatus(message, context);
 	}

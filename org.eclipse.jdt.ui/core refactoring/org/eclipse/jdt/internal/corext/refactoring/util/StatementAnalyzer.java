@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 /**
@@ -70,7 +70,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			ISourceRange range= new SourceRange(selectionOffset, node.getStartPosition() - selectionOffset + 1);
 			invalidSelection(
 				RefactoringCoreMessages.getString("StatementAnalyzer.beginning_of_selection"),  //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, range));
+				JavaStatusContext.create(fCUnit, range));
 			return;
 		}	
 		
@@ -80,7 +80,7 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 			ISourceRange range= new SourceRange(ASTNodes.getExclusiveEnd(node), pos - ASTNodes.getExclusiveEnd(node));
 			invalidSelection(
 				RefactoringCoreMessages.getString("StatementAnalyzer.end_of_selection"), 	//$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, range)); 
+				JavaStatusContext.create(fCUnit, range)); 
 		}
 	}
 	

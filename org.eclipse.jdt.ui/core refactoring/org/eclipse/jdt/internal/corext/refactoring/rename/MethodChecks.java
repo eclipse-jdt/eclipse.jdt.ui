@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -66,7 +66,7 @@ public class MethodChecks {
 		if (overrides == null)
 			return null;
 
-		Context context= JavaSourceContext.create(overrides);
+		Context context= JavaStatusContext.create(overrides);
 		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.overrides", //$NON-NLS-1$
 				new String[]{JavaElementUtil.createMethodSignature(overrides), JavaModelUtil.getFullyQualifiedName(overrides.getDeclaringType())});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, overrides, RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD);
@@ -78,7 +78,7 @@ public class MethodChecks {
 		if (inInterface == null)
 			return null;
 
-		Context context= JavaSourceContext.create(inInterface);
+		Context context= JavaStatusContext.create(inInterface);
 		String message= RefactoringCoreMessages.getFormattedString("MethodChecks.implements", //$NON-NLS-1$
 				new String[]{JavaElementUtil.createMethodSignature(inInterface), JavaModelUtil.getFullyQualifiedName(inInterface.getDeclaringType())});
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, inInterface, RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE);

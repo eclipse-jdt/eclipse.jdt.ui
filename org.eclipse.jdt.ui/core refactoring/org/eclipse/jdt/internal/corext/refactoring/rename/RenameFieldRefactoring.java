@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
@@ -436,7 +436,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 		String message= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.already_exists", //$NON-NLS-1$
 				new String[]{JavaElementUtil.createMethodSignature(accessor), JavaModelUtil.getFullyQualifiedName(fField.getDeclaringType())});
-		result.addError(message, JavaSourceContext.create(accessor));
+		result.addError(message, JavaStatusContext.create(accessor));
 		return result;
 	}
 	
@@ -479,7 +479,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
 																			new String[]{fField.getElementName(), getNewName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
-				result.addWarning(msg, JavaSourceContext.create(otherField));
+				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
 		}	
@@ -496,7 +496,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
 				 															new String[]{getNewName(), JavaModelUtil.getFullyQualifiedName(current)});
-				result.addWarning(msg, JavaSourceContext.create(otherField));
+				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			current= current.getDeclaringType();
 		}

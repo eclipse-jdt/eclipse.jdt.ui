@@ -22,7 +22,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
@@ -70,7 +70,7 @@ class InvocationAnalyzer {
 				addEntry(result,
 					RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					fSeverity,
-					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()),
+					JavaStatusContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()),
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW);
 			}
 		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
@@ -91,7 +91,7 @@ class InvocationAnalyzer {
 				addEntry(result,
 					RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
 					fSeverity,
-					JavaSourceContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()),
+					JavaStatusContext.create(fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration()),
 					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW);
 			}
 		}		
@@ -143,7 +143,7 @@ class InvocationAnalyzer {
 	private void addEntry(RefactoringStatus result, String message, int code) {
 		result.addEntry(new RefactoringStatusEntry(
 			message, fSeverity, 
-			JavaSourceContext.create(fCUnit, fInvocation),
+			JavaStatusContext.create(fCUnit, fInvocation),
 			null, code));
 	}
 	

@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -356,7 +357,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 			for (int i= 0; i < newProblems.length; i++) {
                 IProblem problem= newProblems[i];
                 if (problem.isError())
-                	result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
+                	result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
             }
 	
 			return result;

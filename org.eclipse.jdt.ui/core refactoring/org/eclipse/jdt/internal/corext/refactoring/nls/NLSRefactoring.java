@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
@@ -461,7 +461,7 @@ public class NLSRefactoring extends Refactoring {
 			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
 
 		if (key.startsWith("!") || key.startsWith("#")){ //$NON-NLS-1$ //$NON-NLS-2$
-			Context context= new StringContext(key, new SourceRange(0, 0));
+			Context context= new JavaStringStatusContext(key, new SourceRange(0, 0));
 			result.addWarning(NLSMessages.getString("NLSRefactoring.warning"), context); //$NON-NLS-1$
 		}	
 			

@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 
@@ -130,7 +130,7 @@ class AccessAnalyzer extends ASTVisitor {
 		ASTNode parent= node.getParent();
 		if (!(parent instanceof ExpressionStatement)) {
 			fStatus.addError(RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.cannot_convert_postfix_expression"),  //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, new SourceRange(node)));
+				JavaStatusContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}
 		fChange.addTextEdit(POSTFIX_ACCESS, new EncapsulatePostfixAccess(fGetter, fSetter, node));

@@ -14,15 +14,27 @@ import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public class StringContext extends Context {
+/**
+ * A Java string context can be used to annotate a </code>RefactoringStatusEntry<code> 
+ * with detailed information about an error detected in Java source code represented
+ * by a string.
+ */
+public class JavaStringStatusContext extends Context {
+	
 	private String fSource;
 	private ISourceRange fSourceRange;
-	
-	public StringContext(String source, ISourceRange sourceRange){
+
+	/**
+	 * Creates a new <code>JavaStringStatusContext</code>.
+	 * 
+	 * @param source the source code containing the error
+	 * @param range a source range inside <code>source</code> or
+	 *  <code>null</code> if no special source range is known.
+	 */	
+	public JavaStringStatusContext(String source, ISourceRange range){
 		Assert.isNotNull(source);
-		Assert.isNotNull(sourceRange);
 		fSource= source;
-		fSourceRange= sourceRange;
+		fSourceRange= range;
 	}
 	
 	public String getSource() {

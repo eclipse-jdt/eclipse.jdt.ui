@@ -44,7 +44,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
@@ -98,7 +98,7 @@ class SourceAnalyzer  {
 			if (binding == null && !status.hasFatalError()) {
 				status.addFatalError(
 					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
-					JavaSourceContext.create(fCUnit, fDeclaration));
+					JavaStatusContext.create(fCUnit, fDeclaration));
 				return false;
 			}
 			return true;
@@ -107,7 +107,7 @@ class SourceAnalyzer  {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
 					RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.qualified_this_expressions"), //$NON-NLS-1$
-					JavaSourceContext.create(fCUnit, node));
+					JavaStatusContext.create(fCUnit, node));
 				return false;
 			}
 			return true;
@@ -262,26 +262,26 @@ class SourceAnalyzer  {
 		if (!fCUnit.isStructureKnown()) {
 			result.addFatalError(		
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.syntax_errors"), //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit));		
+				JavaStatusContext.create(fCUnit));		
 			return result;
 		}
 		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
 		if (problems.length > 0) {
 			result.addFatalError(		
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.declaration_has_errors"), //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, fDeclaration));		
+				JavaStatusContext.create(fCUnit, fDeclaration));		
 			return result;
 		}
 		if (fDeclaration.getBody() == null) {
 			result.addFatalError(
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.abstract_methods"),  //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, fDeclaration));
+				JavaStatusContext.create(fCUnit, fDeclaration));
 				return result;
 		}
 		if (fDeclaration.isConstructor()) {
 			result.addFatalError(
 				RefactoringCoreMessages.getString("InlineMethodRefactoring.SourceAnalyzer.constructors"),  //$NON-NLS-1$
-				JavaSourceContext.create(fCUnit, fDeclaration));
+				JavaStatusContext.create(fCUnit, fDeclaration));
 			return result;
 		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();

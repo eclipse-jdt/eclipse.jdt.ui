@@ -25,7 +25,7 @@ public class ObjectStateExpression extends CompositeExpression {
 	
 	public ObjectStateExpression(IConfigurationElement element) {
 		fAdaptable= element.getAttribute(ADAPTABLE);
-		parse(element);
+		parse(this, element);
 	}
 
 	/* (non-Javadoc)
@@ -39,12 +39,20 @@ public class ObjectStateExpression extends CompositeExpression {
 		return evaluateAnd(element);
 	}
 
-	private void parse(IConfigurationElement root) {
+	private static void parse(CompositeExpression result, IConfigurationElement root) {
 		IConfigurationElement[] children= root.getChildren();
 		for (int i= 0; i < children.length; i++) {
 			String name= children[i].getName();
 			if (PropertyExpression.NAME.equals(name)) {
-				add(new PropertyExpression(children[i]));
+				result.add(new PropertyExpression(children[i]));
+			} else if (OrExpression.NAME.equals(name)) {
+				OrExpression expression= new OrExpression();
+				result.add(expression);
+				parse(expression, children[i]);
+			} else if (AndExpression.NAME.equals(name)) {
+				AndExpression expression= new AndExpression();
+				result.add(expression);
+				parse(expression, children[i]);
 			}
 		}
 	}

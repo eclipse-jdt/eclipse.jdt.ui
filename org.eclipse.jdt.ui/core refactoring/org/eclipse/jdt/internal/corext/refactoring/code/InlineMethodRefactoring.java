@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -392,7 +392,7 @@ public class InlineMethodRefactoring extends Refactoring {
 			if (overridden != null && overridden.length > 0) {
 				result.addError(
 					RefactoringCoreMessages.getFormattedString(key, types[i].getElementName()), 
-					JavaSourceContext.create(overridden[0]));
+					JavaStatusContext.create(overridden[0]));
 			}
 		}
 	}

@@ -28,12 +28,12 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 
 /**
- * A java element context can be used to annotate a </code>RefactoringStatusEntry<code> with
- * detailed information about an error detected in an <code>IJavaElement</code>
+ * A Java element context that can be used to annotate a </code>RefactoringStatusEntry<code> 
+ * with detailed information about an error detected in an <code>IJavaElement</code>.
  */
-public abstract class JavaSourceContext extends Context {
+public abstract class JavaStatusContext extends Context {
 
-	private static class MemberSourceContext extends JavaSourceContext {
+	private static class MemberSourceContext extends JavaStatusContext {
 		private IMember fMember;
 		private MemberSourceContext(IMember member) {
 			fMember= member;
@@ -56,7 +56,7 @@ public abstract class JavaSourceContext extends Context {
 		}
 	}
 	
-	private static class ImportDeclarationSourceContext extends JavaSourceContext {
+	private static class ImportDeclarationSourceContext extends JavaStatusContext {
 		private IImportDeclaration fImportDeclartion;
 		private ImportDeclarationSourceContext(IImportDeclaration declaration) {
 			fImportDeclartion= declaration;
@@ -79,7 +79,7 @@ public abstract class JavaSourceContext extends Context {
 		}
 	}
 	
-	private static class CompilationUnitSourceContext extends JavaSourceContext {
+	private static class CompilationUnitSourceContext extends JavaStatusContext {
 		private ICompilationUnit fCUnit;
 		private ISourceRange fSourceRange;
 		private CompilationUnitSourceContext(ICompilationUnit cunit, ISourceRange range) {
@@ -105,26 +105,28 @@ public abstract class JavaSourceContext extends Context {
 	/**
 	 * Creates an status entry context for the given member
 	 * 
-	 * @param member the java member for which the context is supposed to be created
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * @param member the java member for which the context is supposed 
+	 *  to be created
+	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
 	public static Context create(IMember member) {
 		if (member == null || !member.exists())
-			return NULL_CONTEXT;
+			return null;
 		return new MemberSourceContext(member);
 	}
 	
 	/**
 	 * Creates an status entry context for the given import declaration
 	 * 
-	 * @param declaration the import declaration for which the context is supposed to be created
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * @param declaration the import declaration for which the context is 
+	 *  supposed to be created
+	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
 	public static Context create(IImportDeclaration declaration) {
 		if (declaration == null || !declaration.exists())
-			return NULL_CONTEXT;
+			return null;
 		return new ImportDeclarationSourceContext(declaration);
 	}
 	
@@ -162,14 +164,14 @@ public abstract class JavaSourceContext extends Context {
 	 * Creates an status entry context for the given compilation unit and source range.
 	 * 
 	 * @param cunit the compilation unit containing the error
-	 * @param range the source range that has caused the error or <code>null</code>
-	 *  	if the source range is unknown.
-	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 * @param range the source range that has caused the error or 
+	 *  <code>null</code> if the source range is unknown
+	 * @return the status entry context or <code>null</code> if the
 	 * 	context cannot be created
 	 */
 	public static Context create(ICompilationUnit cunit, ISourceRange range) {
 		if (cunit == null)
-			return NULL_CONTEXT;
+			return null;
 		return new CompilationUnitSourceContext(cunit, range);
 	}
 

@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 
 public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
@@ -69,7 +69,7 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 					Message[] messages= ASTNodes.getMessages(block, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
 						invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.compile_errors"), //$NON-NLS-1$
-							JavaSourceContext.create(getCompilationUnit(), block)); //$NON-NLS-1$
+							JavaStatusContext.create(getCompilationUnit(), block)); //$NON-NLS-1$
 						break superCall;
 					}
 				}
@@ -101,14 +101,14 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 	
 	public void endVisit(SuperConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleSuper"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleSuper"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 		super.endVisit(node);
 	}
 	
 	public void endVisit(ConstructorInvocation node) {
 		if (getSelection().getEndVisitSelectionMode(node) == Selection.SELECTED) {
-			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleThis"), JavaSourceContext.create(fCUnit, node)); //$NON-NLS-1$
+			invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.cannotHandleThis"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
 		}
 		super.endVisit(node);
 	}

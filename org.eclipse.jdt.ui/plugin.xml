@@ -2968,16 +2968,16 @@
 </extension>
 -->
 
-<extension-point name="%renameProcessorExtensionPoint" id="renameProcessor"/>
+<extension-point name="%renameProcessorExtensionPoint" id="renameProcessors"/>
 <extension-point name="%renameParticipantsExtensionPoint" id="renameParticipants"/>
 <extension-point name="%moveParticipantsExtensionPoint" id="moveParticipants"/>
 
-<extension point="org.eclipse.jdt.ui.renameProcessor">
+<extension point="org.eclipse.jdt.ui.renameProcessors">
   <renameProcessor
      id="org.eclipse.jdt.renameProcessor.IFile"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameFileProcessor">
      <objectState adaptable="*">
-       <property name="instanceOf" value="org.eclipse.core.resources.IFile"/>
+       <property name="instanceof" value="org.eclipse.core.resources.IFile"/>
      </objectState>
   </renameProcessor>
   
@@ -2985,7 +2985,7 @@
      id="org.eclipse.jdt.renameProcessor.IPackageFragment"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.RenamePackageProcessor">
      <objectState>
-        <property name="instanceOf" value="org.eclipse.jdt.core.IPackageFragment"/>
+        <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragment"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -2994,7 +2994,7 @@
      override="org.eclipse.jdt.renameProcessor.IFile"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameCompilationUnitProcessor">
      <objectState>
-        <property name="instanceOf" value="org.eclipse.jdt.core.ICompilationUnit"/>
+        <property name="instanceof" value="org.eclipse.jdt.core.ICompilationUnit"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -3003,51 +3003,37 @@
      override="org.eclipse.jdt.renameProcessor.IFile"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameTypeProcessor">
      <objectState>
-        <property name="instanceOf" value="org.eclipse.jdt.core.IType"/>
+        <property name="instanceof" value="org.eclipse.jdt.core.IType"/>
 	 </objectState>     
   </renameProcessor>
 </extension>
 
-<extension point="org.eclipse.jdt.ui.renameParticipants">
-  <renameParticipant
-     id="org.eclipse.jdt.renameParticipants.Gif_files"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameGifFileParticipant">
-     <scopeState>
-       <nature value="org.eclipse.web.core.webnature"/>
-     </scopeState>
-     <objectState>
-        <property name="instanceOf" value="org.eclipse.core.resources.IFile"/>
-        <property name="name" value="*.gif"/>
-	 </objectState>     
-  </renameParticipant>
+<extension-point name="%statusViewerExtensionPoint" id="statusContextViewers"/>
+<extension-point name="%changeViewerExtensionPoint" id="changeViewers"/>
+
+<extension point="org.eclipse.jdt.ui.statusContextViewers">
+	
+  <statusViewer
+    id="org.eclipse.jdt.ui.javaStatusContextViewer"
+    class="org.eclipse.jdt.internal.ui.refactoring.JavaStatusContextViewer">
+    <objectState>
+       <or>
+          <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext"/>
+          <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext"/>
+       </or>   
+    </objectState>
+  </statusViewer>
   
-  <renameParticipant
-  	id="org.eclipse.jdt.renameParticipant.lauchning"
-  	class="org.eclipse.jdt.internal.corext.refactoring.participants.LaunchConfigUpdater">
-    <scopeState>
-      <nature value="org.eclipse.jdt.core.javanature"/>
-    </scopeState>
+  <statusViewer
+  	id="org.eclipse.jdt.ui.fileStatusContextViewer"
+  	class="org.eclipse.jdt.internal.ui.refactoring.FileStatusContextViewer">
   	<objectState>
-  	  <property name="instanceOf" value="org.eclipse.jdt.core.IType"/>
-  	  <property name="hasMainType" value="true"/>
+       <property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext"/>
   	</objectState>
-  </renameParticipant>  
-</extension>
-   
-<extension point="org.eclipse.jdt.ui.moveParticipants">
-  <moveParticipant
-     id="org.eclipse.jdt.moveParticipants.HTML_files"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.MoveHtmlFileParticipant">
-     <scopeState>
-       <nature value="org.eclipse.jdt.core.javanature"/>
-     </scopeState>
-     <objectState>
-        <property name="instanceOf" value="org.eclipse.core.resources.IFile"/>
-        <property name="name" value="*.html"/>
-	 </objectState>     
-  </moveParticipant>
-</extension>
+  </statusViewer>
   
+</extension>
+
 <extension point="org.eclipse.ui.views">
 	<view
 		id="org.eclipse.jdt.ui.SourceView"

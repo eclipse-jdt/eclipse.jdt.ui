@@ -31,7 +31,7 @@ public class PropertyExpression extends Expression {
 	private static final String ATT_NAME= "name"; //$NON-NLS-1$
 	
 	private static final String PROPERTY_NAME= "name";	 //$NON-NLS-1$
-	private static final String PROPERTY_INSTANCE_OF= "instanceOf";	 //$NON-NLS-1$
+	private static final String PROPERTY_INSTANCE_OF= "instanceof";	 //$NON-NLS-1$
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
 
 	public PropertyExpression(IConfigurationElement element) {

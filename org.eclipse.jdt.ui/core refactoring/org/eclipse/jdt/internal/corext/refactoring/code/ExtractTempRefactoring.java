@@ -66,7 +66,8 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -286,7 +287,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			for (int i= 0; i < newProblems.length; i++) {
                 IProblem problem= newProblems[i];
                 if (problem.isError())
-                	result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
+                	result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
             }
 			return result;
 		} catch (JavaModelException e){
@@ -303,7 +304,7 @@ public class ExtractTempRefactoring extends Refactoring {
 			ASTNode node= matchingFragments[i].getAssociatedNode();
 			if (isLeftValue(node)){
 				String msg= RefactoringCoreMessages.getString("ExtractTempRefactoring.assigned_to"); //$NON-NLS-1$
-				result.addWarning(msg, JavaSourceContext.create(fCu, node));
+				result.addWarning(msg, JavaStatusContext.create(fCu, node));
 			}
 		}
 		return result;

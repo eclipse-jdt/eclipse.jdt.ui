@@ -25,7 +25,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -68,7 +68,7 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName());
 			
 			if (hierarchyMethod != null){
-				Context context= JavaSourceContext.create(hierarchyMethod);
+				Context context= JavaStatusContext.create(hierarchyMethod);
 				String message= RefactoringCoreMessages.getFormattedString("RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
 																			new String[]{JavaModelUtil.getFullyQualifiedName(getMethod().getDeclaringType()), getNewName()});
                 result.addError(message, context);

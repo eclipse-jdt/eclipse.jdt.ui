@@ -83,7 +83,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
@@ -722,7 +722,7 @@ public class PullUpRefactoring extends Refactoring {
 			for (int j= 0; j < refNodes.length; j++) {
 				ASTNode node= refNodes[j];
 				if ((node instanceof ClassInstanceCreation) || ConstructorReferenceFinder.isImplicitConstructorReferenceNodeInClassCreations(node)){
-					Context context= JavaSourceContext.create(cu, node);
+					Context context= JavaStatusContext.create(cu, node);
 					result.addError(msg, context);
 				}
 			}
@@ -766,7 +766,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createTypeLabel(typeInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Type_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaSourceContext.create(typeInType);
+		Context context= JavaStatusContext.create(typeInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 
@@ -776,7 +776,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createFieldLabel(fieldInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.Field_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaSourceContext.create(fieldInType);
+		Context context= JavaStatusContext.create(fieldInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 	
@@ -786,7 +786,7 @@ public class PullUpRefactoring extends Refactoring {
 			return null;
 		String[] keys= {createMethodLabel(methodInType), createTypeLabel(type)};
 		String msg= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.methodis_declared_in_class", keys); //$NON-NLS-1$
-		Context context= JavaSourceContext.create(methodInType);
+		Context context= JavaStatusContext.create(methodInType);
 		return RefactoringStatus.createWarningStatus(msg, context);
 	}
 
@@ -854,7 +854,7 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i= 0; i < fMembersToPullUp.length; i++) {
 			IMember member= fMembersToPullUp[i];
 			if (member.getElementType() == IJavaElement.FIELD && ! JdtFlags.isStatic(member) && JdtFlags.isFinal(member)){
-				Context context= JavaSourceContext.create(member);
+				Context context= JavaStatusContext.create(member);
 				result.addWarning(RefactoringCoreMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
@@ -885,7 +885,7 @@ public class PullUpRefactoring extends Refactoring {
 			if (! canBeAccessedFrom(iType, targetClass)){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.type_not_accessible", //$NON-NLS-1$
 					new String[]{createTypeLabel(iType), createTypeLabel(targetClass)});
-				result.addError(message, JavaSourceContext.create(iType));
+				result.addError(message, JavaStatusContext.create(iType));
 			}	
 		}
 		pm.done();
@@ -912,11 +912,11 @@ public class PullUpRefactoring extends Refactoring {
 			if (! isAccessible){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.field_not_accessible", //$NON-NLS-1$
 					new String[]{createFieldLabel(field), createTypeLabel(targetClass)});
-				result.addError(message, JavaSourceContext.create(field));
+				result.addError(message, JavaStatusContext.create(field));
 			} else if (isDeclaredInSkippedSuperclass(field, new NullProgressMonitor())){
 				String[] keys= {createFieldLabel(field), createTypeLabel(targetClass)};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.field_cannot_be_accessed", keys); //$NON-NLS-1$
-				result.addError(message, JavaSourceContext.create(field));
+				result.addError(message, JavaStatusContext.create(field));
 			}
 		}
 		pm.done();
@@ -944,11 +944,11 @@ public class PullUpRefactoring extends Refactoring {
 			if (! isAccessible){
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.method_not_accessible", //$NON-NLS-1$
 					new String[]{createMethodLabel(method), createTypeLabel(targetClass)});
-				result.addError(message, JavaSourceContext.create(method));
+				result.addError(message, JavaStatusContext.create(method));
 			} else if (isDeclaredInSkippedSuperclass(method, new NullProgressMonitor())){
 				String[] keys= {createMethodLabel(method), createTypeLabel(targetClass)};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.method_cannot_be_accessed", keys); //$NON-NLS-1$
-				result.addError(message, JavaSourceContext.create(method));
+				result.addError(message, JavaStatusContext.create(method));
 			}	
 		}
 		pm.done();
@@ -1052,7 +1052,7 @@ public class PullUpRefactoring extends Refactoring {
 				String[] keys= {createMethodLabel(matchingMethod), createTypeLabel(matchingMethod.getDeclaringType())};	
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_method_return_type", //$NON-NLS-1$
 					keys);
-				Context context= JavaSourceContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
+				Context context= JavaStatusContext.create(matchingMethod.getCompilationUnit(), matchingMethod.getNameRange());
 				result.addError(message, context);	
 			}
 		}
@@ -1076,7 +1076,7 @@ public class PullUpRefactoring extends Refactoring {
 				String[] keys= {createFieldLabel(matchingField), createTypeLabel(matchingField.getDeclaringType())};
 				String message= RefactoringCoreMessages.getFormattedString("PullUpRefactoring.different_field_type", //$NON-NLS-1$
 					keys);
-				Context context= JavaSourceContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
+				Context context= JavaStatusContext.create(matchingField.getCompilationUnit(), matchingField.getSourceRange());					 
 				result.addError(message, context);	
 			}
 		}
@@ -1097,7 +1097,7 @@ public class PullUpRefactoring extends Refactoring {
 	}
 	
 	private void checkMethodAccessModifiers(RefactoringStatus result, IMethod method) throws JavaModelException {
-		Context errorContext= JavaSourceContext.create(method);
+		Context errorContext= JavaStatusContext.create(method);
 		
 		if (JdtFlags.isStatic(method)){
 				String[] keys= {createMethodLabel(method), createTypeLabel(method.getDeclaringType())};

@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
@@ -302,7 +302,7 @@ class InstanceMethodMover {
 			for (Iterator iter= method.getMethodDeclaration().parameters().iterator(); iter.hasNext();) {
 				SingleVariableDeclaration param= (SingleVariableDeclaration) iter.next();
 				if (originalReceiverParameterName.equals(param.getName().getIdentifier())){
-					Context context= JavaSourceContext.create(method.getDeclaringCU(), param);
+					Context context= JavaStatusContext.create(method.getDeclaringCU(), param);
 					String msg= RefactoringCoreMessages.getFormattedString("InstanceMethodMover.parameter_name_used", new String[]{originalReceiverParameterName}); //$NON-NLS-1$
 					int code= RefactoringStatusCodes.PARAM_NAME_ALREADY_USED;
 					RefactoringStatusEntry entry= new RefactoringStatusEntry(msg, RefactoringStatus.ERROR, context, null, code); 

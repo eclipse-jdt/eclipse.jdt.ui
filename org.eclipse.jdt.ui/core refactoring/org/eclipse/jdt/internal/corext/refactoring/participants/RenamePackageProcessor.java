@@ -50,7 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -464,7 +464,7 @@ public class RenamePackageProcessor extends RenameProcessor implements IReferenc
 			if (topLevelTypeNames.contains(name)){
 				String[] keys= {packageName, name};
 				String msg= RefactoringCoreMessages.getFormattedString("RenamePackageRefactoring.contains_type", keys); //$NON-NLS-1$
-				Context context= JavaSourceContext.create(types[i]);
+				Context context= JavaStatusContext.create(types[i]);
 				result.addError(msg, context);
 			}	
 		}

@@ -72,7 +72,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
@@ -597,7 +598,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) decl.parameters().get(info.getOldIndex());
 					ASTNode[] paramRefs= TempOccurrenceFinder.findTempOccurrenceNodes(paramDecl, true, false);
 					if (paramRefs.length > 0){
-						Context context= JavaSourceContext.create(cu, paramRefs[0]);
+						Context context= JavaStatusContext.create(cu, paramRefs[0]);
 						Object[] keys= new String[]{paramDecl.getName().getIdentifier(),
 													decl.getName().getIdentifier(),
 													typeName};
@@ -694,7 +695,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			if (shouldReport(problem))
-				result.addEntry(RefactoringStatusEntry.create(problem, newCuSource));
+				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
 		}
 		return result;
 	}
@@ -786,7 +787,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				if (newParameterNames.contains(paramNames[j])){
 					String[] args= new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), paramNames[j]};
 					String msg= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.already_has", args); //$NON-NLS-1$
-					Context context= JavaSourceContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
+					Context context= JavaStatusContext.create(fRippleMethods[i].getCompilationUnit(), fRippleMethods[i].getNameRange());
 					result.addError(msg, context);
 				}	
 			}
@@ -826,7 +827,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (JdtFlags.isNative(fRippleMethods[i])){
 				String message= RefactoringCoreMessages.getFormattedString("ChangeSignatureRefactoring.native", //$NON-NLS-1$
 					new String[]{JavaElementUtil.createMethodSignature(fRippleMethods[i]), JavaModelUtil.getFullyQualifiedName(fRippleMethods[i].getDeclaringType())});
-				result.addError(message, JavaSourceContext.create(fRippleMethods[i]));			
+				result.addError(message, JavaStatusContext.create(fRippleMethods[i]));			
 			}								
 		}
 		return result;

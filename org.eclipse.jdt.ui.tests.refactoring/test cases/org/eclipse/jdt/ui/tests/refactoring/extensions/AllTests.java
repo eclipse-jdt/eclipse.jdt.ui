@@ -8,27 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring;
+package org.eclipse.jdt.ui.tests.refactoring.extensions;
 
-import org.eclipse.swt.widgets.Control;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
-/**
- * A special viewer to present a context for a <code>RefactoringStatusEntry</code>.
- */
-public interface  IErrorContextViewer {
+public class AllTests {
 	
-	/**
-	 * Sets the error context viewer's input element.
-	 * 
-	 * @param input the input element
-	 */
-	public void setInput(Object input);
-	
-	/**
-	 * Returns the error context viewer's SWT control.
-	 * 
-	 * @return the error context viewer's SWT control
-	 */
-	public Control getControl();	
+	public static Test suite() {
+		TestSuite suite= new TestSuite(AllTests.class.getName());
+		suite.addTest(ExtensionPointTests.suite());
+		return suite;
+	}
 }
 

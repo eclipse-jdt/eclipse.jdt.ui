@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
@@ -397,7 +397,7 @@ public class InlineConstantRefactoring extends Refactoring {
 						if(qualification != null)					
 							fQualifications.add(qualification);
 					} catch (ClassQualification.ClassQualificationCannotBePerformed e) {
-						e.fillInStatus(fStatus, JavaSourceContext.create(fNewLocationCU, fNewLocation));
+						e.fillInStatus(fStatus, JavaStatusContext.create(fNewLocationCU, fNewLocation));
 						fCanBePrepared= false;	
 					}
 				}

@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -29,9 +31,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ToolBarManager;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -41,49 +40,37 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.compare.CompareUI;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.compare.CompareUI;
-
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.model.IWorkbenchAdapter;
-import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.part.PageBook;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
-import org.eclipse.jdt.internal.corext.refactoring.base.FileContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
-import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
-import org.eclipse.jdt.internal.ui.refactoring.SourceContextViewer.SourceContextInput;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 class RefactoringStatusViewer extends SashForm {
 
-	private static class NullContextViewer implements IErrorContextViewer {
+	private static class NullContextViewer implements IStatusContextViewer {
 		private Label fLabel;
-		public NullContextViewer(Composite parent) {
+		public NullContextViewer() {
+		}
+		public void createControl(Composite parent) {
 			fLabel= new Label(parent, SWT.CENTER | SWT.FLAT);
 			fLabel.setText(RefactoringMessages.getString("ErrorWizardPage.no_context_information_available")); //$NON-NLS-1$
 		}
-		public void setInput(Object input) {
+		public void setInput(Context input) {
 			// do nothing
 		}
 		public Control getControl() {
@@ -152,8 +139,8 @@ class RefactoringStatusViewer extends SashForm {
 	private PageBook fContextViewerContainer;
 	private ViewerPane fContextViewerPane;
 	private Image fPaneImage;
-	private IErrorContextViewer fCurrentContextViewer;
-	private SourceContextViewer fSourceViewer;
+	private Map fStatusContextViewers;
+	private IStatusContextViewer fCurrentContextViewer;
 	private NullContextViewer fNullContextViewer;
 	
 	private NextProblem fNextProblem;
@@ -161,6 +148,7 @@ class RefactoringStatusViewer extends SashForm {
 	
 	public RefactoringStatusViewer(Composite parent, int style) {
 		super(parent, style | SWT.VERTICAL);
+		fStatusContextViewers= new HashMap();
 		createContents();
 	}
 
@@ -178,7 +166,7 @@ class RefactoringStatusViewer extends SashForm {
 				RefactoringStatusEntry entry= getFirstEntry();
 				if (entry != null) {
 					fTableViewer.setSelection(new StructuredSelection(entry));
-					showInSourceViewer(entry);
+					showContextViewer(entry);
 					fTableViewer.getControl().setFocus();
 				}
 			}
@@ -195,88 +183,6 @@ class RefactoringStatusViewer extends SashForm {
 		return fStatus;
 	}
 	
-	/**
-	 * Returns a viewer used to show a context for the given status entry. The returned viewer
-	 * is kept referenced until the wizard page gets disposed. So it is up to the implementor of this
-	 * method to reuse existing viewers over different staus entries. The method may return
-	 * <code>nulll</code> indicating that no context is available for the given status entry.
-	 * 
-	 * @param entry the <code>RefactoringStatusEntry</code> for which the context viewer is requested
-	 * @param currentViewer the currently used error context viewer
-	 * @param parent the parent to be used if a new viewer must be created
-	 * @return the viewer to show a context for the given status entry
-	 */
-	protected IErrorContextViewer getErrorContextViewer(RefactoringStatusEntry entry, IErrorContextViewer currentViewer, Composite parent) {
-		return null;
-	}
-	
-	/**
-	 * Returns the <code>SourceContextInput</code> if the context for the given status entry
-	 * can be displayed using a </code>SourceContextViewer</code>. The method may return
-	 * <code>null</code> indicating that the context for the given status entry is not compatible
-	 * with a source viewer.
-	 * 
-	 * @param entry the <code>RefactoringStatusEntry</code>
-	 * @return a input element for a <code>SourceContextViewer</code>
-	 */
-	protected SourceContextInput getSourceContextInput(RefactoringStatusEntry entry) {
-		Context context= entry.getContext();
-		if (context == Context.NULL_CONTEXT)
-			return null;
-		SourceViewerConfiguration configuration= null;
-		ISourceRange range= null;
-		IDocument document= null;
-		try {
-			if (context instanceof FileContext) {
-				FileContext fc= (FileContext)context;
-				IEditorInput editorInput= new FileEditorInput(fc.getFile());
-				configuration= new SourceViewerConfiguration();
-				range= fc.getSourceRange();
-				document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
-			} else if (context instanceof JavaSourceContext) {
-				JavaSourceContext jsc= (JavaSourceContext)context;
-				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-				range= jsc.getSourceRange();
-				if (jsc.isBinary()) {
-					IEditorInput editorInput= new InternalClassFileEditorInput(jsc.getClassFile());
-					document= getDocument(JavaPlugin.getDefault().getClassFileDocumentProvider(), editorInput);
-				} else {
-					ICompilationUnit cunit= jsc.getCompilationUnit();
-					if (cunit.isWorkingCopy()) {
-						document= new Document(cunit.getSource());
-					} else {
-						IEditorInput editorInput= new FileEditorInput((IFile)cunit.getResource());
-						document= getDocument(JavaPlugin.getDefault().getCompilationUnitDocumentProvider(), editorInput);
-					}
-				}
-			} else if (context instanceof StringContext){
-				StringContext sc= (StringContext)context;
-				configuration= new JavaSourceViewerConfiguration(getJavaTextTools(), null);
-				range= sc.getSourceRange();
-				document= new Document(sc.getSource());
-			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
-		if (document == null || configuration == null)
-			return null;
-		return new SourceContextInput(document, configuration, range);
-	}
-	
-	private IDocument getDocument(IDocumentProvider provider, IEditorInput input) {
-		if (input == null)
-			return null;
-		IDocument result= null;
-		try {
-			provider.connect(input);
-			result= provider.getDocument(input);
-		} catch (CoreException e) {
-		} finally {
-			provider.disconnect(input);
-		}
-		return result;
-	}
-		 
 	//---- UI creation ----------------------------------------------------------------------
 	
 	public Point computeSize (int wHint, int hHint, boolean changed) {
@@ -300,8 +206,8 @@ class RefactoringStatusViewer extends SashForm {
 		
 		fContextViewerPane= new ViewerPane(this, SWT.BORDER | SWT.FLAT);
 		fContextViewerContainer= new PageBook(fContextViewerPane, SWT.NONE);
-		fNullContextViewer= new NullContextViewer(fContextViewerContainer);
-		fSourceViewer= new SourceContextViewer(fContextViewerContainer);
+		fNullContextViewer= new NullContextViewer();
+		fNullContextViewer.createControl(fContextViewerContainer);
 		fContextViewerContainer.showPage(fNullContextViewer.getControl());
 		fCurrentContextViewer= fNullContextViewer;
 		fContextViewerPane.setContent(fContextViewerContainer);	
@@ -349,7 +255,7 @@ class RefactoringStatusViewer extends SashForm {
 		
 		RefactoringStatusEntry entry= (RefactoringStatusEntry)first;
 		updateTitle(entry);	
-		showInSourceViewer(entry);
+		showContextViewer(entry);
 	}
 
 	private void updateTitle(RefactoringStatusEntry first) {
@@ -383,15 +289,32 @@ class RefactoringStatusViewer extends SashForm {
 			return first.getContext().getCorrespondingElement();
 	}
 
-	private void showInSourceViewer(RefactoringStatusEntry entry) {
-		SourceContextInput input= getSourceContextInput(entry);
-		if (input != null) {
-			fSourceViewer.setInput(input);
-			fCurrentContextViewer= fSourceViewer;
+	private void showContextViewer(RefactoringStatusEntry entry) {
+		Context context= entry.getContext();
+		if (context == null) {
+			fCurrentContextViewer= fNullContextViewer;
 		} else {
-			fCurrentContextViewer= getErrorContextViewer(entry, fCurrentContextViewer, fContextViewerContainer);
-			if (fCurrentContextViewer == null)
-				fCurrentContextViewer= fNullContextViewer;
+			try {
+				StatusContextViewerDescriptor descriptor= StatusContextViewerDescriptor.get(context);
+				if (descriptor == null) {
+					fCurrentContextViewer= fNullContextViewer;
+				} else {
+					IStatusContextViewer viewer= (IStatusContextViewer)fStatusContextViewers.get(descriptor);
+					if (viewer == null) {
+						viewer= descriptor.createViewer();
+						viewer.createControl(fContextViewerContainer);
+						fStatusContextViewers.put(descriptor, viewer);
+					}
+					fCurrentContextViewer= viewer;
+				}
+			} catch (CoreException e) {
+			}
+		}
+		try {
+			fCurrentContextViewer.setInput(context);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			fCurrentContextViewer= fNullContextViewer;
 		}
 		fContextViewerContainer.showPage(fCurrentContextViewer.getControl());
 	}

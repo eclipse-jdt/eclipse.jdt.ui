@@ -17,10 +17,6 @@ import org.eclipse.core.runtime.IAdaptable;
  * additional information presentable in the UI.
  */
 public class Context {
-
-	/** A singleton for the null context */
-	public static final Context NULL_CONTEXT= new Context();
-
 	public IAdaptable getCorrespondingElement() {
 		return null;
 	}

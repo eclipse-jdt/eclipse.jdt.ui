@@ -42,8 +42,8 @@ public class RefactoringStatusEntry{
 				   || severity == RefactoringStatus.WARNING
 				   || severity == RefactoringStatus.ERROR
 				   || severity == RefactoringStatus.FATAL);
+		Assert.isNotNull(msg);
 		fMessage= msg;
-		Assert.isNotNull(fMessage);
 		fSeverity= severity;
 		fContext= context;
 		fData= data;
@@ -132,12 +132,6 @@ public class RefactoringStatusEntry{
 	 */	
 	public static RefactoringStatusEntry createFatal(String msg, Context context) {
 		return new RefactoringStatusEntry(msg, RefactoringStatus.FATAL, context);
-	}
-	
-	public static RefactoringStatusEntry create(IProblem problem, String newWcSource) {
-		Context context= new StringContext(newWcSource, new SourceRange(problem));
-		int severity= problem.isError() ? RefactoringStatus.ERROR: RefactoringStatus.WARNING;
-		return new RefactoringStatusEntry(problem.getMessage(), severity, context);
 	}
 	
 	/**

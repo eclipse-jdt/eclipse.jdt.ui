@@ -14,7 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 
 public class RenameExtensionManager {
 	
-	private static final String PROCESSOR_EXT_POINT= "renameProcessor"; //$NON-NLS-1$
+	private static final String PROCESSOR_EXT_POINT= "renameProcessors"; //$NON-NLS-1$
 	private static final String PARTICIPANT_EXT_POINT= "renameParticipants"; //$NON-NLS-1$
 	
 	private static ExtensionManager fInstance= new ExtensionManager(PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT);

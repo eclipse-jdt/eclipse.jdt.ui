@@ -30,7 +30,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ISurroundWithTryCatchQuery;
@@ -113,8 +113,8 @@ public class SurroundWithTryCatchAction extends SelectionDispatchAction {
 			if (status.hasFatalError()) {
 				RefactoringErrorDialogUtil.open(getDialogTitle(), status);
 				RefactoringStatusEntry entry= status.getFirstEntry(RefactoringStatus.FATAL);
-				if (entry.getContext() instanceof JavaSourceContext && fEditor != null) {
-					JavaSourceContext context= (JavaSourceContext)entry.getContext();
+				if (entry.getContext() instanceof JavaStatusContext && fEditor != null) {
+					JavaStatusContext context= (JavaStatusContext)entry.getContext();
 					ISourceRange range= context.getSourceRange();
 					fEditor.setHighlightRange(range.getOffset(), range.getLength(), true);
 				}

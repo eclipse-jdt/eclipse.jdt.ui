@@ -223,14 +223,24 @@ public class Bindings {
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
-	 * exists.
+	 * exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the super class is exaimined and than the implemented interfaces.
 	 */
 	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
-		while (type != null) {
-			IMethodBinding method= findMethodInType(type, methodName, parameters);
+		IMethodBinding method= findMethodInType(type, methodName, parameters);
+		if (method != null)
+			return method;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			method= findMethodInHierarchy(superClass, methodName, parameters);
+			if (method != null)
+				return method;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
 			if (method != null)
 				return method;
-			type= type.getSuperclass();
 		}
 		return null;
 	}
