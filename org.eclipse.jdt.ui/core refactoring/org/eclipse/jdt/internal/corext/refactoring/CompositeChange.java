@@ -94,14 +94,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 		if (change != null)
 			fChanges.add(change);	
 	}
-	
-	/**
-	 *@deprecated use add
-	 */ 	
-	public void addChange(IChange change){
-		add(change);
-	}
-	
+		
 	public IChange[] getChildren() {
 		if (fChanges == null)
 			return null;
