@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.PartInitException;import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
 
 public class GotoTypeAction extends OpenJavaElementAction {
 	
@@ -16,7 +16,6 @@ public class GotoTypeAction extends OpenJavaElementAction {
 	
 	public GotoTypeAction(PackageExplorerPart part) {
 		super(JavaPlugin.getResourceBundle(), PREFIX);
-		//setImageDescriptor(JavaPluginImages.DESC_TOOL_OPENTYPE);
 		fPackageExplorer= part;
 	}
 
@@ -42,7 +41,6 @@ public class GotoTypeAction extends OpenJavaElementAction {
 		if (types != null && types.length > 0) {
 			gotoType((IType) types[0]);
 		}
-				
 	}
 	
 	private void gotoType(IType type) {
@@ -62,16 +60,7 @@ public class GotoTypeAction extends OpenJavaElementAction {
 			PackageExplorerPart view= PackageExplorerPart.openInActivePerspective();
 			if (view != null) {
 				view.selectReveal(new StructuredSelection(element));
-				return;
 			}
 		}
-	}
-	
-	public void dispose() {
-		// do nothing.
-	}
-		
-	public void selectionChanged(IAction action, ISelection selection) {
-		// do nothing. Action doesn't depend on selection.
 	}
 }

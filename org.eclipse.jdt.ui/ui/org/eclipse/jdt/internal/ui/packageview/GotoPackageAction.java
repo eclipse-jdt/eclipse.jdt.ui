@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;import java.util.Arrays;import java.util.HashSet;import java.util.List;import java.util.Map;import java.util.Set;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.internal.core.builder.IPackage;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.JavaPluginImages;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JavaModelUtility;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jdt.ui.JavaUI;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.IDialogConstants;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jface.viewers.ISelection;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.IWorkbenchWindow;import org.eclipse.ui.IWorkbenchWindowActionDelegate;import org.eclipse.ui.PartInitException;import org.eclipse.ui.dialogs.SelectionDialog;
+import java.util.ArrayList;import java.util.HashSet;import java.util.List;import java.util.Set;import org.eclipse.core.resources.IWorkspaceRoot;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IJavaModel;import org.eclipse.jdt.core.IJavaProject;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IPackageFragmentRoot;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.actions.JavaUIAction;import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;import org.eclipse.jdt.ui.JavaElementLabelProvider;import org.eclipse.jface.viewers.StructuredSelection;import org.eclipse.swt.widgets.Shell;import org.eclipse.ui.dialogs.SelectionDialog;
 
 public class GotoPackageAction extends JavaUIAction {
 	
@@ -45,6 +45,8 @@ public class GotoPackageAction extends JavaUIAction {
 			IPackageFragmentRoot[] roots= projects[i].getPackageFragmentRoots();	
 			for (int j= 0; j < roots.length; j++) {
 				IPackageFragmentRoot root= roots[j];
+				if (root.isArchive() && !showLibraries()) 
+					continue;
 		 		if (!set.contains(root)) {
 					set.add(root);
 					IJavaElement[] packages= root.getChildren();
@@ -70,12 +72,8 @@ public class GotoPackageAction extends JavaUIAction {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
 		return;
 	}
-
-	public void dispose() {
-		// do nothing.
-	}
-		
-	public void selectionChanged(IAction action, ISelection selection) {
-		// do nothing. Action doesn't depend on selection.
+	
+	boolean showLibraries()  {
+		return fPackageExplorer.getLibraryFilter().getShowLibraries();
 	}
 }
