@@ -27,17 +27,13 @@ public class OpenTextEditorTestSetup extends TestSetup {
 	}
 
 	protected void setUp() throws Exception {
-		try {
-			String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-			String src= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE;
-			String destPrefix= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX;
-			for (int i= 0; i < OpenTextEditorTest.N_OF_COPIES; i++)
-				FileTool.copy(new File(src), new File(destPrefix + i + OpenTextEditorTest.FILE_SUFFIX));
+		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
+		String src= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.ORIG_FILE;
+		String destPrefix= workspacePath + PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH + OpenTextEditorTest.FILE_PREFIX;
+		for (int i= 0; i < OpenTextEditorTest.N_OF_COPIES; i++)
+			FileTool.copy(new File(src), new File(destPrefix + i + OpenTextEditorTest.FILE_SUFFIX));
 
-			ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH)).refreshLocal(IResource.DEPTH_INFINITE, null);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(PerformanceTestSetup.PROJECT + OpenTextEditorTest.PATH)).refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
 	
 	protected void tearDown() {

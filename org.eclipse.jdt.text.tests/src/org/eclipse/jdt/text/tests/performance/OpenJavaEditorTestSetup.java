@@ -30,13 +30,9 @@ public class OpenJavaEditorTestSetup extends TestSetup {
 	}
 
 	protected void setUp() throws Exception {
-		try {
-			String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
-			duplicate(workspacePath + PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH, OpenJavaEditorTest.FILE_PREFIX, OpenJavaEditorTest.FILE_SUFFIX, OpenJavaEditorTest.N_OF_COPIES);
-			ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH)).refreshLocal(IResource.DEPTH_INFINITE, null);
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
+		String workspacePath= ResourcesPlugin.getWorkspace().getRoot().getLocation().toString() + "/";
+		duplicate(workspacePath + PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH, OpenJavaEditorTest.FILE_PREFIX, OpenJavaEditorTest.FILE_SUFFIX, OpenJavaEditorTest.N_OF_COPIES);
+		ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(PerformanceTestSetup.PROJECT + OpenJavaEditorTest.PATH)).refreshLocal(IResource.DEPTH_INFINITE, null);
 	}
 	
 	protected void tearDown() {

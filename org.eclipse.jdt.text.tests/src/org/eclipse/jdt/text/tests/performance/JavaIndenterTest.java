@@ -53,7 +53,6 @@ public class JavaIndenterTest extends TestCase {
 
 	protected void tearDown() {
 		EditorTestHelper.closeAllEditors();
-		fPerformanceMeter.commit();
 	}
 	
 	public void testJavaIndenter1() {
@@ -80,6 +79,7 @@ public class JavaIndenterTest extends TestCase {
 			assertEquals(originalNumberOfLines, document.getNumberOfLines());
 			sleep(2000); // NOTE: runnables posted from other threads, while the main thread waits here, are executed and measured only in the next iteration
 		}
+		fPerformanceMeter.commit();
 	}
 
 	private void runAction(IAction action) {
