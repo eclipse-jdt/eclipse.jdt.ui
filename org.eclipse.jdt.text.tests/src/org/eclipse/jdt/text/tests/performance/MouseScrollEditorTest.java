@@ -40,7 +40,7 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		fPerformanceMeter= Performance.createPerformanceMeterFactory().createPerformanceMeter(this);
 		EditorTestHelper.bringToTop();
 		fEditor= EditorTestHelper.openInEditor(getFile(), true);
-		EditorTestHelper.calmDown(3000, 10000, 100);
+		EditorTestHelper.calmDown(5000, 10000, 100);
 	}
 
 	protected void tearDown() throws Exception {
@@ -57,37 +57,44 @@ public abstract class MouseScrollEditorTest extends TestCase {
 		int thumbY= text.computeTrim(0, 0, 0, 0).height + 2;
 		final Point thumb= display.map(text, null, thumbX, thumbY);
 		
-		final int numberOfLines= text.getLineCount();
-		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
+		SWTEventHelper.pressKeyCodeCombination(display, CTRL_END);
+		final int maxTopPixel= text.getTopPixel();
+		assertEquals(text.getLineCount(), text.getTopIndex() + text.getClientArea().height / text.getLineHeight());
+		SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
 		
 		Runnable runnable= new Runnable() {
-			private volatile int fTopIndex;
 			private volatile int fTopPixel;
+			private int fOldTopPixel;
 			private Runnable fRunnable= new Runnable() {
 				public void run() {
-					fTopIndex= text.getTopIndex();
 					fTopPixel= text.getTopPixel();
 				}
 			};
-			public void run() {
-				fTopIndex= 0;
-				fTopPixel= 0;
-				int i= thumb.y + 1;
-				int posts= 0;
-				SWTEventHelper.mouseMoveEvent(display, thumb.x, thumb.y, false);
-				SWTEventHelper.mouseDownEvent(display, 1, false);
-				while (fTopIndex + visibleLinesInViewport < numberOfLines - 1) {
-					SWTEventHelper.mouseMoveEvent(display, thumb.x, i++, false);
-					int oldTopPixel= fTopPixel;
-					while (oldTopPixel == fTopPixel) {
-						posts++;
-						display.syncExec(fRunnable);
-					}
+			private Condition fCondition= new Condition() {
+				public boolean isTrue() {
+					display.syncExec(fRunnable);
+					return fOldTopPixel != fTopPixel;
 				}
-				SWTEventHelper.mouseUpEvent(display, 1, false);
-				fDone= true;
-				display.wake();
-//				System.out.println("scrolls == " + (i - mappedGuessY - 1) + ", posts == " + posts);
+			};
+			public void run() {
+				try {
+					fTopPixel= 0;
+					int i= thumb.y + 1;
+					SWTEventHelper.mouseMoveEvent(display, thumb.x, thumb.y, false);
+					SWTEventHelper.mouseDownEvent(display, 1, false);
+					while (fTopPixel < maxTopPixel) {
+						SWTEventHelper.mouseMoveEvent(display, thumb.x, i++, false);
+						fOldTopPixel= fTopPixel;
+						if (!fCondition.busyWaitFor(1000)) {
+							System.out.println("Scrolling timed out.");
+							break;
+						}
+					}
+				} finally {
+					SWTEventHelper.mouseUpEvent(display, 1, false);
+					fDone= true;
+					display.wake();
+				}
 			}
 		};
 		for (int i= 0; i < nOfRuns; i++) {
@@ -98,10 +105,10 @@ public abstract class MouseScrollEditorTest extends TestCase {
 				if (!display.readAndDispatch())
 					display.sleep();
 			fPerformanceMeter.stop();
-			assertTrue(text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
+			assertEquals(maxTopPixel, text.getTopPixel());
 			SWTEventHelper.pressKeyCodeCombination(display, CTRL_END);
 			SWTEventHelper.pressKeyCodeCombination(display, CTRL_HOME);
-			assertEquals(0, text.getTopIndex());
+			assertEquals(0, text.getTopPixel());
 		}
 		fPerformanceMeter.commit();
 	}
