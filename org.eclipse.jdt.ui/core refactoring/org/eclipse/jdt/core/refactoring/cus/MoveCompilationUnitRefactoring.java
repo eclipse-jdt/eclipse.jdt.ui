@@ -100,7 +100,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		 *  a. native methods in locally defined types in this package (too expensive - requires AST analysis)
 		 */
 		pm.beginTask("", 46);
-		pm.subTask("Checking preconditions");
+		pm.subTask("checking preconditions...");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAvailability(fNewPackage));
 		pm.worked(1);
@@ -119,14 +119,15 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		if (result.hasFatalError())
 			return result;
 		
-		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL), getCu());
+		pm.subTask("computing imports");
+		fNeedsImportToCurrentPackage= needsImportToCurrentPackage(new SubProgressMonitor(pm, 3), getCu());
 		if (fNeedsImportToCurrentPackage)
 			result.merge(checkTopLevelTypeNameConflict(fNewPackage, getCu()));
 							
-		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL))));
+		result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 11))));
 		pm.worked(5);
-		result.merge(checkReferencesInOurCompilationUnit(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-		result.merge(checkReferencesInOtherCompilationUnits(new SubProgressMonitor(pm, 11, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+		result.merge(checkReferencesInOurCompilationUnit(new SubProgressMonitor(pm, 11)));
+		result.merge(checkReferencesInOtherCompilationUnits(new SubProgressMonitor(pm, 11)));
 		pm.done();
 		return result;
 	}
@@ -183,7 +184,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 			
 	private static List getMembers(MemberValidator validator, IMember[] members) throws JavaModelException{
 		if (members == null)
-			return null;
+			return new ArrayList(0);
 		List list= new ArrayList(members.length);
 		for (int i= 0; i < members.length; i++){
 			if (validator.isAccepted(members[i]))
@@ -198,7 +199,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 		 * it is a compiler error but this code will just ignore such cases
 		 */
 		if (Flags.isPrivate(type.getFlags()))
-			return null;
+			return new ArrayList(0);
 		IType[] types= type.getTypes();
 		List l= new ArrayList(3);
 		if (types != null){
@@ -218,7 +219,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	private static List getMembers(MemberValidator validator, ICompilationUnit cu) throws JavaModelException{
 		IType[] types= cu.getTypes();
 		if (types == null || types.length == 0)
-			return null;	
+			return new ArrayList(0);	
 		ArrayList list= new ArrayList(3);
 		for (int i= 0; i < types.length; i++){
 			//on top level everything is visible
@@ -261,6 +262,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	
 	private RefactoringStatus checkReferencesInOurCompilationUnit(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 2);
+		pm.subTask("analyzing references");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkReferencesInOurCompilationUnit("protected", createProtectedMemberValidator(), new SubProgressMonitor(pm, 1)));
 		pm.worked(1);
@@ -293,6 +295,7 @@ public class MoveCompilationUnitRefactoring extends CompilationUnitRefactoring{
 	
 	private RefactoringStatus checkReferencesInOtherCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 2);
+		pm.subTask("analyzing references");
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkReferencesInOtherCompilationUnits("protected", createProtectedMemberValidator(), new SubProgressMonitor(pm, 1)));
 		pm.worked(1);
