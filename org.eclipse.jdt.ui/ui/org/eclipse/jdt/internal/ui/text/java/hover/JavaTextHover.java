@@ -19,7 +19,6 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
 
 
 /**
@@ -27,7 +26,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
  */
 public class JavaTextHover extends AbstractJavaEditorTextHover {
 		
-	private static String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"; //$NON-NLS-1$
+	public static final String ID= "org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover"; //$NON-NLS-1$
 
 	private static class JavaEditorTextHoverDescriptorComparator implements Comparator {
 		
@@ -94,26 +93,23 @@ public class JavaTextHover extends AbstractJavaEditorTextHover {
 			if (!ID.equals(descriptor.getId()))
 				fTextHoverSpecifications.add(descriptor);
 		}
-		
 		Collections.sort(fTextHoverSpecifications, new JavaEditorTextHoverDescriptorComparator());
 	}	
-
 
 	private void checkTextHovers() {
 		if (fTextHoverSpecifications.size() == 0)
 			return;
 
-		for (Iterator iterator= fTextHoverSpecifications.iterator(); iterator.hasNext(); ) {
+		for (Iterator iterator= new ArrayList(fTextHoverSpecifications).iterator(); iterator.hasNext(); ) {
 			JavaEditorTextHoverDescriptor spec= (JavaEditorTextHoverDescriptor) iterator.next();
 
 			IJavaEditorTextHover hover= spec.createTextHover();
 			if (hover != null) {
 				hover.setEditor(getEditor());
-				addTextHover(hover);					
+				addTextHover(hover);
+				fTextHoverSpecifications.remove(spec);
 			}
 		}
-
-		fTextHoverSpecifications.clear();
 	}
 
 	protected void addTextHover(ITextHover hover) {

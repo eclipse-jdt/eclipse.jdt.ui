@@ -207,15 +207,15 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, AbstractTextEditor.PREFERENCE_NAVIGATION_SMART_HOME_END),
 		
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.DEFAULT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.NONE_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_ALT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_ALT_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.CTRL_SHIFT_HOVER),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditorHoverConfigurationBlock.ALT_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.DEFAULT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.NONE_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_ALT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_ALT_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.CTRL_SHIFT_HOVER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, JavaEditor.ALT_SHIFT_HOVER),
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {

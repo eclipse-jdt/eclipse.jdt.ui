@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BidiSegmentEvent;
 import org.eclipse.swt.custom.BidiSegmentListener;
@@ -41,9 +44,6 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
@@ -120,6 +120,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
@@ -131,9 +132,10 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
+
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
@@ -232,8 +234,8 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			IDocument document= sourceViewer.getDocument();
 			if (document != null)
-				document.addDocumentListener(this);
-			
+				document.addDocumentListener(this);			
+
 			text.addKeyListener(this);
 			text.addMouseListener(this);
 			text.addMouseMoveListener(this);
@@ -485,6 +487,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fDefaultCursor == null)
 				fDefaultCursor= new Cursor(display, SWT.CURSOR_IBEAM);			
 			text.setCursor(fDefaultCursor);
+			
 			if (fCursor != null) {
 				fCursor.dispose();
 				fCursor= null;
@@ -505,7 +508,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				deactivate();
 				return;
 			}
-
+			
 			fActive= true;
 
 			ISourceViewer viewer= getSourceViewer();
@@ -515,7 +518,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			IRegion region= getCurrentTextRegion(viewer);
 			if (region == null)
 				return;
-
+			
 //			removed for #25871			
 //			highlightRegion(viewer, region);
 //			activateCursor(viewer);												
@@ -541,7 +544,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		 * @see org.eclipse.swt.events.MouseListener#mouseDown(org.eclipse.swt.events.MouseEvent)
 		 */
 		public void mouseDown(MouseEvent event) {
-
+			
 			if (!fActive)
 				return;
 				
@@ -865,7 +868,28 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	public final static String LINE_NUMBER_COLOR= "lineNumberColor"; //$NON-NLS-1$
 	/** Preference key for the link color */
 	public final static String LINK_COLOR= "linkColor"; //$NON-NLS-1$
-	
+
+	/** Preference key for the default hover */
+	public static final String DEFAULT_HOVER= "defaultHover"; //$NON-NLS-1$
+	/** Preference key for hover while no modifier is pressed */
+	public static final String NONE_HOVER= "noneHover"; //$NON-NLS-1$
+	/** Preference key for hover while Ctrl modifier is pressed */
+	public static final String CTRL_HOVER= "ctrlHover"; //$NON-NLS-1$
+	/** Preference key for hover while Shift modifier is pressed */
+	public static final String SHIFT_HOVER= "shiftHover"; //$NON-NLS-1$
+	/** Preference key for hover while Ctrl+Alt modifiers are pressed */
+	public static final String CTRL_ALT_HOVER= "ctrlAltHover"; //$NON-NLS-1$
+	/** Preference key for hover while Ctrl+Alt+Shift modifiers are pressed */
+	public static final String CTRL_ALT_SHIFT_HOVER= "ctrlAltShiftHover"; //$NON-NLS-1$
+	/** Preference key for hover while Ctrl+Shift modifiers are pressed */
+	public static final String CTRL_SHIFT_HOVER= "ctrlShiftHover"; //$NON-NLS-1$
+	/** Preference key for hover while Alt+Shift modifiers are pressed */
+	public static final String ALT_SHIFT_HOVER= "altShiftHover"; //$NON-NLS-1$
+	/** Id indicating no hover is configured */
+	public static final String NO_HOVER_CONFIGURED_ID= "noHoverConfiguredId"; //$NON-NLS-1$
+	/** Hover id indicating the default hover */
+	public static final String DEFAULT_HOVER_CONFIGURED_ID= "defaultHoverConfiguredId"; //$NON-NLS-1$
+
 	/** The outline page */
 	protected JavaOutlinePage fOutlinePage;
 	/** Outliner context menu Id */
@@ -1388,13 +1412,24 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				updateHoverBehavior();
 			}
 
-			if (JavaEditorHoverConfigurationBlock.isAffectedBy(property)) {
+			if (isJavaEditorHoverProperty(property)) {
 				updateHoverBehavior();
 			}				
 			
 		} finally {
 			super.handlePreferenceStoreChanged(event);
 		}
+	}
+
+	private boolean isJavaEditorHoverProperty(String property) {
+		return	JavaEditor.DEFAULT_HOVER.equals(property)
+			|| JavaEditor.NONE_HOVER.equals(property)
+			|| JavaEditor.CTRL_HOVER.equals(property)
+			|| JavaEditor.SHIFT_HOVER.equals(property)
+			|| JavaEditor.CTRL_ALT_HOVER.equals(property)
+			|| JavaEditor.CTRL_SHIFT_HOVER.equals(property)
+			|| JavaEditor.CTRL_ALT_SHIFT_HOVER.equals(property)
+			|| JavaEditor.ALT_SHIFT_HOVER.equals(property);
 	}
 	
 	/**

@@ -27,7 +27,6 @@ import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
 
 /**
  * Proxy for JavaEditorTextHovers.
@@ -37,6 +36,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
 public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
 
+	// XXX: Can be removed if we decide we don't want enabling and disabling of hovers
 	class ListenerRemover implements IPartListener {
 
 		void dispose() {
@@ -70,6 +70,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 	};
 
 
+	// XXX: Can be removed if we decide we don't want enabling and disabling of hovers
 	class EnableStateUpdater implements IPropertyChangeListener {
 		/*
 		 * @see IPropertyChangeListener#propertyChange(PropertyChangeEvent)
@@ -109,6 +110,7 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 		if (fHover != null)
 			fHover.setEditor(getEditor());
 
+//		XXX: Can be removed if we decide we don't want enabling and disabling of hovers
 //		if (fEditor != null) {
 //			fListenerRemover= new ListenerRemover();
 //			IWorkbenchWindow window= fEditor.getSite().getWorkbenchWindow();
@@ -124,16 +126,6 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 
 	public boolean isEnabled() {
 		return true;
-	}
-
-	private boolean isCreated() {
-		return fHover != null;
-	}
-
-	private boolean createHover() {
-		fHover= fHoverDescriptor.createTextHover();
-		fHover.setEditor(getEditor());
-		return isCreated();
 	}
 
 	/*
@@ -167,4 +159,14 @@ public class JavaEditorTextHoverProxy extends AbstractJavaEditorTextHover {
 		
 	}
 	
+	private boolean isCreated() {
+		return fHover != null;
+	}
+
+	private boolean createHover() {
+		fHover= fHoverDescriptor.createTextHover();
+		if (fHover != null)
+			fHover.setEditor(getEditor());
+		return isCreated();
+	}
 }

@@ -54,8 +54,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorHoverConfigurationBlock;
-import org.eclipse.jdt.internal.ui.preferences.JavaEditorTextHoverDescriptor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.JavaAnnotationHover;
@@ -68,6 +67,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
+import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
@@ -362,11 +362,11 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 		if (!enabled)
 			return null;
 
-		JavaEditorTextHoverDescriptor descriptor= JavaEditorHoverConfigurationBlock.getTextHoverDescriptor(stateMask);
+		JavaEditorTextHoverDescriptor descriptor= JavaEditorTextHoverDescriptor.getTextHoverDescriptor(stateMask);
 
 		if (stateMask != ITextViewerExtension2.DEFAULT_HOVER_STATE_MASK) {
 			// Ensure that no additional instance is created for default hover
-			if (JavaEditorHoverConfigurationBlock.isDefaultTextHoverDescriptor(descriptor))
+			if ((descriptor == null && JavaEditorTextHoverDescriptor.getDefaultHoverId().equals(JavaEditor.NO_HOVER_CONFIGURED_ID)) ||(descriptor != null && descriptor.isDefaultTextHoverDescriptor()))
 				return null;	// use default hover instance
 		}
 
