@@ -41,8 +41,9 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.actions.IRefactoringAction;
 import org.eclipse.jdt.internal.ui.reorg.DeleteSourceReferencesAction;
+import org.eclipse.jdt.internal.ui.reorg.MockUnifiedSite;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
-import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
+import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 import org.eclipse.jdt.internal.ui.reorg.SimpleSelectionProvider;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -113,7 +114,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				
 				if (! canPasteSourceReferences(target, event))
 					return;
-				DeleteSourceReferencesAction delete= ReorgGroup.createDeleteSourceReferencesAction(getDragableSourceReferences());
+				DeleteSourceReferencesAction delete= ReorgActionFactory.createDeleteSourceReferencesAction(getDragableSourceReferences());
 				delete.setAskForDeleteConfirmation(false);
 				delete.setCanDeleteGetterSetter(false);
 				delete.update();
@@ -124,13 +125,14 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				handleDropCopy(target, event);
 			}
 			
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
+		}	finally{
 			// The drag source listener must not perform any operation
 			// since this drop adapter did the remove of the source even
 			// if we moved something.
 			event.detail= DND.DROP_NONE;
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, PackagesMessages.getString("SelectionTransferDropAdapter.error.title"), PackagesMessages.getString("SelectionTransferDropAdapter.error.message")); //$NON-NLS-1$ //$NON-NLS-2$
-		}	
+		}
 	}
 	
 	private int handleValidateMove(Object target, DropTargetEvent event) throws JavaModelException{
@@ -180,7 +182,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 
 	private void pasteSourceReferences(final Object target, DropTargetEvent event) {
-		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(getDragableSourceReferences(), target);
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(getDragableSourceReferences(), target);
 		pasteAction.update();
 		if (!pasteAction.isEnabled()){
 			event.detail= DND.DROP_NONE;
@@ -211,7 +213,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		ISourceReference[] elements= getDragableSourceReferences();
 		if (elements.length != fElements.size())
 			return false;
-		SelectionDispatchAction pasteAction= ReorgGroup.createPasteAction(elements, target);
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(elements, target);
 		pasteAction.update();
 		return pasteAction.isEnabled();
 	}
@@ -252,7 +254,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			return;
 		}
 		
-		IRefactoringAction action= ReorgGroup.createDnDCopyAction(fElements, ResourceUtil.getResource(target));
+		SelectionDispatchAction action= ReorgActionFactory.createDnDCopyAction(fElements, ResourceUtil.getResource(target));
 		action.run();
 	}
 	
@@ -262,7 +264,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		private static final int PREVIEW_ID= IDialogConstants.CLIENT_ID + 1;
 		
 		public DragNDropMoveAction(ISelectionProvider provider, Object target){
-			super("#MOVE", provider);//$NON-NLS-1$
+			super(new MockUnifiedSite(provider));
 			Assert.isNotNull(target);
 			fTarget= target;
 		}
