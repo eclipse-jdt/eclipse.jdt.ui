@@ -4,13 +4,14 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
-import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.GapTextStore;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextStore;
+
+import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
 
 /**
  * The code indentator indentates a text block by a given indentation level.

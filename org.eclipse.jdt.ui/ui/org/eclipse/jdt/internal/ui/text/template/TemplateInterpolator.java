@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
-import org.eclipse.jdt.internal.core.Assert;
-
 public class TemplateInterpolator {
 
 	/*
@@ -22,6 +20,7 @@ public class TemplateInterpolator {
 	private static final int ESCAPE= 1;
 	private static final int IDENTIFIER= 2;
 
+	// tokens
 	private static final char ESCAPE_CHARACTER= '$';
 	private static final char IDENTIFIER_BEGIN= '{';
 	private static final char IDENTIFIER_END= '}';
@@ -61,7 +60,7 @@ public class TemplateInterpolator {
 				
 				case IDENTIFIER_BEGIN:
 					// flush text
-					evaluator.acceptText(text.toString(), buffer.length());
+					evaluator.acceptText(text.toString());
 					buffer.append(text);
 
 					// transition to variable identifier				
@@ -83,7 +82,7 @@ public class TemplateInterpolator {
 				case IDENTIFIER_END:
 					{
 						// flush variable
-						String value= evaluator.evaluateVariable(text.toString(), buffer.length());
+						String value= evaluator.evaluateVariable(text.toString());
 					
 						if (value == null) {
 							// leave variable untouched
@@ -112,14 +111,14 @@ public class TemplateInterpolator {
 		
 		switch (state) {
 		case TEXT:
-			evaluator.acceptText(text.toString(), buffer.length());
+			evaluator.acceptText(text.toString());
 			buffer.append(text);
 			break;
 		
 		// illegal, but be tolerant
 		case ESCAPE:
 			text.append(ESCAPE_CHARACTER);
-			evaluator.acceptText(text.toString(), buffer.length());
+			evaluator.acceptText(text.toString());
 			buffer.append(text);			
 			break;
 				
@@ -127,7 +126,7 @@ public class TemplateInterpolator {
 		case IDENTIFIER:
 			text.append(ESCAPE_CHARACTER);
 			buffer.append(IDENTIFIER_BEGIN);			
-			evaluator.acceptText(text.toString(), buffer.length());
+			evaluator.acceptText(text.toString());
 			buffer.append(text);			
 			break;		
 		}

@@ -5,18 +5,15 @@
 package org.eclipse.jdt.internal.ui.text.template;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
 
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager;
 
 public class TemplateEngine {
 
@@ -63,16 +60,14 @@ public class TemplateEngine {
 		Assert.isNotNull(viewer);
 
 		// prohibit recursion
-		if (TemplateEditor.isEditorActive(viewer))
+		if (LinkedPositionManager.hasActiveManager(viewer.getDocument()))
 			return;
 		
 		TemplateContext context= new TemplateContext(viewer, completionPosition, sourceUnit, fContextType);
 		Template[] templates= TemplateSet.getInstance().getMatchingTemplates(context);
 
-		for (int i= 0; i != templates.length; i++) {
-			TemplateProposal proposal= new TemplateProposal(templates[i], context);
-			fProposals.add(proposal);
-		}
+		for (int i= 0; i != templates.length; i++)
+			fProposals.add(new TemplateProposal(templates[i], context));
 	}
 	
 }

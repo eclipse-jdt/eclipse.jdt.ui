@@ -4,8 +4,9 @@
  */
 package org.eclipse.jdt.internal.ui.text.template;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * A template consiting of a name and a pattern.

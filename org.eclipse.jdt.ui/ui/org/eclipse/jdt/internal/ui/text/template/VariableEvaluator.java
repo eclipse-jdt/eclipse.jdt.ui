@@ -18,20 +18,18 @@ public interface VariableEvaluator {
 	 * Returns the value of a variable.
 	 * 
 	 * @param variable the variable to evaluate.
-	 * @param offset   the offset at which the variable is evaluated.
 	 * @return        returns the value of the variable, <code>null</code> if the variable is not recognized.
 	 */
-	void acceptText(String text, int offset);
+	void acceptText(String text);
 
 	/**
 	 * Returns the value of a variable, <code>null</code> if the variable
 	 * cannot be evaluated.
 	 * 
 	 * @param variable the variable to evaluate.
-	 * @param offset   the offset at which the variable is evaluated.
 	 * @return         returns the value of the variable, <code>null</code> if the variable is not recognized.
 	 */
-	String evaluateVariable(String variable, int offset);
+	String evaluateVariable(String variable);
 	
 }
 

@@ -1,8 +1,13 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
 package org.eclipse.jdt.internal.ui.text.template;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelProviderListener;
 import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.swt.graphics.Image;
 
 public class TemplateLabelProvider implements ITableLabelProvider {
 

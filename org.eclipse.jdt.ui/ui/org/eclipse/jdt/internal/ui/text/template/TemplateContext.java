@@ -7,13 +7,11 @@ package org.eclipse.jdt.internal.ui.text.template;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.core.Assert;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class TemplateContext implements VariableEvaluator {
 	
@@ -94,17 +92,17 @@ public class TemplateContext implements VariableEvaluator {
 	/*
 	 * @see VariableEvaluator#acceptText(String, int)
 	 */
-	public void acceptText(String variable, int offset) {
+	public void acceptText(String variable) {
 	}
 		 	 	
 	/*
 	 * @see VariableEvaluator#evaluateVariable(String, int)
 	 */
-	public String evaluateVariable(String variable, int offset) {
+	public String evaluateVariable(String variable) {
 		if (variable.equals(FILE)) {
 			if (fUnit != null)
 				return fUnit.getElementName();
-
+/*
 		} else if (variable.equals(LINE)) {
 			try {
 				int line= fViewer.getDocument().getLineOfOffset(offset) + 1;
@@ -112,7 +110,7 @@ public class TemplateContext implements VariableEvaluator {
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
 			}
-			
+*/			
 		} else if (variable.equals(DATE)) {
 			return DateFormat.getDateInstance().format(new Date());
 

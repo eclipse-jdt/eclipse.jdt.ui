@@ -92,6 +92,10 @@ All Rights Reserved.
 	${cursor}
 }</template>
 
+  <template description="dynamic cast" name="cast" context="java"
+>${type} ${new_name} = (${type}) ${name};
+}</template>
+
   <template description="convert collection to array" name="toarray" context="java"
   >${type}[] ${array} = (${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
@@ -112,6 +116,9 @@ All Rights Reserved.
 
   <template description="&lt;code&gt;&lt;/code&gt;" name="&lt;code&gt;" context="javadoc"
   >&lt;code&gt;${cursor}&lt;/code&gt;</template>
+
+  <template description="&lt;code&gt;null&lt;/code&gt;" name="&lt;code&gt;" context="javadoc"
+  >&lt;code&gt;null&lt;/code&gt;</template>
 
   <template description="&lt;pre&gt;&lt;/pre&gt;" name="&lt;pre&gt;" context="javadoc"
   >&lt;pre&gt;${cursor}&lt;/pre&gt;</template>
