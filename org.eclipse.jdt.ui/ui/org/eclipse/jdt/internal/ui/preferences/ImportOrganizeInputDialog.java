@@ -168,7 +168,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 	private void doBrowseTypes() {		
 		IRunnableContext context= new BusyIndicatorRunnableContext();
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		int style= IJavaElementSearchConstants.CONSIDER_TYPES;
+		int style= IJavaElementSearchConstants.CONSIDER_ALL_TYPES;
 		try {
 			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), context, scope, style, false, fNameDialogField.getText());
 			dialog.setTitle(PreferencesMessages.getString("ImportOrganizeInputDialog.ChooseTypeDialog.title")); //$NON-NLS-1$
