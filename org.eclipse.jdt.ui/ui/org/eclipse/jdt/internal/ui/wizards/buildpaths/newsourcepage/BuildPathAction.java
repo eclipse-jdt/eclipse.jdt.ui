@@ -35,9 +35,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
@@ -48,8 +51,11 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
@@ -135,7 +141,9 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
                 types[i]= DialogPackageExplorerActionGroup.getType(elements.get(i), fJavaProject);
             }
             
-            if(fOperation instanceof LinkedSourceFolderOperation)
+            if(fOperation instanceof LinkedSourceFolderOperation || 
+                    fOperation instanceof AddExternalArchivesOperation ||
+                    fOperation instanceof AddLibraryOperation)
                 setEnabled(elements.size() == 1 && types[0] == DialogPackageExplorerActionGroup.JAVA_PROJECT);
             else 
                 setEnabled(fOperation.isValid(elements, types) && sameJavaProject());
@@ -174,8 +182,13 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
         if(!(element instanceof IAdaptable))
             return null;
         IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
-        if(resource == null)
+        if(resource == null) {
+            if(element instanceof IPackageFragmentRoot)
+                return ((IPackageFragmentRoot)element).getJavaProject(); // this case is necessary for external archives
+            if(element instanceof ClassPathContainer)
+                return ((ClassPathContainer)element).getJavaProject();
             return null;
+        }
         IJavaProject project= JavaCore.create(resource.getProject());
         return project;
     }
@@ -259,6 +272,26 @@ public class BuildPathAction extends SelectionDispatchAction implements IClasspa
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
         return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fJavaProject, fJavaProject.getOutputLocation().makeRelative());
+    }
+    
+    /**
+     * Return an <code>IAddArchivesQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultArchivesQuery(Shell)
+     * @see IClasspathInformationProvider#getExternalArchivesQuery()
+     */
+    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+        return ClasspathModifierQueries.getDefaultArchivesQuery(getShell());
+    }
+    
+    /**
+     * Return an <code>IAddLibrariesQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultLibrariesQuery(Shell)
+     * @see IClasspathInformationProvider#getLibrariesQuery()
+     */
+    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+        return ClasspathModifierQueries.getDefaultLibrariesQuery(getShell());
     }
 
     /**

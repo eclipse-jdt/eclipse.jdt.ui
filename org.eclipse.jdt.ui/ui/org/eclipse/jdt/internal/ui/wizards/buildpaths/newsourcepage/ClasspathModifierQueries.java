@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -338,6 +339,34 @@ public class ClasspathModifierQueries {
     }
 
     /**
+     * Query to add archives (.jar or .zip files) to the buildpath.
+     */
+    public static interface IAddArchivesQuery {
+        /**
+         * Get the paths to the new archive entries that should be added to the buildpath.
+         * 
+         * @return Returns the new classpath container entry paths or an empty array if the query has
+         * been cancelled by the user.
+         */
+        public IPath[] doQuery();
+    }
+    
+    /**
+     * Query to add libraries to the buildpath.
+     */
+    public static interface IAddLibrariesQuery {
+        /**
+         * Get the new classpath entries for libraries to be added to the buildpath.
+         * 
+         * @param project the Java project
+         * @param entries an array of classpath entries for the project
+         * @return Returns the selected classpath container entries or an empty if the query has
+         * been cancelled by the user.
+         */
+        public IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries);
+    }
+    
+    /**
      * The query is used to get information about whether the project should be removed as
      * source folder and update build folder to <code>outputLocation</code>
      * 
@@ -606,6 +635,62 @@ public class ClasspathModifierQueries {
                 return getDefaultFolderQuery(shell, desiredOutputLocation);
             }
             
+        };
+    }
+    
+    /**
+     * Shows the UI to select new external JAR or ZIP archive entries. If the query 
+     * was aborted, the result is an empty array.
+     * 
+     * @param shell The parent shell for the dialog, can be <code>null</code>
+     * @return an <code>IAddArchivesQuery</code> showing a dialog to selected archive files 
+     * to be added to the buildpath
+     * 
+     * @see IAddArchivesQuery
+     */
+    public static IAddArchivesQuery getDefaultArchivesQuery(final Shell shell) {
+        return new IAddArchivesQuery() {
+
+            public IPath[] doQuery() {
+                final IPath[][] selected= {null};
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+                        selected[0]= BuildPathDialogAccess.chooseExternalJAREntries(sh);
+                    }
+                });
+                if(selected[0] == null)
+                    return new IPath[0];
+                return selected[0];
+            }  
+        };
+    }
+    
+    /**
+     * Shows the UI to choose new classpath container classpath entries. See {@link IClasspathEntry#CPE_CONTAINER} for
+     * details about container classpath entries.
+     * The query returns the selected classpath entries or an empty array if the query has
+     * been cancelled.
+     * 
+     * @param shell The parent shell for the dialog, can be <code>null</code>
+     * @return Returns the selected classpath container entries or an empty array if the query has
+     * been cancelled by the user.
+     */
+    public static IAddLibrariesQuery getDefaultLibrariesQuery(final Shell shell) {
+        return new IAddLibrariesQuery() {
+
+            public IClasspathEntry[] doQuery(final IJavaProject project, final IClasspathEntry[] entries) {
+                final IClasspathEntry[][] selected= {null};
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+                        selected[0]= BuildPathDialogAccess.chooseContainerEntries(sh, project, entries);
+                    }
+                });
+                if(selected[0] == null)
+                    return new IClasspathEntry[0];
+                return selected[0];
+            }  
         };
     }
 }

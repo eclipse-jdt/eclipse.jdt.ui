@@ -387,7 +387,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
                     selectedList.add(cpElement);
                 }
                 else if (obj instanceof IJavaProject) {
-                    IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
+                    IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
                     if (entry == null)
                         continue;
                     CPListElement cpElement= CPListElement.createFromExisting(entry, project);

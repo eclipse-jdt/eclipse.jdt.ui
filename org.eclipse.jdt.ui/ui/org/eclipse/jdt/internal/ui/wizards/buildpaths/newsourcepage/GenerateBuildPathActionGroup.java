@@ -31,6 +31,8 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
+import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
+import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddToClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
@@ -133,15 +135,17 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         ISelectionProvider provider= fSite.getSelectionProvider();
         ISelection selection= provider.getSelection();
         
-        fActions= new BuildPathAction[7];
+        fActions= new BuildPathAction[9];
 
         fActions[0]= createBuildPathAction(site, IClasspathInformationProvider.CREATE_LINK);
         fActions[1]= createBuildPathAction(site, IClasspathInformationProvider.ADD_TO_BP);
         fActions[2]= createBuildPathAction(site, IClasspathInformationProvider.REMOVE_FROM_BP);
-        fActions[3]= createBuildPathAction(site, IClasspathInformationProvider.EXCLUDE);
-        fActions[4]= createBuildPathAction(site, IClasspathInformationProvider.UNEXCLUDE);
-        fActions[5]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_FILTERS);
-        fActions[6]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_OUTPUT);
+        fActions[3]= createBuildPathAction(site, IClasspathInformationProvider.ADD_JAR_TO_BP);
+        fActions[4]= createBuildPathAction(site, IClasspathInformationProvider.ADD_LIB_TO_BP);
+        fActions[5]= createBuildPathAction(site, IClasspathInformationProvider.EXCLUDE);
+        fActions[6]= createBuildPathAction(site, IClasspathInformationProvider.UNEXCLUDE);
+        fActions[7]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_FILTERS);
+        fActions[8]= createBuildPathAction(site, IClasspathInformationProvider.EDIT_OUTPUT);
         
         for(int i= 0; i < fActions.length; i++) {
             fActions[i].update(selection);
@@ -225,6 +229,22 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
                 ((EditOutputFolderOperation)operation).showOutputFolders(true);
                 break;
             }
+            case IClasspathInformationProvider.ADD_JAR_TO_BP: {
+                imageDescriptor= JavaPluginImages.DESC_OBJS_EXTJAR;
+                // TODO add disabled icon
+                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddJarCP.label"); //$NON-NLS-1$
+                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddJarCP.tooltip"); //$NON-NLS-1$
+                operation= new AddExternalArchivesOperation(null, action);
+                break;
+            }
+            case IClasspathInformationProvider.ADD_LIB_TO_BP: {
+                imageDescriptor= JavaPluginImages.DESC_OBJS_LIBRARY;
+                // TODO add disabled icon
+                text= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddLibCP.label"); //$NON-NLS-1$
+                tooltip= NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.AddLibCP.tooltip"); //$NON-NLS-1$
+                operation= new AddLibraryOperation(null, action);
+                break;
+            }
             default: break;
         }
         action.initialize(operation, imageDescriptor, disabledImageDescriptor, text, tooltip);
@@ -286,9 +306,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         for(int i= 0; i < fActions.length; i++) {
             if(i == 1)
                 source.add(new Separator(GROUP_BUILDPATH));
-            else if(i == 3)
+            else if(i == 5)
                 source.add(new Separator(GROUP_FILTER));
-            else if (i == 5)
+            else if (i == 7)
                 source.add(new Separator(GROUP_CUSTOMIZE));
             added+= addAction(source, fActions[i]);
         }

@@ -69,7 +69,7 @@ public class EditOutputFolderOperation extends ClasspathModifierOperation {
             CPListElement selElement;
             if (selection instanceof IJavaElement) {
                 IJavaElement javaElement= (IJavaElement)selection;
-                IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(javaElement.getPath(), project);
+                IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(javaElement.getPath(), project, IClasspathEntry.CPE_SOURCE);
                 selElement= CPListElement.createFromExisting(entry, project);
             } else
                 selElement= ((CPListElementAttribute)selection).getParent();

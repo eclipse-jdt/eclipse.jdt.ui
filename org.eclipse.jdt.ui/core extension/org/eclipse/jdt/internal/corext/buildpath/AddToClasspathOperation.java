@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
@@ -117,7 +118,7 @@ public class AddToClasspathOperation extends ClasspathModifierOperation {
      * @throws JavaModelException
      */
     private boolean isValidProject(IJavaProject project) throws JavaModelException {
-        if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project) == null)
+        if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) == null)
             return true;
         return false;
     }

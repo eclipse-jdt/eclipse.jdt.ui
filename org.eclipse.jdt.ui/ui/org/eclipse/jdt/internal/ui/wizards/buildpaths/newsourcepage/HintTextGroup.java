@@ -61,6 +61,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
@@ -495,6 +497,26 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
         return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
+    }
+    
+    /**
+     * Return an <code>IAddArchivesQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultArchivesQuery(Shell)
+     * @see IClasspathInformationProvider#getExternalArchivesQuery()
+     */
+    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
+        return ClasspathModifierQueries.getDefaultArchivesQuery(getShell());
+    }
+    
+    /**
+     * Return an <code>IAddLibrariesQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultLibrariesQuery(Shell)
+     * @see IClasspathInformationProvider#getLibrariesQuery()
+     */
+    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
+        return ClasspathModifierQueries.getDefaultLibrariesQuery(getShell());
     }
     
     /**

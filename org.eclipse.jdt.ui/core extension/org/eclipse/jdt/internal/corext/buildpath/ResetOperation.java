@@ -121,7 +121,7 @@ public class ResetOperation extends ClasspathModifierOperation {
      */
     private boolean isValidProject(IJavaProject project) throws JavaModelException {
         if (project.isOnClasspath(project.getUnderlyingResource())) {
-            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project);
+            IClasspathEntry entry= ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE);
             if (entry.getInclusionPatterns().length != 0 || entry.getExclusionPatterns().length != 0)
                 return true;
         }

@@ -18,11 +18,13 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 
@@ -92,10 +94,10 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
         Iterator iterator= elements.iterator();
         while(iterator.hasNext()) {
             Object element= iterator.next();
-            if (!(element instanceof IPackageFragmentRoot || element instanceof IJavaProject))
+            if (!(element instanceof IPackageFragmentRoot || element instanceof IJavaProject || element instanceof ClassPathContainer))
                 return false;
             if (element instanceof IJavaProject) {
-                if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project) == null)
+                if (ClasspathModifier.getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) == null)
                     return false;
             }
         }

@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -40,12 +41,16 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock.IRemoveOldBinariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
@@ -236,10 +241,99 @@ public class ClasspathModifier {
     }
     
     /**
+     * Add external archives (.jar and .zip files) to the buildpath. The 
+     * method uses the query to find out which entries need to be added. 
+     * 
+     * @param query the query to get the information which entries need to be added
+     * @param project the java project 
+     * @param monitor progress monitor, can be <code>null</code> 
+     * @return a list of <code>IPackageFragmentRoot</code>s representing the added 
+     * archives or an empty list if no element was added.
+     * @throws CoreException
+     * 
+     * @see IAddArchivesQuery
+     */
+    protected List addExternalJars(IAddArchivesQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        IPath[] selected= query.doQuery();
+        List addedEntries= new ArrayList();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 4); //$NON-NLS-1$
+            if (selected != null) {
+                for (int i= 0; i < selected.length; i++) {
+                    addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_LIBRARY, selected[i], null));
+                }
+                monitor.worked(1);
+                
+                List existingEntries= getExistingEntries(project);
+                setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
+                updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+                
+                List result= new ArrayList(addedEntries.size());
+                for(int i= 0; i < addedEntries.size(); i++) {
+                    IClasspathEntry entry= ((CPListElement)addedEntries.get(i)).getClasspathEntry();
+                    result.add(project.findPackageFragmentRoot(entry.getPath()));
+                }
+                monitor.worked(1);
+                return result;
+            }
+        } finally {
+            monitor.done();
+        }
+        return new ArrayList();
+    }
+    
+    /**
+     * Add libraries to the buildpath. The 
+     * method uses the query to find out which entries need to be added. 
+     * 
+     * @param query the query to get the information which entries need to be added
+     * @param project the java project 
+     * @param monitor progress monitor, can be <code>null</code> 
+     * @return a list of <code>ClasspathContainer</code>s representing the added 
+     * archives or an empty list if no element was added.
+     * @throws CoreException
+     * 
+     * @see IAddArchivesQuery
+     */
+    protected List addLibraries(IAddLibrariesQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+        if (monitor == null)
+            monitor= new NullProgressMonitor();
+        IClasspathEntry[] selected= query.doQuery(project, project.getRawClasspath());
+        List addedEntries= new ArrayList();
+        try {
+            monitor.beginTask(NewWizardMessages.getString("ClasspathModifier.Monitor.AddToBuildpath"), 4); //$NON-NLS-1$
+            if (selected != null) {
+                for (int i= 0; i < selected.length; i++) {
+                    addedEntries.add(new CPListElement(project, IClasspathEntry.CPE_CONTAINER, selected[i].getPath(), null));
+                }
+                monitor.worked(1);
+                
+                List existingEntries= getExistingEntries(project);
+                setNewEntry(existingEntries, addedEntries, project, new SubProgressMonitor(monitor, 1));
+                updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
+                
+                List result= new ArrayList(addedEntries.size());
+                for(int i= 0; i < addedEntries.size(); i++) {
+                    result.add(new ClassPathContainer(project, selected[i]));
+                }
+                monitor.worked(1);
+                return result;
+            }
+        } finally {
+            monitor.done();
+        }
+        return new ArrayList();
+    }
+    
+    
+    /**
      * Remove a list of elements to the build path.
      * 
      * @param elements a list of elements to be removed from the build path. An element 
-     * must either be of type <code>IJavaProject</code> or <code>IPackageFragmentRoot</code>
+     * must either be of type <code>IJavaProject</code>, <code>IPackageFragmentRoot</code> or 
+     * <code>ClassPathContainer</code>
      * @param project the Java project
      * @param monitor progress monitor, can be <code>null</code> 
      * @return returns a list of elements of type <code>IFile</code> (in case of removed archives) or 
@@ -255,19 +349,32 @@ public class ClasspathModifier {
             List existingEntries= getExistingEntries(project);
             List resultElements= new ArrayList();
             
+            boolean archiveRemoved= false;
             for(int i= 0; i < elements.size(); i++) {
-                IJavaElement element= (IJavaElement)elements.get(i);
+                Object element= elements.get(i);
                 if (element instanceof IJavaProject) {
                     resultElements.add(removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1)));
                 }
+                else if (element instanceof IPackageFragmentRoot){
+                    IPackageFragmentRoot root= (IPackageFragmentRoot)element;
+                    if(isExternalArchiveOrLibrary(CPListElement.createFromExisting(root.getRawClasspathEntry(), project), project)) {
+                        archiveRemoved= true;
+                        removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+                    }
+                    else
+                        resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+                }
                 else {
-                    IPackageFragmentRoot root= (IPackageFragmentRoot)elements.get(i);
-                    resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+                    archiveRemoved= true;
+                    ClassPathContainer container= (ClassPathContainer)element;
+                    existingEntries.remove(CPListElement.createFromExisting(container.getClasspathEntry(), project));
                 }
             }
             
             updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
             fireEvent(existingEntries);
+            if(archiveRemoved && resultElements.size() == 0)
+                resultElements.add(project);
             return resultElements;
         } finally {
             monitor.done();
@@ -674,7 +781,8 @@ public class ClasspathModifier {
     public static CPListElement getClasspathEntry(List elements, IPackageFragmentRoot root) throws JavaModelException {
         IClasspathEntry entry= root.getRawClasspathEntry();
         for(int i= 0; i < elements.size(); i++) {
-            if(((CPListElement)elements.get(i)).getPath().equals(root.getPath()))
+            CPListElement element= (CPListElement)elements.get(i);
+            if(element.getPath().equals(root.getPath()) && element.getEntryKind() == entry.getEntryKind())
                 return (CPListElement)elements.get(i);
         }
         CPListElement newElement= CPListElement.createFromExisting(entry, root.getJavaProject());
@@ -745,11 +853,11 @@ public class ClasspathModifier {
      * is no such entry
      * @throws JavaModelException
      */
-    public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project) throws JavaModelException {
+    public static IClasspathEntry getClasspathEntryFor(IPath path, IJavaProject project, int entryKind) throws JavaModelException {
         IClasspathEntry[] entries= project.getRawClasspath();
         for(int i= 0; i < entries.length; i++) {
             IClasspathEntry entry= entries[i];
-            if (entry.getPath().equals(path) && isEntryKind(entry.getEntryKind()))
+            if (entry.getPath().equals(path) && equalEntryKind(entry, entryKind))
                 return entry;
         }
         return null;
@@ -958,6 +1066,23 @@ public class ClasspathModifier {
         } finally {
             monitor.done();
         }
+    }
+
+    /**
+     * Check whether the provided file is an archive (.jar or .zip).
+     * 
+     * @param file the file to be checked
+     * @param project the Java project
+     * @return <code>true</code> if the file is an archive, <code>false</code> 
+     * otherwise
+     * @throws JavaModelException
+     */
+    public static boolean isArchive(IFile file, IJavaProject project) throws JavaModelException {
+        if (!ArchiveFileFilter.isArchivePath(file.getFullPath()))
+            return false;
+        if (project != null && project.exists() && (project.findPackageFragmentRoot(file.getFullPath()) == null))
+            return true;
+        return false;
     }
 
     /**
@@ -1593,12 +1718,12 @@ public class ClasspathModifier {
         IStatus validate= workspaceRoot.getWorkspace().validatePath(path.toString(), IResource.FOLDER);
         StatusInfo rootStatus= new StatusInfo();
         rootStatus.setOK();
-        
-        if (validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
+        boolean isExternal= isExternalArchiveOrLibrary(entry, project);
+        if (!isExternal && validate.matches(IStatus.ERROR) && !project.getPath().equals(path)) {
             rootStatus.setError(NewWizardMessages.getFormattedString("NewSourceFolderWizardPage.error.InvalidRootName", validate.getMessage())); //$NON-NLS-1$
             throw new CoreException(rootStatus);
         } else {
-            if (!project.getPath().equals(path)) {
+            if (!isExternal && !project.getPath().equals(path)) {
                 IResource res= workspaceRoot.findMember(path);
                 if (res != null) {
                     if (res.getType() != IResource.FOLDER && res.getType() != IResource.FILE) {
@@ -1627,7 +1752,7 @@ public class ClasspathModifier {
                 }
             }
             
-            if(!entry.getPath().equals(project.getPath()))
+            if(!isExternal && !entry.getPath().equals(project.getPath()))
                 exclude(entry.getPath(), existingEntries, new ArrayList(), project, null);
             
             IPath outputLocation= project.getOutputLocation();
@@ -1652,7 +1777,7 @@ public class ClasspathModifier {
                 throw new CoreException(rootStatus);
             }
             
-            if (getClasspathEntryFor(project.getPath(), project) != null || project.getPath().equals(path)) {
+            if (getClasspathEntryFor(project.getPath(), project, IClasspathEntry.CPE_SOURCE) != null || project.getPath().equals(path)) {
                 rootStatus.setWarning(NewWizardMessages.getString("NewSourceFolderWizardPage.warning.ReplaceSF")); //$NON-NLS-1$
                 return;
             }
@@ -1662,17 +1787,26 @@ public class ClasspathModifier {
         }
     }
     
+    public boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
+        if(entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+            if(entry.getPath().matchingFirstSegments(project.getPath()) != 1)
+                return true;
+        }
+        return false;
+    }
+    
     /**
      * Test if the provided kind is of type
      * <code>IClasspathEntry.CPE_SOURCE</code>
      * 
+     * @param entry the classpath entry to be compared with the provided type
      * @param kind the kind to be checked
      * @return <code>true</code> if kind equals
      * <code>IClasspathEntry.CPE_SOURCE</code>, 
      * <code>false</code> otherwise
      */
-    private static boolean isEntryKind(int kind) {
-        return kind == IClasspathEntry.CPE_SOURCE;
+    private static boolean equalEntryKind(IClasspathEntry entry, int kind) {
+        return entry.getEntryKind() == kind;
     }
     
     /**
@@ -1772,8 +1906,8 @@ public class ClasspathModifier {
              * path2, <code>false</code> otherwise
              */
             private boolean isSubFolderOf(IPath path1, IPath path2) {
-                if (path2 == null) {
-                    if (path1 == null)
+                if (path1 == null || path2 == null) {
+                    if (path1 == null && path2 == null)
                         return true;
                     return false;
                 }

@@ -59,9 +59,9 @@ import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathMod
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.ArchiveFileFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 
 /**
@@ -167,6 +167,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public static final int NULL_SELECTION= 0x12;
     /** Elements that are contained in an archive (.jar or .zip) */
     public static final int ARCHIVE_RESOURCE= 0x13;
+    /** Elements that represent classpath container (= libraries) */
+    public static final int CONTAINER= 0x14;
     
     private ClasspathModifierAction[] fActions;
     private int fLastType;
@@ -555,6 +557,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     public static int getType(Object obj, IJavaProject project) throws JavaModelException {
             if (obj instanceof IJavaProject)
                 return JAVA_PROJECT;
+            if (obj instanceof ClassPathContainer)
+                return CONTAINER;
             if (obj instanceof IPackageFragmentRoot)
                 return ClasspathModifier.filtersSet((IPackageFragmentRoot)obj) ? MODIFIED_FRAGMENT_ROOT : PACKAGE_FRAGMENT_ROOT;
             if (obj instanceof IPackageFragment) {
@@ -617,7 +621,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @throws JavaModelException 
      */
     private static int getFileType(IFile file, IJavaProject project) throws JavaModelException {
-        if (isArchive(file, project))
+        if (ClasspathModifier.isArchive(file, project))
             return ARCHIVE;
         if (!file.getName().endsWith(".java")) //$NON-NLS-1$
             return FILE;
@@ -638,23 +642,6 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             return EXCLUDED_FILE;
         }
         return EXCLUDED_FILE;
-    }
-    
-    /**
-     * Check whether the provided file is an archive (.jar or .zip).
-     * 
-     * @param file the file to be checked
-     * @param project the Java project
-     * @return <code>true</code> if the file is an archive, <code>false</code> 
-     * otherwise
-     * @throws JavaModelException
-     */
-    private static boolean isArchive(IFile file, IJavaProject project) throws JavaModelException {
-        if (!ArchiveFileFilter.isArchivePath(file.getFullPath()))
-            return false;
-        if (project != null && project.exists() && (project.findPackageFragmentRoot(file.getFullPath()) == null))
-            return true;
-        return false;
     }
     
     /**

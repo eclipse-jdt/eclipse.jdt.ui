@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
@@ -62,6 +64,8 @@ public interface IClasspathInformationProvider {
     public static final int INCLUDE= 0xA;
     public static final int UNINCLUDE= 0xB;
     public static final int CREATE_FOLDER= 0xC;
+    public static final int ADD_JAR_TO_BP= 0xD;
+    public static final int ADD_LIB_TO_BP= 0xE;
     
     /**
      * Method to invoce the <code>IClasspathInformationProvider</code> to 
@@ -168,6 +172,30 @@ public interface IClasspathInformationProvider {
      * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException;
+    
+    /**
+     * Method to retrieve an <code>IAddArchivesQuery</code> from 
+     * the provider.
+     * 
+     * @return an <code>IAddArchivesQuery</code>, must not be 
+     * <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see ClasspathModifierQueries#getDefaultArchivesQuery(Shell)
+     */
+    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException;
+    
+    /**
+     * Method to retrieve an <code>IAddLibrariesQuery</code> from 
+     * the provider.
+     * 
+     * @return an <code>IAddLibrariesQuery</code>, must not be 
+     * <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see ClasspathModifierQueries#getDefaultLibrariesQuery(Shell)
+     */
+    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException;
     
     /**
      * Delete all newly created folders and files.
