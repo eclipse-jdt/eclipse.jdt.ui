@@ -139,11 +139,20 @@ public class TestMethodSelectionDialog extends ElementListSelectionDialog {
 		ILabelProvider labelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_PARAMETERS | JavaElementLabelProvider.SHOW_ROOT);
 		ElementListSelectionDialog dialog= new ElementListSelectionDialog(null, labelProvider);
 		dialog.setTitle("Go To Referring Tests"); 
-		dialog.setMessage("More than project contains the type junit.framework.Test. Select the type you want to find referring tests.");
-		dialog.setElements(result.toArray());
+		dialog.setMessage("Select the project containing \"junit.framework.Test\" that should be used when searching for tests.");
+		IJavaProject[] projects= new IJavaProject[result.size()];
+		IType[] testTypes= (IType[]) result.toArray(new IType[result.size()]);
+		for (int i= 0; i < projects.length; i++) 
+			projects[i]= testTypes[i].getJavaProject();
+		dialog.setElements(projects);
 		if (dialog.open() == ElementListSelectionDialog.CANCEL)	
 			return null;
-		return (IType) dialog.getFirstResult();	
+		IJavaProject project= (IJavaProject) dialog.getFirstResult();
+		for (int i= 0; i < testTypes.length; i++) {
+			if (testTypes[i].getJavaProject().equals(project))
+				return testTypes[i];
+		}
+		return null;	
 	}
 	
 	public Object[] searchTestMethods(final IJavaElement element, final IType testType, IRunnableContext context) throws InvocationTargetException, InterruptedException  {
