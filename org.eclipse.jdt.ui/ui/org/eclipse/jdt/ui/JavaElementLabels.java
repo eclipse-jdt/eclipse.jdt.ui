@@ -751,8 +751,14 @@ public class JavaElementLabels {
 				if (type.isEnum()) {
 					typeName= '{' + ELLIPSIS_STRING + '}'; 
 				} else {
-					String superclassName= Signature.getSimpleName(type.getSuperclassName());
-					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , superclassName); //$NON-NLS-1$
+					String supertypeName;
+					String[] superInterfaceNames= type.getSuperInterfaceNames();
+					if (superInterfaceNames.length > 0) {
+						supertypeName= Signature.getSimpleName(superInterfaceNames[0]);
+					} else {
+						supertypeName= Signature.getSimpleName(type.getSuperclassName());
+					}
+					typeName= JavaUIMessages.getFormattedString("JavaElementLabels.anonym_type" , supertypeName); //$NON-NLS-1$
 				}
 			} catch (JavaModelException e) {
 				//ignore
