@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -25,6 +26,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -112,18 +114,15 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		String returnTypeName= returnType.getName();
 		
 		String[] paramTypes= new String[arguments.size()];
-		String[] paramNames= new String[arguments.size()];
 		
-		NameProposer nameProposer= new NameProposer();
 		for (int i= 0; i < paramTypes.length; i++) {
-			Expression expr= (Expression) arguments.get(i);
-			ITypeBinding binding= evaluateParameterType(expr, importEdit);
+			ITypeBinding binding= evaluateParameterType((Expression) arguments.get(i), importEdit);
 			paramTypes[i]= (binding != null) ? binding.getName() : "Object";
-			paramNames[i]= nameProposer.proposeParameterName(paramTypes[i]);
 		}
 		
+		String[] paramNames= getParameterNames(paramTypes, arguments);
+		
 		if (settings.createComments) {
-			
 			StubUtility.genJavaDocStub("Method " + methodName, paramNames, Signature.createTypeSignature(returnTypeName, true), null, buf); //$NON-NLS-1$
 		}
 		
@@ -169,6 +168,26 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		}
 		return buf.toString();
 	}
+	
+	private String[] getParameterNames(String[] paramTypes, List arguments) {
+		ArrayList names= new ArrayList(paramTypes.length);
+		NameProposer nameProposer= new NameProposer();
+		for (int i= 0; i < paramTypes.length; i++) {
+			String name;
+			Object currArg= arguments.get(i);
+			if (currArg instanceof SimpleName) {
+				name= ((SimpleName) currArg).getIdentifier();
+			} else {
+				name= nameProposer.proposeParameterName(paramTypes[i]);
+			}
+			while (names.contains(name)) {
+				name= name + '1';
+			}
+			names.add(name);
+		}
+		return (String[]) names.toArray(new String[names.size()]);
+	}
+	
 	
 	private ITypeBinding evaluateMethodType(ImportEdit importEdit) {
 		ITypeBinding binding= ASTResolving.getTypeBinding(fNode);
