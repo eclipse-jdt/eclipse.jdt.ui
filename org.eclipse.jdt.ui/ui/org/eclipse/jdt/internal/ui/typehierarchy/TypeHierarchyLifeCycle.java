@@ -11,6 +11,7 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
@@ -32,7 +33,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
  * Manages a type hierarchy, to keep it refreshed, and to allow it to be shared.
@@ -95,7 +95,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 		}
 	}
 		
-	public void ensureRefreshedTypeHierarchy(final IJavaElement element) throws JavaModelException {
+	public void ensureRefreshedTypeHierarchy(final IJavaElement element, IRunnableContext context) throws JavaModelException {
 		if (element == null || !element.exists()) {
 			freeHierarchy();
 			return;
@@ -114,7 +114,7 @@ public class TypeHierarchyLifeCycle implements ITypeHierarchyChangedListener, IE
 			};
 			
 			try {
-				new BusyIndicatorRunnableContext().run(false, false, op);
+				context.run(false, false, op);
 			} catch (InvocationTargetException e) {
 				Throwable th= e.getTargetException();
 				if (th instanceof JavaModelException) {

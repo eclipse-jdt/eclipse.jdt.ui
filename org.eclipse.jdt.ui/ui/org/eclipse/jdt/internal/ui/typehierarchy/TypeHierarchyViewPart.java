@@ -96,8 +96,6 @@ import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage;
-import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
@@ -405,7 +403,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			clearInput();
 		} else {			
 			try {
-				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement);
+				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				clearInput();
@@ -1158,7 +1156,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (changedTypes == null) {
 				// hierarchy change
 				try {
-					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement);
+					fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement, getSite().getWorkbenchWindow());
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e.getStatus());
 					clearInput();
