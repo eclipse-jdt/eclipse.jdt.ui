@@ -266,27 +266,19 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		ICompilationUnit wc= null;
 		try{
 			pm.beginTask(RefactoringCoreMessages.getString("ExtractTempRefactoring.checking_preconditions"), 1); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			
-			TextEdit[] edits= getAllEdits();
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("RenameTempRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.setKeepExecutedTextEdits(true);
-
-			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
-			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(change, wc, newCUNode, fCompilationUnitNode));
-			
+			change.addTextEdit("", getAllEdits());//$NON-NLS-1$
+			String newCuSource= change.getPreviewContent();
+			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, fCompilationUnitNode));
 			return result;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
-		} finally{
-			if (wc != null)
-				wc.destroy();
-			pm.done();
-		}	
+		} 	
 	}
 	
 	public String getTempSignaturePreview() throws JavaModelException{

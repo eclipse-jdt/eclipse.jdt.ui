@@ -470,34 +470,27 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private RefactoringStatus checkCompilation() 
-		throws JavaModelException
-	{
-		ICompilationUnit wc= null;
+	private RefactoringStatus checkCompilation() throws JavaModelException {
 		try{
-			
 			RefactoringStatus result= new RefactoringStatus();
 			
 			TextEdit[] edits= getAllEdits();
 			TextChange change= new TextBufferChange(RefactoringCoreMessages.getString("ExtractConstantRefactoring.rename"), TextBuffer.create(fCu.getSource())); //$NON-NLS-1$
-			change.setKeepExecutedTextEdits(true);
+			change.addTextEdit("", edits);//$NON-NLS-1$
 
-			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
-			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(change, wc, newCUNode, fCompilationUnitNode));
-			
+			String newCuSource= change.getPreviewContent();
+			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, fCompilationUnitNode));
+	
 			return result;
 		} catch (CoreException e){
 			throw new JavaModelException(e);	
-		} finally{
-			if (wc != null)
-				wc.destroy();
-		}
+		} 
 	}
 
 	// !! similar to ExtractTempRefactoring equivalent
 	public String getConstantSignaturePreview() throws JavaModelException {
-		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-1$
+		return getModifier() + " " + getConstantTypeName() + " " + fConstantName; //$NON-NLS-2$//$NON-NLS-1$
 	}
 
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {

@@ -178,16 +178,17 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			change.setKeepExecutedTextEdits(true);
 		
 			wc= RefactoringAnalyzeUtil.getWorkingCopyWithNewContent(edits, change, fCu);
-			CompilationUnit newCUNode= AST.parseCompilationUnit(wc, true);
+			String newCuSource= change.getPreviewContent();
+			CompilationUnit newCUNode= AST.parseCompilationUnit(newCuSource.toCharArray(), fCu.getElementName(), fCu.getJavaProject());
 			
-			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(change, wc, newCUNode, fCompilationUnitNode));
+			result.merge(RefactoringAnalyzeUtil.analyzeIntroducedCompileErrors(newCuSource, newCUNode, fCompilationUnitNode));
 			if (result.hasError())
 				return result;
 			
 			String fullKey= RefactoringAnalyzeUtil.getFullDeclarationBindingKey(edits, fCompilationUnitNode);	
 			MethodDeclaration methodDeclaration= RefactoringAnalyzeUtil.getMethodDeclaration(RefactoringAnalyzeUtil.getFirstEdit(edits), change, newCUNode);
 			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(methodDeclaration, edits, change, fullKey);
-			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(wc, problemNodes));
+			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
 			return result;
 		} catch(CoreException e) {
 			throw new JavaModelException(e);
