@@ -35,22 +35,22 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
  * 
  * @since 3.1
  */
-public final class SuperTypeConstraintsSolver {
+public class SuperTypeConstraintsSolver {
 
 	/** The type estimate data (type: <code>TType</code>) */
-	public final static String DATA_TYPE_ESTIMATE= "te"; //$NON-NLS-1$
+	public static final String DATA_TYPE_ESTIMATE= "te"; //$NON-NLS-1$
 
 	/** The type constraint model to solve */
-	private final SuperTypeConstraintsModel fModel;
+	protected final SuperTypeConstraintsModel fModel;
 
 	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
-	private Map fObsoleteCasts= null;
+	protected Map fObsoleteCasts= null;
 
 	/** The list of constraint variables to be processed */
-	private LinkedList fProcessable= null;
+	protected LinkedList fProcessable= null;
 
 	/** The type occurrences (element type: <code>&ltICompilationUnit, Collection&ltIDeclaredConstraintVariable&gt</code>) */
-	private Map fTypeOccurrences= null;
+	protected Map fTypeOccurrences= null;
 
 	/**
 	 * Creates a new super type constraints solver.
@@ -130,7 +130,7 @@ public final class SuperTypeConstraintsSolver {
 	 * @param variable the constraint variable
 	 * @return the initial type estimate
 	 */
-	private ITypeSet computeTypeEstimate(final ConstraintVariable2 variable) {
+	protected ITypeSet computeTypeEstimate(final ConstraintVariable2 variable) {
 		final TType type= variable.getType();
 		if (variable instanceof ImmutableTypeVariable2 || !type.getErasure().equals(fModel.getSubType().getErasure()))
 			return SuperTypeSet.createTypeSet(type);
@@ -171,22 +171,24 @@ public final class SuperTypeConstraintsSolver {
 	 */
 	private void computeTypeOccurrences(final Collection variables) {
 		fTypeOccurrences= new HashMap();
-		TType type= null;
-		ITypeSet estimate= null;
+		final TType superErasure= fModel.getSuperType().getErasure();
+		TType estimatedType= null;
+		ITypeSet set= null;
 		ICompilationUnit unit= null;
 		ConstraintVariable2 variable= null;
 		ITypeConstraintVariable declaration= null;
+		TType variableType= null;
 		for (final Iterator iterator= variables.iterator(); iterator.hasNext();) {
 			variable= (ConstraintVariable2) iterator.next();
 			if (variable instanceof ITypeConstraintVariable) {
 				declaration= (ITypeConstraintVariable) variable;
-				estimate= declaration.getTypeEstimate();
-				if (estimate != null) {
-					type= estimate.chooseSingleType();
-					final TType typeErasure= type.getErasure();
-					final TType superErasure= fModel.getSuperType().getErasure();
-					if (!typeErasure.equals(variable.getType().getErasure()) && typeErasure.equals(superErasure)) {
-						declaration.setData(DATA_TYPE_ESTIMATE, type);
+				variableType= variable.getType();
+				set= declaration.getTypeEstimate();
+				if (set != null) {
+					estimatedType= set.chooseSingleType();
+					final TType typeErasure= estimatedType.getErasure();
+					if (!typeErasure.equals(variableType.getErasure()) && typeErasure.equals(superErasure)) {
+						declaration.setData(DATA_TYPE_ESTIMATE, estimatedType);
 						unit= declaration.getCompilationUnit();
 						if (unit != null) {
 							Collection matches= (Collection) fTypeOccurrences.get(unit);
@@ -268,7 +270,7 @@ public final class SuperTypeConstraintsSolver {
 			if (!usage.isEmpty())
 				processConstraints(usage);
 			else
-				variable.setData(DATA_TYPE_ESTIMATE, fModel.getSuperType());
+				variable.setData(DATA_TYPE_ESTIMATE, variable.getTypeEstimate().chooseSingleType());
 		}
 		computeTypeOccurrences(variables);
 		computeObsoleteCasts(fModel.getCastVariables());
