@@ -58,6 +58,21 @@ hovers.<br>
 <li>
 Applied patch submitted by Sebastian Davids. It adds the new template variable ${year}.
 </li>
+<li>
+Added a new refactoring, Inline Constant.  This refactoring operates on multiple
+compilation files, and lets the user automatically replace
+references to a static final field with expressions equivalent to the field's initializer (provided the static final field is not blank).
+The action can be invoked when a reference to, or declaration of, such a constant is selected, either
+in the editor, or in an outline.  The user can choose to only inline
+the selected reference (if a reference is selected), inline all references (anywhere in the workspace), or inline only some references,
+selecting only the desired changes from the preview page.  If all references
+are to be replaced, the user can choose to have the constant declaration removed.
+When the initializer expression refers to entities not visible from a particular
+inline site, the initializer will be adapted to that inline site by
+qualifying the names of some of the entities (by prepending multiple levels of enclosing
+class names).  If the initializer refers to non-static or non-final fields,
+the user will be unobtrusively warned.
+</li>
 </ul>
 
 <h2>
