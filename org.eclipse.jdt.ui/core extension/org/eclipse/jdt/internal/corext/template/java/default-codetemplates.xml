@@ -2,20 +2,17 @@
 <templates>
 <codetemplate name="gettercomment" description="%CodeTemplates.gettercomment" context="gettercomment_context" enabled="true">/**
  * @return %CodeTemplates.gettercomment.returntagcontent
- * %CodeTemplates.generated
  */</codetemplate>
  <codetemplate name="settercomment" description="%CodeTemplates.settercomment" context="settercomment_context" enabled="true">/**
  * @param ${param} %CodeTemplates.settercomment.paramtagcontent
- * %CodeTemplates.generated
  */</codetemplate>
 <codetemplate name="constructorcomment" description="%CodeTemplates.constructorcomment" context="constructorcomment_context" enabled="true">/**
  * ${tags}
- * %CodeTemplates.generated
  */</codetemplate>
  <codetemplate name="typecomment" description="%CodeTemplates.typecomment" context="typecomment_context" enabled="true">/**
  * @author ${user}
  *
- * %CodeTemplates.typecomment.content1
+ * ${todo} %CodeTemplates.typecomment.content1
  * %CodeTemplates.typecomment.content2
  */</codetemplate>
  
@@ -26,7 +23,6 @@
  
  <codetemplate name="methodcomment" description="%CodeTemplates.nonoverridingcomment" context="methodcomment_context" enabled="true">/**
  * ${tags}
- * %CodeTemplates.generated
  */</codetemplate>
 <codetemplate name="overridecomment" description="%CodeTemplates.overridecomment" context="overridecomment_context" enabled="true">/* %CodeTemplates.overridecomment.nonjd
  * ${see_to_overridden}
@@ -34,7 +30,7 @@
  <codetemplate name="newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">/*
  * %CodeTemplates.newfile.content1
  *
- * %CodeTemplates.newfile.content2
+ * ${todo} %CodeTemplates.newfile.content2
  * %CodeTemplates.newfile.content3
  */
 ${package_declaration}
