@@ -205,8 +205,9 @@ public class SpellCheckEngine implements ISpellCheckEngine, IPropertyChangeListe
 			}
 		}
 		dictionary= (ISpellDictionary)fLocaleDictionaries.get(locale);
-		if (dictionary == null && !fLocaleDictionaries.isEmpty()) {
-			fLocale= (Locale)getAvailableLocales().iterator().next();
+		Set availableLocales= getAvailableLocales();
+		if (dictionary == null && !availableLocales.isEmpty()) {
+			fLocale= (Locale)availableLocales.iterator().next();
 			dictionary= (ISpellDictionary)fLocaleDictionaries.get(fLocale);
 		} else
 			fLocale= locale;
