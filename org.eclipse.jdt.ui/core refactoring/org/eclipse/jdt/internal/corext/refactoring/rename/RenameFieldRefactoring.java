@@ -293,7 +293,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
 			pm.beginTask("", 13); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(Checks.checkIfCuBroken(fField));
 			if (result.hasFatalError())
@@ -306,10 +306,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			pm.worked(1);
 			
 			fReferences= null;
-			if (fUpdateReferences)
+			if (fUpdateReferences){
+				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
 				fReferences= getReferences(new SubProgressMonitor(pm, 3));
-			else
+				pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
+			} else {
 				pm.worked(3);
+			}	
 			
 			if (fUpdateReferences)
 				result.merge(analyzeAffectedCompilationUnits());
@@ -507,7 +510,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.searching"));	 //$NON-NLS-1$
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
 	}
 	
@@ -526,7 +528,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	
 	private TextChangeManager createTextChangeManager(IProgressMonitor pm) throws CoreException {
 		try{
-			pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 3); //$NON-NLS-1$
+			pm.beginTask("", 3); //$NON-NLS-1$
 				
 			TextChangeManager manager= new TextChangeManager();
 		
@@ -582,7 +584,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}	
 	
 	private void addOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException{
-		pm.beginTask(RefactoringCoreMessages.getString("RenameFieldRefactoring.creating_change"), 5);//$NON-NLS-1$
+		pm.beginTask("", 5);//$NON-NLS-1$
 
 		addDeclarationUpdate(manager);
 		pm.worked(1);	

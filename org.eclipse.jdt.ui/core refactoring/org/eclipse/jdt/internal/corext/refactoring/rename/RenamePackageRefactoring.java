@@ -206,7 +206,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
 			pm.beginTask("", 17); //$NON-NLS-1$
-			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName(fNewName));
 			pm.worked(1);
@@ -230,8 +230,9 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 			if (!fUpdateReferences)
 				return result;
 			
+			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
 			fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
-			pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.analyzing")); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 3)));
 			result.merge(checkPackageName(fNewName));
 			pm.worked(1);
@@ -257,7 +258,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
-		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
 		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 		
@@ -349,7 +349,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
-	
 	// ----------- Changes ---------------
 	
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
@@ -385,7 +384,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
-		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.adding_occurrences")); //$NON-NLS-1$
 		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		return manager;
@@ -398,7 +396,6 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching_text")); //$NON-NLS-1$
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 		
-		pm.subTask(RefactoringCoreMessages.getString("RenamePackageRefactoring.adding_occurrences")); //$NON-NLS-1$
 		addReferenceUpdates(manager, new SubProgressMonitor(pm, 1));
 		
 		//putting it together
