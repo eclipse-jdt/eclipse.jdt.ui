@@ -19,7 +19,7 @@ Two combiners are existing: AND and OR query. These cannot be extended, however 
 specific atomic queries, which may or may not be recognized by other tools (depending on the query implementation).
 
 The intent is that participants describe aspects of a search process, which can span across several participants (the search scope 
-determines how many participants are involved). Participants are responsible for remember their index file locations, but not their
+determines how many participants are involved). Participants are responsible for remembering their index file locations, but not their
 indexes per se which aren't in the API directly. Each participant would have its own set of indexes. If JSP participant wants to record
 Java references into its index, then it would use services of a Java indexer, but targeting its own JSP index (implicitly).
 
