@@ -304,6 +304,20 @@ public class ASTNodes {
 			parentType == ASTNode.BREAK_STATEMENT || parentType != ASTNode.CONTINUE_STATEMENT;
 	}
 	
+	public static boolean isStatic(BodyDeclaration declaration) {
+		switch(declaration.getNodeType()) {
+			case ASTNode.FIELD_DECLARATION:
+				return Modifier.isStatic(((FieldDeclaration)declaration).getModifiers());
+			case ASTNode.METHOD_DECLARATION:
+				return Modifier.isStatic(((MethodDeclaration)declaration).getModifiers());
+			case ASTNode.TYPE_DECLARATION:
+				return Modifier.isStatic(((TypeDeclaration)declaration).getModifiers());
+			case ASTNode.INITIALIZER:
+				return Modifier.isStatic(((Initializer)declaration).getModifiers());
+			}
+		return false;
+	}
+	
 	public static String getTypeName(Type type) {
 		final StringBuffer buffer= new StringBuffer();
 		ASTVisitor visitor= new ASTVisitor() {
@@ -687,7 +701,7 @@ public class ASTNodes {
 	 * @return the insertion index to be used
 	 */
 	public static int getInsertionIndex(BodyDeclaration member, List container) {
-		return getInsertionIndex(member.getNodeType(), container);
+		return getInsertionIndex(container, member.getNodeType(), isStatic(member));
 	}
 	
 	/**
@@ -700,7 +714,7 @@ public class ASTNodes {
 	 * @param container a list containing objects of type <code>BodyDeclaration</code>
 	 * @return the insertion index to be used
 	 */
-	public static int getInsertionIndex(int memberType, List container) {
+	private static int getInsertionIndex(List container, int memberType, boolean isStatic) {
 		if (memberType == ASTNode.TYPE_DECLARATION || memberType == ASTNode.INITIALIZER)
 			return 0;
 		int defaultIndex= container.size();
@@ -727,17 +741,32 @@ public class ASTNodes {
 			return defaultIndex;
 		}
 		if (memberType == ASTNode.METHOD_DECLARATION) {
-			int last= -1;
+			int lastMethod= -1;
+			int lastStaticMethod= -1;
+			int firstMethod= -1;
 			int i= 0;
 			for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-				int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
+				ASTNode node= (ASTNode)iter.next();
+				int nodeType= node.getNodeType();
 				switch (nodeType) {
 					case ASTNode.METHOD_DECLARATION:
-						last= i;
+						MethodDeclaration declaration= (MethodDeclaration)node;
+						if (firstMethod == -1)
+							firstMethod= i;
+						if (isStatic && Modifier.isStatic(declaration.getModifiers()))
+							lastStaticMethod= i;
+						lastMethod= i;
 				}
 			}
-			if (last != -1)
-				return ++last;
+			if (isStatic) {
+				if (lastStaticMethod != -1)
+					return ++lastStaticMethod;
+				else if (firstMethod != 1)
+					return firstMethod;
+			} else {
+				if (lastMethod != -1)
+					return ++lastMethod;
+			}
 			return defaultIndex;
 		}
 		return defaultIndex;

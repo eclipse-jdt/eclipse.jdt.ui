@@ -1,0 +1,160 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2003 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.ui.actions;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
+/**
+ * Action that encapsulates the IntroduceFactoryRefactoring refactoring for
+ * association with UI entities.
+ * @author rfuhrer
+ */
+public class IntroduceFactoryAction extends SelectionDispatchAction {
+	private CompilationUnitEditor   fEditor;
+
+	private static final String DIALOG_MESSAGE_TITLE= RefactoringMessages.getString("IntroduceFactoryAction.dialog_title");//$NON-NLS-1$
+
+	/**
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 */
+	public IntroduceFactoryAction(CompilationUnitEditor editor) {
+		this(editor.getEditorSite());
+		fEditor= editor;
+		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
+	}
+
+	/**
+	 * Creates a new <code>IntroduceFactoryAction</code>. The action requires
+	 * that the selection provided by the site's selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 */
+	public IntroduceFactoryAction(IWorkbenchSite site) {
+		super(site);
+		setText(RefactoringMessages.getString("IntroduceFactoryAction.label")); //$NON-NLS-1$
+		setToolTipText(RefactoringMessages.getString("IntroduceFactoryAction.tooltipText")); //$NON-NLS-1$
+		setDescription(RefactoringMessages.getString("IntroduceFactoryAction.description")); //$NON-NLS-1$
+		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INTRODUCE_FACTORY_ACTION);
+	}
+	
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	public void run(IStructuredSelection selection) {
+		try {
+			//we have to call this here - no selection changed event is sent after a refactoring but it may still invalidate enablement
+			if (canEnable(selection)) {
+				IMethod	method= getSingleSelectedMethod(selection);
+				ICompilationUnit unit= method.getCompilationUnit();
+				ISourceRange nameRange= method.getNameRange();
+				ITextSelection textSel= new TextSelection(nameRange.getOffset(), nameRange.getLength());
+				IntroduceFactoryRefactoring refactoring= createRefactoring(unit, textSel);
+
+				if (refactoring == null)
+					return;
+				new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+			}
+		} catch (CoreException e) {
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("IntroduceFactoryAction.exception")); //$NON-NLS-1$
+		}
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	public void run(ITextSelection selection) {
+		if (!ActionUtil.isProcessable(getShell(), fEditor))
+			return;
+		try{
+			IntroduceFactoryRefactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			if (refactoring == null)
+				return;
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+		} catch (CoreException e){
+			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("IntroduceFactoryAction.exception")); //$NON-NLS-1$
+		}
+	}
+
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		return canRunOn(getSingleSelectedMethod(selection));
+	}
+
+	private static boolean canRunOn(IMethod method) throws JavaModelException{
+		return method != null && method.isConstructor();
+	}
+
+	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
+		if (selection.isEmpty() || selection.size() != 1) 
+			return null;
+		if (selection.getFirstElement() instanceof IMethod)
+			return (IMethod)selection.getFirstElement();
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(checkEnabled(selection));
+	}
+	
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
+			setEnabled(false);//no ui here - happens on selection changes
+		}
+	}
+
+	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
+		return IntroduceFactoryRefactoring.create(cunit, 
+				selection.getOffset(), selection.getLength(),
+				JavaPreferencesSettings.getCodeGenerationSettings());
+	}
+
+	private RefactoringWizard createWizard(IntroduceFactoryRefactoring refactoring) {
+		String pageTitle= RefactoringMessages.getString("IntroduceFactoryAction.use_factory"); //$NON-NLS-1$
+
+		return new IntroduceFactoryWizard(refactoring, pageTitle);
+	}
+
+	private boolean checkEnabled(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+}

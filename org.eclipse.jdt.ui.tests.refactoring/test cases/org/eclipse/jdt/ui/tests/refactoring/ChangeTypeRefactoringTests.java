@@ -11,19 +11,20 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.Collection;
-import java.util.Hashtable;
 
 import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 /**
@@ -67,19 +68,6 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 	private ICompilationUnit createAdditionalCU(String fileName, IPackageFragment pack) throws Exception {
 		String fullName= TEST_PATH_PREFIX + getRefactoringPath() + "positive/" + fileName + ".java";
 		return createCU(pack, fileName + ".java", getFileContents(fullName));
-	}
-
-	protected void setUp() throws Exception {
-		super.setUp();
-		Hashtable options= JavaCore.getOptions();
-		options.put(JavaCore.FORMATTER_COMPACT_ASSIGNMENT, JavaCore.COMPACT);
-		JavaCore.setOptions(options);
-	}
-	
-	protected void tearDown() throws Exception {
-		super.tearDown();
-		Hashtable options= JavaCore.getOptions();
-		JavaCore.setOptions(options);	
 	}
 
 	ChangeTypeRefactoring helper1(int startLine, int startColumn, int endLine, int endColumn, String selectedTypeName)

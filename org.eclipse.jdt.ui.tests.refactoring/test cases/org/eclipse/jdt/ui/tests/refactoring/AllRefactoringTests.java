@@ -33,6 +33,7 @@ public class AllRefactoringTests {
 		suite.addTest(ConvertAnonymousToNestedTests.suite());
 		suite.addTest(InlineConstantTests.suite());
 		suite.addTest(IntroduceParameterTests.suite());
+		suite.addTest(IntroduceFactoryTests.suite());
 		
 		//-- structure
 		suite.addTest(ChangeSignatureTests.suite());
