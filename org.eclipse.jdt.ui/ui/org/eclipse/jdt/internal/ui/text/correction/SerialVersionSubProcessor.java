@@ -16,9 +16,12 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -57,16 +60,23 @@ public final class SerialVersionSubProcessor {
 			if (selection instanceof SimpleType) {
 				final SimpleType type= (SimpleType) selection;
 				name= type.getName();
+			} else if (selection instanceof ParameterizedType) {
+				final ParameterizedType type= (ParameterizedType) selection;
+				final Type raw= type.getType();
+				if (raw instanceof SimpleType)
+					name= ((SimpleType) raw).getName();
+				else if (raw instanceof QualifiedType)
+					name= ((QualifiedType) raw).getName();
 			} else if (selection instanceof Name) {
 				name= (Name) selection;
 			}
-			final SimpleName simple= name.isSimpleName() ? (SimpleName) name : ((QualifiedName) name).getName();
-
-			final ICompilationUnit unit= context.getCompilationUnit();
-			if (JavaModelUtil.isEditable(unit)) {
-
-				proposals.add(new SerialVersionDefaultProposal(unit, simple));
-				proposals.add(new SerialVersionHashProposal(unit, simple));
+			if (name != null) {
+				final SimpleName simple= name.isSimpleName() ? (SimpleName) name : ((QualifiedName) name).getName();
+				final ICompilationUnit unit= context.getCompilationUnit();
+				if (JavaModelUtil.isEditable(unit)) {
+					proposals.add(new SerialVersionDefaultProposal(unit, simple));
+					proposals.add(new SerialVersionHashProposal(unit, simple));
+				}
 			}
 		}
 	}

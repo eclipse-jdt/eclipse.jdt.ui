@@ -10,36 +10,36 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.io.ObjectStreamClass;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.debug.ui.IDebugUIConstants;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -49,7 +49,11 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
+import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Proposal for a hashed serial version id.
@@ -58,35 +62,47 @@ import org.eclipse.jdt.internal.corext.Assert;
  */
 public final class SerialVersionHashProposal extends AbstractSerialVersionProposal {
 
+	/** The launch configuration type */
+	public static final String LAUNCH_CONFIG_TYPE= "org.eclipse.jdt.ui.serial.support"; //$NON-NLS-1$
+
+	/** The serial support jar */
+	public static final String SERIAL_SUPPORT_JAR= "serialsupport.jar"; //$NON-NLS-1$
+
 	/**
-	 * Class loader that doesn't delegate to parent. Additionally findClass
-	 * has to be public.
+	 * Displays an appropriate error message for a specific problem.
+	 * 
+	 * @param message The message to display
 	 */
-	public final class SerialVersionClassLoader extends URLClassLoader {
-		public SerialVersionClassLoader(final URL[] urls) {
-			super(urls, null);
-		}
-		public final Class findClass(final String name) throws ClassNotFoundException {
-			return super.findClass(name);
+	protected static void displayErrorMessage(final String message) {
+		final Display display= PlatformUI.getWorkbench().getDisplay();
+		if (display != null && !display.isDisposed()) {
+			display.asyncExec(new Runnable() {
+
+				public final void run() {
+					if (display != null && !display.isDisposed()) {
+						final Shell shell= display.getActiveShell();
+						if (shell != null && !shell.isDisposed())
+							MessageDialog.openError(shell, CorrectionMessages.getString("SerialVersionHashProposal.dialog.error.caption"), CorrectionMessages.getFormattedString("SerialVersionHashProposal.dialog.error.message", message)); //$NON-NLS-1$ //$NON-NLS-2$
+					}
+				}
+			});
 		}
 	}
 
-	/** The jar file extension */
-	private static final String EXTENSION_JAR= ".jar"; //$NON-NLS-1$
-
-	/** The file url protocol */
-	private static final String PROTOCOL_FILE= "file:"; //$NON-NLS-1$
-
-	/** The serial version id */
-	private long fSerialVersionId= SERIAL_VALUE;
+	/**
+	 * Displays an appropriate error message for a specific problem.
+	 * 
+	 * @param throwable the throwable object to display
+	 */
+	protected static void displayErrorMessage(final Throwable throwable) {
+		displayErrorMessage(throwable.getLocalizedMessage());
+	}
 
 	/**
 	 * Creates a new serial version hash proposal.
 	 * 
-	 * @param unit
-	 *        the compilation unit
-	 * @param node
-	 *        the originally selected node
+	 * @param unit the compilation unit
+	 * @param node the originally selected node
 	 */
 	public SerialVersionHashProposal(final ICompilationUnit unit, final ASTNode node) {
 		super(CorrectionMessages.getString("SerialVersionSubProcessor.createhashed.description"), unit, node); //$NON-NLS-1$
@@ -99,25 +115,19 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		Assert.isNotNull(fragment);
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+
 				public final void run(final IProgressMonitor monitor) {
 					Assert.isNotNull(monitor);
 					fragment.setInitializer(computeDefaultExpression(monitor));
 				}
 			});
 		} catch (InvocationTargetException exception) {
-			// Do nothing
+			JavaPlugin.log(exception);
 		} catch (InterruptedException exception) {
 			// Do nothing
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
-	 */
-	public final String getAdditionalProposalInfo() {
-		return CorrectionMessages.getString("SerialVersionHashProposal.message.generated.info"); //$NON-NLS-1$
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal#addLinkedPositions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.core.dom.VariableDeclarationFragment)
 	 */
@@ -130,73 +140,66 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 */
 	protected final Expression computeDefaultExpression(final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
-
-		final List list= new ArrayList();
-		final String name= computeTypeName();
-
+		long serialVersionID= SERIAL_VALUE;
+		ILaunchConfiguration configuration= null;
 		try {
-			final ICompilationUnit unit= getCompilationUnit();
-			final IJavaProject project= unit.getJavaProject();
-
-			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, monitor);
-
-			monitor.beginTask(CorrectionMessages.getString("SerialVersionHashProposal.progress.title"), 8); //$NON-NLS-1$
+			monitor.beginTask(CorrectionMessages.getString("SerialVersionHashProposal.computing.id"), 4); //$NON-NLS-1$
+			final IJavaProject project= getCompilationUnit().getJavaProject();
+			final ILaunchConfigurationWorkingCopy copy= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE).newInstance(null, LAUNCH_CONFIG_TYPE + System.currentTimeMillis());
 			monitor.worked(1);
-
-			addClassPathEntries(project, new HashSet(), list);
-
+			copy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_DEFAULT_CLASSPATH, false);
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, SerialVersionComputer.class.getName());
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, getQualifiedName());
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
+			final String[] entries= JavaRuntime.computeDefaultRuntimeClassPath(project);
+			final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
 			monitor.worked(1);
-			if (monitor.isCanceled())
-				return null;
-
-			final URL[] urls= new URL[list.size()];
-
-			String path= null;
-			for (int index= 0; index < list.size(); index++) {
-
-				path= (String) list.get(index);
-				if (!path.endsWith(EXTENSION_JAR))
-					path+= IPath.SEPARATOR;
-
-				urls[index]= new URL(PROTOCOL_FILE + path);
+			classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
+			classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
+			for (int index= 2; index < classpath.length; index++)
+				classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(new Path(entries[index - 2]));
+			final List mementos= new ArrayList(classpath.length);
+			IRuntimeClasspathEntry entry= null;
+			for (int index= 0; index < classpath.length; index++) {
+				entry= classpath[index];
+				mementos.add(entry.getMemento());
 			}
-
+			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH, mementos);
+			configuration= copy.doSave();
 			monitor.worked(1);
-			if (monitor.isCanceled())
-				return null;
-
-			final SerialVersionClassLoader loader= new SerialVersionClassLoader(urls);
-
-			monitor.worked(1);
-			if (monitor.isCanceled())
-				return null;
-
-			final Class clazz= loader.findClass(name);
-
-			monitor.worked(1);
-			if (monitor.isCanceled())
-				return null;
-
-			final ObjectStreamClass stream= ObjectStreamClass.lookup(clazz);
-
-			monitor.worked(1);
-			if (monitor.isCanceled())
-				return null;
-
-			if (stream != null)
-				fSerialVersionId= stream.getSerialVersionUID();
-
-			monitor.worked(1);
-
-		} catch (Throwable throwable) {
-			monitor.done();
-			displayErrorMessage(throwable);
-
-			return null;
+			final ILaunchConfigurationDelegate delegate= configuration.getType().getDelegate(ILaunchManager.RUN_MODE);
+			if (delegate instanceof SerialVersionLaunchConfigurationDelegate) {
+				final SerialVersionLaunchConfigurationDelegate extension= (SerialVersionLaunchConfigurationDelegate) delegate;
+				configuration.launch(ILaunchManager.RUN_MODE, new SubProgressMonitor(monitor, 1), true);
+				monitor.worked(1);
+				serialVersionID= extension.getSerialVersionID();
+				final String message= extension.getErrorMessage();
+				if (message != null && message.length() > 0)
+					displayErrorMessage(message);
+			} else
+				displayErrorMessage(CorrectionMessages.getString("SerialVersionHashProposal.wrong.launch.delegate")); //$NON-NLS-1$
+		} catch (CoreException exception) {
+			displayErrorMessage(exception);
+		} catch (IOException exception) {
+			displayErrorMessage(exception);
 		} finally {
+			try {
+				if (configuration != null)
+					configuration.delete();
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
+			}
 			monitor.done();
 		}
-		return getAST().newNumberLiteral(fSerialVersionId + LONG_SUFFIX);
+		return getAST().newNumberLiteral(serialVersionID + LONG_SUFFIX);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+	 */
+	public final String getAdditionalProposalInfo() {
+		return CorrectionMessages.getString("SerialVersionHashProposal.message.generated.info"); //$NON-NLS-1$
 	}
 
 	/**
@@ -204,9 +207,8 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 * 
 	 * @return the qualified type name of the class
 	 */
-	private String computeTypeName() {
+	protected String getQualifiedName() {
 		final ASTNode parent= getDeclarationNode();
-
 		ITypeBinding binding= null;
 		if (parent instanceof TypeDeclaration) {
 			final TypeDeclaration declaration= (TypeDeclaration) parent;
@@ -214,107 +216,10 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		} else if (parent instanceof AnonymousClassDeclaration) {
 			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
 			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
-
 			binding= creation.resolveTypeBinding();
 		}
 		if (binding != null)
 			return binding.getBinaryName();
-
 		return null;
 	}
-
-	/**
-	 * Adds the class path entries of the specified project to the path entry list.
-	 * 
-	 * @param project
-	 *        the project to add its class path entries
-	 * @param projects
-	 *        the set of projects whose class path entries have already been added
-	 * @param paths
-	 *        the path entry list to add the entries to
-	 * 
-	 * @throws JavaModelException
-	 *         if the class path for the project could not be resolved
-	 */
-	private static void addClassPathEntries(final IJavaProject project, final Set projects, final List paths) throws JavaModelException {
-		Assert.isNotNull(project);
-		Assert.isNotNull(projects);
-		Assert.isNotNull(paths);
-
-		projects.add(project);
-
-		final IClasspathEntry[] entries= project.getResolvedClasspath(true);
-		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-
-		int kind= 0;
-		IClasspathEntry entry= null;
-
-		IPath path= null;
-		IProject resource= null;
-		IJavaProject reference= null;
-
-		for (int index= 0; index < entries.length; index++) {
-			entry= entries[index];
-			kind= entry.getEntryKind();
-
-			if (kind == IClasspathEntry.CPE_LIBRARY) {
-				final IPath library= entry.getPath();
-
-				final IPath location= ResourcesPlugin.getWorkspace().getRoot().getFile(library).getLocation();
-				if (location != null)
-					addClassPathEntry(paths, location.toString());
-				else
-					addClassPathEntry(paths, library.toString());
-			} else if (kind == IClasspathEntry.CPE_SOURCE)
-				addClassPathEntry(paths, project.getProject().getLocation().makeAbsolute().toString() + project.getOutputLocation().removeFirstSegments(1).makeAbsolute().toString());
-			else if (kind == IClasspathEntry.CPE_PROJECT) {
-				path= entry.getPath();
-
-				resource= root.getProject(path.toString());
-				if (resource != null && resource.exists()) {
-					reference= JavaCore.create(resource);
-					if (reference != null && !projects.contains(reference))
-						addClassPathEntries(reference, projects, paths);
-				}
-			} else
-				Assert.isTrue(false);
-		}
-	}
-
-	/**
-	 * Adds a class path entry described by the indicated path into the path entry list.
-	 * 
-	 * @param paths
-	 *        the path entry list to add the path to
-	 * @param path
-	 *        the path of the class path entry
-	 */
-	private static void addClassPathEntry(final List paths, final String path) {
-		Assert.isNotNull(paths);
-		Assert.isNotNull(path);
-
-		if (!paths.contains(path))
-			paths.add(path);
-	}
-
-	/**
-	 * Displays an appropriate error message if the class could not be loaded.
-	 * 
-	 * @param throwable
-	 *        the throwable object to display
-	 */
-	private static void displayErrorMessage(final Throwable throwable) {
-		final Display display= PlatformUI.getWorkbench().getDisplay();
-		if (display != null && !display.isDisposed()) {
-			display.asyncExec(new Runnable() {
-				public final void run() {
-					if (display != null && !display.isDisposed()) {
-						final Shell shell= display.getActiveShell();
-						if (shell != null && !shell.isDisposed())
-							MessageDialog.openError(shell, CorrectionMessages.getString("SerialVersionHashProposal.dialog.error.caption"), CorrectionMessages.getFormattedString("SerialVersionHashProposal.dialog.error.message", throwable.getLocalizedMessage())); //$NON-NLS-1$ //$NON-NLS-2$
-					}
-				}
-			});
-		}
-	}	
 }

@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -90,6 +91,9 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
 
 		fProject= JavaProjectHelper.createJavaProject("serialIdProject", "bin");
+		Map preferences= fProject.getOptions(true);
+		JavaProjectHelper.set15CompilerOptions(preferences);
+		fProject.setOptions(preferences);
 		JavaProjectHelper.addRTJar(fProject);
 
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.NEWTYPE).setPattern(""); //$NON-NLS-1$
@@ -97,6 +101,16 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		JavaPlugin.getDefault().getCodeTemplateStore().findTemplate(CodeTemplateContextType.FIELDCOMMENT).setPattern(FIELD_COMMENT); //$NON-NLS-1$
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fProject, "src"); //$NON-NLS-1$
+
+		IPackageFragment package0= fSourceFolder.createPackageFragment("test0", false, null); //$NON-NLS-1$
+		StringBuffer buffer= new StringBuffer();
+
+		buffer.append("package test0;\n"); //$NON-NLS-1$
+		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+		buffer.append("public class Test<T> implements Serializable {\n"); //$NON-NLS-1$
+		buffer.append("}\n"); //$NON-NLS-1$
+
+		package0.createCompilationUnit("Test.java", buffer.toString(), false, null); //$NON-NLS-1$
 	}
 
 	protected void tearDown() throws Exception {
@@ -150,7 +164,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    public void test() {\n"); //$NON-NLS-1$
 				buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
 				buffer.append("            " + FIELD_COMMENT + "\n");
-				buffer.append("            private static final long serialVersionUID = -70923185657280836L;\n"); //$NON-NLS-1$
+				buffer.append("            private static final long serialVersionUID = 3258125877639328056L;\n"); //$NON-NLS-1$
 				buffer.append("            int var4;\n"); //$NON-NLS-1$
 				buffer.append("        };\n"); //$NON-NLS-1$
 				buffer.append("    }\n"); //$NON-NLS-1$
@@ -175,6 +189,225 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("            int var4;\n"); //$NON-NLS-1$
 				buffer.append("        };\n"); //$NON-NLS-1$
 				buffer.append("    }\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+			}
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	public void testGenericAnonymousClass() throws Exception {
+
+		IPackageFragment package4= fSourceFolder.createPackageFragment("test4", false, null); //$NON-NLS-1$
+		StringBuffer buffer= new StringBuffer();
+
+		buffer.append("package test4;\n"); //$NON-NLS-1$
+		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+		buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+		buffer.append("public class Test4<T> {\n"); //$NON-NLS-1$
+		buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+		buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+		buffer.append("    public void test() {\n"); //$NON-NLS-1$
+		buffer.append("        Serializable var3= new Test<T>() {\n"); //$NON-NLS-1$
+		buffer.append("            int var4;\n"); //$NON-NLS-1$
+		buffer.append("        };\n"); //$NON-NLS-1$
+		buffer.append("    }\n"); //$NON-NLS-1$
+		buffer.append("}\n"); //$NON-NLS-1$
+
+		ICompilationUnit unit4= package4.createCompilationUnit("Test4.java", buffer.toString(), false, null); //$NON-NLS-1$
+		fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+
+		CompilationUnit root4= getASTRoot(unit4);
+		ArrayList proposals4= collectCorrections(unit4, root4);
+
+		assertNumberOf("proposals4", proposals4.size(), 2); //$NON-NLS-1$
+		assertCorrectLabels(proposals4);
+
+		Object current= null;
+		for (int index= 0; index < proposals4.size(); index++) {
+
+			current= proposals4.get(index);
+			if (current instanceof SerialVersionHashProposal) {
+
+				SerialVersionHashProposal proposal= (SerialVersionHashProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test4;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+				buffer.append("public class Test4<T> {\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+				buffer.append("    public void test() {\n"); //$NON-NLS-1$
+				buffer.append("        Serializable var3= new Test<T>() {\n"); //$NON-NLS-1$
+				buffer.append("            " + FIELD_COMMENT + "\n");
+				buffer.append("            private static final long serialVersionUID = 3257288045601240375L;\n"); //$NON-NLS-1$
+				buffer.append("            int var4;\n"); //$NON-NLS-1$
+				buffer.append("        };\n"); //$NON-NLS-1$
+				buffer.append("    }\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+
+			} else if (current instanceof SerialVersionDefaultProposal) {
+
+				SerialVersionDefaultProposal proposal= (SerialVersionDefaultProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test4;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+				buffer.append("public class Test4<T> {\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+				buffer.append("    public void test() {\n"); //$NON-NLS-1$
+				buffer.append("        Serializable var3= new Test<T>() {\n"); //$NON-NLS-1$
+				buffer.append("            " + FIELD_COMMENT + "\n");
+				buffer.append("            private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
+				buffer.append("            int var4;\n"); //$NON-NLS-1$
+				buffer.append("        };\n"); //$NON-NLS-1$
+				buffer.append("    }\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+			}
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	public void testGenericInnerClass() throws Exception {
+
+		IPackageFragment package5= fSourceFolder.createPackageFragment("test5", false, null); //$NON-NLS-1$
+		StringBuffer buffer= new StringBuffer();
+
+		buffer.append("package test5;\n"); //$NON-NLS-1$
+		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+		buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+		buffer.append("public class Test5 {\n"); //$NON-NLS-1$
+		buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+		buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+		buffer.append("    protected static class Test1<T> extends Test<T> {\n"); //$NON-NLS-1$
+		buffer.append("        public long var3;\n"); //$NON-NLS-1$
+		buffer.append("    }\n"); //$NON-NLS-1$
+		buffer.append("}\n"); //$NON-NLS-1$
+
+		ICompilationUnit unit5= package5.createCompilationUnit("Test5.java", buffer.toString(), false, null); //$NON-NLS-1$
+		fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+
+		CompilationUnit root5= getASTRoot(unit5);
+		ArrayList proposals5= collectCorrections(unit5, root5);
+
+		assertNumberOf("proposals5", proposals5.size(), 2); //$NON-NLS-1$
+		assertCorrectLabels(proposals5);
+
+		Object current= null;
+		for (int index= 0; index < proposals5.size(); index++) {
+
+			current= proposals5.get(index);
+			if (current instanceof SerialVersionHashProposal) {
+
+				SerialVersionHashProposal proposal= (SerialVersionHashProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test5;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+				buffer.append("public class Test5 {\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+				buffer.append("    protected static class Test1<T> extends Test<T> {\n"); //$NON-NLS-1$
+				buffer.append("        " + FIELD_COMMENT + "\n");
+				buffer.append("        private static final long serialVersionUID = 3256720676126538041L;\n"); //$NON-NLS-1$
+				buffer.append("        public long var3;\n"); //$NON-NLS-1$
+				buffer.append("    }\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+
+			} else if (current instanceof SerialVersionDefaultProposal) {
+
+				SerialVersionDefaultProposal proposal= (SerialVersionDefaultProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test5;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("import test0.Test;\n"); //$NON-NLS-1$
+				buffer.append("public class Test5 {\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+				buffer.append("    protected static class Test1<T> extends Test<T> {\n"); //$NON-NLS-1$
+				buffer.append("        " + FIELD_COMMENT + "\n");
+				buffer.append("        private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
+				buffer.append("        public long var3;\n"); //$NON-NLS-1$
+				buffer.append("    }\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+			}
+		}
+	}
+
+	/**
+	 * @throws Exception
+	 */
+	public void testGenericOuterClass() throws Exception {
+
+		IPackageFragment package6= fSourceFolder.createPackageFragment("test6", false, null); //$NON-NLS-1$
+		StringBuffer buffer= new StringBuffer();
+
+		buffer.append("package test6;\n"); //$NON-NLS-1$
+		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+		buffer.append("public class Test6<T> implements Serializable {\n"); //$NON-NLS-1$
+		buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+		buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+		buffer.append("}\n"); //$NON-NLS-1$
+
+		ICompilationUnit unit6= package6.createCompilationUnit("Test6.java", buffer.toString(), false, null); //$NON-NLS-1$
+		fProject.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+
+		CompilationUnit root6= getASTRoot(unit6);
+		ArrayList proposals6= collectCorrections(unit6, root6);
+
+		assertNumberOf("proposals6", proposals6.size(), 2); //$NON-NLS-1$
+		assertCorrectLabels(proposals6);
+
+		Object current= null;
+		for (int index= 0; index < proposals6.size(); index++) {
+
+			current= proposals6.get(index);
+			if (current instanceof SerialVersionHashProposal) {
+
+				SerialVersionHashProposal proposal= (SerialVersionHashProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test6;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("public class Test6<T> implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("    " + FIELD_COMMENT + "\n");
+				buffer.append("    private static final long serialVersionUID = 3257853198738667576L;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+				buffer.append("}\n"); //$NON-NLS-1$
+				assertEqualString(preview, buffer.toString());
+
+			} else if (current instanceof SerialVersionDefaultProposal) {
+
+				SerialVersionDefaultProposal proposal= (SerialVersionDefaultProposal) current;
+				String preview= getPreviewContent(proposal);
+
+				buffer= new StringBuffer();
+				buffer.append("package test6;\n"); //$NON-NLS-1$
+				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+				buffer.append("public class Test6<T> implements Serializable {\n"); //$NON-NLS-1$
+				buffer.append("    " + FIELD_COMMENT + "\n");
+				buffer.append("    private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("}\n"); //$NON-NLS-1$
 				assertEqualString(preview, buffer.toString());
 			}
@@ -225,7 +458,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("    protected class Test1 implements Serializable {\n"); //$NON-NLS-1$
 				buffer.append("        " + FIELD_COMMENT + "\n");
-				buffer.append("        private static final long serialVersionUID = -4023230086280104302L;\n"); //$NON-NLS-1$
+				buffer.append("        private static final long serialVersionUID = 3257281422661137200L;\n"); //$NON-NLS-1$
 				buffer.append("        public long var3;\n"); //$NON-NLS-1$
 				buffer.append("    }\n"); //$NON-NLS-1$
 				buffer.append("}\n"); //$NON-NLS-1$
@@ -253,6 +486,9 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		}
 	}
 
+	/**
+	 * @throws Exception
+	 */
 	public void testOuterClass() throws Exception {
 
 		IPackageFragment package1= fSourceFolder.createPackageFragment("test1", false, null); //$NON-NLS-1$
@@ -288,7 +524,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 				buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
 				buffer.append("public class Test1 implements Serializable {\n"); //$NON-NLS-1$
 				buffer.append("    " + FIELD_COMMENT + "\n");
-				buffer.append("    private static final long serialVersionUID = -2242798150684569765L;\n"); //$NON-NLS-1$
+				buffer.append("    private static final long serialVersionUID = 3256720680304458040L;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var1;\n"); //$NON-NLS-1$
 				buffer.append("    protected int var2;\n"); //$NON-NLS-1$
 				buffer.append("}\n"); //$NON-NLS-1$

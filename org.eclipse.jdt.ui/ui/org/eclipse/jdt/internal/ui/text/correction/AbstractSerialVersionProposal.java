@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -31,6 +32,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -54,11 +56,11 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	/** The default serial value */
 	protected static final long SERIAL_VALUE= 1;
 
-	/** The default serial id expression */
-	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; //$NON-NLS-1$
-
 	/** The originally selected node */
 	private final ASTNode fNode;
+
+	/** The default serial id expression */
+	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; //$NON-NLS-1$
 
 	/**
 	 * Creates a new abstract serial version proposal.
@@ -126,6 +128,8 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 		if (!(parent instanceof TypeDeclaration)) {
 
 			parent= parent.getParent();
+			if (parent instanceof ParameterizedType)
+				parent= parent.getParent();
 			if (parent instanceof ClassInstanceCreation) {
 
 				final ClassInstanceCreation creation= (ClassInstanceCreation) parent;
@@ -163,7 +167,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 			addLinkedPositions(rewrite, fragment);
 		}
 
-		final String comment= CodeGeneration.getFieldComment(getCompilationUnit(), declaration.getType().toString(), NAME_FIELD, String.valueOf('\n'));
+		final String comment= CodeGeneration.getFieldComment(getCompilationUnit(), declaration.getType().toString(), NAME_FIELD, StubUtility.getLineDelimiterUsed(getCompilationUnit()));
 		if (comment != null && comment.length() > 0) {
 			final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			declaration.setJavadoc(doc);
