@@ -90,6 +90,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	 */
 	public JavaWorkingSetPage() {
 		super(PAGE_ID, PAGE_TITLE, JavaPluginImages.DESC_WIZBAN_JAVA_WORKINGSET);
+		setDescription(WorkingSetMessages.getString("JavaWorkingSetPage.workingSet.description")); //$NON-NLS-1$
 		fFirstCheck= true;
 	}
 
@@ -169,6 +170,10 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		});
 
+		if (fWorkingSet != null)
+			fWorkingSetName.setText(fWorkingSet.getName());
+		initializeCheckedState();
+		disableClosedProjects();
 		validateInput();
 
 		// Set help for the page 
@@ -188,7 +193,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	public void setSelection(IWorkingSet workingSet) {
 		Assert.isNotNull(workingSet, "Working set must not be null"); //$NON-NLS-1$
 		fWorkingSet= workingSet;
-		if (getShell() != null && fWorkingSetName != null) {
+		if (getContainer() != null && getShell() != null && fWorkingSetName != null) {
 			fFirstCheck= false;
 			fWorkingSetName.setText(fWorkingSet.getName());
 			initializeCheckedState();
@@ -231,6 +236,12 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		String errorMessage= null; //$NON-NLS-1$
 		String newText= fWorkingSetName.getText();
 
+		if (newText.equals(newText.trim()) == false)
+			errorMessage = WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameWhitespace"); //$NON-NLS-1$
+		else if (fFirstCheck) {
+			fFirstCheck = false;
+			return;
+		}
 		if (newText.equals("")) //$NON-NLS-1$
 			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.nameMustNotBeEmpty"); //$NON-NLS-1$
 
@@ -245,11 +256,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 		if (errorMessage == null && fTree.getCheckedElements().length == 0)
 			errorMessage= WorkingSetMessages.getString("JavaWorkingSetPage.warning.resourceMustBeChecked"); //$NON-NLS-1$
 
-		if (fFirstCheck)
-			fFirstCheck= false;
-		else
-			setErrorMessage(errorMessage);
-
+		setErrorMessage(errorMessage);
 		setPageComplete(errorMessage == null);
 	}
 	
