@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IVisibilityChangeListener;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 /**
@@ -422,7 +421,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 			return null;
 		
 		Group group= new Group(parent, SWT.NONE);
-		group.setText(RefactoringMessages.getString("VisibilityControlUtil.Access_modifier")); //$NON-NLS-1$
+		group.setText(ActionMessages.getString("SourceActionDialog.modifier_group")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		group.setLayoutData(gd);
 		GridLayout layout= new GridLayout();
@@ -431,10 +430,10 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		group.setLayout(layout);
 		
 		String[] labels= new String[] {
-			"&public", //$NON-NLS-1$
-			"pro&tected", //$NON-NLS-1$
-			RefactoringMessages.getString("VisibilityControlUtil.defa&ult_4"), //$NON-NLS-1$
-			"pri&vate" //$NON-NLS-1$
+			ActionMessages.getString("SourceActionDialog.modifier_public"), //$NON-NLS-1$
+			ActionMessages.getString("SourceActionDialog.modifier_protected"), //$NON-NLS-1$
+			ActionMessages.getString("SourceActionDialog.modifier_default"), //$NON-NLS-1$
+			ActionMessages.getString("SourceActionDialog.modifier_private"), //$NON-NLS-1$
 		};
 		Integer[] data= new Integer[] {
 					new Integer(Modifier.PUBLIC),
@@ -463,7 +462,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
 
 		Button finalCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		finalCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.final")); //$NON-NLS-1$
+		finalCheckboxButton.setText(ActionMessages.getString("SourceActionDialog.modifier_final")); //$NON-NLS-1$
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		finalCheckboxButton.setLayoutData(gd);
 		finalCheckboxButton.setData(new Integer(Modifier.FINAL));
@@ -480,7 +479,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		});	
 			
 		Button syncCheckboxButton= new Button(visibilityComposite, SWT.CHECK);
-		syncCheckboxButton.setText(RefactoringMessages.getString("VisibilityControlUtil.synchronized")); //$NON-NLS-1$
+		syncCheckboxButton.setText(ActionMessages.getString("SourceActionDialog.modifier_synchronized")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		syncCheckboxButton.setLayoutData(gd);
 		syncCheckboxButton.setData(new Integer(Modifier.SYNCHRONIZED));
