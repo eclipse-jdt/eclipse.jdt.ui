@@ -33,10 +33,12 @@ public class RevertJavaEditorTest extends RevertEditorTest {
 	}
 
 	public void testRevertJavaEditor() throws Exception {
+		// Merged into 2.1.3
 		measureRevert(ResourceTestHelper.findFile(FILE));
 	}
 
 	public void test2() throws Exception {
+		// Merged into 2.1.3
 		measureRevert(ResourceTestHelper.findFile(FILE));
 	}
 }

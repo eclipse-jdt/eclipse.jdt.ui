@@ -19,6 +19,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.filebuffers.tests.FileTool;
+import org.eclipse.core.filebuffers.tests.ResourceHelper;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -32,19 +34,25 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.core.filebuffers.tests.FileTool;
-import org.eclipse.core.filebuffers.tests.ResourceHelper;
-
-import org.eclipse.text.tests.Accessor;
-
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.ITypeNameRequestor;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.text.JavaReconciler;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IWidgetTokenKeeper;
+import org.eclipse.jface.text.IWidgetTokenOwner;
 import org.eclipse.jface.text.reconciler.AbstractReconciler;
 import org.eclipse.jface.text.source.SourceViewer;
-
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.tests.Accessor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IViewPart;
@@ -62,20 +70,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.wizards.datatransfer.FileSystemStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.IImportStructureProvider;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.ITypeNameRequestor;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-
-import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 
 
 /**
@@ -267,24 +261,6 @@ public class EditorTestHelper {
 		return shown;
 	}
 	
-	public static boolean showView(String viewId) throws PartInitException {
-		IWorkbenchPage activePage= getActivePage();
-		IViewPart view= activePage.findView(viewId);
-		boolean notShown= view == null;
-		if (notShown)
-			activePage.showView(viewId);
-		return notShown;
-	}
-	
-	public static boolean hideView(String viewId) {
-		IWorkbenchPage activePage= getActivePage();
-		IViewPart view= activePage.findView(viewId);
-		boolean shown= view != null;
-		if (shown)
-			activePage.hideView(view);
-		return shown;
-	}
-	
 	public static void bringToTop() {
 		getActiveWorkbenchWindow().getShell().forceActive();
 	}
@@ -352,6 +328,16 @@ public class EditorTestHelper {
 			workbench.showPerspective(perspective, activeWindow);
 		}
 		return shownPerspective;
+	}
+	
+	public static void closeAllPopUps(SourceViewer sourceViewer) {
+		IWidgetTokenKeeper tokenKeeper= new IWidgetTokenKeeper() {
+			public boolean requestWidgetToken(IWidgetTokenOwner owner) {
+				return true;
+			}
+		};
+		sourceViewer.requestWidgetToken(tokenKeeper /* Merged into 2.1.3: , Integer.MAX_VALUE */);
+		sourceViewer.releaseWidgetToken(tokenKeeper);
 	}
 	
 	public static IJavaProject createJavaProject(String project, String externalSourceFolder) throws CoreException, JavaModelException {

@@ -13,11 +13,14 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import junit.framework.Assert;
 
 import com.sun.jdi.ClassType;
 import com.sun.jdi.Method;
@@ -39,16 +42,16 @@ import com.sun.jdi.request.EventRequest;
 
 import org.eclipse.test.internal.performance.InternalDimensions;
 import org.eclipse.test.internal.performance.InternalPerformanceMeter;
+import org.eclipse.test.internal.performance.PerformanceTestPlugin;
 import org.eclipse.test.internal.performance.data.DataPoint;
 import org.eclipse.test.internal.performance.data.Sample;
 import org.eclipse.test.internal.performance.data.Scalar;
-import org.eclipse.test.internal.performance.db.DB;
 import org.eclipse.jdi.Bootstrap;
 
 /**
  * To use this performance meter add the following VM arguments:
- * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=PORT,suspend=n,server=y -Decilpse.perf.debugPort=PORT</code>
- * where PORT is the port on which the debugger will listen and connect to.
+ * <code>-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=7777,suspend=n,server=y -Declipse.perf.debugPort=7777</code>.
+ * Try a different port if 7777 does not work.
  * Because the performance meter uses the VM's debugging facility, it cannot be
  * debugged itself. A {@link org.eclipse.test.performance.Performance#getNullPerformanceMeter()}
  * could be used while debugging clients.
@@ -126,29 +129,45 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 				}
 				while (!fIsStopping) {
 					try {
-						EventSet eventSet= fEventQueue.remove();
+						EventSet eventSet;
+						if (fTimeout == -1)
+							eventSet= fEventQueue.remove();
+						else {
+							eventSet= fEventQueue.remove(fTimeout);
+							if (eventSet == null) {
+								fIsStopping= true;
+								System.out.println("Event reader timed out");
+								return;
+							}
+						}
 						
 						EventIterator iterator= eventSet.eventIterator();
 						while (iterator.hasNext()) {
 							Event event= iterator.nextEvent();
 							if (event instanceof BreakpointEvent)
 								handleBreakpointEvent((BreakpointEvent) event);
-							if (event instanceof VMDeathEvent)
-								stop();
+							if (event instanceof VMDeathEvent) {
+								fIsStopping= true;
+								System.out.println("VM unexpectedly died"); //$NON-NLS-1$
+							}
 						}
 						
 						eventSet.resume();
-					} catch (InterruptedException e) {
+					} catch (InterruptedException x) {
 						if (fIsStopping)
 							return;
 						System.out.println("Event reader loop unexpectedly interrupted"); //$NON-NLS-1$
-					} catch (VMDisconnectedException e) {
+						x.printStackTrace();
+						return;
+					} catch (VMDisconnectedException x) {
 						System.out.println("VM unexpectedly disconnected"); //$NON-NLS-1$
+						x.printStackTrace();
 						return;
 					}
 				}
 			} finally {
 				disableBreakpoints();
+				fVM.resume();
 			}
 		}
 
@@ -255,7 +274,16 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/** Default debugging port when the system property cannot be interpreted as an integer */
 	public static final int DEBUG_PORT_DEFAULT= 7777;
 	
-	/** Debugging port */
+	/**
+	 * Debugging port
+	 * <p>
+	 * TODO: Fetch the debug port with
+	 * <code>Platform.getCommandLineArgs()</code> or
+	 * <code>org.eclipse.core.runtime.adaptor.EnvironmentInfo.getDefault().getCommandLineArgs()</code>
+	 * (the latter may be necessary because it also includes low-level
+	 * arguments).
+	 * </p>
+	 */
 	private static final int PORT= intValueOf(System.getProperty(DEBUG_PORT_PROPERTY), DEBUG_PORT_DEFAULT);
 	
 	/** Empty array of methods */
@@ -294,6 +322,9 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	/** <code>true</code> iff additional information should be collected per instance */
 	private boolean fCollectInstanceResults= true;
 	
+	/** Timeout after which the event reader aborts when no event occurred, <code>-1</code> for infinite */
+	private long fTimeout= -1;
+	
 	/**
 	 * Initialize the performance meter to count the number of invocation of
 	 * the given methods and constructors.
@@ -304,10 +335,12 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public InvocationCountPerformanceMeter(String scenarioId, java.lang.reflect.Method[] methods, Constructor[] constructors) {
 		super(scenarioId);
+		Assert.assertNotNull("Could not create performance meter: check the command line arguments (see InvocationCountPerformanceMeter for details)", System.getProperty(DEBUG_PORT_PROPERTY));
+		
 		fMethods= methods;
 		fConstructors= constructors;
 		fStartTime= System.currentTimeMillis();
-		fVerbose= !DB.isActive() || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
+		fVerbose= PerformanceTestPlugin.getDBLocation() == null || System.getProperty(VERBOSE_PERFORMANCE_METER_PROPERTY) != null;
 	}
 	
 	/**
@@ -338,7 +371,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 	 */
 	public void start() {
 		try {
-			attach("localhost", PORT); //$NON-NLS-1$
+			String localhost = InetAddress.getLocalHost().getCanonicalHostName();
+			attach(localhost, PORT); //$NON-NLS-1$
 			
 			List requests= new ArrayList();
 			for (int i= 0; i < fMethods.length; i++)
@@ -353,6 +387,8 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			x.printStackTrace();
 		} catch (IllegalConnectorArgumentsException x) {
 			x.printStackTrace();
+		} finally {
+			Assert.assertNotNull("Could not start performance meter, hints:\n1) check the command line arguments (see InvocationCountPerformanceMeter for details)\n2) use a different port number", fEventReader);
 		}
 	}
 	
@@ -417,6 +453,7 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 		List connectors= manager.attachingConnectors();
 		AttachingConnector connector= (AttachingConnector) connectors.get(0);
 		Map args= connector.defaultArguments();
+		
 		((Connector.Argument) args.get("port")).setValue(String.valueOf(port)); //$NON-NLS-1$
 		((Connector.Argument) args.get("hostname")).setValue(host); //$NON-NLS-1$
 		fVM= connector.attach(args);
@@ -608,5 +645,36 @@ public class InvocationCountPerformanceMeter extends InternalPerformanceMeter {
 			// use default
 		}
 		return defaultValue;
+	}
+	
+	/**
+	 * Returns the timeout after which the event reader aborts when no event
+	 * occurred, <code>-1</code> for infinite.
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
+	 * 
+	 * @return the timeout after which the event reader aborts when no event
+	 *         occurred, <code>-1</code> for infinite
+	 */
+	public long getTimeout() {
+		return fTimeout;
+	}
+	
+	/**
+	 * Sets the timeout after which the event reader aborts when no event
+	 * occurred, <code>-1</code> for infinite.
+	 * <p>
+	 * For debugging purposes.
+	 * </p>
+	 * 
+	 * @param timeout the timeout after which the event reader aborts when
+	 *                no event occurred, <code>-1</code> for infinite
+	 */
+	public void setTimeout(long timeout) {
+		fTimeout= timeout;
 	}
 }

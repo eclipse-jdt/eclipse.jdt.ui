@@ -21,7 +21,7 @@ public class PerformanceTestSuite4 extends TestSuite {
 
 	public static Test suite() {
 		// exclude PerformanceTestSetup because this suite measures startup performance
-		return new CloseWorkbenchDecorator(new PerformanceTestSuite4());
+		return new PerformanceTestSuite4();
 	}
 	
 	public PerformanceTestSuite4() {

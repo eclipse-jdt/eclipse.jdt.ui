@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.widgets.Shell;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -39,12 +37,7 @@ public class OpenJavaContentAssistTest extends OpenQuickControlTest {
 	}
 
 	protected void tearDownMeasurement(AbstractTextEditor editor) throws Exception {
-		Shell[] shells= EditorTestHelper.getActiveDisplay().getShells();
-		for (int i= 0; i < shells.length; i++) {
-			Shell shell= shells[i];
-			if ("".equals(shell.getText()))
-				shell.dispose();
-		}
+		EditorTestHelper.closeAllPopUps(EditorTestHelper.getSourceViewer(editor));
 	}
 	
 	public void test1() throws Exception {

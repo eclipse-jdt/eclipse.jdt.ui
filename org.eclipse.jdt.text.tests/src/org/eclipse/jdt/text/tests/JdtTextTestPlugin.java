@@ -13,14 +13,15 @@ package org.eclipse.jdt.text.tests;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.IPluginDescriptor;
+
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPluginDescriptor;
 
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
- * The main plugin class to be used in the desktop.
+ * The main plug-in class to be used in the desktop.
  */
 public class JdtTextTestPlugin extends AbstractUIPlugin {
 	/**
@@ -35,12 +36,14 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * The constructor.
+	 * 
+	 * @param descriptor the plug-in descriptor
 	 */
 	public JdtTextTestPlugin(IPluginDescriptor descriptor) {
 		super(descriptor);
 		plugin = this;
 		try {
-			resourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.text.test.JdtTextTestPluginResources"); //$NON-NLS-1$
+			resourceBundle= ResourceBundle.getBundle("org.eclipse.jdt.text.tests.JdtTextTestPluginResources"); //$NON-NLS-1$
 		} catch (MissingResourceException x) {
 			resourceBundle = null;
 		}
@@ -48,6 +51,8 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the shared instance.
+	 * 
+	 * @return the default plug-in instance 
 	 */
 	public static JdtTextTestPlugin getDefault() {
 		return plugin;
@@ -55,14 +60,18 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Returns the workspace instance.
+	 * 
+	 * @return the workspace 
 	 */
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Returns the string from the plugin's resource bundle.
+	 * 
+	 * @param key the resource key 
+	 * @return the resource string or the given <code>key</code> if not found 
 	 */
 	public static String getResourceString(String key) {
 		ResourceBundle bundle= JdtTextTestPlugin.getDefault().getResourceBundle();
@@ -74,7 +83,9 @@ public class JdtTextTestPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Returns the plugin's resource bundle,
+	 * Returns the plugin's resource bundle.
+	 * 
+	 * @return the resource bundle
 	 */
 	public ResourceBundle getResourceBundle() {
 		return resourceBundle;

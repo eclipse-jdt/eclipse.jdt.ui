@@ -137,27 +137,31 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	
 	public void testOpenEditor3() throws Exception {
 		PerformanceMeter performanceMeter= createPerformanceMeterForSummary(SHORT_NAME_WARM_RUN_FIRST, Dimension.ELAPSED_PROCESS); 
-		measureOpenInEditor(LARGE_FILE, true, performanceMeter);
+		measureOpenInEditor(LARGE_FILE, true, true, performanceMeter);
 	}
 
 	public void testOpenEditor4() throws Exception {
-		measureOpenInEditor(LARGE_FILE, true, createPerformanceMeter());
+		measureOpenInEditor(LARGE_FILE, false, true, createPerformanceMeter());
 	}
 
 	public void testOpenEditor5() throws Exception {
-		measureOpenInEditor(LARGE_FILE, false, createPerformanceMeter());
+		measureOpenInEditor(LARGE_FILE, true, false, createPerformanceMeter());
 	}
 
 	public void testOpenEditor6() throws Exception {
-		measureOpenInEditor(LARGE_FILE, false, createPerformanceMeter());
+		measureOpenInEditor(LARGE_FILE, false, false, createPerformanceMeter());
 	}
 	
-	protected void measureOpenInEditor(String file, boolean showOutline, PerformanceMeter performanceMeter) throws PartInitException {
+	protected void measureOpenInEditor(String file, boolean enableFolding, boolean showOutline, PerformanceMeter performanceMeter) throws PartInitException {
 		boolean shown= EditorTestHelper.isViewShown(EditorTestHelper.OUTLINE_VIEW_ID);
 		try {
+			// Merged into 2.1.3:
+//			EditorTestHelper.enableFolding(enableFolding);
 			showOutline(showOutline);
 			measureOpenInEditor(file, performanceMeter);
 		} finally {
+			// Merged into 2.1.3:
+//			EditorTestHelper.resetFolding();
 			showOutline(shown);
 		}
 	}

@@ -3,7 +3,7 @@
 <plugin
    id="org.eclipse.jdt.text.tests"
    name="%Plugin.name"
-   version="3.0.0"
+   version="2.1.3"
    provider-name="%Plugin.providerName"
    class="org.eclipse.jdt.text.tests.JdtTextTestPlugin">
 
@@ -28,6 +28,7 @@
       <import plugin="org.eclipse.text.tests"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.jdt.debug"/>
+      <import plugin="org.eclipse.pde"/>
    </requires>
 
 

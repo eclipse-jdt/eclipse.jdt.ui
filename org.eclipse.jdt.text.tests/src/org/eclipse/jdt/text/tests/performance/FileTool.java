@@ -174,6 +174,7 @@ public class FileTool {
 
 	public static File getFileInPlugin(Plugin plugin, IPath path) {
 		try {
+			// Merged into 2.1.3
 			String sPath= path.toString();
 			if (sPath.startsWith("/"))
 				sPath= sPath.substring(1);
