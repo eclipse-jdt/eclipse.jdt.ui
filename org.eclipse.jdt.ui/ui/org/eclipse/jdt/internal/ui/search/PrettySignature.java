@@ -13,9 +13,9 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class PrettySignature {
 
@@ -27,7 +27,9 @@ public class PrettySignature {
 				case IJavaElement.METHOD:
 					return getMethodSignature((IMethod)element);
 				case IJavaElement.TYPE:
-					return JavaModelUtil.getFullyQualifiedName((IType)element);
+					return JavaElementLabels.getElementLabel(element, JavaElementLabels.T_FULLY_QUALIFIED);
+				case IJavaElement.FIELD:
+					return getFieldSignature((IField) element);
 				default:
 					return element.getElementName();
 			}
@@ -35,7 +37,7 @@ public class PrettySignature {
 	
 	public static String getMethodSignature(IMethod method) {
 		StringBuffer buffer= new StringBuffer();
-		buffer.append(JavaModelUtil.getFullyQualifiedName(method.getDeclaringType()));
+		buffer.append(JavaElementLabels.getElementLabel(method.getDeclaringType(), JavaElementLabels.T_FULLY_QUALIFIED));
 		boolean isConstructor= method.getElementName().equals(method.getDeclaringType().getElementName());
 		if (!isConstructor) {
 			buffer.append('.');
@@ -70,8 +72,7 @@ public class PrettySignature {
 	}
 
 	public static String getFieldSignature(IField field) {
-		IType type= field.getDeclaringType();
-		return 	JavaModelUtil.concatenateName(JavaModelUtil.getFullyQualifiedName(type), field.getElementName());
+		return JavaElementLabels.getElementLabel(field, JavaElementLabels.F_FULLY_QUALIFIED);
 
 	}	
 }
