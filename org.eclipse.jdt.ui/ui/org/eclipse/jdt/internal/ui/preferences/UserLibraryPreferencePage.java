@@ -66,6 +66,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferencePage;
+import org.eclipse.jface.resource.StringConverter;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
@@ -154,6 +155,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			Composite composite= (Composite) super.createDialogArea(parent);
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField, fIsSystemField }, true, SWT.DEFAULT, SWT.DEFAULT);
 			fNameField.postSetFocusOnDialogField(parent.getDisplay());
+			
+			Dialog.applyDialogFont(composite);
 			return composite;
 		}
 		
@@ -196,6 +199,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	
 	public static class LoadSaveDialog extends StatusDialog implements IStringButtonAdapter, IDialogFieldListener {
 		
+		
 		private static final String CURRENT_VERSION= "1"; //$NON-NLS-1$
 
 		private static final String TAG_ROOT= "eclipse-userlibraries"; //$NON-NLS-1$
@@ -209,7 +213,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 		private static final String TAG_JAVADOC= "javadoc"; //$NON-NLS-1$
 
 		private static final String PREF_LASTPATH= JavaUI.ID_PLUGIN + ".lastuserlibrary"; //$NON-NLS-1$
-
+		private static final String PREF_USER_LIBRARY_LOADSAVE_SIZE= "UserLibraryLoadSaveDialog.size"; //$NON-NLS-1$
+		
 		private List fExistingLibraries;
 		private IDialogSettings fSettings;
 		
@@ -224,12 +229,20 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			setShellStyle(getShellStyle() | SWT.MAX | SWT.RESIZE);
 			
 			PixelConverter converter= new PixelConverter(shell);
-			fInitialSize= new Point(converter.convertWidthInCharsToPixels(80), converter.convertHeightInCharsToPixels(34));
 			
 			fExistingLibraries= existingLibraries;
 			fSettings= dialogSettings;
 			fLastFile= null;
 			
+			int defaultWidth= converter.convertWidthInCharsToPixels(80);
+			int defaultHeigth= converter.convertHeightInCharsToPixels(34);
+			String lastSize= fSettings.get(PREF_USER_LIBRARY_LOADSAVE_SIZE);
+			if (lastSize != null) {
+				fInitialSize= StringConverter.asPoint(lastSize, new Point(defaultWidth, defaultHeigth));
+			} else {
+				fInitialSize= new Point(defaultWidth, defaultHeigth);
+			}
+		
 			if (isSave()) {
 				setTitle(PreferencesMessages.getString("UserLibraryPreferencePage.LoadSaveDialog.save.title")); //$NON-NLS-1$
 			} else {
@@ -263,7 +276,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				fLocationField.setText(""); //$NON-NLS-1$
 			}
 		}
-		
+				
 		protected Point getInitialSize() {
 			return fInitialSize;
 		}
@@ -287,6 +300,8 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fExportImportList.getListControl(null).setLayoutData(new GridData(GridData.FILL_BOTH));
 			
 			fLocationField.postSetFocusOnDialogField(parent.getDisplay());
+			
+			Dialog.applyDialogFont(composite);
 			return composite;
 		}
 		
@@ -392,6 +407,15 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 				}
 			}
 			super.okPressed();
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.dialogs.Dialog#close()
+		 */
+		public boolean close() {
+			Point point= getShell().getSize();
+			fSettings.put(PREF_USER_LIBRARY_LOADSAVE_SIZE, StringConverter.asString(point));
+			return super.close();
 		}
 		
 		private IStatus validateSettings() {
@@ -919,7 +943,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 	}
 
 	private boolean canRemove(List list) { 
-		return true;
+		return !list.isEmpty();
 	}
 
 	private CPListElement[] openExtJarFileDialog(CPListElement existing, Object parent) {
