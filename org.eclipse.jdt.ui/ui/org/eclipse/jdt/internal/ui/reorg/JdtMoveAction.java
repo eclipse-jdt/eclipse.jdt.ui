@@ -29,7 +29,9 @@ import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -44,6 +46,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage;
@@ -77,8 +80,28 @@ public class JdtMoveAction extends ReorgDestinationAction {
 		if (ClipboardActionUtil.hasOnlyProjects(selection)){
 			moveProject(selection);
 		}	else {
-			super.run(selection);
+			if (!needsSaving(selection)) {
+				super.run(selection);
+			} else {
+				RefactoringSaveHelper helper= new RefactoringSaveHelper();
+				try {
+					if (helper.saveEditors()) {
+						super.run(selection);
+					}
+				} finally {
+					helper.triggerBuild();
+				}
+			}
 		}
+	}
+	
+	private boolean needsSaving(IStructuredSelection selection) {
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= (Object) iter.next();
+			if (element instanceof ICompilationUnit || element instanceof IType)
+				return true;
+		}
+		return false;
 	}
 
 	public static ElementTreeSelectionDialog makeDialog(Shell parent, MoveRefactoring refactoring) {
