@@ -16,20 +16,6 @@ public class GetterSetterUtil {
 	private GetterSetterUtil(){
 	}
 	
-	/**
-	 * @deprecated use getGetter(IField) instead
-	 */
-	public static IMethod getGetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
-		return getGetter(field);
-	}
-
-	/**
-	 * @deprecated use getSetter(IField) instead
-	 */	
-	public static IMethod getSetter(IField field, String[] namePrefixes, String[] nameSuffixes) throws JavaModelException{
-		return getSetter(field);
-	}
-	
 	public static String getGetterName(IField field, String[] excludedNames) throws JavaModelException {
 		if (excludedNames == null) {
 			excludedNames= empty;
