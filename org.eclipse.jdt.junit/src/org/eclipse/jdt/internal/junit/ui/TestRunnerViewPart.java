@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import org.eclipse.core.internal.jobs.JobManager;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
@@ -29,6 +30,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.ILock;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -87,9 +90,10 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.progress.IWorkbenchSiteProgressService;
 import org.eclipse.ui.progress.UIJob;
 
-/**
+/** 
  * A ViewPart that shows the results of a test run.
  */
 public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, IPropertyChangeListener {
@@ -228,6 +232,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private Composite fCounterComposite;
 	private Composite fParent;
 	private UpdateUIJob fUpdateJob;
+	/**
+	 * A Job that runs as long as a test run is
+	 * running. It is used to get the progress feedback
+	 * for running jobs in the view.
+	 */
+	private JUnitIsRunningJob fJUnitIsRunningJob;
+	private ILock fJUnitIsRunningLock;
+
+	public static final Object FAMILY_JUNIT_RUN = new Object();
+
 
 	private StopAction fStopAction;
 	protected boolean fPartIsVisible= false;
@@ -394,7 +408,18 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
+		IWorkbenchSiteProgressService progressService= getProgressService();
+		if (progressService != null)
+			progressService.showBusyForFamily(TestRunnerViewPart.FAMILY_JUNIT_RUN);
 	}
+	
+	private IWorkbenchSiteProgressService getProgressService() {
+		Object siteService= getSite().getAdapter(IWorkbenchSiteProgressService.class);
+		if(siteService != null)
+			return (IWorkbenchSiteProgressService) siteService;
+		return null;
+	}
+
 
 	private void restoreLayoutState(IMemento memento) {
 		Integer page= memento.getInteger(TAG_PAGE);
@@ -423,7 +448,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	public void stopTest() {
 		if (fTestRunnerClient != null)
 			fTestRunnerClient.stopTest();
-		stopUpdateJob();
+		stopUpdateJobs();
 	}
 
 	/**
@@ -457,8 +482,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		reset(testCount);
 		fShowOnErrorOnly= JUnitPreferencePage.getShowOnErrorOnly();
 		fExecutedTests++;
-		stopUpdateJob();
-		fUpdateJob= new UpdateUIJob(JUnitMessages.getString("TestRunnerViewPart.jobName")); //$NON-NLS-1$  
+		stopUpdateJobs();
+		fUpdateJob= new UpdateUIJob(JUnitMessages.getString("TestRunnerViewPart.jobName")); //$NON-NLS-1$ 
+		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.getString("TestRunnerViewPart.wrapperJobName")); //$NON-NLS-1$
+		fJUnitIsRunningLock= JobManager.getInstance().newLock();
+		// acquire lock while a test run is running
+		// the lock is released when the test run terminates
+		// the wrapper job will wait on this lock.
+		fJUnitIsRunningLock.acquire();
+		getProgressService().schedule(fJUnitIsRunningJob);
 		fUpdateJob.schedule(REFRESH_INTERVAL);
 	}
 	
@@ -513,15 +545,20 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 					TestRunTab v= (TestRunTab) e.nextElement();
 					v.aboutToEnd();
 				}
+				warnOfContentChange();
 			}
 		});	
-		stopUpdateJob();
+		stopUpdateJobs();
 	}
 
-	private void stopUpdateJob() {
+	private void stopUpdateJobs() {
 		if (fUpdateJob != null) {
 			fUpdateJob.stop();
 			fUpdateJob= null;
+		}
+		if (fJUnitIsRunningJob != null && fJUnitIsRunningLock != null) {
+			fJUnitIsRunningLock.release();
+			fJUnitIsRunningJob= null;
 		}
 	}
 
@@ -568,7 +605,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				fProgressBar.stopped();
 			}
 		});	
-		stopUpdateJob();
+		stopUpdateJobs();
 	}
 
 	private void resetViewIcon() {
@@ -943,8 +980,21 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		public boolean shouldSchedule() {
 			return fRunning;
 		}
-		
-		
+	}
+
+	class JUnitIsRunningJob extends Job {
+		public JUnitIsRunningJob(String name) {
+			super(name);
+			setSystem(true);
+		}
+		public IStatus run(IProgressMonitor monitor) {
+			// wait until the test run terminates
+			fJUnitIsRunningLock.acquire();
+			return Status.OK_STATUS;
+		}
+		public boolean belongsTo(Object family) {
+			return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
+		}
 	}
 
 	protected void doShowStatus() {
@@ -1358,6 +1408,12 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 	
+	public void warnOfContentChange() {
+		IWorkbenchSiteProgressService service= getProgressService();
+		if (service != null) 
+			service.warnOfContentChange();
+	}
+
 	public boolean lastLaunchIsKeptAlive() {
 		return fTestRunnerClient != null && fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(fLaunchMode);
 	}
