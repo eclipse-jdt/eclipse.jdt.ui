@@ -338,6 +338,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		helper1(new String[] {"p.A", "p.Second"}, "p.A", 5, 17, 5, 22, FIELD, "s", false, false);
 	}
 
+	// move local class (41530)
+	public void test24() throws Exception {
+		helper1(new String[] {"p1.A", "p1.B", "p1.StarDecorator"}, "p1.A", 9, 17, 9, 22, PARAMETER, "b", false, false);
+	}
+
 
 	// Cannot move interface method declaration
 	public void testFail0() throws Exception {

@@ -729,7 +729,7 @@ class InstanceMethodMover {
 				
 				IBinding binding= name.resolveBinding();
 				if(binding instanceof ITypeBinding)
-					return true;
+					return !((ITypeBinding) binding).isLocal();
 				if(binding instanceof IMethodBinding)
 					return Modifier.isStatic(((IMethodBinding) binding).getModifiers());
 				if(binding instanceof IVariableBinding)
