@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 
 import org.eclipse.jdt.core.dom.PostfixExpression;
 
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
@@ -21,9 +22,9 @@ final class EncapsulatePostfixAccess extends SimpleTextEdit {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getCopy
+	 * @see TextEdit#copy0
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new EncapsulatePostfixAccess(getTextRange().copy(), getText());
 	}	
 }

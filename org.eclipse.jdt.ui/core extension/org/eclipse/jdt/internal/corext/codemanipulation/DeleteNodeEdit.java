@@ -4,8 +4,6 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ToolFactory;
@@ -13,15 +11,11 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -52,8 +46,7 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect(TextBufferEditor)
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {
-		TextBuffer buffer= editor.getTextBuffer();
+	public void connect(TextBuffer buffer) throws CoreException {
 		TextRange range= getTextRange();
 		TextRegion region;
 		int startOffset= buffer.getLineInformationOfOffset(range.getOffset()).getOffset();
@@ -71,9 +64,9 @@ public final class DeleteNodeEdit extends SimpleTextEdit {
 	}
 
 	/* non Java-doc
-	 * @see TextEdit#copy()
+	 * @see TextEdit#copy0()
 	 */
-	public TextEdit copy() throws CoreException {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new DeleteNodeEdit(getTextRange().copy(), this.fDeleteLine);
 	}
 	

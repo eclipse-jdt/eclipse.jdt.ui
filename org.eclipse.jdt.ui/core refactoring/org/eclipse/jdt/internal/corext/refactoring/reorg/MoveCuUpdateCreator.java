@@ -40,8 +40,9 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -301,27 +302,27 @@ class MoveCuUpdateCreator {
 		return RefactoringSearchEngine.createSearchPattern(cu.getTypes(), IJavaSearchConstants.REFERENCES);
 	}
 
-	private static class UpdateTypeReferenceEdit extends SimpleTextEdit{
+	private final static class UpdateTypeReferenceEdit extends SimpleTextEdit {
 		
 		private SearchResult fSearchResult;
 		private IPackageFragment fDestination;
 		private IPackageFragment fSource;
 		
-		UpdateTypeReferenceEdit(SearchResult searchResult, IPackageFragment source, IPackageFragment destination){
+		UpdateTypeReferenceEdit(SearchResult searchResult, IPackageFragment source, IPackageFragment destination) {
 			fSearchResult= searchResult;
 			fDestination= destination;
 			fSource= source;
 		}
 		
-		public TextEdit copy() throws CoreException {
+		protected TextEdit copy0(TextEditCopier copier) {
 			return new UpdateTypeReferenceEdit(fSearchResult, fSource, fDestination);
 		}
 
-		public void connect(TextBufferEditor editor) throws CoreException {
+		public void connect(TextBuffer buffer) throws CoreException {
 			int length= fSearchResult.getEnd() - fSearchResult.getStart();
 			int offset= fSearchResult.getStart();
 			String newText= fDestination.getElementName();
-			String oldText= editor.getTextBuffer().getContent(offset, length);
+			String oldText= buffer.getContent(offset, length);
 			String currectPackageName= fSource.getElementName();
 			
 			if (fSource.isDefaultPackage()){
@@ -335,7 +336,7 @@ class MoveCuUpdateCreator {
 			}
 			setText(newText);
 			setTextRange(new TextRange(offset, length));
-			super.connect(editor);
+			super.connect(buffer);
 		}
 	}
 }

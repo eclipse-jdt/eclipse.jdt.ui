@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
@@ -23,15 +24,6 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 public final class CodeBlockEdit extends TextEdit {
-
-	private static class UndoEdit extends SimpleTextEdit {
-		public UndoEdit(TextRange range, String text) {
-			super(range, text);
-		}
-		public TextEdit copy() throws CoreException {
-			return new UndoEdit(this.getTextRange(), getText());
-		}
-	}
 
 	private TextRange fRange;
 	private AbstractCodeBlock fBlock;
@@ -59,15 +51,14 @@ public final class CodeBlockEdit extends TextEdit {
 		fSpacing= spacing;
 	}
 
-	public TextEdit copy() throws CoreException {
+	public TextEdit copy0(TextEditCopier copier) {
 		return new CodeBlockEdit(fRange.copy(), fBlock, fIndent, fSpacing);
 	}
 
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {		
-		final TextBuffer buffer= editor.getTextBuffer();
+	public void connect(TextBuffer buffer) throws CoreException {		
 		final int offset= fRange.getOffset();
 		final int end= offset + fRange.getLength();
 		int lineOffset= buffer.getLineInformationOfOffset(end).getOffset();
@@ -89,10 +80,9 @@ public final class CodeBlockEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public final TextEdit perform(TextBuffer buffer) throws CoreException {
+	public final void perform(TextBuffer buffer) throws CoreException {
 		String current= buffer.getContent(fRange.getOffset(), fRange.getLength());
 		buffer.replace(fRange, createText(buffer));
-		return new UndoEdit(fRange, current);
 	}	
 	
 	private String createText(TextBuffer buffer) {

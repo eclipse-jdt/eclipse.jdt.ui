@@ -73,13 +73,7 @@ public class CompilationUnitChange extends TextFileChange {
 	public String getPreviewContent(ISourceReference element, EditChange[] changes) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
 		TextBufferEditor editor= new TextBufferEditor(buffer);
-		Map positionMap= getPositionMap();
-		for (int i= 0; i < changes.length; i++) {
-			EditChange change= changes[i];
-			Assert.isTrue(change.getTextChange() == this);
-			if (change.isActive())
-				change.addTo(editor, true, positionMap);
-		}
+		addTextEdits(editor, changes);
 		int oldLength= buffer.getLength();
 		editor.performEdits(new NullProgressMonitor());
 		int delta= buffer.getLength() - oldLength;

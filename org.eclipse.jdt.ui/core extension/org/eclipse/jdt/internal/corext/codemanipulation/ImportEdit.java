@@ -12,12 +12,11 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
@@ -25,7 +24,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  * A special edit that allows add imports to a import container in a structured way.
  * Additionally this edit honors the Organize Imports preferences
  */
-public class ImportEdit extends SimpleTextEdit {
+public final class ImportEdit extends SimpleTextEdit {
 	
 	private ICompilationUnit fCUnit;
 	private CodeGenerationSettings fSettings;
@@ -107,8 +106,7 @@ public class ImportEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {
-		TextBuffer buffer= editor.getTextBuffer();
+	public void connect(TextBuffer buffer) throws CoreException {
 		ImportsStructure importStructure= new ImportsStructure(fCUnit, fSettings.importOrder, fSettings.importThreshold, true);
 		importStructure.setFilterImplicitImports(fFilterImplicitImports);
 		for (Iterator iter= fRemovedImports.iterator(); iter.hasNext();) {
@@ -127,13 +125,13 @@ public class ImportEdit extends SimpleTextEdit {
 			setText(""); //$NON-NLS-1$
 			setTextRange(new TextRange(0,0));
 		}
-		super.connect(editor);
+		super.connect(buffer);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public TextEdit copy() throws CoreException {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new ImportEdit(fCUnit, fSettings, fAddedImports, fRemovedImports, fFilterImplicitImports);
 	}
 	

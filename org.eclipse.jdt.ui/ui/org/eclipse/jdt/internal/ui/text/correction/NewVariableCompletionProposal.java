@@ -32,26 +32,26 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public class NewVariableCompletionProposal extends CUCorrectionProposal {
+import org.eclipse.jdt.ui.JavaUI;
+
+public final class NewVariableCompletionProposal extends CUCorrectionProposal {
 	
-	private static class AddLocalVariableEdit extends SimpleTextEdit {
+	private final static class AddLocalVariableEdit extends SimpleTextEdit {
 		private String fContent;
 		private ASTNode fAstRoot;
 		private int fTabSize;
@@ -63,21 +63,20 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		}
 		
 		/* non Java-doc
-		 * @see TextEdit#getCopy
+		 * @see TextEdit#copy0
 		 */
-		public TextEdit copy() {
+		protected TextEdit copy0(TextEditCopier copier) {
 			return new AddLocalVariableEdit(fAstRoot, fContent, fTabSize);
 		}
 		
 		/* non Java-doc
 		 * @see TextEdit#connect
 		 */
-		public void connect(TextBufferEditor editor) throws CoreException {
+		public void connect(TextBuffer buffer) throws CoreException {
 			if (fAstRoot == null) {
 				return;
 			}
 			
-			TextBuffer buffer= editor.getTextBuffer();
 			int offset= 0;
 			String insertString= null;
 			
@@ -104,11 +103,11 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 			}
 			setTextRange(new TextRange(offset, 0));
 			setText(insertString);
-			super.connect(editor);
+			super.connect(buffer);
 		}	
 	}
 	
-	private static class AddParameterEdit extends SimpleTextEdit {
+	private final static class AddParameterEdit extends SimpleTextEdit {
 		private String fContent;
 		private ASTNode fAstRoot;
 		private ICompilationUnit fCompilationUnit;
@@ -120,16 +119,16 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 		}
 		
 		/* non Java-doc
-		 * @see TextEdit#getCopy
+		 * @see TextEdit#copy0
 		 */
-		public TextEdit copy() {
+		protected TextEdit copy0(TextEditCopier copier) {
 			return new AddParameterEdit(fCompilationUnit, fAstRoot, fContent);
 		}
 		
 		/* non Java-doc
 		 * @see TextEdit#connect
 		 */
-		public void connect(TextBufferEditor editor) throws CoreException {
+		public void connect(TextBuffer buffer) throws CoreException {
 			if (fAstRoot == null) {
 				return;
 			}
@@ -168,7 +167,7 @@ public class NewVariableCompletionProposal extends CUCorrectionProposal {
 			}
 			setTextRange(new TextRange(offset, 0));
 			setText(insertString);
-			super.connect(editor);
+			super.connect(buffer);
 		}	
 	}	
 

@@ -15,16 +15,16 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
 /**
  * Changes the visibility of a <code>IMember</code> instance.
  */
-public class ChangeVisibilityEdit extends SimpleTextEdit {
+public final class ChangeVisibilityEdit extends SimpleTextEdit {
 
 	private IMember fMember;
 	private String fVisibility;
@@ -43,9 +43,9 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getCopy
+	 * @see TextEdit#copy0()
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new ChangeVisibilityEdit(fMember, fVisibility);
 	}
 	
@@ -59,8 +59,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {
-		TextBuffer buffer= editor.getTextBuffer();
+	public void connect(TextBuffer buffer) throws CoreException {
 		int offset= fMember.getSourceRange().getOffset();
 		int length= 0;
 		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
@@ -82,7 +81,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 			text+= " "; //$NON-NLS-1$
 		setTextRange(new TextRange(offset, length));
 		setText(text);
-		super.connect(editor);
+		super.connect(buffer);
 	}	
 }
 

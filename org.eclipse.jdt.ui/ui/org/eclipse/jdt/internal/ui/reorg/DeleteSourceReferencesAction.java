@@ -164,7 +164,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 				if (pm.isCanceled())
 					throw new OperationCanceledException();			
 			}
-			if (! tbe.canPerformEdits())
+			if (! tbe.canPerformEdits().isOK())
 				return; ///XXX can i assert here?
 			tbe.performEdits(new SubProgressMonitor(pm, 1));	
 			TextBuffer.commitChanges(tb, false, new SubProgressMonitor(pm, 1));

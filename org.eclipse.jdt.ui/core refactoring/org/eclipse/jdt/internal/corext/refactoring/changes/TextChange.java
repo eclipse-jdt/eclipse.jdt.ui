@@ -16,27 +16,29 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.AutoOrganizingTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 
 public abstract class TextChange extends AbstractTextChange {
 
-	public static abstract class EditChange {
-		private String fName;
+	public static class EditChange {
 		private boolean fIsActive;
 		private TextChange fTextChange;
+		private GroupDescription fDescription;
 		
-		/* package */ EditChange(String name, TextChange change) {
-			fName= name;
+		/* package */ EditChange(GroupDescription description, TextChange change) {
 			fTextChange= change;
 			fIsActive= true;
+			fDescription= description;
 		}
 		public String getName() {
-			return fName;
+			return fDescription.getName();
 		}
 		public void setActive(boolean active) {
 			fIsActive= active;
@@ -47,61 +49,22 @@ public abstract class TextChange extends AbstractTextChange {
 		public TextChange getTextChange() {
 			return fTextChange;
 		}
-		public abstract TextRange getTextRange();
-		public abstract Object getModifiedElement();
-
-		protected abstract void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException;
-		abstract Object getEdit();
-	}
-
-	private static class TextEditChange extends EditChange {
-		private TextEdit fEdit;
-		private TextEditChange(String name, TextEdit edit, TextChange change) {
-			super(name, change);
-			fEdit= edit;
-		}
-		protected void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException {
-			TextEdit edit= copy ? fEdit.copy() : fEdit;
-			if (positionMap != null)
-				positionMap.put(fEdit, edit);
-			editor.add(edit);
-		}
 		public TextRange getTextRange() {
-			return fEdit.getTextRange();
+			return fDescription.getTextRange();
 		}
 		public Object getModifiedElement() {
-			return fEdit.getModifiedElement();
+			return fDescription.getModifiedElement();
 		}
-		Object getEdit() {
-			return fEdit;
-		}
-	}
-
-	private static class MultiTextEditChange extends EditChange {
-		private MultiTextEdit fEdit;
-		private MultiTextEditChange(String name, MultiTextEdit edit, TextChange change) {
-			super(name, change);
-			fEdit= edit;
-		}
-		protected void addTo(TextBufferEditor editor, boolean copy, Map positionMap) throws CoreException {
-			MultiTextEdit edit= copy ? fEdit.copy() : fEdit;
-			if (positionMap != null)
-				positionMap.put(fEdit, edit);
-			editor.add(edit);
-		}
-		public TextRange getTextRange() {
-			return fEdit.getTextRange();
-		}
-		public Object getModifiedElement() {
-			return fEdit.getModifiedElement();
-		}
-		Object getEdit() {
-			return fEdit;
+		/* package */ GroupDescription getGroupDescription() {
+			return fDescription;
 		}
 	}
 
 	private List fTextEditChanges;
-	private Map fPositionMap;
+	private TextEditCopier fCopier;
+	private TextEdit fEdit;
+	private boolean fTrackPositions;
+	private boolean fAutoMode;
 
 	/**
 	 * Creates a new <code>TextChange</code> with the given name.
@@ -121,22 +84,52 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param edit the text edit to add
 	 */
 	public void addTextEdit(String name, TextEdit edit) {
-		Assert.isNotNull(name);
-		Assert.isNotNull(edit);
-		fTextEditChanges.add(new TextEditChange(name, edit, this));
+		addTextEdit(name, new TextEdit[] {edit});
 	}
 	
 	/**
-	 * Addes a multi text edit to this text buffer change.
-	 * 
-	 * @param name the name of the given multi text edit. The name is used to render this
-	 * 	change in the UI
-	 * @param edit the multi text edit to add
+	 * Adds an array of  text edit objects to this text buffer change.
+	 *
+	 * @param name the name of the given text edit. The name is used to render this 
+	 * 	change in the UI.
+	 * @param edite the array of text edits to add
 	 */
-	public void addTextEdit(String name, MultiTextEdit edit) {
+	public void addTextEdit(String name, TextEdit[] edits) {
 		Assert.isNotNull(name);
-		Assert.isNotNull(edit);
-		fTextEditChanges.add(new MultiTextEditChange(name, edit, this));		
+		Assert.isNotNull(edits);
+		GroupDescription description= new GroupDescription(name, edits);
+		fTextEditChanges.add(new EditChange(description, this));
+		if (fEdit == null) {
+			fEdit= new AutoOrganizingTextEdit();
+			fAutoMode= true;
+		} else {
+			Assert.isTrue(fAutoMode);
+		}
+		for (int i= 0; i < edits.length; i++) {
+			fEdit.add(edits[i]);
+		}
+	}
+	
+	/**
+	 * Sets the root text edit.
+	 * 
+	 * @param edit the root text edit
+	 */
+	public void setEdit(TextEdit edit) {
+		Assert.isTrue(edit != null && !fAutoMode);
+		fEdit= edit;
+		fTextEditChanges=  new ArrayList(5);
+		fAutoMode= false;
+	}
+	
+	/**
+	 * Adds a group description.
+	 * 
+	 * @param description the group description to be added
+	 */
+	public void addGroupDescription(GroupDescription description) {
+		Assert.isTrue(description != null && !fAutoMode);
+		fTextEditChanges.add(description);
 	}
 	
 	/**
@@ -183,7 +176,7 @@ public abstract class TextChange extends AbstractTextChange {
 	public TextBuffer getPreviewTextBuffer() throws JavaModelException {
 		try {
 			TextBufferEditor editor= new TextBufferEditor(createTextBuffer());
-			addTextEdits(editor, true);
+			addTextEdits(editor);
 			editor.performEdits(new NullProgressMonitor());
 			return editor.getTextBuffer();
 		} catch (CoreException e) {
@@ -227,10 +220,7 @@ public abstract class TextChange extends AbstractTextChange {
 	 * @param track if <code>true</code> track text position changes.
 	 */
 	public void setTrackPositionChanges(boolean track) {
-		if (track)
-			fPositionMap= new HashMap(fTextEditChanges.size() * 2);
-		else
-			fPositionMap= null;
+		fTrackPositions= track;
 	}
 	
 	/**
@@ -243,9 +233,9 @@ public abstract class TextChange extends AbstractTextChange {
 	 * </P>
 	 */
 	public TextRange getNewTextRange(TextEdit edit) {
-		if (fPositionMap == null)
+		if (!fTrackPositions || fCopier == null)
 			return null;
-		TextEdit result= (TextEdit)fPositionMap.get(edit);
+		TextEdit result= fCopier.getCopy(edit);
 		if (result == null)
 			return null;
 		return result.getTextRange().copy();
@@ -255,10 +245,14 @@ public abstract class TextChange extends AbstractTextChange {
 	 * Note: API is under construction
 	 */
 	public TextRange getNewTextRange(EditChange editChange) {
-		Object edit= editChange.getEdit();
-		if (edit instanceof TextEdit)
-			return getNewTextRange((TextEdit)edit);
-		return null;
+		if (!fTrackPositions || fCopier == null)
+			return null;
+		TextEdit[] edits= editChange.getGroupDescription().getTextEdits();
+		List copies= new ArrayList(edits.length);
+		for (int i= 0; i < edits.length; i++) {
+			copies.add(fCopier.getCopy(edits[i]));
+		}
+		return TextEdit.getTextRange(copies);
 	}
 	
 	/* (Non-Javadoc)
@@ -275,17 +269,40 @@ public abstract class TextChange extends AbstractTextChange {
 	/* non Java-doc
 	 * @see AbstractTextChange#addTextEdits
 	 */
-	protected void addTextEdits(TextBufferEditor editor, boolean copy) throws CoreException {
+	protected void addTextEdits(TextBufferEditor editor) throws CoreException {
+		fCopier= new TextEditCopier(fEdit);
+		TextEdit copiedEdit= fCopier.copy();
 		for (Iterator iter= fTextEditChanges.iterator(); iter.hasNext(); ) {
 			EditChange edit= (EditChange)iter.next();
-			if (edit.isActive()) {
-				edit.addTo(editor, copy, fPositionMap);
+			if (!edit.isActive()) {
+				TextEdit[] edits= edit.getGroupDescription().getTextEdits();
+				for (int i= 0; i < edits.length; i++) {
+					TextEdit textEdit= fCopier.getCopy(edits[i]);
+					if (textEdit != null)
+						textEdit.setActive(false);
+				}
 			}
-		}		
+		}
+		editor.add(copiedEdit);		
+		if (!fTrackPositions)
+			fCopier= null;
 	}
 	
-	protected Map getPositionMap() {
-		return fPositionMap;
+	protected void addTextEdits(TextBufferEditor editor, EditChange[] changes) throws CoreException {
+		fCopier= new TextEditCopier(fEdit);
+		TextEdit copiedEdit= fCopier.copy();
+		copiedEdit.setActive(false);
+		for (int c= 0; c < changes.length; c++) {
+			EditChange change= changes[c];
+			Assert.isTrue(change.getTextChange() == this);
+			boolean active= change.isActive();
+			TextEdit[] edits= change.getGroupDescription().getTextEdits();
+			for (int e= 0; e < edits.length; e++) {
+				fCopier.getCopy(edits[e]).setActive(active);
+			}
+		}
+		editor.add(copiedEdit);		
+		fCopier= null;
 	}
 	
 	private String getContent(EditChange change, int surroundingLines, boolean preview) throws CoreException {
@@ -293,7 +310,7 @@ public abstract class TextChange extends AbstractTextChange {
 		TextBuffer buffer= createTextBuffer();
 		if (preview) {
 			TextBufferEditor editor= new TextBufferEditor(buffer);
-			change.addTo(editor, true, fPositionMap);
+			addTextEdits(editor, new EditChange[] { change });
 			editor.performEdits(new NullProgressMonitor());
 		}
 		TextRange range= change.getTextRange();

@@ -75,7 +75,7 @@ public abstract class AbstractTextChange extends Change {
 	 * @param copy if <code>true</code> the edits are copied before adding.
 	 * 	Otherwise the original edits are added.
 	 */
-	protected abstract void addTextEdits(TextBufferEditor editor, boolean copy) throws CoreException;
+	protected abstract void addTextEdits(TextBufferEditor editor) throws CoreException;
 	
 	/**
 	 * Creates a <code>IChange</code> that can undo this change.
@@ -127,7 +127,7 @@ public abstract class AbstractTextChange extends Change {
 		try {
 			fUndoChange= null;
 			editor= new TextBufferEditor(acquireTextBuffer());
-			addTextEdits(editor, false);
+			addTextEdits(editor);
 			fUndoChange= createReverseChange(editor.performEdits(pm), getReverseKind());
 		} catch (Exception e) {
 			handleException(context, e);

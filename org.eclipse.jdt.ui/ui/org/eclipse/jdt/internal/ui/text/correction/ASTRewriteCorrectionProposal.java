@@ -8,8 +8,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.ASTRewriteAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.changes.enhanced.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.TextBuffer;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 
 /**
   */

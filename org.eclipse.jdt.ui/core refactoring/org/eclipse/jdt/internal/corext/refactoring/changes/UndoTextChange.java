@@ -18,7 +18,7 @@ abstract class UndoTextChange extends AbstractTextChange {
 		fUndos= undos;
 	}
 	
-	protected void addTextEdits(TextBufferEditor editor, boolean copy) throws CoreException {
+	protected void addTextEdits(TextBufferEditor editor) throws CoreException {
 		editor.add(fUndos);
 	}	
 }

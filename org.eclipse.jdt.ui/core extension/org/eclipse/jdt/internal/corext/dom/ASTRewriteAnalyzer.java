@@ -20,13 +20,13 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.changes.enhanced.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.CopySourceEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.MultiTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.TextRegion;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -166,7 +166,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fScanner= null;
 		
 		fCurrentEdit= new MultiTextEdit();
-		fChange.addTextEdit("Root", fCurrentEdit);
+		fChange.setEdit(fCurrentEdit);
 	}
 	
 	public void addInsert(int offset, String insertString, String description) {

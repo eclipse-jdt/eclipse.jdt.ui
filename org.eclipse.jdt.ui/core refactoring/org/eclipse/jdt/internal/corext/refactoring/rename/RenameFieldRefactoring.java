@@ -42,8 +42,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -624,7 +625,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	}
 
 	//-----------
-	private static class UpdateFieldReference extends SimpleTextEdit{
+	private final static class UpdateFieldReference extends SimpleTextEdit {
 
 		private String fOldName;
 		
@@ -641,16 +642,16 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	
 		/* non Java-doc
-		 * @see TextEdit#copy
+		 * @see TextEdit#copy0
 		 */
-		public TextEdit copy() {
+		protected TextEdit copy0(TextEditCopier copier) {
 			return new UpdateFieldReference(getTextRange().copy(), getText(), fOldName);
 		}
 		
 		/* non java-doc
-		 * @see TextEdit#connect(TextBufferEditor)
+		 * @see TextEdit#connect(TextBuffer)
 		 */
-		public void connect(TextBufferEditor editor) throws CoreException {
+		public void connect(TextBuffer buffer) throws CoreException {
 			TextRange oldRange= getTextRange();
 			int offset= oldRange.getOffset() + oldRange.getLength() - fOldName.length();
 			setTextRange(new TextRange(offset, fOldName.length()));

@@ -13,12 +13,13 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
-public class UpdateTypeReferenceEdit extends SimpleTextEdit {
+public final class UpdateTypeReferenceEdit extends SimpleTextEdit {
 
 	private String fOldName;
 	
@@ -35,16 +36,16 @@ public class UpdateTypeReferenceEdit extends SimpleTextEdit {
 	}
 
 	/* non Java-doc
-	 * @see TextEdit#copy
+	 * @see TextEdit#copy0
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new UpdateTypeReferenceEdit(getTextRange().copy(), getText(), fOldName);
 	}
 
 	/* non Java-doc
-	 * @see TextEdit#connect(TextBufferEditor)
+	 * @see TextEdit#connect(TextBuffer)
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {
+	public void connect(TextBuffer buffer) throws CoreException {
 		int offset= getTextRange().getOffset() + getTextRange().getLength() - fOldName.length();
 		setTextRange(new TextRange(offset, fOldName.length()));
 	}

@@ -14,6 +14,8 @@ import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 
 final class EncapsulateWriteAccess extends MultiTextEdit {
 	
@@ -32,6 +34,12 @@ final class EncapsulateWriteAccess extends MultiTextEdit {
 		}
 	}
 	
+	private EncapsulateWriteAccess() {
+	}
+	
+	protected TextEdit copy0(TextEditCopier copier) {
+		return new EncapsulateWriteAccess();
+	}
 	private static int getOffset(Assignment assignment) {
 		Expression lhs= assignment.getLeftHandSide();
 		ASTNode result= lhs;

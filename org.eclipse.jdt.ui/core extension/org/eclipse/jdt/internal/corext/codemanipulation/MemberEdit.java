@@ -18,16 +18,16 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-public class MemberEdit extends SimpleTextEdit {
+public final class MemberEdit extends SimpleTextEdit {
 	
 	public static final int INSERT_BEFORE= 0;			// fMember is sibling
 	public static final int INSERT_AFTER= 1;				// fMember is sibling
@@ -73,7 +73,7 @@ public class MemberEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#getCopy
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		MemberEdit result= new MemberEdit(fMember, fInsertionKind, fSource, fTabWidth);
 		result.setUseFormatter(fUseFormatter);
 		result.setEmptyLinesBetweenMembers(fEmptyLinesBetweenMembers);
@@ -92,8 +92,7 @@ public class MemberEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {		
-		TextBuffer buffer= editor.getTextBuffer();
+	public void connect(TextBuffer buffer) throws CoreException {		
 		StringBuffer sb= new StringBuffer();
 		String lineDelimiter= buffer.getLineDelimiter();
 
@@ -223,7 +222,7 @@ public class MemberEdit extends SimpleTextEdit {
 		setTextRange(new TextRange(offset, length));
 		setText(sb.toString());
 		
-		super.connect(editor);
+		super.connect(buffer);
 	}
 	
 	private static String extract(TextBuffer buffer, int offset, IScanner scanner) {

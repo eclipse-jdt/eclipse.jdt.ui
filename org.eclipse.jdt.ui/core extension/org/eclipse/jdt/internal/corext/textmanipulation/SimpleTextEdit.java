@@ -1,49 +1,46 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
+
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-public abstract class SimpleTextEdit extends TextEdit {
+public class SimpleTextEdit extends TextEdit {
 
 	private TextRange fRange;
 	private String fText;
 
 	public static SimpleTextEdit createReplace(int offset, int length, String text) {
-		return new SimpleTextEditImpl(offset, length, text);
+		return new SimpleTextEdit(offset, length, text);
 	}
 
 	public static SimpleTextEdit createInsert(int offset, String text) {
-		return new SimpleTextEditImpl(offset, 0, text);
+		return new SimpleTextEdit(offset, 0, text);
 	}
 	
 	public static SimpleTextEdit createDelete(int offset, int length) {
-		return new SimpleTextEditImpl(offset, length, ""); //$NON-NLS-1$
+		return new SimpleTextEdit(offset, length, ""); //$NON-NLS-1$
 	}
 	
-	private final static class SimpleTextEditImpl extends SimpleTextEdit {
-		protected SimpleTextEditImpl(TextRange range, String text) {
-			super(range, text);
-		}
-		protected SimpleTextEditImpl(int offset, int length, String text) {
-			super(offset, length, text);
-		}
-		public TextEdit copy() {
-			return new SimpleTextEditImpl(getTextRange().copy(), getText());
-		}	
+	public SimpleTextEdit(int offset, int length, String text) {
+		this(new TextRange(offset, length), text);
 	}
 	
 	protected SimpleTextEdit() {
 		this(TextRange.UNDEFINED, ""); //$NON-NLS-1$
 	}
 	
-	protected SimpleTextEdit(int offset, int length, String text) {
-		this(new TextRange(offset, length), text);
-	}
 	protected SimpleTextEdit(TextRange range, String text) {
 		Assert.isNotNull(range);
 		Assert.isNotNull(text);
@@ -69,8 +66,8 @@ public abstract class SimpleTextEdit extends TextEdit {
 	 * @param text the text edit's text
 	 */	
 	protected final void setText(String text) {
+		Assert.isTrue(text != null && !isConnected());
 		fText= text;
-		Assert.isNotNull(fText);
 	}
 	
 	/**
@@ -81,25 +78,34 @@ public abstract class SimpleTextEdit extends TextEdit {
 	 * 
 	 * @param range the text edit's range.
 	 */	
-	protected void setTextRange(TextRange range) {
+	protected final void setTextRange(TextRange range) {
+		Assert.isTrue(range != null && !isConnected());
 		fRange= range;
-		Assert.isNotNull(fRange);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#getTextRange
 	 */
-	public TextRange getTextRange() {
+	public final TextRange getTextRange() {
 		return fRange;
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
-	public final TextEdit perform(TextBuffer buffer) throws CoreException {
-		String current= buffer.getContent(fRange.fOffset, fRange.fLength);
+	public final void perform(TextBuffer buffer) throws CoreException {
+		String current= buffer.getContent(fRange.getOffset(), fRange.getLength());
 		buffer.replace(fRange, fText);
-		return new SimpleTextEditImpl(fRange, current);
+	}
+	
+	protected TextEdit copy0(TextEditCopier copier) {
+		Assert.isTrue(SimpleTextEdit.class == getClass(), "Subclasses must reimplement copy0");
+		return new SimpleTextEdit(getTextRange().copy(), getText());
+	}		
+	
+	/* package */ void updateTextRange(int delta, List executedEdits) {
+		super.updateTextRange(delta, executedEdits);
+		markAsDeleted(getChildren());
 	}	
 }
 

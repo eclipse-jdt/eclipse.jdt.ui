@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder;
@@ -37,7 +39,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.MoveSourceEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.MoveTargetEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 class ReorderParametersRefactoring extends Refactoring {
@@ -298,8 +303,7 @@ class ReorderParametersRefactoring extends Refactoring {
 					ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getCompilatonUnit(group));
 					if (cu == null)
 						continue;
-					MultiTextEdit edit= new PermuteSourceRangesTextEdit(sourceRanges, convertPermutation(fPermutation));	
-					manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"), edit);			 //$NON-NLS-1$
+					addMoveEdits(manager.get(cu), sourceRanges, convertPermutation(fPermutation));
 				}
 				pm.worked(1);
 			}
@@ -315,6 +319,38 @@ class ReorderParametersRefactoring extends Refactoring {
 		if (element instanceof ICompilationUnit)
 			return (ICompilationUnit)element;
 		return null;	
+	}
+	
+	private void addMoveEdits(TextChange change, ISourceRange[] ranges, int[] permutation) {
+		validateArguments(ranges, permutation);
+		List edits= new ArrayList(ranges.length * 2);
+		for (int i= 0; i < ranges.length; i++) {
+			MoveSourceEdit source= new MoveSourceEdit(ranges[i].getOffset(), ranges[i].getLength());
+			MoveTargetEdit target= new MoveTargetEdit(ranges[permutation[i]].getOffset());
+			source.setTargetEdit(target);
+			edits.add(source);
+			edits.add(target);
+		}
+		change.addTextEdit(
+			RefactoringCoreMessages.getString("ReorderParametersRefactoring.editName"),  //$NON-NLS-1$
+			(TextEdit[]) edits.toArray(new TextEdit[edits.size()]));
+	}
+	
+	private static void validateArguments(ISourceRange[] ranges, int[] permutation){
+		Assert.isTrue(ranges.length == permutation.length);
+		int[] copy= createCopy(permutation);
+		Arrays.sort(copy);
+		for (int i= 0; i < copy.length; i++) {
+			Assert.isTrue(copy[i] == i);
+		}
+	}
+	
+	private static int[] createCopy(int[] orig){
+		int[] result= new int[orig.length];
+		for (int i= 0; i < result.length; i++) {
+			result[i]= orig[i];
+		}
+		return result;
 	}
 	
 	/**

@@ -50,9 +50,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
@@ -889,7 +889,7 @@ public class NLSRefactoring extends Refactoring {
 	
 	//-----------
 	
-	private static class AddNLSTagEdit extends SimpleTextEdit{
+	private final static class AddNLSTagEdit extends SimpleTextEdit{
 		
 		AddNLSTagEdit(int offset, int length, String newText){
 			super(offset, length, newText);
@@ -900,17 +900,16 @@ public class NLSRefactoring extends Refactoring {
 		}
 		
 		/* non Java-doc
-		 * @see TextEdit#getCopy
+		 * @see TextEdit#copy0()
 		 */
-		public TextEdit copy() {
+		protected TextEdit copy0(TextEditCopier copier) {
 			return new AddNLSTagEdit(getTextRange().copy(), getText());
 		}	
 		
 		/* non Java-doc
 		 * @see TextEdit#connect
 		 */
-		public void connect(TextBufferEditor editor) throws CoreException {
-			TextBuffer buffer= editor.getTextBuffer();
+		public void connect(TextBuffer buffer) throws CoreException {
 			TextRange range= getTextRange();
 			int offset= range.getOffset();
 			int lineEndOffset= getLineEndOffset(buffer, range.getOffset());

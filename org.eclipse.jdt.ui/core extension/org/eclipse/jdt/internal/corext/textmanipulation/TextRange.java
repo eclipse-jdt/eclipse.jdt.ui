@@ -10,10 +10,13 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public final class TextRange {
 
-	/* package */ int fOffset;
-	/* package */ int fLength;
+	private int fOffset;
+	private int fLength;
+
+	private static final int UNDEFINED_VALUE= -1;
+	private static final int DELETED_VALUE= -2;
 	
-	public static final TextRange UNDEFINED= new TextRange((TextRange)null);
+	public static final TextRange UNDEFINED= new TextRange(null, UNDEFINED_VALUE);
 
 	/**
 	 * Creates a insert position with the given offset.
@@ -40,9 +43,9 @@ public final class TextRange {
 	/**
 	 * Constructor for the undefined text range.
 	 */
-	private TextRange(TextRange dummy) {
-		fOffset= -1;
-		fLength= -1;
+	private TextRange(TextRange dummy, int value) {
+		fOffset= value;
+		fLength= value;
 	}
 	
 	public static TextRange createFromStartAndLength(int start, int length) {
@@ -112,6 +115,8 @@ public final class TextRange {
 	public TextRange copy() {
 		if (isUndefined())
 			return this;
+		if (isDeleted())
+			return new TextRange(null, DELETED_VALUE);
 		return new TextRange(fOffset, fLength);
 	}
 	
@@ -121,6 +126,14 @@ public final class TextRange {
 	 */
 	public boolean isUndefined() {
 		return UNDEFINED == this;
+	}
+	
+	/**
+	 * Returns <code>true</code> if the text represented by this <code>TextRange</code>
+	 * got deleted. Otherwise <code>false</code> is returned.
+	 */
+	public boolean isDeleted() {
+		return fOffset == DELETED_VALUE && fLength == DELETED_VALUE;
 	}
 	
 	/**
@@ -135,6 +148,35 @@ public final class TextRange {
 	 */
 	public boolean isValid() {
 		return fOffset >= 0 && fLength >= 0;
+	}
+	
+	/* non Java-doc
+	 * @see Object#toString()
+	 */
+	public String toString() {
+		StringBuffer buffer= new StringBuffer();
+		buffer.append("Offset: ");
+		buffer.append(fOffset);
+		buffer.append(" Length: ");
+		buffer.append(fLength);
+		return buffer.toString();
+	}
+
+	/* non Java-doc
+	 * @see Object#equals()
+	 */
+	public boolean equals(Object obj) {
+		if (! (obj instanceof TextRange))
+			return false;
+		TextRange other= (TextRange)obj;	
+		return fOffset == other.fOffset && fLength == other.fLength;
+	}
+
+	/* non Java-doc
+	 * @see Object#hashCode()
+	 */
+	public int hashCode() {
+		return fOffset * fLength;
 	}
 	
 	/* package */ boolean isInsertionPoint() {
@@ -168,28 +210,22 @@ public final class TextRange {
 			return fOffset <= otherOffset && otherOffset + other.fLength <= fOffset + fLength;
 		}
 	}
-	/* non Java-doc
-	 * @see Object#toString()
-	 */
-	public String toString() {
-		StringBuffer buffer= new StringBuffer();
-		buffer.append(TextManipulationMessages.getString("TextRange.offset")); //$NON-NLS-1$
-		buffer.append(fOffset);
-		buffer.append(TextManipulationMessages.getString("TextRange.length")); //$NON-NLS-1$
-		buffer.append(fLength);
-		return buffer.toString();
+	
+	/* package */ void markAsDeleted() {
+		fOffset= DELETED_VALUE;
+		fLength= DELETED_VALUE;
 	}
-
-	public boolean equals(Object obj) {
-		if (! (obj instanceof TextRange))
-			return false;
-		TextRange other= (TextRange)obj;	
-		return fOffset == other.getOffset() && fLength == other.getLength();
+	
+	/* package */ void adjustOffset(int delta) {
+		if (isUndefined() || isDeleted())
+			return;
+		fOffset+= delta;
 	}
-
-	public int hashCode() {
-		return fOffset ^ fLength;
+	
+	/* package */ void adjustLength(int delta) {
+		if (isUndefined() || isDeleted())
+			return;
+		fLength+= delta;
 	}
-
 }
 

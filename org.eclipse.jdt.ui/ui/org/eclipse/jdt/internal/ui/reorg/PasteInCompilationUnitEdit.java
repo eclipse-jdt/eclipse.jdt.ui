@@ -10,12 +10,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
-class PasteInCompilationUnitEdit extends SimpleTextEdit {
+final class PasteInCompilationUnitEdit extends SimpleTextEdit {
 
 	private String fSource;
 	private int fType;
@@ -36,19 +37,19 @@ class PasteInCompilationUnitEdit extends SimpleTextEdit {
 	}
 
 	/*
-	 * @see TextEdit#copy()
+	 * @see TextEdit#copy0()
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new PasteInCompilationUnitEdit(fSource, fType, fCu);
 	}
 
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBufferEditor editor) throws CoreException {	
+	public void connect(TextBuffer buffer) throws CoreException {	
 		setText(fSource);
 		setTextRange(new TextRange(computeOffset(), 0));
-		super.connect(editor);
+		super.connect(buffer);
 	}
 	
 	private int computeOffset() throws JavaModelException{

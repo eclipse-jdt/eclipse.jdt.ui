@@ -180,7 +180,7 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 				MemberEdit edit= new MemberEdit(element, style, sourceLines, tabWidth);
 				tbe.add(edit);
 			}
-			if (! tbe.canPerformEdits())
+			if (! tbe.canPerformEdits().isOK())
 				return; ///XXX
 			tbe.performEdits(new NullProgressMonitor());	
 			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());
@@ -199,7 +199,7 @@ public class PasteSourceReferencesFromClipboardAction extends SelectionDispatchA
 			for (int i= 0; i < elems.length; i++) {
 				tbe.add(new PasteInCompilationUnitEdit(elems[i].getSource(), elems[i].getType(), unit));
 			}
-			if (! tbe.canPerformEdits())
+			if (! tbe.canPerformEdits().isOK())
 				return; ///XXX
 			tbe.performEdits(new NullProgressMonitor());	
 			TextBuffer.commitChanges(tb, false, new NullProgressMonitor());

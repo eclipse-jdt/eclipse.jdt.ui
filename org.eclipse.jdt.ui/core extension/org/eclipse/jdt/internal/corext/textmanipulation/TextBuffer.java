@@ -8,13 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.core.resources.IFile;
@@ -23,9 +21,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextManipulationMessages;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
@@ -315,7 +312,7 @@ public class TextBuffer {
 	}
 	
 	public void replace(TextRange range, String text) throws CoreException {
-		replace(range.fOffset, range.fLength, text);
+		replace(range.getOffset(), range.getLength(), text);
 	}
 
 	//---- Special methods used by the <code>TextBufferEditor</code>

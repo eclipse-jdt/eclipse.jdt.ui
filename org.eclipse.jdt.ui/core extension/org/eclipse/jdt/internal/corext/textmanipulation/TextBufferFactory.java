@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.io.BufferedInputStream;
@@ -17,7 +23,6 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -27,8 +32,6 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.IOCloser;
 import org.eclipse.jdt.internal.ui.JavaPlugin;

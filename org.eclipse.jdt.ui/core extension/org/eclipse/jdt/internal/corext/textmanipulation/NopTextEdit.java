@@ -1,7 +1,13 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v1.0 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v10.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
 package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.core.runtime.CoreException;
@@ -11,7 +17,7 @@ import org.eclipse.core.runtime.CoreException;
  * positions when executing <code>TextEdits</code> associated with a <code>
  * TextBufferEditor</code>.
  */
-public class NopTextEdit extends TextEdit {
+public final class NopTextEdit extends TextEdit {
 	
 	private TextRange fTextRange;
 	
@@ -39,22 +45,20 @@ public class NopTextEdit extends TextEdit {
 	/* non Java-doc
 	 * @see TextEdit#getTextRange
 	 */	
-	public TextRange getTextRange() {
+	public final TextRange getTextRange() {
 		return fTextRange;
 	}
 
 	/* non Java-doc
 	 * @see TextEdit#perform
 	 */	
-	public TextEdit perform(TextBuffer buffer) throws CoreException {
-		return new NopTextEdit(fTextRange);
+	public final void perform(TextBuffer buffer) throws CoreException {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#perform
+	 * @see TextEdit#copy
 	 */	
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new NopTextEdit(fTextRange.copy());
 	}	
 }
-

@@ -7,8 +7,9 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEditCopier;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 
@@ -16,7 +17,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
  * A special text edit that deletes the selected source range and everything to the next token (not inluding semicolons)
  * or end of the line.
  */
-class LineEndDeleteTextEdit extends SimpleTextEdit {
+final class LineEndDeleteTextEdit extends SimpleTextEdit {
 	
 	private String fFullSource;
 	
@@ -29,16 +30,16 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 	}
 	
 	/*
-	 * @see TextEdit#copy()
+	 * @see TextEdit#copy0()
 	 */
-	public TextEdit copy() {
+	protected TextEdit copy0(TextEditCopier copier) {
 		return new LineEndDeleteTextEdit(getTextRange().getOffset(), getTextRange().getLength(), fFullSource);
 	}
 	
 	/*
 	 * @see TextEdit#connect(TextBuffer)
 	 */
-	public void connect(TextBufferEditor editor) throws JavaModelException{
+	public void connect(TextBuffer buffer) throws JavaModelException{
 		setTextRange(new TextRange(getTextRange().getOffset(), computeLength()));
 	}
 	

@@ -8,10 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.jdt.internal.corext.Assert;
 
 public class CopyTargetEdit extends AbstractTransferEdit {
 
@@ -40,10 +42,20 @@ public class CopyTargetEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	protected TextEdit copy0() throws CoreException {
+	protected TextEdit copy0(TextEditCopier copier) {
+		Assert.isTrue(CopyTargetEdit.class == getClass(), "Subclasses must reimplement copy0");
 		return new CopyTargetEdit(getTextRange().copy());
 	}
 
+	/* non Java-doc
+	 * @see TextEdit#postProcessCopy
+	 */	
+	protected void postProcessCopy(TextEditCopier copier) {
+		if (fSource != null) {
+			((CopyTargetEdit)copier.getCopy(this)).setSourceEdit((CopySourceEdit)copier.getCopy(fSource));
+		}
+	}
+	
 	public void perform(TextBuffer buffer) throws CoreException {
 		if (++fSource.fCounter == 2 && !getTextRange().isDeleted()) {
 			try {

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.List;
 
@@ -74,10 +74,19 @@ public final class MoveSourceEdit extends AbstractTransferEdit {
 	/* non Java-doc
 	 * @see TextEdit#copy
 	 */	
-	public TextEdit copy0() {
+	public TextEdit copy0(TextEditCopier copier) {
 		return new MoveSourceEdit(getTextRange().copy());
 	}
 
+	/* non Java-doc
+	 * @see TextEdit#postProcessCopy
+	 */	
+	protected void postProcessCopy(TextEditCopier copier) {
+		if (fTarget != null) {
+			((MoveSourceEdit)copier.getCopy(this)).setTargetEdit((MoveTargetEdit)copier.getCopy(fTarget));
+		}
+	}
+	
 	/* package */ String getContent() {
 		return fContent;
 	}

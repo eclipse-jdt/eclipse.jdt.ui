@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.corext.textmanipulation.enhanced;
+package org.eclipse.jdt.internal.corext.textmanipulation;
 
 import java.util.ArrayList;
 import java.util.List;

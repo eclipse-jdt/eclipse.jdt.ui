@@ -11,24 +11,19 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.compare.contentmergeviewer.ITokenComparator;
 import org.eclipse.compare.rangedifferencer.RangeDifference;
 import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
-import org.eclipse.jdt.internal.corext.refactoring.changes.enhanced.*;
-//import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-//import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-//import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
-//import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
-import org.eclipse.jdt.internal.corext.textmanipulation.enhanced.*;
-
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
