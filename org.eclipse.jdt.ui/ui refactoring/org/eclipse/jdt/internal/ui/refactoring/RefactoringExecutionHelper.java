@@ -47,7 +47,7 @@ import org.eclipse.ltk.ui.refactoring.RefactoringUI;
  * undo change onto the undo stack and folding editor edits into one editor
  * undo object.
  */
-public class RefactoringExecutionHelper {
+public final class RefactoringExecutionHelper {
 
 	private final Refactoring fRefactoring;
 	private final Shell fParent;
@@ -92,7 +92,16 @@ public class RefactoringExecutionHelper {
 		fNeedsSavedEditors= needsSavedEditors;
 	}
 	
-	public void perform() throws InterruptedException, InvocationTargetException {
+	/**
+	 * Performs the refactoring.
+	 * 
+	 * @return <code>true</code> if the refactoring got executed; <code>false</code>
+	 *  otherwise 
+	 * 
+	 * @throws InterruptedException if the operation got canceled
+	 * @throws InvocationTargetException if an error occurred during execution
+	 */
+	public boolean perform() throws InterruptedException, InvocationTargetException {
 		Assert.isTrue(Display.getCurrent() != null);
 		final IJobManager manager=  Platform.getJobManager();
 		try {
@@ -120,7 +129,7 @@ public class RefactoringExecutionHelper {
 						RefactoringMessages.getFormattedString(
 							"RefactoringExecutionHelper.cannot_execute", //$NON-NLS-1$
 							validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
-					return;
+					return false;
 				}
 			} catch (InvocationTargetException e) {
 				PerformChangeOperation pco= op.fPerformChangeOperation;
@@ -144,5 +153,6 @@ public class RefactoringExecutionHelper {
 			manager.resume(ResourcesPlugin.getWorkspace().getRoot());
 			fRefactoring.setValidationContext(null);
 		}
+		return true;
 	}	
 }

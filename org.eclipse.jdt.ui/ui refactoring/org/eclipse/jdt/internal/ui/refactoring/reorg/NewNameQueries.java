@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -45,6 +48,7 @@ public class NewNameQueries implements INewNameQueries {
 	private static final String INVALID_NAME_NO_MESSAGE= "";//$NON-NLS-1$
 	private final Wizard fWizard;
 	private final Shell fShell;
+	private Map fNameChanges= new HashMap();
 
 	public NewNameQueries() {
 		fShell= null;
@@ -59,6 +63,10 @@ public class NewNameQueries implements INewNameQueries {
 	public NewNameQueries(Shell shell) {
 		fShell = shell;
 		fWizard= null;
+	}
+	
+	public Map getNameChanges() {
+		return fNameChanges;
 	}
 
 	private Shell getShell() {
@@ -79,27 +87,27 @@ public class NewNameQueries implements INewNameQueries {
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
 		String[] keys= {removeTrailingJava(cu.getElementName())};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
+		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell(), cu, fNameChanges);
 	}
 
 
 	public INewNameQuery createNewResourceNameQuery(IResource res, String initialSuggestedName) {
 		String[] keys= {res.getName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell());
+		return createStaticQuery(createResourceNameValidator(res), message, initialSuggestedName, getShell(), res, fNameChanges);
 	}
 
 
 	public INewNameQuery createNewPackageNameQuery(IPackageFragment pack, String initialSuggestedName) {
 		String[] keys= {pack.getElementName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell());
+		return createStaticQuery(createPackageNameValidator(pack), message, initialSuggestedName, getShell(), pack, fNameChanges);
 	}
 
 	public INewNameQuery createNewPackageFragmentRootNameQuery(IPackageFragmentRoot root, String initialSuggestedName) {
 		String[] keys= {root.getElementName()};
 		String message= ReorgMessages.getFormattedString("ReorgQueries.enterNewNameQuestion", keys); //$NON-NLS-1$
-		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell());
+		return createStaticQuery(createPackageFragmentRootNameValidator(root), message, initialSuggestedName, getShell(), root, fNameChanges);
 	}
 
 
@@ -116,12 +124,15 @@ public class NewNameQueries implements INewNameQueries {
 		};
 	}
 
-	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
+	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell, final Object element, final Map nameChanges){
 		return new INewNameQuery(){
 			public String getNewName() {
 				InputDialog dialog= new InputDialog(shell, ReorgMessages.getString("ReorgQueries.nameConflictMessage"), message, initial, validator); //$NON-NLS-1$
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
+				if (element != null) {
+					nameChanges.put(element, dialog.getValue());
+				}
 				return dialog.getValue();
 			}
 		};
@@ -187,7 +198,7 @@ public class NewNameQueries implements INewNameQueries {
 	}
 	
 	private static IInputValidator createPackageNameValidator(final IPackageFragment pack) {
-		IInputValidator validator= new IInputValidator(){
+		IInputValidator validator= new IInputValidator() {
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
@@ -211,5 +222,5 @@ public class NewNameQueries implements INewNameQueries {
 			}
 		};	
 		return validator;
-	}			
+	}		
 }

@@ -33,10 +33,15 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 public class ReorgCopyStarter {
 	
 	private final CopyRefactoring fCopyRefactoring;
+	private ReorgResult fResult;
 
 	private ReorgCopyStarter(CopyRefactoring copyRefactoring) {
 		Assert.isNotNull(copyRefactoring);
 		fCopyRefactoring= copyRefactoring;
+	}
+	
+	public ReorgResult getResult() {
+		return fResult;
 	}
 	
 	public static ReorgCopyStarter create(IJavaElement[] javaElements, IResource[] resources, IJavaElement destination) throws JavaModelException {
@@ -65,8 +70,16 @@ public class ReorgCopyStarter {
 	
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 		IRunnableContext context= new ProgressMonitorDialog(parent);
-		fCopyRefactoring.setNewNameQueries(new NewNameQueries(parent));
+		NewNameQueries nameQueries= new NewNameQueries(parent);
+		fCopyRefactoring.setNewNameQueries(nameQueries);
 		fCopyRefactoring.setReorgQueries(new ReorgQueries(parent));
-		new RefactoringExecutionHelper(fCopyRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform();
+		try {
+			fResult= new ReorgResult(
+				!new RefactoringExecutionHelper(fCopyRefactoring, RefactoringCore.getConditionCheckingFailedSeverity(), false, parent, context).perform(),
+				nameQueries.getNameChanges());
+		} catch(InterruptedException e) {
+			fResult= new ReorgResult(true, nameQueries.getNameChanges());
+			throw e;
+		}
 	}
 }

@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.MultiTextEdit;
@@ -27,6 +29,7 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -89,9 +92,17 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 
-public class PasteAction extends SelectionDispatchAction{
+public class PasteAction extends SelectionDispatchAction {
 
+    public static final String PASTE_PRE_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PastePreNotification";
+    public static final String PASTE_RESULT_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PasteResultNotification";
+    
 	private final Clipboard fClipboard;
+	
+	// Interface to tag trackable pasters. This is done to make sure that
+	// we only neotify for those actions where it is really necessary. This
+	// minimizes the impact of this change onto existing clients.
+	private static interface ResultTrackable {};
 
 	public PasteAction(IWorkbenchSite site, Clipboard clipboard) {
 		super(site);
@@ -147,7 +158,7 @@ public class PasteAction extends SelectionDispatchAction{
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 		
-		paster= new JavaElementAndResourcePaster(shell, fClipboard);
+		paster= new JavaElementAndResourcePaster(shell, fClipboard, this);
 		if (paster.canEnable(availableDataTypes)) 
 			result.add(paster);
 
@@ -181,6 +192,7 @@ public class PasteAction extends SelectionDispatchAction{
 	}
 
 	public void run(IStructuredSelection selection) {
+		Paster paster= null;
 		try {
 			TransferData[] availableTypes= fClipboard.getAvailableTypes();
 			List elements= selection.toList();
@@ -188,24 +200,46 @@ public class PasteAction extends SelectionDispatchAction{
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
 			Paster[] pasters= createEnabledPasters(availableTypes);
 			for (int i= 0; i < pasters.length; i++) {
-				if (pasters[i].canPasteOn(javaElements, resources)) {
-					pasters[i].paste(javaElements, resources, availableTypes);
-					return;//one is enough
+				paster= pasters[i];
+				if (paster.canPasteOn(javaElements, resources)) {
+					paster.paste(javaElements, resources, availableTypes);
+					if (paster instanceof ResultTrackable) {
+						ReorgResult result= paster.getResult();
+						if (result != null) { 				
+							firePropertyChange(PASTE_RESULT_NOTIFICATION, null, result); 
+							notifyResult(!result.isCanceled());
+						} else {
+							notifyResult(true);
+						}
+					}
+					return; //one is enough
 				}	
 			}
-
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			if (paster instanceof ResultTrackable) {
+				notifyResult(false);
+			}
 		} catch(InvocationTargetException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			if (paster instanceof ResultTrackable) {
+				notifyResult(false);
+			}
 		} catch (InterruptedException e) {
-			//ok
+			if (paster instanceof ResultTrackable) {
+				if (paster.getResult() != null) {
+					firePropertyChange(PASTE_RESULT_NOTIFICATION, null, paster.getResult());
+				}
+				notifyResult(false);
+			}
 		}
 	}
-
+	
 	private abstract static class Paster{
 		private final Shell fShell;
 		private final Clipboard fClipboard2;
+		private ReorgResult fResult;
+		
 		protected Paster(Shell shell, Clipboard clipboard){
 			fShell= shell;
 			fClipboard2= clipboard;
@@ -240,14 +274,22 @@ public class PasteAction extends SelectionDispatchAction{
 			}
 			return null;
 		}
+
+		public final ReorgResult getResult() {
+			return fResult;
+		}
+		
+		protected final void setResult(ReorgResult result) {
+			fResult= result;
+		}
 	
 		public abstract void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
 		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
 		public abstract boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources)  throws JavaModelException;
 	}
     
-    private static class ProjectPaster extends Paster{
-    	
+    private static class ProjectPaster extends Paster implements ResultTrackable { 
+
     	protected ProjectPaster(Shell shell, Clipboard clipboard) {
 			super(shell, clipboard);
 		}
@@ -270,12 +312,25 @@ public class PasteAction extends SelectionDispatchAction{
 			pasteProjects(getProjectsToPaste(availableTypes));
 		}
 		
-		private void pasteProjects(IProject[] projects){
+		private void pasteProjects(IProject[] projects) {
 			Shell shell= getShell();
+			Map nameChanges= new HashMap();
+			boolean canceled= false;
 			for (int i = 0; i < projects.length; i++) {
-				new CopyProjectOperation(shell).copyProject(projects[i]);
-			}
-		}
+				CopyProjectOperation copyProjectOperation= new CopyProjectOperation(shell);
+				copyProjectOperation.copyProject(projects[i]);
+				canceled |= copyProjectOperation.isCanceled();
+				if (!copyProjectOperation.isCanceled()) {
+					nameChanges.put(projects[i], copyProjectOperation.getNewName());
+				}
+			} 
+			ReorgResult reorgResult= new ReorgResult(canceled, nameChanges);
+			reorgResult.setArguments(ResourcesPlugin.getWorkspace().getRoot(), 
+				projects, 
+				null);
+			setResult(reorgResult);
+		}		
+
 		private IProject[] getProjectsToPaste(TransferData[] availableTypes) {
 			IResource[] resources= getClipboardResources(availableTypes);
 			IJavaElement[] javaElements= getClipboardJavaElements(availableTypes);
@@ -384,10 +439,13 @@ public class PasteAction extends SelectionDispatchAction{
 			return new ParentChecker(resources, javaElements).getCommonParent();		
 		}
     }
-    private static class JavaElementAndResourcePaster extends Paster {
+    private static class JavaElementAndResourcePaster extends Paster implements ResultTrackable {
 
-		protected JavaElementAndResourcePaster(Shell shell, Clipboard clipboard) {
+    	private PasteAction fAction;
+    	
+		protected JavaElementAndResourcePaster(Shell shell, Clipboard clipboard, PasteAction action) {
 			super(shell, clipboard);
+			fAction= action;
 		}
 
 		private TransferData[] fAvailableTypes;
@@ -401,10 +459,28 @@ public class PasteAction extends SelectionDispatchAction{
 				clipboardJavaElements= new IJavaElement[0];
 
 			Object destination= getTarget(javaElements, resources);
+			if (fAction != null) {
+				ReorgResult result= new ReorgResult(false, null);
+				result.setArguments(destination, clipboardResources, clipboardJavaElements);
+				fAction.firePropertyChange(PasteAction.PASTE_PRE_NOTIFICATION, null, result);
+				fAction= null; // make sure we don't leak for some reasons.
+			}
+			ReorgCopyStarter starter= null;
 			if (destination instanceof IJavaElement)
-				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination).run(getShell());
+				starter= ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IJavaElement)destination);
 			else if (destination instanceof IResource)
-				ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination).run(getShell());
+				starter= ReorgCopyStarter.create(clipboardJavaElements, clipboardResources, (IResource)destination);
+			if (starter != null) {
+				try {
+					starter.run(getShell());
+				} finally {
+				    ReorgResult result= starter.getResult();
+				    if (result != null) {
+				    	result.setArguments(destination, clipboardResources, clipboardJavaElements); 
+						setResult(result);
+					}
+				}
+			}
 		}
 
 		private Object getTarget(IJavaElement[] javaElements, IResource[] resources) {
