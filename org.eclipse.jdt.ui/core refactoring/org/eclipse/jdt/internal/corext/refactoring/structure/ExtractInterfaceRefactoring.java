@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -549,7 +550,45 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 					}	
 				}
 			}	
-	
+			
+			if (parentNode instanceof FieldDeclaration){
+				FieldDeclaration fd= (FieldDeclaration)parentNode;
+				if (fd.getType() == node){
+					VariableDeclarationFragment[] fragments= (VariableDeclarationFragment[]) fd.fragments().toArray(new VariableDeclarationFragment[fd.fragments().size()]);
+					for (int i= 0; i < fragments.length; i++) {
+						IVariableBinding vb= fragments[i].resolveBinding();
+						IField field= Binding2JavaModel.lookupIField(vb, getCompilationUnit(fd).getJavaProject());
+						ISearchPattern pattern= SearchEngine.createSearchPattern(field, IJavaSearchConstants.REFERENCES);
+						IJavaSearchScope scope= RefactoringScopeFactory.create(field);
+						SearchResultGroup[] resultGroups= RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), scope, pattern);
+						for (int j= 0; j < resultGroups.length; j++) {
+							ICompilationUnit referencedCU= resultGroups[i].getCompilationUnit();
+							if (referencedCU == null){
+								addAllToBadVarSet(fragments);
+								return true;
+							}	
+							SearchResult[] searchResults= resultGroups[i].getSearchResults();
+							ASTNode[] referenceNodes= getAstNodes(searchResults, getAST(referencedCU));
+							for (int k= 0; k < referenceNodes.length; k++) {
+								ASTNode aSTNode= referenceNodes[j];
+								//XXX code dup
+								if (aSTNode.getParent() instanceof MethodInvocation){
+									MethodInvocation mi= (MethodInvocation)aSTNode.getParent();
+									if (mi.getExpression() == aSTNode && ! isMethodInvocationOk(mi)){
+										addAllToBadVarSet(fragments);
+										return true;
+									}	
+								}
+								if (aSTNode.getParent() instanceof FieldAccess){
+									addAllToBadVarSet(fragments);
+									return true;
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			if (parentNode instanceof SingleVariableDeclaration && parentNode.getParent() instanceof CatchClause)
 				return true;
 				
@@ -928,6 +967,13 @@ public class ExtractInterfaceRefactoring extends Refactoring {
 	private void addToBadVarSet(VariableDeclaration variableDeclaration) {
 		fBadVarSet.add(variableDeclaration);
 	}
+	
+	private void addAllToBadVarSet(VariableDeclaration[] variableDeclarations) {
+		for (int i= 0; i < variableDeclarations.length; i++) {
+			addToBadVarSet(variableDeclarations[i]);
+		}
+	}
+	
 
 	private boolean areAllTempReferencesOK(VariableDeclaration tempDeclaration) throws JavaModelException{
 		ASTNode[] tempReferences= TempOccurrenceFinder.findTempOccurrenceNodes(tempDeclaration, true, false);			
