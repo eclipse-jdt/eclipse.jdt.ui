@@ -615,12 +615,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 	}
 	
 	private static boolean canReorg(ICompilationUnit cu){
-		try {
-			IResource res= cu.getUnderlyingResource();
-			return res != null && res.equals(cu.getCorrespondingResource());
-		} catch (JavaModelException e) {
+		if (cu == null || ! cu.exists())
 			return false;
-		}
+		IResource res= cu.getResource();
+        return res != null && res.exists();
 	}
 	
 	private static boolean isSourceFolder(IPackageFragmentRoot root) throws JavaModelException{
