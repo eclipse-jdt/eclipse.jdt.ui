@@ -110,12 +110,19 @@ public class TypeRestrictionEntryDialog extends StatusDialog {
 		description.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.description")); //$NON-NLS-1$
 
 		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
-		gd.widthHint= convertWidthInCharsToPixels(50);
+		gd.widthHint= convertWidthInCharsToPixels(60);
 		description.setLayoutData(gd);
 		
 		fRuleKindCombo.doFillIntoGrid(inner, 2);
 		fPatternDialog.doFillIntoGrid(inner, 2);
 				
+		Label description2= new Label(inner, SWT.WRAP);
+		description2.setText(NewWizardMessages.getString("TypeRestrictionEntryDialog.description2")); //$NON-NLS-1$
+
+		gd= new GridData(GridData.FILL, GridData.CENTER, true, false, 2, 1);
+		gd.widthHint= convertWidthInCharsToPixels(60);
+		description2.setLayoutData(gd);
+		
 		fPatternDialog.postSetFocusOnDialogField(parent.getDisplay());
 		applyDialogFont(composite);		
 		return composite;
