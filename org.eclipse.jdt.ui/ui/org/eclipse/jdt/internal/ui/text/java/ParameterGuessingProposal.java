@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal.ExitPolicy;
 
 /**
  * This is a {@link org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal} which includes templates 
@@ -150,6 +151,7 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 				LinkedUIControl editor= new LinkedUIControl(environment, fViewer);
 				editor.setPositionListener(new EditorHistoryUpdater());
 				editor.setExitPosition(fViewer, baseOffset + replacementString.length(), 0, Integer.MAX_VALUE);
+				editor.setExitPolicy(new ExitPolicy(')'));
 				editor.setCyclingMode(LinkedUIControl.CYCLE_WHEN_NO_PARENT);
 				editor.setDoContextInfo(true);
 				editor.enter();
