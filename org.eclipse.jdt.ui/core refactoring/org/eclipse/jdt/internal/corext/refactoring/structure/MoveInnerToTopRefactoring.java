@@ -101,7 +101,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 	private boolean fMarkInstanceFieldAsFinal;
 	
 	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings){
-		Assert.isTrue(type.exists());
+		Assert.isNotNull(type);
 		Assert.isNotNull(codeGenerationSettings);
 		fType= type;
 		fCodeGenerationSettings= codeGenerationSettings;
