@@ -8,12 +8,12 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.Assert;
-
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.model.IWorkbenchAdapter;
@@ -33,15 +33,28 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 /**
  * Default strategy of the Java plugin for the construction of Java element icons.
  */
 public class JavaImageLabelProvider {
 	
+	/**
+	 * Flags for the JavaImageLabelProvider:
+	 * Generate images with overlays.
+	 */
+	public final static int OVERLAY_ICONS= 0x1;
+
+	/**
+	 * Generate small sized images.
+	 */
+	public final static int SMALL_ICONS= 0x2;
+
+	/**
+	 * Use the 'light' style for rendering types.
+	 */	
+	public final static int LIGHT_TYPE_ICONS= 0x4;
 	
-	public final static int SHOW_ALTERNATIVE_TYPE_ICONS= 0x400;
+	
 	
 	private static final Point SMALL_SIZE= new Point(16, 16);
 	private static final Point BIG_SIZE= new Point(22, 16);
@@ -56,60 +69,55 @@ public class JavaImageLabelProvider {
 		DESC_OBJ_FOLDER= 		 images.getImageDescriptor(ISharedImages.IMG_OBJ_FOLDER);
 	}
 	
-	private int fFlags;
-	private Point fSize;
 	private ImageDescriptorRegistry fRegistry;
 	private IErrorTickProvider fErrorTickProvider;
 		
-	public JavaImageLabelProvider(int flags) {
-		fFlags= flags;
-		if ((flags & JavaElementLabelProvider.SHOW_SMALL_ICONS) != 0)
-			fSize= SMALL_SIZE;
-		else 
-			fSize= BIG_SIZE;
+	public JavaImageLabelProvider() {
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
 	}
 	
 	public void setErrorTickProvider(IErrorTickProvider provider) {
 		fErrorTickProvider= provider;
 	}
-	
-	public void turnOn(int flags) {
-		fFlags |= flags;
-	}
-	
-	public void turnOff(int flags) {
-		fFlags &= (~flags);
-	}	
-	
+		
 	/**
 	 * Returns the icon for a given Java elements. The icon depends on the element type
 	 * and element properties. If configured, overlay icons are constructed for
-	 * <code>ISourceReference</code>s. Overlay icon construction is  done by the 
-	 * <code>OverlayIconManager</code>.
+	 * <code>ISourceReference</code>s.
+	 * @param flags Flags as defined by the JavaImageLabelProvider
 	 */
-	public Image getLabelImage(IJavaElement element) {
-		int flags= showOverlayIcons() ? computeAdornmentFlags(element) : 0;
-		JavaElementImageDescriptor descriptor= new JavaElementImageDescriptor(
-			computeBaseImageDescriptor(element), flags, fSize);
+	public Image getLabelImage(IJavaElement element, int flags) {
+		ImageDescriptor descriptor= getImageDescriptor(element, flags);
+		return fRegistry.get(descriptor);
+	}
+	
+	private boolean showOverlayIcons(int flags) {
+		return (flags & OVERLAY_ICONS) != 0;
+	}
+	
+	private boolean useLightIcons(int flags) {
+		return (flags & LIGHT_TYPE_ICONS) != 0;
+	}
+	
+	private boolean useSmallSize(int flags) {
+		return (flags & SMALL_ICONS) != 0;
+	}		
 
-		return fRegistry.get(descriptor);			
+	/**
+	 * Maps a Java element to an appropriate base image descriptor.
+	 */
+	public ImageDescriptor getImageDescriptor(IJavaElement element, int flags) {
+		int adornmentFlags= showOverlayIcons(flags) ? computeAdornmentFlags(element) : 0;
+		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
+		return new JavaElementImageDescriptor(getBaseImageDescriptor(element, flags), adornmentFlags, size);
 	}
-	
-	private boolean showOverlayIcons() {
-		return (fFlags & JavaElementLabelProvider.SHOW_OVERLAY_ICONS) != 0;
-	}
-	
-	private boolean useAlternativeTypeIcoms() {
-		return (fFlags & SHOW_ALTERNATIVE_TYPE_ICONS) != 0;
-	}	
 	
 	// ---- Computation of base image key -------------------------------------------------
 	
 	/**
 	 * Maps a Java element to an appropriate base image descriptor.
 	 */
-	private ImageDescriptor computeBaseImageDescriptor(IJavaElement element) {
+	public ImageDescriptor getBaseImageDescriptor(IJavaElement element, int renderFlags) {
 		try {
 			
 			switch (element.getElementType()) {
@@ -143,7 +151,7 @@ public class JavaImageLabelProvider {
 				case IJavaElement.TYPE: {
 					IType type= (IType) element;
 					
-					if (useAlternativeTypeIcoms()) {
+					if (useLightIcons(renderFlags)) {
 						if (type.isClass())
 							return JavaPluginImages.DESC_OBJS_CLASSALT;
 						else 

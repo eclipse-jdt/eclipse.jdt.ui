@@ -327,8 +327,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		updateInput(element);	
 	}
 	
-	
-			
 	/**
 	 * Changes the input to a new type
 	 */
@@ -427,8 +425,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		};
 		
-		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT, this);
-		lprovider.setErrorTickManager(new MarkerErrorTickProvider());
+		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(this, new MarkerErrorTickProvider());
 				
 		// Create the viewers
 		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);

@@ -117,6 +117,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 	private JavaImageLabelProvider fImageLabelProvider;
 	private WorkbenchLabelProvider fWorkbenchLabelProvider;
 	
+	private int fFlags;
+	
 	// map images for JarEntryFiles, key = extension - value = image
 	// the cached images will be disposed wen the label provider is disposed.
 	private Map fJarImageMap= new HashMap(10);
@@ -127,18 +129,23 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 */
 	public JavaElementLabelProvider(int flags) {
 		fTextLabelProvider= new JavaTextLabelProvider(flags);
-		fImageLabelProvider= new JavaImageLabelProvider(flags);
+		fImageLabelProvider= new JavaImageLabelProvider();
 		fWorkbenchLabelProvider= new WorkbenchLabelProvider();
+		fFlags= flags;
 	}
-
+	
+	private boolean getFlag(int flag) {
+		return (fFlags & flag) != 0;
+	}
+	
 	/**
 	 * Turns on the rendering options specified in the given flags.
 	 *
 	 * @param flags the options; a bitwise OR of <code>SHOW_* </code> constants
 	 */
 	public void turnOn(int flags) {
+		fFlags |= flags;
 		fTextLabelProvider.turnOn(flags);
-		fImageLabelProvider.turnOn(flags);
 	}
 	
 	/**
@@ -147,8 +154,8 @@ public class JavaElementLabelProvider extends LabelProvider {
 	 * @param flags the initial options; a bitwise OR of <code>SHOW_* </code> constants
 	 */
 	public void turnOff(int flags) {
+		fFlags &= (~flags);
 		fTextLabelProvider.turnOff(flags);
-		fImageLabelProvider.turnOff(flags);
 	}
 
 	/* (non-Javadoc)
@@ -158,7 +165,14 @@ public class JavaElementLabelProvider extends LabelProvider {
 
 		if (element instanceof IJavaElement) {
 			IJavaElement e= (IJavaElement) element;
-			return fImageLabelProvider.getLabelImage(e);
+			int imageFlags= 0;
+			if (getFlag(SHOW_OVERLAY_ICONS)) {
+				imageFlags |= JavaImageLabelProvider.OVERLAY_ICONS;
+			}
+			if (getFlag(SHOW_SMALL_ICONS)) {
+				imageFlags |= JavaImageLabelProvider.SMALL_ICONS;
+			}			
+			return fImageLabelProvider.getLabelImage(e, imageFlags);
 		}
 
 		Image result= fWorkbenchLabelProvider.getImage(element);
@@ -208,7 +222,7 @@ public class JavaElementLabelProvider extends LabelProvider {
 	}	
 	
 	/*
-	 * Dispose the cached images for JarEntry files
+	 * Dispose the cached images for JarEntry files 
 	 */
 	private void disposeJarEntryImages() {
 		Iterator each= fJarImageMap.values().iterator();

@@ -5,8 +5,6 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
  * All Rights Reserved.
  */
  
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +32,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.ResultCollector;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaImageLabelProvider;
 
 public class CompletionEvaluator {
 	
