@@ -68,20 +68,17 @@ public class LinkFolderDialog extends StatusDialog {
     private final class FolderNameField extends Observable implements IDialogFieldListener {
         private StringDialogField fNameDialogField;
         
-        public FolderNameField(Composite parent) {
-            createControls(parent);
+        public FolderNameField(Composite parent, int numOfColumns) {
+            createControls(parent, numOfColumns);
         }
         
-        private void createControls(Composite parent) {
-            int numColumns= 4;      
+        private void createControls(Composite parent, int numColumns) {
             fNameDialogField= new StringDialogField();
             fNameDialogField.setLabelText(NewWizardMessages.getString("LinkFolderDialog.folderNameGroup.label")); //$NON-NLS-1$
-            fNameDialogField.doFillIntoGrid(parent, numColumns - 1);
+            fNameDialogField.doFillIntoGrid(parent, 2);
             LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
-
-            GridData data= (GridData)fNameDialogField.getLabelControl(null).getLayoutData();
-            data.horizontalSpan= numColumns;
-            data.grabExcessHorizontalSpace= true;
+			LayoutUtil.setHorizontalSpan(fNameDialogField.getLabelControl(null), numColumns);
+			DialogField.createEmptySpace(parent, numColumns - 1);
             
             fNameDialogField.setDialogFieldListener(this);
         }
@@ -110,17 +107,15 @@ public class LinkFolderDialog extends StatusDialog {
     }
     
     private final class LinkFields extends Observable implements IStringButtonAdapter, IDialogFieldListener{
-        protected StringButtonDialogField fLinkLocation;
+        private StringButtonDialogField fLinkLocation;
         
         private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
         
-        public LinkFields(Composite parent) {
-            createControls(parent);
+        public LinkFields(Composite parent, int numColumns) {
+            createControls(parent, numColumns);
         }
         
-        private void createControls(Composite parent) {
-            final int numColumns= 4;
-            
+        private void createControls(Composite parent, int numColumns) {
             fLinkLocation= new StringButtonDialogField(this);
             
             fLinkLocation.setLabelText(NewWizardMessages.getString("LinkFolderDialog.dependenciesGroup.locationLabel.desc")); //$NON-NLS-1$
@@ -136,9 +131,8 @@ public class LinkFolderDialog extends StatusDialog {
             });
             
             fLinkLocation.doFillIntoGrid(parent, numColumns);
-            GridData data= (GridData)fLinkLocation.getLabelControl(null).getLayoutData();
-            data.horizontalSpan= numColumns;
-            data.grabExcessHorizontalSpace= true;
+
+			LayoutUtil.setHorizontalSpan(fLinkLocation.getLabelControl(null), numColumns);
             LayoutUtil.setHorizontalGrabbing(fLinkLocation.getTextControl(null));
             
             variables.doFillIntoGrid(parent, 1);
@@ -200,7 +194,7 @@ public class LinkFolderDialog extends StatusDialog {
             fireEvent();
         }
         
-        protected void fireEvent() {
+		private void fireEvent() {
             setChanged();
             notifyObservers();
         }
@@ -347,20 +341,24 @@ public class LinkFolderDialog extends StatusDialog {
      * Method declared on Dialog.
      */
     protected Control createDialogArea(Composite parent) {
-        int numOfColumns= 4;
+		initializeDialogUnits(parent);
+		
+        int numOfColumns= 3;
         Composite composite = new Composite(parent, SWT.NONE);
         GridLayout layout = new GridLayout(numOfColumns, false);
+		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
         composite.setLayout(layout);
-        GridData gridData= new GridData(GridData.FILL_HORIZONTAL);
-        gridData.minimumWidth= 430;
+        GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+        gridData.minimumWidth= convertWidthInCharsToPixels(80);
         composite.setLayoutData(gridData);
         
         Label label= new Label(composite, SWT.NONE);
         label.setText(NewWizardMessages.getFormattedString("LinkFolderDialog.createIn", fContainer.getFullPath().makeRelative().toString())); //$NON-NLS-1$
-        DialogField.createEmptySpace(composite, numOfColumns);
+		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, numOfColumns, 1));
         
-        fDependenciesGroup= new LinkFields(composite);
-        fFolderNameField= new FolderNameField(composite);
+        fDependenciesGroup= new LinkFields(composite, numOfColumns);
+        fFolderNameField= new FolderNameField(composite, numOfColumns);
         
         Validator validator= new Validator();
         fDependenciesGroup.addObserver(validator);
