@@ -85,13 +85,13 @@ public class SourceAttachmentWizardPage extends WizardPage implements IStatusCha
 			IClasspathEntry[] entries= jproject.getRawClasspath();
 			
 			int index= findClasspathEntry(entries, fJarRoot.getPath());
-			IPath path= null;
-			IPath prefix= null;
+			IClasspathEntry entry;
 			if (index != -1) {
-				path= entries[index].getSourceAttachmentPath();
-				prefix= entries[index].getSourceAttachmentRootPath();
+				entry= entries[index];
+			} else {
+				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
 			}	
-			fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, fJarRoot.getPath(), path, prefix);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
 			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			ErrorDialog.openError(getShell(), "Error", "", e.getStatus());

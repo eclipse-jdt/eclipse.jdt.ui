@@ -33,13 +33,13 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 				IClasspathEntry[] entries= jproject.getRawClasspath();
 				
 				int index= findClasspathEntry(entries, fRoot.getPath());
-				IPath path= null;
-				IPath prefix= null;
+				IClasspathEntry entry;
 				if (index != -1) {
-					path= entries[index].getSourceAttachmentPath();
-					prefix= entries[index].getSourceAttachmentRootPath();
+					entry= entries[index];
+				} else {
+					entry= JavaCore.newLibraryEntry(fRoot.getPath(), null, null);
 				}
-				fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, fRoot.getPath(), path, prefix);
+				fSourceAttachmentBlock= new SourceAttachmentBlock(jproject.getProject(), this, entry);
 				return fSourceAttachmentBlock.createControl(composite);				
 			} catch (CoreException e) {
 				ErrorDialog.openError(getShell(), "Error", "", e.getStatus());

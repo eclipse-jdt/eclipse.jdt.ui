@@ -29,7 +29,7 @@ public class VariableCreationDialog extends StatusDialog {
 	
 	private StringButtonDialogField fPathField;
 	private StatusInfo fPathStatus;
-	
+		
 	private CPVariableElement fElement;
 	
 	private List fExistingNames;

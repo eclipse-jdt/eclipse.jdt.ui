@@ -366,7 +366,6 @@ public abstract class TypePage extends ContainerPage {
 		
 		public void selectionChanged(DialogField field) {}
 		
-		
 		// -------- IDialogFieldListener
 		
 		public void dialogFieldChanged(DialogField field) {
