@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.internal.dialogs.ContainerCheckedTreeViewer;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -66,9 +67,12 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 	
 		public void run() {
+			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=39264
+			Object[] elementList= getOverrideContentProvider().getViewer().getCheckedElements();
 			fToggle= !fToggle;
 			setChecked(fToggle);
-			getOverrideContentProvider().setShowTypes(fToggle);			
+			getOverrideContentProvider().setShowTypes(fToggle);		
+			getOverrideContentProvider().getViewer().setCheckedElements(elementList);
 		}
 		
 		private OverrideMethodContentProvider getOverrideContentProvider() {
@@ -86,9 +90,13 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		private final Object[] fEmpty= new Object[0];
 			
 		private boolean fShowTypes;
-		private Viewer fViewer;
+		private ContainerCheckedTreeViewer fViewer;
 		private IDialogSettings fSettings;
 	
+		public ContainerCheckedTreeViewer getViewer() {
+			return fViewer;
+		}
+
 		/**
 		 * Constructor for OverrideMethodContentProvider.
 		 */
@@ -157,7 +165,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		 * @see IContentProvider#inputChanged(Viewer, Object, Object)
 		 */
 		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			fViewer= viewer;
+			fViewer= (ContainerCheckedTreeViewer) viewer;
 		}
 			
 			
@@ -173,7 +181,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 					fViewer.refresh();
 				}
 			}
-		}											
+		}										
 	}
 	
 	private static class OverrideMethodSorter extends ViewerSorter {
