@@ -39,6 +39,11 @@ public class ScopeAnalyzer {
 	 */		
 	public static final int TYPES= 4;
 	
+	/**
+	 * Flag to specify that only visible elements should be added.
+	 */		
+	public static final int CHECK_VISIBILITY= 16;
+		
 	private ArrayList fRequestor;
 	private HashSet fNamesAdded;
 	private HashSet fTypesVisited;
@@ -173,9 +178,9 @@ public class ScopeAnalyzer {
 		if (node instanceof TypeDeclaration || node instanceof AnonymousClassDeclaration) {
 			addLocalDeclarations(node.getParent(), flags);
 			
-			ITypeBinding parentTypeBidning= Bindings.getBindingOfParentType(node.getParent());
-			if (parentTypeBidning != null) {
-				addTypeDeclarations(parentTypeBidning, flags);
+			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node.getParent());
+			if (parentTypeBinding != null) {
+				addTypeDeclarations(parentTypeBinding, flags);
 			}
 			
 		}
@@ -220,13 +225,18 @@ public class ScopeAnalyzer {
 	
 	public IBinding[] getDeclarationsInScope(SimpleName selector, int flags) {
 		try {
+			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
+			
 			ITypeBinding binding= getQualifier(selector);
 			if (binding == null) {
 				addLocalDeclarations(selector, flags);
-				binding= Bindings.getBindingOfParentType(selector);
+				binding= parentTypeBinding;
 			}
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
+			}
+			if (hasFlag(CHECK_VISIBILITY, flags)) {
+				firterNonVisible(parentTypeBinding);
 			}
 			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
 		} finally {
@@ -252,13 +262,81 @@ public class ScopeAnalyzer {
 			if (binding != null) {
 				addTypeDeclarations(binding, flags);
 			}
-		
+			
+			if (hasFlag(CHECK_VISIBILITY, flags)) {
+				firterNonVisible(binding);
+			}
 			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
 		} finally {
 			clearLists();			
 		}
 	}
 	
+	private void firterNonVisible(ITypeBinding binding) {
+		// remove non-visible declarations
+		for (int i= fRequestor.size() - 1; i >= 0; i--) {
+			if (!isVisible((IBinding) fRequestor.get(i), binding)) {
+				fRequestor.remove(i);
+			}
+		}
+	}
+
+	private static ITypeBinding getDeclaringType(IBinding binding) {
+		switch (binding.getKind()) {
+			case IBinding.VARIABLE:
+				return ((IVariableBinding) binding).getDeclaringClass();
+			case IBinding.METHOD:
+				return ((IMethodBinding) binding).getDeclaringClass();
+			case IBinding.TYPE:
+				ITypeBinding typeBinding= (ITypeBinding) binding;
+				if (typeBinding.getDeclaringClass() != null) {
+					return typeBinding;
+				}
+				return typeBinding;
+		}
+		return null;
+	}
+	
+	/**
+	 * Evaluates if the declaration is visible in a certain context. 
+	 * @param binding The binding of the declaration to examine
+	 * @param context The context to test in
+	 * @return Returns 
+	 */
+	public static boolean isVisible(IBinding binding, ITypeBinding context) {
+		if (binding.getKind() == IBinding.VARIABLE && !((IVariableBinding) binding).isField()) {
+			return true; // all local variables found are visible
+		}
+		ITypeBinding declaring= getDeclaringType(binding);
+		if (declaring == null) {
+			return false;
+		}
+	
+		int modifiers= binding.getModifiers();
+		if (Modifier.isPublic(modifiers) || declaring.isInterface()) {
+			return true;
+		} else if (Modifier.isProtected(modifiers) || !Modifier.isPrivate(modifiers)) {
+			if (declaring != null && declaring.getPackage() == context.getPackage()) {
+				return true;
+			}
+			return isTypeInScope(declaring, context, Modifier.isProtected(modifiers));
+		}
+		// private visibility
+		return isTypeInScope(declaring, context, false);
+	}
+	
+	private static boolean isTypeInScope(ITypeBinding declaring, ITypeBinding context, boolean includeHierarchy) {
+		ITypeBinding curr= context;
+		while (curr != null && curr != declaring) {
+			if (includeHierarchy && Bindings.isSuperType(declaring, curr)) {
+				return true;
+			}
+			curr= curr.getDeclaringClass();
+		}
+		return curr == declaring;
+	}
+	
+
 	public IBinding[] getDeclarationsAfter(int offset, int flags) {
 		try {		
 			NodeFinder finder= new NodeFinder(offset, 0);
@@ -429,4 +507,5 @@ public class ScopeAnalyzer {
 			}
 		}
 	}
+	
 }
