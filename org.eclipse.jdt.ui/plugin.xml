@@ -259,6 +259,11 @@
 		id="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.JavaBasePreferencePage">
 	</page>
+	<page name="%appearancePrefName"
+		id="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
+		class="org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage"
+		category= "org.eclipse.jdt.ui.preferences.JavaBasePreferencePage">
+	</page>		
 	<page name="%organizeImportsPrefName"
 		id="org.eclipse.jdt.ui.preferences.ImportOrganizePreferencePage"
 		class="org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage"

@@ -11,7 +11,7 @@ import org.eclipse.ui.IEditorInput;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * The <code>JavaEditorErrorTickUpdater</code> will register as a AnnotationModelListener
@@ -22,7 +22,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 
 	private JavaEditor fJavaEditor;
 	private IAnnotationModel fAnnotationModel;
-	private ErrorTickImageProvider fImageProvider;
+	private JavaElementImageProvider fImageProvider;
 
 	public JavaEditorErrorTickUpdater(JavaEditor editor) {
 		fJavaEditor= editor;
@@ -42,7 +42,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 				
 		if (model != null) {
 			if (fImageProvider == null) {
-				fImageProvider= new ErrorTickImageProvider();
+				fImageProvider= new JavaElementImageProvider();
 			}
 			fAnnotationModel=model;
 			fAnnotationModel.addAnnotationModelListener(this);
@@ -56,7 +56,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		}	
 	}
 			
-	/**
+	/*
 	 * @see IAnnotationModelListener#modelChanged(IAnnotationModel)
 	 */
 	public void modelChanged(IAnnotationModel model) {
@@ -68,7 +68,7 @@ public class JavaEditorErrorTickUpdater implements IAnnotationModelListener {
 		if (input != null) { // might run async, tests needed
 			IJavaElement jelement= (IJavaElement) input.getAdapter(IJavaElement.class);
 			if (fImageProvider != null && jelement != null) {
-				Image newImage= fImageProvider.getImageLabel(jelement, ErrorTickImageProvider.OVERLAY_ICONS | ErrorTickImageProvider.SMALL_ICONS);
+				Image newImage= fImageProvider.getImageLabel(jelement, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.ERROR_TICKS);
 				if (titleImage != newImage) {
 					updatedTitleImage(newImage);
 				}

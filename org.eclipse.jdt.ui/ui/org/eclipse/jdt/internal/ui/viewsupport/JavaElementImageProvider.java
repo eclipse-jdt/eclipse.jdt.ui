@@ -40,7 +40,6 @@ import org.eclipse.jdt.ui.JavaElementImageDescriptor;
  */
 public class JavaElementImageProvider {
 	
-
 	/**
 	 * Flags for the JavaImageLabelProvider:
 	 * Generate images with overlays.
@@ -56,7 +55,18 @@ public class JavaElementImageProvider {
 	 * Use the 'light' style for rendering types.
 	 */	
 	public final static int LIGHT_TYPE_ICONS= 0x4;
-		
+	
+	/**
+	 * Show error ticks. Note that viewers showing error ticks have to care for updates.
+	 * OVERLAY_ICONS has to be set to make this flag efficient.
+	 */	
+	public final static int ERROR_TICKS= 0x8;
+	
+	/**
+	 * Show override indicators.
+	 * OVERLAY_ICONS has to be set to make this flag efficient.
+	 */	
+	public final static int OVERRIDE_INDICATORS= 0x10;
 	
 	private static final Point SMALL_SIZE= new Point(16, 16);
 	private static final Point BIG_SIZE= new Point(22, 16);
@@ -72,9 +82,14 @@ public class JavaElementImageProvider {
 	}
 	
 	private ImageDescriptorRegistry fRegistry;
+	private IAdornmentProvider[] fAdornmentProviders;
 		
 	public JavaElementImageProvider() {
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
+		fAdornmentProviders= new IAdornmentProvider[] {
+			new ErrorTickAdornmentProvider(),
+			new OverrideAdornmentProvider()
+		};
 	}
 			
 	/**
@@ -112,7 +127,7 @@ public class JavaElementImageProvider {
 	 * Returns an image descriptor for a java element. The descriptor includes overlays, if specified.
 	 */
 	public ImageDescriptor getJavaImageDescriptor(IJavaElement element, int flags) {
-		int adornmentFlags= showOverlayIcons(flags) ? computeAdornmentFlags(element) : 0;
+		int adornmentFlags= showOverlayIcons(flags) ? computeAdornmentFlags(element, flags) : 0;
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 		return new JavaElementImageDescriptor(getBaseImageDescriptor(element, flags), adornmentFlags, size);
 	}
@@ -130,7 +145,7 @@ public class JavaElementImageProvider {
 		if (descriptor == null) {
 			return null;
 		}
-		int adornmentFlags= computeExtraAdornmentFlags(adaptable);
+		int adornmentFlags= computeExtraAdornmentFlags(adaptable, flags);
 		Point size= useSmallSize(flags) ? SMALL_SIZE : BIG_SIZE;
 		return new JavaElementImageDescriptor(descriptor, adornmentFlags, size);
 	}
@@ -265,9 +280,9 @@ public class JavaElementImageProvider {
 
 	// ---- Methods to compute the adornments flags ---------------------------------
 	
-	private int computeAdornmentFlags(IJavaElement element) {
+	private int computeAdornmentFlags(IJavaElement element, int renderFlags) {
 		
-		int flags= computeExtraAdornmentFlags(element);
+		int flags= computeExtraAdornmentFlags(element, renderFlags);
 					
 		if (element instanceof ISourceReference) { 
 			ISourceReference sourceReference= (ISourceReference)element;
@@ -294,8 +309,14 @@ public class JavaElementImageProvider {
 		return flags;
 	}
 	
-	protected int computeExtraAdornmentFlags(Object element) {
-		return 0;
+	private int computeExtraAdornmentFlags(Object element, int renderFlags) {
+		int flags= 0;
+		if (fAdornmentProviders != null) {
+			for (int i= 0; i < fAdornmentProviders.length; i++) {
+				flags |= fAdornmentProviders[i].computeAdornmentFlags(element, renderFlags);
+			}
+		}
+		return flags;
 	}	
 	
 	private boolean confirmAbstract(IMember member) {
@@ -330,7 +351,13 @@ public class JavaElementImageProvider {
 		return 0;
 	}
 	
+	/**
+	 * Disposes the image provider
+	 */
 	public void dispose() {
+		for (int i= 0; i < fAdornmentProviders.length; i++) {
+			fAdornmentProviders[i].dispose();
+		}
 	}
 
 }

@@ -29,45 +29,47 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
 	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
 	 */
-	public JavaUILabelProvider(int textFlags, int imageFlags, JavaElementImageProvider imageLabelProvider) {
-		fImageLabelProvider= imageLabelProvider;
+	public JavaUILabelProvider(int textFlags, int imageFlags) {
+		fImageLabelProvider= new JavaElementImageProvider();
 		fStorageLabelProvider= new StorageLabelProvider();
 		fImageFlags= imageFlags;
 		fTextFlags= textFlags;
 	}
-
-	/**
-	 * @param textFlags Flags defined in <code>JavaElementLabels</code>.
-	 * @param imageFlags Flags defined in <code>JavaElementImageProvider</code>.
-	 */	
-	public JavaUILabelProvider(int textFlags, int imageFlags) {
-		this(textFlags, imageFlags, new JavaElementImageProvider());
-	}
-	
-	public JavaUILabelProvider(JavaElementImageProvider imageLabelProvider) {
-		this(JavaElementLabels.M_PARAMETER_TYPES, JavaElementImageProvider.OVERLAY_ICONS, imageLabelProvider);
-
-	}		
 	
 	/**
-	 * Sets the text flags to use. Valid flags are defined in <code>JavaElementLabels</code>.
+	 * Sets the textFlags.
+	 * @param textFlags The textFlags to set
 	 */
-	public void setTextFlags(int flags) {
-		fTextFlags= flags;
+	public void setTextFlags(int textFlags) {
+		fTextFlags= textFlags;
+	}
+
+	/**
+	 * Sets the imageFlags.
+	 * @param imageFlags The imageFlags to set
+	 */
+	public void setImageFlags(int imageFlags) {
+		fImageFlags= imageFlags;
 	}
 	
 	/**
-	 * Sets the image flags to use. Valid flags are defined in <code>JavaElementImageProvider</code>.
+	 * Gets the image flags. Can be overwriten by super classes.
+	 * @return Returns a int
 	 */
-	public void setImageFlags(int flags) {
-		fImageFlags= flags;
+	protected int getImageFlags() {
+		return fImageFlags;
+	}
+
+	/**
+	 * Gets the text flags. Can be overwriten by super classes.
+	 * @return Returns a int
+	 */
+	protected int getTextFlags() {
+		return fTextFlags;
 	}	
-	
-	/* (non-Javadoc)
-	 * @see ILabelProvider#getImage
-	 */
+
 	public Image getImage(Object element) {
-		Image result= fImageLabelProvider.getImageLabel(element, fImageFlags);
+		Image result= fImageLabelProvider.getImageLabel(element, getImageFlags());
 		if (result != null) {
 			return result;
 		}
@@ -82,7 +84,7 @@ public class JavaUILabelProvider extends LabelProvider {
 	 * @see ILabelProvider#getText
 	 */
 	public String getText(Object element) {
-		String text= JavaElementLabels.getTextLabel(element, fTextFlags);
+		String text= JavaElementLabels.getTextLabel(element, getTextFlags());
 		if (text.length() > 0) {
 			return text;
 		}
@@ -101,4 +103,7 @@ public class JavaUILabelProvider extends LabelProvider {
 		fStorageLabelProvider.dispose();
 		fImageLabelProvider.dispose();
 	}
+	
+
+
 }

@@ -43,7 +43,7 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
@@ -78,8 +78,7 @@ public class MethodsViewer extends ProblemTableViewer {
 	public MethodsViewer(Composite parent, IWorkbenchPart part) {
 		super(new Table(parent, SWT.MULTI));
 		
-		fLabelProvider= new JavaUILabelProvider(new ErrorTickImageProvider());
-
+		fLabelProvider= new JavaUILabelProvider(LABEL_BASEFLAGS, JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
 		
 		MethodsContentProvider contentProvider= new MethodsContentProvider();
 

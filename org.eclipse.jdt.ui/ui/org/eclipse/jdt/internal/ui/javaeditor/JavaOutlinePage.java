@@ -21,8 +21,6 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.Widget;
 
-import org.eclipse.compare.structuremergeviewer.IStructureComparator;
-
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -78,8 +76,7 @@ import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.OverrideImageProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.StandardJavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -791,9 +788,9 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		
 		Tree tree= new Tree(parent, SWT.MULTI);
 
-		JavaUILabelProvider lprovider= new JavaUILabelProvider(new OverrideImageProvider());
-		lprovider.setImageFlags(JavaElementImageProvider.OVERLAY_ICONS);
-		lprovider.setTextFlags(JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.F_APP_TYPE_SIGNATURE);
+		StandardJavaUILabelProvider lprovider= new StandardJavaUILabelProvider();
+		lprovider.setImageFlags(JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.OVERRIDE_INDICATORS | JavaElementImageProvider.ERROR_TICKS);
+		lprovider.setTextFlags(JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_APP_RETURNTYPE |  JavaElementLabels.F_APP_TYPE_SIGNATURE);
 	
 		fOutlineViewer= new JavaOutlineViewer(tree);		
 		fOutlineViewer.setContentProvider(new ChildrenProvider());

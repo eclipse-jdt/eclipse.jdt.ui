@@ -8,14 +8,13 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
 public class HierarchyLabelProvider extends LabelProvider {
 
 	private TypeHierarchyViewPart fViewPart;
-	private ErrorTickImageProvider fImageLabelProvider;
+	private JavaElementImageProvider fImageLabelProvider;
 
 	/**
 	 * Constructor for HierarchyLabelProvider.
@@ -24,7 +23,7 @@ public class HierarchyLabelProvider extends LabelProvider {
 	public HierarchyLabelProvider(TypeHierarchyViewPart viewPart) {
 		super();
 		fViewPart= viewPart;
-		fImageLabelProvider= new ErrorTickImageProvider();
+		fImageLabelProvider= new JavaElementImageProvider();
 	}
 
 	/*
@@ -33,7 +32,7 @@ public class HierarchyLabelProvider extends LabelProvider {
 	public Image getImage(Object obj) {
 		if (obj instanceof IJavaElement) {
 			IJavaElement element= (IJavaElement) obj;
-			int flags= JavaElementImageProvider.OVERLAY_ICONS;
+			int flags= JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS;
 
 			IJavaElement input= fViewPart.getInputElement();
 			if (input != null && input.getElementType() != IJavaElement.TYPE && element.getElementType() == IJavaElement.TYPE) {

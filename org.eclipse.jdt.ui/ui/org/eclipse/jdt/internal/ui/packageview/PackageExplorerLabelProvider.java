@@ -12,7 +12,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.StorageLabelProvider;
@@ -41,8 +40,8 @@ class PackageExplorerLabelProvider extends LabelProvider {
 	 */
 	public PackageExplorerLabelProvider() {
 		fStorageLabelProvider= new StorageLabelProvider();
-		fImageLabelProvider= new ErrorTickImageProvider();
-		fImageFlags= JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS;
+		fImageLabelProvider= new JavaElementImageProvider();
+		fImageFlags= JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.ERROR_TICKS;
 		fTextFlags= JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES;
 		if (WorkInProgressPreferencePage.isCompressingPkgNameInPackagesView())
 			fTextFlags |= JavaElementLabels.P_COMPRESSED;

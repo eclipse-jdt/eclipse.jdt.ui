@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPreferencePage;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
+import org.eclipse.jdt.internal.ui.preferences.AppearancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeGenerationPreferencePage;
@@ -304,6 +305,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		store.setDefault(IPreferencesConstants.EDITOR_SHOW_SEGMENTS, false);
 		
 		JavaBasePreferencePage.initDefaults(store);
+		AppearancePreferencePage.initDefaults(store);
 		ImportOrganizePreferencePage.initDefaults(store);
 		ClasspathVariablesPreferencePage.initDefaults(store);
 		RefactoringPreferencePage.initDefaults(store);		

@@ -6,30 +6,29 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
-import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
-
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 
-public class OverrideImageProvider extends ErrorTickImageProvider {
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
+
+public class OverrideAdornmentProvider implements IAdornmentProvider {
 	
 	private TypeHierarchyLifeCycle fTypeHierarchy;
 	
-	public OverrideImageProvider() {
-		fTypeHierarchy= new TypeHierarchyLifeCycle(true);
+	public OverrideAdornmentProvider() {
+		fTypeHierarchy= null;
 	}
 	
 	/*
-	 * @see JavaElementImageProvider#computeExtraAdornmentFlags(Object)
+	 * @see IAdornmentProvider#computeAdornmentFlags(Object, int)
 	 */
-	protected int computeExtraAdornmentFlags(Object element) {
-		int adornmentFlags= super.computeExtraAdornmentFlags(element);
-		if (!WorkInProgressPreferencePage.showOverrideIndicators()) {
-			return adornmentFlags;
+	public int computeAdornmentFlags(Object element, int renderFlags) {
+		if ((renderFlags & JavaElementImageProvider.OVERRIDE_INDICATORS) == 0) {
+			return 0;
 		}
 		
+		int adornmentFlags= 0;
 		
 		if (element instanceof IMethod) {
 			try {
@@ -56,16 +55,20 @@ public class OverrideImageProvider extends ErrorTickImageProvider {
 	}
 	
 	private ITypeHierarchy getTypeHierarchy(IType type) throws JavaModelException {
+		if (fTypeHierarchy ==  null) {
+			fTypeHierarchy= new TypeHierarchyLifeCycle(true);
+		}
 		fTypeHierarchy.ensureRefreshedTypeHierarchy(type);
 		return fTypeHierarchy.getHierarchy();
 	}
 		
 	/*
-	 * @see JavaElementImageProvider#dispose()
+	 * @see IAdornmentProvider#dispose()
 	 */
 	public void dispose() {
-		fTypeHierarchy.freeHierarchy();
-		super.dispose();
+		if (fTypeHierarchy != null) {
+			fTypeHierarchy.freeHierarchy();
+		}
 	}
 
 }

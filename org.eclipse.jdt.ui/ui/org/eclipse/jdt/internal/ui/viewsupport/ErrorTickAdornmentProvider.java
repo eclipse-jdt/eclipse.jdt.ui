@@ -2,14 +2,14 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.Iterator;
 
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationModel;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
@@ -19,20 +19,24 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-import org.eclipse.jdt.ui.JavaElementImageDescriptor;
-
-public class ErrorTickImageProvider extends JavaElementImageProvider {
+public class ErrorTickAdornmentProvider implements IAdornmentProvider {
 	
 	private static final int ERRORTICK_WARNING= JavaElementImageDescriptor.WARNING;
 	private static final int ERRORTICK_ERROR= JavaElementImageDescriptor.ERROR;	
 	
 	/*
-	 * @see JavaElementImageProvider#computeExtraAdornmentFlags(Object)
+	 * @see IAdornmentProvider#computeAdornmentFlags(Object, int)
 	 */
-	protected int computeExtraAdornmentFlags(Object obj) {
+	public int computeAdornmentFlags(Object obj, int renderFlags) {
+		if ((renderFlags & JavaElementImageProvider.ERROR_TICKS) == 0) {
+			return 0;
+		}		
+		
 		try {
 			if (obj instanceof IJavaElement) {
 				IJavaElement element= (IJavaElement) obj;
@@ -76,6 +80,12 @@ public class ErrorTickImageProvider extends JavaElementImageProvider {
 		}
 		return 0;
 	}
+	
+	/*
+	 * @see IAdornmentProvider#dispose()
+	 */
+	public void dispose() {
+	}	
 	
 	private int getErrorTicksFromMarkers(IResource res, int depth, ISourceRange range) throws CoreException {
 		if (res == null) { // for elements in archives
@@ -149,6 +159,7 @@ public class ErrorTickImageProvider extends JavaElementImageProvider {
 				
 		return null;
 	}	
-	
-		
+
+
+
 }

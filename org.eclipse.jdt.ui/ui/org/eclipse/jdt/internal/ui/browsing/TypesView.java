@@ -14,15 +14,10 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.jarpackager.LibraryFilter;
-import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
-import org.eclipse.jdt.internal.ui.packageview.EmptyPackageFilter;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class TypesView extends JavaBrowsingPart {
 
@@ -35,8 +30,7 @@ public class TypesView extends JavaBrowsingPart {
 	protected ILabelProvider createLabelProvider() {
 		return new JavaUILabelProvider(
 						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS,
-						new ErrorTickImageProvider());
+						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
 	}
 
 	/**

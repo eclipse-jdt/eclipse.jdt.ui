@@ -22,10 +22,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-
 import org.eclipse.jdt.internal.ui.typehierarchy.MethodsViewerFilter;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
@@ -45,8 +43,7 @@ public class MembersView extends JavaBrowsingPart {
 	protected ILabelProvider createLabelProvider() {
 		return new JavaUILabelProvider(
 						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS,
-						new ErrorTickImageProvider());
+						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.ERROR_TICKS);
 	}
 
 	/**

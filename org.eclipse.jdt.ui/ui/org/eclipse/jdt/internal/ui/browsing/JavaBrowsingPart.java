@@ -65,7 +65,6 @@ import org.eclipse.ui.actions.OpenPerspectiveMenu;
 import org.eclipse.ui.actions.OpenWithMenu;
 import org.eclipse.ui.actions.RefreshAction;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
-import org.eclipse.ui.help.ViewContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.views.internal.framelist.BackAction;
@@ -86,10 +85,8 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
-
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JarEntryEditorInput;
@@ -105,7 +102,6 @@ import org.eclipse.jdt.internal.ui.reorg.ReorgGroup;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.BaseJavaElementContentProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.ErrorTickImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
@@ -598,8 +594,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	protected ILabelProvider createLabelProvider() {
 		return new JavaUILabelProvider(
 						JavaElementLabels.ROOT_VARIABLE | JavaElementLabels.M_PARAMETER_TYPES,
-						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS,
-						new ErrorTickImageProvider());
+						JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS | JavaElementImageProvider.ERROR_TICKS);
 	}
 
 	protected ILabelProvider createTitleProvider() {
