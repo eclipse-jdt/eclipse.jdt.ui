@@ -112,7 +112,7 @@ public class NameProposerTest extends TestCase {
 	}
 	
 	private void assertEqualString(String expected, String actual) {
-		assertTrue("Expected '" + expected + "', is '" + actual + "'", expected.equals(actual));
+		assertEquals("Expected '" + expected + "', is '" + actual + "'", expected, actual);
 	}	
 	
 }

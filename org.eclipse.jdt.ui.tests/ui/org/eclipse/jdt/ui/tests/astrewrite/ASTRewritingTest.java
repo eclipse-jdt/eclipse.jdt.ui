@@ -16,6 +16,7 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.testplugin.StringAsserts;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
@@ -25,6 +26,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -37,7 +39,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
-import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.NewASTRewrite;
 
 /**
@@ -75,32 +76,9 @@ public class ASTRewritingTest extends TestCase {
 		return document.get();
 	}
 	
-	private static final int printRange= 6;
 	
-	public static void assertEqualString(String expected, String actual) {	
-		int len1= Math.min(expected.length(), actual.length());
-		
-		int diffPos= -1;
-		for (int i= 0; i < len1; i++) {
-			if (expected.charAt(i) != actual.charAt(i)) {
-				diffPos= i;
-				break;
-			}
-		}
-		if (diffPos == -1 && expected.length() != actual.length()) {
-			diffPos= len1;
-		}
-		if (diffPos != -1) {
-			int diffAhead= Math.max(0, diffPos - printRange);
-			int diffAfter= Math.min(expected.length(), diffPos + printRange);
-			
-			String diffStr= expected.substring(diffAhead, diffPos) + '^' + expected.substring(diffPos, diffAfter);
-			
-			// use detailed message
-			String message= "Content not as expected: is\n" + expected + "\nDiffers at pos " + diffPos + ": " + diffStr + "\nexpected:\n" + actual;  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
-			
-			assertEquals(message, expected, actual);
-		}
+	public static void assertEqualString(String actual, String expected) {
+		StringAsserts.assertEqualString(actual, expected);
 	}
 	
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -152,11 +130,5 @@ public class ASTRewritingTest extends TestCase {
 		decl.setBody(isAbstract ? null : ast.newBlock());
 		return decl;
 	}
-	
-	
-	protected void clearRewrite(ASTRewrite rewrite) {
-		rewrite.removeModifications();
-	}
-	
 
 }
