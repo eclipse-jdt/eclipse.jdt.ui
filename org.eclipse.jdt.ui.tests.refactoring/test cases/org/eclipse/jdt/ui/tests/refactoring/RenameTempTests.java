@@ -310,6 +310,12 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;public class R
 		helper1("j", true, 6, 11, 6, 14);
 	}
 	
+	public void test45() throws Exception{
+//		printTestDisabledMessage("regression test for Bug#12210");
+		helper1("j", true, 4, 14, 4, 14);
+	}
+	
+	
 // -----
 	public void testFail0() throws Exception{
 		printTestDisabledMessage("fails - must revisit");
