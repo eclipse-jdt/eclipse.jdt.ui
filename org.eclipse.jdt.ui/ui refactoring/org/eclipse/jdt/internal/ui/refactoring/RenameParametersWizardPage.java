@@ -4,28 +4,11 @@
  */
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.viewers.CellEditor;
-import org.eclipse.jface.viewers.ColumnLayoutData;
-import org.eclipse.jface.viewers.ColumnWeightData;
-import org.eclipse.jface.viewers.ICellModifier;
-import org.eclipse.jface.viewers.IStructuredContentProvider;
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableLayout;
-import org.eclipse.jface.viewers.TableViewer;
-import org.eclipse.jface.viewers.TextCellEditor;
-import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -39,16 +22,43 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
+
+import org.eclipse.jface.viewers.CellEditor;
+import org.eclipse.jface.viewers.ColumnLayoutData;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.ICellModifier;
+import org.eclipse.jface.viewers.IStructuredContentProvider;
+import org.eclipse.jface.viewers.ITableLabelProvider;
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TextCellEditor;
+import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.ui.help.DialogPageContextComputer;
 import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+
+import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IMultiRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class RenameParametersWizardPage extends UserInputWizardPage {
 
 	public static final String PAGE_NAME= "RenameParametersInputPage"; //$NON-NLS-1$
 	
-	private static final String[] PROPERTIES= {"old", "new"}; //$NON-NLS-2$ //$NON-NLS-1$
-	private static final int OLDNAME_PROP= 0; 
-	private static final int NEWNAME_PROP= 1; 
+	private static final String[] PROPERTIES= {"type", "old", "new"}; //$NON-NLS-2$ //$NON-NLS-1$
+	private static final int TYPE_PROP= 0; 
+	private static final int OLDNAME_PROP= 1; 
+	private static final int NEWNAME_PROP= 2;
+	
+	private static final int ROW_COUNT= 5; 
 	
 	private TableViewer fViewer;
 	private boolean fAlreadyShown= false;
@@ -57,8 +67,8 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		super(PAGE_NAME, isLastUserPage);
 	}
 	
-	private IMultiRenameRefactoring getMultiRenameRefactoring(){
-		return (IMultiRenameRefactoring)getRefactoring();
+	private RenameParametersRefactoring getRenameParametersRefactoring(){
+		return (RenameParametersRefactoring)getRefactoring();
 	}			
 	
 	/* non java-doc
@@ -70,7 +80,9 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		fViewer= new TableViewer(table);
 		fViewer.setUseHashlookup(true);
 		
-		final CellEditor editors[]= new CellEditor[2];
+		final CellEditor editors[]= new CellEditor[PROPERTIES.length];
+		
+		editors[TYPE_PROP]= new TextCellEditor(table);
 		editors[OLDNAME_PROP]= new TextCellEditor(table);
 		
 		class AutoApplyTextCellEditor extends TextCellEditor {
@@ -93,10 +105,10 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		fViewer.setColumnProperties(PROPERTIES);
 		fViewer.setCellModifier(new CellModifier());
 
-		fViewer.setContentProvider(new ParameterPairContentProvider());
-		fViewer.setLabelProvider(new ParameterPairLabelProvider());
+		fViewer.setContentProvider(new ParameterDescriptionContentProvider());
+		fViewer.setLabelProvider(new ParameterDescriptionLabelProvider());
 		
-		fViewer.setInput(createNamePairs());
+		fViewer.setInput(createParameterDescriptions());
 		
 		WorkbenchHelp.setHelp(getControl(), new DialogPageContextComputer(this, IJavaHelpContextIds.RENAME_PARAMS_WIZARD_PAGE));
 	}
@@ -125,7 +137,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	}
 	
 	private RefactoringStatus validateTable(Map renamings) throws JavaModelException{
-		IMultiRenameRefactoring ref= getMultiRenameRefactoring();
+		IMultiRenameRefactoring ref= getRenameParametersRefactoring();
 		ref.setNewNames(renamings);
 		return ref.checkNewNames();
 	}
@@ -149,7 +161,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	}
 	
 	private Map getNewParameterNames(){
-		ParameterNamePair[] input= (ParameterNamePair[])fViewer.getInput();
+		ParameterDescription[] input= (ParameterDescription[])fViewer.getInput();
 		Map result= new HashMap();
 		for (int i= 0; i < input.length; i++){
 			result.put(input[i].oldName, input[i].newName);
@@ -173,7 +185,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		table.setLinesVisible(true);
 		table.setHeaderVisible(true);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * 5;
+		gd.heightHint= table.getGridLineWidth() + table.getItemHeight() * ROW_COUNT;
 		table.setLayoutData(gd);
 		table.setLayout(createTableLayout(table));
 		return table;
@@ -200,56 +212,74 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 	
 	private TableLayout createTableLayout(Table table) {
 		TableLayout layout= new TableLayout();
-		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[2];
-		columnLayoutData[0]= new ColumnWeightData(50);
-		columnLayoutData[1]= new ColumnWeightData(50);
+		ColumnLayoutData[] columnLayoutData= new ColumnLayoutData[PROPERTIES.length];
+		columnLayoutData[0]= new ColumnWeightData(33);
+		columnLayoutData[1]= new ColumnWeightData(33);
+		columnLayoutData[2]= new ColumnWeightData(33);
 		
 		layout.addColumnData(columnLayoutData[0]);
 		layout.addColumnData(columnLayoutData[1]);
+		layout.addColumnData(columnLayoutData[2]);
 		
 		TableColumn tc= new TableColumn(table, SWT.NONE, 0);
 		tc.setResizable(columnLayoutData[0].resizable);
-		tc.setText(RefactoringMessages.getString("RenameParametersWizardPage.old_names")); //$NON-NLS-1$
+		tc.setText("Parameter Types"); 
 		
 		tc= new TableColumn(table, SWT.NONE, 1);
 		tc.setResizable(columnLayoutData[1].resizable);
+		tc.setText(RefactoringMessages.getString("RenameParametersWizardPage.old_names")); //$NON-NLS-1$
+		
+		tc= new TableColumn(table, SWT.NONE, 2);
+		tc.setResizable(columnLayoutData[2].resizable);
 		tc.setText(RefactoringMessages.getString("RenameParametersWizardPage.new_names")); //$NON-NLS-1$
+		
 		return layout;
 	}
 	
-	private ParameterNamePair[] createNamePairs()   {
-		try{
-			Map renamings= getMultiRenameRefactoring().getNewNames();
-			Set result= new HashSet();
-			for (Iterator iterator = renamings.keySet().iterator(); iterator.hasNext();) {
-				String oldName = (String) iterator.next();
-				String newName= (String)renamings.get(oldName);
-				ParameterNamePair each= new ParameterNamePair();	
-				each.oldName= oldName;
-				each.newName= newName;
+	private ParameterDescription[] createParameterDescriptions() {
+		try {
+			Map renamings= getRenameParametersRefactoring().getNewNames();
+			String[] typeNames= getRenameParametersRefactoring().getMethod().getParameterTypes();
+			String[] oldNames= getRenameParametersRefactoring().getMethod().getParameterNames();
+			Collection result= new ArrayList(typeNames.length);
+			
+			for (int i= 0; i < oldNames.length; i++){
+				ParameterDescription each= new ParameterDescription();	
+				each.typeName= typeNames[i]; 
+				each.oldName= oldNames[i];
+				each.newName= (String)renamings.get(oldNames[i]);
 				result.add(each);
 			}
-			return (ParameterNamePair[]) result.toArray(new ParameterNamePair[result.size()]);
-		} catch (JavaModelException e){
-			ExceptionHandler.handle(e, "Exception", "Unexpected exception occurred. See log for details.");
-			return new ParameterNamePair[0];
-		}	
+			return ((ParameterDescription[]) result.toArray(new ParameterDescription[result.size()]));
+		} catch(JavaModelException e) {
+			ExceptionHandler.handle(e, "Rename Parameters", "Unexpected exception. See log for details.");
+			return new ParameterDescription[0];
+		}		
 	}
 	
 	//--------- private classes 
-	private static class ParameterNamePair{
+	private static class ParameterDescription{
+		String typeName;
 		String oldName;
 		String newName;
 	}
 	
-	private static class ParameterPairLabelProvider extends LabelProvider implements ITableLabelProvider {
+	private static class ParameterDescriptionLabelProvider extends LabelProvider implements ITableLabelProvider {
 		public String getColumnText(Object element, int columnIndex) {
-			if (! (element instanceof ParameterNamePair)) 
-				return ""; //$NON-NLS-1$
-			if (columnIndex == OLDNAME_PROP)
-				return ((ParameterNamePair) element).oldName;
-			else
-				return ((ParameterNamePair) element).newName;
+			if (! (element instanceof ParameterDescription)) 
+				return ""; //$NON-NLS-1$	
+			ParameterDescription description= (ParameterDescription)element;
+			switch (columnIndex){
+				case TYPE_PROP: 
+					return Signature.toString(description.typeName);	
+				case OLDNAME_PROP: 
+					return description.oldName;
+				case NEWNAME_PROP:
+					return description.newName;	
+				default: 
+					Assert.isTrue(false); 
+					return null;
+			}	
 		}
 		
 		public Image getColumnImage(Object element, int columnIndex){
@@ -257,7 +287,7 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		}
 	};
 	
-	private static class ParameterPairContentProvider implements IStructuredContentProvider {
+	private static class ParameterDescriptionContentProvider implements IStructuredContentProvider {
 		
 		public Object[] getElements(Object inputElement) {
 			return (Object[])inputElement;
@@ -277,12 +307,14 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 		}
 		
 		public Object getValue(Object element, String property) {
-			if (! (element instanceof ParameterNamePair))
+			if (! (element instanceof ParameterDescription))
 				return null;
+			if (property.equals(PROPERTIES[TYPE_PROP]))
+				return ((ParameterDescription) element).typeName;	
 			if (property.equals(PROPERTIES[OLDNAME_PROP]))
-				return ((ParameterNamePair) element).oldName;
+				return ((ParameterDescription) element).oldName;
 			if (property.equals(PROPERTIES[NEWNAME_PROP]))
-				return ((ParameterNamePair) element).newName;
+				return ((ParameterDescription) element).newName;
 			return null;
 		}
 		
@@ -290,9 +322,9 @@ public class RenameParametersWizardPage extends UserInputWizardPage {
 			if (! (element instanceof TableItem)) 
 				return;
 			Object data= ((TableItem) element).getData();
-			if (! (data instanceof ParameterNamePair)) 
+			if (! (data instanceof ParameterDescription)) 
 				return;
-			ParameterNamePair s= (ParameterNamePair) data;
+			ParameterDescription s= (ParameterDescription) data;
 			if (property.equals(PROPERTIES[NEWNAME_PROP])) {
 				s.newName= (String) value;
 				tableModified(getNewParameterNames());
