@@ -169,7 +169,9 @@ public class Strings {
 						blanks= 0;
 					}
 			} else {
-				Assert.isTrue(false, "Line does not have requested number of indents"); //$NON-NLS-1$
+				// Assert.isTrue(false, "Line does not have requested number of indents"); //$NON-NLS-1$
+				start= i + 1;
+				break; 
 			}
 			if (indents == indentsToRemove) {
 				start= i + 1;

@@ -84,7 +84,7 @@ public class ASTNodes {
 	}
 
 	public static String asString(ASTNode node) {
-		return ASTNode2String.perform(node);
+		return (new ASTNode2String()).generateSimple(node);
 	}
 
     public static String modifierString(int mod) {

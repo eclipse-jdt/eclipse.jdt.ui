@@ -95,29 +95,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fJProject1);
 	}
-	
-	private FieldDeclaration newField(AST ast, String name) {
-		VariableDeclarationFragment frag= ast.newVariableDeclarationFragment();
-		frag.setName(ast.newSimpleName(name));
-		FieldDeclaration newFieldDecl= ast.newFieldDeclaration(frag);
-		newFieldDecl.setModifiers(Modifier.PRIVATE);
-		newFieldDecl.setType(ast.newPrimitiveType(PrimitiveType.DOUBLE));
-		return newFieldDecl;
-	}
-	
-	private MethodDeclaration newMethod(AST ast, String name, boolean isAbstract) {
-		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.setName(ast.newSimpleName(name));
-		decl.setReturnType(ast.newPrimitiveType(PrimitiveType.VOID));
-		decl.setModifiers(isAbstract ? (Modifier.ABSTRACT | Modifier.PRIVATE) : Modifier.PRIVATE);
-		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
-		param.setName(ast.newSimpleName("str"));
-		param.setType(ast.newSimpleType(ast.newSimpleName("String")));
-		decl.parameters().add(param);
-		decl.setBody(isAbstract ? null : ast.newBlock());
-		return decl;
-	}	
-	
+		
 	public void testTypeDeclChanges() throws Exception {
 		ICompilationUnit cu= fCU_E;
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
@@ -146,7 +124,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", !members.isEmpty());
 			
-			FieldDeclaration newFieldDecl= newField(ast, "fCount");
+			FieldDeclaration newFieldDecl= createNewField(ast, "fCount");
 			
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), newFieldDecl);
 		}
@@ -158,7 +136,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			List members= type.bodyDeclarations();
 			assertTrue("Has declarations", members.size() == 1);
 
-			MethodDeclaration methodDecl= newMethod(ast, "newFoo", true);
+			MethodDeclaration methodDecl= createNewMethod(ast, "newFoo", true);
 
 			ASTRewriteAnalyzer.markAsReplaced((ASTNode) members.get(0), methodDecl);
 		}
@@ -299,19 +277,19 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			ASTRewriteAnalyzer.markAsInserted(newSuperclass);
 */
 
-			FieldDeclaration newField= newField(ast, "fCount");
+			FieldDeclaration newField= createNewField(ast, "fCount");
 			
 			List innerMembers= innerType.bodyDeclarations();
 			innerMembers.add(0, newField);
 			
 			ASTRewriteAnalyzer.markAsInserted(newField);
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", false);
+			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
 			members.add(4, newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
 		}
-		{ // remove interface
+		{ // add exception, add method
 			TypeDeclaration type= findTypeDeclaration(astRoot, "F");
 			
 			SimpleName newSuperclass= ast.newSimpleName("Exception");
@@ -321,12 +299,12 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			List members= type.bodyDeclarations();
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", false);
+			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", false);
 			members.add(newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);	
 		}			
-		{ // remove interface
+		{ // insert interface
 			TypeDeclaration type= findTypeDeclaration(astRoot, "G");
 						
 			SimpleName newInterface= ast.newSimpleName("Runnable");
@@ -336,7 +314,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			
 			List members= type.bodyDeclarations();
 			
-			MethodDeclaration newMethodDecl= newMethod(ast, "newMethod", true);
+			MethodDeclaration newMethodDecl= createNewMethod(ast, "newMethod", true);
 			members.add(newMethodDecl);
 			
 			ASTRewriteAnalyzer.markAsInserted(newMethodDecl);
@@ -379,6 +357,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 	}
 	
 	public void testBug22161() throws Exception {
+		System.out.println(getClass().getName()+"::" + getName() +" disabled (bug 22161)");
 	/*
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
