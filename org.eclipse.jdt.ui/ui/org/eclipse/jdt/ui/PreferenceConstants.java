@@ -1781,6 +1781,26 @@ public class PreferenceConstants {
 	 */
 	public static final String QUICK_DIFF_DELETED_COLOR= "lineNumberBar.colors.deleted"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that controls whether quick diff information is shown on a newly opened editor.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static String QUICK_DIFF_ALWAYS_ON= "quickdiff.alwaysOn"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls the preferred provider to be used for quick diff reference.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static String QUICK_DIFF_DEFAULT_PROVIDER= "quickdiff.preferredProvider"; //$NON-NLS-1$
+
 
 
 	/**
@@ -1986,6 +2006,8 @@ public class PreferenceConstants {
 		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_CHANGED_COLOR, new RGB(255, 230, 230));
 		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_ADDED_COLOR, new RGB(230, 230, 255));
 		PreferenceConverter.setDefault(store, PreferenceConstants.QUICK_DIFF_DELETED_COLOR, new RGB(0, 0, 0));
+		store.setDefault(PreferenceConstants.QUICK_DIFF_ALWAYS_ON, true);
+		store.setDefault(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, "org.eclipse.ui.internal.editors.quickdiff.LastSaveReferenceProvider"); //$NON-NLS-1$
 
 		
 		// work in progress

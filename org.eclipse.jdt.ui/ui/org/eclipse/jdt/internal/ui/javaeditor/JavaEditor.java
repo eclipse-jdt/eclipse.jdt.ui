@@ -57,6 +57,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.DocumentEvent;
@@ -85,6 +86,7 @@ import org.eclipse.jface.text.source.ChangeRulerColumn;
 import org.eclipse.jface.text.source.CompositeRuler;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.IAnnotationModelExtension;
 import org.eclipse.jface.text.source.IChangeRulerColumn;
 import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISharedTextColors;
@@ -116,9 +118,9 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.editors.quickdiff.IQuickDiffProviderImplementation;
 import org.eclipse.ui.editors.text.DefaultEncodingSupport;
 import org.eclipse.ui.editors.text.IEncodingSupport;
-import org.eclipse.ui.editors.text.TextEditorPreferenceConstants;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.part.IShowInTargetList;
@@ -137,6 +139,10 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.tasklist.TaskList;
+
+import org.eclipse.ui.internal.editors.quickdiff.DocumentLineDiffer;
+import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -228,7 +234,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				selectionProvider.removeSelectionChangedListener(this);
 			}			
 		}
-	};
+	}
 
 	/**
 	 * Updates the Java outline page selection and this editor's range indicator.
@@ -252,7 +258,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			synchronizeOutlinePage(element);
 			setSelection(element, false);
 		}
-	};
+	}
 		
 	/**
 	 * Updates the selection in the editor's widget with the selection of the outline page. 
@@ -261,7 +267,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		public void selectionChanged(SelectionChangedEvent event) {
 			doSelectionChanged(event);
 		}
-	};
+	}
 	
 	/*
 	 * Link mode.  
@@ -332,7 +338,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			if (fKeyModifierMask == -1) {
 				// Fallback to stored state mask
 				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
-			};
+			}
 		}
 
 		private int computeStateMask(String modifiers) {
@@ -918,7 +924,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			
 			return maxLocation;
 		}
-	};
+	}
 	
 	/**
 	 * This action dispatches into two behaviours: If there is no current text
@@ -1063,7 +1069,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 
 		}
-	};
+	}
 	
 	static protected class AnnotationAccess implements IAnnotationAccess {
 
@@ -1097,7 +1103,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			}
 			return false;
 		}
-	};
+	}
 
 	private class PropertyChangeListener implements org.eclipse.core.runtime.Preferences.IPropertyChangeListener {		
 		/*
@@ -1106,7 +1112,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		public void propertyChange(org.eclipse.core.runtime.Preferences.PropertyChangeEvent event) {
 			handlePreferencePropertyChanged(event);
 		}
-	};
+	}
 	
 	
 	/** Preference key for showing the line number ruler */
@@ -1262,8 +1268,6 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		setRangeIndicator(new DefaultRangeIndicator());
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
 		setKeyBindingScopes(new String[] { "org.eclipse.jdt.ui.javaEditorScope" });  //$NON-NLS-1$
-		
-		fIsChangeInformationShown= getPreferenceStore().getBoolean(TextEditorPreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 	
 	/*
@@ -1923,23 +1927,193 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * @see org.eclipse.ui.texteditor.ITextEditorExtension3#showChangeInformation(boolean)
 	 */
 	public void showChangeInformation(boolean show) {
+		if (show == fIsChangeInformationShown)
+			return;
+		
+		if (fIsChangeInformationShown) {
+			uninstallChangeRulerModel();
+			showChangeRuler(false); // hide change ruler if its displayed - if the line number ruler is showing, only the colors get removed by deinstalling the model
+		} else {
+			ensureChangeInfoCanBeDisplayed(); // can be replaced w/ showChangeRuler(false) once the old line number ruler is gone
+			installChangeRulerModel();
+		}
+		
 		fIsChangeInformationShown= show;
+	}
+
+	/**
+	 * Installs the differ annotation model with the current quick diff display. 
+	 * @since R3.0
+	 */
+	private void installChangeRulerModel() {
+		IChangeRulerColumn column= getChangeColumn();
+		if (column != null)
+			column.setModel(getOrCreateDiffer());
+	}
+
+	/**
+	 * Uninstalls the differ annotation model from the current quick diff display.
+	 * 
+	 * @since R3.0
+	 */
+	private void uninstallChangeRulerModel() {
+		IChangeRulerColumn column= getChangeColumn();
+		if (column != null)
+			column.setModel(null);
+	}
+
+	/**
+	 * Ensures that either the line number display is a <code>LineNumberChangeRuler</code> or
+	 * a separate change ruler gets displayed.
+	 * 
+	 * @since R3.0
+	 */
+	private void ensureChangeInfoCanBeDisplayed() {
 		if (isLineNumberRulerVisible()) {
 			if (!(fLineNumberRulerColumn instanceof IChangeRulerColumn)) {
 				hideLineNumberRuler();
+				// HACK: set state already so a change ruler is created. Not needed once always a change line number bar gets installed
+				fIsChangeInformationShown= true;
 				showLineNumberRuler();
 			}
 		} else 
-			showChangeRulerColumn(show);
-		
+			showChangeRuler(true);
+	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.ITextEditorExtension3#isChangeInformationShowing()
+	 */
+	public boolean isChangeInformationShowing() {
+		return fIsChangeInformationShown;
 	}
 	
-	private void showChangeRulerColumn(boolean show) {
+	/**
+	 * Creates a new <code>DocumentLineDiffer</code> and installs it with <code>model</code>.
+	 * The default reference provider is installed with the newly created differ.
+	 * 
+	 * @param model the annotation model of the current document.
+	 * @return a new <code>DocumentLineDiffer</code> instance.
+	 * @since R3.0
+	 */
+	private DocumentLineDiffer createDiffer(IAnnotationModelExtension model) {
+		DocumentLineDiffer differ;
+		differ= new DocumentLineDiffer();
+		IQuickDiffProviderImplementation provider= getDefaultReferenceProvider();
+		if (provider != null)
+			differ.setReferenceProvider(provider);
+		model.addAnnotationModel(IChangeRulerColumn.QUICK_DIFF_MODEL_ID, differ);
+		return differ;
+	}
+	
+	/**
+	 * Returns the default quick diff reference provider. It is determined by first trying to 
+	 * enable the preferred provider as specified by the preferences; if this is unsuccessful, the
+	 * default provider as specified by the extension point mechanism is installed. If that fails
+	 * as well, <code>null</code> is returned.
+	 * 
+	 * @return the default reference provider
+	 * @since R3.0
+	 */
+	private IQuickDiffProviderImplementation getDefaultReferenceProvider() {
+		String defaultID= getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER);
+		EditorsPlugin editorPlugin= EditorsPlugin.getDefault();
+		ReferenceProviderDescriptor[] descs= editorPlugin.getExtensions();
+		IQuickDiffProviderImplementation provider= null;
+		// try to fetch preferred provider; load if needed
+		for (int i= 0; i < descs.length; i++) {
+			if (descs[i].getId().equals(defaultID)) {
+				provider= descs[i].createProvider();
+				if (provider != null) {
+					provider.setActiveEditor(this);
+					if (provider.isEnabled())
+						break;
+					provider.dispose();
+					provider= null;
+				}
+			}
+		}
+		// if not found, get default provider as specified by the extension point
+		if (provider == null) {
+			ReferenceProviderDescriptor defaultDescriptor= editorPlugin.getDefaultProvider();
+			if (defaultDescriptor != null) {
+				provider= defaultDescriptor.createProvider();
+				if (provider != null) {
+					provider.setActiveEditor(this);
+					if (!provider.isEnabled()) {
+						provider.dispose();
+						provider= null;
+					}
+				}
+			}
+		}
+		return provider;
+	}
+
+	/**
+	 * Returns the annotation model associated with the document displayed in the 
+	 * viewer if it is an <code>IAnnotationModelExtension</code>, or <code>null</code>.
+	 * 
+	 * @return the displayed document's annotation model if it is an <code>IAnnotationModelExtension</code>, or <code>null</code> 
+	 * @since R3.0
+	 */
+	private IAnnotationModelExtension getModel() {
+		ISourceViewer viewer= getSourceViewer();
+		if (viewer == null)
+			return null;
+		IAnnotationModel m= viewer.getAnnotationModel();
+		if (m instanceof IAnnotationModelExtension)
+			return (IAnnotationModelExtension) m;
+		else
+			return null;
+	}
+
+	/**
+	 * Extracts the line differ from the displayed document's annotation model. If none can be found,
+	 * a new differ is created and attached to the annotation model.
+	 * 
+	 * @return the linediffer, or <code>null</code> if none could be found or created.
+	 * @since R3.0
+	 */
+	private DocumentLineDiffer getOrCreateDiffer() {
+		IAnnotationModelExtension model= getModel();
+		if (model == null)
+			return null;
+
+		DocumentLineDiffer differ= (DocumentLineDiffer)model.getAnnotationModel(IChangeRulerColumn.QUICK_DIFF_MODEL_ID);
+		if (differ == null)
+			differ= createDiffer(model);
+		return differ;
+	}
+
+	/**
+	 * Returns the <code>IChangeRulerColumn</code> of this editor, or <code>null</code> if there is none. Either
+	 * the line number bar or a separate change ruler column can be returned.
+	 * 
+	 * @return an instance of <code>IChangeRulerColumn</code> or <code>null</code>.
+	 * @since R3.0
+	 */
+	private IChangeRulerColumn getChangeColumn() {
+		if (fChangeRulerColumn != null)
+			return fChangeRulerColumn;
+		else if (fLineNumberRulerColumn instanceof IChangeRulerColumn)
+			return (IChangeRulerColumn) fLineNumberRulerColumn;
+		else
+			return null;
+	}
+
+	/**
+	 * Sets the display state of the separate change ruler column (not the quick diff display on
+	 * the line number ruler column) to <code>show</code>.
+	 * 
+	 * @param show <code>true</code> if the change ruler column should be shown, <code>false</code> if it should be hidden
+	 * @since R3.0
+	 */
+	private void showChangeRuler(boolean show) {
 		IVerticalRuler v= getVerticalRuler();
 		if (v instanceof CompositeRuler) {
 			CompositeRuler c= (CompositeRuler) v;
 			if (show && fChangeRulerColumn == null)
-				c.addDecorator(1, createChangeRuler());
+				c.addDecorator(1, createChangeRulerColumn());
 			else if (!show && fChangeRulerColumn != null) {
 				c.removeDecorator(fChangeRulerColumn);
 				fChangeRulerColumn= null;
@@ -1951,7 +2125,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * Shows the line number ruler column.
 	 */
 	private void showLineNumberRuler() {
-		showChangeRulerColumn(false);
+		showChangeRuler(false);
 		IVerticalRuler v= getVerticalRuler();
 		if (v instanceof CompositeRuler) {
 			CompositeRuler c= (CompositeRuler) v;
@@ -1970,17 +2144,30 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			fLineNumberRulerColumn= null;
 		}
 		if (fIsChangeInformationShown)
-			showChangeRulerColumn(true);
+			showChangeRuler(true);
 	}
 	
 	/**
 	 * Return whether the line number ruler column should be 
 	 * visible according to the preference store settings.
+	 * 
 	 * @return <code>true</code> if the line numbers should be visible
 	 */
 	private boolean isLineNumberRulerVisible() {
 		IPreferenceStore store= getPreferenceStore();
 		return store.getBoolean(LINE_NUMBER_RULER);
+	}
+	
+	/**
+	 * Returns whether quick diff info should be visible upon opening an editor 
+	 * according to the preference store settings.
+	 * 
+	 * @return <code>true</code> if the line numbers should be visible
+	 * @since R3.0
+	 */
+	private boolean isQuickDiffAlwaysOn() {
+		IPreferenceStore store= getPreferenceStore();
+		return store.getBoolean(PreferenceConstants.QUICK_DIFF_ALWAYS_ON);
 	}
 	
 	/**
@@ -2073,6 +2260,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	/**
 	 * Initializes the given line number ruler column from the preference store.
+	 * 
 	 * @param rulerColumn the ruler column to be initialized
 	 */
 	protected void initializeLineNumberRulerColumn(LineNumberRulerColumn rulerColumn) {
@@ -2110,9 +2298,11 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	
 	/**
 	 * Creates a new line number ruler column that is appropriately initialized.
+	 * 
+	 * @return a new line number ruler column
 	 */
 	protected IVerticalRulerColumn createLineNumberRulerColumn() {
-		if (fIsChangeInformationShown && fChangeRulerColumn == null) {
+		if (isQuickDiffAlwaysOn() || isChangeInformationShowing()) {
 			LineNumberChangeRulerColumn column= new LineNumberChangeRulerColumn();
 			column.setHover(new JavaChangeHover());
 			initializeChangeRulerColumn(column);
@@ -2125,9 +2315,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	}
 	
 	/**
+	 * Initializes the given change ruler column from the preference store.
 	 * 
-	 * 
-	 * @param lineNumberRulerColumn
+	 * @param changeColumn the ruler column to be initialized
+	 * @since R3.0
 	 */
 	private void initializeChangeRulerColumn(IChangeRulerColumn changeColumn) {
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
@@ -2181,8 +2372,15 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		
 		changeColumn.redraw();
 	}
-
-	protected IChangeRulerColumn createChangeRuler() {
+	
+	/**
+	 * Creates a new change ruler column for quick diff display independent of the 
+	 * line number ruler column
+	 * 
+	 * @return a new change ruler column
+	 * @since R3.0
+	 */
+	protected IChangeRulerColumn createChangeRulerColumn() {
 		IChangeRulerColumn column= new ChangeRulerColumn();
 		column.setHover(new JavaChangeHover());
 		fChangeRulerColumn= column;
@@ -2196,8 +2394,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	protected IVerticalRuler createVerticalRuler() {
 		CompositeRuler ruler= new CompositeRuler();
 		ruler.addDecorator(0, new AnnotationRulerColumn(VERTICAL_RULER_WIDTH));
+		
 		if (isLineNumberRulerVisible())
 			ruler.addDecorator(1, createLineNumberRulerColumn());
+		else if (isQuickDiffAlwaysOn())
+			ruler.addDecorator(1, createChangeRulerColumn());
+			
 		return ruler;
 	}
 	
@@ -2291,6 +2493,9 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_DISABLE_OVERWRITE_MODE))
 			configureInsertMode(OVERWRITE, false);
+		
+		if (isQuickDiffAlwaysOn())
+			showChangeInformation(true);
 	}
 	
 	protected void showOverviewRuler() {

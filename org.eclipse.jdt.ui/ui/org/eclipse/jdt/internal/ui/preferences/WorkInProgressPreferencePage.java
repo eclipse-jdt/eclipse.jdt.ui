@@ -37,6 +37,9 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.ui.internal.editors.quickdiff.ReferenceProviderDescriptor;
+import org.eclipse.ui.internal.editors.text.EditorsPlugin;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -72,7 +75,13 @@ WorkInProgressPreferencePage
 		{PreferencesMessages.getString(PREFIX + "quickdiff.addedLineColor"), PreferenceConstants.QUICK_DIFF_ADDED_COLOR}, //$NON-NLS-1$
 		{PreferencesMessages.getString(PREFIX + "quickdiff.deletedLineColor"), PreferenceConstants.QUICK_DIFF_DELETED_COLOR}, //$NON-NLS-1$
 	};
-	
+	/** List for the reference provider default. */
+	private org.eclipse.swt.widgets.List fQuickDiffProviderList;
+	/** The reference provider default's list model. */
+	private String[][] fQuickDiffProviderListModel;
+	/** Button controlling default setting of the selected reference provider. */
+	private Button fSetDefaultButton;
+
 	/**
 	 * creates a new preference page.
 	 */
@@ -81,8 +90,28 @@ WorkInProgressPreferencePage
 		fRadioButtons= new ArrayList();
 		fCheckBoxes= new ArrayList();
 		fTextControls= new ArrayList();
+
+		ReferenceProviderDescriptor[] providers= EditorsPlugin.getDefault().getExtensions();
+		fQuickDiffProviderListModel= createQuickDiffReferenceListModel(providers);
 	}
 
+	private String[][] createQuickDiffReferenceListModel(ReferenceProviderDescriptor[] providers) {
+		ArrayList listModelItems= new ArrayList();
+		for (int i= 0; i < providers.length; i++) {
+			listModelItems.add(new String[] { providers[i].getId(), providers[i].getLabel() });
+		}
+		String[][] items= new String[listModelItems.size()][];
+		listModelItems.toArray(items);
+		return items;
+	}
+	
+	private void handleProviderListSelection() {
+		int i= fQuickDiffProviderList.getSelectionIndex();
+		
+		boolean b= getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]);
+		fSetDefaultButton.setEnabled(!b);
+	}
+	
 	private Button addCheckBox(Composite parent, String label, String key) { 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		
@@ -145,12 +174,20 @@ WorkInProgressPreferencePage
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		l.setLayoutData(gd);
 	
+		button= addCheckBox(group, PreferencesMessages.getString(PREFIX + "showQuickDiffPerDefault"), PreferenceConstants.QUICK_DIFF_ALWAYS_ON); //$NON-NLS-1$
+		
+		l= new Label(group, SWT.LEFT );
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		l.setLayoutData(gd);
+	
 		l= new Label(group, SWT.LEFT);
 		l.setText(PreferencesMessages.getString(PREFIX + "quickdiff.appearanceOptions")); //$NON-NLS-1$
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		gd.horizontalSpan= 2;
 		l.setLayoutData(gd);
-	
+
 		Composite editorComposite= new Composite(group, SWT.NONE);
 		layout= new GridLayout();
 		layout.numColumns= 2;
@@ -217,6 +254,101 @@ WorkInProgressPreferencePage
 			}
 		});
 		
+		l= new Label(group, SWT.LEFT );
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		l.setLayoutData(gd);
+	
+		l= new Label(result, SWT.LEFT);
+		l.setText(PreferencesMessages.getString(PREFIX + "quickdiff.referenceprovidertitle")); //$NON-NLS-1$
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		l.setLayoutData(gd);
+
+		editorComposite= new Composite(group, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		editorComposite.setLayout(layout);
+		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL);
+		gd.horizontalSpan= 2;
+		editorComposite.setLayoutData(gd);		
+
+		fQuickDiffProviderList= new org.eclipse.swt.widgets.List(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING | GridData.FILL_HORIZONTAL);
+		gd.heightHint= convertHeightInCharsToPixels(4);
+		fQuickDiffProviderList.setLayoutData(gd);
+						
+		stylesComposite= new Composite(editorComposite, SWT.NONE);
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		stylesComposite.setLayout(layout);
+		stylesComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+		fSetDefaultButton= new Button(stylesComposite, SWT.PUSH);
+		fSetDefaultButton.setText(PreferencesMessages.getString(PREFIX + "quickdiff.setDefault")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fSetDefaultButton.setLayoutData(gd);
+		
+		fQuickDiffProviderList.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				handleProviderListSelection();
+			}
+
+		});
+		
+		fSetDefaultButton.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			
+			public void widgetSelected(SelectionEvent e) {
+				int i= fQuickDiffProviderList.getSelectionIndex();
+				for (int j= 0; j < fQuickDiffProviderListModel.length; j++) {
+					if (getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[j][0])) {
+						fQuickDiffProviderList.remove(j);
+						fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1], j);
+					}
+					if (i == j) {
+						fQuickDiffProviderList.remove(j);
+						fQuickDiffProviderList.add(fQuickDiffProviderListModel[j][1] + " " + PreferencesMessages.getString(PREFIX + "quickdiff.defaultlabel"), j);  //$NON-NLS-1$//$NON-NLS-2$
+					}
+				}
+				fSetDefaultButton.setEnabled(false);
+				fQuickDiffProviderList.setSelection(i);
+				fQuickDiffProviderList.redraw();
+				
+				getPreferenceStore().setValue(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER, fQuickDiffProviderListModel[i][0]);
+			}
+		});
+		
+		for (int i= 0; i < fQuickDiffProviderListModel.length; i++) {
+			String sLabel= fQuickDiffProviderListModel[i][1];
+			if (getPreferenceStore().getString(PreferenceConstants.QUICK_DIFF_DEFAULT_PROVIDER).equals(fQuickDiffProviderListModel[i][0]))
+				sLabel += " " + PreferencesMessages.getString(PREFIX + "quickdiff.defaultlabel"); //$NON-NLS-1$ //$NON-NLS-2$
+			fQuickDiffProviderList.add(sLabel);
+		}
+		fQuickDiffProviderList.getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				if (fQuickDiffProviderList != null && !fQuickDiffProviderList.isDisposed()) {
+					fQuickDiffProviderList.select(0);
+					handleProviderListSelection();
+				}
+			}
+		});
+
+
+
 		group= new Group(result, SWT.NONE);
 		group.setLayout(new GridLayout());
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -290,6 +422,7 @@ WorkInProgressPreferencePage
 		store.setToDefault(PreferenceConstants.QUICK_DIFF_ADDED_COLOR);
 		store.setToDefault(PreferenceConstants.QUICK_DIFF_DELETED_COLOR);
 		handleListSelection();
+		handleProviderListSelection();
 		
 		super.performDefaults();
 	}
