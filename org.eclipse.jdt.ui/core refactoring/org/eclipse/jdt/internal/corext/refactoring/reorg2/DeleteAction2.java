@@ -104,8 +104,14 @@ public class DeleteAction2 extends SelectionDispatchAction{
 
 	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		DeleteRefactoring2 refactoring= createRefactoring(resources, javaElements);
+		RefactoringWizard wizard= createWizard(refactoring);
+		/*
+		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
+		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
+		 */
+		refactoring.setQueries(new ReorgQueries(wizard));
 		if (refactoring != null)
-			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
+			new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), false); //$NON-NLS-1$
 	}
 
 	private static RefactoringWizard createWizard(DeleteRefactoring2 refactoring){
@@ -113,7 +119,7 @@ public class DeleteAction2 extends SelectionDispatchAction{
 	}
 		
 	private DeleteRefactoring2 createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
-		return DeleteRefactoring2.create(resources, javaElements, new ReorgQueries(getShell()));
+		return DeleteRefactoring2.create(resources, javaElements);
 	}
 
 	private static IResource[] getResources(IStructuredSelection selection) {
