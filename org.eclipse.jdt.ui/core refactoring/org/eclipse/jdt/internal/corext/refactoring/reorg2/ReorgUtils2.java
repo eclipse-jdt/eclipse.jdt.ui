@@ -397,4 +397,22 @@ public class ReorgUtils2 {
 		return (javaElement instanceof IPackageFragmentRoot) &&
 				((IPackageFragmentRoot)javaElement).getKind() == IPackageFragmentRoot.K_SOURCE;
 	}
+	
+	public static boolean isPackageFragmentRoot(IJavaProject javaProject) throws JavaModelException{
+		return getCorrespondingPackageFragmentRoot(javaProject) != null;
+	}
+	
+	private static final boolean isPackageFragmentRootCorrespondingToProject(IPackageFragmentRoot root) throws JavaModelException {
+		return root.getResource() instanceof IProject;
+	}
+
+	public static final IPackageFragmentRoot getCorrespondingPackageFragmentRoot(IJavaProject p) throws JavaModelException {
+		IPackageFragmentRoot[] roots= p.getPackageFragmentRoots();
+		for (int i= 0; i < roots.length; i++) {
+			if (isPackageFragmentRootCorrespondingToProject(roots[i]))
+				return roots[i];
+		}
+		return null;
+	}
+
 }

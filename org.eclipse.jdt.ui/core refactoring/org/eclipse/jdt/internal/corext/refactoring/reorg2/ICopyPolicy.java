@@ -24,6 +24,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 interface ICopyPolicy extends IReorgEnablementPolicy{
 	public IFile[] getAllModifiedFiles();
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
-	public RefactoringStatus setDestination(IJavaElement javaElement)throws JavaModelException;
-	public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries);
+	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
+	public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException;
 }

@@ -404,19 +404,30 @@ public final class CopyRefactoring2 extends Refactoring{
 			
 			protected RefactoringStatus doSetDestination(IJavaElement javaElement) throws JavaModelException {
 				Assert.isNotNull(javaElement);
-				if (! javaElement.exists())
-					return RefactoringStatus.createFatalErrorStatus("The selected destination does not exist");
-				if (javaElement.isReadOnly())
-					return RefactoringStatus.createFatalErrorStatus("Package fragment roots cannot be moved to read-only elements");
-				if (! ReorgUtils2.isSourceFolder(javaElement))
+				IPackageFragmentRoot destRoot= getDestinationAsPackageFragmentRoot(javaElement);
+				if (! ReorgUtils2.isSourceFolder(destRoot))
 					return RefactoringStatus.createFatalErrorStatus("Packages can only be moved to source folders or Java projects that do not have source folders");
-				return new RefactoringStatus();					
+				return new RefactoringStatus();
 			}
-			private IPackageFragmentRoot getDestinationPackageFragmentRoot(){
-				return (IPackageFragmentRoot) getJavaElementDestination();
+			
+			private IPackageFragmentRoot getDestinationPackageFragmentRoot() throws JavaModelException{
+				return getDestinationAsPackageFragmentRoot(getJavaElementDestination());
+			}
+			
+			private IPackageFragmentRoot getDestinationAsPackageFragmentRoot(IJavaElement javaElement) throws JavaModelException{
+				if (javaElement instanceof IPackageFragment){
+					IPackageFragment pack= (IPackageFragment)javaElement;
+					if (pack.getParent() instanceof IPackageFragmentRoot)
+						return (IPackageFragmentRoot) pack.getParent();
+				}
+				if (javaElement instanceof IPackageFragmentRoot)
+					return (IPackageFragmentRoot) javaElement;
+				if (javaElement instanceof IJavaProject)
+					return ReorgUtils2.getCorrespondingPackageFragmentRoot((IJavaProject) javaElement);				
+				return null;
 			}
 
-			public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) {
+			public IChange createChange(IProgressMonitor pm, ICopyQueries copyQueries) throws JavaModelException {
 				NewNameProposer nameProposer= new NewNameProposer();
 				pm.beginTask("", fPackageFragments.length);
 				CompositeChange composite= new CompositeChange();
@@ -428,7 +439,7 @@ public final class CopyRefactoring2 extends Refactoring{
 				return composite;
 			}
 
-			private IChange createChange(IPackageFragment pack, NewNameProposer nameProposer, ICopyQueries copyQueries) {
+			private IChange createChange(IPackageFragment pack, NewNameProposer nameProposer, ICopyQueries copyQueries) throws JavaModelException {
 				IPackageFragmentRoot root= getDestinationPackageFragmentRoot();
 				String newName= nameProposer.createNewName(pack, root);
 				if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR){

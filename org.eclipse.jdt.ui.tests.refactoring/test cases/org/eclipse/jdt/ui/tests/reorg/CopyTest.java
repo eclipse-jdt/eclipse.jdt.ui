@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -37,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICopyQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg2.CopyRefactoring2;
+import org.eclipse.jdt.internal.corext.refactoring.reorg2.ReorgUtils2;
 
 
 public class CopyTest extends RefactoringTest {
@@ -363,13 +365,6 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 	
-	public void testDestination_package_no_0() throws Exception{
-		IJavaElement[] javaElements= { getPackageP()};
-		IResource[] resources= {};
-		CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-		verifyInvalidDestination(ref, getPackageP());//TODO not sure here, could be enabled maybe
-	}
-
 	public void testDestination_package_no_1() throws Exception{
 		IJavaElement[] javaElements= { getPackageP()};
 		IResource[] resources= {};
@@ -386,7 +381,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
 
 			Object destination=cu;
-			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled maybe
+			verifyInvalidDestination(ref, destination);
 		} finally {
 			performDummySearch();
 			cu.delete(true, new NullProgressMonitor());			
@@ -404,7 +399,7 @@ public class CopyTest extends RefactoringTest {
 			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
 
 			Object destination= file;
-			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled if file lives in a package
+			verifyInvalidDestination(ref, destination);
 		} finally {
 			performDummySearch();
 			file.delete(true, new NullProgressMonitor());			
@@ -426,21 +421,6 @@ public class CopyTest extends RefactoringTest {
 		} finally {
 			performDummySearch();
 			folder.delete(true, new NullProgressMonitor());			
-		}
-	}
-
-	public void testDestination_package_no_5() throws Exception{		
-		IPackageFragment otherPackage= getRoot().createPackageFragment("other.pack", true, new NullProgressMonitor());
-		try {
-			IJavaElement[] javaElements= { getPackageP()};
-			IResource[] resources= {};
-			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
-
-			Object destination= otherPackage;
-			verifyInvalidDestination(ref, destination);//TODO not sure here, could be enabled maybe
-		} finally {
-			performDummySearch();
-			otherPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -1106,6 +1086,28 @@ public class CopyTest extends RefactoringTest {
 		verifyValidDestination(ref, destination);						
 	}
 
+	public void testDestination_package_yes_1() throws Exception{
+		IJavaElement[] javaElements= { getPackageP()};
+		IResource[] resources= {};
+		CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+		verifyValidDestination(ref, getPackageP());
+	}
+
+	public void testDestination_package_yes_2() throws Exception{		
+		IPackageFragment otherPackage= getRoot().createPackageFragment("other.pack", true, new NullProgressMonitor());
+		try {
+			IJavaElement[] javaElements= { getPackageP()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, null);
+
+			Object destination= otherPackage;
+			verifyValidDestination(ref, destination);
+		} finally {
+			performDummySearch();
+			otherPackage.delete(true, new NullProgressMonitor());
+		}
+	}
+
 	public void testDestination_root_yes_0() throws Exception{
 		IJavaElement[] javaElements= {getRoot()};
 		IResource[] resources= {};
@@ -1127,7 +1129,7 @@ public class CopyTest extends RefactoringTest {
 			verifyValidDestination(ref, destination);
 		} finally {
 			performDummySearch();
-			otherJavaProject.getProject().delete(true, true, null);
+			JavaProjectHelper.delete(otherJavaProject);
 		}						
 	}
 
@@ -1831,4 +1833,123 @@ public class CopyTest extends RefactoringTest {
 		}
 	}
 
+	public void testCopy_Package_to_Its_Root() throws Exception {
+		IPackageFragment newPackage= null;
+		try {
+			ICopyQueries queries= new TestCopyQueries();
+
+			IJavaElement[] javaElements= {getPackageP()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, queries);
+
+			Object destination= getRoot();
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source package does not exist before copying", getPackageP().exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source package does not exist after copying", getPackageP().exists());
+			
+			newPackage= getRoot().getPackageFragment(TestCopyQueries.NEW_PACKAGE_NAME);
+			assertTrue("new package does not exist after copying", newPackage.exists());
+		} finally {
+			performDummySearch();
+			newPackage.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testCopy_Package_to_Itself() throws Exception {
+		IPackageFragment newPackage= null;
+		try {
+			ICopyQueries queries= new TestCopyQueries();
+
+			IJavaElement[] javaElements= {getPackageP()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, queries);
+
+			Object destination= getPackageP();
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source package does not exist before copying", getPackageP().exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source package does not exist after copying", getPackageP().exists());
+			
+			newPackage= getRoot().getPackageFragment(TestCopyQueries.NEW_PACKAGE_NAME);
+			assertTrue("new package does not exist after copying", newPackage.exists());
+		} finally {
+			performDummySearch();
+			if (newPackage != null && newPackage.exists())
+				newPackage.delete(true, new NullProgressMonitor());
+		}
+	}
+
+	public void testCopy_Package_to_Another_Root() throws Exception {
+		IPackageFragmentRoot otherRoot= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "otherRoot");
+		IPackageFragment newPackage= null;
+		String packageName= getPackageP().getElementName();
+		try {
+			ICopyQueries queries= new TestCopyQueries();
+
+			IJavaElement[] javaElements= {getPackageP()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, queries);
+
+			Object destination= otherRoot;
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source package does not exist before copying", getPackageP().exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source package does not exist after copying", getPackageP().exists());
+			
+			newPackage= otherRoot.getPackageFragment(packageName);
+			assertTrue("new package does not exist after copying", newPackage.exists());
+		} finally {
+			performDummySearch();
+			newPackage.delete(true, new NullProgressMonitor());
+			otherRoot.delete(0, 0, new NullProgressMonitor());
+		}
+	}
+
+	public void testCopy_Package_to_JavaProject_That_Is_Root() throws Exception {
+		IJavaProject otherProject= JavaProjectHelper.createJavaProject("otherProject", null);
+		JavaProjectHelper.addSourceContainer(otherProject, null);
+		try {
+			ICopyQueries queries= new TestCopyQueries();
+
+			IJavaElement[] javaElements= {getPackageP()};
+			IResource[] resources= {};
+			CopyRefactoring2 ref= verifyEnabled(resources, javaElements, queries);
+
+			Object destination= otherProject;
+			verifyValidDestination(ref, destination);
+			
+			assertTrue("source package does not exist before copying", getPackageP().exists());
+			
+			RefactoringStatus status= performRefactoring(ref);
+			assertEquals(null, status);
+			
+			assertTrue("source package does not exist after copying", getPackageP().exists());
+			
+			IPackageFragment newPackage= null;
+			IPackageFragmentRoot[] roots= otherProject.getAllPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (ReorgUtils2.isSourceFolder(roots[i])){
+					newPackage= roots[i].getPackageFragment(getPackageP().getElementName());
+					assertTrue("new package does not exist after copying", newPackage.exists());					
+				}
+			}
+			assertNotNull(newPackage);
+		} finally {
+			performDummySearch();
+			JavaProjectHelper.delete(otherProject);
+		}
+	}
 }
