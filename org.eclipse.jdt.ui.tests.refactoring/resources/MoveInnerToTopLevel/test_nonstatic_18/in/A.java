@@ -1,7 +1,7 @@
 package p;
 
 class A{
-	class Inner{
+	class Inner {
 		Inner(){
 			this(0);
 		}
