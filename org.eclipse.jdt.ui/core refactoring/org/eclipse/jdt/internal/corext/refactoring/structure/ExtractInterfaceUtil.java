@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayAccess;
@@ -65,6 +66,9 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextBufferChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -127,12 +131,31 @@ class ExtractInterfaceUtil {
 		return (ConstraintVariable[]) result.toArray(new ConstraintVariable[result.size()]);
 	}
 
-	private ConstraintVariable[] getUpdatableVariables(IType theClass, IType theInterface, IProgressMonitor pm) throws JavaModelException{
+	private ConstraintVariable[] getUpdatableVariables(IType theClass, IType theInterface, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException{
 		ITypeBinding typeBinding= getTypeBinding(theClass);
 		ITypeBinding interfaceBinding= getSuperTypeBinding(typeBinding, theInterface);
 		ICompilationUnit[] referringCus= getCusToParse(theClass, theInterface, pm);
+		checkCompileErrors(referringCus, status);
+		if (status.hasFatalError())
+			return new ConstraintVariable[0];
 		ITypeConstraint[] constraints= getConstraints(referringCus);
 		return getUpdatableVariables(constraints, typeBinding, interfaceBinding);
+	}
+
+	private void checkCompileErrors(ICompilationUnit[] referringCus, RefactoringStatus status) throws JavaModelException {
+		for (int i= 0; i < referringCus.length; i++) {
+			ICompilationUnit unit= referringCus[i];
+			String source= unit.getSource();
+			CompilationUnit cuNode= fASTManager.getAST(unit);
+			IProblem[] problems= ASTNodes.getProblems(cuNode, ASTNodes.INCLUDE_ALL_PARENTS, ASTNodes.ERROR);
+			for (int j= 0; j < problems.length; j++) {
+				IProblem problem= problems[j];
+				if (problem.isError()) {
+					Context context= new JavaStringStatusContext(source,  new SourceRange(problem));
+					status.addFatalError(problem.getMessage(), context);
+				}
+			}
+		}
 	}
 
 	private static ITypeBinding getSuperTypeBinding(ITypeBinding typeBinding, IType superType) {
@@ -154,11 +177,13 @@ class ExtractInterfaceUtil {
 		return true;
 	}
 
-	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm) throws CoreException{
+	public static CompilationUnitRange[] updateReferences(TextChangeManager manager, IType inputType, IType supertypeToUse, WorkingCopyOwner workingCopyOwner, boolean updateInputTypeCu, IProgressMonitor pm, RefactoringStatus status) throws CoreException{
 		ASTNodeMappingManager astManager= new ASTNodeMappingManager(workingCopyOwner);
 		ICompilationUnit typeWorkingCopy= inputType.getCompilationUnit();
 		ExtractInterfaceUtil inst= new ExtractInterfaceUtil(typeWorkingCopy, supertypeToUse.getCompilationUnit(), astManager);
-		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputType, supertypeToUse, pm);
+		ConstraintVariable[] updatableVars= inst.getUpdatableVariables(inputType, supertypeToUse, pm, status);
+		if (status.hasFatalError())
+			return new CompilationUnitRange[0];
 		ASTNode[] nodes= inst.getNodes(updatableVars, inputType);
 		String typeName= inputType.getElementName();
 		String superTypeName= supertypeToUse.getElementName();
