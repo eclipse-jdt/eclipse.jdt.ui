@@ -19,7 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+
+import org.eclipse.jface.action.ContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -138,14 +144,21 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	}
 
 	private void fillViewMenu(IMenuManager viewMenu) {
-		IAction openFilterDialogAction=
-			new Action(FilterMessages.getString("OpenCustomFiltersDialogAction.text")) { //$NON-NLS-1$
-				public void run() {
-					openDialog();
-				}
-			};
-		openFilterDialogAction.setToolTipText(FilterMessages.getString("OpenCustomFiltersDialogAction.tooltip")); //$NON-NLS-1$
-		viewMenu.add(openFilterDialogAction);
+		viewMenu.add(new ContributionItem() {
+			public void fill(Menu menu, int index) {
+				MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
+				mi.setText(FilterMessages.getString("OpenCustomFiltersDialogAction.text")); //$NON-NLS-1$
+				mi.setSelection(areUserDefinedPatternsEnabled() || getEnabledFilterIds().length > 0);
+				mi.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						openDialog();
+					}
+				});
+			}
+			public boolean isDynamic() {
+				return true;
+			}
+		});
 	}
 
 	/* 
