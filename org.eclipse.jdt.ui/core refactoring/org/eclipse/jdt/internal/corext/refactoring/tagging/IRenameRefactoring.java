@@ -4,7 +4,9 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
@@ -28,6 +30,11 @@ public interface IRenameRefactoring extends IRefactoring{
 	 */
 	public String getCurrentName();
 	
+	/**
+	 * Gets the element after renaming.
+	 */	
+	public Object getNewElement() throws JavaModelException;
+
 	/**
 	 * Checks if the new name is valid for the entity that this refactoring renames.
 	 */
