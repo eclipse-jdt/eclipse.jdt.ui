@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -67,25 +68,25 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (getElements().isEmpty())
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (hasParentCollision(getElements()))
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (hasNonCusOrFiles() && (hasCus() || hasFiles()))
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (hasPackages() && hasNonPackages())
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (hasSourceFolders() && hasNonSourceFolders())	
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 				
 			if (! canReorgAll())
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 						
 			return new RefactoringStatus();
 		} finally{
@@ -182,10 +183,10 @@ public abstract class ReorgRefactoring extends Refactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		Assert.isNotNull(fDestination, "destination not specified");
-		pm.beginTask("", fElements.size());
+		Assert.isNotNull(fDestination, RefactoringCoreMessages.getString("ReorgRefactoring.assert.destination")); //$NON-NLS-1$
+		pm.beginTask("", fElements.size()); //$NON-NLS-1$
 		try{
-			CompositeChange composite= new CompositeChange("reorganize elements", fElements.size());
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("ReorgRefactoring.reorganize_elements"), fElements.size()); //$NON-NLS-1$
 			for (Iterator iter= fElements.iterator(); iter.hasNext();){
 				composite.add(createChange(iter.next()));
 			}
@@ -211,7 +212,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (o instanceof IResource)
 			return createChange((IResource)o);
 			
-		Assert.isTrue(false, "not expected to get here");	
+		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
 		return null;	
 	}
 	
@@ -479,7 +480,7 @@ public abstract class ReorgRefactoring extends Refactoring {
 		if (o instanceof IResource)
 			return causesNameConflict(getDestinationForResources(getDestination()), newName);
 
-		Assert.isTrue(false, "not expected to get here");	
+		Assert.isTrue(false, RefactoringCoreMessages.getString("ReorgRefactoring.assert.whyhere"));	 //$NON-NLS-1$
 		return true;
 	}
 	

@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -55,14 +56,14 @@ public class MoveRefactoring extends ReorgRefactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Move elements";
+		return RefactoringCoreMessages.getString("MoveRefactoring.move_elements"); //$NON-NLS-1$
 	}
 	
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public final RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
@@ -215,9 +216,9 @@ public class MoveRefactoring extends ReorgRefactoring {
 		if (! fUpdateReferences)
 			return super.createChange(pm);
 		
-		pm.beginTask("", 2);
+		pm.beginTask("", 2); //$NON-NLS-1$
 		try{
-			CompositeChange composite= new CompositeChange("Reorganize elements", 2){
+			CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), 2){ //$NON-NLS-1$
 				public boolean isUndoable(){ //XX this can be undoable in some cases. should enable it at some point.
 					return false; 
 				}
@@ -237,7 +238,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 			}	
 			//</workaround>
 				
-			addAllChildren(composite, new CompositeChange("Reorganize elements", fChangeManager.getAllChanges()));
+			addAllChildren(composite, new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.reorganize_elements"), fChangeManager.getAllChanges())); //$NON-NLS-1$
 			
 			IChange fileMove= super.createChange(new SubProgressMonitor(pm, 1));
 			if (fileMove instanceof ICompositeChange){
@@ -295,7 +296,7 @@ public class MoveRefactoring extends ReorgRefactoring {
 		IResource res= root.getUnderlyingResource();
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
-		CompositeChange result= new CompositeChange("move source folder", 2);
+		CompositeChange result= new CompositeChange(RefactoringCoreMessages.getString("MoveRefactoring.move_source_folder"), 2); //$NON-NLS-1$
 		result.add(new MoveResourceChange(res, project));
 		if (javaProject != null)
 			result.add(new AddToClasspathChange(javaProject, root.getElementName()));

@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -59,16 +60,16 @@ public class DeleteRefactoring extends Refactoring {
 	 * @see Refactoring#checkActivation(IProgressMonitor)
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (fElements.isEmpty())
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (hasProjects() && hasNonProjects())	
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 			
 			if (! canDeleteAll())
-				return RefactoringStatus.createFatalErrorStatus("");
+				return RefactoringStatus.createFatalErrorStatus(""); //$NON-NLS-1$
 						
 			return new RefactoringStatus();
 		} finally{
@@ -80,7 +81,7 @@ public class DeleteRefactoring extends Refactoring {
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			RefactoringStatus result= new RefactoringStatus();	
 			result.merge(checkReadOnlyStatus());
@@ -97,8 +98,10 @@ public class DeleteRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		for (Iterator iter= fElements.iterator(); iter.hasNext(); ){
 			Object each= iter.next();
-			if (Checks.isReadOnly(each))
-				result.addError("Selected element " + ReorgUtils.getName(each) + "(or one or its sub-elements) is marked as read-only.");
+			if (Checks.isReadOnly(each)){
+				result.addError(RefactoringCoreMessages.getFormattedString("DeleteRefactoring.read_only", //$NON-NLS-1$
+									ReorgUtils.getName(each)));
+			}	
 		}
 		return result;
 	}
@@ -108,7 +111,7 @@ public class DeleteRefactoring extends Refactoring {
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			prepareElementList();
 			CompositeChange composite= new CompositeChange();
@@ -246,7 +249,7 @@ public class DeleteRefactoring extends Refactoring {
 		if (members.length == 0)
 			return new NullChange();
 			
-		CompositeChange composite= new CompositeChange("Delete resources", members.length);
+		CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_resources"), members.length); //$NON-NLS-1$
 		for (int i= 0; i < members.length; i++){
 			composite.add(createDeleteChange(members[i]));
 		}
@@ -254,7 +257,7 @@ public class DeleteRefactoring extends Refactoring {
 	}
 
 	private IChange createDeleteChange(IPackageFragmentRoot root) throws JavaModelException {
-		CompositeChange composite= new CompositeChange("Delete package fragment root", 2);
+		CompositeChange composite= new CompositeChange(RefactoringCoreMessages.getString("DeleteRefactoring.delete_package_fragment_root"), 2); //$NON-NLS-1$
 
 		composite.add(new DeleteFromClasspathChange(root));
 		if (! ReorgUtils.isClasspathDelete(root))
@@ -275,7 +278,7 @@ public class DeleteRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Delete";
+		return RefactoringCoreMessages.getString("DeleteRefactoring.delete"); //$NON-NLS-1$
 	}
 	
 	private boolean hasNonProjects(){

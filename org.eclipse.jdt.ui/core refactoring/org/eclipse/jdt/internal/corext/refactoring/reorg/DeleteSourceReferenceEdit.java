@@ -50,7 +50,7 @@ public class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	 * @see TextEdit#connect
 	 */
 	public void connect(TextBufferEditor editor) throws CoreException {		
-		setText("");
+		setText(""); //$NON-NLS-1$
 		ISourceRange range= SourceReferenceSourceRangeComputer.computeSourceRange(fSourceReference, fCu);
 		setTextRange(new TextRange(range));
 		super.connect(editor);
