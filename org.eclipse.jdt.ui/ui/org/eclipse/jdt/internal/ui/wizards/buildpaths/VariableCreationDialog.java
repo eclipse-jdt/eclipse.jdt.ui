@@ -254,6 +254,7 @@ public class VariableCreationDialog extends StatusDialog {
 		
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setText(NewWizardMessages.getString("VariableCreationDialog.extdirdialog.text")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("VariableCreationDialog.extdirdialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {

@@ -51,6 +51,7 @@ import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
 import org.eclipse.jdt.internal.ui.dialogs.IStatusChangeListener;
@@ -492,10 +493,12 @@ public class NewPackageRootCreationWizardPage extends NewElementWizardPage {
 		}
 		
 		try {
-			IFolder folder= fWorkspaceRoot.getFolder(fCurrJProject.getOutputLocation());
-			res.add(folder);
+			IResource container= fWorkspaceRoot.findMember(fCurrJProject.getOutputLocation());
+			if (container != null) {
+				res.add(container);
+			}
 		} catch (JavaModelException e) {
-			// ignore it here
+			JavaPlugin.log(e.getStatus());
 		}	
 		
 		for (int i= 0; i < fEntries.length; i++) {

@@ -574,6 +574,7 @@ public class SourceAttachmentBlock {
 		}
 		DirectoryDialog dialog= new DirectoryDialog(getShell());
 		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.jdocdialog.text")); //$NON-NLS-1$
+		dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.jdocdialog.message")); //$NON-NLS-1$
 		dialog.setFilterPath(initPath);
 		String res= dialog.open();
 		if (res != null) {
