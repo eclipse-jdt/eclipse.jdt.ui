@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 
 
-class ASTNodeDeleteUtil {
+public class ASTNodeDeleteUtil {
 	private ASTNodeDeleteUtil(){}
 	
 	public static void markAsDeleted(IJavaElement[] javaElements, CompilationUnit cuNode, ASTRewrite rewrite) throws JavaModelException{
