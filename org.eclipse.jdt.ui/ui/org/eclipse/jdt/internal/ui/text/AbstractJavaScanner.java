@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Display;
 
@@ -29,6 +30,7 @@ import org.eclipse.jface.text.rules.IToken;
 import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.IColorManagerExtension;
 
@@ -46,7 +48,18 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	
 	private Map fTokenMap= new HashMap();
 	private String[] fPropertyNamesColor;
-	private String[] fPropertyNamesStyle;
+	/**
+	 * Preference keys for boolean preferences which are <code>true</code>,
+	 * iff the corresponding token should be rendered bold. 
+	 */
+	private String[] fPropertyNamesBold;
+	/**
+	 * Preference keys for boolean preferences which are <code>true</code>,
+	 * iff the corresponding token should be rendered italic.
+	 * 
+	 * @since 3.0 
+	 */
+	private String[] fPropertyNamesItalic;
 	
 	
 	private boolean fNeedsLazyColorLoading;
@@ -79,16 +92,18 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		
 		fPropertyNamesColor= getTokenProperties();
 		int length= fPropertyNamesColor.length;
-		fPropertyNamesStyle= new String[length];
+		fPropertyNamesBold= new String[length];
+		fPropertyNamesItalic= new String[length];
 		
 		fNeedsLazyColorLoading= Display.getCurrent() == null; 
 
 		for (int i= 0; i < length; i++) {
-			fPropertyNamesStyle[i]= fPropertyNamesColor[i] + "_bold"; //$NON-NLS-1$
+			fPropertyNamesBold[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_BOLD_SUFFIX;
+			fPropertyNamesItalic[i]= fPropertyNamesColor[i] + PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 			if (fNeedsLazyColorLoading)
-				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+				addTokenWithProxyAttribute(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
 			else
-				addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
 		}
 		
 		initializeRules();
@@ -103,18 +118,17 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 	private void resolveProxyAttributes() {
 		if (fNeedsLazyColorLoading && Display.getCurrent() != null) {
 			for (int i= 0; i < fPropertyNamesColor.length; i++) {
-				addToken(fPropertyNamesColor[i], fPropertyNamesStyle[i]);
+				addToken(fPropertyNamesColor[i], fPropertyNamesBold[i], fPropertyNamesItalic[i]);
 			}
 			fNeedsLazyColorLoading= true;
 		}
 	}
 
-	private void addTokenWithProxyAttribute(String colorKey, String styleKey) {
-		boolean bold= fPreferenceStore.getBoolean(styleKey);
-		fTokenMap.put(colorKey, new Token(new TextAttribute(null, null, bold ? SWT.BOLD : SWT.NORMAL)));
+	private void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey) {
+		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey, italicKey)));
 	}
 
-	private void addToken(String colorKey, String styleKey) {
+	private void addToken(String colorKey, String boldKey, String italicKey) {
 		RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
 		if (fColorManager instanceof IColorManagerExtension) {
 			IColorManagerExtension ext= (IColorManagerExtension) fColorManager;
@@ -122,17 +136,36 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 			ext.bindColor(colorKey, rgb);
 		}
 		
-		boolean bold= fPreferenceStore.getBoolean(styleKey);
-		
 		if (!fNeedsLazyColorLoading)
-			fTokenMap.put(colorKey, new Token(new TextAttribute(fColorManager.getColor(colorKey), null, bold ? SWT.BOLD : SWT.NORMAL)));
+			fTokenMap.put(colorKey, new Token(createTextAttribute(colorKey, boldKey, italicKey)));
 		else {
 			Token token= ((Token)fTokenMap.get(colorKey));
 			if (token != null)
-				token.setData(new TextAttribute(fColorManager.getColor(colorKey), null, bold ? SWT.BOLD : SWT.NORMAL));
+				token.setData(createTextAttribute(colorKey, boldKey, italicKey));
 		}
 	}
 	
+	/**
+	 * Create a text attribute based on the given color, bold and italic preference keys.
+	 * 
+	 * @param colorKey the color preference key
+	 * @param boldKey the bold preference key
+	 * @param italicKey the italic preference key
+	 * @return the created text attribute
+	 * @since 3.0
+	 */
+	private TextAttribute createTextAttribute(String colorKey, String boldKey, String italicKey) {
+		Color color= null;
+		if (colorKey != null)
+			color= fColorManager.getColor(colorKey);
+		
+		int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
+		if (fPreferenceStore.getBoolean(italicKey))
+			style |= SWT.ITALIC;
+		
+		return new TextAttribute(color, null, style);
+	}
+
 	protected Token getToken(String key) {
 		if (fNeedsLazyColorLoading)
 			resolveProxyAttributes();
@@ -152,7 +185,7 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		if (property != null) {
 			int length= fPropertyNamesColor.length;
 			for (int i= 0; i < length; i++) {
-				if (property.equals(fPropertyNamesColor[i]) || property.equals(fPropertyNamesStyle[i]))
+				if (property.equals(fPropertyNamesColor[i]) || property.equals(fPropertyNamesBold[i]) || property.equals(fPropertyNamesItalic[i]))
 					return i;
 			}
 		}
@@ -169,8 +202,10 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		Token token= getToken(fPropertyNamesColor[index]);
 		if (fPropertyNamesColor[index].equals(p))
 			adaptToColorChange(token, event);
-		else
-			adaptToStyleChange(token, event);
+		else if (fPropertyNamesBold[index].equals(p))
+			adaptToStyleChange(token, event, SWT.BOLD);
+		else if (fPropertyNamesItalic[index].equals(p))
+			adaptToStyleChange(token, event, SWT.ITALIC);
 	}
 	
 	private void adaptToColorChange(Token token, PropertyChangeEvent event) {
@@ -200,25 +235,20 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		}
 	}
 	
-	private void adaptToStyleChange(Token token, PropertyChangeEvent event) {
-		boolean bold= false;
+	private void adaptToStyleChange(Token token, PropertyChangeEvent event, int styleAttribute) {
+		boolean eventValue= false;
 		Object value= event.getNewValue();
 		if (value instanceof Boolean)
-			bold= ((Boolean) value).booleanValue();
-		else if (value instanceof String) {
-			String s= (String) value;
-			if (IPreferenceStore.TRUE.equals(s))
-				bold= true;
-			else if (IPreferenceStore.FALSE.equals(s))
-				bold= false;
-		}
+			eventValue= ((Boolean) value).booleanValue();
+		else if (IPreferenceStore.TRUE.equals(value))
+			eventValue= true;
 		
 		Object data= token.getData();
 		if (data instanceof TextAttribute) {
 			TextAttribute oldAttr= (TextAttribute) data;
-			boolean isBold= (oldAttr.getStyle() == SWT.BOLD);
-			if (isBold != bold) 
-				token.setData(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), bold ? SWT.BOLD : SWT.NORMAL));
+			boolean activeValue= (oldAttr.getStyle() & styleAttribute) == styleAttribute;
+			if (activeValue != eventValue) 
+				token.setData(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), eventValue ? oldAttr.getStyle() | styleAttribute : oldAttr.getStyle() & ~styleAttribute));
 		}
 	}
 	/**

@@ -380,9 +380,16 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
 			String colorKey= SemanticHighlightings.getColorPreferenceKey(semanticHighlighting);
-			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
 			addColor(colorKey);
-			fHighlightings[i]= new Highlighting(new TextAttribute(fColorManager.getColor(PreferenceConverter.getColor(fPreferenceStore, colorKey)), null, fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL));
+			
+			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
+			int style= fPreferenceStore.getBoolean(boldKey) ? SWT.BOLD : SWT.NORMAL;
+
+			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
+			if (fPreferenceStore.getBoolean(italicKey))
+				style |= SWT.ITALIC;
+
+			fHighlightings[i]= new Highlighting(new TextAttribute(fColorManager.getColor(PreferenceConverter.getColor(fPreferenceStore, colorKey)), null, style));
 		}
 	}
 
@@ -436,7 +443,14 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			
 			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
 			if (boldKey.equals(event.getProperty())) {
-				adaptToTextStyleChange(fHighlightings[i], event);
+				adaptToTextStyleChange(fHighlightings[i], event, SWT.BOLD);
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				continue;
+			}
+			
+			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
+			if (italicKey.equals(event.getProperty())) {
+				adaptToTextStyleChange(fHighlightings[i], event, SWT.ITALIC);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
@@ -467,18 +481,19 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		}
 	}
 	
-	private void adaptToTextStyleChange(Highlighting highlighting, PropertyChangeEvent event) {
-		boolean bold= false;
+	private void adaptToTextStyleChange(Highlighting highlighting, PropertyChangeEvent event, int styleAttribute) {
+		boolean eventValue= false;
 		Object value= event.getNewValue();
 		if (value instanceof Boolean)
-			bold= ((Boolean) value).booleanValue();
+			eventValue= ((Boolean) value).booleanValue();
 		else if (IPreferenceStore.TRUE.equals(value))
-			bold= true;
+			eventValue= true;
 		
 		TextAttribute oldAttr= highlighting.getTextAttribute();
-		boolean isBold= (oldAttr.getStyle() == SWT.BOLD);
-		if (isBold != bold) 
-			highlighting.setTextAttribute(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), bold ? SWT.BOLD : SWT.NORMAL));
+		boolean activeValue= (oldAttr.getStyle() & styleAttribute) == styleAttribute;
+		
+		if (activeValue != eventValue) 
+			highlighting.setTextAttribute(new TextAttribute(oldAttr.getForeground(), oldAttr.getBackground(), eventValue ? oldAttr.getStyle() | styleAttribute : oldAttr.getStyle() & ~styleAttribute));
 	}
 	
 	private void addColor(String colorKey) {

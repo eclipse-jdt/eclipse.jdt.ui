@@ -97,6 +97,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -135,6 +142,13 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
 			return false;
 		}
 		
@@ -181,6 +195,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -223,6 +244,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -262,6 +290,13 @@ public class SemanticHighlightings {
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
 		 */
 		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
 			return false;
 		}
 		
@@ -312,6 +347,13 @@ public class SemanticHighlightings {
 		}
 		
 		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
 		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
 		 */
 		public String getDisplayName() {
@@ -343,13 +385,23 @@ public class SemanticHighlightings {
 	}
 
 	/**
-	 * A named preference that controls if the given semantic highlighting is bold.
+	 * A named preference that controls if the given semantic highlighting has the text attribute bold.
 	 * 
 	 * @param semanticHighlighting the semantic highlighting
 	 * @return the bold preference key
 	 */
 	public static String getBoldPreferenceKey(SemanticHighlighting semanticHighlighting) {
 		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
+	}
+	
+	/**
+	 * A named preference that controls if the given semantic highlighting has the text attribute italic.
+	 * 
+	 * @param semanticHighlighting the semantic highlighting
+	 * @return the italic preference key
+	 */
+	public static String getItalicPreferenceKey(SemanticHighlighting semanticHighlighting) {
+		return PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + semanticHighlighting.getPreferenceKey() + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
 	}
 	
 	/**
@@ -380,6 +432,7 @@ public class SemanticHighlightings {
 			SemanticHighlighting semanticHighlighting= semanticHighlightings[i];
 			PreferenceConverter.setDefault(store, SemanticHighlightings.getColorPreferenceKey(semanticHighlighting), semanticHighlighting.getDefaultTextColor());
 			store.setDefault(SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting), semanticHighlighting.isBoldByDefault());
+			store.setDefault(SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting), semanticHighlighting.isItalicByDefault());
 		}
 	}
 

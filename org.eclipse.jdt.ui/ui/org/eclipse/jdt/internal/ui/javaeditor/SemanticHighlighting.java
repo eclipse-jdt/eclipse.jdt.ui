@@ -29,9 +29,14 @@ public abstract class SemanticHighlighting {
 	public abstract RGB getDefaultTextColor();
 
 	/**
-	 * @return the default bold text style
+	 * @return <code>true</code> if the text attribute bold is set by default
 	 */
 	public abstract boolean isBoldByDefault();
+	
+	/**
+	 * @return <code>true</code> if the text attribute italic is set by default
+	 */
+	public abstract boolean isItalicByDefault();
 	
 	/**
 	 * @return the display name

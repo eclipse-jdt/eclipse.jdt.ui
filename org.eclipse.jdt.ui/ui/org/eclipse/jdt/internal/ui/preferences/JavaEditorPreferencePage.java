@@ -115,6 +115,8 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		private String fColorKey;
 		/** Bold preference key */
 		private String fBoldKey;
+		/** Italic preference key */
+		private String fItalicKey;
 		/** Item color */
 		private Color fItemColor;
 		
@@ -126,10 +128,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		 * @param boldKey the bold preference key
 		 * @param itemColor the item color
 		 */
-		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, Color itemColor) {
+		public HighlightingColorListItem(String displayName, String colorKey, String boldKey, String italicKey, Color itemColor) {
 			fDisplayName= displayName;
 			fColorKey= colorKey;
 			fBoldKey= boldKey;
+			fItalicKey= italicKey;
 			fItemColor= itemColor;
 		}
 		
@@ -138,6 +141,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		 */
 		public String getBoldKey() {
 			return fBoldKey;
+		}
+		
+		/**
+		 * @return the bold preference key
+		 */
+		public String getItalicKey() {
+			return fItalicKey;
 		}
 		
 		/**
@@ -219,6 +229,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	}
 	
 	private static final String BOLD= PreferenceConstants.EDITOR_BOLD_SUFFIX;
+	/**
+	 * Preference key suffix for italic preferences.
+	 * @since 3.0
+	 */
+	private static final String ITALIC= PreferenceConstants.EDITOR_ITALIC_SUFFIX;
 	private static final String COMPILER_TASK_TAGS= JavaCore.COMPILER_TASK_TAGS;	
 	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorPreferencePage.navigation.delimiter"); //$NON-NLS-1$
 
@@ -310,6 +325,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	private Button fBackgroundCustomRadioButton;
 	private Button fBackgroundColorButton;
 	private Button fBoldCheckBox;
+	/**
+	 * Check box for italic preference.
+	 * @since 3.0
+	 */
+	private Button fItalicCheckBox;
 	private SourceViewer fPreviewViewer;
 	private Color fBackgroundColor;
     private Control fAutoInsertDelayText;
@@ -380,7 +400,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		Color itemColor= JavaPlugin.getDefault().getJavaTextTools().getColorManager().getColor(new RGB(SEMANTIC_HIGHLIGHTING_ITEM_COLOR[0], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[1], SEMANTIC_HIGHLIGHTING_ITEM_COLOR[2]));
 		SemanticHighlighting[] semanticHighlightings= SemanticHighlightings.getSemanticHighlightings();
 		for (int i= 0, n= semanticHighlightings.length; i < n; i++)
-			fSemanticHighlightingColorList.add(new HighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), itemColor));
+			fSemanticHighlightingColorList.add(new HighlightingColorListItem(semanticHighlightings[i].getDisplayName(), SemanticHighlightings.getColorPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getBoldPreferenceKey(semanticHighlightings[i]), SemanticHighlightings.getItalicPreferenceKey(semanticHighlightings[i]), itemColor));
 		
 		MarkerAnnotationPreferences markerAnnotationPreferences= new MarkerAnnotationPreferences();
 		fKeys= createOverlayStoreKeys(markerAnnotationPreferences);
@@ -405,45 +425,13 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.INT, AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH));
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD));
+		for (int i= 0; i < fSyntaxColorListModel.length; i++) {
+			String colorKey= fSyntaxColorListModel[i][1];
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, colorKey));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + BOLD));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, colorKey + ITALIC));
+		}
 		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD));
-				
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_STRING_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_STRING_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TASK_TAG_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_TASK_TAG_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVA_OPERATOR_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD));
-
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD));
-		
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD));
-				
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
 		
@@ -526,6 +514,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			HighlightingColorListItem item= (HighlightingColorListItem) fSemanticHighlightingColorList.get(i);
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, item.getColorKey()));
 			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getBoldKey()));
+			overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, item.getItalicKey()));
 		}
 		
 		OverlayPreferenceStore.OverlayKey[] keys= new OverlayPreferenceStore.OverlayKey[overlayKeys.size()];
@@ -552,6 +541,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		RGB rgb= PreferenceConverter.getColor(fOverlayStore, item.getColorKey());
 		fSyntaxForegroundColorEditor.setColorValue(rgb);		
 		fBoldCheckBox.setSelection(fOverlayStore.getBoolean(item.getBoldKey()));
+		fItalicCheckBox.setSelection(fOverlayStore.getBoolean(item.getItalicKey()));
 	}
 
 	private void handleAppearanceColorListSelection() {	
@@ -683,11 +673,18 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		foregroundColorButton.setLayoutData(gd);
 		
 		fBoldCheckBox= new Button(stylesComposite, SWT.CHECK);
-        fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
+		fBoldCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.bold")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
-        gd.horizontalSpan= 2;
+		gd.horizontalSpan= 2;
 		fBoldCheckBox.setLayoutData(gd);
+		
+		fItalicCheckBox= new Button(stylesComposite, SWT.CHECK);
+		fItalicCheckBox.setText(PreferencesMessages.getString("JavaEditorPreferencePage.italic")); //$NON-NLS-1$
+		gd= new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalAlignment= GridData.BEGINNING;
+		gd.horizontalSpan= 2;
+		fItalicCheckBox.setLayoutData(gd);
 		
 		label= new Label(colorComposite, SWT.LEFT);
 		label.setText(PreferencesMessages.getString("JavaEditorPreferencePage.preview")); //$NON-NLS-1$
@@ -732,6 +729,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 			public void widgetSelected(SelectionEvent e) {
 				HighlightingColorListItem item= getHighlightingColorListItem();
 				fOverlayStore.setValue(item.getBoldKey(), fBoldCheckBox.getSelection());
+			}
+		});
+				
+		fItalicCheckBox.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				// do nothing
+			}
+			public void widgetSelected(SelectionEvent e) {
+				HighlightingColorListItem item= getHighlightingColorListItem();
+				fOverlayStore.setValue(item.getItalicKey(), fItalicCheckBox.getSelection());
 			}
 		});
 				
@@ -1350,7 +1357,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		initializeFields();
 		
 		for (int i= 0, n= fSyntaxColorListModel.length; i < n; i++)
-			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, null));
+			fHighlightingColorList.add(new HighlightingColorListItem (fSyntaxColorListModel[i][0], fSyntaxColorListModel[i][1], fSyntaxColorListModel[i][1] + BOLD, fSyntaxColorListModel[i][1] + ITALIC, null));
 		if (fSemanticHighlightingEnabled.getSelection())
 			fHighlightingColorList.addAll(fSemanticHighlightingColorList);
 		fHighlightingColorListViewer.setInput(fHighlightingColorList);

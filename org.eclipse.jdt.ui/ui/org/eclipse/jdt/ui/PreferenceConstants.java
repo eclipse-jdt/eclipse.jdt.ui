@@ -1157,6 +1157,13 @@ public class PreferenceConstants {
 	public static final String EDITOR_BOLD_SUFFIX= "_bold"; //$NON-NLS-1$
 
 	/**
+	 * Preference key suffix for italic text style preference keys.
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_ITALIC_SUFFIX= "_italic"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that holds the color used to render multi line comments.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1186,6 +1193,17 @@ public class PreferenceConstants {
 	public final static String EDITOR_MULTI_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_BOLD_SUFFIX; 
 
 	/**
+	 * A named preference that controls whether multi line comments are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> multi line comments are rendered
+	 * in italic. If <code>false</code> the are rendered using no italic font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_MULTI_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_MULTI_LINE_COMMENT + EDITOR_ITALIC_SUFFIX; 
+
+	/**
 	 * A named preference that holds the color used to render single line comments.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1205,6 +1223,17 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_SINGLE_LINE_COMMENT_BOLD= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_BOLD_SUFFIX; 
+
+	/**
+	 * A named preference that controls whether single line comments are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>. If <code>true</code> single line comments are rendered
+	 * in italic. If <code>false</code> the are rendered using no italic font style attribute.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_SINGLE_LINE_COMMENT_ITALIC= IJavaColorConstants.JAVA_SINGLE_LINE_COMMENT + EDITOR_ITALIC_SUFFIX; 
 
 	/**
 	 * A named preference that holds the color used to render java keywords.
@@ -1227,6 +1256,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_KEYWORD_BOLD= IJavaColorConstants.JAVA_KEYWORD + EDITOR_BOLD_SUFFIX;
 
 	/**
+	 * A named preference that controls whether keywords are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_ITALIC= IJavaColorConstants.JAVA_KEYWORD + EDITOR_ITALIC_SUFFIX;
+
+	/**
 	 * A named preference that holds the color used to render string constants.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1245,6 +1284,16 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_STRING_BOLD= IJavaColorConstants.JAVA_STRING + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether string constants are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_STRING_ITALIC= IJavaColorConstants.JAVA_STRING + EDITOR_ITALIC_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render method names.
@@ -1270,6 +1319,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_METHOD_NAME_BOLD= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_BOLD_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether method names are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVA_METHOD_NAME_ITALIC= IJavaColorConstants.JAVA_METHOD_NAME + EDITOR_ITALIC_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render the 'return' keyword.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1291,6 +1350,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public final static String EDITOR_JAVA_KEYWORD_RETURN_BOLD= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_BOLD_SUFFIX;
+	
+	/**
+	 * A named preference that controls whether 'return' keyword is rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVA_KEYWORD_RETURN_ITALIC= IJavaColorConstants.JAVA_KEYWORD_RETURN + EDITOR_ITALIC_SUFFIX;
 	
 	/**
 	 * A named preference that holds the color used to render operators and brackets.
@@ -1316,6 +1385,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVA_OPERATOR_BOLD= IJavaColorConstants.JAVA_OPERATOR + EDITOR_BOLD_SUFFIX;
 	
 	/**
+	 * A named preference that controls whether operators and brackets are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVA_OPERATOR_ITALIC= IJavaColorConstants.JAVA_OPERATOR + EDITOR_ITALIC_SUFFIX;
+	
+	/**
 	 * A named preference that holds the color used to render java default text.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1334,6 +1413,16 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_JAVA_DEFAULT_BOLD= IJavaColorConstants.JAVA_DEFAULT + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether Java default text is rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVA_DEFAULT_ITALIC= IJavaColorConstants.JAVA_DEFAULT + EDITOR_ITALIC_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render task tags.
@@ -1358,6 +1447,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_TASK_TAG_BOLD= IJavaColorConstants.TASK_TAG + EDITOR_BOLD_SUFFIX;
 
 	/**
+	 * A named preference that controls whether task tags are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_TASK_TAG_ITALIC= IJavaColorConstants.TASK_TAG + EDITOR_ITALIC_SUFFIX;
+
+	/**
 	 * A named preference that holds the color used to render javadoc keywords.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1376,6 +1475,16 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_JAVADOC_KEYWORD_BOLD= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether javadoc keywords are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVADOC_KEYWORD_ITALIC= IJavaColorConstants.JAVADOC_KEYWORD + EDITOR_ITALIC_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used to render javadoc tags.
@@ -1398,6 +1507,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVADOC_TAG_BOLD= IJavaColorConstants.JAVADOC_TAG + EDITOR_BOLD_SUFFIX;
 
 	/**
+	 * A named preference that controls whether javadoc tags are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVADOC_TAG_ITALIC= IJavaColorConstants.JAVADOC_TAG + EDITOR_ITALIC_SUFFIX;
+
+	/**
 	 * A named preference that holds the color used to render javadoc links.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1418,6 +1537,16 @@ public class PreferenceConstants {
 	public final static String EDITOR_JAVADOC_LINKS_BOLD= IJavaColorConstants.JAVADOC_LINK + EDITOR_BOLD_SUFFIX;
 		
 	/**
+	 * A named preference that controls whether javadoc links are rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVADOC_LINKS_ITALIC= IJavaColorConstants.JAVADOC_LINK + EDITOR_ITALIC_SUFFIX;
+		
+	/**
 	 * A named preference that holds the color used to render javadoc default text.
 	 * <p>
 	 * Value is of type <code>String</code>. A RGB color value encoded as a string
@@ -1436,6 +1565,16 @@ public class PreferenceConstants {
 	 * </p>
 	 */
 	public final static String EDITOR_JAVADOC_DEFAULT_BOLD= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_BOLD_SUFFIX;
+
+	/**
+	 * A named preference that controls whether javadoc default text is rendered in italic.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public final static String EDITOR_JAVADOC_DEFAULT_ITALIC= IJavaColorConstants.JAVADOC_DEFAULT + EDITOR_ITALIC_SUFFIX;
 
 	/**
 	 * A named preference that holds the color used for 'linked-mode' underline.
@@ -1765,7 +1904,7 @@ public class PreferenceConstants {
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX=".color"; //$NON-NLS-1$
 
 	/**
-	 * A named preference suffix that controls if semantic highlighting is bold.
+	 * A named preference suffix that controls if semantic highlighting has the text attribute bold.
 	 * <p>
 	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
 	 * </p>
@@ -1773,6 +1912,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX=".bold"; //$NON-NLS-1$
+
+	/**
+	 * A named preference suffix that controls if semantic highlighting has the text attribute bold.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> is enabled.
+	 * </p>
+	 * 
+	 * @since 3.0
+	 */
+	public static final String EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX=".italic"; //$NON-NLS-1$
 
 	/**
 	 * A named preference that controls disabling of the overwrite mode.
@@ -2536,42 +2685,55 @@ public class PreferenceConstants {
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
 		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_MULTI_LINE_COMMENT_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_COLOR, new RGB(63, 127, 95));
 		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_SINGLE_LINE_COMMENT_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR, new RGB(127, 0, 85));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_BOLD, true);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_STRING_COLOR, new RGB(42, 0, 255));
 		store.setDefault(PreferenceConstants.EDITOR_STRING_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_STRING_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR, new RGB(0, 0, 0));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_DEFAULT_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_METHOD_NAME_COLOR, new RGB(0, 0, 0));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_METHOD_NAME_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_METHOD_NAME_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR, new RGB(127, 0, 85));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_BOLD, true);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR, new RGB(0, 0, 0));
 		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVA_OPERATOR_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_TASK_TAG_COLOR, new RGB(127, 159, 191));
 		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_BOLD, true);
+		store.setDefault(PreferenceConstants.EDITOR_TASK_TAG_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_KEYWORD_COLOR, new RGB(127, 159, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_BOLD, true);
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_KEYWORD_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_TAG_COLOR, new RGB(127, 127, 159));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_TAG_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_LINKS_COLOR, new RGB(63, 63, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_LINKS_ITALIC, false);
 
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_JAVADOC_DEFAULT_COLOR, new RGB(63, 95, 191));
 		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_BOLD, false);
+		store.setDefault(PreferenceConstants.EDITOR_JAVADOC_DEFAULT_ITALIC, false);
 
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_DELAY, 500);
