@@ -316,9 +316,9 @@ public class CommentRegion extends TypedPosition implements IHtmlTagConstants, I
 	 * Returns the line delimiter used in this comment line break.
 	 * 
 	 * @param predecessor
-	 *                  The predecessor comment line before the line break
+	 *                  The predecessor comment line after the line break
 	 * @param successor
-	 *                  The successor comment line after the line break
+	 *                  The successor comment line before the line break
 	 * @param previous
 	 *                  The comment range after the line break
 	 * @param next
