@@ -52,9 +52,11 @@ import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -331,11 +333,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 	
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
+	private final static String SETTINGS_USE_RECONCILER= "use_reconciler"; //$NON-NLS-1$
 	
 	private TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fFocusAction;
 	private Action fRefreshAction;
+	private Action fUseReconcilerAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
 	private TreeCopyAction fCopyAction;
@@ -351,6 +355,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private IDocument fCurrentDocument;
 	
 	private boolean fDoLinkWithEditor;
+	private boolean fDoUseReconciler;
 	private Object fPreviousDouble;
 	
 	private ListenerMix fSuperListener;
@@ -364,6 +369,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	public ASTView() {
 		fSuperListener= null;
 		fDoLinkWithEditor= ASTViewPlugin.getDefault().getDialogSettings().getBoolean(SETTINGS_LINK_WITH_EDITOR);
+		fDoUseReconciler= ASTViewPlugin.getDefault().getDialogSettings().getBoolean(SETTINGS_USE_RECONCILER);
 		fCurrentASTLevel= AST.JLS2;
 	}
 	
@@ -423,26 +429,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private CompilationUnit internalSetInput(IOpenable input, int offset, int length, int astLevel) throws CoreException {
-		IBuffer buffer= input.getBuffer();
-		if (buffer == null) {
+		if (input.getBuffer() == null) {
 			throw new CoreException(getErrorStatus("Input has no buffer", null)); //$NON-NLS-1$
 		}
-	
-		ASTParser parser= ASTParser.newParser(astLevel);
-		parser.setResolveBindings(true);
-		if (input instanceof ICompilationUnit) {
-			parser.setSource((ICompilationUnit) input);
-		} else {
-			parser.setSource((IClassFile) input);
-		}
+		
 		try {
-			long startTime= System.currentTimeMillis();
-			CompilationUnit root= (CompilationUnit) parser.createAST(null);
-			long endTime= System.currentTimeMillis();
-			if (root == null) {
-				throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
-			}
-			updateContentDescription((IJavaElement) input, root, endTime - startTime);
+			CompilationUnit root= createAST(input, astLevel);
 			
 			fViewer.setInput(root);
 			fSash.setMaximizedControl(fViewer.getTree());
@@ -464,8 +456,49 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 	
-	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
+	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
+		long startTime;
+		long endTime;
+		CompilationUnit root;
+		boolean useReconciler= input instanceof ICompilationUnit && fUseReconcilerAction.isChecked();
+		
+		if (useReconciler) {
+			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(null);
+			try {
+				//make inconsistent (otherwise, no AST is generated):
+				IBuffer buffer= wc.getBuffer();
+				buffer.append(new char[] {' '});
+				buffer.replace(buffer.getLength() - 2, 1, new char[0]);
+				
+				startTime= System.currentTimeMillis();
+				root= wc.reconcile(getCurrentASTLevel(), true, null, null);
+				endTime= System.currentTimeMillis();
+			} finally {
+				wc.discardWorkingCopy();
+			}
+		} else {
+			ASTParser parser= ASTParser.newParser(astLevel);
+			parser.setResolveBindings(true);
+			if (input instanceof ICompilationUnit) {
+				parser.setSource((ICompilationUnit) input);
+			} else {
+				parser.setSource((IClassFile) input);
+			}
+			startTime= System.currentTimeMillis();
+			root= (CompilationUnit) parser.createAST(null);
+			endTime= System.currentTimeMillis();
+		}
+		if (root == null) {
+			throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
+		}
+		updateContentDescription((IJavaElement) input, root, endTime - startTime, useReconciler);
+		return root;
+	}
+
+	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time, boolean useReconciler) {
 		String version= root.getAST().apiLevel() == AST.JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
+		if (useReconciler)
+			version+= ", from reconciler"; //$NON-NLS-1$
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
 		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (AST nodes only)."; //$NON-NLS-1$
@@ -479,6 +512,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	 */
 	public void dispose() {
 		ASTViewPlugin.getDefault().getDialogSettings().put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
+		ASTViewPlugin.getDefault().getDialogSettings().put(SETTINGS_USE_RECONCILER, fDoUseReconciler);
 		
 		if (fSuperListener != null) {
 			if (fEditor != null) {
@@ -496,7 +530,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fTray.removePostSelectionChangedListener(fTrayUpdater);
 			fTrayUpdater= null;
 		}
-		fCopyAction.dispose();
 		super.dispose();
 	}
 	
@@ -516,23 +549,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.setLabelProvider(new ASTViewLabelProvider());
 		fViewer.addSelectionChangedListener(fSuperListener);
 		fViewer.addDoubleClickListener(fSuperListener);
-		
-		makeActions();
-		hookContextMenu();
-		contributeToActionBars();
-		getSite().setSelectionProvider(new ASTViewSelectionProvider());
-		
-		try {
-			IEditorPart part= EditorUtility.getActiveEditor();
-			if (part instanceof ITextEditor) {
-				setInput((ITextEditor) part);
-			}
-		} catch (CoreException e) {
-			// ignore
-		}
-		if (fOpenable == null) {
-			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
-		}
 		
 		ViewForm trayForm= new ViewForm(fSash, SWT.NONE);
 		Label label= new Label(trayForm, SWT.NONE);
@@ -561,6 +577,23 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.addPostSelectionChangedListener(fTrayUpdater);
 		//TODO: hook tray context menu, copy & delete actions, ...
 		
+		makeActions();
+		hookContextMenu();
+		contributeToActionBars();
+		getSite().setSelectionProvider(new ASTViewSelectionProvider());
+		
+		try {
+			IEditorPart part= EditorUtility.getActiveEditor();
+			if (part instanceof ITextEditor) {
+				setInput((ITextEditor) part);
+			}
+		} catch (CoreException e) {
+			// ignore
+		}
+		if (fOpenable == null) {
+			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
+		}
+		
 		setASTUptoDate(fOpenable != null);
 	}
 
@@ -587,11 +620,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
-		manager.add(fLinkWithEditor);
-		manager.add(new Separator());
 		for (int i= 0; i < fASTVersionToggleActions.length; i++) {
 			manager.add(fASTVersionToggleActions[i]);	
 		}
+		manager.add(new Separator());
+		manager.add(fUseReconcilerAction);
+		manager.add(new Separator());
+		manager.add(fLinkWithEditor);
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
@@ -636,6 +671,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fRefreshAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fRefreshAction, ASTViewImages.REFRESH);
 
+		fUseReconcilerAction = new Action("&Use Reconciler", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performUseReconciler();
+			}
+		};
+		fUseReconcilerAction.setChecked(fDoUseReconciler);
+		fUseReconcilerAction.setToolTipText("Use Reconciler to create AST"); //$NON-NLS-1$
+		fUseReconcilerAction.setEnabled(true);
+
 		fFocusAction = new Action() {
 			public void run() {
 				performSetFocus();
@@ -666,7 +710,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fExpandAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fExpandAction, ASTViewImages.EXPAND);
 		
-		fCopyAction= new TreeCopyAction(fViewer.getTree());
+		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree(), fTray.getTree()});
 		
 		fDoubleClickAction = new Action() {
 			public void run() {
@@ -680,13 +724,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 		};
 		fLinkWithEditor.setChecked(fDoLinkWithEditor);
-		fLinkWithEditor.setText("Link with editor"); //$NON-NLS-1$
+		fLinkWithEditor.setText("&Link with Editor"); //$NON-NLS-1$
 		fLinkWithEditor.setToolTipText("Link With Editor"); //$NON-NLS-1$
 		ASTViewImages.setImageDescriptors(fLinkWithEditor, ASTViewImages.LINK_WITH_EDITOR);
 			
 		fASTVersionToggleActions= new ASTLevelToggle[] {
-				new ASTLevelToggle("AST Level 2.0", AST.JLS2), //$NON-NLS-1$
-				new ASTLevelToggle("AST Level 3.0", AST.JLS3) //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &2.0", AST.JLS2), //$NON-NLS-1$
+				new ASTLevelToggle("AST Level &3.0", AST.JLS3) //$NON-NLS-1$
 		};
 		
 		fAddToTrayAction= new Action() {
@@ -711,8 +755,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 
 		internalSetInput(fOpenable, offset, length, getCurrentASTLevel());
 	}
-	
-	
+		
 	protected void setASTLevel(int level, boolean doRefresh) {
 		int oldLevel= fCurrentASTLevel;
 		fCurrentASTLevel= level;
@@ -790,7 +833,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 			return;
 		}
 		
-		
+		doLinkWithEditor(selection);
+	}
+	
+	private void doLinkWithEditor(ISelection selection) {
 		ITextSelection textSelection= (ITextSelection) selection;
 		int offset= textSelection.getOffset();
 		int length= textSelection.getLength();
@@ -803,14 +849,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fViewer.setSelection(new StructuredSelection(covering));
 		}
 	}
-	
+
 	protected void handleDoubleClick(DoubleClickEvent event) {
 		fDoubleClickAction.run();
 	}
-	
 
 	protected void performLinkWithEditor() {
 		fDoLinkWithEditor= fLinkWithEditor.isChecked();
+		if (fDoLinkWithEditor && fEditor != null)
+			doLinkWithEditor(fEditor.getSelectionProvider().getSelection());
 	}
 
 	protected void performCollapse() {
@@ -866,7 +913,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewPlugin.log(message, e);
 		ErrorDialog.openError(getSite().getShell(), "AST View", message, e.getStatus()); //$NON-NLS-1$
 	}
-
+	
+	protected void performUseReconciler() {
+		fDoUseReconciler= fUseReconcilerAction.isChecked();
+		performRefresh();
+	}
+	
 	protected void performDoubleClick() {
 		ISelection selection = fViewer.getSelection();
 		Object obj = ((IStructuredSelection) selection).getFirstElement();

@@ -77,12 +77,10 @@ public class TreeCopyAction extends Action {
 		}
 	}
 	
-	private final Tree fTree;
-	private final Clipboard fClipboard;
+	private final Tree[] fTrees;
 	
-	public TreeCopyAction(Tree tree) {
-		fTree= tree;
-		fClipboard= new Clipboard(tree.getDisplay());
+	public TreeCopyAction(Tree[] trees) {
+		fTrees= trees;
 		setText("&Copy"); //$NON-NLS-1$
 		setToolTipText("Copy to Clipboard"); //$NON-NLS-1$
 		setEnabled(false);
@@ -92,15 +90,35 @@ public class TreeCopyAction extends Action {
 	}
 
 	public void run() {
-		TreeItem[] selection= fTree.getSelection();
-		if (selection.length == 1) {
-			fClipboard.setContents(new Object[] { selection[0].getText() }, new Transfer[] {TextTransfer.getInstance()});
-		} else if (selection.length > 1) {
-			copyTree(selection);
+		Tree tree= null;
+		for (int i= 0; i < fTrees.length; i++) {
+			if (fTrees[i].isFocusControl()) {
+				tree= fTrees[i];
+				break;
+			}
+		}
+		if (tree == null)
+			return;
+		
+		TreeItem[] selection= tree.getSelection();
+		if (selection.length == 0)
+			return;
+		
+		Clipboard clipboard= null;
+		try {
+			clipboard= new Clipboard(tree.getDisplay());
+			if (selection.length == 1) {
+				clipboard.setContents(new Object[]{selection[0].getText()}, new Transfer[]{TextTransfer.getInstance()});
+			} else if (selection.length > 1) {
+				copyTree(selection, clipboard);
+			}
+		} finally {
+			if (clipboard != null)
+				clipboard.dispose();
 		}
 	}
 
-	private void copyTree(TreeItem[] selection) {
+	private void copyTree(TreeItem[] selection, Clipboard clipboard) {
 		HashMap elementToTreeObj= new HashMap();
 		List roots= new ArrayList();
 		int indent= Integer.MIN_VALUE;
@@ -142,7 +160,7 @@ public class TreeCopyAction extends Action {
 		StringBuffer buf= new StringBuffer();
 		appendSelectionObjects(buf, indent, roots);
 		String result= buf.length() > 0 ? buf.substring(1) : buf.toString();
-		fClipboard.setContents(new Object[] { result }, new Transfer[] { TextTransfer.getInstance() });
+		clipboard.setContents(new Object[] { result }, new Transfer[] { TextTransfer.getInstance() });
 	}
 
 	private void appendSelectionObjects(StringBuffer buffer, int indent, List selObjs) {
@@ -156,9 +174,5 @@ public class TreeCopyAction extends Action {
 			}
 			appendSelectionObjects(buffer, indent + 1, selObj.getChildren());
 		}
-	}
-
-	public void dispose() {
-		fClipboard.dispose();
 	}
 }
