@@ -906,8 +906,8 @@ public class PackageExplorerPart extends ViewPart
 				} finally {
 					fViewer.addSelectionChangedListener(fSelectionListener);
 				}
-				return true;
 			}
+			return true;
 		}
 		return false;
 	}
