@@ -14,8 +14,8 @@
     <classpathentry kind="src" path="/org.eclipse.debug.core"/>
     <classpathentry kind="src" path="/org.eclipse.debug.ui"/>
     <classpathentry kind="src" path="/org.eclipse.jdt.debug"/>
-    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="src" path="/org.eclipse.compare"/>
+    <classpathentry kind="src" path="/org.eclipse.jdt.launching"/>
     <classpathentry kind="var" path="JRE_LIB" rootpath="JRE_SRCROOT" sourcepath="JRE_SRC"/>
     <classpathentry kind="output" path="bin"/>
 </classpath>
