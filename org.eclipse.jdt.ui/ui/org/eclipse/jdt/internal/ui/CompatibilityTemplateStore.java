@@ -23,19 +23,18 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
-import org.eclipse.jdt.internal.corext.template.java.TemplateSet;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
 
 /**
- * @deprecated don't use
+ * for compatibility only - don't use
  */
-public final class CompatibilityTemplateStore extends TemplateStore {
+public final class CompatibilityTemplateStore extends ContributionTemplateStore {
 
 
-	private TemplateSet fLegacySet;
+	private org.eclipse.jdt.internal.corext.template.java.TemplateSet fLegacySet;
 
-	public CompatibilityTemplateStore(ContextTypeRegistry registry, IPreferenceStore store, String key, TemplateSet legacySet) {
+	public CompatibilityTemplateStore(ContextTypeRegistry registry, IPreferenceStore store, String key, org.eclipse.jdt.internal.corext.template.java.TemplateSet legacySet) {
 		super(registry, store, key);
 		fLegacySet= legacySet;
 	}
@@ -84,7 +83,7 @@ public final class CompatibilityTemplateStore extends TemplateStore {
 	}
 	
 	private boolean isCodeTemplates() {
-		return fLegacySet instanceof CodeTemplates;
+		return fLegacySet instanceof org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 	}
 
 	/**

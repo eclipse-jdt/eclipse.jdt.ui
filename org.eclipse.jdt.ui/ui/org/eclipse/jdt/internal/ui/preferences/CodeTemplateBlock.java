@@ -21,8 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.xml.sax.SAXException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.graphics.Font;
@@ -45,8 +43,8 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.SourceViewer;
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
 import org.eclipse.jface.text.templates.persistence.TemplateReaderWriter;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
@@ -371,8 +369,6 @@ public class CodeTemplateBlock {
 			updateSourceViewerInput(fCodeTemplateTree.getSelectedElements());
 
 		} catch (FileNotFoundException e) {
-			openReadErrorDialog(e);
-		} catch (SAXException e) {
 			openReadErrorDialog(e);
 		} catch (IOException e) {
 			openReadErrorDialog(e);

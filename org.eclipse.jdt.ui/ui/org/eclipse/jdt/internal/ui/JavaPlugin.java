@@ -17,6 +17,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -25,19 +32,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IBufferFactory;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -48,10 +42,11 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
-import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -60,10 +55,24 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
+import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.ConfigurationElementSorter;
 import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
+
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IBufferFactory;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
@@ -72,7 +81,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
@@ -88,13 +96,6 @@ import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -599,7 +600,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public ContextTypeRegistry getTemplateContextRegistry() {
 		if (fContextTypeRegistry == null) {
-			fContextTypeRegistry= new ContextTypeRegistry();
+			fContextTypeRegistry= new ContributionContextTypeRegistry();
 			
 			fContextTypeRegistry.addContextType(new JavaContextType());
 			fContextTypeRegistry.addContextType(new JavaDocContextType());
@@ -618,7 +619,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fTemplateStore == null) {
 			boolean alreadyMigrated= getPreferenceStore().getBoolean(TEMPLATES_MIGRATION_KEY);
 			if (alreadyMigrated)
-				fTemplateStore= new TemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
+				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
 			else {
 				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY, Templates.getInstance());
 				getPreferenceStore().setValue(TEMPLATES_MIGRATION_KEY, true);
@@ -644,7 +645,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public ContextTypeRegistry getCodeTemplateContextRegistry() {
 		if (fCodeTemplateContextTypeRegistry == null) {
-			fCodeTemplateContextTypeRegistry= new ContextTypeRegistry();
+			fCodeTemplateContextTypeRegistry= new ContributionContextTypeRegistry();
 			
 			CodeTemplateContextType.registerContextTypes(fCodeTemplateContextTypeRegistry);
 		}
@@ -662,7 +663,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fCodeTemplateStore == null) {
 			boolean alreadyMigrated= getPreferenceStore().getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
 			if (alreadyMigrated)
-				fCodeTemplateStore= new TemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY);
+				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY);
 			else {
 				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY, CodeTemplates.getInstance());
 				getPreferenceStore().setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
