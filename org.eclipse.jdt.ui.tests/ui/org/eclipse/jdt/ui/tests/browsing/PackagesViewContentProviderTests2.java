@@ -11,6 +11,8 @@
 package org.eclipse.jdt.ui.tests.browsing;
 
 
+import java.io.File;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -371,10 +373,10 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		//JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
 
 		//----------------Set up internal jar----------------------------
-		//File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
-		//assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
+		File myInternalJar= JavaTestPlugin.getDefault().getFileInPlugin(new Path("testresources/compoundtest.jar"));//$NON-NLS-1$
+		assertTrue("lib not found", myInternalJar != null && myInternalJar.exists());//$NON-NLS-1$
 		
-		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, new Path("testresources/compoundtest.jar"), null, null); //$NON-NLS-1$
+		fInternalJarRoot= JavaProjectHelper.addLibraryWithImport(fJProject2, new Path(myInternalJar.getPath()), null, null); //$NON-NLS-1$
 		
 		fInternalPackDefault= fInternalJarRoot.getPackageFragment("");//$NON-NLS-1$
 		fInternalPack3= fInternalJarRoot.getPackageFragment("pack3");//$NON-NLS-1$
