@@ -49,6 +49,11 @@ public class ExtractTempTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 	
+	/** See <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316">Bug 47316</a>. */
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+
 	private String getSimpleTestFileName(boolean canExtract, boolean input){
 		String fileName = "A_" + getName();
 		if (canExtract)
