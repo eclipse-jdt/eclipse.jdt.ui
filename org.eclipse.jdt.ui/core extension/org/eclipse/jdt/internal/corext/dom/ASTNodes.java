@@ -311,6 +311,44 @@ public class ASTNodes {
 		return buffer.toString();
 	}
 	
+	public static InfixExpression.Operator convertToInfixOperator(Assignment.Operator operator) {
+		if (operator.equals(Assignment.Operator.PLUS_ASSIGN))
+			return InfixExpression.Operator.PLUS;
+			
+		if (operator.equals(Assignment.Operator.MINUS_ASSIGN))
+			return InfixExpression.Operator.MINUS;
+			
+		if (operator.equals(Assignment.Operator.TIMES_ASSIGN))
+			return InfixExpression.Operator.TIMES;
+			
+		if (operator.equals(Assignment.Operator.DIVIDE_ASSIGN))
+			return InfixExpression.Operator.DIVIDE;
+			
+		if (operator.equals(Assignment.Operator.BIT_AND_ASSIGN))
+			return InfixExpression.Operator.AND;
+			
+		if (operator.equals(Assignment.Operator.BIT_OR_ASSIGN))
+			return InfixExpression.Operator.OR;
+			
+		if (operator.equals(Assignment.Operator.BIT_XOR_ASSIGN))
+			return InfixExpression.Operator.XOR;
+			
+		if (operator.equals(Assignment.Operator.REMAINDER_ASSIGN))
+			return InfixExpression.Operator.REMAINDER;
+			
+		if (operator.equals(Assignment.Operator.LEFT_SHIFT_ASSIGN))
+			return InfixExpression.Operator.LEFT_SHIFT;
+			
+		if (operator.equals(Assignment.Operator.RIGHT_SHIFT_SIGNED_ASSIGN))
+			return InfixExpression.Operator.RIGHT_SHIFT_SIGNED;
+			
+		if (operator.equals(Assignment.Operator.RIGHT_SHIFT_UNSIGNED_ASSIGN))
+			return InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED;
+
+		Assert.isTrue(false, "Cannot convert assignment operator"); //$NON-NLS-1$
+		return null;			
+	}
+	
 	public static boolean needsParentheses(Expression expression) {
 		int type= expression.getNodeType();
 		return type == ASTNode.INFIX_EXPRESSION || type == ASTNode.CONDITIONAL_EXPRESSION ||

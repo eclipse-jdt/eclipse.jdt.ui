@@ -5,7 +5,6 @@ public class TestFinalField {
 	TestFinalField(Object y) {
 		field = y;
 	}
-
 	private Object getField() {
 		return field;
 	}

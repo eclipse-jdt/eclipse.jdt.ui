@@ -12,9 +12,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.sef;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -24,6 +28,9 @@ import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -33,11 +40,12 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
 
 /**
  * Analyzer to find all references to the field and to determine how to convert 
@@ -46,11 +54,12 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 class AccessAnalyzer extends ASTVisitor {
 
 	private ICompilationUnit fCUnit;
-	private BindingIdentifier fFieldIdentifier;
-	private BindingIdentifier fDeclaringClassIdentifier;	
+	private IVariableBinding fFieldBinding;
+	private ITypeBinding fDeclaringClassBinding;	
 	private String fGetter;
 	private String fSetter;
-	private TextChange fChange;
+	private ASTRewrite fRewriter;
+	private List fGroupDescriptions;
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
@@ -61,16 +70,17 @@ class AccessAnalyzer extends ASTVisitor {
 	private static final String PREFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_prefix_access"); //$NON-NLS-1$
 	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.getString("SelfEncapsulateField.AccessAnalyzer.encapsulate_postfix_access"); //$NON-NLS-1$
 		
-	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, BindingIdentifier field, BindingIdentifier declaringClass, TextChange change) {
+	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter) {
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(unit);
 		Assert.isNotNull(field);
 		Assert.isNotNull(declaringClass);
-		Assert.isNotNull(change);
+		Assert.isNotNull(rewriter);
 		fCUnit= unit;
-		fFieldIdentifier= field;
-		fDeclaringClassIdentifier= declaringClass;
-		fChange= change;
+		fFieldBinding= field;
+		fDeclaringClassBinding= declaringClass;
+		fRewriter= rewriter;
+		fGroupDescriptions= new ArrayList();
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
 		fEncapsulateDeclaringClass= refactoring.getEncapsulateDeclaringClass();
@@ -90,21 +100,59 @@ class AccessAnalyzer extends ASTVisitor {
 		return fStatus;
 	}
 	
+	public List getGroupDescriptions() {
+		return fGroupDescriptions;
+	}
+	
 	public boolean visit(Assignment node) {
 		Expression lhs= node.getLeftHandSide();
 		if (!considerBinding(resolveBinding(lhs), lhs))
 			return true;
 			
 		checkParent(node);
-		if (!fIsFieldFinal)
-			fChange.addTextEdit(WRITE_ACCESS, new EncapsulateWriteAccess(fGetter, fSetter, node));
+		if (!fIsFieldFinal) {
+			// Write access.
+			AST ast= node.getAST();
+			MethodInvocation invocation= ast.newMethodInvocation();
+			invocation.setName(ast.newSimpleName(fSetter));
+			Expression receiver= getReceiver(lhs);
+			if (receiver != null)
+				invocation.setExpression((Expression)fRewriter.createCopy(receiver));
+			List arguments= invocation.arguments();
+			if (node.getOperator() == Assignment.Operator.ASSIGN) {
+				arguments.add(fRewriter.createCopy(node.getRightHandSide()));
+			} else {
+				// This is the compound assignment case: field+= 10;
+				boolean needsParentheses= ASTNodes.needsParentheses(node.getRightHandSide());
+				InfixExpression exp= ast.newInfixExpression();
+				exp.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
+				MethodInvocation getter= ast.newMethodInvocation();
+				getter.setName(ast.newSimpleName(fGetter));
+				if (receiver != null)
+					getter.setExpression((Expression)fRewriter.createCopy(receiver));
+				exp.setLeftOperand(getter);
+				Expression rhs= (Expression)fRewriter.createCopy(node.getRightHandSide());
+				if (needsParentheses) {
+					ParenthesizedExpression p= ast.newParenthesizedExpression();
+					p.setExpression(rhs);
+					rhs= p;
+				}
+				exp.setRightOperand(rhs);
+				arguments.add(exp);
+			}
+			fRewriter.markAsReplaced(node, invocation, createGroupDescription(WRITE_ACCESS));
+		}
 		node.getRightHandSide().accept(this);
 		return false;
 	}
 
 	public boolean visit(SimpleName node) {
-		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node))
-			fChange.addTextEdit(READ_ACCESS, new EncapsulateReadAccess(fGetter, node));
+		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
+			fRewriter.markAsReplaced(
+				node, 
+				fRewriter.createPlaceholder(fGetter + "()", ASTRewrite.EXPRESSION), //$NON-NLS-1$
+				createGroupDescription(READ_ACCESS));
+		}
 		return true;
 	}
 	
@@ -118,7 +166,10 @@ class AccessAnalyzer extends ASTVisitor {
 			return true;
 			
 		checkParent(node);
-		fChange.addTextEdit(PREFIX_ACCESS, new EncapsulatePrefixAccess(fGetter, fSetter, node));
+		
+		fRewriter.markAsReplaced(node, 
+			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
+			createGroupDescription(PREFIX_ACCESS));
 		return false;
 	}
 	
@@ -133,12 +184,14 @@ class AccessAnalyzer extends ASTVisitor {
 				JavaStatusContext.create(fCUnit, new SourceRange(node)));
 			return false;
 		}
-		fChange.addTextEdit(POSTFIX_ACCESS, new EncapsulatePostfixAccess(fGetter, fSetter, node));
+		fRewriter.markAsReplaced(node, 
+			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
+			createGroupDescription(POSTFIX_ACCESS));
 		return false;
 	}
 	
 	private boolean considerBinding(IBinding binding, ASTNode node) {
-		boolean result= fFieldIdentifier.matches(binding);
+		boolean result= Bindings.equals(fFieldBinding, binding);
 		if (!result || fEncapsulateDeclaringClass)
 			return result;
 			
@@ -146,7 +199,7 @@ class AccessAnalyzer extends ASTVisitor {
 			TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
 			if (type != null) {
 				ITypeBinding declaringType= type.resolveBinding();
-				return !fDeclaringClassIdentifier.matches(declaringType);
+				return !Bindings.equals(fDeclaringClassBinding, declaringType);
 			}
 		}
 		return true;
@@ -166,6 +219,50 @@ class AccessAnalyzer extends ASTVisitor {
 		else if (expression instanceof FieldAccess)
 			return ((FieldAccess)expression).getName().resolveBinding();
 		return null;
-	}	
+	}
+	
+	private Expression getReceiver(Expression expression) {
+		int type= expression.getNodeType();
+		switch(type) {
+			case ASTNode.SIMPLE_NAME:
+				return null;
+			case ASTNode.QUALIFIED_NAME:
+				return ((QualifiedName)expression).getQualifier();
+			case ASTNode.FIELD_ACCESS:
+				return ((FieldAccess)expression).getExpression();
+		}
+		return null;
+	}
+		
+	private MethodInvocation createInvocation(AST ast, Expression operand, String operator) {
+		Expression receiver= getReceiver(operand);
+		MethodInvocation invocation= ast.newMethodInvocation();
+		invocation.setName(ast.newSimpleName(fSetter));
+		if (receiver != null)
+			invocation.setExpression((Expression)fRewriter.createCopy(receiver));
+		InfixExpression argument= ast.newInfixExpression();
+		invocation.arguments().add(argument);
+		if ("++".equals(operator)) { //$NON-NLS-1$
+			argument.setOperator(InfixExpression.Operator.PLUS);
+		} else if ("--".equals(operator)) { //$NON-NLS-1$
+			argument.setOperator(InfixExpression.Operator.MINUS);
+		} else {
+			Assert.isTrue(false, "Should not happen"); //$NON-NLS-1$
+		}
+		MethodInvocation getter= ast.newMethodInvocation();
+		getter.setName(ast.newSimpleName(fGetter));
+		if (receiver != null)
+			getter.setExpression((Expression)fRewriter.createCopy(receiver));
+		argument.setLeftOperand(getter);
+		argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
+
+		return invocation;
+	}
+	
+	private GroupDescription createGroupDescription(String name) {
+		GroupDescription result= new GroupDescription(name);
+		fGroupDescriptions.add(result);
+		return result;
+	}
 }
 

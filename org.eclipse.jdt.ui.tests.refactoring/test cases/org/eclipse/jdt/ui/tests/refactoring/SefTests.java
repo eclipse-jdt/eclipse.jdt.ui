@@ -25,15 +25,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
 public class SefTests extends AbstractSelectionTestCase {
 
@@ -65,7 +62,6 @@ public class SefTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
@@ -73,7 +69,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field, settings);
+		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		assertTrue(!status.hasFatalError());
 		IChange change= refactoring.createChange(pm);
@@ -92,7 +88,6 @@ public class SefTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 
 		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
@@ -101,7 +96,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 
-		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field, settings);
+		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 		RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
 		assertTrue(status.hasError());
 	}	

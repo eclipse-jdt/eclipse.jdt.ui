@@ -4,7 +4,7 @@ public class TestThisExpression {
 	private int field;
 	
 	public void foo() {
-		setField(10);
+		this.setField(10);
 		new TestThisExpression().setField(11);
 	}
 

@@ -25,38 +25,39 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.ReturnStatement;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.codemanipulation.MemberEdit;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.BindingIdentifier;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -69,10 +70,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.corext.textmanipulation.GroupDescription;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 /**
  * Encapsulates a field into gettter and setter calls.
@@ -80,9 +82,9 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 public class SelfEncapsulateFieldRefactoring extends Refactoring {
 
 	private IField fField;
-	private CodeGenerationSettings fSettings;
 	private TextChangeManager fChangeManager;
 	
+	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
 
 	private int fVisibility;
@@ -90,33 +92,29 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private String fSetterName;
 	private String fArgName;
 	private boolean fSetterMustReturnValue;
-	private int fInsertionIndex;
+	private int fInsertionIndex;	// -1 represents as first method.
 	private boolean fEncapsulateDeclaringClass;
 	
 	private List fUsedReadNames;
 	private List fUsedModifyNames;
-	private TextEdit[] fNewMethods;
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
-	private SelfEncapsulateFieldRefactoring(IField field, CodeGenerationSettings settings) throws JavaModelException {
+	private SelfEncapsulateFieldRefactoring(IField field) throws JavaModelException {
 		Assert.isNotNull(field);
-		Assert.isNotNull(settings);
 		fField= field;
-		fSettings= settings;
 		fChangeManager= new TextChangeManager();
 		fGetterName= GetterSetterUtil.getGetterName(field, null);
 		fSetterName= GetterSetterUtil.getSetterName(field, null);
 		fEncapsulateDeclaringClass= true;
 		fArgName= NamingConventions.removePrefixAndSuffixForFieldName(field.getJavaProject(), field.getElementName(), field.getFlags());
 		checkArgName();
-		fNewMethods= new TextEdit[2];
 	}
 	
-	public static SelfEncapsulateFieldRefactoring create(IField field, CodeGenerationSettings settings) throws JavaModelException {
+	public static SelfEncapsulateFieldRefactoring create(IField field) throws JavaModelException {
 		if (Checks.checkAvailability(field).hasFatalError())
 			return null;
-		return new SelfEncapsulateFieldRefactoring(field, settings);
+		return new SelfEncapsulateFieldRefactoring(field);
 	}
 	
 	//---- Setter and Getter methdos ----------------------------------------------------------
@@ -171,11 +169,17 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
 		fVisibility= (fField.getFlags() & (Flags.AccPublic | Flags.AccProtected | Flags.AccPrivate));
 		RefactoringStatus result=  new RefactoringStatus();
-		ASTNode node= JavaElementMapper.perform(fField, VariableDeclarationFragment.class);
-		if (node == null || !(node instanceof VariableDeclarationFragment)) {
+		
+		fRoot= AST.parseCompilationUnit(fField.getCompilationUnit(), true);
+		ISourceRange sourceRange= fField.getNameRange();
+		ASTNode node= NodeFinder.perform(fRoot, sourceRange.getOffset(), sourceRange.getLength());
+		if (node == null) {
 			return mappingErrorFound(result, node);
 		}
-		fFieldDeclaration= (VariableDeclarationFragment)node;
+		fFieldDeclaration= (VariableDeclarationFragment)ASTNodes.getParent(node, VariableDeclarationFragment.class);
+		if (fFieldDeclaration == null) {
+			return mappingErrorFound(result, node);
+		}
 		if (fFieldDeclaration.resolveBinding() == null) {
 			if (!processCompilerError(result, node))
 				result.addFatalError(RefactoringCoreMessages.getString("SelfEncapsulateField.type_not_resolveable")); //$NON-NLS-1$
@@ -263,23 +267,35 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.analyzing"));	 //$NON-NLS-1$
 			IProgressMonitor sub= new SubProgressMonitor(pm, 5);
 			sub.beginTask(NO_NAME, affectedCUs.length);
-			BindingIdentifier fieldIdentifier= new BindingIdentifier(fFieldDeclaration.resolveBinding());
-			BindingIdentifier declaringClass= new BindingIdentifier(
-				((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding());
+			IVariableBinding fieldIdentifier= fFieldDeclaration.resolveBinding();
+			ITypeBinding declaringClass= 
+				((TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class)).resolveBinding();
+			ICompilationUnit owner= fField.getCompilationUnit();
 			for (int i= 0; i < affectedCUs.length; i++) {
 				ICompilationUnit unit= affectedCUs[i];
 				sub.subTask(unit.getElementName());
-				CompilationUnit root= AST.parseCompilationUnit(unit, true);
-				if (isProcessable(result, root, unit)) {
-					TextChange change= fChangeManager.get(unit);
-					AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, change);
-					root.accept(analyzer);
-					result.merge(analyzer.getStatus());
-					if (!fSetterMustReturnValue) 
-						fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
+				CompilationUnit root= null;
+				if (owner.equals(unit)) {
+					root= fRoot;
+				} else {
+					root= AST.parseCompilationUnit(unit, true);
 				}
-				if (result.hasFatalError())
+				checkCompileErrors(result, root, unit);
+				ASTRewrite rewriter= new ASTRewrite(root);
+				AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter);
+				root.accept(analyzer);
+				result.merge(analyzer.getStatus());
+				if (!fSetterMustReturnValue) 
+					fSetterMustReturnValue= analyzer.getSetterMustReturnValue();
+				if (result.hasFatalError()) {
+					fChangeManager.clear();
 					break;
+				}
+				List descriptions= new ArrayList(analyzer.getGroupDescriptions());
+				if (owner.equals(unit)) {
+					descriptions.addAll(addGetterSetterChanges(root, rewriter));
+				}
+				createEdits(unit, rewriter, descriptions);
 				sub.worked(1);
 			}
 			if (result.hasFatalError())
@@ -293,27 +309,33 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
+		TextChange change= fChangeManager.get(unit);
+		TextBuffer buffer= TextBuffer.acquire(getFile(unit));
+		try {
+			MultiTextEdit root= new MultiTextEdit(); 
+			rewriter.rewriteNode(buffer, root);
+			change.setEdit(root);
+			change.addGroupDescriptions((GroupDescription[])groups.toArray(new GroupDescription[groups.size()]));
+		} finally {
+			TextBuffer.release(buffer);
+		}
+	}
+
 	/*
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
-		try {
-			CompositeChange result= new CompositeChange(getName());
-			addGetterSetterChanges();
-			TextChange[] changes= fChangeManager.getAllChanges();
-			pm.beginTask(NO_NAME, changes.length);
-			pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
-			for (int i= 0; i < changes.length; i++) {
-				result.add(changes[i]);
-				pm.worked(1);
-			}
-			pm.done();
-			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
+		CompositeChange result= new CompositeChange(getName());
+		TextChange[] changes= fChangeManager.getAllChanges();
+		pm.beginTask(NO_NAME, changes.length);
+		pm.setTaskName(RefactoringCoreMessages.getString("SelfEncapsulateField.create_changes")); //$NON-NLS-1$
+		for (int i= 0; i < changes.length; i++) {
+			result.add(changes[i]);
+			pm.worked(1);
 		}
+		pm.done();
+		return result;
 	}
 
 	/*
@@ -325,14 +347,13 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	
 	//---- Helper methods -------------------------------------------------------------
 	
-	private boolean isProcessable(RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
+	private void checkCompileErrors(RefactoringStatus result, CompilationUnit root, ICompilationUnit element) {
 		Message[] messages= root.getMessages();
 		if (messages.length != 0) {
 			result.addError(RefactoringCoreMessages.getFormattedString(
 				"SelfEncapsulateField.compiler_errors_update", //$NON-NLS-1$
 				element.getElementName()), JavaStatusContext.create(element));
 		}
-		return true;
 	}
 	
 	private void checkInHierarchy(RefactoringStatus status)	throws CoreException {
@@ -364,121 +385,120 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 	}
 	
-	private void addGetterSetterChanges() throws CoreException {
-		int insertionKind= MemberEdit.INSERT_AFTER;
-		IMember sibling= null;
-		IMethod[] methods= fField.getDeclaringType().getMethods();
-		if (fInsertionIndex < 0) {
-			if (methods.length > 0) {
-				sibling= methods[0];
-				insertionKind= MemberEdit.INSERT_BEFORE;
-			} else {
-				IField[] fields= fField.getDeclaringType().getFields();
-				sibling= fields[fields.length - 1];
-			}
-		} else {
-			sibling= methods[fInsertionIndex];
+	private List addGetterSetterChanges(CompilationUnit root, ASTRewrite rewriter) throws CoreException {
+		List result= new ArrayList(2);
+		AST ast= root.getAST();
+		if (!JdtFlags.isPrivate(fField)) {
+			FieldDeclaration decl= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
+			FieldDeclaration modified= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
+			modified.setModifiers(Modifier.PRIVATE);
+			rewriter.markAsModified(decl, modified);
 		}
-							
-		TextChange change= fChangeManager.get(fField.getCompilationUnit());
 		
-		if (!JdtFlags.isPrivate(fField))
-			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.change_visibility"), createVisibilityEdit()); //$NON-NLS-1$
-		
-		String modifiers= createModifiers();
-		String type= Signature.toString(fField.getTypeSignature());
-		if (!JdtFlags.isFinal(fField))
-			change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter"), createSetterMethod(insertionKind, sibling, modifiers, type)); //$NON-NLS-1$
-		change.addTextEdit(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter"), createGetterMethod(insertionKind, sibling, modifiers, type));	 //$NON-NLS-1$
-	}
-
-	private SimpleTextEdit createVisibilityEdit() throws CoreException {
-		TextRange range= getVisibilityRange();
-		String text= getVisibilityString(range.getLength());
-		return SimpleTextEdit.createReplace(range.getOffset(), range.getLength(), text);
-	}
-
-	private TextRange getVisibilityRange() throws CoreException {
-		int offset= fField.getSourceRange().getOffset();
-		int length= 0;
-		IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-		scanner.setSource(fField.getSource().toCharArray());
-		int token= 0;
-		try {
-			while((token= scanner.getNextToken()) != ITerminalSymbols.TokenNameEOF) {
-				if (token == ITerminalSymbols.TokenNamepublic || token == ITerminalSymbols.TokenNameprotected || token == ITerminalSymbols.TokenNameprivate) {
-					offset+= scanner.getCurrentTokenStartPosition();
-					length= scanner.getCurrentTokenEndPosition() - scanner.getCurrentTokenStartPosition() + 1;
+		TypeDeclaration type= (TypeDeclaration)ASTNodes.getParent(fFieldDeclaration, TypeDeclaration.class);
+		int position= 0;
+		int numberOfMethods= 0;
+		List members= type.bodyDeclarations();
+		for (Iterator iter= members.iterator(); iter.hasNext();) {
+			BodyDeclaration element= (BodyDeclaration)iter.next();
+			if (element.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				if (fInsertionIndex == -1) {
+					break;
+				} else if (fInsertionIndex == numberOfMethods) {
+					position++;
 					break;
 				}
+				numberOfMethods++;	
 			}
-		} catch (InvalidInputException e) {
-			throw new JavaModelException(e, IJavaModelStatusConstants.INVALID_CONTENTS);
+			position++;
 		}
-		return new TextRange(offset, length);
-	}
-	
-	private String getVisibilityString(int tokenLength) {
-		String text= JdtFlags.getVisibilityString(Modifier.PRIVATE);
-		if (tokenLength == 0)
-			text+= " "; //$NON-NLS-1$
-		return text;
-	}
-		
-	private TextEdit createSetterMethod(int insertionKind, IMember sibling, String modifiers, String type) throws JavaModelException {
-		String returnType= createSetterReturnType();
-		String returnStatement= fSetterMustReturnValue ? "return " : ""; //$NON-NLS-1$ //$NON-NLS-2$
-		return fNewMethods[1]= createMemberEdit(
-			sibling,
-			insertionKind,
-			new String[] {
-				modifiers + "  " + returnType + " " + getSetterName() + "(" + type + " " + fArgName + ") {", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
-				returnStatement + createFieldAccess() + " = " + fArgName + ";", //$NON-NLS-1$ //$NON-NLS-2$
-				"}" //$NON-NLS-1$
-			});
-	}
-	
-	private TextEdit createGetterMethod(int insertionKind, IMember sibling, String modifiers, String type) {
-		return fNewMethods[0]= createMemberEdit(
-			sibling,
-			insertionKind,
-			new String[] {
-				modifiers + " " + type + " " + getGetterName() + "() {", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"return " + fField.getElementName() + ";", //$NON-NLS-1$ //$NON-NLS-2$
-				"}" //$NON-NLS-1$
-			});
-	}
-
-	private MemberEdit createMemberEdit(IMember sibling, int insertionKind, String[] source) {
-		MemberEdit result= new MemberEdit(sibling, insertionKind, source, fSettings.tabWidth);
-		result.setUseFormatter(true);
+		GroupDescription description;
+		if (!JdtFlags.isFinal(fField)) {
+			description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_setter")); //$NON-NLS-1$
+			result.add(description);
+			members.add(position++, createSetterMethod(ast, rewriter));
+		}
+		description= new GroupDescription(RefactoringCoreMessages.getString("SelfEncapsulateField.add_getter")); //$NON-NLS-1$
+		result.add(description);
+		members.add(position, createGetterMethod(ast, rewriter));
 		return result;
 	}
 
-	private String createModifiers() throws JavaModelException {
-		StringBuffer result= new StringBuffer();
+	private MethodDeclaration createSetterMethod(AST ast, ASTRewrite rewriter) throws JavaModelException {
+		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
+		Type type= field.getType();
+		MethodDeclaration result= ast.newMethodDeclaration();
+		rewriter.markAsInserted(result);
+		result.setName(ast.newSimpleName(fSetterName));
+		result.setModifiers(createModifiers());
+		if (fSetterMustReturnValue) {
+			result.setReturnType((Type)rewriter.createCopy(type));
+		}
+		SingleVariableDeclaration param= ast.newSingleVariableDeclaration();
+		result.parameters().add(param);
+		param.setName(ast.newSimpleName(fArgName));
+		param.setType((Type)rewriter.createCopy(type));
+		
+		Block block= ast.newBlock();
+		result.setBody(block);
+		Assignment ass= ast.newAssignment();
+		ass.setLeftHandSide(createFieldAccess(ast));
+		ass.setRightHandSide(ast.newSimpleName(fArgName));
+		if (fSetterMustReturnValue) {
+			ReturnStatement rs= ast.newReturnStatement();
+			rs.setExpression(ass);
+			block.statements().add(rs);
+		} else {
+			block.statements().add(ast.newExpressionStatement(ass));
+		}
+		return result;
+	}
+	
+	private MethodDeclaration createGetterMethod(AST ast, ASTRewrite rewriter) throws JavaModelException {
+		FieldDeclaration field= (FieldDeclaration)ASTNodes.getParent(fFieldDeclaration, FieldDeclaration.class);
+		Type type= field.getType();
+		MethodDeclaration result= ast.newMethodDeclaration();
+		rewriter.markAsInserted(result);
+		result.setName(ast.newSimpleName(fGetterName));
+		result.setModifiers(createModifiers());
+		result.setReturnType((Type)rewriter.createCopy(type));
+		
+		Block block= ast.newBlock();
+		result.setBody(block);
+		ReturnStatement rs= ast.newReturnStatement();
+		rs.setExpression(ast.newSimpleName(fField.getElementName()));
+		block.statements().add(rs);
+		return result;
+	}
+
+	private int createModifiers() throws JavaModelException {
+		int result= 0;
 		if (Flags.isPublic(fVisibility)) 
-			result.append("public "); //$NON-NLS-1$
+			result |= Modifier.PUBLIC;
 		else if (Flags.isProtected(fVisibility)) 
-			result.append("protected "); //$NON-NLS-1$
+			result |= Modifier.PROTECTED;
 		else if (Flags.isPrivate(fVisibility))
-			result.append("private "); //$NON-NLS-1$
-		if (JdtFlags.isStatic(fField)) result.append("static "); //$NON-NLS-1$
-		return result.toString();
+			result |= Modifier.PRIVATE;
+		if (JdtFlags.isStatic(fField)) 
+			result |= Modifier.STATIC; 
+		return result;
 	}
 	
-	private String createSetterReturnType() throws JavaModelException {
-		return fSetterMustReturnValue ? Signature.toString(fField.getTypeSignature()) : "void"; //$NON-NLS-1$
-	}
-	
-	private String createFieldAccess() throws JavaModelException {
+	private Expression createFieldAccess(AST ast) throws JavaModelException {
 		String fieldName= fField.getElementName();
 		if (fArgName.equals(fieldName)) {
-			return (JdtFlags.isStatic(fField) 
-				? fField.getDeclaringType().getElementName() + "."  //$NON-NLS-1$
-				: "this.") + fieldName; //$NON-NLS-1$
+			if (JdtFlags.isStatic(fField)) {
+				return ast.newQualifiedName(
+					ast.newSimpleName(fField.getDeclaringType().getElementName()), 
+					ast.newSimpleName(fieldName));
+			} else {
+				FieldAccess result= ast.newFieldAccess();
+				result.setExpression(ast.newThisExpression());
+				result.setName(ast.newSimpleName(fieldName));
+				return result;
+			}
 		} else {
-			return fieldName;
+			return ast.newSimpleName(fieldName);
 		}
 	}
 	
@@ -491,6 +511,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		}
 		if (isStatic && fArgName.equals(fieldName) && fieldName.equals(fField.getDeclaringType().getElementName()))
 			fArgName= "_" + fieldName; //$NON-NLS-1$
-	}	
+	}
+	
+	private static IFile getFile(ICompilationUnit cu) throws CoreException {
+		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
+	}		
 }
 
