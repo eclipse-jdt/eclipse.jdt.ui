@@ -15,26 +15,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
-
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
+import org.eclipse.core.resources.IncrementalProjectBuilder;
+
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 
 import org.eclipse.debug.ui.IDebugUIConstants;
 
@@ -102,6 +108,30 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	}
 
 	/**
+	 * Displays a dialog with a question as message.
+	 * 
+	 * @param title The title to display
+	 * @param message The message to display
+	 */
+	protected static boolean displayYesNoMessage(final String title, final String message) {
+		final boolean[] result= { true};
+		final Display display= PlatformUI.getWorkbench().getDisplay();
+		if (display != null && !display.isDisposed()) {
+			display.syncExec(new Runnable() {
+
+				public final void run() {
+					if (display != null && !display.isDisposed()) {
+						final Shell shell= display.getActiveShell();
+						if (shell != null && !shell.isDisposed())
+							result[0]= MessageDialog.openQuestion(shell, title, message);
+					}
+				}
+			});
+		}
+		return result[0];
+	}
+
+	/**
 	 * Creates a new serial version hash proposal.
 	 * 
 	 * @param unit the compilation unit
@@ -146,8 +176,21 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		long serialVersionID= SERIAL_VALUE;
 		ILaunchConfiguration configuration= null;
 		try {
-			monitor.beginTask(CorrectionMessages.getString("SerialVersionHashProposal.computing.id"), 4); //$NON-NLS-1$
-			final IJavaProject project= getCompilationUnit().getJavaProject();
+			monitor.beginTask(CorrectionMessages.getString("SerialVersionHashProposal.computing.id"), 7); //$NON-NLS-1$
+			final ICompilationUnit unit= getCompilationUnit();
+			final IJavaProject project= unit.getJavaProject();
+			final IPath path= unit.getResource().getFullPath();
+			try {
+				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 1));
+				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
+				if (buffer.isDirty() && buffer.isStateValidated() && buffer.isCommitable() && displayYesNoMessage(CorrectionMessages.getString("SerialVersionHashProposal.save.caption"), CorrectionMessages.getString("SerialVersionHashProposal.save.message"))) //$NON-NLS-1$ //$NON-NLS-2$
+					buffer.commit(new SubProgressMonitor(monitor, 1), true);
+				else
+					monitor.worked(1);
+			} finally {
+				FileBuffers.getTextFileBufferManager().disconnect(path, new SubProgressMonitor(monitor, 1));
+			}
+			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 1));
 			final ILaunchConfigurationWorkingCopy copy= DebugPlugin.getDefault().getLaunchManager().getLaunchConfigurationType(LAUNCH_CONFIG_TYPE).newInstance(null, LAUNCH_CONFIG_TYPE + System.currentTimeMillis());
 			monitor.worked(1);
 			copy.setAttribute(IDebugUIConstants.ATTR_PRIVATE, true);
