@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -186,9 +185,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 		ASTNode[] nodes= getSelectedNodes();
 		if (nodes != null && nodes.length == 1) {
 			ASTNode node= nodes[0];
-			if (node instanceof NullLiteral) {
-				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_null"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
-			} else if (node instanceof Type) {
+			if (node instanceof Type) {
 				status.addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_type_reference"), JavaStatusContext.create(fCUnit, node)); //$NON-NLS-1$
 			}
 		}
@@ -210,11 +207,15 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					fExpressionBinding= expression.resolveTypeBinding();
 				}
 				if (fExpressionBinding != null) {
-					fReturnType= ASTNodeFactory.newType(ast, fExpressionBinding, true);
-					break;
+					if (fExpressionBinding.isNullType()) {
+						getStatus().addFatalError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_extract_null_type"), JavaStatusContext.create(fCUnit, expression)); //$NON-NLS-1$
+					} else {
+						fReturnType= ASTNodeFactory.newType(ast, fExpressionBinding, true);
+					}
+				} else {
+					fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
+					getStatus().addError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_determine_return_type"), JavaStatusContext.create(fCUnit, expression)); //$NON-NLS-1$
 				}
-				fReturnType= ast.newPrimitiveType(PrimitiveType.VOID);
-				getStatus().addError(RefactoringCoreMessages.getString("ExtractMethodAnalyzer.cannot_determine_return_type"), JavaStatusContext.create(fCUnit, expression)); //$NON-NLS-1$
 				break;	
 			case RETURN_STATEMENT_VALUE:
 				fReturnType= fEnclosingMethod.getReturnType();
