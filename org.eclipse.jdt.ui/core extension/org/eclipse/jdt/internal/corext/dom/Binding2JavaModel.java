@@ -5,6 +5,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -14,6 +15,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -81,6 +83,19 @@ public class Binding2JavaModel {
 			if (candidate.getElementName().equals(method.getName()) && sameParameters(method, candidate)) {
 				return candidate;
 			}
+		}
+		return null;
+	}
+
+	public static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
+		IMethod inThisType= find(method, type);
+		if (inThisType != null)
+			return inThisType;
+		IType[] superTypes= type.newSupertypeHierarchy(pm).getAllSupertypes(type);
+		for (int i= 0; i < superTypes.length; i++) {
+			IMethod m= find(method, superTypes[i]);
+			if (m != null)
+				return m;
 		}
 		return null;
 	}
