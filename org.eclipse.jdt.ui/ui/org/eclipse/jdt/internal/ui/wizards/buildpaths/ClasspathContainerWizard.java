@@ -39,6 +39,14 @@ public class ClasspathContainerWizard extends Wizard {
 	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		this(null, pageDesc, currProject, currEntries);	
 	}
+
+	/**
+	 * @deprecated
+	 */	
+	public ClasspathContainerWizard(ClasspathContainerDescriptor pageDesc) {
+		this(null, pageDesc, null, null);	
+	}
+	
 	
 	private ClasspathContainerWizard(IClasspathEntry entryToEdit, ClasspathContainerDescriptor pageDesc, IJavaProject currProject, IClasspathEntry[] currEntries) {
 		fEntryToEdit= entryToEdit;
