@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
 import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * This is the main view for the callers plugin. It builds a tree of callers/callees
@@ -188,7 +189,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
             return;
         }
-
+        method= (IMethod) JavaModelUtil.toOriginal(method);
         if ((method != null) && !method.equals(fShownMethod)) {
             addHistoryEntry(method);
         }

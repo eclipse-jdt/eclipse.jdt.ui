@@ -25,7 +25,7 @@ public class MethodCall {
      * @param enclosingElement
      */
     public MethodCall(IMember enclosingElement) {
-        this.fMember = enclosingElement;
+        this.fMember = CallHierarchy.getOriginalElement(enclosingElement);
     }
 
     /**

@@ -46,8 +46,8 @@ public class CallLocation implements IAdaptable {
      * @param end
      */
     public CallLocation(IMember member, IMember calledMember, int start, int end, int lineNumber) {
-        this.fMember = member;
-        this.fCalledMember = calledMember;
+        this.fMember = CallHierarchy.getOriginalElement(member);
+        this.fCalledMember = CallHierarchy.getOriginalElement(calledMember);
         this.fStart = start;
         this.fEnd = end;
         this.fLineNumber= lineNumber;
