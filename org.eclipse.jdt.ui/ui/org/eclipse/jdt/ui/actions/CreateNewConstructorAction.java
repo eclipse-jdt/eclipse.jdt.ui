@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
@@ -503,6 +504,8 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		private CreateNewConstructorContentProvider fContentProvider;
 		private IType fType;
 		private int fSuperIndex;
+		private int fWidth = 60;
+		private int fHeight = 18;
 		
 		private static final int UP_BUTTON= IDialogConstants.CLIENT_ID + 1;
 		private static final int DOWN_BUTTON= IDialogConstants.CLIENT_ID + 2;		
@@ -512,6 +515,64 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 			fContentProvider= contentProvider;
 			fType= type;
 		}	
+		
+		protected Control createDialogArea(Composite parent) {
+			initializeDialogUnits(parent);
+			
+			Composite composite = new Composite(parent, SWT.NONE);
+			GridLayout layout = new GridLayout();
+			GridData gd= null;
+		
+			layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+			layout.marginWidth= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+			layout.verticalSpacing=	convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+			layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);			
+			composite.setLayout(layout);
+			composite.setFont(parent.getFont());	
+						
+			Label messageLabel = createMessageArea(composite);			
+			if (messageLabel != null) {
+				gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+				gd.horizontalSpan= 2;
+				messageLabel.setLayoutData(gd);	
+			}
+			
+			Composite classConstructorComposite= addSuperClassConstructorChoices(composite);
+			gd= new GridData(GridData.FILL_BOTH);
+			classConstructorComposite.setLayoutData(gd);
+			
+			Composite inner= new Composite(composite, SWT.NONE);
+			GridLayout innerLayout = new GridLayout();
+			innerLayout.numColumns= 2;
+			innerLayout.marginHeight= 0;
+			innerLayout.marginWidth= 0;
+			inner.setLayout(innerLayout);
+			inner.setFont(parent.getFont());		
+			
+			CheckboxTreeViewer treeViewer= createTreeViewer(inner);
+			gd= new GridData(GridData.FILL_BOTH);
+			gd.widthHint = convertWidthInCharsToPixels(fWidth);
+			gd.heightHint = convertHeightInCharsToPixels(fHeight);
+			treeViewer.getControl().setLayoutData(gd);			
+					
+			Composite buttonComposite= createSelectionButtons(inner);
+			gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.VERTICAL_ALIGN_FILL);
+			buttonComposite.setLayoutData(gd);
+			
+			gd= new GridData(GridData.FILL_BOTH);
+			inner.setLayoutData(gd);
+		
+			Composite entryComposite= createEntryPtCombo(composite); 
+			entryComposite.setLayoutData(new GridData(GridData.FILL_BOTH));
+		
+			Composite commentComposite= createCommentSelection(composite);
+			commentComposite.setLayoutData(new GridData(GridData.FILL_BOTH));		
+
+			gd= new GridData(GridData.FILL_BOTH);
+			composite.setLayoutData(gd);
+			
+			return composite;
+		}
 		
 		protected Composite createSelectionButtons(Composite composite) {
 			Composite buttonComposite= super.createSelectionButtons(composite);
@@ -561,9 +622,7 @@ public class CreateNewConstructorAction extends SelectionDispatchAction {
 		}		
 
 		protected Composite createEntryPtCombo(Composite composite) {
-			Composite entryComposite= super.createEntryPtCombo(composite);			
-			addSuperClassConstructorChoices(entryComposite);
-			
+			Composite entryComposite= super.createEntryPtCombo(composite);						
 			return entryComposite;						
 		}
 		
