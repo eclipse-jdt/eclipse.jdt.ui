@@ -22,10 +22,10 @@ import org.eclipse.jdt.core.JavaModelException;
  * Represents a search result - exactly as found by SearchEngine
  */
 public final class SearchResult {
-	private IResource fResource;
-	private IJavaElement fEnclosingElement;
-	private int fStart, fEnd;
-	private int fAccuracy;
+	private final IResource fResource;
+	private final IJavaElement fEnclosingElement;
+	private final int fStart, fEnd;
+	private final int fAccuracy;
 	
 	/**
 	 * @see org.eclipse.jdt.core.search.IJavaSearchResultCollector#accept(IResource, int, int, IJavaElement, int)
@@ -85,9 +85,13 @@ public final class SearchResult {
 	
 	public ICompilationUnit getCompilationUnit(){
 		IJavaElement jElement= JavaCore.create(getResource());
-		if (jElement == null || jElement.getElementType() != IJavaElement.COMPILATION_UNIT)
+		if (jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT)
+			return (ICompilationUnit)jElement;
+		if (fEnclosingElement == null)
 			return null;
-		return (ICompilationUnit)jElement;
+		if (fEnclosingElement instanceof ICompilationUnit)
+			return (ICompilationUnit)fEnclosingElement;
+		return (ICompilationUnit)fEnclosingElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 	}
 	
 	
