@@ -712,6 +712,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	}
 
 	void adjustInputAndSetSelection(IJavaElement je) {
+		je= getSuitableJavaElement(je);
 		IJavaElement elementToSelect= findElementToSelect(je);
 		IJavaElement newInput= findInputForJavaElement(je);
 		if (elementToSelect == null && !isValidInput(newInput))
