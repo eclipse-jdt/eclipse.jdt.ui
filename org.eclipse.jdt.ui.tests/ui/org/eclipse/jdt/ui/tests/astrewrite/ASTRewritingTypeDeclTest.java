@@ -652,7 +652,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(int i, int[] k, int[] x[]) {\n");
+		buf.append("    public void foo(int i, final int[] k, int[] x[]) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -667,8 +667,14 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 
 		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
 		List arguments= methodDecl.parameters();
-		{ // change type, change name
+		{ // add modifier, change type, change name, add extra dimension
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(0);
+			
+			SingleVariableDeclaration modifierNode= ast.newSingleVariableDeclaration();
+			modifierNode.setModifiers(Modifier.FINAL);
+			modifierNode.setExtraDimensions(1);
+			
+			rewrite.markAsModified(decl, modifierNode);
 			
 			ArrayType newVarType= ast.newArrayType(ast.newPrimitiveType(PrimitiveType.FLOAT), 2);
 			rewrite.markAsReplaced(decl.getType(), newVarType);
@@ -676,12 +682,27 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 			Name newName= ast.newSimpleName("count");
 			rewrite.markAsReplaced(decl.getName(), newName);
 		}
-/*		{
+		{ // remove modifier, change type
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(1);
+			
+			SingleVariableDeclaration modifierNode= ast.newSingleVariableDeclaration();
+			modifierNode.setModifiers(0);
+			modifierNode.setExtraDimensions(decl.getExtraDimensions()); // no change
+			
+			rewrite.markAsModified(decl, modifierNode);
+			
+			Type newVarType= ast.newPrimitiveType(PrimitiveType.FLOAT);
+			rewrite.markAsReplaced(decl.getType(), newVarType);
 		}
-		{
+		{ // remove extra dim
 			SingleVariableDeclaration decl= (SingleVariableDeclaration) arguments.get(2);
-		}*/			
+			
+			SingleVariableDeclaration modifierNode= ast.newSingleVariableDeclaration();
+			modifierNode.setModifiers(decl.getModifiers()); // no change
+			modifierNode.setExtraDimensions(0); 
+			
+			rewrite.markAsModified(decl, modifierNode);
+		}			
 			
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
 		proposal.getCompilationUnitChange().setSave(true);
@@ -691,7 +712,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("    public void foo(float[][] count, int[] k, int[] x[]) {\n");
+		buf.append("    public void foo(final float[][] count[], float k, int[] x) {\n");
 		buf.append("    }\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
