@@ -184,45 +184,12 @@ public class RefactoringScopeFactory {
 	/**
 	 * @return scope with all projects possibly referenced from within <code>javaElements</code>.
 	 */ 
-	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements) throws JavaModelException {
-		Set allProjects= getReferencedProjects(javaElements);
-		IJavaElement[] allReferencedProjects= (IJavaProject[]) allProjects.toArray(new IJavaProject[allProjects.size()]);
-		return SearchEngine.createJavaSearchScope(allReferencedProjects, false);
-	}
-	
-	/**
-	 * @param javaElements iteration base
-	 * @return Collection of IJavaProject
-	 * @throws JavaModelException
-	 */
-	private static Set getReferencedProjects(IJavaElement[] javaElements) throws JavaModelException {
-		Set allProjects= new HashSet();
+	public static IJavaSearchScope createReferencedScope(IJavaElement[] javaElements) {
+		Set projects= new HashSet();
 		for (int i= 0; i < javaElements.length; i++) {
-			IJavaProject project= javaElements[i].getJavaProject();
-			addReferencedProjects(project, allProjects);
-			allProjects.add(project);
+			projects.add(javaElements[i].getJavaProject());
 		}
-		return allProjects;
-	}
-	/**
-	 * Adds to <code>projects</code> IJavaProject objects for all projects
-	 * directly or indirectly referenced by focus.
-	 * 
-	 * @param focus
-	 * @param projects		IJavaProjects will be added to this set
-	 * @throws JavaModelException
-	 */
-	private static void addReferencedProjects(IJavaProject focus, Set projects) throws JavaModelException {
-		IClasspathEntry[] classpathEntries= focus.getResolvedClasspath(true);
-		for (int i= 0; i < classpathEntries.length; i++) {
-			IClasspathEntry entry= classpathEntries[i];
-			if (entry.getEntryKind() != IClasspathEntry.CPE_PROJECT)
-				continue;
-			IJavaProject candidate= focus.getJavaModel().getJavaProject(entry.getPath().lastSegment());
-			if (candidate == null || !candidate.exists() || projects.contains(candidate))
-				continue;
-			projects.add(candidate);
-			addReferencedProjects(candidate, projects);
-		}
+		IJavaProject[] prj= (IJavaProject[]) projects.toArray(new IJavaProject[projects.size()]);
+		return SearchEngine.createJavaSearchScope(prj, true);
 	}
 }
