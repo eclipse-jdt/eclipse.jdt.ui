@@ -142,8 +142,11 @@ public abstract class EvaluateAction extends Action implements IUpdate, IJavaEva
 	public void update() {
 		boolean enabled = false;
 		if (isValidStackFrame()) {
-			if (textHasContent(((ITextSelection)fWorkbenchPart.getSite().getSelectionProvider().getSelection()).getText())) {
-				enabled = true;
+			ISelectionProvider provider = fWorkbenchPart.getSite().getSelectionProvider();
+			if (provider != null)  {
+				if (textHasContent(((ITextSelection)provider.getSelection()).getText())) {
+					enabled = true;
+				}
 			}
 		}
 		setEnabled(enabled);
