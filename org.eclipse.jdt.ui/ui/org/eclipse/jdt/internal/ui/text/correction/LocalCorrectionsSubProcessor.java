@@ -155,39 +155,16 @@ public class LocalCorrectionsSubProcessor {
 			String uncaughtName= problemPos.getArguments()[0];
 			
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			SimpleName name= methodDecl.getName();
-
-			int pos= name.getStartPosition() + name.getLength();
-			
-			StringBuffer insertString= new StringBuffer();
-			if (methodDecl.thrownExceptions().isEmpty()) {
-				insertString.append(" throws "); //$NON-NLS-1$
-				try {
-					IScanner scanner= ASTResolving.createScanner(cu, name.getStartPosition());
-					int nextNoken= scanner.getNextToken();
-					while (nextNoken != ITerminalSymbols.TokenNameRPAREN) {
-						nextNoken= scanner.getNextToken();
-						if (nextNoken == ITerminalSymbols.TokenNameEOF) {
-							return;
-						}
-					}
-					pos= scanner.getCurrentTokenEndPosition() + 1;
-				} catch (InvalidInputException e) {
-					return;
-				}
-			} else {
-				insertString.append(", "); //$NON-NLS-1$
-				List thrownExceptions= methodDecl.thrownExceptions();
-				ASTNode last= (ASTNode) thrownExceptions.get(thrownExceptions.size() - 1);
-				pos= last.getStartPosition() + last.getLength();
-			}
-			insertString.append(Signature.getSimpleName(uncaughtName));
+			List exceptions= methodDecl.thrownExceptions();
+			SimpleName addedException= astRoot.getAST().newSimpleName(Signature.getSimpleName(uncaughtName));
+			exceptions.add(addedException);
+			ASTRewriteAnalyzer.markAsInserted(addedException);
 			
 			String label= CorrectionMessages.getString("LocalCorrectionsSubProcessor.addthrows.description"); //$NON-NLS-1$
-			InsertCorrectionProposal proposal= new InsertCorrectionProposal(label, cu, pos, insertString.toString(), 0);
-			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION));
-			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-			ImportEdit edit= new ImportEdit(cu, settings);
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, astRoot, 0, image);
+
+			ImportEdit edit= new ImportEdit(cu, JavaPreferencesSettings.getCodeGenerationSettings());
 			edit.addImport(uncaughtName);
 			proposal.getCompilationUnitChange().addTextEdit("import", edit); //$NON-NLS-1$
 		
