@@ -173,7 +173,7 @@ public class ProblemPainter implements IPainter, PaintListener, IAnnotationModel
 		
 		for (Iterator e = fProblemPositions.iterator(); e.hasNext();) {
 			Position p = (Position) e.next();
-			if (p.overlapsWith(vOffset, vLength)) {
+			if (p.overlapsWith(vOffset, vLength) && p.overlapsWith(offset , length)) {
 				int p1= Math.max(offset, p.getOffset());
 				int p2= Math.min(offset + length, p.getOffset() + p.getLength());
 				draw(gc, p1 - offset, p2 - p1);
