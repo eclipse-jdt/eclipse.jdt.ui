@@ -26,8 +26,10 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -124,8 +126,25 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 			if ((delta.getFlags() & IJavaElementDelta.F_SOURCEDETACHED) != 0 ||
 				(delta.getFlags() & IJavaElementDelta.F_SOURCEATTACHED) != 0)
 			{
-				fireInputChanged(fInput);
-				return false;
+				IClassFile file= fInput != null ? fInput.getClassFile() : null;
+				IJavaProject project= input != null ? input.getJavaProject() : null;
+				
+				boolean isOnClasspath= false;
+				if (file != null && project != null) {
+					try {
+						isOnClasspath= project.isOnClasspath(file);
+					} catch (JavaModelException x) {
+						// ignore
+					}		
+				}
+				
+				if (isOnClasspath) {
+					fireInputChanged(fInput);
+					return false;
+				} else {
+					handleDeleted(fInput);
+					return true;
+				}
 			}
 		
 			return false;
