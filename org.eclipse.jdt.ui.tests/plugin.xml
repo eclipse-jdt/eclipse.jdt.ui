@@ -144,4 +144,20 @@
       </quickAssistProcessor>
    </extension>
 
+   <extension
+      point="org.eclipse.jdt.core.classpathContainerInitializer">
+      <classpathContainerInitializer
+            class="org.eclipse.jdt.ui.examples.MyClasspathContainerInitializer"
+            id="org.eclipse.jdt.EXAMPLE_CONTAINER">
+      </classpathContainerInitializer>
+   </extension>
+   
+   <extension
+         point="org.eclipse.jdt.ui.classpathContainerPage">
+      <classpathContainerPage
+            name="My Example Container"
+            class="org.eclipse.jdt.ui.examples.MyClasspathContainerPage"
+            id="org.eclipse.jdt.EXAMPLE_CONTAINER">
+      </classpathContainerPage>
+   </extension>
 </plugin>
