@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -260,6 +261,9 @@ public class ASTResolving {
 		do {
 			found= false;
 			int curr= scanner.getNextToken();
+			if (curr == ITerminalSymbols.TokenNameEOF) {
+				throw new InvalidInputException("End of File");
+			}
 			for (int i= 0; i < prevTokens.length; i++) {
 				if (prevTokens[i] == curr) {
 					found= true;
@@ -268,7 +272,7 @@ public class ASTResolving {
 			}
 		} while (found);
 	}
-	
+		
 	public static void readToToken(IScanner scanner, int tok) throws InvalidInputException {
 		int curr= 0;
 		do {
