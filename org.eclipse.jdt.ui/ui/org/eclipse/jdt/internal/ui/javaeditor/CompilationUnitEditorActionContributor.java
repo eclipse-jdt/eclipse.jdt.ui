@@ -122,14 +122,14 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fRetargetPreviousError= new RetargetEditorAction(RetargetActionIDs.SHOW_PREVIOUS_PROBLEM, fPreviousError);
 		fRetargetNextError= new RetargetEditorAction(RetargetActionIDs.SHOW_NEXT_PROBLEM, fNextError);
 		
-		fStructureSelectEnclosingAction= new RetargetTextEditorAction(bundle, "StructureSelectEnclosing.");
-		fStructureSelectNextAction= new RetargetTextEditorAction(bundle, "StructureSelectNext.");
-		fStructureSelectPreviousAction= new RetargetTextEditorAction(bundle, "StructureSelectPrevious.");
-		fStructureSelectHistoryAction= new RetargetTextEditorAction(bundle, "StructureSelectHistory.");
+		fStructureSelectEnclosingAction= new RetargetTextEditorAction(bundle, "StructureSelectEnclosing."); //$NON-NLS-1$
+		fStructureSelectNextAction= new RetargetTextEditorAction(bundle, "StructureSelectNext."); //$NON-NLS-1$
+		fStructureSelectPreviousAction= new RetargetTextEditorAction(bundle, "StructureSelectPrevious."); //$NON-NLS-1$
+		fStructureSelectHistoryAction= new RetargetTextEditorAction(bundle, "StructureSelectHistory."); //$NON-NLS-1$
 	}
 
 	private String getLabel(ResourceBundle bundle, String prefix) {
-		final String labelKey= "label";
+		final String labelKey= "label"; //$NON-NLS-1$
 		try {
 			return bundle.getString(prefix + labelKey);
 		} catch (MissingResourceException e) {
@@ -160,7 +160,7 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	}
 
 	private void addStructureSelection(IMenuManager editMenu) {
-		MenuManager structureSelection= new MenuManager("Expand &Selection to");
+		MenuManager structureSelection= new MenuManager(JavaEditorMessages.getString("ExpandSelectionMenu.label")); //$NON-NLS-1$
 		structureSelection.add(fStructureSelectEnclosingAction);
 		structureSelection.add(fStructureSelectNextAction);
 		structureSelection.add(fStructureSelectPreviousAction);
@@ -209,13 +209,13 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		IActionBars bars= getActionBars();		
 		// Source menu.
 
-		bars.setGlobalActionHandler(RetargetActionIDs.COMMENT, getAction(textEditor, "Comment"));
-		bars.setGlobalActionHandler(RetargetActionIDs.UNCOMMENT, getAction(textEditor, "Uncomment"));
-		bars.setGlobalActionHandler(RetargetActionIDs.FORMAT, getAction(textEditor, "Format"));
+		bars.setGlobalActionHandler(RetargetActionIDs.COMMENT, getAction(textEditor, "Comment")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(RetargetActionIDs.UNCOMMENT, getAction(textEditor, "Uncomment")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(RetargetActionIDs.FORMAT, getAction(textEditor, "Format")); //$NON-NLS-1$
 
-		bars.setGlobalActionHandler(RetargetActionIDs.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection"));
-		bars.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports"));
-		bars.setGlobalActionHandler(RetargetActionIDs.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch"));
+		bars.setGlobalActionHandler(RetargetActionIDs.ADD_IMPORT, getAction(textEditor, "AddImportOnSelection")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(RetargetActionIDs.ORGANIZE_IMPORTS, getAction(textEditor, "OrganizeImports")); //$NON-NLS-1$
+		bars.setGlobalActionHandler(RetargetActionIDs.SURROUND_WITH_TRY_CATCH, getAction(textEditor, "SurroundWithTryCatch")); //$NON-NLS-1$
 		
 		// Navigate menu
 	
