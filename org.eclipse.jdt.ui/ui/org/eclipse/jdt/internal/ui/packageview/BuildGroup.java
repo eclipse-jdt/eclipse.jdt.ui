@@ -21,7 +21,7 @@ public class BuildGroup extends ContextMenuGroup {
 		if (fBuildAction == null) {
 			fBuildAction= new BuildAction(JavaPlugin.getActiveWorkbenchShell(),
 				IncrementalProjectBuilder.INCREMENTAL_BUILD);
-			fBuildAction.setText("Build Project");
+			fBuildAction.setText("&Build Project");
 		}
 		
 		
@@ -31,7 +31,7 @@ public class BuildGroup extends ContextMenuGroup {
 		if (fFullBuildAction == null) {
 			fFullBuildAction= new BuildAction(JavaPlugin.getActiveWorkbenchShell(),
 				IncrementalProjectBuilder.FULL_BUILD);
-			fFullBuildAction.setText("Rebuild Project");
+			fFullBuildAction.setText("Rebuild Pro&ject");
 		}
 		
 		fFullBuildAction.selectionChanged(convertSelectionToProjects((IStructuredSelection)context.getSelection()));

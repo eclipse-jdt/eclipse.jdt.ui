@@ -122,7 +122,7 @@
 	</category>
 	<wizard 
 		id="org.eclipse.jdt.ui.wizards.NewProjectCreationWizard"
-		name="Java Project"
+		name="%NewJavaProject.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewProjectCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		project="true"
@@ -132,7 +132,7 @@
     </wizard>	
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewPackageCreationWizard"
-		name="Java Package"
+		name="%NewJavaPackage.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newpack_wiz.gif">
@@ -140,7 +140,7 @@
 	</wizard>	
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard"
-		name="Java Class"
+		name="%NewJavaClass.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newclass_wiz.gif">
@@ -148,7 +148,7 @@
 	</wizard>
 	<wizard 
 		id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard"
-		name="Java Interface"
+		name="%NewJavaInterface.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newint_wiz.gif">
@@ -156,7 +156,7 @@
 	</wizard>
 	<wizard
 		id="org.eclipse.jdt.ui.wizards.NewSnippetCreationWizard"
-		name="Java Scrapbook Page"
+		name="%NewJavaScrapbookPage.label"
 		class="org.eclipse.jdt.internal.ui.wizards.NewSnippetCreationWizard"
 		category="org.eclipse.jdt.ui.java"
 		icon="icons/full/ctool16/newsbook_wiz.gif">
@@ -219,7 +219,7 @@
    <editor
       id="org.eclipse.jdt.ui.CompilationUnitEditor"
       icon="icons/full/obj16/jcu_obj.gif"
-      name="Java Editor"
+      name="%JavaEditor.label"
       extensions="java"
       class="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor"
       contributorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditorActionContributor">
@@ -237,7 +237,7 @@
    <editor
       id="org.eclipse.jdt.ui.SnippetEditor"
       icon="icons/full/obj16/jsbook_obj.gif"
-      name="Java Snippet Editor"
+      name="%JavaSnippetEditor.label"
       extensions="jpage"
       class="org.eclipse.jdt.internal.ui.snippeteditor.JavaSnippetEditor"
       contributorClass="org.eclipse.jdt.internal.ui.snippeteditor.SnippetEditorActionContributor">

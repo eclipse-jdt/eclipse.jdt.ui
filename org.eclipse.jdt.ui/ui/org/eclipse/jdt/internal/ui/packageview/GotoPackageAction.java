@@ -15,7 +15,7 @@ public class GotoPackageAction extends JavaUIAction {
 	private EmptyInnerPackageFilter fFilter;
 	
 	public GotoPackageAction(PackageExplorerPart part) {
-		super("Package...");
+		super("&Package...");
 		fPackageExplorer= part;
 		fFilter= new EmptyInnerPackageFilter();
 	}
