@@ -33,14 +33,13 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.IWizardContainer;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.ITextSelection;
@@ -742,17 +741,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	private void typePageLinkActivated(HyperlinkEvent e) {
-		Shell shell= null;
-		if (getWizard() != null) {
-			IWizardContainer container= getWizard().getContainer();
-			if (container != null) {
-				shell= container.getShell();
-				if (shell != null && shell.isDisposed())
-					shell= null;
-			}
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		if (root != null) {
+			PreferenceDialog dialog= PreferencesUtil.createPropertyDialogOn(getShell(), root.getJavaProject().getProject(), CodeTemplatePreferencePage.PROP_ID, null, null);
+			dialog.open();
+		} else {
+			String title= NewWizardMessages.getString("NewTypeWizardPage.configure_templates.title"); //$NON-NLS-1$
+			String message= NewWizardMessages.getString("NewTypeWizardPage.configure_templates.message"); //$NON-NLS-1$
+			MessageDialog.openInformation(getShell(), title, message);
 		}
-		PreferenceDialog dialog= PreferencesUtil.createPreferenceDialogOn(shell, CodeTemplatePreferencePage.PREF_ID, null, null);
-		dialog.open();
 	}
 	
 	private void typePageChangeControlPressed(DialogField field) {
