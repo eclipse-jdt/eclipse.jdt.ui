@@ -954,12 +954,7 @@ public class PackageExplorerPart extends ViewPart
 	
 	private boolean isOnClassPath(IFile file) {
 		IJavaProject jproject= JavaCore.create(file.getProject());
-		try {
-			return jproject.isOnClasspath(file);
-		} catch (JavaModelException e) {
-			// fall through
-		}
-		return false;
+		return jproject.isOnClasspath(file);
 	}
 
 	/**

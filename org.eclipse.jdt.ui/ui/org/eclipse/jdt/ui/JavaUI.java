@@ -604,13 +604,8 @@ public final class JavaUI {
 			IWorkingCopy wc= wcs[i];
 			if (wc instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)wc;
-				try {
-					if (je.getJavaProject().isOnClasspath(je)) {
-						result.add(wc);
-					}
-				} catch (JavaModelException e) {
-					// could evaluate project. Assuming that element
-					// isn't on class path.
+				if (je.getJavaProject().isOnClasspath(je)) {
+					result.add(wc);
 				}
 			}
 		}

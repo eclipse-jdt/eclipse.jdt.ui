@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 /**
  * Working set filter for Java viewers.
@@ -143,13 +142,9 @@ public class WorkingSetFilter extends ViewerFilter {
 						if (scopeElement.getElementType() == IJavaElement.JAVA_PROJECT && searchedElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT_ROOT) {
 							IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)searchedElement;
 							if (pkgRoot.isExternal() && pkgRoot.isArchive()) {
-								try {
-									if (((IJavaProject)scopeElement).isOnClasspath(searchedElement))
-										return true;
-								} catch (JavaModelException e) {
-									// go on with next statement
-								}
-							}
+								if (((IJavaProject)scopeElement).isOnClasspath(searchedElement))
+									return true;
+						}
 						}
 						searchedElement= searchedElement.getParent();
 						if (searchedElement != null && searchedElement.getElementType() == IJavaElement.COMPILATION_UNIT) {

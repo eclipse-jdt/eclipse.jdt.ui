@@ -663,12 +663,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				if (selectedElement instanceof IFolder) {
 					// Convert resource to Java element if possible
 					IJavaElement je= JavaCore.create((IResource)selectedElement);
-					try {
-						if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)selectedElement))
-							selectedElement= je;
-					} catch (JavaModelException e) {
-						// Don't convert the selected element to Java element
-					}
+					if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)selectedElement))
+						selectedElement= je;
 				}					
 				fInputGroup.initialCheckTreeItem(selectedElement);
 			}

@@ -29,8 +29,6 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.IResourceLocator;
@@ -130,13 +128,8 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 				IJavaProject project= input != null ? input.getJavaProject() : null;
 				
 				boolean isOnClasspath= false;
-				if (file != null && project != null) {
-					try {
-						isOnClasspath= project.isOnClasspath(file);
-					} catch (JavaModelException x) {
-						// ignore
-					}		
-				}
+				if (file != null && project != null) 
+					isOnClasspath= project.isOnClasspath(file);
 				
 				if (isOnClasspath) {
 					fireInputChanged(fInput);

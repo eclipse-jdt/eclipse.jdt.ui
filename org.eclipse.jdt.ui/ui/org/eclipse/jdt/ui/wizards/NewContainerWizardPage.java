@@ -298,13 +298,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					} catch (CoreException e) {
 						status.setWarning(NewWizardMessages.getString("NewContainerWizardPage.warning.NotAJavaProject")); //$NON-NLS-1$
 					}
-					try {
-						if (!jproject.isOnClasspath(fCurrRoot)) {
-							status.setWarning(NewWizardMessages.getFormattedString("NewContainerWizardPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
-						}		
-					} catch (JavaModelException e) {
+					if (!jproject.isOnClasspath(fCurrRoot)) {
 						status.setWarning(NewWizardMessages.getFormattedString("NewContainerWizardPage.warning.NotOnClassPath", str)); //$NON-NLS-1$
-					}					
+					}		
 					if (fCurrRoot.isArchive()) {
 						status.setError(NewWizardMessages.getFormattedString("NewContainerWizardPage.error.ContainerIsBinary", str)); //$NON-NLS-1$
 						return status;

@@ -283,11 +283,7 @@ public class JarFileExportOperation implements IJarExportRunnable {
 			if (pkgRoot != null) {
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
 				boolean isOnBuildPath;
-				try {
-					isOnBuildPath= jProject.isOnClasspath(resource);
-				} catch (JavaModelException ex) {
-					isOnBuildPath= false;
-				}
+				isOnBuildPath= jProject.isOnClasspath(resource);
 				if (!isOnBuildPath || (mustUseSourceFolderHierarchy() && !pkgRoot.getElementName().equals(IPackageFragmentRoot.DEFAULT_PACKAGEROOT_PATH)))
 					leadSegmentsToRemove--;
 			}

@@ -401,14 +401,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			 */
 			public void beginReporting() {
 				ICompilationUnit unit= getWorkingCopy(fInput);
-				try {
-					if (unit != null && unit.getJavaProject().isOnClasspath(unit))
-						fCollectedProblems= new ArrayList();
-					else
-						fCollectedProblems= null;
-				} catch (JavaModelException e) {
-					fCollectedProblems= null;	
-				}				
+				if (unit != null && unit.getJavaProject().isOnClasspath(unit))
+					fCollectedProblems= new ArrayList();
+				else
+					fCollectedProblems= null;
 			}
 			
 			/*

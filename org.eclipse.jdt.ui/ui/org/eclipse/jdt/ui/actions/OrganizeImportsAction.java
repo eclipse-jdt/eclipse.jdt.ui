@@ -340,21 +340,14 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 	
 	private boolean testOnBuildPath(ICompilationUnit cu, MultiStatus status) {
-		try {
-			IJavaProject project= cu.getJavaProject();
-			if (!project.isOnClasspath(cu)) {
-				String cuLocation= cu.getPath().makeRelative().toString();
-				String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.notoncp", cuLocation); //$NON-NLS-1$
-				status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
-				return false;
-			}
-			return true;
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-			String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.unexpected", e.getStatus().getMessage()); //$NON-NLS-1$
-			status.add(new Status(Status.ERROR, JavaUI.ID_PLUGIN, Status.ERROR, message, null));					
+		IJavaProject project= cu.getJavaProject();
+		if (!project.isOnClasspath(cu)) {
+			String cuLocation= cu.getPath().makeRelative().toString();
+			String message= ActionMessages.getFormattedString("OrganizeImportsAction.multi.error.notoncp", cuLocation); //$NON-NLS-1$
+			status.add(new Status(Status.INFO, JavaUI.ID_PLUGIN, Status.ERROR, message, null));
 			return false;
 		}
+		return true;
 	}
 	
 		

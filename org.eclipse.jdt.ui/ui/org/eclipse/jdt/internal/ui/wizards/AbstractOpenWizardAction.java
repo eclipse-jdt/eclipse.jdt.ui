@@ -28,8 +28,6 @@ import org.eclipse.ui.actions.NewProjectAction;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -214,13 +212,9 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 	}
 	
 	protected static boolean isOnBuildPath(Object obj) {
-		try {
-			if (obj instanceof IJavaElement) {
-				IJavaElement elem= (IJavaElement)obj;
-				return elem.getJavaProject().isOnClasspath(elem);
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e.getStatus());
+		if (obj instanceof IJavaElement) {
+			IJavaElement elem= (IJavaElement)obj;
+			return elem.getJavaProject().isOnClasspath(elem);
 		}
 		return false;
 	}

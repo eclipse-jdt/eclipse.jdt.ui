@@ -460,11 +460,7 @@ public class JavaModelUtil {
 		IJavaProject project= element.getJavaProject();
 		if (!project.exists())
 			return false;
-		try {
-			return project.isOnClasspath(element);
-		} catch (JavaModelException e) {
-			return false;
-		}
+		return project.isOnClasspath(element);
 	}
 
 	/**
