@@ -51,8 +51,18 @@ import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommand;
+import org.eclipse.ui.commands.ICommandManager;
+import org.eclipse.ui.commands.IKeySequenceBinding;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.keys.CharacterKey;
+import org.eclipse.ui.keys.KeySequence;
+import org.eclipse.ui.keys.KeyStroke;
+import org.eclipse.ui.keys.ModifierKey;
+import org.eclipse.ui.keys.SWTKeySupport;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
@@ -205,26 +215,53 @@ public class MoveMembersWizard extends RefactoringWizard {
 				}
 			});
 
-			combo.addKeyListener(new KeyAdapter() {
-				/*
-				 * @see org.eclipse.swt.events.KeyListener#keyReleased(org.eclipse.swt.events.KeyEvent)
-				 */
-				public void keyPressed(KeyEvent e) {
-//					ICommandManager cm= ((Workbench)PlatformUI.getWorkbench()).getCommandManager();
-//					ICommand command= cm.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
-//					command.getKeyBindings();
-//					System.out.println("pressed");
-
-					if (e.character == ' ' && e.stateMask == SWT.CTRL) {
-						e.doit= false;
-						String errorMessage= contentAssistant.showPossibleCompletions();
-						if (errorMessage != null)
-							setErrorMessage(errorMessage);
-					}
-					
-				}});
+			combo.addKeyListener(getContentAssistKeyAdapter(contentAssistant));
 			contentAssistant.install(new ComboContentAssistSubjectAdapter(combo));
 			return contentAssistant;
+		}
+
+		private KeyAdapter getContentAssistKeyAdapter(final ContentAssistant contentAssistant) {
+			return new KeyAdapter() {
+				KeySequence[] fKeySequences;
+				
+				private KeySequence[] getKeySequences() {
+					if (fKeySequences == null) {
+						ICommandManager cm = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
+						ICommand command= cm.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+						if (command.isDefined()) {
+							List list= command.getKeySequenceBindings();
+							if (!list.isEmpty()) {
+								fKeySequences= new KeySequence[list.size()];
+								for (int i= 0; i < fKeySequences.length; i++) {
+									fKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
+								}
+								return fKeySequences;
+							}		
+						}
+						// default is Ctrl+Space
+						fKeySequences= new KeySequence[] { 
+								KeySequence.getInstance(KeyStroke.getInstance(ModifierKey.CTRL, CharacterKey.SPACE))
+						};
+					}
+					return fKeySequences;
+				}
+				
+				public void keyPressed(KeyEvent e) {
+					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
+					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
+					KeySequence[] sequences= getKeySequences();
+					
+					for (int i= 0; i < sequences.length; i++) {
+						// only works for single strokes (would need to hold KeyBindingState for multiple):
+						if (sequences[i].equals(keySequence)) {
+							e.doit= false;
+							String errorMessage= contentAssistant.showPossibleCompletions();
+							if (errorMessage != null)
+								setErrorMessage(errorMessage);
+							return;
+						}
+					}
+				}};
 		}
 
 		public void dispose() {
