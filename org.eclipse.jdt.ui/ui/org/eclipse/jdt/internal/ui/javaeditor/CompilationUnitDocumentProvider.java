@@ -48,17 +48,18 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
+import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelListener;
 import org.eclipse.jface.text.source.IAnnotationModelListenerExtension;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
-import org.eclipse.ui.texteditor.AnnotationLayerLookup;
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.MarkerAnnotation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.ResourceMarkerAnnotationModel;
@@ -116,6 +117,42 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 		 */
 		static protected class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
 
+			//XXX: To be fully correct these constants should be non-static
+			/** 
+			 * The layer in which task problem annotations are located.
+			 */
+			private static final int TASK_LAYER;
+			/** 
+			 * The layer in which info problem annotations are located.
+			 */
+			private static final int INFO_LAYER;
+			/** 
+			 * The layer in which warning problem annotations representing are located.
+			 */
+			private static final int WARNING_LAYER;
+			/** 
+			 * The layer in which error problem annotations representing are located.
+			 */
+			private static final int ERROR_LAYER;
+			
+			static {
+				// XXX: This should be offered by Editor plug-in
+				AnnotationPreferenceLookup lookup= new AnnotationPreferenceLookup();
+				TASK_LAYER= computeLayer("org.eclipse.ui.workbench.texteditor.task", lookup); //$NON-NLS-1$
+				INFO_LAYER= computeLayer("org.eclipse.jdt.ui.info", lookup); //$NON-NLS-1$
+				WARNING_LAYER= computeLayer("org.eclipse.jdt.ui.warning", lookup); //$NON-NLS-1$
+				ERROR_LAYER= computeLayer("org.eclipse.jdt.ui.error", lookup); //$NON-NLS-1$
+			}
+			
+			private static int computeLayer(String annotationType, AnnotationPreferenceLookup lookup) {
+				Annotation annotation= new Annotation(annotationType, false, null);
+				AnnotationPreference preference= lookup.getAnnotationPreference(annotation);
+				if (preference != null)
+					return preference.getPresentationLayer() + 1;
+				else
+					return IAnnotationAccessExtension.DEFAULT_LAYER + 1;
+			}
+
 			private static Image fgQuickFixImage;
 			private static Image fgQuickFixErrorImage;
 			private static boolean fgQuickFixImagesInitialized= false;
@@ -125,7 +162,7 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 			private IProblem fProblem;
 			private Image fImage;
 			private boolean fQuickFixImagesInitialized= false;
-			
+			private int fLayer= IAnnotationAccessExtension.DEFAULT_LAYER;
 			
 			public ProblemAnnotation(IProblem problem, ICompilationUnit cu) {
 				
@@ -134,17 +171,24 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 				
 				if (IProblem.Task == fProblem.getID()) {
 					setType(JavaMarkerAnnotation.TASK_ANNOTATION_TYPE);
-					setLayer(AnnotationLayerLookup.TASK_LAYER + 1);
+					fLayer= TASK_LAYER;
 				} else if (fProblem.isWarning()) {
 					setType(JavaMarkerAnnotation.WARNING_ANNOTATION_TYPE);
-					setLayer(AnnotationLayerLookup.WARNING_LAYER + 1);
+					fLayer= WARNING_LAYER;
 				} else if (fProblem.isError()) {
 					setType(JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE);
-					setLayer(AnnotationLayerLookup.ERROR_LAYER + 1);
+					fLayer= ERROR_LAYER;
 				} else {
 					setType(JavaMarkerAnnotation.INFO_ANNOTATION_TYPE);
-					setLayer(AnnotationLayerLookup.INFO_LAYER + 1);
+					fLayer= INFO_LAYER;
 				}
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.source.Annotation#getLayer()
+			 */
+			public int getLayer() {
+				return fLayer;
 			}
 			
 			private void initializeImages() {
