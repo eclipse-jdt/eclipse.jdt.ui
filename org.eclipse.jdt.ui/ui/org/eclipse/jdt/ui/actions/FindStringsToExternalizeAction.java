@@ -190,61 +190,75 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 	 * returns List of Strings
 	 */
 	private List analyze(IPackageFragment pack, IProgressMonitor pm) throws JavaModelException{
-		if (pack == null)
-			return new ArrayList(0);
+		try{
+			if (pack == null)
+				return new ArrayList(0);
+				
+			ICompilationUnit[] cus= pack.getCompilationUnits();
+	
+			pm.beginTask("", cus.length); //$NON-NLS-1$
+			pm.setTaskName(pack.getElementName());
 			
-		ICompilationUnit[] cus= pack.getCompilationUnits();
-
-		pm.beginTask("", cus.length); //$NON-NLS-1$
-		
-		List l= new ArrayList(cus.length);
-		for (int i= 0; i < cus.length; i++){
-			
-			NonNLSElement element = analyze(cus[i]);
-			if (element != null)
-				l.add(element);
-			pm.worked(1);
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
+			List l= new ArrayList(cus.length);
+			for (int i= 0; i < cus.length; i++){
+				pm.subTask(cus[i].getElementName());
+				NonNLSElement element = analyze(cus[i]);
+				if (element != null)
+					l.add(element);
+				pm.worked(1);
+				if (pm.isCanceled())
+					throw new OperationCanceledException();
+			}	
+			return l;					
+		} finally {
+			pm.done();
 		}	
-		return l;					
 	}
 
 	/*
 	 * returns List of Strings
 	 */	
 	private List analyze(IPackageFragmentRoot sourceFolder, IProgressMonitor pm) throws JavaModelException{
-		IJavaElement[] children= sourceFolder.getChildren();
-		pm.beginTask("", children.length); //$NON-NLS-1$
-		List result= new ArrayList();
-		for (int i= 0; i < children.length; i++) {
-			IJavaElement iJavaElement= children[i];
-			if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
-				IPackageFragment pack= (IPackageFragment)iJavaElement;
-				if (! pack.isReadOnly())
-					result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
-				else
-					pm.worked(1);	
-			} else	
-				pm.worked(1);
-		}
-		return result;
+		try{
+			IJavaElement[] children= sourceFolder.getChildren();
+			pm.beginTask("", children.length); //$NON-NLS-1$
+			pm.setTaskName(sourceFolder.getElementName());
+			List result= new ArrayList();
+			for (int i= 0; i < children.length; i++) {
+				IJavaElement iJavaElement= children[i];
+				if (iJavaElement.getElementType() == IJavaElement.PACKAGE_FRAGMENT){
+					IPackageFragment pack= (IPackageFragment)iJavaElement;
+					if (! pack.isReadOnly())
+						result.addAll(analyze(pack, new SubProgressMonitor(pm, 1)));
+					else
+						pm.worked(1);	
+				} else	
+					pm.worked(1);
+			}
+			return result;
+		} finally{
+			pm.done();
+		}	
 	}
 	
 	/*
 	 * returns List of Strings
 	 */
 	private List analyze(IJavaProject project, IProgressMonitor pm) throws JavaModelException{
-		IPackageFragment[] packs= project.getPackageFragments();
-		pm.beginTask("", packs.length); //$NON-NLS-1$
-		List result= new ArrayList();
-		for (int i= 0; i < packs.length; i++) {
-			if (! packs[i].isReadOnly())
-				result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
-			else 
-				pm.worked(1);	
-		}
-		return result;		
+		try{
+			IPackageFragment[] packs= project.getPackageFragments();
+			pm.beginTask("", packs.length); //$NON-NLS-1$
+			List result= new ArrayList();
+			for (int i= 0; i < packs.length; i++) {
+				if (! packs[i].isReadOnly())
+					result.addAll(analyze(packs[i], new SubProgressMonitor(pm, 1)));
+				else 
+					pm.worked(1);	
+			}
+			return result;		
+		} finally{
+			pm.done();
+		}	
 	}
 	
 	private int countStrings(){
