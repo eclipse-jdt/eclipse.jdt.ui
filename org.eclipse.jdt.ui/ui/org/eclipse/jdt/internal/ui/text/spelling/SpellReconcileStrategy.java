@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -34,13 +33,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellChecker;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener;
-
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * Reconcile strategy to spell-check comments.
@@ -264,9 +262,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 		fPreferences= store;
 
 		final IAnnotationModel model= editor.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
-		Assert.isLegal(model instanceof IProblemRequestor);
-
-		fRequestor= (IProblemRequestor)model;
+		fRequestor= (model instanceof IProblemRequestor) ? (IProblemRequestor) model : null;
 	}
 
 	/**
@@ -290,21 +286,24 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEventListener#handle(org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellEvent)
 	 */
 	public void handle(final ISpellEvent event) {
-
-		final SpellProblem problem= new SpellProblem(event.getWord());
-
-		problem.setSourceStart(event.getBegin());
-		problem.setSourceEnd(event.getEnd());
-		problem.setSentenceStart(event.isStart());
-		problem.setDictionaryMatch(event.isMatch());
-
-		try {
-			problem.setSourceLineNumber(fDocument.getLineOfOffset(event.getBegin()) + 1);
-		} catch (BadLocationException exception) {
-			// Do nothing
+		
+		if (fRequestor != null) {
+			
+			final SpellProblem problem= new SpellProblem(event.getWord());
+			
+			problem.setSourceStart(event.getBegin());
+			problem.setSourceEnd(event.getEnd());
+			problem.setSentenceStart(event.isStart());
+			problem.setDictionaryMatch(event.isMatch());
+			
+			try {
+				problem.setSourceLineNumber(fDocument.getLineOfOffset(event.getBegin()) + 1);
+			} catch (BadLocationException x) {
+				// Do nothing
+			}
+			
+			fRequestor.acceptProblem(problem);
 		}
-
-		fRequestor.acceptProblem(problem);
 	}
 
 	/*
@@ -331,7 +330,7 @@ public class SpellReconcileStrategy implements IReconcilingStrategy, IReconcilin
 	 */
 	public void reconcile(final IRegion region) {
 
-		if (fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING)) {
+		if (fPreferences.getBoolean(ISpellCheckPreferenceKeys.SPELLING_CHECK_SPELLING) && fRequestor != null) {
 
 			try {
 
