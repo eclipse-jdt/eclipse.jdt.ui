@@ -13,10 +13,15 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.zip.ZipEntry;
@@ -175,6 +180,41 @@ public class FileTool {
 			return new File(localURL.getFile());
 		} catch (IOException e) {
 			return null;
+		}
+	}
+
+	public static StringBuffer read(String fileName) throws FileNotFoundException, IOException {
+		StringBuffer s= new StringBuffer();
+		Reader reader= null;
+		try {
+			reader= new FileReader(fileName);
+			char[] buffer= new char[8196];
+			int chars= reader.read(buffer);
+			while (chars != -1) {
+				s.append(buffer, 0, chars);
+				chars= reader.read(buffer);
+			}
+		} finally {
+			try {
+				if (reader != null)
+					reader.close();
+			} catch (IOException e) {
+			}
+		}
+		return s;
+	}
+
+	public static void write(String fileName, StringBuffer c) throws IOException {
+		Writer writer= null;
+		try {
+			writer= new FileWriter(fileName);
+			writer.write(c.toString());
+		} finally {
+			try {
+				if (writer != null)
+					writer.close();
+			} catch (IOException e) {
+			}
 		}
 	}
 }

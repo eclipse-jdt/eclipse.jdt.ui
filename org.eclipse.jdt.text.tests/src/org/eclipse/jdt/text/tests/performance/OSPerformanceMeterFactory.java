@@ -13,7 +13,7 @@ package org.eclipse.jdt.text.tests.performance;
 
 public class OSPerformanceMeterFactory extends PerformanceMeterFactory {
 
-	protected PerformanceMeter internalCreatePerformanceMeter(String scenario) {
+	protected PerformanceMeter doCreatePerformanceMeter(String scenario) {
 		return new OSPerformanceMeter(scenario);
 	}
 }

@@ -22,7 +22,7 @@ public abstract class PerformanceMeterFactory {
 	
 	public PerformanceMeter createPerformanceMeter(String scenario) {
 		assertUniqueScenario(scenario);
-		return internalCreatePerformanceMeter(scenario);
+		return doCreatePerformanceMeter(scenario);
 	}
 
 	public PerformanceMeter createPerformanceMeter(TestCase testCase, String monitorId) {
@@ -36,7 +36,7 @@ public abstract class PerformanceMeterFactory {
 		return createPerformanceMeter(testCase, null);
 	}
 
-	protected abstract PerformanceMeter internalCreatePerformanceMeter(String scenario);
+	protected abstract PerformanceMeter doCreatePerformanceMeter(String scenario);
 	
 	private static void assertUniqueScenario(String scenario) {
 		if (fScenarios.contains(scenario))

@@ -11,12 +11,7 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Reader;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -62,28 +57,14 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 	}
 
 	private static void duplicate(String origPrefix, String origName, String origPostfix, int n) throws IOException {
-		StringBuffer s= read(origPrefix + origName + origPostfix);
+		StringBuffer s= FileTool.read(origPrefix + origName + origPostfix);
 		
 		List positions= identifierPositions(s, origName);
 		
 		for (int j= 0; j < n; j++) {
 			StringBuffer c= new StringBuffer(s.toString());
 			replacePositions(c, origName.length(), origName + Integer.toString(j), positions);
-			write(origPrefix + origName + j + origPostfix, c);
-		}
-	}
-
-	private static void write(String fileName, StringBuffer c) throws IOException {
-		Writer writer= null;
-		try {
-			writer= new FileWriter(fileName);
-			writer.write(c.toString());
-		} finally {
-			try {
-				if (writer != null)
-					writer.close();
-			} catch (IOException e) {
-			}
+			FileTool.write(origPrefix + origName + j + origPostfix, c);
 		}
 	}
 
@@ -110,27 +91,6 @@ public class OpenJavaEditorTest extends OpenEditorTest {
 			positions.add(new Integer(i));
 		}
 		return positions;
-	}
-
-	private static StringBuffer read(String fileName) throws FileNotFoundException, IOException {
-		StringBuffer s= new StringBuffer();
-		Reader reader= null;
-		try {
-			reader= new FileReader(fileName);
-			char[] buffer= new char[8196];
-			int chars= reader.read(buffer);
-			while (chars != -1) {
-				s.append(buffer, 0, chars);
-				chars= reader.read(buffer);
-			}
-		} finally {
-			try {
-				if (reader != null)
-					reader.close();
-			} catch (IOException e) {
-			}
-		}
-		return s;
 	}
 
 }
