@@ -294,6 +294,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	protected void toggleHierarchy() {
 		TreeViewer treeViewer= getTreeViewer();
 		
+		treeViewer.getTree().setRedraw(false);
+		
 		Object[] expandedElements= treeViewer.getExpandedElements();
 		TypeHierarchyContentProvider contentProvider= (TypeHierarchyContentProvider) treeViewer.getContentProvider();
 		treeViewer.setContentProvider(fOtherContentProvider);
@@ -304,6 +306,8 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		} else {
 			treeViewer.expandAll();
 		}
+		
+		treeViewer.getTree().setRedraw(true);
 		
 		fOtherContentProvider= contentProvider;
 		fOtherExpandedElements= expandedElements;

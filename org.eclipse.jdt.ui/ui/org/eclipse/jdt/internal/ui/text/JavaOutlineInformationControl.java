@@ -178,8 +178,10 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		}
 		
 		public void toggleShowInheritedMembers() {
+			getTreeViewer().getTree().setRedraw(false);
 			fShowInheritedMembers= !fShowInheritedMembers;
 			getTreeViewer().refresh();
+			getTreeViewer().getTree().setRedraw(true);
 		}
 		
 		/**
@@ -366,7 +368,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		int flags= AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE;
 		if (!fOutlineContentProvider.isShowingInheritedMembers())
 			flags |= JavaElementLabels.ALL_POST_QUALIFIED;
-		fInnerLabelProvider.setTextFlags(flags);	
+		fInnerLabelProvider.setTextFlags(flags);
 		fOutlineContentProvider.toggleShowInheritedMembers();
 		updateStatusFieldText();
 	}
