@@ -92,7 +92,7 @@ public class RefactoringWizardDialog2 extends Dialog implements IWizardContainer
 			fImage.setLayoutData(gd);
 			fImage.setImage(null);
 			fText= new Label(this, SWT.WRAP);
-			fText.setText("\n\n"); //$NON-NLS-1$
+			fText.setText(" \n "); //$NON-NLS-1$
 			size= fText.computeSize(SWT.DEFAULT, SWT.DEFAULT);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.heightHint= size.y;
