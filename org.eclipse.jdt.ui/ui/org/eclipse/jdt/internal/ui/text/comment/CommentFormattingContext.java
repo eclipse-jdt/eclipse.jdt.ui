@@ -19,9 +19,9 @@ import java.util.Set;
 
 import org.eclipse.jface.text.formatter.FormattingContext;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 /**
  * Formatting context for the comment formatter.
@@ -175,16 +175,16 @@ public class CommentFormattingContext extends FormattingContext {
 	 * @since 3.1
 	 */
 	private static final String[] MAPPED_PREFERENCE_KEYS= new String[] { 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMAT, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATSOURCE, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_NEWLINEFORPARAMETER, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_LINELENGTH, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES, 
-		    CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHTML };
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_SOURCE, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_PARAMETER_DESCRIPTION, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INDENT_ROOT_TAGS, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_CLEAR_BLANK_LINES, 
+		    DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HTML };
 
 	/**
 	 * Map from JDT/UI preference keys to JDT/Core preference keys.

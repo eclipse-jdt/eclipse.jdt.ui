@@ -32,10 +32,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterPreferenceConstants;
-import org.eclipse.jdt.internal.corext.text.comment.CommentFormatterConstants;
-import org.eclipse.jdt.internal.corext.text.comment.ITextMeasurement;
-
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -53,9 +49,6 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/** Partitions to be formatted by this strategy */
 	private final LinkedList fPartitions= new LinkedList();
 
-	/** Text measurement, can be <code>null</code> */
-	private ITextMeasurement fTextMeasurement;
-
 	/** Last formatted document's hash-code. */
 	private int fLastDocumentHash;
 	
@@ -68,16 +61,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	/** End of the header in the last document. */
 	private int fLastDocumentsHeaderEnd;
 
-	/**
-	 * Creates a new comment formatting strategy.
-	 * 
-	 * @param textMeasurement the text measurement
-	 */
-	public CommentFormattingStrategy(ITextMeasurement textMeasurement) {
-		super();
-		fTextMeasurement= textMeasurement;
-	}
-
+	
 	/*
 	 * @see org.eclipse.jface.text.formatter.IFormattingStrategyExtension#format()
 	 */
@@ -90,7 +74,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 			return;
 		
 		Map preferences= CommentFormattingContext.mapOptions(getPreferences());
-		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(CommentFormatterPreferenceConstants.FORMATTER_COMMENT_FORMATHEADER));
+		final boolean isFormattingHeader= Boolean.toString(true).equals(preferences.get(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_HEADER));
 		int documentsHeaderEnd= computeHeaderEnd(document);
 		
 		if (isFormattingHeader || position.offset >= documentsHeaderEnd) {
@@ -103,7 +87,7 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 				int partitionOffset= position.getOffset() - sourceOffset;
 				int sourceLength= partitionOffset + position.getLength();
 				String source= document.get(sourceOffset, sourceLength);
-				CodeFormatter commentFormatter= org.eclipse.jdt.internal.corext.text.comment.ToolFactory.createCommentFormatter(fTextMeasurement, preferences);
+				CodeFormatter commentFormatter= ToolFactory.createCodeFormatter(preferences);
 				int indentationLevel= inferIndentationLevel(source.substring(0, partitionOffset), getTabSize(preferences));
 				edit= commentFormatter.format(getKindForPartitionType(position.getType()), source, partitionOffset, position.getLength(), indentationLevel, TextUtilities.getDefaultLineDelimiter(document));
 				
@@ -155,11 +139,11 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 	 */
 	private static int getKindForPartitionType(String type) {
 		if (IJavaPartitions.JAVA_SINGLE_LINE_COMMENT.equals(type))
-				return CommentFormatterConstants.K_SINGLE_LINE_COMMENT;
+				return CodeFormatter.K_SINGLE_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_MULTI_LINE_COMMENT.equals(type))
-				return CommentFormatterConstants.K_MULTI_LINE_COMMENT;
+				return CodeFormatter.K_MULTI_LINE_COMMENT;
 		if (IJavaPartitions.JAVA_DOC.equals(type))
-				return CommentFormatterConstants.K_JAVA_DOC;
+				return CodeFormatter.K_JAVA_DOC;
 		return -1;
 	}
 	
@@ -176,13 +160,8 @@ public class CommentFormattingStrategy extends ContextBasedFormattingStrategy {
 		StringBuffer expanded= expandTabs(reference, tabSize);
 		
 		int spaceWidth, referenceWidth;
-		if (fTextMeasurement != null) {
-			spaceWidth= fTextMeasurement.computeWidth(" "); //$NON-NLS-1$
-			referenceWidth= fTextMeasurement.computeWidth(expanded.toString());
-		} else {
-			spaceWidth= 1;
-			referenceWidth= expanded.length();
-		}
+		spaceWidth= 1;
+		referenceWidth= expanded.length();
 		
 		int level= referenceWidth / (tabSize * spaceWidth);
 		if (referenceWidth % (tabSize * spaceWidth) > 0)
