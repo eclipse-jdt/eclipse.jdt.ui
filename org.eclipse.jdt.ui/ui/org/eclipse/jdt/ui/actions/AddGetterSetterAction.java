@@ -134,14 +134,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		try {
 			IField[] selectedFields= getSelectedFields(selection);
 			if (canEnableOn(selectedFields)){
-				run(selectedFields[0].getDeclaringType(), selectedFields, false);
+				run(selectedFields[0].getDeclaringType(), selectedFields);
 				return;
 			}	
 			Object firstElement= selection.getFirstElement();
 			if (firstElement instanceof IType)
-				run((IType)firstElement, new IField[0], true);
+				run((IType)firstElement, new IField[0]);
 			else if (firstElement instanceof ICompilationUnit)	
-				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0], true);
+				run(JavaElementUtil.getMainType((ICompilationUnit)firstElement), new IField[0]);
 		} catch (CoreException e) {
 			JavaPlugin.log(e.getStatus());
 			showError(ActionMessages.getString("AddGetterSetterAction.error.actionfailed")); //$NON-NLS-1$
@@ -178,9 +178,14 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return fields != null && fields.length > 0 && JavaModelUtil.isEditable(fields[0].getCompilationUnit());
 	}
 	
-	private void run(IType type, IField[] preselected, boolean filterExistingMethods) throws CoreException{
+	private void run(IType type, IField[] preselected) throws CoreException{
 		ILabelProvider lp= new AddGetterSetterLabelProvider(createNameProposer());
-		ITreeContentProvider cp= new AddGetterSetterContentProvider(type, filterExistingMethods);
+		Map entries= createGetterSetterMapping(type);
+		if (entries.isEmpty()){
+			MessageDialog.openInformation(getShell(), dialogTitle, "The type contains no fields or all fields have getters/setters already.");
+			return;
+		}	
+		ITreeContentProvider cp= new AddGetterSetterContentProvider(entries);
 		CheckedTreeSelectionDialog dialog= new CheckedTreeSelectionDialog(getShell(), lp, cp);
 		dialog.setSorter(new JavaElementSorter());
 		dialog.setTitle(dialogTitle);
@@ -329,7 +334,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 				IField field= (IField)elements[0];
 				if (! checkCu(field))
 					return;
-				run(field.getDeclaringType(), new IField[] {field}, false);
+				run(field.getDeclaringType(), new IField[] {field});
 				return;
 			}
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
@@ -339,7 +344,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					if (! checkCu(type))
 						return; //dialog already shown - just return
 					if (type.getFields().length > 0){
-						run(type, new IField[0], true);	
+						run(type, new IField[0]);	
 						return;
 					} 
 				}
@@ -524,25 +529,34 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 	
+	
+	/**
+	 * @return map IField -> GetterSetterEntry[]
+	 */
+	private static Map createGetterSetterMapping(IType type) throws JavaModelException{
+		IField[] fields= type.getFields();
+		Map result= new HashMap();
+		String[] prefixes= AddGetterSetterAction.getGetterSetterPrefixes();
+		String[] suffixes= AddGetterSetterAction.getGetterSetterSuffixes();
+		for (int i= 0; i < fields.length; i++) {
+			List l= new ArrayList(2);
+			if (GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
+				l.add(new GetterSetterEntry(fields[i], true));
+				
+			if (GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
+				l.add(new GetterSetterEntry(fields[i], false));	
+
+			if (! l.isEmpty())
+				result.put(fields[i], (GetterSetterEntry[]) l.toArray(new GetterSetterEntry[l.size()]));
+		}
+		return result;
+	}
+	
 	private static class AddGetterSetterContentProvider implements ITreeContentProvider{
 		private static final Object[] EMPTY= new Object[0];
 		private Map fGetterSetterEntries;
-		public AddGetterSetterContentProvider(IType type, boolean filterExistingMethods) throws JavaModelException {
-			IField[] fields= type.getFields();
-			fGetterSetterEntries= new HashMap();
-			String[] prefixes= AddGetterSetterAction.getGetterSetterPrefixes();
-			String[] suffixes= AddGetterSetterAction.getGetterSetterSuffixes();
-			for (int i= 0; i < fields.length; i++) {
-				List l= new ArrayList(2);
-				if ((! filterExistingMethods) || GetterSetterUtil.getGetter(fields[i], prefixes, suffixes) == null)
-					l.add(new GetterSetterEntry(fields[i], true));
-					
-				if ((! filterExistingMethods) || GetterSetterUtil.getSetter(fields[i], prefixes, suffixes) == null)
-					l.add(new GetterSetterEntry(fields[i], false));	
-
-				if (! l.isEmpty())
-					fGetterSetterEntries.put(fields[i], (GetterSetterEntry[]) l.toArray(new GetterSetterEntry[l.size()]));
-			}
+		public AddGetterSetterContentProvider(Map entries) throws JavaModelException {
+			fGetterSetterEntries= entries;
 		}
 		
 		/*
