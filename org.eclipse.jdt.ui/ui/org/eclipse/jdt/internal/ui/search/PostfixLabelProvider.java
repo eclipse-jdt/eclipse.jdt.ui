@@ -51,12 +51,27 @@ public class PostfixLabelProvider extends SearchLabelProvider {
 		}
 		int matchCount= fPage.getDisplayedMatchCount(element);
 		String text=internalGetText(element);
-		if (matchCount < 2) {
-			String label= getSingularLabel(element);
-			return MessageFormat.format(label, new String[] { text, postfix.toString() });
-		}
+		if (hasShownChildren(element) && matchCount == 1) {
+				String label= getSingularLabel(element);
+				return MessageFormat.format(label, new String[] { text, postfix.toString() });
+		} 
+			if (matchCount < 2) {
+				String label= getNoCountLabel(element);
+				return MessageFormat.format(label, new String[] { text, postfix.toString() });
+			} 
 		String label= getPluralLabel(element);
 		return MessageFormat.format(label, new Object[] { text, new Integer(matchCount), postfix.toString() });
+	}
+
+	private boolean hasShownChildren(Object element) {
+		ITreeContentProvider contentProvider= (ITreeContentProvider) fPage.getViewer().getContentProvider();
+		return contentProvider.hasChildren(element);
+	}
+
+	private String getNoCountLabel(Object element) {
+		if (hasPotentialMatches(element))
+			return SearchMessages.getString("PostfixLabelProvider.potential_noCount"); //$NON-NLS-1$
+		return SearchMessages.getString("PostfixLabelProvider.exact_noCount"); //$NON-NLS-1$
 	}
 
 	private String getSingularLabel(Object element) {
