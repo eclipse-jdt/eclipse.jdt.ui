@@ -1574,8 +1574,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		} finally {
 			if (fMethod.getCompilationUnit().equals(getTargetType().getCompilationUnit()))
 				targetRewrite.clearImportRewrites();
-			else
-				fChangeManager.manage(targetRewrite.getCu(), targetRewrite.createChange());
 		}
 		return result;
 	}
