@@ -157,6 +157,7 @@ public class TemplateProposal implements ICompletionProposal {
 
 		try {
 			document.replace(start, length, finalString);
+			fContext.getViewer().revealRange(start, finalString.length());
 		} catch (BadLocationException x) {} // ignore		
 	}
 	
