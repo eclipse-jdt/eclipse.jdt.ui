@@ -19,7 +19,7 @@ public class RenameParametersActionDelegate extends RefactoringActionDelegate {
 		super.init(window);
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(window.getSelectionService());
 		initPossibleTargets(new RefactoringAction[] {
-			RefactoringGroup.createRenameParametersAction(provider, getChangeCreator())		
+			RefactoringGroup.createRenameParametersAction(provider)		
 		});
 	}
 }
