@@ -55,7 +55,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	private ISearchResultView fView;
 	private JavaSearchOperation fOperation;
 	private int fMatchCount= 0;
-	private boolean fFoundPotentialMatch;
+	private int fPotentialMatchCount= 0;
 	private Integer[] fMessageFormatArgs= new Integer[1];
 	
 	private class ContextMenuContributor implements IContextMenuContributor {
@@ -90,7 +90,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 	 * @see IJavaSearchResultCollector#aboutToStart().
 	 */
 	public void aboutToStart() {
-		fFoundPotentialMatch= false;
+		fPotentialMatchCount= 0;
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
 		if (fView != null) {
@@ -100,7 +100,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 				fOperation.getPluralLabelPattern(),
 				fOperation.getImageDescriptor(),
 				fContextMenu,
-				new JavaSearchResultLabelProvider(fView),
+				new JavaSearchResultLabelProvider(),
 				new GotoMarkerAction(),
 				new GroupByKeyComputer(),
 				fOperation);
@@ -117,7 +117,7 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		HashMap attributes;
 		Object groupKey= enclosingElement;
 		if (accuracy == POTENTIAL_MATCH) {
-			fFoundPotentialMatch= true;
+			fPotentialMatchCount++;
 			attributes= new HashMap(6);
 			attributes.put(IJavaSearchUIConstants.ATT_ACCURACY, POTENTIAL_MATCH_VALUE);
 			if (groupKey == null)
@@ -152,8 +152,8 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		}
 
 		if (fView != null) {
-			if (fFoundPotentialMatch && PotentialMatchDialog.shouldExplain())
-				explainPotentialMatch();
+			if (fPotentialMatchCount > 0 && PotentialMatchDialog.shouldExplain())
+				explainPotentialMatch(fPotentialMatchCount);
 			fView.searchFinished();
 		}
 
@@ -162,12 +162,12 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 		fMonitor= null;
 	}
 
-	private void explainPotentialMatch() {
+	private void explainPotentialMatch(final int potentialMatchCount) {
 		// Make sure we are doing it in the right thread.
 		final Shell shell= fView.getSite().getShell();
 		shell.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				PotentialMatchDialog.open(shell);
+				PotentialMatchDialog.open(shell, potentialMatchCount);
 			}
 		});
 	}
