@@ -323,7 +323,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 		store.setDefault(CompilationUnitEditor.ERROR_INDICATION_IN_OVERVIEW_RULER, true);
 		store.setDefault(CompilationUnitEditor.WARNING_INDICATION_IN_OVERVIEW_RULER, true);
-		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, true);
+		store.setDefault(CompilationUnitEditor.MARKER_INDICATION_IN_OVERVIEW_RULER, false);
 		
 		store.setDefault(JavaEditorPreferencePage.PREF_SHOW_TEMP_PROBLEMS, true);
 		store.setDefault(JavaEditorPreferencePage.PREF_SYNC_OUTLINE_ON_CURSOR_MOVE, false);
