@@ -279,26 +279,22 @@ public class BuildPathsBlock {
 		fCurrJProject= jproject;
 		boolean projectExists= false;
 		List newClassPath= null;
-		try {
-			IProject project= fCurrJProject.getProject();
-			projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
-			if  (projectExists) {
-				if (outputLocation == null) {
-					outputLocation=  fCurrJProject.getOutputLocation();
-				}
-				if (classpathEntries == null) {
-					classpathEntries=  fCurrJProject.getRawClasspath();
-				}
-			}
+		IProject project= fCurrJProject.getProject();
+		projectExists= (project.exists() && project.getFile(".classpath").exists()); //$NON-NLS-1$
+		if  (projectExists) {
 			if (outputLocation == null) {
-				outputLocation= getDefaultBuildPath(jproject);
-			}			
-
-			if (classpathEntries != null) {
-				newClassPath= getExistingEntries(classpathEntries);
+				outputLocation=  fCurrJProject.readOutputLocation();
 			}
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
+			if (classpathEntries == null) {
+				classpathEntries=  fCurrJProject.readRawClasspath();
+			}
+		}
+		if (outputLocation == null) {
+			outputLocation= getDefaultBuildPath(jproject);
+		}			
+
+		if (classpathEntries != null) {
+			newClassPath= getExistingEntries(classpathEntries);
 		}
 		if (newClassPath == null) {
 			newClassPath= getDefaultClassPath(jproject);
