@@ -41,6 +41,8 @@ public class JavaProjectHelper {
 	public static final IPath RT_STUBS= new Path("testresources/rtstubs.jar");
 	public static final IPath JUNIT_SRC= new Path("testresources/junit37-noUI-src.zip");
 	
+	public static final IPath MYLIB= new Path("testresources/mylib.jar");
+	
 
 	/**
 	 * Creates a IJavaProject.

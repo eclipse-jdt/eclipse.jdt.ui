@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -300,7 +301,7 @@ class ExternalizeWizardPage2 extends UserInputWizardPage {
 			return;
 
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{root.getJavaProject()});
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES);
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), IJavaSearchConstants.CLASS, scope);
 		dialog.setTitle(NLSUIMessages.getString("wizardPage2.Class_Selection")); //$NON-NLS-1$
 		dialog.setMessage(NLSUIMessages.getString("wizardPage2.Choose_the_type_to_import")); //$NON-NLS-1$
 		dialog.setUpperListLabel(NLSUIMessages.getString("wizardPage2.Matching_classes")); //$NON-NLS-1$

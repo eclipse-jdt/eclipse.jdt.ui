@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsO
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 public class AddUnimplementedMethodsTest extends TestCase {
 	
+	private static final Class THIS= AddUnimplementedMethodsTest.class;
+	
 	private IJavaProject fJavaProject;
 	private IPackageFragment fPackage;
 	private IType fClassA, fInterfaceB, fClassC, fClassD, fInterfaceE;
@@ -34,11 +36,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), AddUnimplementedMethodsTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}		
 		
 	public static Test suite() {
-		TestSuite suite= new TestSuite(AddUnimplementedMethodsTest.class.getName());
+		TestSuite suite= new TestSuite(THIS.getName());
 		suite.addTest(new AddUnimplementedMethodsTest("test1"));
 		suite.addTest(new AddUnimplementedMethodsTest("test2"));
 		suite.addTest(new AddUnimplementedMethodsTest("test3"));

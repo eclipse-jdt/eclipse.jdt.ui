@@ -24,6 +24,7 @@ import org.eclipse.jface.util.Assert;
 /**
  * Search for all types in the workspace. Instead of returning objects of type <code>IType</code>
  * the methods of this class returns a list of the lightweight objects <code>TypeInfo</code>.
+ * @deprecated use AllTypesCache
  */
 public class AllTypesSearchEngine {
 

@@ -23,17 +23,17 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.SourceElementRequestorAdapter;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 
 
@@ -64,7 +64,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private ArrayList fAllTypes;
 		private boolean fIgnoreLowerCaseNames;
 		
-		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames, IProgressMonitor monitor) {
+		public TypeReferenceProcessor(ArrayList oldSingleImports, ArrayList oldDemandImports, ImportsStructure impStructure, boolean ignoreLowerCaseNames, IProgressMonitor monitor) throws JavaModelException {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
@@ -79,12 +79,10 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	
 		
-		private void fetchAllTypes(ArrayList list, IJavaProject project, IProgressMonitor monitor) {
+		private void fetchAllTypes(ArrayList list, IJavaProject project, IProgressMonitor monitor) throws JavaModelException {
 			IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaProject[] { project });		
-			AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getProject().getWorkspace());
-			searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, monitor);
+			AllTypesCache.getTypes(searchScope, IJavaSearchConstants.TYPE, monitor, list);
 		}
-		
 		
 		/**
 		 * Tries to find the given type name and add it to the import structure.

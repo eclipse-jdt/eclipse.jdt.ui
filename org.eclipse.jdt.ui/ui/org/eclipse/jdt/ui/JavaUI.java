@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -288,13 +289,22 @@ public final class JavaUI {
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) throws JavaModelException {
-		Assert.isTrue((style | IJavaElementSearchConstants.CONSIDER_TYPES) == IJavaElementSearchConstants.CONSIDER_TYPES);
+		int elementKinds= 0;
+		if (style == IJavaElementSearchConstants.CONSIDER_TYPES) {
+			elementKinds= IJavaSearchConstants.TYPE;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_INTERFACES) {
+			elementKinds= IJavaSearchConstants.INTERFACE;
+		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES) {
+			elementKinds= IJavaSearchConstants.CLASS;
+		} else {
+			Assert.isTrue(false, "illegal style");
+		}
 		if (multipleSelection) {
-			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, scope, style);
+			MultiTypeSelectionDialog dialog= new MultiTypeSelectionDialog(parent, context, elementKinds, scope);
 			dialog.setFilter(filter);
 			return dialog;			
 		} else {
-			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, scope, style);
+			TypeSelectionDialog dialog= new TypeSelectionDialog(parent, context, elementKinds, scope);
 			dialog.setFilter(filter);
 			return dialog;
 		}

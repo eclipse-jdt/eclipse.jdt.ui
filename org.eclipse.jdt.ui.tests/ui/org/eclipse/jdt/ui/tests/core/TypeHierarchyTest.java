@@ -21,6 +21,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class TypeHierarchyTest extends TestCase {
 	
+	private static final Class THIS= TypeHierarchyTest.class;
+	
 	private IJavaProject fJavaProject1;
 	private IJavaProject fJavaProject2;
 	public TypeHierarchyTest(String name) {
@@ -28,11 +30,11 @@ public class TypeHierarchyTest extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeHierarchyTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}		
 			
 	public static Test suite() {
-		return new TestSuite(TypeHierarchyTest.class);
+		return new TestSuite(THIS);
 	}
 	
 	protected void setUp() throws Exception {

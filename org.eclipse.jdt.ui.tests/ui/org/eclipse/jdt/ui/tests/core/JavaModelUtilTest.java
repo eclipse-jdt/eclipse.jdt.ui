@@ -37,6 +37,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class JavaModelUtilTest extends TestCase {
 	
+	private static final Class THIS= JavaModelUtilTest.class;
+	
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
@@ -47,12 +49,12 @@ public class JavaModelUtilTest extends TestCase {
 	}
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), JavaModelUtilTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}
 
 
 	public static Test suite() {
-		return new TestSuite(JavaModelUtilTest.class);
+		return new TestSuite(THIS);
 	}
 
 

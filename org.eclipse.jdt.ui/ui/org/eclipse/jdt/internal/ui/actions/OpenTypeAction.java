@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
@@ -12,13 +14,12 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -28,8 +29,6 @@ import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 public class OpenTypeAction extends Action implements IWorkbenchWindowActionDelegate {
 	
@@ -44,7 +43,7 @@ public class OpenTypeAction extends Action implements IWorkbenchWindowActionDele
 	public void run() {
 		Shell parent= JavaPlugin.getActiveWorkbenchShell();
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
+			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 		
 		dialog.setMatchEmptyString(false);	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$

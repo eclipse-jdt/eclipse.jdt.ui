@@ -13,10 +13,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableContext;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
@@ -30,7 +29,7 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog {
 	private List fOldContent;
 	
 	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IJavaProject p) {
-		super(parent, context, createSearchScope(p), IJavaElementSearchConstants.CONSIDER_INTERFACES);
+		super(parent, context, IJavaSearchConstants.INTERFACE, createSearchScope(p));
 		fList= list;
 		//to restore the content of the dialog field if the dialog is canceled
 		fOldContent= fList.getElements(); 

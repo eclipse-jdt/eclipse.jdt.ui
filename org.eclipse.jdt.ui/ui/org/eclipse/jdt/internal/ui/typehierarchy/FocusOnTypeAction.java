@@ -14,9 +14,8 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
@@ -43,7 +42,7 @@ public class FocusOnTypeAction extends Action {
 	public void run() {
 		Shell parent= fViewPart.getSite().getShell();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(parent, new ProgressMonitorDialog(parent), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
+			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 	
 		dialog.setTitle(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(TypeHierarchyMessages.getString("FocusOnTypeAction.dialog.message")); //$NON-NLS-1$

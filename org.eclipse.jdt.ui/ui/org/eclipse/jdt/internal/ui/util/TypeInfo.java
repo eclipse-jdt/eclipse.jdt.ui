@@ -30,8 +30,6 @@ public class TypeInfo {
 	private final boolean fIsInterface;
 	private final String fPath;
 
-	private static final char SEPARATOR= '|';
-
 	public TypeInfo(char[] pkg, char[] name, char[][] enclosingTypes, String path, boolean isInterface) {
 		fPath= path;
 		fPackage= new String(pkg);
@@ -53,6 +51,13 @@ public class TypeInfo {
 	 */	
 	public boolean isInterface() {
 		return fIsInterface;
+	}
+	
+	/**
+	 * Returns true if the info is enclosed in the given scope
+	 */
+	public boolean isEnclosed(IJavaSearchScope scope) {
+		return scope.encloses(fPath);
 	}
 
 	/**
@@ -124,7 +129,7 @@ public class TypeInfo {
 	 * Contructs the package fragment root name from the type ref path.
 	 */	
 	public IPath getPackageFragmentRootPath() {
-		int index= fPath.indexOf(SEPARATOR);
+		int index= fPath.indexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
 		if (index > 0) {
 			return new Path(fPath.substring(0, index));
 		} else {
@@ -157,7 +162,7 @@ public class TypeInfo {
 
 	private IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
-		int index= fPath.indexOf(SEPARATOR);		
+		int index= fPath.indexOf(IJavaSearchScope.JAR_FILE_ENTRY_SEPARATOR);
 		if (index > 0) 
 			return findJarInScope(root, scope, fPath.substring(0, index), new Path(fPath.substring(index + 1)));
 		else 

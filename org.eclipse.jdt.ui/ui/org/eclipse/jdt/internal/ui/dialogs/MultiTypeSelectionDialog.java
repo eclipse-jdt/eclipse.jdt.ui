@@ -4,25 +4,29 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows
@@ -32,17 +36,17 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
-	private int fStyle;
+	private int fElementKinds;
 	
 	/**
 	 * Constructs an instance of <code>MultiTypeSelectionDialog</code>.
 	 * @param parent  the parent shell.
 	 * @param context the context.
+	 * @param elementKinds IJavaSearchConstants.CLASS, IJavaSearchConstants.INTERFACE
+	 * or IJavaSearchConstants.TYPE
 	 * @param scope   the java search scope.
-	 * @param style   the widget style.
 	 */
-	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style)
+	public MultiTypeSelectionDialog(Shell parent, IRunnableContext context, int elementKinds, IJavaSearchScope scope)
 	{
 		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_PACKAGE_POSTFIX)); 
 			
@@ -53,18 +57,36 @@ public class MultiTypeSelectionDialog extends ElementListSelectionDialog {
 
 		fRunnableContext= context;
 		fScope= scope;
-		fStyle= style;
+		fElementKinds= elementKinds;
 	}
 
 	/*
 	 * @see Window#open()
 	 */
 	public int open() {
-		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
-		List typesFound= engine.searchTypes(fRunnableContext, fScope, fStyle);
-
-		if (typesFound.size() == 0)
+		
+		final ArrayList typesFound= new ArrayList();
+		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					AllTypesCache.getTypes(fScope, fElementKinds, monitor, typesFound);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
+				if (monitor.isCanceled()) {
+					throw new InterruptedException();
+				}
+			}
+		};
+		
+		try {
+			fRunnableContext.run(true, true, runnable);
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+		} catch (InterruptedException e) {
+			// cancelled by user
 			return CANCEL;
+		}
 		
 		setFilter("A"); //$NON-NLS-1$
 		setElements(typesFound.toArray());

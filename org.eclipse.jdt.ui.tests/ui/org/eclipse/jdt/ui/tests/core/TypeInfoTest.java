@@ -38,6 +38,8 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoRequestor;
 
 public class TypeInfoTest extends TestCase {
 	
+	private static final Class THIS= TypeInfoTest.class;
+	
 	private IJavaProject fJProject1;
 	private IJavaProject fJProject2;
 
@@ -47,12 +49,12 @@ public class TypeInfoTest extends TestCase {
 
 
 	public static void main(String[] args) {
-		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), TypeInfoTest.class, args);
+		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), THIS, args);
 	}
 
 
 	public static Test suite() {
-		return new TestSuite(TypeInfoTest.class);
+		return new TestSuite(THIS);
 	}
 
 

@@ -4,26 +4,29 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
@@ -98,18 +101,17 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 
 	private IRunnableContext fRunnableContext;
 	private IJavaSearchScope fScope;
-	private int fStyle;
+	private int fElementKinds;
 	
 	/**
 	 * Constructs a type selection dialog.
 	 * @param parent  the parent shell.
 	 * @param context the runnable context.
+	 * @param elementKinds <code>IJavaSearchConstants.CLASS</code>, <code>IJavaSearchConstants.INTERFACE</code>
+	 * or <code>IJavaSearchConstants.TYPE</code>
 	 * @param scope   the java search scope.
-	 * @param style   the widget style.
 	 */
-	public TypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style)
-	{
+	public TypeSelectionDialog(Shell parent, IRunnableContext context, int elementKinds, IJavaSearchScope scope) {
 		super(parent, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_TYPE_ONLY),
 			new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX));
 
@@ -118,7 +120,7 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 
 		fRunnableContext= context;
 		fScope= scope;
-		fStyle= style;
+		fElementKinds= elementKinds;
 		
 		setUpperListLabel(JavaUIMessages.getString("TypeSelectionDialog.upperLabel")); //$NON-NLS-1$
 		setLowerListLabel(JavaUIMessages.getString("TypeSelectionDialog.lowerLabel")); //$NON-NLS-1$
@@ -147,9 +149,28 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	 * @see Window#open()
 	 */
 	public int open() {
-		AllTypesSearchEngine engine= new AllTypesSearchEngine(JavaPlugin.getWorkspace());
+		final ArrayList typeList= new ArrayList();
+		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				try {
+					AllTypesCache.getTypes(fScope, fElementKinds, monitor, typeList);
+				} catch (JavaModelException e) {
+					throw new InvocationTargetException(e);
+				}
+				if (monitor.isCanceled()) {
+					throw new InterruptedException();
+				}
+			}
+		};
 		
-		List typeList= engine.searchTypes(fRunnableContext, fScope, fStyle);
+		try {
+			fRunnableContext.run(true, true, runnable);
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, "Exception", "Unexpected exception. See log for details.");
+		} catch (InterruptedException e) {
+			// cancelled by user
+			return CANCEL;
+		}
 
 		// #6385 workaround: filter out anonymous (!) classes
 		List filteredList= new ArrayList(typeList.size());

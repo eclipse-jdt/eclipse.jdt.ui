@@ -24,14 +24,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class MoveMembersInputPage extends UserInputWizardPage {
@@ -124,9 +122,9 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	}
 	
 	private void openTypeSelectionDialog(){
-		int style= IJavaElementSearchConstants.CONSIDER_CLASSES;
+		int elementKinds= IJavaSearchConstants.CLASS;
 		IJavaSearchScope scope= createWorkspaceSourceScope();
-		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, style);
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), elementKinds, scope);
 		dialog.setTitle("Choose Type");
 		dialog.setMessage("&Choose a type (? = any character, * = any string):");
 		dialog.setUpperListLabel("&Matching types:");

@@ -2,7 +2,23 @@
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.swt.SWT;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.widgets.Button;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.IDialogSettings;import org.eclipse.jface.operation.IRunnableContext;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.JavaPlugin;
+package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
@@ -20,13 +36,14 @@ public class OpenTypeSelectionDialog extends TypeSelectionDialog {
 	 * Constructs an instance of <code>OpenTypeSelectionDialog</code>.
 	 * @param parent  the parent shell.
 	 * @param context the context.
+	 * @param elementKinds <code>IJavaSearchConstants.CLASS</code>, <code>IJavaSearchConstants.INTERFACE</code>
+	 * or <code>IJavaSearchConstants.TYPE</code>
 	 * @param scope   the java search scope.
-	 * @param style   the widget style.
 	 */
-	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context,
-		IJavaSearchScope scope, int style)
+	public OpenTypeSelectionDialog(Shell parent, IRunnableContext context, int elementKinds,
+		IJavaSearchScope scope)
 	{
-		super(parent, context, scope, style);
+		super(parent, context, elementKinds, scope);
 		fShowInTypeHierarchy= getDialogSetting().getBoolean(SHOW_IN_TYPE_HIERARCHY);
 	}
 	

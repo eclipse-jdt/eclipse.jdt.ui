@@ -9,6 +9,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
+import org.eclipse.jdt.ui.tests.core.AllTypesCacheTest;
 import org.eclipse.jdt.ui.tests.core.ImportOrganizeTest;
 import org.eclipse.jdt.ui.tests.core.JavaModelUtilTest;
 import org.eclipse.jdt.ui.tests.core.TextBufferTest;
@@ -39,6 +40,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(JavaModelUtilTest.suite());
 		addTest(TextBufferTest.suite());
 		addTest(TypeHierarchyTest.suite());
+		addTest(AllTypesCacheTest.suite());
 	}
 	
 	public static void main(String[] args) {

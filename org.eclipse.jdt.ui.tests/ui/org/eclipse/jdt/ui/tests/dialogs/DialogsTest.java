@@ -25,6 +25,7 @@ import org.eclipse.ui.internal.WorkbenchPlugin;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
@@ -34,14 +35,13 @@ import org.eclipse.jdt.testplugin.util.DialogCheck;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 
+import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.OpenTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;
 import org.eclipse.jdt.internal.ui.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementSorter;
@@ -84,7 +84,7 @@ public class DialogsTest extends TestCase {
 		IProject project= jproject.getProject();
 
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
+			IJavaSearchConstants.TYPE, SearchEngine.createWorkspaceScope());
 	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
@@ -113,9 +113,8 @@ public class DialogsTest extends TestCase {
 		IProject project= jproject.getProject();
 
 		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { jproject });		
-		AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getWorkspace());
-		searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, null);
-
+		AllTypesCache.getTypes(searchScope, IJavaSearchConstants.TYPE, null, list);
+		
 		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle("Title"); //$NON-NLS-1$
 		dialog.setMessage("Description:"); //$NON-NLS-1$
