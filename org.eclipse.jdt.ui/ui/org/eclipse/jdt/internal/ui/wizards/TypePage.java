@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -60,6 +61,7 @@ import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.template.Template;
 import org.eclipse.jdt.internal.ui.text.template.Templates;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IListAdapter;
@@ -334,8 +336,11 @@ public abstract class TypePage extends ContainerPage {
 		gd.horizontalSpan= 2;
 		c.setLayoutData(gd);
 		
-		c= fEnclosingTypeDialogField.getChangeControl(composite);
-		c.setLayoutData(new MGridData(MGridData.HORIZONTAL_ALIGN_FILL));
+		Button button= fEnclosingTypeDialogField.getChangeControl(composite);
+		gd= new MGridData(MGridData.HORIZONTAL_ALIGN_FILL);
+		gd.heightHint = SWTUtil.getButtonHeigthHint(button);
+		gd.widthHint = SWTUtil.getButtonWidthHint(button);
+		button.setLayoutData(gd);
 	}	
 
 	/**
@@ -830,6 +835,10 @@ public abstract class TypePage extends ContainerPage {
 				return status;
 			}
 			fCurrEnclosingType= type;
+			IPackageFragmentRoot enclosingRoot= JavaModelUtil.getPackageFragmentRoot(type);
+			if (!enclosingRoot.equals(root)) {
+				status.setWarning(NewWizardMessages.getString("TypePage.warning.EnclosingNotInSourceFolder")); //$NON-NLS-1$
+			}
 			return status;
 		} catch (JavaModelException e) {
 			status.setError(NewWizardMessages.getString("TypePage.error.EnclosingTypeNotExists")); //$NON-NLS-1$
@@ -1067,21 +1076,7 @@ public abstract class TypePage extends ContainerPage {
 			return null;
 		}
 		
-		// the search scop only contains source folders
-		ArrayList elementsInScope= new ArrayList();
-		try {
-			IPackageFragmentRoot[] pfrs= root.getJavaProject().getPackageFragmentRoots();
-			for (int i= 0; i < pfrs.length; i++) {
-				if (pfrs[i].getKind() == IPackageFragmentRoot.K_SOURCE) {
-					elementsInScope.add(pfrs[i]);
-				}
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-
-		IJavaElement[] elements= (IJavaElement[]) elementsInScope.toArray(new IJavaElement[elementsInScope.size()]);
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { root });
 			
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_TYPES);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChooseEnclosingTypeDialog.title")); //$NON-NLS-1$
