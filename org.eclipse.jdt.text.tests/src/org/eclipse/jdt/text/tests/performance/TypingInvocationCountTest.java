@@ -86,10 +86,10 @@ public abstract class TypingInvocationCountTest extends TextPerformanceTestCase 
 			
 			fShownPerspective= EditorTestHelper.showPerspective(getPerspectiveId());
 			
-			if (!EditorTestHelper.projectExists(PROJECT))
+			if (!ResourceTestHelper.projectExists(PROJECT))
 				fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 			else
-				fJavaProject= JavaCore.create(EditorTestHelper.getProject(PROJECT));
+				fJavaProject= JavaCore.create(ResourceTestHelper.getProject(PROJECT));
 			
 			fWasSearchViewShown= EditorTestHelper.isViewShown(SEARCH_VIEW);
 			ITextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile(getFile()), true);

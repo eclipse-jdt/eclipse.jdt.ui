@@ -18,7 +18,6 @@ import junit.framework.Assert;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -386,14 +385,5 @@ public class EditorTestHelper {
 		Assert.assertTrue(folder.exists());
 		JavaProjectHelper.addSourceContainer(javaProject, "src");
 		return javaProject;
-	}
-
-	public static boolean projectExists(String projectName) {
-		return getProject(projectName).exists();
-	}
-
-	public static IProject getProject(String projectName) {
-		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		return workspace.getRoot().getProject(projectName);
 	}
 }

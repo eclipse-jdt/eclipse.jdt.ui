@@ -222,4 +222,13 @@ public class ResourceTestHelper {
 		FileTool.unzip(new ZipFile(FileTool.getFileInPlugin(installationPlugin, new Path(projectZip))), new File(workspacePath));
 		return createExistingProject(projectName);
 	}
+
+	public static IProject getProject(String projectName) {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		return workspace.getRoot().getProject(projectName);
+	}
+
+	public static boolean projectExists(String projectName) {
+		return getProject(projectName).exists();
+	}
 }

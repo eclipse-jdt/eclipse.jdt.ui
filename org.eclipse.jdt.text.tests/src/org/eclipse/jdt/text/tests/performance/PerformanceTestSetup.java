@@ -68,14 +68,14 @@ public class PerformanceTestSetup extends TestSetup {
 		if (fSetPerspective)
 			EditorTestHelper.showPerspective(EditorTestHelper.JAVA_PERSPECTIVE);
 		
-		if (!EditorTestHelper.projectExists(PROJECT)) {
+		if (!ResourceTestHelper.projectExists(PROJECT)) {
 			boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
 			setUpProject();
 			ResourceTestHelper.fullBuild();
-			if (wasAutobuilding) {
+			if (wasAutobuilding)
 				ResourceTestHelper.enableAutoBuilding();
-				EditorTestHelper.joinBackgroundActivities();
-			}
+			
+			EditorTestHelper.joinBackgroundActivities();
 		}
 	}
 	

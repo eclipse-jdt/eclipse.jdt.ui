@@ -62,13 +62,13 @@ public class JavaFormatterTest extends TextPerformanceTestCase {
 	 * @throws Exception
 	 */
 	public void test() throws Exception {
-		measureFormat(getNullPerformanceMeter(), getWarmUpRuns());
-		measureFormat(createPerformanceMeter(), getMeasuredRuns());
+		measure(getNullPerformanceMeter(), getWarmUpRuns());
+		measure(createPerformanceMeter(), getMeasuredRuns());
 		commitAllMeasurements();
 		assertAllPerformance();
 	}
 
-	private void measureFormat(PerformanceMeter performanceMeter, int runs) throws CoreException {
+	private void measure(PerformanceMeter performanceMeter, int runs) throws CoreException {
 		IAction format= fEditor.getAction("Format");
 		for (int i= 0; i < runs; i++) {
 			fEditor.selectAndReveal(0, 0);
