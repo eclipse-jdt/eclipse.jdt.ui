@@ -308,10 +308,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 		}
 
 		private static boolean canCopyToClipboard(IJavaElement element) throws JavaModelException {
-			if (element == null)
-				return false;
-				
-			if (! element.exists())
+			if (element == null || ! element.exists())
 				return false;
 				
 			if (element instanceof IJavaModel)
@@ -334,6 +331,9 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			}
 			
 			if (ReorgUtils2.isDeletedFromEditor(element))
+				return false;
+			
+			if (! (element instanceof IMember) && element.isReadOnly()) 
 				return false;
 
 			return true;
