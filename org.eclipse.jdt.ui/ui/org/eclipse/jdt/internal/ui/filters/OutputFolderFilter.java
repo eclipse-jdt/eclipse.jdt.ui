@@ -58,14 +58,14 @@ public class OutputFolderFilter extends ViewerFilter {
 				// Check default output location
 				IPath defaultOutputLocation= jProject.getOutputLocation();
 				IPath folderPath= folder.getFullPath();
-				if (defaultOutputLocation != null && defaultOutputLocation.isPrefixOf(folderPath))
+				if (defaultOutputLocation != null && defaultOutputLocation.equals(folderPath))
 					return false;
 				
 				// Check output location for each class path entry
 				IClasspathEntry[] cpEntries= jProject.getRawClasspath();
 				for (int i= 0, length= cpEntries.length; i < length; i++) {
 					IPath outputLocation= cpEntries[i].getOutputLocation();
-					if (outputLocation != null && outputLocation.isPrefixOf(folderPath))
+					if (outputLocation != null && outputLocation.equals(folderPath))
 						return false;
 				}
 			} catch (CoreException ex) {
