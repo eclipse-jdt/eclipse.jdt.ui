@@ -258,7 +258,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		return null;
 	}
 
-	//---- Java Editior --------------------------------------------------------------
+	//---- Java Editor --------------------------------------------------------------
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -465,7 +465,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		public IStatus validate(Object[] selection) {
 			StringBuffer buffer= new StringBuffer();
-			buffer.append("("); //$NON-NLS-1$
+			buffer.append('(');
 			// first form the part of the signature corresponding to the super constructor combo choice
 			IMethod chosenSuper= fDialog.getSuperConstructorChoice();
 			try {
@@ -489,8 +489,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 
 			int fieldCount= countSelectedFields(selection);
-				String message= ActionMessages.getFormattedString("GenerateConstructorUsingFieldsAction.fields_selected", //$NON-NLS-1$
-	new Object[] { String.valueOf(fieldCount), String.valueOf(fEntries)});
+			String message= ActionMessages.getFormattedString("GenerateConstructorUsingFieldsAction.fields_selected", new Object[] { String.valueOf(fieldCount), String.valueOf(fEntries)}); //$NON-NLS-1$
 			return new StatusInfo(IStatus.INFO, message);
 		}
 
@@ -540,8 +539,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
 		private Button fOmitSuperButton;
 
-		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethod[] superConstructors) {
-			super(parent, labelProvider, contentProvider, editor, type);
+		public GenerateConstructorUsingFieldsSelectionDialog(Shell parent, ILabelProvider labelProvider, GenerateConstructorUsingFieldsContentProvider contentProvider, CompilationUnitEditor editor, IType type, IMethod[] superConstructors) throws JavaModelException {
+			super(parent, labelProvider, contentProvider, editor, type, true);
 			fContentProvider= contentProvider;
 			fTreeViewerAdapter= new GenerateConstructorUsingFieldsTreeViewerAdapter();
 

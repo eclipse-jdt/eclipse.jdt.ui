@@ -29,18 +29,21 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.resource.StringConverter;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -57,75 +60,152 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
  * extra buttons and composites.
  */
 public class SourceActionDialog extends CheckedTreeSelectionDialog {
-	private int fInsertPosition;
+	
+	private List fInsertPositions;
+	private List fLabels;
+	private int fCurrentPositionIndex;
+	
 	private IDialogSettings fSettings;
 	private CompilationUnitEditor fEditor;
 	private ITreeContentProvider fContentProvider;
 	private boolean fGenerateComment;
 	private IType fType;
-	private int fWidth = 60;
-	private int fHeight = 18;
+	private int fWidth, fHeight;
 	private String fCommentString;
+		
 	private int fVisibilityModifier;
 	private boolean fFinal;
 	private boolean fSynchronized;
 	
-	private final String SETTINGS_SECTION= "SourceActionDialog"; //$NON-NLS-1$
-	public final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
+	private final String SETTINGS_SECTION_METHODS= "SourceActionDialog.methods"; //$NON-NLS-1$
+	private final String SETTINGS_SECTION_CONSTRUCTORS= "SourceActionDialog.constructors"; //$NON-NLS-1$
+	
+	private final String SETTINGS_INSERTPOSITION= "InsertPosition"; //$NON-NLS-1$
 	private final String VISIBILITY_MODIFIER= "VisibilityModifier"; //$NON-NLS-1$
 	private final String FINAL_MODIFIER= "FinalModifier"; //$NON-NLS-1$
 	private final String SYNCHRONIZED_MODIFIER= "SynchronizedModifier"; //$NON-NLS-1$
-
-	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
+	
+	public SourceActionDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type, boolean isConstructor) throws JavaModelException {
 		super(parent, labelProvider, contentProvider);
 		fEditor= editor;
 		fContentProvider= contentProvider;		
 		fType= type;
 		fCommentString= ActionMessages.getString("SourceActionDialog.createMethodComment"); //$NON-NLS-1$
+
+		fWidth= 60;
+		fHeight= 18;
 		
 		// Take the default from the default for generating comments from the code gen prefs
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 		fGenerateComment= settings.createComments;		
-
+		
+		int insertionDefault= isConstructor ? 0 : 1;
+		
 		IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
-		fSettings= dialogSettings.getSection(SETTINGS_SECTION);		
+		String sectionId= isConstructor ? SETTINGS_SECTION_CONSTRUCTORS : SETTINGS_SECTION_METHODS;
+		fSettings= dialogSettings.getSection(sectionId);		
 		if (fSettings == null)  {
-			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-			fSettings.put(VISIBILITY_MODIFIER, Modifier.PUBLIC); //$NON-NLS-1$
-			fSettings.put(FINAL_MODIFIER, false); //$NON-NLS-1$
-			fSettings.put(SYNCHRONIZED_MODIFIER, false); //$NON-NLS-1$
-			fSettings.put(SETTINGS_INSERTPOSITION, 1); //$NON-NLS-1$
+			fSettings= dialogSettings.addNewSection(sectionId);
+			fSettings.put(VISIBILITY_MODIFIER, StringConverter.asString(Modifier.PUBLIC));
+			fSettings.put(FINAL_MODIFIER, StringConverter.asString(false));
+			fSettings.put(SYNCHRONIZED_MODIFIER, StringConverter.asString(false));
+			fSettings.put(SETTINGS_INSERTPOSITION, insertionDefault);
 		}
+		
+		fVisibilityModifier= StringConverter.asInt(fSettings.get(VISIBILITY_MODIFIER), Modifier.PUBLIC);
+		fFinal= StringConverter.asBoolean(fSettings.get(FINAL_MODIFIER), false);
+		fSynchronized= StringConverter.asBoolean(fSettings.get(SYNCHRONIZED_MODIFIER), false);
+		fCurrentPositionIndex= StringConverter.asInt(fSettings.get(SETTINGS_INSERTPOSITION), insertionDefault);
+		
+		fInsertPositions= new ArrayList();
+		fLabels= new ArrayList(); 
+		
+		IJavaElement[] members= fType.getChildren();
+		IMethod[] methods= fType.getMethods();
+		
+		fInsertPositions.add(methods.length > 0 ? methods[0]: null); // first
+		fInsertPositions.add(null); // last
+		
+		fLabels.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
+		fLabels.add(ActionMessages.getString("SourceActionDialog.last_method")); //$NON-NLS-1$
 
-		try {
-			fVisibilityModifier= fSettings.getInt(VISIBILITY_MODIFIER);
-			fFinal= fSettings.getBoolean(FINAL_MODIFIER);
-			fSynchronized= fSettings.getBoolean(SYNCHRONIZED_MODIFIER);
-			fInsertPosition= fSettings.getInt(SETTINGS_INSERTPOSITION);
-		} catch (NumberFormatException e) {
-			fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-			fSettings.put(VISIBILITY_MODIFIER, Modifier.PUBLIC); //$NON-NLS-1$
-			fSettings.put(FINAL_MODIFIER, false); //$NON-NLS-1$
-			fSettings.put(SYNCHRONIZED_MODIFIER, false); //$NON-NLS-1$
-			fSettings.put(SETTINGS_INSERTPOSITION, 1); //$NON-NLS-1$			
+		if (hasCursorPositionElement(fEditor, members, fInsertPositions)) {
+			fLabels.add(ActionMessages.getString("SourceActionDialog.cursor")); //$NON-NLS-1$
+			fCurrentPositionIndex= 2;
 		}
+		
+		for (int i = 0; i < methods.length; i++) {
+			IMethod curr= methods[i];
+			fLabels.add(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
+			fInsertPositions.add(findSibling(curr, members));
+		}
+		fInsertPositions.add(null);
+	}
+	
+	private IJavaElement findSibling(IMethod curr, IJavaElement[] members) throws JavaModelException {
+		IJavaElement res= null;
+		int methodStart= curr.getSourceRange().getOffset();
+		for (int i= members.length-1; i >= 0; i--) {
+			IMember member= (IMember) members[i];
+			if (methodStart < member.getSourceRange().getOffset()) {
+				return res;
+			}
+			res= member;
+		}
+		return null;
 	}
 
-	/***
-	 * Returns 0 for the first method, 1 for the last method, > 1  for all else.
+	private boolean hasCursorPositionElement(CompilationUnitEditor editor, IJavaElement[] members, List insertPositions) throws JavaModelException {
+		if (editor == null) {
+			return false;
+		}
+		int offset= ((ITextSelection) editor.getSelectionProvider().getSelection()).getOffset();
+
+		for (int i= 0; i < members.length; i++) {
+			IMember curr= (IMember) members[i];
+			ISourceRange range= curr.getSourceRange();
+			if (offset < range.getOffset()) {
+				insertPositions.add(curr);
+				return true;
+			} else if (offset < range.getOffset() + range.getLength()) {
+				return false; // in the middle of a member
+			}
+		}
+		insertPositions.add(null);
+		return true;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#close()
 	 */
-	public int getInsertPosition() {
-		return fInsertPosition;
+	public boolean close() {
+		fSettings.put(VISIBILITY_MODIFIER, StringConverter.asString(fVisibilityModifier));
+		fSettings.put(FINAL_MODIFIER, StringConverter.asString(fFinal));
+		fSettings.put(SYNCHRONIZED_MODIFIER, StringConverter.asString(fSynchronized));
+		
+		if (fCurrentPositionIndex == 0 || fCurrentPositionIndex == 1) {
+			fSettings.put(SETTINGS_INSERTPOSITION, StringConverter.asString(fCurrentPositionIndex));
+		}
+		return super.close();
 	}
+	
+	/**
+	 * Sets the size of the tree in unit of characters.
+	 * @param width  the width of the tree.
+	 * @param height the height of the tree.
+	 */
+	public void setSize(int width, int height) {
+		fWidth = width;
+		fHeight = height;
+	}
+
 	
 	/***
 	 * Set insert position valid input is 0 for the first position, 1 for the last position, > 1 for all else.
 	 */
-	public void setInsertPosition(int insert) {
-		if (fInsertPosition != insert) {
-			fInsertPosition= insert;
-			fSettings.put(SETTINGS_INSERTPOSITION, insert);
-		}
+	private void setInsertPosition(int insert) {
+		fCurrentPositionIndex= insert;
+		fSettings.put(SETTINGS_INSERTPOSITION, insert);
 	}	
 	
 	public void setCommentString(String string) {
@@ -147,36 +227,17 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	public void setGenerateComment(boolean comment) {
 		fGenerateComment= comment;
 	}
-	
-	/**
-	 * Sets the size of the tree in unit of characters.
-	 * @param width  the width of the tree.
-	 * @param height the height of the tree.
-	 */
-	public void setSize(int width, int height) {
-		fWidth = width;
-		fHeight = height;
-	}		
-	
-	public void setVisibility(int visibility) {
-		if (fVisibilityModifier != visibility) {
-			fVisibilityModifier= visibility;
-			fSettings.put(VISIBILITY_MODIFIER, visibility);
-		}
+		
+	private void setVisibility(int visibility) {
+		fVisibilityModifier= visibility;
 	}
 	
-	public void setFinal(boolean value) {
-		if (fFinal != value)  {
-			fFinal= value;
-			fSettings.put(FINAL_MODIFIER, value);
-		}
+	private void setFinal(boolean value) {
+		fFinal= value;
 	}
 		
-	public void setSynchronized(boolean value)  {
-		if (fSynchronized != value)  {
-			fSynchronized= value;
-			fSettings.put(SYNCHRONIZED_MODIFIER, value);
-		}
+	private void setSynchronized(boolean value)  {
+		fSynchronized= value;
 	}	
 	
 	protected Composite createSelectionButtons(Composite composite) {
@@ -462,58 +523,8 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	}
 
 	private void fillWithPossibleInsertPositions(Combo combo) {
-		try {
-			int position= 0;
-			int presetOffset= 0;
-			if (fEditor != null) {
-				presetOffset= ((TextSelection) fEditor.getSelectionProvider().getSelection()).getOffset();
-			}
-			else {
-				List preselected= getInitialElementSelections();	
-				int size= preselected.size();
-				if ((size > 1) || (size == 0))
-					presetOffset= 0;		
-				else {				
-					IJavaElement element= (IJavaElement) preselected.get(0);
-					int type= element.getElementType();					
-					if (type == IJavaElement.FIELD)
-						presetOffset= ((IField)element).getSourceRange().getOffset();									
-					else if (type == IJavaElement.METHOD)
-						presetOffset= ((IMethod)element).getSourceRange().getOffset();	
-				}
-			}
-			
-			IMethod[] methods= fType.getMethods();
-
-			combo.add(ActionMessages.getString("SourceActionDialog.first_method")); //$NON-NLS-1$
-			combo.add(ActionMessages.getString("SourceActionDialog.last_method")); //$NON-NLS-1$
-							
-			int bestDiff= Integer.MAX_VALUE;
-			
-			for (int i= 0; i < methods.length; i++) {
-				int currDiff= 0;
-				IMethod curr= methods[i];
-				combo.add(JavaElementLabels.getElementLabel(methods[i], JavaElementLabels.M_PARAMETER_TYPES));
-				// calculate method to pre-select
-				currDiff= presetOffset - curr.getSourceRange().getOffset();
-				if (currDiff >= 0)
-					if(currDiff < bestDiff) {
-						bestDiff= currDiff;
-						position= i + 2;	// first two entries are first/last
-					}
-					else
-						break;
-			}	
-			// Add persistence only if first or last method: http://bugs.eclipse.org/bugs/show_bug.cgi?id=38400
-			int index= getInsertPosition();
-			if (index > 1)
-				combo.select(position);
-			else			
-				combo.select(index);
-
-			setInsertPosition(combo.getSelectionIndex());
-		} catch (JavaModelException e) {
-		}	
+		combo.setItems((String[]) fLabels.toArray(new String[fLabels.size()]));
+		combo.select(fCurrentPositionIndex);
 	}
 	
 	public boolean getFinal() {
@@ -536,42 +547,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 * Determine where in the file to enter the newly created methods.
 	 */
 	public IJavaElement getElementPosition() {
-		int comboBoxIndex= getInsertPosition();		
-		
-		try {
-			if (comboBoxIndex == 0)				// as first method
-				return asFirstMethod(fType);
-			else if (comboBoxIndex == 1)		// as last method
-				return null;
-			else								// method position
-				return atElementPosition(fType, comboBoxIndex);
-		} catch (JavaModelException e) {
-			return null;
-		}			
-	}
-	
-	private IMethod asFirstMethod(IType type) throws JavaModelException {
-		if (type != null) {
-			IMethod[] methods= type.getMethods();
-			if (methods.length > 0) {
-				return methods[0];		
-			}
-		}
-		return null;
+		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);	
 	}
 
-	/* Returns the element directly following the method to insert after. Index should never 
-	 * always be > 2 since 0 means first method, and 1 means last method.
-	 */
-	private IJavaElement atElementPosition(IType type, int index) throws JavaModelException {
-		if (type != null) {
-			IMethod[] methods= type.getMethods();			
-			IJavaElement[] elements= type.getChildren();
-			for (int i= 0; i < (elements.length-1); i++) {
-				if (methods[index-2] == elements[i])			// first two entries are first/last
-					return elements[i+1];
-			}
-		}
-		return null;
-	}
 }

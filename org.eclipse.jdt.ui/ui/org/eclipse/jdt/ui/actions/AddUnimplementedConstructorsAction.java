@@ -404,8 +404,8 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		private final String SETTINGS_SECTION= "AddUnimplementedConstructorsDialog"; //$NON-NLS-1$
 		private final String OMIT_SUPER="OmitCallToSuper"; //$NON-NLS-1$
 
-		public AddUnimplementedConstructorsDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
-			super(parent, labelProvider, contentProvider, editor, type);
+		public AddUnimplementedConstructorsDialog(Shell parent, ILabelProvider labelProvider, ITreeContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
+			super(parent, labelProvider, contentProvider, editor, type, true);
 			
 			IDialogSettings dialogSettings= JavaPlugin.getDefault().getDialogSettings();
 			fAddConstructorsSettings= dialogSettings.getSection(SETTINGS_SECTION);

@@ -216,7 +216,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					IField fld = (IField) curr;
 
 					if (i == 0) {
-						// remember the cu of the first element
+						// remember the CU of the first element
 						cu = fld.getCompilationUnit();
 						if (cu == null) {
 							return null;
@@ -257,7 +257,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		showUI(type, preselected);
 	}
 
-	//---- Java Editior --------------------------------------------------------------
+	//---- Java Editor --------------------------------------------------------------
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -315,7 +315,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 					if (selection[i] instanceof Methods2Field) {
 						count++;
 						try {
-							key = createSignatureKey(((Methods2Field) selection[i]).fMethod);
+							key = createSignatureKey(((Methods2Field) selection[i]).method);
 						} catch (JavaModelException e) {
 							return new StatusInfo(IStatus.ERROR, e.toString());
 						}
@@ -349,7 +349,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			AddDelegateMethodsContentProvider provider = new AddDelegateMethodsContentProvider(type);
 			Methods2FieldLabelProvider methodLabel = new Methods2FieldLabelProvider();
 
-			SourceActionDialog dialog = new SourceActionDialog(getShell(), methodLabel, provider, fEditor, type);			
+			SourceActionDialog dialog = new SourceActionDialog(getShell(), methodLabel, provider, fEditor, type, false);			
 			dialog.setValidator(createValidator(provider.getNumEntries()));
 			Methods2FieldSorter sorter= new Methods2FieldSorter();
 			dialog.setSorter(sorter);
@@ -540,7 +540,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		public Image getImage(Object element) {
 			if (element instanceof Methods2Field) {
 				Methods2Field wrapper = (Methods2Field) element;
-				return fMethodLabel.getImage(wrapper.fMethod);
+				return fMethodLabel.getImage(wrapper.method);
 			} else if (element instanceof IJavaElement) {
 				return fMethodLabel.getImage(element);
 			}
@@ -550,7 +550,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		public String getText(Object element) {
 			if (element instanceof Methods2Field) {
 				Methods2Field wrapper = (Methods2Field) element;
-				return fMethodLabel.getText(wrapper.fMethod);
+				return fMethodLabel.getText(wrapper.method);
 			} else if (element instanceof IJavaElement) {
 				return fMethodLabel.getText(element);
 			}
@@ -580,15 +580,15 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		JavaElementSorter fSorter = new JavaElementSorter();
 		public int category(Object element) {
 			if (element instanceof Methods2Field)
-				element = ((Methods2Field) element).fMethod;
+				element = ((Methods2Field) element).method;
 			return fSorter.category(element);
 		}
 
 		public int compare(Viewer viewer, Object e1, Object e2) {
 			if (e1 instanceof Methods2Field)
-				e1 = ((Methods2Field) e1).fMethod;
+				e1 = ((Methods2Field) e1).method;
 			if (e2 instanceof Methods2Field)
-				e2 = ((Methods2Field) e2).fMethod;
+				e2 = ((Methods2Field) e2).method;
 			return fSorter.compare(viewer, e1, e2);
 		}
 
@@ -597,7 +597,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	/**return all methods of all super types, minus dups*/
+	/**return all methods of all super types, minus duplicates*/
 	private static IMethod[] resolveMethodsHierarchy(IType type) throws JavaModelException {
 		Map map = new HashMap();
 
@@ -635,7 +635,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		return (IMethod[]) list.toArray(new IMethod[list.size()]);
 	}
 
-	/**creates a key used for hashmaps for a method signature (name+arguments(fqn))*/
+	/**creates a key used for hash maps for a method signature (name+arguments(fqn))*/
 	private static String createSignatureKey(IMethod method) throws JavaModelException {
 		StringBuffer buffer = new StringBuffer();
 		buffer.append(method.getElementName());
@@ -706,7 +706,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 	/** 
 	 * returns Type of field.
 	 * 
-	 * if field is primitve null is returned.
+	 * if field is primitive null is returned.
 	 * if field is array java.lang.Object is returned.
 	 **/
 	private static IType resolveTypeOfField(IField field) throws JavaModelException {
@@ -714,7 +714,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		boolean isArray = isArray(field);
 		if (!isPrimitive && !isArray) {
 			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
-			//if the cu has errors its possible no type name is resolved
+			//if the CU has errors its possible no type name is resolved
 			return typeName != null ? field.getJavaProject().findType(typeName) : null;
 		} else if (isArray) {
 			return getJavaLangObject(field.getJavaProject()); 

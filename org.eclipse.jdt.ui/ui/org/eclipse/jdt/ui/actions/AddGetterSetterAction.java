@@ -802,8 +802,8 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		private final String SETTINGS_SECTION= "AddGetterSetterDialog"; //$NON-NLS-1$
 		private final String SORT_ORDER= "SortOrdering"; //$NON-NLS-1$
 				
-		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) {
-			super(parent, labelProvider, contentProvider, editor, type);
+		public GetterSetterTreeSelectionDialog(Shell parent, ILabelProvider labelProvider, AddGetterSetterContentProvider contentProvider, CompilationUnitEditor editor, IType type) throws JavaModelException {
+			super(parent, labelProvider, contentProvider, editor, type, false);
 			fContentProvider= contentProvider;
 			fType= type;
 			

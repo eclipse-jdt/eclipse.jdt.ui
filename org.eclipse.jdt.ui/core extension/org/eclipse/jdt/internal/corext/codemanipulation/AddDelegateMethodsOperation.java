@@ -74,7 +74,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	
 			// already existing methods
 			IMethod[] existingMethods = fType.getMethods();
-			//the delemiter used
+			//the delimiter used
 			String lineDelim = StubUtility.getLineDelimiterUsed(fType);
 			// the indent used + 1
 			int indent = StubUtility.getIndentUsed(fType) + 1;
@@ -96,8 +96,8 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	
 				String content = null;
 				Methods2Field wrapper = (Methods2Field) fList.get(i);
-				IMethod curr = wrapper.fMethod;
-				IField field = wrapper.fField;
+				IMethod curr = wrapper.method;
+				IField field = wrapper.field;
 				
 				monitor.subTask(JavaElementLabels.getElementLabel(curr, JavaElementLabels.M_PARAMETER_TYPES));
 					
@@ -196,7 +196,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	/** 
 	 * returns Type of field.
 	 * 
-	 * if field is primitve null is returned.
+	 * if field is primitive null is returned.
 	 * if field is array java.lang.Object is returned.
 	 **/
 	private static IType resolveTypeOfField(IField field) throws JavaModelException {
@@ -204,7 +204,7 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 		boolean isArray = isArray(field);
 		if (!isPrimitive && !isArray) {
 			String typeName = JavaModelUtil.getResolvedTypeName(field.getTypeSignature(), field.getDeclaringType());
-			//if the cu has errors its possible no type name is resolved
+			//if the CU has errors its possible no type name is resolved
 			return typeName != null ? field.getJavaProject().findType(typeName) : null;
 		} else if (isArray) {
 			return getJavaLangObject(field.getJavaProject()); 
@@ -231,12 +231,12 @@ public class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 	 * to map from dialog results to corresponding fields
 	 */
 	public static class Methods2Field {
-		public IMethod fMethod = null; 		// method to wrap
-		public IField fField = null;			// field where method is declared
+		public IMethod method = null; 		// method to wrap
+		public IField field = null;			// field where method is declared
 		
 		public Methods2Field(IMethod method, IField field) {
-			fMethod = method;
-			fField = field;
+			this.method = method;
+			this.field = field;
 		}
 
 	}

@@ -248,7 +248,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 	}		
 	
 	public OverrideMethodDialog(Shell parent, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
-		super(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), new OverrideMethodContentProvider(), editor, type);
+		super(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), new OverrideMethodContentProvider(), editor, type, false);
 		init(type, isSubType);
 	}
 	
