@@ -448,7 +448,7 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 
 		// no checking required for moving interface fields to classes
 				
-		if (! canDeclareStaticMembers(fDestinationType)){
+		if (! ((JdtFlags.isStatic(fDestinationType)) || (fDestinationType.getDeclaringType() == null))){
 			String message= RefactoringCoreMessages.getString("MoveMembersRefactoring.static_declaration"); //$NON-NLS-1$
 			result.addError(message);
 		}	
@@ -489,24 +489,23 @@ public class MoveStaticMembersProcessor extends MoveProcessor {
 	private boolean canMoveToInterface(IMember member) throws JavaModelException {
 		int flags= member.getFlags();
 		switch (member.getElementType()) {
-			case IJavaElement.FIELD :
-				if (! (Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
+			case IJavaElement.FIELD:
+				if (!(Flags.isPublic(flags) && Flags.isStatic(flags) && Flags.isFinal(flags)))
+					return false;
+				if (Flags.isEnum(flags))
 					return false;
 				VariableDeclarationFragment declaration= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) member, fSource.getRoot());
-				return declaration.getInitializer() != null;
+				if (declaration != null)
+					return declaration.getInitializer() != null;
 
-			case IJavaElement.TYPE :
+			case IJavaElement.TYPE:
 				return (Flags.isPublic(flags) && Flags.isStatic(flags));
-				
-			default :
+
+			default:
 				return false;
 		}
 	}
 
-	private static boolean canDeclareStaticMembers(IType type) throws JavaModelException {
-		return (JdtFlags.isStatic(type)) || (type.getDeclaringType() == null);
-	}
-	
 	private RefactoringStatus checkAccessedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
 		pm.beginTask("", 3); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
