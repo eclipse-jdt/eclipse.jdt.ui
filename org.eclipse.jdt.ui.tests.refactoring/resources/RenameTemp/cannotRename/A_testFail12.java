@@ -5,7 +5,7 @@ class A{
 		/*[*/final int i= 0;/*]*/
 		A a= new A(){
 			void m(int j){
-				i++;
+				int u= i;
 			}
 		};
 	}
