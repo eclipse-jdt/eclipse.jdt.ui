@@ -53,6 +53,8 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 	private int fWidth= 60;
 	private int fHeight= 18;
 	
+	private int[] fSelectionIndices= new int[0];
+	
 	/**
 	 * Constructs a list selection dialog.
 	 * @param renderer The label renderer used
@@ -319,13 +321,31 @@ public abstract class AbstractElementListSelectionDialog extends SelectionStatus
 				handleDefaultSelected();
 			}
 			public void widgetSelected(SelectionEvent e) {
-				handleSelectionChanged();
+				handleWidgetSelected();
 			}
 		});
 
 		fFilteredList= list;		
 
 		return list;		
+	}
+
+	// 3515	
+	private void handleWidgetSelected() {
+		int[] newSelectionIndices= fFilteredList.getSelectionIndices();
+		
+		if (newSelectionIndices.length != fSelectionIndices.length) {
+			fSelectionIndices= newSelectionIndices;
+			handleSelectionChanged();
+		} else {
+			for (int i= 0; i != newSelectionIndices.length; i++) {
+				if (newSelectionIndices[i] != fSelectionIndices[i]) {
+					fSelectionIndices= newSelectionIndices;
+					handleSelectionChanged();
+					break;							
+				}
+			}
+		}		
 	}
 
 	protected Text createFilterText(Composite parent) {
