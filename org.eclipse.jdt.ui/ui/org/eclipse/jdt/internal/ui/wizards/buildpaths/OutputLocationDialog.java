@@ -14,13 +14,15 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -36,18 +38,21 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 public class OutputLocationDialog extends StatusDialog {
 	
 	private StringButtonDialogField fContainerDialogField;
+	private SelectionButtonDialogField fUseDefault;
+	private SelectionButtonDialogField fUseSpecific;
 	private StatusInfo fContainerFieldStatus;
 	
 	private IProject fCurrProject;
@@ -57,22 +62,32 @@ public class OutputLocationDialog extends StatusDialog {
 		super(parent);
 		setTitle(NewWizardMessages.getString("OutputLocationDialog.title"));
 		fContainerFieldStatus= new StatusInfo();
-		
-		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.location.label", entryToEdit.getPath().makeRelative().toString());
-		
+	
 		OutputLocationAdapter adapter= new OutputLocationAdapter();
+
+		fUseDefault= new SelectionButtonDialogField(SWT.RADIO);
+		fUseDefault.setLabelText(NewWizardMessages.getString("OutputLocationDialog.usedefault.label"));
+		fUseDefault.setDialogFieldListener(adapter);		
+
+		String label= NewWizardMessages.getFormattedString("OutputLocationDialog.usespecific.label", entryToEdit.getPath().makeRelative().toString());
+		fUseSpecific= new SelectionButtonDialogField(SWT.RADIO);
+		fUseSpecific.setLabelText(label);
+		fUseSpecific.setDialogFieldListener(adapter);		
+		
 		fContainerDialogField= new StringButtonDialogField(adapter);
-		fContainerDialogField.setLabelText(label);
 		fContainerDialogField.setButtonLabel(NewWizardMessages.getString("OutputLocationDialog.location.button"));
 		fContainerDialogField.setDialogFieldListener(adapter);
+		
+		fUseSpecific.attachDialogField(fContainerDialogField);
 		
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		
 		IPath outputLocation= (IPath) entryToEdit.getAttribute(CPListElement.OUTPUT);
 		if (outputLocation == null) {
-			fContainerDialogField.setText(""); //$NON-NLS-1$
+			fUseDefault.setSelection(true);
 		} else {
-			fContainerDialogField.setText(outputLocation.makeRelative().toString());
+			fUseSpecific.setSelection(true);
+			fContainerDialogField.setText(outputLocation.removeFirstSegments(1).makeRelative().toString());
 		}
 	}
 	
@@ -81,6 +96,7 @@ public class OutputLocationDialog extends StatusDialog {
 		Composite composite= (Composite)super.createDialogArea(parent);
 		
 		int widthHint= convertWidthInCharsToPixels(60);
+		int indent= convertWidthInCharsToPixels(4);
 		
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
@@ -89,15 +105,22 @@ public class OutputLocationDialog extends StatusDialog {
 		layout.numColumns= 2;
 		inner.setLayout(layout);
 		
-		fContainerDialogField.doFillIntoGrid(inner, 3);
+		fUseDefault.doFillIntoGrid(inner, 2);
+		fUseSpecific.doFillIntoGrid(inner, 2);
 		
-		LayoutUtil.setWidthHint(fContainerDialogField.getLabelControl(null), widthHint);
-		LayoutUtil.setHorizontalSpan(fContainerDialogField.getLabelControl(null), 2);
+		Text textControl= fContainerDialogField.getTextControl(inner);
+		GridData textData= new GridData();
+		textData.widthHint= widthHint;
+		textData.grabExcessHorizontalSpace= true;
+		textData.horizontalIndent= indent;
+		textControl.setLayoutData(textData);
 		
-		LayoutUtil.setWidthHint(fContainerDialogField.getTextControl(null), widthHint);
-		LayoutUtil.setHorizontalGrabbing(fContainerDialogField.getTextControl(null));
-				
-		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
+		Button buttonControl= fContainerDialogField.getChangeControl(inner);
+		GridData buttonData= new GridData();
+		buttonData.widthHint= SWTUtil.getButtonWidthHint(buttonControl);
+		buttonData.heightHint= SWTUtil.getButtonHeigthHint(buttonControl);
+		buttonControl.setLayoutData(buttonData);
+		
 		return composite;
 	}
 
@@ -120,7 +143,7 @@ public class OutputLocationDialog extends StatusDialog {
 	protected void doChangeControlPressed() {
 		IContainer container= chooseOutputLocation();
 		if (container != null) {
-			fContainerDialogField.setText(container.getFullPath().toString());
+			fContainerDialogField.setText(container.getProjectRelativePath().toString());
 		}
 	}
 	
@@ -132,15 +155,22 @@ public class OutputLocationDialog extends StatusDialog {
 	
 	protected void checkIfPathValid() {
 		fOutputLocation= null;
-		IWorkspace workspace= fCurrProject.getWorkspace();
-		
+		fContainerFieldStatus.setOK();
+
+		if (fUseDefault.isSelected()) {
+			return;
+		}
+				
 		String pathStr= fContainerDialogField.getText();
 		if (pathStr.length() == 0) {
 			fContainerFieldStatus.setOK();
 			return;
 		}
+		IPath projectPath= fCurrProject.getFullPath();
 				
-		IPath path= new Path(pathStr).makeAbsolute();
+		IPath path= projectPath.append(pathStr);
+		
+		IWorkspace workspace= fCurrProject.getWorkspace();		
 		IStatus pathValidation= workspace.validatePath(path.toString(), IResource.PROJECT | IResource.FOLDER);
 		if (!pathValidation.isOK()) {
 			fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.invalidpath", pathValidation.getMessage())); //$NON-NLS-1$
@@ -155,15 +185,8 @@ public class OutputLocationDialog extends StatusDialog {
 				fContainerFieldStatus.setError(NewWizardMessages.getString("OutputLocationDialog.error.existingisfile")); //$NON-NLS-1$
 				return;
 			}
-		} else {
-			String project= path.segment(0);
-			if (workspace.getRoot().findMember(project) == null) {
-				fContainerFieldStatus.setError(NewWizardMessages.getFormattedString("OutputLocationDialog.error.projectdoesnotexist", project)); //$NON-NLS-1$
-				return;
-			}
 		}
 		fOutputLocation= path;
-		fContainerFieldStatus.setOK();
 	}
 	
 		
