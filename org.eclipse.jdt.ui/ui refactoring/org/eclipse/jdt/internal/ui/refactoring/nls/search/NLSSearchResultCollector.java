@@ -68,7 +68,7 @@ public class NLSSearchResultCollector implements IJavaSearchResultCollector {
 		fView= SearchUI.getSearchResultView();
 		fMatchCount= 0;
 		if (fView != null)
-			fView.searchStarted(NLSSearchPage.EXTENSION_POINT_ID, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), null, NLSSearchResultLabelProvider.INSTANCE, new GotoMarkerAction(), new GroupByKeyComputer(), fOperation);
+			fView.searchStarted(NLSSearchPage.EXTENSION_POINT_ID, fOperation.getSingularLabel(), fOperation.getPluralLabelPattern(), fOperation.getImageDescriptor(), null, NLSSearchResultLabelProvider.INSTANCE, new GotoMarkerAction(), new NLSGroupByKeyComputer(), fOperation);
 		loadProperties(fPropertyFile);
 		fUsedPropertyNames= new HashSet(fProperties.size());
 
