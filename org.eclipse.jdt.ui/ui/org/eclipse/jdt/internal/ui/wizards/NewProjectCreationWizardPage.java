@@ -199,8 +199,12 @@ public class NewProjectCreationWizardPage extends JavaCapabilityConfigurationPag
 					}
 					entries[nSourceFolders]= JavaRuntime.getJREVariableEntry();
 					
-					outputLocation= project.getFolder(JavaBasePreferencePage.getOutputLocationName()).getFullPath();
-				
+					IPath projPath= project.getFullPath();
+					if (nSourceFolders == 1 && entries[0].getPath().equals(projPath)) {
+						outputLocation= projPath;
+					} else {
+						outputLocation= projPath.append(JavaBasePreferencePage.getOutputLocationName());
+					} 				
 					if (!JavaConventions.validateClasspath(JavaCore.create(project), entries, outputLocation).isOK()) {
 						outputLocation= null;
 						entries= null;
