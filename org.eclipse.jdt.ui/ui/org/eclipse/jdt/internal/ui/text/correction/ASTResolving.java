@@ -404,6 +404,8 @@ public class ASTResolving {
 		res.add(type);
 		if (type.isArray()) {
 			res.add(ast.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
+			res.add(ast.resolveWellKnownType("java.io.Serializable")); //$NON-NLS-1$
+			res.add(ast.resolveWellKnownType("java.lang.Cloneable")); //$NON-NLS-1$
 		} else if (type.isPrimitive()) {
 			Code code= PrimitiveType.toCode(type.getName());
 			boolean found= false;
