@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.swt.SWT;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
+import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSupertypeWherePossibleRefactoring;
@@ -137,25 +139,43 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			try {
 				initializeRefactoring();
 				IWizardPage nextPage= super.getNextPage();
-				IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
-				IType selectedType= (IType)ss.getFirstElement();
-				if (nextPage == this){
-					setMessage(RefactoringMessages.getString("UseSupertypeInputPage.No_updates"), DialogPage.INFORMATION); //$NON-NLS-1$
-					setPageComplete(false);
-					fFileCount.put(selectedType, new Integer(0));
-				} else if (nextPage instanceof IPreviewWizardPage){
-					IChange change= getRefactoringWizard().getChange();
-					if (change instanceof ICompositeChange){
-						ICompositeChange cc= (ICompositeChange)change;
-						fFileCount.put(selectedType, new Integer(cc.getChildren().length));
-					}
-				}
-				fTableViewer.refresh();
+				updateUpdateLabels();
 				return nextPage;
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				return null;
 			}
+		}
+
+		private void updateUpdateLabels() {
+			IType selectedType= getSelectedSupertype();
+			IChange change= getRefactoringWizard().getChange();
+			if (change instanceof ICompositeChange){
+				fFileCount.put(selectedType, new Integer(((ICompositeChange)change).getChildren().length));
+			}
+			fTableViewer.refresh();
+			if (noSupertypeCanBeUsed()){
+				setMessage("No updates are possible for any of the supertypes", DialogPage.INFORMATION);
+				setPageComplete(false);	
+			}
+		}
+
+		private boolean noSupertypeCanBeUsed() {
+			return fTableViewer.getTable().getItemCount() == countFilesWithValue(0);
+		}
+
+		private int countFilesWithValue(int i) {
+			int count= 0;
+			for (Iterator iter= fFileCount.keySet().iterator(); iter.hasNext();) {
+				if (((Integer)fFileCount.get(iter.next())).intValue() == i)
+					count++;
+			}
+			return count;
+		}
+
+		private IType getSelectedSupertype() {
+			IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
+			return (IType)ss.getFirstElement();
 		}
 
 		/*
@@ -164,7 +184,15 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		public boolean performFinish(){
 			try {
 				initializeRefactoring();
-				return super.performFinish();
+				boolean superFinish= super.performFinish();
+				if (! superFinish)
+					return false;
+				IChange c= getRefactoringWizard().getChange();
+				if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
+					updateUpdateLabels();
+					return false;
+				}
+				return superFinish;
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 				return false;
