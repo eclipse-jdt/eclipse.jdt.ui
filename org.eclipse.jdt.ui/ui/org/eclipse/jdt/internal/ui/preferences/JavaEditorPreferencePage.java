@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.TabFolderLayout;
 
 /*
@@ -211,9 +212,11 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END),
 	
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS),
 
 		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS),
-		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER),
+		new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK)
 	};
 	
 	private final String[][] fSyntaxColorListModel= new String[][] {
@@ -1054,6 +1057,21 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		fBrowserLikeLinksKeyModifierText= addTextField(composite, text, PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, 20, 0, false);
 		fBrowserLikeLinksKeyModifierText.setTextLimit(Text.LIMIT);
 		
+		if (computeStateMask(fOverlayStore.getString(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER)) == -1) {
+			// Fix possible illegal modifier string
+			int stateMask= fOverlayStore.getInt(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
+			StringBuffer buf= new StringBuffer(""); //$NON-NLS-1$
+			if ((stateMask & SWT.CTRL) == SWT.CTRL)
+				appendModifierString(buf, SWT.CTRL);
+			if ((stateMask & SWT.ALT) == SWT.ALT)
+				appendModifierString(buf, SWT.ALT);
+			if ((stateMask & SWT.SHIFT) == SWT.SHIFT)
+				appendModifierString(buf, SWT.SHIFT);
+			if ((stateMask & SWT.COMMAND) == SWT.COMMAND)
+				appendModifierString(buf,  SWT.COMMAND);
+			fBrowserLikeLinksKeyModifierText.setText(buf.toString());
+		}
+		
 		fBrowserLikeLinksKeyModifierText.addKeyListener(new KeyListener() {
 			private boolean isModifierCandidate;
 			public void keyPressed(KeyEvent e) {
@@ -1062,19 +1080,19 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		
 			public void keyReleased(KeyEvent e) {
 				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
-					String text= fBrowserLikeLinksKeyModifierText.getText();
+					String modifierString= fBrowserLikeLinksKeyModifierText.getText();
 					Point selection= fBrowserLikeLinksKeyModifierText.getSelection();
 					int i= selection.x - 1;
-					while (i > -1 && Character.isWhitespace(text.charAt(i))) {
+					while (i > -1 && Character.isWhitespace(modifierString.charAt(i))) {
 						i--;
 					}
-					boolean needsPrefixDelimiter= i > -1 && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+					boolean needsPrefixDelimiter= i > -1 && !String.valueOf(modifierString.charAt(i)).equals(DELIMITER);
 
 					i= selection.y;
-					while (i < text.length() && Character.isWhitespace(text.charAt(i))) {
+					while (i < modifierString.length() && Character.isWhitespace(modifierString.charAt(i))) {
 						i++;
 					}
-					boolean needsPostfixDelimiter= i < text.length() && !String.valueOf(text.charAt(i)).equals(DELIMITER);
+					boolean needsPostfixDelimiter= i < modifierString.length() && !String.valueOf(modifierString.charAt(i)).equals(DELIMITER);
 
 					String insertString;
 
@@ -1099,6 +1117,16 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		});
 
 		return composite;
+	}
+
+	private void appendModifierString(StringBuffer buf, int modifier) {
+		if (buf == null)
+			return;
+		
+		if (buf.length() > 0)
+			buf.append(DELIMITER);
+		
+		buf.append(Action.findModifierString(modifier));
 	}
 
 	private void handleBrowserLikeLinksKeyModifierModified() {
@@ -1140,7 +1168,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		int stateMask= 0;
 		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 		while (modifierTokenizer.hasMoreTokens()) {
-			int modifier= Action.findModifier(modifierTokenizer.nextToken());
+			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
 			if (modifier == 0 || (stateMask & modifier) == modifier)
 				return -1;
 			stateMask= stateMask | modifier;
@@ -1323,6 +1351,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 	 */
 	public boolean performOk() {
 		fJavaEditorHoverConfigurationBlock.performOk();
+		fOverlayStore.setValue(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, computeStateMask(fBrowserLikeLinksKeyModifierText.getText()));
 		fOverlayStore.propagate();
 		JavaPlugin.getDefault().savePluginPreferences();
 		return true;

@@ -284,6 +284,12 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		private void updateKeyModifierMask() {
 			String modifiers= getPreferenceStore().getString(BROWSER_LIKE_LINKS_KEY_MODIFIER);
 			fKeyModifierMask= computeStateMask(modifiers);
+			if (fKeyModifierMask == -1) {
+				// Fallback to stored state mask
+				fKeyModifierMask= getPreferenceStore().getInt(BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK);
+				if (fKeyModifierMask == 0)
+					fKeyModifierMask= -1;
+			};
 		}
 
 		private int computeStateMask(String modifiers) {
@@ -296,7 +302,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 			int stateMask= 0;
 			StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 			while (modifierTokenizer.hasMoreTokens()) {
-				int modifier= Action.findModifier(modifierTokenizer.nextToken());
+				int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
 				if (modifier == 0 || (stateMask & modifier) == modifier)
 					return -1;
 				stateMask= stateMask | modifier;
@@ -1092,6 +1098,14 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	private final static String BROWSER_LIKE_LINKS= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS;
 	/** Preference key for key modifier of browser like links */
 	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER;
+	/**
+	 * Preference key for key modifier mask of browser like links.
+	 * The value is only used if the value of <code>EDITOR_BROWSER_LIKE_LINKS</code>
+	 * cannot be resolved to valid SWT modifier bits.
+	 * 
+	 * @since 2.1.1
+	 */
+	private final static String BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK;
 	
 	protected final static char[] BRACKETS= { '{', '}', '(', ')', '[', ']' };
 
@@ -1266,10 +1280,10 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 	 * position in the editor.
 	 */
 	public void synchronizeOutlinePageSelection() {
-		
+
 		if (isEditingScriptRunning())
 			return;
-		
+
 		ISourceViewer sourceViewer= getSourceViewer();
 		if (sourceViewer == null || fOutlinePage == null)
 			return;
@@ -1286,7 +1300,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		int offset= sourceViewer.getVisibleRegion().getOffset();
 			caret= offset + styledText.getCaretOffset();
 		}
-		
+
 		IJavaElement element= getElementAt(caret);
 		if (element instanceof ISourceReference) {
 			fOutlinePage.removeSelectionChangedListener(fSelectionChangedListener);
@@ -1636,7 +1650,7 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_STRUCTURE, action);
 		WorkbenchHelp.setHelp(action, IJavaHelpContextIds.OPEN_STRUCTURE_ACTION);
-
+		
 		action= new TextOperationAction(JavaEditorMessages.getResourceBundle(),"OpenHierarchy.", this, JavaSourceViewer.SHOW_HIERARCHY, true); //$NON-NLS-1$
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY);
 		setAction(IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, action);

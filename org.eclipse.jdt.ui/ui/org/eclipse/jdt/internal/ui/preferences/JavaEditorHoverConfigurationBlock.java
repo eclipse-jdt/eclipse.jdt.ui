@@ -246,6 +246,7 @@ class JavaEditorHoverConfigurationBlock {
 
 	void performOk() {
 		StringBuffer buf= new StringBuffer();
+		StringBuffer maskBuf= new StringBuffer();
 		for (int i= 0; i < fHoverConfigs.length; i++) {
 			buf.append(getContributedHovers()[i].getId());
 			buf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
@@ -256,8 +257,14 @@ class JavaEditorHoverConfigurationBlock {
 				modifier= JavaEditorTextHoverDescriptor.NO_MODIFIER;
 			buf.append(modifier);
 			buf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+			
+			maskBuf.append(getContributedHovers()[i].getId());
+			maskBuf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+			maskBuf.append(fHoverConfigs[i].fStateMask);
+			maskBuf.append(JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
 		}
 		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, buf.toString());
+		fStore.setValue(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, maskBuf.toString());
 		JavaPlugin.getDefault().resetJavaEditorTextHoverDescriptors();
 	}
 
@@ -278,6 +285,17 @@ class JavaEditorHoverConfigurationBlock {
 				idToModifier.put(id, tokenizer.nextToken());
 		}
 
+		String compiledTextHoverModifierMasks= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS);
+
+		tokenizer= new StringTokenizer(compiledTextHoverModifierMasks, JavaEditorTextHoverDescriptor.VALUE_SEPARATOR);
+		HashMap idToModifierMask= new HashMap(tokenizer.countTokens() / 2);
+
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (tokenizer.hasMoreTokens())
+				idToModifierMask.put(id, tokenizer.nextToken());
+		}
+
 		for (int i= 0; i < fHoverConfigs.length; i++) {
 			String modifierString= (String)idToModifier.get(getContributedHovers()[i].getId());
 			boolean enabled= true;
@@ -295,6 +313,14 @@ class JavaEditorHoverConfigurationBlock {
 			fHoverConfigs[i].fModifierString= modifierString;
 			fHoverConfigs[i].fIsEnabled= enabled;
 			fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifierString);
+
+			if (fHoverConfigs[i].fStateMask == -1) {
+				try {
+					fHoverConfigs[i].fStateMask= Integer.parseInt((String)idToModifierMask.get(getContributedHovers()[i].getId()));
+				} catch (NumberFormatException ex) {
+					fHoverConfigs[i].fStateMask= -1;
+				}
+			}
 		}
 	}
 

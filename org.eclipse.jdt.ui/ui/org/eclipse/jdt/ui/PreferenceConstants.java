@@ -437,13 +437,23 @@ public class PreferenceConstants {
 	public static final String JAVADOC_COMMAND= "command"; //$NON-NLS-1$
 
 	/**
-	 * A named preference that defines the hover shown when no control key is
-	 * pressed.
+	 * A named preference that defines the key for the hover modifiers.
 	 *
 	 * @see JavaUI
 	 * @since 2.1
 	 */
 	public static final String EDITOR_TEXT_HOVER_MODIFIERS= "hoverModifiers"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that defines the key for the hover modifier state masks.
+	 * The value is only used if the value of <code>EDITOR_TEXT_HOVER_MODIFIERS</code>
+	 * cannot be resolved to valid SWT modifier bits.
+	 * 
+	 * @see JavaUI
+	 * @see #EDITOR_TEXT_HOVER_MODIFIERS
+	 * @since 2.1.1
+	 */
+	public static final String EDITOR_TEXT_HOVER_MODIFIER_MASKS= "hoverModifierMasks"; //$NON-NLS-1$
 
 	/**
 	 * The id of the best match hover contributed for extension point
@@ -1383,6 +1393,19 @@ public class PreferenceConstants {
 	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER= "browserLikeLinksKeyModifier"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls the key modifier mask for browser like links.
+	 * The value is only used if the value of <code>EDITOR_BROWSER_LIKE_LINKS</code>
+	 * cannot be resolved to valid SWT modifier bits.
+	 * <p>
+	 * Value is of type <code>String</code>.
+	 * </p>
+	 * 
+	 * @see #EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIERR
+	 * @since 2.1.1
+	 */
+	public static final String EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK= "browserLikeLinksKeyModifierMask"; //$NON-NLS-1$
+
+	/**
 	 * A named preference that controls the smart typing input mode.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
@@ -1883,9 +1906,11 @@ public class PreferenceConstants {
 
 		String ctrl= Action.findModifierString(SWT.CTRL);
 		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIERS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + ctrl); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS, "org.eclipse.jdt.ui.BestMatchHover;0;org.eclipse.jdt.ui.JavaSourceHover;" + SWT.CTRL); //$NON-NLS-1$
 		
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS, true);
 		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER, ctrl);
+		store.setDefault(PreferenceConstants.EDITOR_BROWSER_LIKE_LINKS_KEY_MODIFIER_MASK, SWT.CTRL);
 		
 		// work in progress
 		store.setDefault(PreferenceConstants.EDITOR_SMART_TYPING, true);

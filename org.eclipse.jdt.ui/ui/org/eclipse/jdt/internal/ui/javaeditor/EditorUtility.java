@@ -16,6 +16,10 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
 
+import org.eclipse.swt.SWT;
+
+import org.eclipse.jface.action.Action;
+
 import org.eclipse.ui.IEditorDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -300,5 +304,29 @@ public class EditorUtility {
 		}
 		
 		return null;
+	}
+
+	/**
+	 * Maps the localized modifier name to a code in the same
+	 * manner as #findModifier.
+	 * 
+	 * @return the SWT modifier bit, or <code>0</code> if no match was found
+	 * @see findModifier
+	 * @since 2.1.1
+	 */
+	public static int findLocalizedModifier(String token) {
+		if (token == null)
+			return 0;
+		
+		if (token.equalsIgnoreCase(Action.findModifierString(SWT.CTRL)))
+			return SWT.CTRL;
+		if (token.equalsIgnoreCase(Action.findModifierString(SWT.SHIFT)))
+			return SWT.SHIFT;
+		if (token.equalsIgnoreCase(Action.findModifierString(SWT.ALT)))
+			return SWT.ALT;
+		if (token.equalsIgnoreCase(Action.findModifierString(SWT.COMMAND)))
+			return SWT.COMMAND;
+
+		return 0;
 	}
 }

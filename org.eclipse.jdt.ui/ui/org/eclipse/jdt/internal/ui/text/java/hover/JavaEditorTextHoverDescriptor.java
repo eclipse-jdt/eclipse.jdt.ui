@@ -36,6 +36,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.hover.IJavaEditorTextHover;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesMessages;
 
 /**
  * Describes a Java editor text hover.
@@ -52,6 +54,8 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 	private static final String ACTIVATE_PLUG_IN_ATTRIBUTE= "activate"; //$NON-NLS-1$
 	private static final String DESCRIPTION_ATTRIBUTE= "description"; //$NON-NLS-1$
 
+	private static final String DELIMITER= PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.delimiter"); //$NON-NLS-1$
+	
 	public static final String NO_MODIFIER= "0"; //$NON-NLS-1$
 	public static final String DISABLED_TAG= "!"; //$NON-NLS-1$
 	public static final String VALUE_SEPARATOR= ";"; //$NON-NLS-1$
@@ -90,7 +94,7 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 		int stateMask= 0;
 		StringTokenizer modifierTokenizer= new StringTokenizer(modifiers, ",;.:+-* "); //$NON-NLS-1$
 		while (modifierTokenizer.hasMoreTokens()) {
-			int modifier= Action.findModifier(modifierTokenizer.nextToken());
+			int modifier= EditorUtility.findLocalizedModifier(modifierTokenizer.nextToken());
 			if (modifier == 0 || (stateMask & modifier) == modifier)
 				return -1;
 			stateMask= stateMask | modifier;
@@ -241,6 +245,17 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 				idToModifier.put(id, tokenizer.nextToken());
 		}
 
+		String compiledTextHoverModifierMasks= JavaPlugin.getDefault().getPreferenceStore().getString(PreferenceConstants.EDITOR_TEXT_HOVER_MODIFIER_MASKS);
+
+		tokenizer= new StringTokenizer(compiledTextHoverModifierMasks, VALUE_SEPARATOR);
+		HashMap idToModifierMask= new HashMap(tokenizer.countTokens() / 2);
+
+		while (tokenizer.hasMoreTokens()) {
+			String id= tokenizer.nextToken();
+			if (tokenizer.hasMoreTokens())
+				idToModifierMask.put(id, tokenizer.nextToken());
+		}
+
 		for (int i= 0; i < hovers.length; i++) {
 			String modifierString= (String)idToModifier.get(hovers[i].getId());
 			boolean enabled= true;
@@ -258,7 +273,39 @@ public class JavaEditorTextHoverDescriptor implements Comparable {
 			hovers[i].fModifierString= modifierString;
 			hovers[i].fIsEnabled= enabled;
 			hovers[i].fStateMask= computeStateMask(modifierString);
+			if (hovers[i].fStateMask == -1) {
+				// Fallback: use stored modifier masks
+				try {
+					hovers[i].fStateMask= Integer.parseInt((String)idToModifierMask.get(hovers[i].getId()));
+				} catch (NumberFormatException ex) {
+					hovers[i].fStateMask= -1;
+				}
+				// Fix modifier string
+				int stateMask= hovers[i].fStateMask;
+				if (stateMask == -1)
+					stateMask= 0;
+				StringBuffer buf= new StringBuffer(""); //$NON-NLS-1$
+				if ((stateMask & SWT.CTRL) == SWT.CTRL)
+					appendModifierString(buf, SWT.CTRL);
+				if ((stateMask & SWT.ALT) == SWT.ALT)
+					appendModifierString(buf, SWT.ALT);
+				if ((stateMask & SWT.SHIFT) == SWT.SHIFT)
+					appendModifierString(buf, SWT.SHIFT);
+				if ((stateMask & SWT.COMMAND) == SWT.COMMAND)
+					appendModifierString(buf,  SWT.COMMAND);
+				hovers[i].fModifierString= buf.toString();
+			}
 		}
+	}
+	
+	private static void appendModifierString(StringBuffer buf, int modifier) {
+		if (buf == null)
+			return;
+		
+		if (buf.length() > 0)
+			buf.append(DELIMITER);
+		
+		buf.append(Action.findModifierString(modifier));
 	}
 
 	/**
