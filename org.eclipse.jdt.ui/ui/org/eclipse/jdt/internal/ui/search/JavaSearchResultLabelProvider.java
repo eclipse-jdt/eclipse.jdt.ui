@@ -23,10 +23,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.ui.OverrideIndicatorLabelDecorator;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 
 public class JavaSearchResultLabelProvider extends LabelProvider {
@@ -88,7 +87,7 @@ public class JavaSearchResultLabelProvider extends LabelProvider {
 		IJavaElement javaElement= getJavaElement(o);
 
 		if (javaElement == null || !javaElement.exists())
-			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_FATAL);
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_UNKNOWN);
 
 		Image image= fLabelProvider.getImage(javaElement);
 		if (fDecorator != null) {
