@@ -682,10 +682,13 @@ public final class MemberVisibilityAdjustor {
 					matches= group.getSearchResults();
 					for (int offset= 0; offset < matches.length; offset++)
 						adjustOutgoingVisibility(rewrite, matches[offset], new SubProgressMonitor(monitor, 1));
-				} else if (element != null)
-					fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
-				else if (group.getResource() != null)
-					fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.resource", new String[] { group.getResource().getName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
+				} // else if (element != null)
+//					fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
+//				else if (group.getResource() != null)
+//					fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.resource", new String[] { group.getResource().getName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
+
+				// TW: enable when bug 78387 is fixed
+
 				monitor.worked(1);
 			}
 		} finally {
