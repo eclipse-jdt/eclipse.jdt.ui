@@ -95,7 +95,7 @@ public class ProblemLocation implements IProblemLocation {
 	public String toString() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("Id: ").append(getErrorCode(fId)).append('\n'); //$NON-NLS-1$
-		buf.append('[').append(fOffset).append(", ").append(fOffset).append(']').append('\n'); //$NON-NLS-1$
+		buf.append('[').append(fOffset).append(", ").append(fLength).append(']').append('\n'); //$NON-NLS-1$
 		String[] arg= fArguments;
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
@@ -129,6 +129,9 @@ public class ProblemLocation implements IProblemLocation {
 		}
 		if ((code & IProblem.Syntax) != 0) {
 			buf.append("Syntax + "); //$NON-NLS-1$
+		}
+		if ((code & IProblem.Annotation) != 0) {
+			buf.append("Annotation + "); //$NON-NLS-1$
 		}
 		buf.append(code & IProblem.IgnoreCategoriesMask);
 			
