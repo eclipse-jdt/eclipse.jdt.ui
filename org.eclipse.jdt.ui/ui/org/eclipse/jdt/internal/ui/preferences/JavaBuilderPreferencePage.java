@@ -170,25 +170,42 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 
 
 	private void doValidation() {
-		fWorkingValues.put(PREF_RESOURCE_FILTER,  fResourceFilterField.getText());
 		IStatus status= validateResourceFilters();
 		updateStatus(status);
 	}
 	
+	private String[] getFilters(String text) {
+		StringTokenizer tok= new StringTokenizer(text, ",");
+		int nTokens= tok.countTokens();
+		String[] res= new String[nTokens];
+		for (int i= 0; i < res.length; i++) {
+			res[i]= tok.nextToken().trim();
+		}
+		return res;
+	}
+	
+	
 	private IStatus validateResourceFilters() {
 		IWorkspace workspace= ResourcesPlugin.getWorkspace();
-		
+				
 		String text= fResourceFilterField.getText();
-		StringTokenizer tok= new StringTokenizer(text, ",");
-		while (tok.hasMoreTokens()) {
-			String curr= tok.nextToken().trim();
-			String fileName= curr.replace('*', 'x');
+		String[] filters= getFilters(text);
+		for (int i= 0; i < filters.length; i++) {
+			String fileName= filters[i].replace('*', 'x');
 			IStatus status= workspace.validateName(fileName, IResource.FILE);
 			if (status.matches(IStatus.ERROR)) {
 				String message= JavaUIMessages.getFormattedString("JavaBuilderPreferencePage.filter.invalidsegment.error", status.getMessage());
 				return new StatusInfo(IStatus.ERROR, message);
 			}
 		}
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < filters.length; i++) {
+			if (i > 0) {
+				buf.append(',');
+			}
+			buf.append(filters[i]);
+		}
+		fWorkingValues.put(PREF_RESOURCE_FILTER, buf.toString());
 		return new StatusInfo();
 	}
 	
@@ -231,7 +248,15 @@ public class JavaBuilderPreferencePage extends PreferencePage implements IWorkbe
 	
 	private void updateControls() {
 		// update the UI
-		fResourceFilterField.setText((String) fWorkingValues.get(PREF_RESOURCE_FILTER));
+		String[] filters= getFilters((String) fWorkingValues.get(PREF_RESOURCE_FILTER));
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < filters.length; i++) {
+			if (i > 0) {
+				buf.append(", ");
+			}
+			buf.append(filters[i]);			
+		}
+		fResourceFilterField.setText(buf.toString());
 	}
 
 }
