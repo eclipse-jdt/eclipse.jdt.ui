@@ -94,8 +94,8 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 public class PasteAction extends SelectionDispatchAction {
 
-    public static final String PASTE_PRE_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PastePreNotification";
-    public static final String PASTE_RESULT_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PasteResultNotification";
+    public static final String PASTE_PRE_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PastePreNotification"; //$NON-NLS-1$
+    public static final String PASTE_RESULT_NOTIFICATION= "org.eclipse.jdt.internal.ui.refactoring.reorg.PasteResultNotification"; //$NON-NLS-1$
     
 	private final Clipboard fClipboard;
 	
