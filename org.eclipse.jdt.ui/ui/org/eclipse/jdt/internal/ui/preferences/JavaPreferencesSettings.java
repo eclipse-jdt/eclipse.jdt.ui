@@ -16,13 +16,9 @@ public class JavaPreferencesSettings  {
 		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
 		
 		CodeGenerationSettings res= new CodeGenerationSettings();
-		res.createFileComments= store.getBoolean(PreferenceConstants.CODEGEN__FILE_COMMENTS);
 		res.createComments= store.getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS);
-		res.createNonJavadocComments= store.getBoolean(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS);
 		res.importOrder= getImportOrderPreference(store);
 		res.importThreshold= getImportNumberThreshold(store);
-		res.fieldPrefixes= getGetterStetterPrefixes(store);
-		res.fieldSuffixes= getGetterStetterSuffixes(store);
 		res.tabWidth= JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);
 		return res;
 	}
@@ -43,33 +39,7 @@ public class JavaPreferencesSettings  {
 		}
 		return new String[0];
 	}
-	
-	/**
-	 * @deprecated
-     */
-	public static String[] getGetterStetterPrefixes(IPreferenceStore prefs) {
-		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_PREFIX)) {
-			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_PREFIX);
-			if (str != null) {
-				return unpackList(str, ","); //$NON-NLS-1$
-			}
-		}
-		return new String[0];
-	}
-	
-	/**
-	 * @deprecated
-	 */
-	public static String[] getGetterStetterSuffixes(IPreferenceStore prefs) {
-		if (prefs.getBoolean(PreferenceConstants.CODEGEN_USE_GETTERSETTER_SUFFIX)) {
-			String str= prefs.getString(PreferenceConstants.CODEGEN_GETTERSETTER_SUFFIX);
-			if (str != null) {
-				return unpackList(str, ","); //$NON-NLS-1$
-			}
-		}
-		return new String[0];
-	}	
-	
+		
 	private static String[] unpackList(String str, String separator) {
 		StringTokenizer tok= new StringTokenizer(str, separator); //$NON-NLS-1$
 		int nTokens= tok.countTokens();
@@ -80,9 +50,6 @@ public class JavaPreferencesSettings  {
 		return res;
 	}
 	
-	private static int getTabSize() {
-		return JavaCore.getPlugin().getPluginPreferences().getInt(JavaCore.FORMATTER_TAB_SIZE);
-	}	
 		
 }
 

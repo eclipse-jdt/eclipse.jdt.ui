@@ -154,14 +154,26 @@ public class PreferenceConstants {
 	 */	
 	public static final String CODEGEN_GETTERSETTER_SUFFIX= "org.eclipse.jdt.ui.gettersetter.suffix.list"; //$NON-NLS-1$
 
+
 	/**
-	 * A name preference that controls if a comment stubs will be added
+	 * A named preference that controls if comment stubs will be added
+	 * automatically to newly created types and methods.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * @since 2.1
+	 */
+	public static final String CODEGEN_ADD_COMMENTS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
+
+	/**
+	 * A named preference that controls if a comment stubs will be added
 	 * automatocally to newly created types and methods.
 	 * <p>
 	 * Value is of type <code>Boolean</code>.
 	 * </p>
+	 * @deprecated Use CODEGEN_ADD_COMMENTS instead (Name is more precice).
 	 */
-	public static final String CODEGEN__JAVADOC_STUBS= "org.eclipse.jdt.ui.javadoc"; //$NON-NLS-1$
+	public static final String CODEGEN__JAVADOC_STUBS= CODEGEN_ADD_COMMENTS;
 
 	/**
 	 * A named preference that controls if a non-javadoc comment gets added to methods generated via the 
@@ -1666,9 +1678,7 @@ public class PreferenceConstants {
 			}
 		}
 		
-		store.setDefault(PreferenceConstants.CODEGEN__JAVADOC_STUBS, true);
-		store.setDefault(PreferenceConstants.CODEGEN__NON_JAVADOC_COMMENTS, false);
-		store.setDefault(PreferenceConstants.CODEGEN__FILE_COMMENTS, false);		
+		store.setDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 
 		// MembersOrderPreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER, "T,SI,SF,SM,I,F,C,M"); //$NON-NLS-1$

@@ -1595,7 +1595,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * is not desired
 	 */		
 	protected String getTypeComment(ICompilationUnit parentCU) {
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN__JAVADOC_STUBS)) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) {
 			try {
 				String enclosing= isEnclosingTypeSelected() ? JavaModelUtil.getTypeQualifiedName(getEnclosingType()) : ""; //$NON-NLS-1$
 				String comment= StubUtility.getTypeComment(parentCU, getTypeName(), enclosing);

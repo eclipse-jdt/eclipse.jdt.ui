@@ -187,7 +187,7 @@ public class CodeTemplateBlock {
 	protected final static Object COMMENT_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.comment.node"); //$NON-NLS-1$
 	protected final static Object CODE_NODE= PreferencesMessages.getString("CodeTemplateBlock.templates.code.node"); //$NON-NLS-1$
 	
-	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN__JAVADOC_STUBS;
+	private static final String PREF_JAVADOC_STUBS= PreferenceConstants.CODEGEN_ADD_COMMENTS;
 	
 	private TreeListDialogField fCodeTemplateTree;
 	
