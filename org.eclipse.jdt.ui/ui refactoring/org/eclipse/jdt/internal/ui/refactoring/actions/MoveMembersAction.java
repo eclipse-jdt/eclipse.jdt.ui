@@ -4,12 +4,12 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.actions.OpenRefactoringWizardAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
@@ -23,11 +23,11 @@ public class MoveMembersAction extends OpenRefactoringWizardAction {
 	private static final String LABEL= RefactoringMessages.getString("RefactoringGroup.move_label"); //$NON-NLS-1$
 	private static final String UNAVAILABLE= RefactoringMessages.getString("MoveMembersAction.unavailable"); //$NON-NLS-1$
 
-	protected MoveMembersAction(IWorkbenchSite site) {
+	public MoveMembersAction(IWorkbenchSite site) {
 		super(LABEL, UNAVAILABLE, site, IMember.class, true);
 	}
 
-	protected MoveMembersAction(CompilationUnitEditor editor) {
+	public MoveMembersAction(CompilationUnitEditor editor) {
 		super(LABEL, UNAVAILABLE, editor, IMember.class, true);
 	}
 

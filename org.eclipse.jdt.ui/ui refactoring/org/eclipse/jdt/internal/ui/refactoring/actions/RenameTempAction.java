@@ -2,9 +2,7 @@ package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,11 +19,16 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class RenameTempAction extends TextSelectionRefactoringAction {
+public class RenameTempAction extends SelectionDispatchAction {
 
+	private CompilationUnitEditor fEditor;
+	private String fDialogMessageTitle;
+	
 	public RenameTempAction(CompilationUnitEditor editor) {
-		super(editor, RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
+		super(editor.getEditorSite());
 		setText(RefactoringMessages.getString("RenameTempAction.rename_Local_Variable"));//$NON-NLS-1$
+		fEditor= editor;
+		fDialogMessageTitle= RefactoringMessages.getString("RenameTempAction.rename_Local_Variable");
 	}
 	
 	protected Refactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
@@ -43,7 +46,7 @@ class RenameTempAction extends TextSelectionRefactoringAction {
 		setEnabled(getCompilationUnit() != null);
 	}
 	
-	protected boolean canRun(ITextSelection selection) {
+	public boolean canRun(ITextSelection selection) {
 		selectionChanged(selection);
 		if (! isEnabled())
 			return false;
@@ -56,8 +59,17 @@ class RenameTempAction extends TextSelectionRefactoringAction {
 			return false;
 		}
 	}
+	
+	protected void run(ITextSelection selection) {
+		try{
+			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			new RefactoringStarter().activate(refactoring, createWizard(refactoring), fDialogMessageTitle, false);
+		} catch (JavaModelException e){
+			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
+		}	
+	}
 		
 	private ICompilationUnit getCompilationUnit(){
-		return SelectionConverter.getInputAsCompilationUnit(getEditor());
+		return SelectionConverter.getInputAsCompilationUnit(fEditor);
 	}	
 }

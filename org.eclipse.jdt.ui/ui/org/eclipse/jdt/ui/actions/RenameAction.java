@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.refactoring.actions;
+package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
@@ -7,10 +7,11 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RenameJavaElementAction;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RenameTempAction;
 
 public class RenameAction extends SelectionDispatchAction {
 

@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.refactoring.actions;
+package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.ui.IWorkbenchSite;
 

@@ -27,13 +27,6 @@ import org.eclipse.jdt.ui.IContextMenuConstants;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractMethodAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ExtractTempAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.InlineTempAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.ModifyParametersAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.MoveAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.PullUpAction;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RenameAction;
 
 /**
  * Action group that adds refactor actions (e.g. Rename..., Move..., etc.)

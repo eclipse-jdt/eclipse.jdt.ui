@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringSupportFactory;
 import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-class RenameJavaElementAction extends SelectionDispatchAction {
+public class RenameJavaElementAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	

@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.ui.refactoring.actions;
+package org.eclipse.jdt.ui.actions;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -13,7 +13,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
@@ -23,6 +22,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.MoveMembersAction;
 import org.eclipse.jdt.internal.ui.reorg.JdtMoveAction;
 
 public class MoveAction extends SelectionDispatchAction{
