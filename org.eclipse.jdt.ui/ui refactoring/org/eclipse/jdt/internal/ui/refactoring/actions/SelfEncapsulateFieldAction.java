@@ -20,13 +20,12 @@ import org.eclipse.jdt.internal.ui.actions.*;
 public class SelfEncapsulateFieldAction extends RefactoringAction {
 
 	public SelfEncapsulateFieldAction(StructuredSelectionProvider provider) {
-		super("Self Encapsulate", provider);
+		super("Self Encapsulate...", provider);
 	}
 	
 	public void run() {
 		IField field= (IField)SelectionUtil.getSingleElement(getStructuredSelection());
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, 
-			RefactoringGroup.createChangeCreator(), CodeFormatterPreferencePage.getTabSize());
+		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, CodeFormatterPreferencePage.getTabSize());
 		try  {	
 			RefactoringAction.activateRefactoringWizard(
 				refactoring, 
