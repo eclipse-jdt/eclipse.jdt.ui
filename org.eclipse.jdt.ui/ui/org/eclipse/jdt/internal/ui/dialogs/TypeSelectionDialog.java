@@ -82,6 +82,18 @@ public class TypeSelectionDialog extends TwoPaneElementSelector {
 	    public int compare(Object left, Object right) {
 	     	String leftString= (String) left;
 	     	String rightString= (String) right;
+	     	
+	     	// XXX workaround for 6385
+	     	if (leftString.length() == 0) {
+	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
+	     		return -1;
+	     	}
+	     	
+	     	// XXX	
+	     	if (rightString.length() == 0) {
+	     	    JavaPlugin.log(new StringIndexOutOfBoundsException("type name was empty"));
+	     		return +1;
+	     	}
 	     		     	
 	     	if (Character.isLowerCase(leftString.charAt(0)) &&
 	     		!Character.isLowerCase(rightString.charAt(0)))
