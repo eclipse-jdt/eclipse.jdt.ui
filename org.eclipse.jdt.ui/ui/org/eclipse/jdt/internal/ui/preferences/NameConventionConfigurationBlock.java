@@ -364,7 +364,7 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		fUseIsForBooleanGettersBox.doFillIntoGrid(composite, 3);
 
 		fExceptionName.doFillIntoGrid(composite, 2);
-		DialogField.createEmptySpace(parent);
+		DialogField.createEmptySpace(composite);
 		
 		return composite;
 	}
