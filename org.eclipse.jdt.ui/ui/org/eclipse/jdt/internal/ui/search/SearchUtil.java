@@ -63,6 +63,9 @@ public class SearchUtil extends JavaModelUtil {
 		try {
 			String handleId= (String)marker.getAttribute(IJavaSearchUIConstants.ATT_JE_HANDLE_ID);
 			IJavaElement je= JavaCore.create(handleId);
+			if (je == null)
+				return null;
+
 			if (!marker.getAttribute(IJavaSearchUIConstants.ATT_IS_WORKING_COPY, false)) {
 				if (je != null && je.exists())
 					return je;
@@ -105,7 +108,7 @@ public class SearchUtil extends JavaModelUtil {
 			return ((IMember)jElement).isBinary();
 
 		IPackageFragmentRoot pkgRoot= (IPackageFragmentRoot)jElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-		if (pkgRoot.isArchive())
+		if (pkgRoot != null && pkgRoot.isArchive())
 			return true;
 
 		return false;
