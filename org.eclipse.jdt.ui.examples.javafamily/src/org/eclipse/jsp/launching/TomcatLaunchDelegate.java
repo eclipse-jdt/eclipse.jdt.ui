@@ -18,13 +18,13 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.variables.IValueVariable;
 import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.jdt.internal.launching.JavaLocalApplicationLaunchConfigurationDelegate;
+import org.eclipse.jdt.launching.JavaLaunchDelegate;
 import org.eclipse.jsp.JspUIPlugin;
 
 /**
  * Launch delegate for a local Tomcat server
  */
-public class TomcatLaunchDelegate extends JavaLocalApplicationLaunchConfigurationDelegate {
+public class TomcatLaunchDelegate extends JavaLaunchDelegate {
 
 	/**
 	 * Identifier for Tomcat launch configurations.
