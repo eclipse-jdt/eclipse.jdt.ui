@@ -86,6 +86,10 @@ public class StatementAnalyzer extends SelectionAnalyzer {
 		return fBuffer;
 	}
 	
+	protected ICompilationUnit getCompilationUnit() {
+		return fCUnit;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared in ASTVisitor
 	 */

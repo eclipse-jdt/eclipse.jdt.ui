@@ -7,10 +7,12 @@ package org.eclipse.jdt.internal.corext.refactoring.surround;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
@@ -47,6 +49,16 @@ public class SurroundWithTryCatchAnalyzer extends CodeAnalyzer {
 			if (getStatus().hasFatalError())
 				break superCall;
 			if (!hasSelectedNodes()) {
+				ASTNode coveringNode= getLastCoveringNode();
+				if (coveringNode instanceof Block) {
+					Block block= (Block)coveringNode;
+					Message[] messages= ASTNodes.getMessages(block, ASTNodes.NODE_ONLY);
+					if (messages.length > 0) {
+						invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.compile_errors"),
+							JavaSourceContext.create(getCompilationUnit(), block)); //$NON-NLS-1$
+						break superCall;
+					}
+				}
 				invalidSelection(RefactoringCoreMessages.getString("SurroundWithTryCatchAnalyzer.doesNotCover")); //$NON-NLS-1$
 				break superCall;
 			}

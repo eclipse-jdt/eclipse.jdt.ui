@@ -433,7 +433,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CodeAnalyzer;
 					if (messages.length > 0) {
 						status.addFatalError(RefactoringCoreMessages.getFormattedString(
 							"ExtractMethodAnalyzer.compile_errors", //$NON-NLS-1$
-							methodDecl.getName().getIdentifier()));
+							methodDecl.getName().getIdentifier()), JavaSourceContext.create(fCUnit, methodDecl));
 						break superCall;
 					}
 				}
