@@ -20,6 +20,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -38,20 +39,22 @@ import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 
 class RenameAnalyzeUtil {
 	
-	private RenameAnalyzeUtil(){}
+	private RenameAnalyzeUtil() {
+		//no instance
+	}
 	
-	static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) throws CoreException{
+	static RefactoringStatus analyzeRenameChanges(TextChangeManager manager,  SearchResultGroup[] oldOccurrences, SearchResultGroup[] newOccurrences) {
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < oldOccurrences.length; i++) {
-			SearchResultGroup searchResultGroup= oldOccurrences[i];
-			SearchResult[] searchResults= searchResultGroup.getSearchResults();
-			ICompilationUnit cunit= searchResultGroup.getCompilationUnit();
+			SearchResultGroup oldGroup= oldOccurrences[i];
+			SearchResult[] oldSearchResults= oldGroup.getSearchResults();
+			ICompilationUnit cunit= oldGroup.getCompilationUnit();
 			if (cunit == null)
 				continue;
-			for (int j= 0; j < searchResults.length; j++) {
-				SearchResult searchResult= searchResults[j];
-				if (! RenameAnalyzeUtil.existsInNewOccurrences(searchResult, newOccurrences, manager)){
-					ISourceRange range= new SourceRange(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart());
+			for (int j= 0; j < oldSearchResults.length; j++) {
+				SearchResult oldSearchResult= oldSearchResults[j];
+				if (! RenameAnalyzeUtil.existsInNewOccurrences(oldSearchResult, newOccurrences, manager)){
+					ISourceRange range= new SourceRange(oldSearchResult.getStart(), oldSearchResult.getEnd() - oldSearchResult.getStart());
 					RefactoringStatusContext context= JavaStatusContext.create(cunit, range); //XXX
 					String message= RefactoringCoreMessages.getFormattedString("RenameAnalyzeUtil.shadows", cunit.getElementName());	//$NON-NLS-1$
 					result.addError(message , context);
@@ -70,19 +73,36 @@ class RenameAnalyzeUtil {
 		return null;
 	}
 
+	/** @deprecated TODO: use WorkingCopyOwner in RenameFieldProcessor */
 	static ICompilationUnit[] getNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, IProgressMonitor pm) throws CoreException{
 		pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
 		ICompilationUnit[] newWorkingCopies= new ICompilationUnit[compilationUnitsToModify.length];
 		for (int i= 0; i < compilationUnitsToModify.length; i++) {
 			ICompilationUnit cu= compilationUnitsToModify[i];
 			newWorkingCopies[i]= WorkingCopyUtil.getNewWorkingCopy(cu);
-			newWorkingCopies[i].getBuffer().setContents(manager.get(cu).getPreviewContent());
-			newWorkingCopies[i].makeConsistent(new SubProgressMonitor(pm, 1));
+			String previewContent= manager.get(cu).getPreviewContent();
+			newWorkingCopies[i].getBuffer().setContents(previewContent);
+			newWorkingCopies[i].reconcile(false, false, null, new SubProgressMonitor(pm, 1));
 		}
 		return newWorkingCopies;
 	}
 	
-	private static boolean existsInNewOccurrences(SearchResult searchResult, SearchResultGroup[] newOccurrences, TextChangeManager manager) throws CoreException{
+
+	static ICompilationUnit[] createNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
+		pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
+		ICompilationUnit[] newWorkingCopies= new ICompilationUnit[compilationUnitsToModify.length];
+		for (int i= 0; i < compilationUnitsToModify.length; i++) {
+			ICompilationUnit cu= compilationUnitsToModify[i];
+			newWorkingCopies[i]= cu.getWorkingCopy(owner, null, null);
+			String previewContent= manager.get(cu).getPreviewContent();
+			newWorkingCopies[i].getBuffer().setContents(previewContent);
+			newWorkingCopies[i].reconcile(false, false, owner, new SubProgressMonitor(pm, 1));
+		}
+		pm.done();
+		return newWorkingCopies;
+	}
+	
+	private static boolean existsInNewOccurrences(SearchResult searchResult, SearchResultGroup[] newOccurrences, TextChangeManager manager) {
 		SearchResultGroup newGroup= findOccurrenceGroup(searchResult.getResource(), newOccurrences);
 		if (newGroup == null)
 			return false;
@@ -100,7 +120,7 @@ class RenameAnalyzeUtil {
 		return false;
 	}
 	
-	private static IRegion getCorrespondingEditChangeRange(SearchResult searchResult, TextChangeManager manager) throws CoreException{
+	private static IRegion getCorrespondingEditChangeRange(SearchResult searchResult, TextChangeManager manager) {
 		TextChange change= getTextChange(searchResult, manager);
 		if (change == null)
 			return null;
@@ -114,21 +134,19 @@ class RenameAnalyzeUtil {
 		return null;
 	}
 	
-	private static TextChange getTextChange(SearchResult searchResult, TextChangeManager manager) throws CoreException{
+	private static TextChange getTextChange(SearchResult searchResult, TextChangeManager manager) {
 		ICompilationUnit cu= searchResult.getCompilationUnit();
 		if (cu == null)
 			return null;
-		ICompilationUnit oldWorkingCopy= WorkingCopyUtil.getWorkingCopyIfExists(cu);
-		if (oldWorkingCopy == null)
-			return null;
-		return manager.get(oldWorkingCopy);
+		return manager.get(cu);
 	}
 	
 	private static IRegion createTextRange(SearchResult searchResult) {
 		int start= searchResult.getStart();
 		return new Region(start, searchResult.getEnd() - start);
 	}
-	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences){
+	
+	private static SearchResultGroup findOccurrenceGroup(IResource resource, SearchResultGroup[] newOccurrences) {
 		for (int i= 0; i < newOccurrences.length; i++) {
 			if (newOccurrences[i].getResource().equals(resource))
 				return newOccurrences[i];

@@ -30,7 +30,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -97,8 +96,8 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), getMethod().getElementName()));
 		for (int i= 0; i < groups.length; i++) {
 			SearchResultGroup group= groups[i];
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
-			if (wc.equals(declaringWorkingCopy())) {
+			ICompilationUnit cu= group.getCompilationUnit();
+			if (cu.equals(getDeclaringCU())) {
 				SearchResult declarationResult= new SearchResult(group.getResource(), getMethod().getNameRange().getOffset(), getMethod().getNameRange().getOffset() + getMethod().getNameRange().getLength(), getMethod(), IJavaSearchResultCollector.EXACT_MATCH);
 				group.add(declarationResult);
 				break;//no need to go further
@@ -113,12 +112,12 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		addReferenceUpdates(manager, pm);
-		addDeclarationUpdate(manager.get(declaringWorkingCopy()));
+		addDeclarationUpdate(manager.get(getDeclaringCU()));
 		pm.worked(1);
 	}
 	
-	private ICompilationUnit declaringWorkingCopy() {
-		return WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
+	private ICompilationUnit getDeclaringCU() {
+		return getMethod().getCompilationUnit();
 	}
 
 	/* non java-doc
@@ -140,7 +139,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		for (int i= 0; i < grouped.length; i++) {
 			SearchResultGroup group= grouped[i];
 			SearchResult[] results= group.getSearchResults();
-			ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(group.getCompilationUnit());
+			ICompilationUnit cu= group.getCompilationUnit();
 			TextChange change= manager.get(cu);
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenamePrivateMethodRefactoring.update"); //$NON-NLS-1$

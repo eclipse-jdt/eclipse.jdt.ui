@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.IWorkingCopy;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -63,6 +63,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private IMethod fMethod;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
+	private WorkingCopyOwner fWorkingCopyOwner;
 	
 	private static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
@@ -74,6 +75,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		fMethod= method;
 		setNewElementName(fMethod.getElementName());
 		fUpdateReferences= true;
+		fWorkingCopyOwner= new WorkingCopyOwner() { };
 	}	
 	
 	protected void setData(RenameMethodProcessor other) {
@@ -156,13 +158,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	//----------- preconditions ------------------
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		IMethod orig= getOriginalMethod(fMethod);
-		if (orig == null || ! orig.exists()){
+		if (fMethod == null || ! fMethod.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
 								fMethod.getCompilationUnit().getElementName());
 			return RefactoringStatus.createFatalErrorStatus(message);
 		}	
-		fMethod= orig;
+		
 		RefactoringStatus result= Checks.checkAvailability(fMethod);
 		if (result.hasFatalError())
 				return result;
@@ -172,10 +173,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return result;
 	}
 
-	private static IMethod getOriginalMethod(IMethod method) throws CoreException {
-		return (IMethod)WorkingCopyUtil.getOriginal(method);
-	}
-	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
@@ -210,6 +207,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			
 			if (fUpdateReferences)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
+				// TODO: analyzeRenameChanges already calls createChangeManager(pm), but throws it away!
 				
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			result.merge(validateModifiesFiles());
@@ -220,32 +218,24 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	protected final IJavaSearchScope createRefactoringScope() throws CoreException {
-		return RefactoringScopeFactory.create(fMethod);
+		return createRefactoringScope(fMethod);
+	}
+	
+	protected static final IJavaSearchScope createRefactoringScope(IMethod method) throws CoreException {
+		return RefactoringScopeFactory.create(method);
 	}
 	
 	ISearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) throws CoreException {
-		return createSearchPattern(pm, fMethod, null);
+		return createSearchPatternWithOwner(pm, fMethod);
 	}
-	
-	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method, IWorkingCopy[] workingCopies) throws CoreException {
-		pm.beginTask("", 4); //$NON-NLS-1$
-		Set methods= methodsToRename(method, new SubProgressMonitor(pm, 3), workingCopies);
-		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
-		pm.done();
-		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
-	}
-	
-	static Set getMethodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws CoreException {
-		return new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(method, pm, workingCopies)));
-	}
-	
-	private static Set methodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws CoreException{
+
+	private ISearchPattern createSearchPatternWithOwner(IProgressMonitor pm, IMethod method) throws CoreException {
 		HashSet methods= new HashSet();
-		pm.beginTask("", 1); //$NON-NLS-1$
 		methods.add(method);
-		methods.addAll(getMethodsToRename(method, new SubProgressMonitor(pm, 1), workingCopies));
-		pm.done();
-		return methods;
+		IMethod[] rippleMethods= RippleMethodFinder2.getRelatedMethods(method, pm, fWorkingCopyOwner);
+		methods.addAll(Arrays.asList(rippleMethods));
+		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
+		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
 	SearchResultGroup[] getOccurrences(){
@@ -278,7 +268,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws CoreException { 
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= getMethodsToRename(fMethod, pm, null).iterator(); iter.hasNext(); ) {
+		//TODO: RippleMethodFinder2? can WorkingCopyOwner be null there?
+		Set methodsToRename= new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(fMethod, pm, null)));
+		for (Iterator iter= methodsToRename.iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
 			
 			result.merge(checkIfConstructorName(method, getNewElementName()));
@@ -298,15 +290,15 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return result;	
 	}
 	
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify() {
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
-	private RefactoringStatus validateModifiesFiles() throws CoreException{
+	private RefactoringStatus validateModifiesFiles() {
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
-	private RefactoringStatus analyzeCompilationUnits() throws CoreException{
+	private RefactoringStatus analyzeCompilationUnits() throws CoreException {
 		if (fOccurrences.length == 0)
 			return null;
 			
@@ -334,7 +326,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			pm.done();
 			if (fNewWorkingCopies != null){
 				for (int i= 0; i < fNewWorkingCopies.length; i++) {
-					fNewWorkingCopies[i].destroy();		
+					fNewWorkingCopies[i].discardWorkingCopy();		
 				}
 			}	
 		}
@@ -343,8 +335,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private SearchResultGroup[] getNewOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 3); //$NON-NLS-1$
 		try{
+//			if (fWorkingCopyOwner != null) {
 			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-			fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
+			fNewWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies(
+					compilationUnitsToModify, manager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			
 			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fMethod.getCompilationUnit());
 			if (declaringCuWorkingCopy == null)
@@ -354,9 +348,28 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (method == null || ! method.exists())
 				return new SearchResultGroup[0];
 			
-			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method, fNewWorkingCopies);
-			return RefactoringSearchEngine.search(createRefactoringScope(), newPattern, 
-				new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()),  fNewWorkingCopies);
+			ISearchPattern newPattern= createSearchPatternWithOwner(new SubProgressMonitor(pm, 1), method);
+			//TODO:
+			// - refactoring scope built with primary wc of method
+			return RefactoringSearchEngine.search(fWorkingCopyOwner, createRefactoringScope(method), newPattern,
+					new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()));
+//			}
+			
+			// TODO: remove:
+//			ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
+//			fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
+//			
+//			ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fMethod.getCompilationUnit());
+//			if (declaringCuWorkingCopy == null)
+//				return new SearchResultGroup[0];
+//			
+//			IMethod method= getNewMethod(declaringCuWorkingCopy);
+//			if (method == null || ! method.exists())
+//				return new SearchResultGroup[0];
+//			
+//			ISearchPattern newPattern= createSearchPattern(new SubProgressMonitor(pm, 1), method, fNewWorkingCopies);
+//			return RefactoringSearchEngine.search(createRefactoringScope(), newPattern, //TODO: refactoring scope built with primary wc of method
+//				new MethodOccurenceCollector(new SubProgressMonitor(pm, 1), method.getElementName()),  fNewWorkingCopies);
 		} finally{
 			pm.done();
 		}	
@@ -431,8 +444,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
 		TextChangeManager manager= new TextChangeManager(true);
 		
-		/* don't really want to add declaration and references separetely in this refactoring 
+		/* - don't really want to add declaration and references separetely in this refactoring 
 		* (declarations of methods are different than declarations of anything else)
+		* - TODO: only one declaration updated, not all of them
 		*/
 		if (! fUpdateReferences)
 			addDeclarationUpdate(manager);
@@ -447,18 +461,18 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
 			if (cu == null)	
 				continue;
-			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+			
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.getString("RenameMethodRefactoring.update_occurrence"); //$NON-NLS-1$
-				TextChangeCompatibility.addTextEdit(manager.get(wc), editName, createTextChange(results[j]));
+				TextChangeCompatibility.addTextEdit(manager.get(cu), editName, createTextChange(results[j]));
 			}
 			pm.worked(1);
 		}		
 	}
 	
 	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
-		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
+		ICompilationUnit cu= fMethod.getCompilationUnit();
 		TextChange change= manager.get(cu);
 		addDeclarationUpdate(change);
 	}

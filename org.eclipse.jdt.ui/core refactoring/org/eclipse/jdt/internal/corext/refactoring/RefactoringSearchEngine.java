@@ -29,35 +29,35 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchResultCollector;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Convenience wrapper for <code>SearchEngine</code> - performs searching and sorts the results.
  */
 public class RefactoringSearchEngine {
 
-	//no instances
 	private RefactoringSearchEngine(){
+		//no instances
 	}
 	
 	public static ICompilationUnit[] findAffectedCompilationUnits(final IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
 		final Set matches= new HashSet(5);
 		IJavaSearchResultCollector collector = new IJavaSearchResultCollector() {
 			private IResource fLastMatch;
-			public void aboutToStart() {}
+			public void aboutToStart() { /*nothing*/ }
 			public void accept(IResource resource, int start, int end, IJavaElement enclosingElement, int accuracy) throws CoreException {
 				if (fLastMatch != resource) {
 					matches.add(resource);	
 					fLastMatch= resource;
 				}
 			}
-			public void done() {}
+			public void done() { /*nothing*/ }
 			public IProgressMonitor getProgressMonitor() {
 				return pm;
 			}
@@ -69,8 +69,7 @@ public class RefactoringSearchEngine {
 			IResource resource= (IResource)iter.next();
 			IJavaElement element= JavaCore.create(resource);
 			if (element instanceof ICompilationUnit) {
-				ICompilationUnit original= (ICompilationUnit)element;
-				result.add(JavaModelUtil.toWorkingCopy(original)); // take working copy is there is one
+				result.add(element);
 			}
 		}
 		return (ICompilationUnit[])result.toArray(new ICompilationUnit[result.size()]);
@@ -97,6 +96,11 @@ public class RefactoringSearchEngine {
 	
 	public static SearchResultGroup[] search(IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector, ICompilationUnit[] workingCopies) throws JavaModelException {
 		internalSearch(scope, pattern, collector, workingCopies);	
+		return groupByResource(createSearchResultArray(collector.getResults()));
+	}
+	
+	public static SearchResultGroup[] search(WorkingCopyOwner owner, IJavaSearchScope scope, ISearchPattern pattern, SearchResultCollector collector) throws JavaModelException {
+		new SearchEngine(owner).search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 		return groupByResource(createSearchResultArray(collector.getResults()));
 	}
 	
