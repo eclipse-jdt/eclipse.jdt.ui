@@ -149,7 +149,7 @@ public class NLSHintHelper {
 							SimpleType simple= (SimpleType) ((TypeLiteral) exp).getType();
 							ITypeBinding typeBinding= simple.resolveBinding();
 							if (typeBinding != null) {
-								return typeBinding.getQualifiedName();
+								return Bindings.getRawQualifiedName(typeBinding);
 							}
 						}
 					}

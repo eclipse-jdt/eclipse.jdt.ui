@@ -76,9 +76,9 @@ public class ASTNodes {
 	public static final int INCLUDE_FIRST_PARENT= 	1;
 	public static final int INCLUDE_ALL_PARENTS= 	2;
 	
-	public static final int WARINING=				1 << 0;
+	public static final int WARNING=				1 << 0;
 	public static final int ERROR=					1 << 1;
-	public static final int PROBLEMS=				WARINING | ERROR;
+	public static final int PROBLEMS=				WARNING | ERROR;
 
 	private static final Message[] EMPTY_MESSAGES= new Message[0];
 	private static final IProblem[] EMPTY_PROBLEMS= new IProblem[0];
@@ -566,7 +566,7 @@ public class ASTNodes {
 			boolean consider= false;
 			if ((severity & PROBLEMS) == PROBLEMS)
 				consider= true;
-			else if ((severity & WARINING) != 0)
+			else if ((severity & WARNING) != 0)
 				consider= problem.isWarning();
 			else if ((severity & ERROR) != 0)
 				consider= problem.isError();

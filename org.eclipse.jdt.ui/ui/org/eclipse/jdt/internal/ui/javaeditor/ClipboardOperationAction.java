@@ -427,7 +427,7 @@ public final class ClipboardOperationAction extends TextEditorAction {
 					typeBinding= typeBinding.getElementType();
 				}
 				if (typeBinding.isMember() || typeBinding.isTopLevel()) {
-					String name= typeBinding.getQualifiedName();
+					String name= Bindings.getRawQualifiedName(typeBinding);
 					if (name.length() > 0) {
 						namesToImport.add(name);
 					}

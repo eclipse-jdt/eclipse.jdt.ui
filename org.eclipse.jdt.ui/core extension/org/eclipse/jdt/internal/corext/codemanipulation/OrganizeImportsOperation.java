@@ -39,7 +39,6 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -386,14 +385,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			Name name= (Name) staticReferences.get(i);
 			IBinding binding= name.resolveBinding();
 			if (binding != null) { // paranoidal check
-				if (binding instanceof IVariableBinding) {
-					ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
-					importsStructure.addStaticImport(declaringType.getQualifiedName(), binding.getName(), true);
-					
-				} else if (binding instanceof IMethodBinding) {
-					ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
-					importsStructure.addStaticImport(declaringType.getQualifiedName(), binding.getName(), false);
-				}
+				importsStructure.addStaticImport(binding);
 			}
 		}
 	}

@@ -731,7 +731,7 @@ public class InlineConstantRefactoring extends Refactoring {
 		}
 		
 		private void addImportForType(ITypeBinding type) {
-			fImportRewrite.addImport(type.getQualifiedName());	
+			fImportRewrite.addImport(type);	
 		}
 				
 		private String prepareInitializerFor(Expression reference, Set newTypes, RefactoringStatus status) throws JavaModelException {

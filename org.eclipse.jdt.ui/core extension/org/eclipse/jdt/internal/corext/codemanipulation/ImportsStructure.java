@@ -54,7 +54,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
@@ -555,6 +558,18 @@ public final class ImportsStructure implements IImportsStructure {
 			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
 		}
 		return internalAddImport(qualifiedTypeName);
+	}
+	
+	
+	public String addStaticImport(IBinding binding) {
+		if (binding instanceof IVariableBinding) {
+			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
+			return addStaticImport(Bindings.getRawQualifiedName(declaringType), binding.getName(), true);
+		} else if (binding instanceof IMethodBinding) {
+			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
+			return addStaticImport(Bindings.getRawQualifiedName(declaringType), binding.getName(), false);
+		}
+		return binding.getName();
 	}
 	
 	/**

@@ -195,7 +195,7 @@ public class Bindings {
 			default:
 				return binding.getName();
 		}
-		return JavaModelUtil.concatenateName(declaring.getQualifiedName(), binding.getName());
+		return JavaModelUtil.concatenateName(getRawQualifiedName(declaring), binding.getName());
 	}	
 	
 	
