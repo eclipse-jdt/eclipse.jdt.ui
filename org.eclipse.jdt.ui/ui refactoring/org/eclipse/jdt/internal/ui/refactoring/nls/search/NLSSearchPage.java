@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.packageview.EmptyInnerPackageFilter;
-import org.eclipse.jdt.internal.ui.search.ElementSearchAction;
+import org.eclipse.jdt.internal.ui.search.JavaElementSearchAction;
 import org.eclipse.jdt.internal.ui.search.IJavaSearchUIConstants;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.PrettySignature;
@@ -165,7 +165,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 					return false;
 				scopeDescription= NLSSearchMessages.getFormattedString("WorkingSetScope", new String[] {SearchUtil.toString(workingSets)}); //$NON-NLS-1$
 				scope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(getContainer().getSelectedWorkingSets());
-				ElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
+				JavaElementSearchAction.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
 		}
 
 		NLSSearchResultCollector collector= new NLSSearchResultCollector(data.propertyFile);
