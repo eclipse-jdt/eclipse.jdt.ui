@@ -65,7 +65,7 @@ public class MemberFilter extends ViewerFilter {
 					return false;
 				}
 				int flags= member.getFlags();
-				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member))) {
+				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterface(member)) && member.getElementType() != IJavaElement.TYPE) {
 					return false;
 				}
 				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterface(member) && !isTopLevelType(member)) {
