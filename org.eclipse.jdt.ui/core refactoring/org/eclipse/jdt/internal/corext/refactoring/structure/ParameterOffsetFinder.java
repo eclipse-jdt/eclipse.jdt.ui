@@ -1,49 +1,25 @@
-/*
- * (c) Copyright IBM Corp. 2000, 2001.
- * All Rights Reserved.
- */
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 
-import org.eclipse.jdt.internal.compiler.ast.Argument;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
-import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.refactoring.AbstractRefactoringASTAnalyzer;
-
-class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
+class ParameterOffsetFinder {
 	
-	private IMethod fMethod;
-	private char[] fParameterName; 
-	private ISourceRange fMethodSourceRange;
-	private int fMethodSourceRangeEnd;
-	
-	private List fOffsetsFound;
-	private List fParamBindings;
-	private boolean fIncludeReferences;
-	
-	private ParameterOffsetFinder(IMethod method, String parameterName, boolean includeReferences) throws JavaModelException{ 
-		fMethod= method;
-		fParameterName= parameterName.toCharArray();
-		fMethodSourceRange= method.getSourceRange();
-		fMethodSourceRangeEnd= fMethodSourceRange.getOffset() + fMethodSourceRange.getLength();
-		fOffsetsFound= new ArrayList();
-		fIncludeReferences= includeReferences;
+	private ParameterOffsetFinder(){
 	}
-
+	
 	/**
 	 * @param method
 	 * @param parameterName
@@ -51,96 +27,86 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	 * @return indices of offsets of the references to the parameter specified in constructor
 	 */
 	static int[] findOffsets(IMethod method, String parameterName, boolean includeReferences) throws JavaModelException{
-		ParameterOffsetFinder instance= new ParameterOffsetFinder(method, parameterName, includeReferences);		
-		((CompilationUnit)method.getCompilationUnit()).accept(instance);
-		return convertFromIntegerList(instance.fOffsetsFound);
+		ParameterOffsetFinderVisitor visitor= new ParameterOffsetFinderVisitor(includeReferences, method, parameterName);
+		AST.parseCompilationUnit(method.getCompilationUnit(), true).accept(visitor);
+		return visitor.getOffsets();
 	}
-	
-	private static int[] convertFromIntegerList(List list){
-		int[] result= new int[list.size()];
-		Integer[] integerResult= (Integer[])list.toArray(new Integer[list.size()]);
-		for (int i= 0; i < integerResult.length; i++){
-			result[i]= integerResult[i].intValue();
+		
+	private static class ParameterOffsetFinderVisitor extends ASTVisitor{
+		
+		private boolean fIncludeReferences;
+		private Set fOffsetsFound;
+		private int fMethodSourceStart;
+		private int fMethodSourceEnd;
+		private Set fParamBindings;
+		private String fParameterName;
+		
+		ParameterOffsetFinderVisitor(boolean includeReferences, IMethod method, String parameterName) throws JavaModelException{
+			fIncludeReferences= includeReferences;
+			fOffsetsFound= new HashSet();
+			fParamBindings= new HashSet();
+			fMethodSourceStart= method.getSourceRange().getOffset();
+			fMethodSourceEnd= method.getSourceRange().getOffset() + method.getSourceRange().getLength();
+			fParameterName= parameterName;
 		}
-		return result;
-	}
-	
-	private void addNodeOffset(AstNode node){
-		addOffset(node.sourceStart);
-	}
-	
-	private void addOffset(int offset){
-		fOffsetsFound.add(new Integer(offset));	
-	}
-	
-	private boolean withinMethod(AstNode node){
-		return (node.sourceStart >= fMethodSourceRange.getOffset()) 
-			&& (node.sourceStart <= fMethodSourceRangeEnd);
-	}
 		
-	private boolean isParameterMatch(SingleNameReference singleNameReference){
-		if (! withinMethod(singleNameReference))
-			return false;
-		if (! CharOperation.equals(fParameterName, singleNameReference.token))
-			return false;
-		if (! fParamBindings.contains(singleNameReference.binding))
-			return false;
-		return true;	
-	}
+		private void addNodeOffset(ASTNode node){
+			addOffset(node.getStartPosition());
+		}
 		
-	//-------  visit methods  ---------
-	
-	public boolean visit(SingleNameReference singleNameReference, BlockScope blockScope){
-		if (! fIncludeReferences)
+		private void addOffset(int offset){
+			fOffsetsFound.add(new Integer(offset));	
+		}
+		
+		private boolean withinMethod(ASTNode node){
+			return (node.getStartPosition() >= fMethodSourceStart) 
+				&& (node.getStartPosition() <= fMethodSourceEnd);
+		}
+		
+		int[] getOffsets(){
+			int[] result= new int[fOffsetsFound.size()];
+			Integer[] integerResult= (Integer[])fOffsetsFound.toArray(new Integer[fOffsetsFound.size()]);
+			for (int i= 0; i < integerResult.length; i++){
+				result[i]= integerResult[i].intValue();
+			}
+			return result;
+		}
+		
+		private boolean isParameterMatch(SimpleName simpleName){
+			if (! withinMethod(simpleName))
+				return false;
+			if (! simpleName.getIdentifier().equals(fParameterName))
+				return false;
+			IBinding binding= simpleName.resolveBinding();	
+			if (! fParamBindings.contains(binding))
+				return false;
+			return true;	
+		}
+		
+		///--- visit methods ----
+		
+		public boolean visit(SimpleName simpleName){
+			if (! fIncludeReferences)
+				return true;
+			
+			if  (isParameterMatch(simpleName))
+				addOffset(simpleName.getStartPosition());
 			return true;
+		}
 		
-		if  (isParameterMatch(singleNameReference)){
-			//XXX workaround for bug#9001
-			int length= singleNameReference.sourceEnd - singleNameReference.sourceStart + 1;
-			int bracketCount= (length - singleNameReference.token.length) / 2;
-			addOffset(singleNameReference.sourceStart + bracketCount);
-		}	
-		return true;
-	}
-	
-	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		if (! fIncludeReferences)
+		public boolean visit(MethodDeclaration methodDeclaration) {
+			if (methodDeclaration.getStartPosition() != fMethodSourceStart)
+				return true;
+				
+			List params= methodDeclaration.parameters();
+			for (Iterator iter= params.iterator(); iter.hasNext();) {
+				SingleVariableDeclaration param= (SingleVariableDeclaration)iter.next();
+				IBinding binding= param.getName().resolveBinding();
+				if (binding != null)
+					fParamBindings.add(binding);
+			}
 			return true;
+		}
 		
-		if (withinMethod(localDeclaration) 
-			&&	fParamBindings.contains(localDeclaration.binding))
-				fOffsetsFound.add(new Integer(localDeclaration.declarationSourceEnd - localDeclaration.name.length));
-		return true;
-	}
-	
-	public boolean visit(MethodDeclaration methodDeclaration, ClassScope scope) {
-		if (methodDeclaration.declarationSourceStart == fMethodSourceRange.getOffset())
-			fParamBindings= RenameParameterASTAnalyzer.getArgumentBindings(methodDeclaration);
-		return true;
-	}
-	
-	public boolean visit(ConstructorDeclaration constructorDeclaration, ClassScope scope) {
-		if (constructorDeclaration.declarationSourceStart == fMethodSourceRange.getOffset())
-			fParamBindings= RenameParameterASTAnalyzer.getArgumentBindings(constructorDeclaration);
-		return true;
-	}
-		
-	public boolean visit(Argument argument, BlockScope scope) {
-		if (withinMethod(argument) 
-		 	&& fParamBindings.contains(argument.binding)
-		 	&& CharOperation.equals(argument.name, fParameterName))
-				fOffsetsFound.add(new Integer(argument.declarationSourceEnd - argument.name.length + 1));		
-		return true;
-	}
-		
-	public boolean visit(QualifiedNameReference qualifiedNameReference,	BlockScope scope) {
-		if (! fIncludeReferences)
-			return true;
-		
-		if (withinMethod(qualifiedNameReference) 
-			&& CharOperation.equals(qualifiedNameReference.tokens[0], fParameterName)){
-				fOffsetsFound.add(new Integer(qualifiedNameReference.sourceStart));
-		}	
-		return true;
 	}
 }
