@@ -494,7 +494,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 		if (!(input instanceof IClassFileEditorInput))
 			throw new CoreException(JavaUIStatus.createError(
 				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE, 
-				JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"),
+				JavaEditorMessages.getString("ClassFileEditor.error.invalid_input_message"), //$NON-NLS-1$
 				null)); //$NON-NLS-1$
 
 		JavaModelException e= probeInputForSource(input);
@@ -504,7 +504,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			if (!file.getJavaProject().isOnClasspath(file)) {
 				throw new CoreException(JavaUIStatus.createError(
 					IJavaModelStatusConstants.INVALID_RESOURCE, 
-					JavaEditorMessages.getString("ClassFileEditor.error.classfile_not_on_classpath"),
+					JavaEditorMessages.getString("ClassFileEditor.error.classfile_not_on_classpath"), //$NON-NLS-1$
 					null)); //$NON-NLS-1$
 			} else {
 				throw e;
