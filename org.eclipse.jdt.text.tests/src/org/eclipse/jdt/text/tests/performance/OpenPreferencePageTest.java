@@ -67,7 +67,7 @@ public class OpenPreferencePageTest extends TestCase {
 		// setExpanded does not work - use keyboard events
 		// item.setExpanded(true);
 		SWTEventHelper.pressKeyCode(display, SWT.KEYPAD_ADD);
-		long timeout= System.currentTimeMillis() + 1000;
+		long timeout= System.currentTimeMillis() + 5000;
 		TreeItem editorNode= null;
 		while (editorNode == null && System.currentTimeMillis() < timeout) {
 			EditorTestHelper.runEventQueue();
