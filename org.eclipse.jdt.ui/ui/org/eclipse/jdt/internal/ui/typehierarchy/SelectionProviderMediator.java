@@ -140,4 +140,12 @@ public class SelectionProviderMediator implements ISelectionProvider {
 			fViewerInFocus.setSelection(selection);
 		}
 	}
+
+	/**
+	 * Returns the viewer in focus or null if no viewer has the focus
+	 */	
+	public Viewer getViewerInFocus() {
+		return fViewerInFocus;
+	}
+	
 }

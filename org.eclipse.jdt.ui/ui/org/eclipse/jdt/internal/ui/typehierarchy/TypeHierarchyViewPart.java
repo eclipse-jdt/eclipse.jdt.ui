@@ -7,6 +7,10 @@ package org.eclipse.jdt.internal.ui.typehierarchy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.custom.CLabel;
@@ -25,10 +29,6 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.ToolBar;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -42,7 +42,6 @@ import org.eclipse.jface.viewers.IBasicPropertyConstants;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -53,6 +52,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IPartListener;
 import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.OpenWithMenu;
@@ -65,7 +65,6 @@ import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -135,6 +134,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			
 	private int fCurrentViewerIndex;
 	private TypeHierarchyViewer[] fAllViewers;
+	
+	private SelectionProviderMediator fSelectionProviderMediator;
+	private ISelectionChangedListener fSelectionChangedListener;
 	
 	private boolean fIsEnableMemberFilter;
 	
@@ -221,7 +223,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			public void partClosed(IWorkbenchPart part) {}
 			public void partDeactivated(IWorkbenchPart part) {}
 			public void partOpened(IWorkbenchPart part) {}
-		};	
+		};
+		
+		fSelectionChangedListener= new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				doSelectionChanged(event);
+			}
+		};
+		
 	}	
 		
 	/**
@@ -369,7 +378,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (!fInputElement.equals(prevInput)) {
 				updateHierarchyViewer();
 			}
-			updateSelection(fInputElement);
+			IType root= getSelectableType(fInputElement);
+			internalSelectType(root);
+			updateMethodViewer(root);
 			updateToolbarButtons();
 			updateTitle();
 		}
@@ -410,26 +421,20 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 	private Control createTypeViewerControl(Composite parent) {
 		fViewerbook= new PageBook(parent, SWT.NULL);
-		
-		ISelectionChangedListener selectionChangedListener= new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				typeSelectionChanged(event.getSelection());
-			}
-		};
-		
+				
 		KeyListener keyListener= createKeyListener();
 		
 		HierarchyLabelProvider lprovider= new HierarchyLabelProvider(this, new MarkerErrorTickProvider());
 				
 		// Create the viewers
 		TypeHierarchyViewer superTypesViewer= new SuperTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
-		initializeTypesViewer(superTypesViewer, selectionChangedListener, keyListener, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW);
+		initializeTypesViewer(superTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUPERTYPES_VIEW);
 		
 		TypeHierarchyViewer subTypesViewer= new SubTypeHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
-		initializeTypesViewer(subTypesViewer, selectionChangedListener, keyListener, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW);
+		initializeTypesViewer(subTypesViewer, keyListener, IContextMenuConstants.TARGET_ID_SUBTYPES_VIEW);
 		
 		TypeHierarchyViewer vajViewer= new TraditionalHierarchyViewer(fViewerbook, fHierarchyLifeCycle, lprovider, this);
-		initializeTypesViewer(vajViewer, selectionChangedListener, keyListener, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW);
+		initializeTypesViewer(vajViewer, keyListener, IContextMenuConstants.TARGET_ID_HIERARCHY_VIEW);
 
 		fAllViewers= new TypeHierarchyViewer[3];
 		fAllViewers[VIEW_ID_SUPER]= superTypesViewer;
@@ -477,7 +482,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	}
 	
 
-	private void initializeTypesViewer(final TypeHierarchyViewer typesViewer, ISelectionChangedListener selectionChangedListener, KeyListener keyListener, String cotextHelpId) {
+	private void initializeTypesViewer(final TypeHierarchyViewer typesViewer, KeyListener keyListener, String cotextHelpId) {
 		typesViewer.getControl().setVisible(false);
 		typesViewer.getControl().addKeyListener(keyListener);
 		typesViewer.initContextMenu(new IMenuListener() {
@@ -485,7 +490,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fillTypesViewerContextMenu(typesViewer, menu);
 			}
 		}, cotextHelpId,	getSite());
-		typesViewer.addSelectionChangedListener(selectionChangedListener);
+		typesViewer.addSelectionChangedListener(fSelectionChangedListener);
 	}
 	
 	private Control createMethodViewerControl(Composite parent) {
@@ -495,11 +500,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				fillMethodsViewerContextMenu(menu);
 			}
 		}, IContextMenuConstants.TARGET_ID_MEMBERS_VIEW, getSite());
-		fMethodsViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-			public void selectionChanged(SelectionChangedEvent event) {
-				methodSelectionChanged(event.getSelection());
-			}
-		});
+		fMethodsViewer.addSelectionChangedListener(fSelectionChangedListener);
+		
 		Control control= fMethodsViewer.getTable();
 		control.addKeyListener(createKeyListener());
 		
@@ -596,7 +598,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		IMenuManager viewMenu= actionBars.getMenuManager();
 		for (int i= 0; i < fToggleOrientationActions.length; i++) {
 			viewMenu.add(fToggleOrientationActions[i]);
-		}	
+		}
+		viewMenu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 	
 		// fill the method viewer toolbar
 		ToolBarManager lowertbmanager= new ToolBarManager(methodViewerToolBar);
@@ -612,11 +615,11 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			trackedViewers[i]= fAllViewers[i];
 		}
 		trackedViewers[nHierarchyViewers]= fMethodsViewer;
-		ISelectionProvider selProvider= new SelectionProviderMediator(trackedViewers);
+		fSelectionProviderMediator= new SelectionProviderMediator(trackedViewers);
 		IStatusLineManager slManager= getViewSite().getActionBars().getStatusLineManager();
-		selProvider.addSelectionChangedListener(new StatusBarUpdater(slManager));
+		fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(slManager));
 		
-		getSite().setSelectionProvider(selProvider);
+		getSite().setSelectionProvider(fSelectionProviderMediator);
 		getSite().getPage().addPartListener(fPartListener);
 				
 		IJavaElement input= determineInputElement();
@@ -797,20 +800,27 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		updateTitle();
 	}	
 	
-	private void updateSelection(IJavaElement elem) {
+	private IType getSelectableType(IJavaElement elem) {
 		ISelection sel= null;
 		if (elem.getElementType() != IJavaElement.TYPE) {
-			Object obj= getCurrentViewer().containsElements();
-			if (obj != null) {
-				sel= new StructuredSelection(obj);
-			} else {
-				sel= StructuredSelection.EMPTY;
-			}
+			return (IType) getCurrentViewer().getTreeRootType();
 		} else {
-			sel= new StructuredSelection(elem);
+			return (IType) elem;
 		}
-		getCurrentViewer().setSelection(sel);
 	}
+	
+	private void internalSelectType(IMember elem) {	
+		TypeHierarchyViewer viewer= getCurrentViewer();
+		viewer.removeSelectionChangedListener(fSelectionChangedListener);
+		viewer.setSelection(elem != null ? new StructuredSelection(elem) : StructuredSelection.EMPTY);
+		viewer.addSelectionChangedListener(fSelectionChangedListener);
+	}
+	
+	private void internalSelectMember(IMember member) {
+		fMethodsViewer.removeSelectionChangedListener(fSelectionChangedListener);
+		fMethodsViewer.setSelection(member != null ? new StructuredSelection(member) : StructuredSelection.EMPTY);
+		fMethodsViewer.addSelectionChangedListener(fSelectionChangedListener);
+	}	
 	
 	/**
 	 * When the input changed or the hierarchy pane becomes visible,
@@ -849,7 +859,17 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 			fMethodsViewer.setInput(input);
 		}
-	}	
+	}
+	
+	private void doSelectionChanged(SelectionChangedEvent e) {
+		if (e.getSelectionProvider() == fMethodsViewer) {
+			methodSelectionChanged(e.getSelection());
+		} else {
+			typeSelectionChanged(e.getSelection());
+		}
+	}
+	
+	
 	
 	private void methodSelectionChanged(ISelection sel) {
 		if (sel instanceof IStructuredSelection) {
@@ -864,7 +884,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				setMemberFilter(memberFilter);
 			}
 			if (nSelected == 1) {
-				revealElementInEditor(selected.get(0));
+				revealElementInEditor(selected.get(0), fMethodsViewer);
 			}
 		}
 	}
@@ -888,7 +908,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					// method selected, no change
 				}
 				if (nSelected == 1) {
-					revealElementInEditor(selected.get(0));
+					revealElementInEditor(selected.get(0), getCurrentViewer());
 				}
 			} else {
 				fSelectedType= null;
@@ -897,10 +917,14 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		}
 	}
 	
-	private void revealElementInEditor(Object elem) {
+	private void revealElementInEditor(Object elem, Viewer originViewer) {
 		// only allow revealing when the type hierarchy is the active pagae
 		// no revealing after selection events due to model changes
 		if (getSite().getPage().getActivePart() != this) {
+			return;
+		}
+		
+		if (fSelectionProviderMediator.getViewerInFocus() != originViewer) {
 			return;
 		}
 		
@@ -975,10 +999,10 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (fInputElement != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
-					updateSelection(fInputElement);
+					internalSelectType(getSelectableType(fInputElement));
 				}
 				if (!fIsEnableMemberFilter) {
-					typeSelectionChanged(getCurrentViewer().getSelection());
+					typeSelectionChanged(currSelection);
 				}
 			}		
 			updateTitle();
@@ -1018,14 +1042,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (on != fIsEnableMemberFilter) {
 			fIsEnableMemberFilter= on;
 			if (!on) {
-				Object methodViewerInput= fMethodsViewer.getInput();
+				IType methodViewerInput= (IType) fMethodsViewer.getInput();
 				setMemberFilter(null);
+			
 				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
 					// avoid that the method view changes content by selecting the previous input
-					getCurrentViewer().setSelection(new StructuredSelection(methodViewerInput));
+					internalSelectType(methodViewerInput);
 				} else if (fSelectedType != null) {
 					// choose a input that exists
-					getCurrentViewer().setSelection(new StructuredSelection(fSelectedType));
+					internalSelectType(fSelectedType);
 					updateMethodViewer(fSelectedType);
 				}
 			} else {
@@ -1169,8 +1194,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		String selectionId= memento.getString(TAG_SELECTION);
 		if (selectionId != null) {
 			IJavaElement elem= JavaCore.create(selectionId);
-			if (getCurrentViewer().isElementShown(elem)) {
-				getCurrentViewer().setSelection(new StructuredSelection(elem));
+			if (getCurrentViewer().isElementShown(elem) && elem instanceof IMember) {
+				internalSelectType((IMember)elem);
 			}
 		}
 		fMethodsViewer.restoreState(memento);
@@ -1194,13 +1219,15 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (elem instanceof IClassFile) {
 				IType type= ((IClassFile)elem).getType();
 				if (currentViewer.isElementShown(type)) {
-					currentViewer.setSelection(new StructuredSelection(type));
+					internalSelectType(type);
+					updateMethodViewer(type);
 				}
 			} else if (elem instanceof ICompilationUnit) {
 				IType[] allTypes= ((ICompilationUnit)elem).getAllTypes();
 				for (int i= 0; i < allTypes.length; i++) {
 					if (currentViewer.isElementShown(allTypes[i])) {
-						currentViewer.setSelection(new StructuredSelection(allTypes[i]));
+						internalSelectType(allTypes[i]);
+						updateMethodViewer(allTypes[i]);
 						return;
 					}
 				}

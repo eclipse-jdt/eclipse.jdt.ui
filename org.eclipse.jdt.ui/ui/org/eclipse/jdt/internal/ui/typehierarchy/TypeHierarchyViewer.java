@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
@@ -36,7 +35,6 @@ import org.eclipse.jdt.internal.ui.actions.OpenJavaElementAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.viewsupport.IProblemChangedListener;
-import org.eclipse.jdt.internal.ui.viewsupport.MarkerErrorTickProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
  
@@ -131,7 +129,20 @@ public abstract class TypeHierarchyViewer extends ProblemTreeViewer implements I
 			return elements[0];
 		}
 		return null;
-	}
+	}	
+	
+	/**
+	 * Returns true if the hierarchy contains elements. Returns one of them
+	 * With member filtering it is possible that no elements are visible
+	 */ 
+	public IType getTreeRootType() {
+		Object[] elements=  ((IStructuredContentProvider)getContentProvider()).getElements(null);
+		if (elements.length > 0 && elements[0] instanceof IType) {
+			return (IType) elements[0];
+		}
+		return null;
+	}	
+			
 		
 	/**
 	 * Returns true if the hierarchy contains element the element.
