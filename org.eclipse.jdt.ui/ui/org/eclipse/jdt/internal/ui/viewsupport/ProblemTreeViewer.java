@@ -8,23 +8,16 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Tree;
-import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
-import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -33,15 +26,11 @@ import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
-import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * Extends a  TreeViewer to allow more performance when showing error ticks.
@@ -50,7 +39,7 @@ import org.eclipse.jdt.ui.JavaUI;
  */
 public class ProblemTreeViewer extends TreeViewer implements IProblemChangedListener {
 
-	private ProblemItemMapper fProblemItemMapper;
+	private ResourceToItemMapper fResourceToItemMapper;
 
 	/*
 	 * @see TreeViewer#TreeViewer(Composite)
@@ -77,21 +66,16 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	}
 	
 	private void initMapper() {
-		fProblemItemMapper= new ProblemItemMapper();
+		fResourceToItemMapper= new ResourceToItemMapper(this);
 	}
 	
 	
 	/*
 	 * @see IProblemChangedListener#problemsChanged
 	 */
-	public void problemsChanged(final Set changed) {
-		Control control= getControl();
-		if (control != null && !control.isDisposed()) {
-			control.getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					fProblemItemMapper.problemsChanged(changed, (ILabelProvider)getLabelProvider());
-				}
-			});
+	public void problemsChanged(IResource[] changed) {
+		for (int i= 0; i < changed.length; i++) {
+			fResourceToItemMapper.resourceChanged(changed[i]);
 		}
 	}
 	
@@ -101,7 +85,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	protected void mapElement(Object element, Widget item) {
 		super.mapElement(element, item);
 		if (item instanceof Item) {
-			fProblemItemMapper.addToMap(element, (Item) item);
+			fResourceToItemMapper.addToMap(element, (Item) item);
 		}
 	}
 
@@ -110,7 +94,7 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	 */
 	protected void unmapElement(Object element, Widget item) {
 		if (item instanceof Item) {
-			fProblemItemMapper.removeFromMap(element, (Item) item);
+			fResourceToItemMapper.removeFromMap(element, (Item) item);
 		}		
 		super.unmapElement(element, item);
 	}
@@ -119,14 +103,22 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 	 * @see ContentViewer#handleLabelProviderChanged(LabelProviderChangedEvent)
 	 */
 	protected void handleLabelProviderChanged(LabelProviderChangedEvent event) {
-		Object[] source= event.getElements();
-		IContentProvider provider= getContentProvider();
-		if (source != null && provider instanceof BaseJavaElementContentProvider) {
-			BaseJavaElementContentProvider javaProvider= (BaseJavaElementContentProvider)provider;
-			Object[] mapped= javaProvider.getCorrespondingJavaElements(source, false);
-			super.handleLabelProviderChanged(new LabelProviderChangedEvent((IBaseLabelProvider)event.getSource(), mapped));	
-			return;
-		} 
+		Object[] changed= event.getElements();
+		if (changed != null) {
+			ArrayList others= new ArrayList();
+			for (int i= 0; i < changed.length; i++) {
+				Object curr= changed[i];
+				if (curr instanceof IResource) {
+					fResourceToItemMapper.resourceChanged((IResource) curr);
+				} else {
+					others.add(curr);
+				}
+			}
+			if (others.isEmpty()) {
+				return;
+			}
+			event= new LabelProviderChangedEvent((IBaseLabelProvider) event.getSource(), others.toArray());
+		}
 		super.handleLabelProviderChanged(event);
 	}
 	
@@ -197,19 +189,6 @@ public class ProblemTreeViewer extends TreeViewer implements IProblemChangedList
 		IContentProvider contentProvider= getContentProvider();
 		return contentProvider instanceof BaseJavaElementContentProvider
 			&& ((BaseJavaElementContentProvider)contentProvider).getProvideWorkingCopy();
-	}
-
-	/**
-	 * @see AbstractTreeViewer#doUpdateItem(Item, Object)
-	 */
-	protected void doUpdateItem(Item item, Object element) {
-		super.doUpdateItem(item, element);
-		// experiment with greying out read only elements
-		if (item instanceof TreeItem && element instanceof IJavaElement) {
-			IJavaElement jelement= (IJavaElement)element;
-			if (jelement.isReadOnly())
-				((TreeItem)item).setForeground(Display.getDefault().getSystemColor(SWT.COLOR_DARK_GRAY));
-		}
 	}
 }
 
