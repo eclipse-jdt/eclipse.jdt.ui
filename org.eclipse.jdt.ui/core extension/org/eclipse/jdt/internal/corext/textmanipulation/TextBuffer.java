@@ -24,6 +24,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
 
@@ -160,7 +162,7 @@ public class TextBuffer {
 	 * @return the line indent for the given line number of <code>-1</code>
 	 */
 	public int getLineIndent(int lineNumber, int tabWidth) {
-		return CodeFormatterUtil.getIndent(getLineContent(lineNumber), tabWidth);
+		return Strings.computeIndent(getLineContent(lineNumber), tabWidth);
 	}
 	
 	/**

@@ -4,34 +4,30 @@
  */
 package org.eclipse.jdt.internal.corext.template.java;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
-import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.template.ContextType;
 import org.eclipse.jdt.internal.corext.template.ContextTypeRegistry;
-import org.eclipse.jdt.internal.corext.template.DocumentTemplateContext;
 import org.eclipse.jdt.internal.corext.template.ITemplateEditor;
 import org.eclipse.jdt.internal.corext.template.Template;
 import org.eclipse.jdt.internal.corext.template.TemplateBuffer;
-import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplateTranslator;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  * A context for java source.
@@ -118,7 +114,7 @@ public class JavaContext extends CompilationUnitContext {
 		TextBuffer textBuffer= TextBuffer.create(string);
 	    String lineContent= textBuffer.getLineContentOfOffset(start);
 
-		return CodeFormatterUtil.getIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
+		return Strings.computeIndent(lineContent, CodeFormatterPreferencePage.getTabSize());
 	}
 
 	private CompilationUnitCompletion guessVariableNames() {

@@ -28,8 +28,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class StubUtility {
 	
@@ -500,7 +500,7 @@ public class StubUtility {
 					}
 				}
 				
-				return CodeFormatterUtil.getIndent(buf.getText(i, offset - i), tabWidth);
+				return Strings.computeIndent(buf.getText(i, offset - i), tabWidth);
 			}
 		}
 		return 0;

@@ -43,6 +43,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.util.CodeBlock;
+import org.eclipse.jdt.internal.corext.refactoring.util.MethodBlock;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -346,79 +348,53 @@ public class ExtractMethodRefactoring extends Refactoring {
 	private TextEdit createNewMethodEdit(TextBuffer buffer, String delimiter) {
 		MethodDeclaration method= fAnalyzer.getEnclosingMethod();
 		final int methodStart= method.getStartPosition();
-		final int spacing= CodeFormatterUtil.probeMethodSpacing(buffer, method);
+		MethodBlock methodBlock= new MethodBlock(getSignature(), createMethodBody(buffer));
+		final int spacing= methodBlock.probeSpacing(buffer, method);
 		StringBuffer code= new StringBuffer();
 		// +1 (e.g <=) for an extra newline since we insert the new code at
 		// the end of a method declaration (e.g. right after the closing }
 		for (int i= 0; i <= spacing; i++)
 			code.append(delimiter);
-		String[] lines= Strings.convertIntoLines(CodeFormatterUtil.createMethodDeclaration(getSignature(), createMethodBody(buffer), delimiter));
 		String indent= CodeFormatterUtil.createIndentString(buffer.getLineContentOfOffset(methodStart));
-		for (int i= 0, lastLine= lines.length - 1; i < lines.length; i++) {
-			code.append(indent);
-			code.append(lines[i]);
-			if (i != lastLine)
-				code.append(delimiter);
-		} 
+		methodBlock.fill(code, indent, delimiter);
 		TextEdit result= SimpleTextEdit.createInsert(methodStart + method.getLength(), code.toString());
 		return result;
 	}
 	
-	private String[] createMethodBody(TextBuffer buffer) {
-		String[] lines= buffer.convertIntoLines(fSelectionStart, fSelectionLength, false);
-		
-		List result= new ArrayList(lines.length);
-		
-		String standardIndent= CodeFormatterUtil.createIndentString(buffer.getLineContentOfOffset(fAnalyzer.getSelectedNodeRange().getOffset()));
-		
-		// Locals that are not passed as an arguments since the extracted method only
-		// writes to them
-		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
-		for (int i= 0; i < methodLocals.length; i++) {
-			if (methodLocals[i] != null)
-				result.add(standardIndent + getLocalDeclaration(methodLocals[i]));
-		}
-
-		String prefix= ""; //$NON-NLS-1$
-		int offset= buffer.getLineInformationOfOffset(fSelectionStart).getOffset();
-		if (offset < fSelectionStart) {
-			String tmp= buffer.getContent(offset, fSelectionStart - offset);
-			if (Strings.containsOnlyWhitespaces(tmp)) {
-				prefix= tmp;
-			} else {
-				prefix= CodeFormatterUtil.createIndentString(CodeFormatterUtil.getIndent(tmp));
-			}
-		}
+	private CodeBlock createMethodBody(TextBuffer buffer) {
+		CodeBlock body= new CodeBlock(buffer, fSelectionStart, fSelectionLength);
 		
 		// We extract an expression
 		boolean extractsExpression= fAnalyzer.isExpressionSelected();
 		if (extractsExpression) {
 			ITypeBinding binding= fAnalyzer.getExpressionBinding();
 			if (binding != null && (!binding.isPrimitive() || !"void".equals(binding.getName()))) //$NON-NLS-1$
-				prefix= prefix + RETURN_BLANK;
+				body.prependToLine(0, RETURN_BLANK);
 		}
 		
-		// Reformat and add to buffer
-		int lastLine= lines.length - 1;
-		for (int i= 0; i < lines.length; i++) {
-			String line= lines[i];
-			if (i == lastLine && sourceNeedsSemicolon())
-				line= line + SEMICOLON;
-			if (i == 0) {
-				result.add(prefix + line);
-			} else {
-				result.add(line);	
-			}
+		if (sourceNeedsSemicolon()) {
+			body.appendToLine(body.size() - 1, SEMICOLON);
 		}
+		
+		// Locals that are not passed as an arguments since the extracted method only
+		// writes to them
+		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
+		// Do in reverse order since we prepend
+		for (int i= methodLocals.length -1; i >= 0; i--) {
+			if (methodLocals[i] != null)
+				body.prepend(getLocalDeclaration(methodLocals[i]));
+		}
+
 		IVariableBinding returnValue= fAnalyzer.getReturnValue();
 		if (returnValue != null) {
-			result.add(standardIndent + RETURN_BLANK + returnValue.getName() + SEMICOLON);
+			body.append(RETURN_BLANK + returnValue.getName() + SEMICOLON);
 		}
-		return (String[]) result.toArray(new String[result.size()]);
+		return body;
 	}
 	
 	private String createCall(TextBuffer buffer, String delimiter) {
-		int firstLineIndent= CodeFormatterUtil.getIndent(buffer.getLineContentOfOffset(fSelectionStart));
+		int tabWidth= CodeFormatterUtil.getTabWidth();
+		int firstLineIndent= Strings.computeIndent(buffer.getLineContentOfOffset(fSelectionStart), tabWidth);
 		StringBuffer code= new StringBuffer();
 		
 		IVariableBinding[] locals= fAnalyzer.getCallerLocals();
@@ -481,8 +457,8 @@ public class ExtractMethodRefactoring extends Refactoring {
 		
 		region= buffer.getLineInformationOfOffset(fSelectionStart);
 		String selectedLine= buffer.getContent(region.getOffset(), fSelectionStart - region.getOffset());
-		int indent= CodeFormatterUtil.getIndent(selectedLine);
-		return CodeFormatterUtil.removeIndent(result,  indent, CodeFormatterUtil.getTabWidth());
+		int indent= Strings.computeIndent(selectedLine, tabWidth);
+		return Strings.trimIndent(result,  indent, tabWidth);
 	}
 
 

@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class MemberEdit extends SimpleTextEdit {
 	
@@ -270,7 +271,7 @@ public class MemberEdit extends SimpleTextEdit {
 		StringBuffer buffer= new StringBuffer();
 		int last= fSource.length-1;
 		
-		CodeFormatterUtil.removeIndentation(fSource, fTabWidth);
+		Strings.trimIndentation(fSource, fTabWidth);
 		
 		String indent= ""; //$NON-NLS-1$
 		if (!fUseFormatter)

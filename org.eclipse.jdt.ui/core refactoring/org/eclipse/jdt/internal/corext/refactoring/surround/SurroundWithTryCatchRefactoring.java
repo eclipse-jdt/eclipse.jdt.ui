@@ -94,8 +94,6 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 		fSettings= settings;
 	}
 
-	
-	
 	public void setSaveChanges(boolean saveChanges) {
 		fSaveChanges= saveChanges;
 	}

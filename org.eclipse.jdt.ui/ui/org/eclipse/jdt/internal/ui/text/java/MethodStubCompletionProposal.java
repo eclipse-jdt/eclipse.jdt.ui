@@ -1,12 +1,12 @@
 
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility.GenStubSettings;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -94,10 +95,10 @@ public class MethodStubCompletionProposal extends JavaCompletionProposal {
 					String lineDelim= StubUtility.getLineDelimiterFor(document);
 					IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 					int lineStart= region.getOffset();
-					int indent= CodeFormatterUtil.getIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
+					int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
 					
 					String replacement= StubUtility.codeFormat(stub, indent, lineDelim);
-					replacement= CodeFormatterUtil.removeLeadingWhiteSpaces(replacement);
+					replacement= Strings.trimLeadingTabsAndSpaces(replacement);
 					
 					setReplacementString(replacement);
 					setCursorPosition(replacement.length());

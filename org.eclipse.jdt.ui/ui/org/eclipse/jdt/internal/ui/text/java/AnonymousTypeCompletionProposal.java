@@ -1,13 +1,13 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OverrideMethodQuery;
@@ -113,10 +114,10 @@ public class AnonymousTypeCompletionProposal extends JavaCompletionProposal {
 			String lineDelim= StubUtility.getLineDelimiterFor(document);
 			int tabWidth= CodeFormatterPreferencePage.getTabSize();
 			IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
-			int indent= CodeFormatterUtil.getIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
+			int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 			
 			String replacement= StubUtility.codeFormat(buf.toString(), indent, lineDelim);
-			replacement= CodeFormatterUtil.removeLeadingWhiteSpaces(replacement);
+			replacement= Strings.trimLeadingTabsAndSpaces(replacement);
 			
 			setReplacementString(replacement);
 		} catch (BadLocationException e) {
