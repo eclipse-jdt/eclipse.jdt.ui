@@ -455,8 +455,9 @@ public class ImportsStructure implements IImportsStructure {
 				}
 			}
 			lastPackage= pack;
-							
-			if (pack.doesNeedStarImport(fImportOnDemandThreshold)) {
+			
+			boolean doStarImport= pack.doesNeedStarImport(fImportOnDemandThreshold);
+			if (doStarImport) {
 				String starImportString= pack.getName() + ".*";
 				appendImportToBuffer(buf, starImportString, lineDelim);
 				nCreated++;
@@ -466,10 +467,11 @@ public class ImportsStructure implements IImportsStructure {
 				ImportDeclEntry currDecl= pack.getImportAt(k);
 				String content= currDecl.getContent();
 				
-				
 				if (content == null) { // new entry
-					appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
-					nCreated++;
+					if (!doStarImport) {
+						appendImportToBuffer(buf, currDecl.getElementName(), lineDelim);
+						nCreated++;
+					}
 				} else {
 					buf.append(content);
 				}
