@@ -172,4 +172,10 @@ public class PropertyFileDocumentModellTest extends TestCase {
 		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "\u00ea"));
 		assertEquals("key=\\u00EA\n", insertEdit.getText());
 	}
+	
+	public void testEscapingOfLeadingWhiteSpaces() {
+		PropertyFileDocumentModel modell= new PropertyFileDocumentModel(new Document());
+		InsertEdit insertEdit= modell.insert(new KeyValuePair("key", "  test"));
+		assertEquals("key=\\ \\ test\n", insertEdit.getText());
+	}
 }

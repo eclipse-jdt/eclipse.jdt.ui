@@ -115,7 +115,7 @@ public class PropertyFileDocumentModel {
             line = reader.readLine();
         }
         fKeyValuePairs.add(new LastKeyValuePair(offset));
-    }    
+    } 
     
     private int getIndexOfSeparationCharacter(String line) {
         int minIndex = -1;
@@ -136,8 +136,8 @@ public class PropertyFileDocumentModel {
         }
         
         return minIndex;        
-    }
-
+    }  
+    
     private class KeyValuePairModell extends KeyValuePair implements Comparable {        
 
         int fOffset;
@@ -155,7 +155,8 @@ public class PropertyFileDocumentModel {
 
         // TODO encode leading whitespaces !!!
         public String getEncodedText() {
-            return unwindEscapeChars(fKey) + '=' + escapeCommentChars(unwindEscapeChars(fValue)) + '\n';
+            return unwindEscapeChars(fKey) + '=' + 
+			escapeLeadingWhiteSpaces(escapeCommentChars(unwindEscapeChars(fValue))) + '\n';
         }
         
         public int compareTo(Object o) {
@@ -191,27 +192,28 @@ public class PropertyFileDocumentModel {
             return sb.toString();
         }       
         
-        // use this to escape "leading" whitespaces
-//      private static String escapeEachChar(String s, char escapeChar) {
-//      char[] chars = new char[s.length() * 2];
-  //
-//      for (int i = 0; i < s.length(); i++) {
-//        chars[2 * i] = escapeChar;
-//        chars[2 * i + 1] = s.charAt(i);
-//      }
-//      return new String(chars);
-//    }
-
-//    /**
-//     * returns the length if only whitespaces
-//     */
-//    private static int findFirstNonWhiteSpace(String s) {
-//      for (int i = 0; i < s.length(); i++) {
-//        if (!Character.isWhitespace(s.charAt(i)))
-//          return i;
-//      }
-//      return s.length();
-//    }
+        private String escapeLeadingWhiteSpaces(String str) {
+        	int firstNonWhiteSpace= findFirstNonWhiteSpace(str);
+        	StringBuffer buf= new StringBuffer(firstNonWhiteSpace);
+        	for (int i = 0; i < firstNonWhiteSpace; i++) {
+        		buf.append('\\');
+        	    buf.append(str.charAt(i));
+			}
+        	buf.append(str.substring(firstNonWhiteSpace));        
+        	return buf.toString();
+        }
+        
+        /**
+         *  returns the length if only whitespaces
+         */
+        private int findFirstNonWhiteSpace(String s) {
+        	for (int i = 0; i < s.length(); i++) {
+        		if (!Character.isWhitespace(s.charAt(i)))
+        			return i;
+        	}
+        	return s.length();
+        }
+        
         private String unwindEscapeChars(String s){
         	StringBuffer sb= new StringBuffer(s.length());
         	int length= s.length();

@@ -174,8 +174,8 @@ public class ReorgCorrectionsSubProcessor {
 			IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 			ArrayList res= new ArrayList();
 			ITypeNameRequestor requestor= new TypeInfoRequestor(res);
-			new SearchEngine().searchAllTypeNames(cu.getResource().getWorkspace(), packageName, typeName,
-					SearchPattern.R_EXACT_MATCH, true, IJavaSearchConstants.TYPE, scope, requestor,
+			new SearchEngine().searchAllTypeNames(packageName, typeName,
+					SearchPattern.R_EXACT_MATCH | SearchPattern.R_CASE_SENSITIVE, IJavaSearchConstants.TYPE, scope, requestor,
 					IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, null);
 			
 			if (res.isEmpty()) {
