@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.corext.refactoring.rename;
+package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -11,6 +11,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
+/**
+ * A special text edit that deletes the selected source range and everything to the next token (not inluding semicolons)
+ * or end of the line.
+ */
 class LineEndDeleteTextEdit extends SimpleTextEdit {
 	
 	private String fFullSource;

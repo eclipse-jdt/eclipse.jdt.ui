@@ -1,4 +1,4 @@
-package org.eclipse.jdt.internal.corext.refactoring.rename;
+package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -10,6 +10,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.C
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.AST;
+import org.eclipse.jdt.internal.corext.refactoring.rename.*;
 
 public class InlineTempRefactoring extends Refactoring {
 
@@ -158,8 +161,8 @@ public class InlineTempRefactoring extends Refactoring {
 		fAST.accept(assignmentFinder);
 		if (! assignmentFinder.hasAssignments())
 			return null;
-		int start= assignmentFinder.getFirstAssignment().sourceStart();
-		int end= assignmentFinder.getFirstAssignment().sourceEnd();
+		int start= assignmentFinder.getFirstAssignment().sourceStart;
+		int end= assignmentFinder.getFirstAssignment().sourceEnd;
 		ISourceRange range= new SourceRange(start, end - start + 1);
 		Context context= JavaSourceContext.create(fCu, range);	
 		return RefactoringStatus.createFatalErrorStatus("Local variable '" + getTempName()+ "' is assigned to more than once", context);
@@ -202,19 +205,18 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
 	private void removeTemp(TextChange change) throws JavaModelException {
-		//XXX need to create a special text edit 
-		//because of trailing semicolons and comments
 		int offset= fTempDeclaration.declarationSourceStart;
 		int end= fTempDeclaration.declarationSourceEnd;
 		int length= end - offset + 1;
 		String changeName= "Remove local variable '" + getTempName() + "'"; 
+		//DebugUtils.dump("temp<" + fCu.getSource().substring(offset, end + 1) + "/>");
 		change.addTextEdit(changeName, new LineEndDeleteTextEdit(offset, length, fCu.getSource()));
 	}
 	
 	private String getInitializerSource() throws JavaModelException{
 		Assert.isTrue(isTempInitializedAtDeclaration());
-		int start= fTempDeclaration.initialization.sourceStart();
-		int end= fTempDeclaration.initialization.sourceEnd();
+		int start= fTempDeclaration.initialization.sourceStart;
+		int end= fTempDeclaration.initialization.sourceEnd;
 		String rawSource= fCu.getSource().substring(start, end + 1);
 		if (! needsBracketsAroundReferences())
 			return rawSource;
@@ -232,6 +234,8 @@ public class InlineTempRefactoring extends Refactoring {
 		if (fTempDeclaration.initialization instanceof Literal)
 			return false;
 		if (fTempDeclaration.initialization instanceof MessageSend)	
+			return false;
+		if (fTempDeclaration.initialization instanceof ArrayReference)	
 			return false;
 		return true;	
 	}
