@@ -17,22 +17,16 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.compiler.IScanner;
+import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class JavaDocAccess {
 	
-	private static int findCommentEnd(IBuffer buffer, int start, int end) {
-		for (int i= start; i < end; i++) {
-			char ch= buffer.getChar(i);
-			if (ch == '*' && (i + 1 < end) && buffer.getChar(i + 1) == '/') {
-				return i + 2;
-			}
-		}
-		return -1;
-	}	
-
 	/**
 	 * Gets a reader for an IMember's JavaDoc comment
 	 * Returns null if the member does not contain a JavaDoc comment or
@@ -49,21 +43,32 @@ public class JavaDocAccess {
 		ISourceRange range= member.getSourceRange();
 		int start= range.getOffset();
 		int length= range.getLength();
-		if (length >= 5 && buf.getChar(start) == '/'
-			&& buf.getChar(start + 1) == '*' && buf.getChar(start + 2) == '*') {
-
-			int end= findCommentEnd(buf, start + 3, start + length);
-			if (end != -1) {
-				return new JavaDocCommentReader(buf, start, end);
+		if (length > 0 && buf.getChar(start) == '/') {
+			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
+			scanner.setSource(buf.getCharacters());
+			scanner.resetTo(start, start + length);
+			try {
+				int terminal= scanner.getNextToken();
+				while (terminal == ITerminalSymbols.TokenNameCOMMENT_LINE || terminal == ITerminalSymbols.TokenNameCOMMENT_BLOCK)
+					terminal= scanner.getNextToken();
+				if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
+					start= scanner.getCurrentTokenStartPosition();
+					int end= scanner.getCurrentTokenEndPosition() + 1;
+					return new JavaDocCommentReader(buf, start, end);
+				}
+			} catch (InvalidInputException ex) {
+				// try if there is inherited Javadoc
 			}
+
 		}
-		
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
 			IMethod method= (IMethod) member;
 			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
 		}
 		return null;
 	}
+
+
 
 	/**
 	 * Gets a reader for an IMember's JavaDoc comment
