@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * Opens the user interface for a given refactoring.

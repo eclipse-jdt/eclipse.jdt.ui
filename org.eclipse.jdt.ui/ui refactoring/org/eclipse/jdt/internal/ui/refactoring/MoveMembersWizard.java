@@ -61,6 +61,9 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public class MoveMembersWizard extends RefactoringWizard {
 
 	public MoveMembersWizard(MoveStaticMembersRefactoring ref) {

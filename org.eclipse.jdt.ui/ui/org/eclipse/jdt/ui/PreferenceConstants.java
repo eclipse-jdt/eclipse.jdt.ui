@@ -2077,6 +2077,8 @@ public class PreferenceConstants {
 	 * @see #REFACTOR_WARNING_SEVERITY
 	 * @see #REFACTOR_INFO_SEVERITY
 	 * @see #REFACTOR_OK_SEVERITY
+	 * 
+	 * @deprecated Use method {@link org.eclipse.ltk.ui.refactoring.RefactoringUI#getConditionCheckingFailedSeverity()}.
 	 */
 	public static final String REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= "Refactoring.ErrorPage.severityThreshold"; //$NON-NLS-1$
 
@@ -2084,6 +2086,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#FATAL} 
 	 */
 	public static final String REFACTOR_FATAL_SEVERITY= "4"; //$NON-NLS-1$
 	
@@ -2091,6 +2094,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#ERROR} 
 	 */	
 	public static final String REFACTOR_ERROR_SEVERITY= "3"; //$NON-NLS-1$
 
@@ -2098,6 +2102,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#WARNING} 
 	 */
 	public static final String REFACTOR_WARNING_SEVERITY= "2"; //$NON-NLS-1$
 
@@ -2105,6 +2110,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#INFO} 
 	 */
 	public static final String REFACTOR_INFO_SEVERITY= "1"; //$NON-NLS-1$
 
@@ -2112,6 +2118,7 @@ public class PreferenceConstants {
 	 * A string value used by the named preference <code>REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD</code>.
 	 * 
 	 * @see #REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD
+	 * @deprecated Use constant {@link org.eclipse.ltk.core.refactoring.RefactoringStatus#OK} 
 	 */
 	public static final String REFACTOR_OK_SEVERITY= "0"; //$NON-NLS-1$
 

@@ -31,10 +31,11 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
 	
 /*
  * The page for setting general java plugin preferences.
@@ -92,6 +93,20 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		return button;
 	}
 	
+	private Button addCheckBox(Composite parent, String label, String key) { 
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(label);
+		button.setData(key);
+		button.setLayoutData(gd);
+
+		button.setSelection(getPreferenceStore().getBoolean(key));
+		
+		fCheckBoxes.add(button);
+		return button;
+	}
+	
 	protected Control createContents(Composite parent) {
 		initializeDialogUnits(parent);
 		
@@ -129,6 +144,14 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		typeHierarchyGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.openTypeHierarchy")); //$NON-NLS-1$
 		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inPerspective"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_PERSPECTIVE);  //$NON-NLS-1$
 		addRadioButton(typeHierarchyGroup, PreferencesMessages.getString("JavaBasePreferencePage.inView"), OPEN_TYPE_HIERARCHY, OPEN_TYPE_HIERARCHY_IN_VIEW_PART); //$NON-NLS-1$
+
+		Group refactoringGroup= new Group(result, SWT.NONE);
+		refactoringGroup.setLayout(new GridLayout());		
+		refactoringGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		refactoringGroup.setText(PreferencesMessages.getString("JavaBasePreferencePage.refactoring.title")); //$NON-NLS-1$
+		addCheckBox(refactoringGroup, 
+			PreferencesMessages.getString("JavaBasePreferencePage.refactoring.auto_save"), //$NON-NLS-1$
+			RefactoringSavePreferences.PREF_SAVE_ALL_EDITORS);
 
 		Dialog.applyDialogFont(result);
 		return result;

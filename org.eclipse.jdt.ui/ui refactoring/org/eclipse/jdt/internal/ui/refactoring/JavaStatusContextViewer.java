@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -27,6 +29,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
@@ -39,6 +42,7 @@ import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.ui.refactoring.TextContextViewer;
 
 
 public class JavaStatusContextViewer extends TextContextViewer {
@@ -98,4 +102,18 @@ public class JavaStatusContextViewer extends TextContextViewer {
 	private static IRegion createRegion(ISourceRange range) {
 		return new Region(range.getOffset(), range.getLength());
 	}
+	
+	private IDocument getDocument(IDocumentProvider provider, IEditorInput input) {
+		if (input == null)
+			return null;
+		IDocument result= null;
+		try {
+			provider.connect(input);
+			result= provider.getDocument(input);
+		} catch (CoreException e) {
+		} finally {
+			provider.disconnect(input);
+		}
+		return result;
+	}	
 }

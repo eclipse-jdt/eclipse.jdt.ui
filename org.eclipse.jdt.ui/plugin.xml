@@ -88,9 +88,6 @@
 	</decorator>	
 </extension>
 
-   <extension-point id="statusContextViewers" name="%statusViewerExtensionPoint"/>
-   <extension-point id="changePreviewViewers" name="%changeViewerExtensionPoint"/>
-
    <extension point="org.eclipse.core.runtime.adapters">
 		<factory 
             class="org.eclipse.jdt.internal.ui.JavaElementAdapterFactory" 
@@ -1113,23 +1110,10 @@
             id="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator">
       </viewer>
    </extension>
-<!-- =========================================================================== -->
-<!-- Refactoring (for action set see below)                                      -->
-<!-- =========================================================================== -->
 <!-- End Java Compare -->
-   <extension
-         point="org.eclipse.ui.preferencePages">
-      <page
-            name="%Refactoring.BasePreferencePage.name"
-            category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.RefactoringPreferencePage"
-            id="org.eclipse.jdt.ui.preferences.RefactoringPreferencePage">
-      </page>
-   </extension>
 <!-- =========================================================================== -->
 <!-- Java Launching and debugging                                                -->
 <!-- =========================================================================== -->
-<!-- End Refactoring -->
    <extension
          point="org.eclipse.ui.ide.resourceFilters">
       <filter
@@ -3996,6 +3980,45 @@
    </extension>
 
 <!-- =========================================================================== -->
+<!-- Refactorig                                                                  -->
+<!-- =========================================================================== -->
+   
+   <extension point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+      		namespace="org.eclipse.jdt.internal.ui"
+            properties="matchesPattern"
+            type="org.eclipse.core.resources.IResource"
+            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourceExtender"
+            id="org.eclipse.jdt.IResourceExtender">
+      </propertyTester>
+   </extension>
+   
+   <extension point="org.eclipse.ltk.ui.refactoring.statusContextViewers">
+      <statusContextViewer
+            class="org.eclipse.jdt.internal.ui.refactoring.JavaStatusContextViewer"
+            id="org.eclipse.jdt.ui.javaStatusContextViewer">
+         <enablement>
+            <or>
+               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext"/>
+               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext"/>
+            </or>
+         </enablement>
+      </statusContextViewer>
+   </extension>
+   
+   <extension point="org.eclipse.ltk.ui.refactoring.changePreviewViewers">
+      <changePreviewViewer
+            class="org.eclipse.jdt.internal.ui.refactoring.CreateTextFileChangePreviewViewer"
+            id="org.eclipse.jdt.ui.createTextFileChangePreviewViewer">
+         <enablement>
+            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange"/>
+         </enablement>
+      </changePreviewViewer>
+   </extension>
+   
+<!-- End Refactoring -->
+
+<!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
 <!-- =========================================================================== -->
    <extension
@@ -4047,59 +4070,7 @@
                id="org.eclipse.ui.texteditor.quickdiff.QuickDiffToggleAction">
          </action>
       </editorContribution>
-   </extension>
-   
-<!-- property testers -->
-   
-   <extension point="org.eclipse.core.expressions.propertyTesters">
-      <propertyTester
-      		namespace="org.eclipse.jdt.internal.ui"
-            properties="matchesPattern"
-            type="org.eclipse.core.resources.IResource"
-            class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourceExtender"
-            id="org.eclipse.jdt.IResourceExtender">
-      </propertyTester>
-   </extension>
-   
-<!--- Status viewer -->
-   
-   <extension point="org.eclipse.jdt.ui.statusContextViewers">
-      <statusContextViewer
-            class="org.eclipse.jdt.internal.ui.refactoring.JavaStatusContextViewer"
-            id="org.eclipse.jdt.ui.javaStatusContextViewer">
-         <enablement>
-            <or>
-               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext"/>
-               <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext"/>
-            </or>
-         </enablement>
-      </statusContextViewer>
-      <statusContextViewer
-            class="org.eclipse.jdt.internal.ui.refactoring.FileStatusContextViewer"
-            id="org.eclipse.jdt.ui.fileStatusContextViewer">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.base.FileStatusContext"/>
-         </enablement>
-      </statusContextViewer>
-   </extension>
-   
-   <extension point="org.eclipse.jdt.ui.changePreviewViewers">
-      <changePreviewViewer
-            class="org.eclipse.jdt.internal.ui.refactoring.TextChangePreviewViewer"
-            id="org.eclipse.jdt.ui.textChangePreviewViewer">
-         <enablement>
-            <instanceof value="org.eclipse.ltk.core.refactoring.TextChange"/>
-         </enablement>
-      </changePreviewViewer>
-      <changePreviewViewer
-            class="org.eclipse.jdt.internal.ui.refactoring.CreateTextFileChangePreviewViewer"
-            id="org.eclipse.jdt.ui.createTextFileChangePreviewViewer">
-         <enablement>
-            <instanceof value="org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange"/>
-         </enablement>
-      </changePreviewViewer>
-   </extension>
-   
+   </extension>   
    
    <extension
          point="org.eclipse.ui.views">

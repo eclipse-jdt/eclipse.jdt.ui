@@ -10,8 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchResultLabelProvider;
 

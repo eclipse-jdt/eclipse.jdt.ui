@@ -31,6 +31,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.ltk.ui.refactoring.IChangePreviewViewer;
+
 
 public class CreateTextFileChangePreviewViewer implements IChangePreviewViewer {
 

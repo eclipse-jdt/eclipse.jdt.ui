@@ -85,5 +85,14 @@ public class CompilationUnitChange extends TextFileChange {
 	protected Change createUndoChange(UndoEdit edit) throws CoreException {
 		return new UndoCompilationUnitChange(getName(), fCUnit, edit, getSaveMode());
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object getAdapter(Class adapter) {
+		if (ICompilationUnit.class.equals(adapter))
+			return fCUnit;
+		return super.getAdapter(adapter);
+	}
 }
 

@@ -21,6 +21,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.resource.JFaceResources;
 
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public abstract class MessageWizardPage extends UserInputWizardPage {
 
 	public static final int STYLE_NONE= 0;

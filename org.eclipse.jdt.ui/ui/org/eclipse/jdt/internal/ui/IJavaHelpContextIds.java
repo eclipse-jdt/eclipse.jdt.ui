@@ -162,10 +162,12 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_FROM_HISTORY_ACTION=							PREFIX + "add_from_history_action"; 	 //$NON-NLS-1$
 	public static final String LAYOUT_FLAT_ACTION=							PREFIX + "layout_flat_action"; 	 //$NON-NLS-1$
 	public static final String LAYOUT_HIERARCHICAL_ACTION=							PREFIX + "layout_hierarchical_action"; 	 //$NON-NLS-1$	
+	// *** Don't delete this constants and the doc since it is still used in refactoring
 	public static final String NEXT_CHANGE_ACTION=							PREFIX + "next_change_action"; 	 //$NON-NLS-1$	
-	public static final String PREVIOUS_CHANGE_ACTION=							PREFIX + "previous_change_action"; 	 //$NON-NLS-1$	
+	public static final String PREVIOUS_CHANGE_ACTION=							PREFIX + "previous_change_action"; 	 //$NON-NLS-1$
 	public static final String NEXT_PROBLEM_ACTION=							PREFIX + "next_problem_action"; 	 //$NON-NLS-1$	
-	public static final String PREVIOUS_PROBLEM_ACTION=							PREFIX + "previous_problem_action"; 	 //$NON-NLS-1$	
+	public static final String PREVIOUS_PROBLEM_ACTION=							PREFIX + "previous_problem_action"; 	 //$NON-NLS-1$
+	// *** end
 	public static final String JAVA_SELECT_MARKER_RULER_ACTION=							PREFIX + "java_select_marker_ruler_action"; 	 //$NON-NLS-1$	
 	public static final String GOTO_NEXT_ERROR_ACTION=							PREFIX + "goto_next_error_action"; 	 //$NON-NLS-1$	
 	public static final String GOTO_PREVIOUS_ERROR_ACTION=							PREFIX + "goto_previous_error_action"; 	 //$NON-NLS-1$	
@@ -285,9 +287,11 @@ public interface IJavaHelpContextIds {
 
 	// Same help for all refactoring error pages. Indidivual help can
 	// be provided per a single refactoring status.	
+	// *** Don't delete this constants and the doc since it is still used in refactoring
 	public static final String REFACTORING_ERROR_WIZARD_PAGE=	PREFIX + "refactoring_error_wizard_page_context";  //$NON-NLS-1$
 	// same help for all refactoring preview pages
-	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= 				PREFIX + "refactoring_preview_wizard_page_context"; //$NON-NLS-1$
+	// *** Don't delete this constants and the doc since it is still used in refactoring
+	public static final String REFACTORING_PREVIEW_WIZARD_PAGE= PREFIX + "refactoring_preview_wizard_page_context"; //$NON-NLS-1$
 	
 	public static final String RENAME_PARAMS_WIZARD_PAGE= 						PREFIX + "rename_params_wizard_page"; //$NON-NLS-1$
 	public static final String EXTERNALIZE_WIZARD_KEYVALUE_PAGE= 				PREFIX + "externalize_wizard_keyvalue_page_context"; //$NON-NLS-1$

@@ -28,10 +28,10 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 
-import org.eclipse.jdt.internal.ui.refactoring.StatusContextViewerDescriptor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.internal.ui.refactoring.StatusContextViewerDescriptor;
 
 
 public class ExtensionPointTests extends TestCase {

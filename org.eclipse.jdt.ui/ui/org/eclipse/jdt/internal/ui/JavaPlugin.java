@@ -90,6 +90,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 
 /**
  * Represents the java plug-in. It provides a series of convenience methods such as
@@ -378,6 +379,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 		};
 		getPreferenceStore().addPropertyChangeListener(fPropertyChangeListener);
+		
+		/*
+		 * Backward compatibility for the refactoring preference key. 
+		 */
+		getPreferenceStore().setValue(
+			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, RefactoringUI.getConditionCheckingFailedSeverity());
 	}
 	
 	/**

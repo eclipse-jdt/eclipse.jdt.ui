@@ -72,6 +72,9 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public class PushDownWizard extends RefactoringWizard {
 
 	public PushDownWizard(PushDownRefactoring ref) {

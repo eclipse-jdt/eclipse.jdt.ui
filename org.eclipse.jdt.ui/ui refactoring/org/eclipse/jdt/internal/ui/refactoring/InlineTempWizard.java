@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class InlineTempWizard extends RefactoringWizard {
 

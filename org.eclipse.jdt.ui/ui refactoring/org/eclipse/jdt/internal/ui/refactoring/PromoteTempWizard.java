@@ -32,6 +32,9 @@ import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefact
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public class PromoteTempWizard extends RefactoringWizard {
 
 	public PromoteTempWizard(PromoteTempToFieldRefactoring ref) {

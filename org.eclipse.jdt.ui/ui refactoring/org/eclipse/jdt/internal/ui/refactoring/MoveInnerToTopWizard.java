@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class MoveInnerToTopWizard extends RefactoringWizard {
 

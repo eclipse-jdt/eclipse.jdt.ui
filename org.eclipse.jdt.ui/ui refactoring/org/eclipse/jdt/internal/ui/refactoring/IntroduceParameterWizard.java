@@ -27,6 +27,9 @@ import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceParameterRefact
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public class IntroduceParameterWizard extends RefactoringWizard {
 
 	public IntroduceParameterWizard(IntroduceParameterRefactoring ref) {

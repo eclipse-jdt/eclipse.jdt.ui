@@ -13,9 +13,10 @@ package org.eclipse.jdt.internal.ui.refactoring.sef;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.PreviewWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.ltk.internal.ui.refactoring.PreviewWizardPage;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class SelfEncapsulateFieldWizard extends RefactoringWizard {
 	

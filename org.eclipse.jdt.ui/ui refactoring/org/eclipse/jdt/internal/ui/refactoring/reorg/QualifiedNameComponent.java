@@ -22,9 +22,9 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class QualifiedNameComponent extends Composite {
 

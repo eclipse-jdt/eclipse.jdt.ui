@@ -83,17 +83,17 @@ public class RefactoringSaveHelper {
 	}
 	
 	private boolean saveAllDirtyEditors(Shell shell) {
-		if (RefactoringPreferences.getSaveAllEditors()) //must save everything
+		if (RefactoringSavePreferences.getSaveAllEditors()) //must save everything
 			return true;
 		ListDialog dialog= new ListDialog(shell) {
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
 				final Button check= new Button(result, SWT.CHECK);
 				check.setText(RefactoringMessages.getString("RefactoringStarter.always_save")); //$NON-NLS-1$
-				check.setSelection(RefactoringPreferences.getSaveAllEditors());
+				check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
 				check.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {
-						RefactoringPreferences.setSaveAllEditors(check.getSelection());
+						RefactoringSavePreferences.setSaveAllEditors(check.getSelection());
 					}
 				});
 				applyDialogFont(result);		

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 /**
  * @author rfuhrer@watson.ibm.com

@@ -24,6 +24,7 @@
       <import plugin="org.eclipse.jdt.ui.tests"/>
       <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
 	  <import plugin="org.eclipse.ltk.core.refactoring"/>      
+	  <import plugin="org.eclipse.ltk.ui.refactoring"/>      
    </requires>
    
     <extension point="org.eclipse.ltk.core.refactoring.renameParticipants">

@@ -30,6 +30,9 @@ import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNested
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
 public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 
 	public ConvertAnonymousToNestedWizard(ConvertAnonymousToNestedRefactoring ref) {

@@ -21,13 +21,13 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IConfirmQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
+
+import org.eclipse.jdt.internal.ui.dialogs.ListDialog;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 public class ReorgQueries implements IReorgQueries{
 	

@@ -33,6 +33,8 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeExceptionHandler;
+import org.eclipse.ltk.internal.ui.refactoring.UIPerformChangeOperation;
+import org.eclipse.ltk.ui.refactoring.RefactoringStatusDialog;
 
 /**
  * A helper class to execute a refactoring. The class takes care of pushing the

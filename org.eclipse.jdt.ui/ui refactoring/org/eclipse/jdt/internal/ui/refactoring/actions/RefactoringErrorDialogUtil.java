@@ -17,11 +17,11 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusContentProvider;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.internal.ui.refactoring.RefactoringStatusContentProvider;
+import org.eclipse.ltk.internal.ui.refactoring.RefactoringStatusEntryLabelProvider;
 
 public class RefactoringErrorDialogUtil {
 	
