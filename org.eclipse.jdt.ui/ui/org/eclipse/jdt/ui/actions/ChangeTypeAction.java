@@ -80,6 +80,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 		setToolTipText(RefactoringMessages.getString("ChangeTypeAction.tooltipText")); //$NON-NLS-1$
 		setDescription(RefactoringMessages.getString("ChangeTypeAction.description")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CHANGE_TYPE_ACTION);
+		fDialogMessageTitle= RefactoringMessages.getString("ChangeTypeAction.dialog.title"); //$NON-NLS-1$
 	}
 	
 	//---- structured selection ---------------------------------------------
