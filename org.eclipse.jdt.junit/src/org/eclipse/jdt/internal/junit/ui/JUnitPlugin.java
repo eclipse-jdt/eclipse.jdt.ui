@@ -74,6 +74,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public static final String PLUGIN_ID= "org.eclipse.jdt.junit"; //$NON-NLS-1$
 	public static final String ID_EXTENSION_POINT_TESTRUN_LISTENERS= PLUGIN_ID + "." + "testRunListeners"; //$NON-NLS-1$ //$NON-NLS-2$
+	public static final String ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS= PLUGIN_ID + "." + "junitLaunchConfigs"; //$NON-NLS-1$ //$NON-NLS-2$
 
 	public final static String TEST_SUPERCLASS_NAME= "junit.framework.TestCase"; //$NON-NLS-1$
 	public final static String TEST_INTERFACE_NAME= "junit.framework.Test"; //$NON-NLS-1$
@@ -96,6 +97,11 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * List storing the registered test run listeners
 	 */
 	private List fTestRunListeners;
+
+	/**
+	 * List storing the registered JUnit launch configuration types
+	 */
+	private List fJUnitLaunchConfigTypeIDs;
 
 	public JUnitPlugin(IPluginDescriptor desc) {
 		super(desc);
@@ -178,11 +184,15 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	/*
 	 * @see ILaunchListener#launchRemoved(ILaunch)
 	 */
-	public void launchRemoved(ILaunch launch) {
+	public void launchRemoved(final ILaunch launch) {
 		fTrackedLaunches.remove(launch);
-		TestRunnerViewPart testRunnerViewPart= findTestRunnerViewPartInActivePage();
-		if (testRunnerViewPart != null && testRunnerViewPart.isCreated() && launch.equals(testRunnerViewPart.getLastLaunch()))
-			testRunnerViewPart.reset();
+		getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				TestRunnerViewPart testRunnerViewPart= findTestRunnerViewPartInActivePage();
+				if (testRunnerViewPart != null && testRunnerViewPart.isCreated() && launch.equals(testRunnerViewPart.getLastLaunch()))
+					testRunnerViewPart.reset();
+			}
+		});
 	}
 
 	/*
@@ -281,10 +291,10 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	public static Display getDisplay() {
-		Shell shell= getActiveWorkbenchShell();
-		if (shell != null) {
-			return shell.getDisplay();
-		}
+//		Shell shell= getActiveWorkbenchShell();
+//		if (shell != null) {
+//			return shell.getDisplay();
+//		}
 		Display display= Display.getCurrent();
 		if (display == null) {
 			display= Display.getDefault();
@@ -378,6 +388,23 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	/**
+	 * Loads the registered JUnit launch configurations
+	 */
+	private void loadLaunchConfigTypeIDs() {
+		fJUnitLaunchConfigTypeIDs= new ArrayList();
+		IExtensionPoint extensionPoint= Platform.getPluginRegistry().getExtensionPoint(ID_EXTENSION_POINT_JUNIT_LAUNCHCONFIGS);
+		if (extensionPoint == null) {
+			return;
+		}
+		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
+
+		for (int i= 0; i < configs.length; i++) {
+			String configTypeID= configs[i].getAttribute("configTypeID"); //$NON-NLS-1$
+			fJUnitLaunchConfigTypeIDs.add(configTypeID);
+		}
+	}
+
+	/**
 	 * Returns an array of all TestRun listeners
 	 */
 	public List getTestRunListeners() {
@@ -385,6 +412,16 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 			loadTestRunListeners();
 		}
 		return fTestRunListeners;
+	}
+
+	/**
+	 * Returns an array of all JUnit launch config types
+	 */
+	public List getJUnitLaunchConfigTypeIDs() {
+		if (fJUnitLaunchConfigTypeIDs == null) {
+			loadLaunchConfigTypeIDs();
+		}
+		return fJUnitLaunchConfigTypeIDs;
 	}
 
 	/**
