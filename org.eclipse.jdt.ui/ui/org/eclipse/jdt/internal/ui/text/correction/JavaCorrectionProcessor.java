@@ -49,6 +49,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			case IProblem.UnterminatedString:
 			case IProblem.UnterminatedComment:
 			case IProblem.UndefinedMethod:
+			case IProblem.UndefinedConstructor:
 			case IProblem.ParameterMismatch:
 			case IProblem.MethodButWithConstructorName:
 			case IProblem.UndefinedField:
@@ -154,6 +155,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.UndefinedMethod:
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, false, proposals);
 					break;
+				case IProblem.UndefinedConstructor:
+					UnresolvedElementsSubProcessor.getConstructorProposals(problemPos, proposals);
+					break;					
 				case IProblem.ParameterMismatch:
 					UnresolvedElementsSubProcessor.getMethodProposals(problemPos, true, proposals);
 					break;

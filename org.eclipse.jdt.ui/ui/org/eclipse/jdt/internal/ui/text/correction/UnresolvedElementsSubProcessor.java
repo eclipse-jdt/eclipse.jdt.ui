@@ -1,6 +1,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -17,11 +18,18 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -220,4 +228,67 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 
+	public static void getConstructorProposals(ProblemPosition problemPos, ArrayList proposals) throws CoreException {
+		ICompilationUnit cu= problemPos.getCompilationUnit();
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		ASTNode selectedNode= ASTResolving.findSelectedNode(astRoot, problemPos.getOffset(), problemPos.getLength());
+		
+		if (selectedNode == null) {
+			return;
+		}
+		int type= selectedNode.getNodeType();
+		if (type == ASTNode.CLASS_INSTANCE_CREATION) {
+			ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
+			
+			IBinding binding= creation.getName().resolveBinding();
+			if (binding != null && binding.getKind() == IBinding.TYPE) {
+				getConstructorProposals((ITypeBinding) binding, creation.arguments(), cu, proposals);
+			}
+		} else if (type == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
+			ASTNode node= selectedNode.getParent();
+			while (node != null && node.getNodeType() != ASTNode.TYPE_DECLARATION) {
+				node= node.getParent();
+			}
+			if (node != null) {
+				TypeDeclaration decl= (TypeDeclaration) node;
+				Name name= decl.getSuperclass();
+				if (name != null) {
+					IBinding binding= name.resolveBinding();
+					if (binding != null && binding.getKind() == IBinding.TYPE) {
+						getConstructorProposals((ITypeBinding) binding, ((SuperConstructorInvocation) selectedNode).arguments(), cu, proposals);
+					}
+				}
+			}
+		} else if (type == ASTNode.CONSTRUCTOR_INVOCATION) {
+			ASTNode node= selectedNode.getParent();
+			while (node != null && node.getNodeType() != ASTNode.TYPE_DECLARATION) {
+				node= node.getParent();
+			}
+			if (node != null) {
+				TypeDeclaration decl= (TypeDeclaration) node;
+				IBinding binding= decl.getName().resolveBinding();
+				if (binding != null && binding.getKind() == IBinding.TYPE) {
+					getConstructorProposals((ITypeBinding) binding, ((ConstructorInvocation) selectedNode).arguments(), cu, proposals);
+				}
+			}			
+		}
+	}
+	
+	private static void getConstructorProposals(ITypeBinding typeBinding, List arguments, ICompilationUnit cu, ArrayList proposals) throws CoreException {
+		if (typeBinding.isFromSource() && typeBinding.isTopLevel()|| typeBinding.isMember()) {
+			IType type= Binding2JavaModel.find(typeBinding, cu.getJavaProject());
+			if (type == null) {
+				return;
+			}
+			IType workingCopyType= (IType) EditorUtility.getWorkingCopy(type);
+			if (workingCopyType != null) {
+				type= workingCopyType;
+			}
+			String label= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createconstructor.description", type.getElementName()); //$NON-NLS-1$
+			proposals.add(new NewConstructorCompletionProposal(label, cu, type, arguments, 1));
+		}		
+	
+	}
+	
 }
