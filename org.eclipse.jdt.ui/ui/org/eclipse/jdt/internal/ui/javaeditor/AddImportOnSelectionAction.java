@@ -15,16 +15,13 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ISelection;
@@ -35,35 +32,27 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.EditorActionBarContributor;
+import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.util.AllTypesCache;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
-		
+
 	private CompilationUnitEditor fEditor;
 	
 	public AddImportOnSelectionAction(CompilationUnitEditor editor) {	
@@ -89,168 +78,79 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 	 * @see org.eclipse.jface.action.IAction#run()
 	 */
 	public void run() {
-		ICompilationUnit cu= getCompilationUnit();
+		final ICompilationUnit cu= getCompilationUnit();
+		if (cu == null)
+			return;
 		if (!ElementValidator.checkValidateEdit(cu, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"))) //$NON-NLS-1$
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
 			
-		if (cu != null) {
-			ISelection s= fEditor.getSelectionProvider().getSelection();
-			IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
-			ITextSelection selection= (ITextSelection) s;
-			
-			if (doc != null) {
-				try {
-					int nameStart= getNameStart(doc, selection.getOffset());
-					int nameEnd= getNameEnd(doc, selection.getOffset() + selection.getLength());
-					int len= nameEnd - nameStart;
-					
-					String name= doc.get(nameStart, len).trim();
-					String simpleName= Signature.getSimpleName(name);
-					String containerName= Signature.getQualifier(name);
-					
-					
-					IImportDeclaration existingImport= JavaModelUtil.findImport(cu, simpleName);
-					if (existingImport != null) {
-						if (!existingImport.getElementName().equals(name)) {
-							getShell().getDisplay().beep();
-							IStatusLineManager manager= getStatusLineManager();
-							if (manager != null) {
-								String message= JavaEditorMessages.getFormattedString("AddImportOnSelection.error.importclash", existingImport.getElementName()); //$NON-NLS-1$
-								manager.setErrorMessage(message);
-							}
-						} else {
-							removeQualification(doc, nameStart, containerName);
-						}
-						return;
-					}			
-					
-					IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { cu.getJavaProject() });
-					
-					TypeInfo[] types= findAllTypes(simpleName, searchScope, null);
-					if (types.length== 0) {
-						getShell().getDisplay().beep();
-						return;
+		ISelection selection= fEditor.getSelectionProvider().getSelection();
+		IDocument doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+		if (selection instanceof ITextSelection && doc != null) {
+			AddImportsOperation op= new AddImportsOperation(cu, doc, (ITextSelection) selection, new SelectTypeQuery(getShell()));
+			try {
+				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+				progressService.runInUI(progressService, new WorkbenchRunnableAdapter(op, op.getScheduleRule()), op.getScheduleRule());
+				IStatus status= op.getStatus();
+				if (!status.isOK()) {
+					IStatusLineManager manager= getStatusLineManager();
+					if (manager != null) {
+						manager.setMessage(status.getMessage());
 					}
-					
-					TypeInfo chosen= selectResult(types, containerName, getShell());
-					if (chosen == null) {
-						return;
-					}
-					IType type= chosen.resolveType(searchScope);
-					if (type == null) {
-						JavaPlugin.logErrorMessage("AddImportOnSelectionAction: Failed to resolve TypeRef: " + chosen.toString()); //$NON-NLS-1$
-						MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), JavaEditorMessages.getString("AddImportOnSelection.error.notresolved.message")); //$NON-NLS-1$ //$NON-NLS-2$
-						return;
-					}
-					removeQualification(doc, nameStart, chosen.getTypeContainerName());
-					
-					CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
-					AddImportsOperation op= new AddImportsOperation(cu, new IJavaElement[] { type }, settings, false);
-					try {
-						PlatformUI.getWorkbench().getProgressService().runInUI(
-							PlatformUI.getWorkbench().getProgressService(),
-							new WorkbenchRunnableAdapter(op, op.getScheduleRule()),
-							op.getScheduleRule());
-					} catch (InvocationTargetException e) {
-						ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
-					} catch (InterruptedException e) {
-						// Do nothing. Operation has been canceled.
-					}
-					return;
-				} catch (CoreException e) {
-					ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
-				} catch (BadLocationException e) {
-					JavaPlugin.log(e);
-					MessageDialog.openError(getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), e.getMessage()); //$NON-NLS-1$
 				}
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, getShell(), JavaEditorMessages.getString("AddImportOnSelection.error.title"), null); //$NON-NLS-1$
+			} catch (InterruptedException e) {
+				// Do nothing. Operation has been canceled.
 			}
 		}		
-	}
-	
-
-	private int getNameStart(IDocument doc, int pos) throws BadLocationException {
-		while (pos > 0) {
-			char ch= doc.getChar(pos - 1);
-			if (!Character.isJavaIdentifierPart(ch) && ch != '.') {
-				return pos;
-			}
-			pos--;
-		}
-		return pos;
-	}
-	
-	private int getNameEnd(IDocument doc, int pos) throws BadLocationException {
-		if (pos > 0) {
-			if (Character.isWhitespace(doc.getChar(pos - 1))) {
-				return pos;
-			}
-		}
-		int len= doc.getLength();
-		while (pos < len) {
-			char ch= doc.getChar(pos);
-			if (!Character.isJavaIdentifierPart(ch)) {
-				return pos;
-			}
-			pos++;
-		}
-		return pos;
-	}		
-	
-	private void removeQualification(IDocument doc, int nameStart, String containerName) throws BadLocationException {
-		int containerLen= containerName.length();
-		int docLen= doc.getLength();
-		if ((containerLen > 0) && (nameStart + containerLen + 1 < docLen)) {
-			for (int k= 0; k < containerLen; k++) {
-				if (doc.getChar(nameStart + k) != containerName.charAt(k)) {
-					return;
-				}
-			}
-			if (doc.getChar(nameStart + containerLen) == '.') {
-				doc.replace(nameStart, containerLen + 1, ""); //$NON-NLS-1$
-			}
-		}
-	}	
-
-	/**
-	 * Finds a type by the simple name.
-	 */
-	private static TypeInfo[] findAllTypes(String simpleTypeName, IJavaSearchScope searchScope, IProgressMonitor monitor) {
-		return AllTypesCache.getTypesForName(simpleTypeName, searchScope, monitor);
 	}
 	
 	private Shell getShell() {
 		return fEditor.getSite().getShell();
 	}
+	
+	private static class SelectTypeQuery implements IChooseImportQuery {
 		
-						
-	private TypeInfo selectResult(TypeInfo[] results, String containerName, Shell shell) {
-		int nResults= results.length;
-		
-		if (nResults == 0) {
-			return null;
-		} else if (nResults == 1) {
-			return results[0];
+		private final Shell fShell;
+
+		public SelectTypeQuery(Shell shell) {
+			fShell= shell;
 		}
-		
-		if (containerName.length() != 0) {
-			for (int i= 0; i < nResults; i++) {
-				TypeInfo curr= results[i];
-				if (containerName.equals(curr.getTypeContainerName())) {
-					return curr;
-				}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery#chooseImport(org.eclipse.jdt.internal.corext.util.TypeInfo[], java.lang.String)
+		 */
+		public TypeInfo chooseImport(TypeInfo[] results, String containerName) {
+			int nResults= results.length;
+			
+			if (nResults == 0) {
+				return null;
+			} else if (nResults == 1) {
+				return results[0];
 			}
-		}		
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
-		dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
-		dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
-		dialog.setElements(results);
-		if (dialog.open() == Window.OK) {
-			return (TypeInfo) dialog.getFirstResult();
+			
+			if (containerName.length() != 0) {
+				for (int i= 0; i < nResults; i++) {
+					TypeInfo curr= results[i];
+					if (containerName.equals(curr.getTypeContainerName())) {
+						return curr;
+					}
+				}
+			}		
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
+			dialog.setTitle(JavaEditorMessages.getString("AddImportOnSelection.dialog.title")); //$NON-NLS-1$
+			dialog.setMessage(JavaEditorMessages.getString("AddImportOnSelection.dialog.message")); //$NON-NLS-1$
+			dialog.setElements(results);
+			if (dialog.open() == Window.OK) {
+				return (TypeInfo) dialog.getFirstResult();
+			}
+			return null;
 		}
-		return null;
 	}
+		
 	
 	private IStatusLineManager getStatusLineManager() {
 		IEditorActionBarContributor contributor= fEditor.getEditorSite().getActionBarContributor();
