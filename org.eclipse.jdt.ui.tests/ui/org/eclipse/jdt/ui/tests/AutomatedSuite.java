@@ -8,6 +8,8 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.tests.astrewrite.ASTRewritingTest;
+import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
+import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.core.AddImportTest;
 import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 import org.eclipse.jdt.ui.tests.core.HierarchicalASTVisitorTest;
@@ -66,7 +68,10 @@ public class AutomatedSuite extends TestSuite {
 		addTest(ContentProviderTests1.suite());
 		addTest(ContentProviderTests2.suite());
 		addTest(ContentProviderTests3.suite());
-		addTest(ContentProviderTests4.suite());						
+		addTest(ContentProviderTests4.suite());	
+		
+		addTest(PackagesViewContentProviderTests.suite());
+		addTest(PackagesViewDeltaTests.suite());				
 	}
 	
 }

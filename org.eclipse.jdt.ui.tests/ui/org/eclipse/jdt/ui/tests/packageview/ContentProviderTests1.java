@@ -187,9 +187,12 @@ public class ContentProviderTests1 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 		
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened());//$NON-NLS-1$
-		assertTrue("Correct Remove", fPack4.equals(fMyPart.getRemovedObject()));//$NON-NLS-1$
-		assertTrue("No refreshes", fMyPart.getRefreshedObject().size()==0);//$NON-NLS-1$
+		assertTrue("Correct Remove", fMyPart.getRemovedObject().contains(fPack4));//$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
 	
 	public void testAddBottomLevelFragment() throws Exception {
@@ -200,9 +203,12 @@ public class ContentProviderTests1 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct Add", test.equals(fMyPart.getAddedObject())); //$NON-NLS-1$
-		assertTrue("No refreshes", fMyPart.getRefreshedObject().size() == 0); //$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
 	public void testChangedTopLevelPackageFragment() throws Exception {
@@ -210,6 +216,9 @@ public class ContentProviderTests1 extends TestCase {
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
@@ -220,42 +229,44 @@ public class ContentProviderTests1 extends TestCase {
 		IElementChangedListener listener= (IElementChangedListener) fProvider;
 		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+		
+		//force events from display
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
 
 		assertEquals("No refresh happened", 0, fMyPart.getRefreshedObject().size());//$NON-NLS-1$
 	}
-	
-	
-	//XXX: These delta tests don't correctly wait for the display thread yet.
 		
-//	public void testRemoveCUsFromPackageFragment() throws Exception{
-//		//send a delta indicating fragment deleted
-//		IElementChangedListener listener= (IElementChangedListener) fProvider;
-//		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
-//		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-//
-//		//wait on display thread
-//		if(!fMyPart.notifyHappened())	
-//			this.wait(10);
-//
-//		assertTrue("Refresh happened", fMyPart.refreshHappened()); //$NON-NLS-1$
-//		assertTrue("Correct refresh", fPack6.equals(fMyPart.getRefreshedObject())); //$NON-NLS-1$
-//		assertTrue("No refreshes", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
-//	}
-//	
-//	public void testRemoveCUFromPackageFragment() throws Exception {
-//		//send a delta indicating fragment deleted
-//		IElementChangedListener listener= (IElementChangedListener) fProvider;
-//		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
-//		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
-//
-//		//wait on display thread
-//		if(!fMyPart.notifyHappened())
-//			this.wait(10);
-//
-//		assertTrue("Refresh happened", fMyPart.refreshHappened()); //$NON-NLS-1$
-//		assertTrue("Correct refresh", fPack6.equals(fMyPart.getRefreshedObject())); //$NON-NLS-1$
-//		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
-//	}
+	public void testRemoveCUsFromPackageFragment() throws Exception{
+		
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+		
+		//force events from display
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertEquals("2 elements removed", 2, fMyPart.getRemovedObject().size()); //$NON-NLS-1$
+		assertTrue("Correct elements removed", fMyPart.getRemovedObject().contains(fCU2) && fMyPart.getRemovedObject().contains(fCU3)); //$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+	public void testRemoveCUFromPackageFragment() throws Exception {
+		
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display			
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
 
 	/**
 	 * @see TestCase#setUp()

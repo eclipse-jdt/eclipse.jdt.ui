@@ -21,8 +21,6 @@ import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 
-import org.eclipse.ui.IViewPart;
-
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -45,7 +43,7 @@ public class MockPluginView extends PackageExplorerPart {
 	private boolean fRemoveHappened;
 	private boolean fAddHappened;
 	
-	private Object fRemovedObject;
+	private List fRemovedObject;
 	private Object fAddedObject;
 	private Object fAddedParentObject;
 
@@ -55,6 +53,7 @@ public class MockPluginView extends PackageExplorerPart {
 	public MockPluginView() {
 		super();
 		fRefreshedObjects= new ArrayList();
+		fRemovedObject= new ArrayList();
 	}
 	
 	/**
@@ -77,7 +76,7 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 	
 	private TreeViewer createViewer(Composite parent) {
-		return new TestProblemTreeViewer(parent, SWT.MULTI, this);
+		return new TestProblemTreeViewer(parent, SWT.MULTI);
 	}
 
 	public void dispose() {
@@ -90,7 +89,7 @@ public class MockPluginView extends PackageExplorerPart {
 		super.dispose();
 	}
 
-	/**
+	/*
 	 * @see org.eclipse.ui.IWorkbenchPart#setFocus()
 	 */
 	public void setFocus() {
@@ -100,15 +99,8 @@ public class MockPluginView extends PackageExplorerPart {
 		return fViewer;
 	}
 	
-	/**
-	 * Returns true if a refresh happened
-	 * @return boolean
-	 */
-	public boolean hasRefreshHappened() {
-		return fRefreshHappened;
-	}
 
-	/**
+	/*
 	 * @see org.eclipse.jdt.internal.ui.browsing.JavaBrowsingPart#findElementToSelect(org.eclipse.jdt.core.IJavaElement)
 	 */
 	protected IJavaElement findElementToSelect(IJavaElement je) {
@@ -131,11 +123,8 @@ public class MockPluginView extends PackageExplorerPart {
 	
 	private class TestProblemTreeViewer extends ProblemTreeViewer{
 		
-		private IViewPart fPart;
-		
-		public TestProblemTreeViewer(Composite parent, int flag, IViewPart part){
-			super(parent, flag);
-			fPart= part;
+		public TestProblemTreeViewer(Composite parent, int flag){
+			super(parent,flag);
 		}
 		
 		public void refresh(Object object){
@@ -143,9 +132,9 @@ public class MockPluginView extends PackageExplorerPart {
 			fRefreshedObjects.add(object);
 		}
 		
-		public void remove (Object object){
+		public void remove(Object object) {
 			fRemoveHappened= true;
-			fRemovedObject= object;
+			fRemovedObject.add(object);
 		}
 		
 		public void add(Object parentObject, Object object){
@@ -184,19 +173,18 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 
 	/**
-	 * Returns the object removed from the viewer
-	 * @return Object
-	 */
-	public Object getRemovedObject() {
-		return fRemovedObject;
-	}
-
-	/**
 	 * Returns true if an object was removed from the viewer
 	 * @return boolean
 	 */
 	public boolean hasRemoveHappened() {
 		return fRemoveHappened;
+	}	
+	/**
+	 * Returns the object removed from the viewer
+	 * @return Object
+	 */
+	public List getRemovedObject() {
+		return fRemovedObject;
 	}
 
 	/**
@@ -208,11 +196,18 @@ public class MockPluginView extends PackageExplorerPart {
 	}
 	
 	/**
+	 * Returns true if a refresh happened
+	 * @return boolean
+	 */
+	public boolean hasRefreshHappened() {
+		return fRefreshHappened;
+	}
+	
+	/**
 	 * Sets the folding preference.
 	 * @param fold
 	 */
 	public void setFolding(boolean fold) {
 		JavaPlugin.getDefault().getPreferenceStore().setValue(PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER, fold);
-	}	
-	
+	}		
 }

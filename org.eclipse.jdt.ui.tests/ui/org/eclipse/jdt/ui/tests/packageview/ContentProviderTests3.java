@@ -94,6 +94,7 @@ public class ContentProviderTests3 extends TestCase {
 	private ICompilationUnit fCUMoneyTest;
 	private ICompilationUnit fCU1;
 	private ICompilationUnit fCU2;
+	private ICompilationUnit fCU3;
 	private IFile fFile1;
 	private IFile fFile2;
 	
@@ -133,14 +134,6 @@ public class ContentProviderTests3 extends TestCase {
 		assertTrue("Wrong children found for PackageFragment with folding",compareArrays(children, expectedChildren));	//$NON-NLS-1$
 	}
 
-//This test will fail unless the contents of junit.samples are deleted
-//	public void testGetChildrenMidLevelFragmentInArchive() throws Exception{
-//		System.out.println("Testing getChildren of a Non bottom level PackageFragment in a PackageFragmentRoot Archive with folding");
-//		Object[] expectedChildren= new Object[]{fPackJunitSamplesMoney, fPackJunitExtentions, fPackJunitFramework, fPackJunitRunner, fPackJunitTextUi, fPackJunitUi, fPackJunitTests};
-//		Object[] children= fProvider.getChildren(fPackJunit);
-//		assertTrue("wrong children found for a NON bottom PackageFragment in PackageFragmentRoot Archive with folding", compareArrays(children, expectedChildren));
-//	}
-
 	public void testGetChildrenBottomLevelFragmentInArchive() throws Exception{
 		Object[] expectedChildren= new Object[]{fCUIMoney, fCUMoney, fCUMoneyBag, fCUMoneyTest};
 		Object[] children= fProvider.getChildren(fPackJunitSamplesMoney);
@@ -165,14 +158,7 @@ public class ContentProviderTests3 extends TestCase {
 	public void testGetParentArchive() throws Exception{
 		Object parent= fProvider.getParent(fArchiveFragmentRoot);
 		assertTrue("Wrong parent found for PackageFragmentRoot Archive with folding", parent==null);//$NON-NLS-1$
-	}
-
-//	public void testGetParentMidLevelFragmentInFoldedArchive() throws Exception{
-//		System.out.println("Testing getParent of a NON top level PackageFragment in an Archive with folding");
-//		Object expectedParent= fPackJunitSamples;
-//		Object parent= fProvider.getParent(fPackJunitSamplesMoney);
-//		assertTrue("Wrong parent found for a NON top level PackageFragment in an Archive with folding", expectedParent.equals(parent));
-//	}	
+	}	
 	
 	public void testGetParentTopLevelFragmentInArchive() throws Exception{
 		Object expectedParent= fPackJunit;
@@ -206,6 +192,9 @@ public class ContentProviderTests3 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(fPack4, IJavaElementDelta.REMOVED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
 		assertTrue("Single refresh", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
@@ -219,6 +208,9 @@ public class ContentProviderTests3 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(test, IJavaElementDelta.ADDED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
 		assertTrue("Correct Refresh", fMyPart.wasObjectRefreshed(fRoot1)); //$NON-NLS-1$
 		assertTrue("Single refreshe", fMyPart.getRefreshedObject().size() == 1); //$NON-NLS-1$
@@ -230,6 +222,9 @@ public class ContentProviderTests3 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(fPack3, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		
 		assertEquals("No refreshs", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 
@@ -239,11 +234,45 @@ public class ContentProviderTests3 extends TestCase {
 		IJavaElementDelta delta= TestDelta.createDelta(fPack6, IJavaElementDelta.CHANGED);
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
+		//force events from dispaly
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+		
 		assertEquals("No refreshs",0,  fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 	}
 	
+	public void testRemoveCUsFromPackageFragment() throws Exception{
 
-	/**
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { fCU2, fCU3 }, fPack6, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertEquals("2 elements removed", 2, fMyPart.getRemovedObject().size()); //$NON-NLS-1$
+		assertTrue("Correct elements removed", fMyPart.getRemovedObject().contains(fCU2) && fMyPart.getRemovedObject().contains(fCU3)); //$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+
+	public void testRemoveCUFromPackageFragment() throws Exception {
+
+		//send a delta indicating fragment deleted
+		IElementChangedListener listener= (IElementChangedListener) fProvider;
+		IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[]{fCU2}, fPack6, IJavaElementDelta.REMOVED);
+		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+
+		//force events from display
+		while(fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch());
+
+		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
+		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
+		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+
+	/*
 	 * @see TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
@@ -311,8 +340,6 @@ public class ContentProviderTests3 extends TestCase {
 		fCUMoneyBag= fPackJunitSamplesMoney.getCompilationUnit("MoneyBag.java");//$NON-NLS-1$
 		fCUMoneyTest= fPackJunitSamplesMoney.getCompilationUnit("MoneyTest.java");//$NON-NLS-1$
 		
-		
-		
 		File mylibJar= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.MYLIB);
 		assertTrue("lib not found", mylibJar != null && mylibJar.exists());//$NON-NLS-1$
 		JavaProjectHelper.addLibraryWithImport(fJProject1, new Path(mylibJar.getPath()), null, null);
@@ -331,7 +358,8 @@ public class ContentProviderTests3 extends TestCase {
 		
 		fCU1= fPack2.createCompilationUnit("Object.java", "", true, null);//$NON-NLS-1$//$NON-NLS-2$
 		fCU2= fPack6.createCompilationUnit("Object.java","", true, null);//$NON-NLS-1$//$NON-NLS-2$
-		
+		fCU3= fPack6.createCompilationUnit("Jen.java","", true,null);//$NON-NLS-1$//$NON-NLS-2$
+
 		//set up the mock view
 		setUpMockView();
 	}
