@@ -29,8 +29,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.actions.OpenExternalJavadocAction;
-
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -149,9 +147,9 @@ public class JavadocConfigurationBlock {
 	
 	private class EntryValidator implements Runnable {
 
-		private String invalidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
-		private String validMessage= JavaUIMessages.getString("JavadocConfigurationBlock.ValidLocation.message"); //$NON-NLS-1$
-		private String title=  JavaUIMessages.getString("JavadocConfigurationBlock.MessageDialog.title"); //$NON-NLS-1$
+		private String fInvalidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.InvalidLocation.message"); //$NON-NLS-1$
+		private String fValidMessage= JavaUIMessages.getString("JavadocConfigurationBlock.ValidLocation.message"); //$NON-NLS-1$
+		private String fTitle=  JavaUIMessages.getString("JavadocConfigurationBlock.MessageDialog.title"); //$NON-NLS-1$
 		public void run() {
 
 			Path path = new Path(fJavaDocField.getText());
@@ -169,10 +167,10 @@ public class JavadocConfigurationBlock {
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
 					validateFile(indexURL, packagelistURL);
 				} else {
-					MessageDialog.openError(fShell, title, message); //$NON-NLS-1$
+					MessageDialog.openInformation(fShell, fTitle, message); //$NON-NLS-1$
 				}
 			} catch (MalformedURLException e) {
-				MessageDialog.openError(fShell, title, message); //$NON-NLS-1$
+				MessageDialog.openInformation(fShell, fTitle, message); //$NON-NLS-1$
 			}
 
 		}
@@ -183,17 +181,17 @@ public class JavadocConfigurationBlock {
 			if (indexFile.exists()) {
 				File packaglistFile = new File(packagelisURL.getFile());
 				if (packaglistFile.exists()) {
-					if (MessageDialog.openConfirm(fShell, title, validMessage)) { //$NON-NLS-1$
+					if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
 						spawnInBrowser(indexURL);
 					}
 					return;
 				}
 			}	
-			MessageDialog.openError(fShell, title, invalidMessage); //$NON-NLS-1$
+			MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
 		}
 
 		public void spawnInBrowser(URL url) {
-				OpenBrowserUtil.open(url, fShell, title);
+				OpenBrowserUtil.open(url, fShell, fTitle);
 		}
 
 		private void validateURL(URL indexURL, URL packagelistURL) {
@@ -207,11 +205,12 @@ public class JavadocConfigurationBlock {
 				connect = packagelistURL.openConnection();
 				in = connect.getInputStream();
 
-				if(MessageDialog.openConfirm(fShell, title, validMessage)) //$NON-NLS-1$
+				if(MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) //$NON-NLS-1$
 					spawnInBrowser(indexURL);
 
 			} catch (IOException e) {
-				MessageDialog.openError(fShell, title, invalidMessage); //$NON-NLS-1$
+				MessageDialog.openInformation(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -241,9 +240,7 @@ public class JavadocConfigurationBlock {
 	private void jdocDialogFieldChanged(DialogField field) {
 		if (field == fJavaDocField) {
 			IStatus status= updateJavaDocLocationStatus();
-			if(status.getSeverity()==IStatus.ERROR)
-				fValidateButton.setEnabled(false);
-			else fValidateButton.setEnabled(true);
+			fValidateButton.setEnabled(!status.matches(IStatus.ERROR) && fJavaDocField.getText().length() > 0);
 			fContext.statusChanged(status);
 		}
 	}
