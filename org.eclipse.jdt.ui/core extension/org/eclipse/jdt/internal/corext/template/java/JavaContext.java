@@ -130,7 +130,8 @@ public class JavaContext extends CompilationUnitContext {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
 		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);			
 		
-		JavaFormatter formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter);
+		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
+		JavaFormatter formatter= new JavaFormatter(lineDelimiter, getIndentation(), useCodeFormatter, project);
 		formatter.format(buffer, this);
 
 		return buffer;

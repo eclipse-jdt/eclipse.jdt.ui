@@ -34,6 +34,7 @@ import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
@@ -60,6 +61,7 @@ public class JavaFormatter {
 	
 	/** The java partitioner */
 	private boolean fUseCodeFormatter;
+	private final IJavaProject fProject;
 
 	/**
 	 * Creates a JavaFormatter with the target line delimiter.
@@ -67,11 +69,13 @@ public class JavaFormatter {
 	 * @param lineDelimiter the line delimiter to use
 	 * @param initialIndentLevel the initial indentation level
 	 * @param useCodeFormatter <code>true</code> if the core code formatter should be used
+	 * @param project the java project from which to get the preferences, or <code>null</code> for workbench settings
 	 */
-	public JavaFormatter(String lineDelimiter, int initialIndentLevel, boolean useCodeFormatter) {
+	public JavaFormatter(String lineDelimiter, int initialIndentLevel, boolean useCodeFormatter, IJavaProject project) {
 		fLineDelimiter= lineDelimiter;
 		fUseCodeFormatter= useCodeFormatter;
 		fInitialIndentLevel= initialIndentLevel;
+		fProject= project;
 	}
 
 	/**
@@ -231,7 +235,7 @@ public class JavaFormatter {
 		
 		// first line
 		int offset= document.getLineOffset(0);
-		TextEdit edit= new InsertEdit(offset, CodeFormatterUtil.createIndentString(fInitialIndentLevel));
+		TextEdit edit= new InsertEdit(offset, CodeFormatterUtil.createIndentString(fInitialIndentLevel, fProject));
 		root.addChild(edit);
 		root.apply(document, TextEdit.UPDATE_REGIONS);
 		root.removeChild(edit);
@@ -241,7 +245,7 @@ public class JavaFormatter {
 		// following lines
 	    int lineCount= document.getNumberOfLines();
 	    JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
-	    JavaIndenter indenter= new JavaIndenter(document, scanner);
+	    JavaIndenter indenter= new JavaIndenter(document, scanner, fProject);
 	    
 	    for (int line= 1; line < lineCount; line++) {
 			IRegion region= document.getLineInformation(line);
