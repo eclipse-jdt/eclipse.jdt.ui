@@ -287,6 +287,7 @@ public class GenerateActionGroup extends ActionGroup {
 		int added= 0;
 		added+= addEditorAction(result, "Comment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "Uncomment"); //$NON-NLS-1$
+		added+= addEditorAction(result, "ToggleComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "AddBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "RemoveBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(result, "Format"); //$NON-NLS-1$
