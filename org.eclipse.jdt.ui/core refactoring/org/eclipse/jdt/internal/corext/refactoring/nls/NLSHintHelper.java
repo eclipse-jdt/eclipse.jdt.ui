@@ -13,17 +13,19 @@ package org.eclipse.jdt.internal.corext.refactoring.nls;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IStorage;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
@@ -40,13 +42,15 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -96,29 +100,19 @@ public class NLSHintHelper {
 		}
 
 		ITypeBinding accessorBinding= methodBinding.getDeclaringClass();
-		if (isAccessorCandidate(accessorBinding)) {
-			return new AccessorClassReference(accessorBinding, new Region(parent.getStartPosition(), parent.getLength()));
+		String resourceBundleName;
+		try {
+			resourceBundleName= getResourceBundleName(accessorBinding);
+		} catch (JavaModelException e) {
+			return null;
 		}
+		
+		if (resourceBundleName != null)
+			return new AccessorClassReference(accessorBinding, resourceBundleName, new Region(parent.getStartPosition(), parent.getLength()));
+
 		return null;
 	}
-
-	private static boolean isAccessorCandidate(ITypeBinding binding) {
-		IVariableBinding[] fields= binding.getDeclaredFields();
-		for (int i= 0; i < fields.length; i++) {
-			if (isBundleField(fields[i]))
-				return true;
-		}
-		return false;
-	}
 	
-	private static boolean isBundleField(IVariableBinding field) {
-		if (field == null)
-			return false;
-		
-		String name= field.getName();
-		return name.equals("BUNDLE_NAME") || name.equals("RESOURCE_BUNDLE") || name.equals("bundleName"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-	}
-
 	public static IPackageFragment getPackageOfAccessorClass(IJavaProject javaProject, ITypeBinding accessorBinding) throws JavaModelException {
 		if (accessorBinding != null) {
 			ICompilationUnit unit= Bindings.findCompilationUnit(accessorBinding, javaProject);
@@ -129,7 +123,7 @@ public class NLSHintHelper {
 		return null;
 	}
 
-	public static String getResourceBundleName(IJavaProject javaProject, ITypeBinding accessorClassBinding) throws JavaModelException {
+	public static String getResourceBundleName(ITypeBinding accessorClassBinding) throws JavaModelException {
 		IJavaElement je= accessorClassBinding.getJavaElement();
 		if (je == null)
 			return null;
@@ -142,31 +136,92 @@ public class NLSHintHelper {
 			container= (IClassFile)openable;
 		else
 			Assert.isLegal(false);
+
+		System.out.println("gettingName");
 		
 		CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(container, ASTProvider.WAIT_YES, null);
 		
-		IVariableBinding[] fields= accessorClassBinding.getDeclaredFields();
-		for (int i= 0; i < fields.length; i++) {
-			if (isBundleField(fields[i])) {
-				VariableDeclarationFragment node= (VariableDeclarationFragment) astRoot.findDeclaringNode(fields[i].getKey());
-				if (node != null) {
-					Expression initializer= node.getInitializer();
-					if (initializer instanceof StringLiteral) {
-						return ((StringLiteral) initializer).getLiteralValue();
-					} else if (initializer instanceof MethodInvocation) {
-						MethodInvocation methInvocation= (MethodInvocation) initializer;
-						Expression exp= methInvocation.getExpression();
-						if ((exp != null) && (exp instanceof TypeLiteral)) {
-							SimpleType simple= (SimpleType) ((TypeLiteral) exp).getType();
-							ITypeBinding typeBinding= simple.resolveBinding();
-							if (typeBinding != null) {
-								return Bindings.getRawQualifiedName(typeBinding);
-							}
+		final Map resultCollector= new HashMap(5);
+		final Object RESULT_KEY= new Object();
+		final Object FIELD_KEY= new Object();
+		
+		astRoot.accept(new ASTVisitor() {
+			
+			public boolean visit(MethodInvocation node) {
+				IMethodBinding method= node.resolveMethodBinding();
+				if (method == null)
+					return true;
+				
+				String name= method.getDeclaringClass().getQualifiedName();
+				if (!("java.util.ResourceBundle".equals(name) && "getBundle".equals(method.getName()) && node.arguments().size() > 0)) //$NON-NLS-1$ //$NON-NLS-2$
+					return true;
+				
+				Expression argument= (Expression)node.arguments().get(0);
+				
+				if (argument instanceof StringLiteral) {
+					resultCollector.put(RESULT_KEY, ((StringLiteral)argument).getLiteralValue());
+					return false;
+				}
+				if (argument instanceof Name) {
+					resultCollector.put(FIELD_KEY, ((Name)argument).resolveBinding());
+					return false;
+				}
+				
+				if (argument instanceof MethodInvocation) {
+					MethodInvocation methInvocation= (MethodInvocation)argument;
+					Expression exp= methInvocation.getExpression();
+					if ((exp != null) && (exp instanceof TypeLiteral)) {
+						SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
+						ITypeBinding typeBinding= simple.resolveBinding();
+						if (typeBinding != null) {
+							resultCollector.put(RESULT_KEY, typeBinding.getQualifiedName());
+							return false;
 						}
 					}
 				}
+				
+				return false;
 			}
-		}
+			
+			public boolean visit(VariableDeclarationFragment node) {
+				Expression initializer= node.getInitializer();
+				if (initializer instanceof StringLiteral) {
+					resultCollector.put(node.getName().resolveBinding(), ((StringLiteral)initializer).getLiteralValue());
+					return false;
+				}
+				if (initializer instanceof MethodInvocation) {
+					MethodInvocation methInvocation= (MethodInvocation)initializer;
+					Expression exp= methInvocation.getExpression();
+					if ((exp != null) && (exp instanceof TypeLiteral)) {
+						SimpleType simple= (SimpleType)((TypeLiteral) exp).getType();
+						ITypeBinding typeBinding= simple.resolveBinding();
+						if (typeBinding != null) {
+							resultCollector.put(node.getName().resolveBinding(), typeBinding.getQualifiedName());
+							return false;
+						}
+					}
+				}
+				return true;	
+			}
+			
+			public boolean visit(Assignment node) {
+				if (node.getLeftHandSide() instanceof Name && node.getRightHandSide() instanceof StringLiteral) {
+					resultCollector.put(((Name)node.getLeftHandSide()).resolveBinding(), ((StringLiteral)node.getRightHandSide()).getLiteralValue());
+					return false;
+				}
+				return true;
+			}
+			
+		});
+		
+		String result= (String)resultCollector.get(RESULT_KEY);
+		if (result != null)
+			return result;
+		
+		Object fieldName= resultCollector.get(FIELD_KEY);
+		if (fieldName != null)
+			return (String)resultCollector.get(fieldName);
+		
 		return null;
 	}
 
@@ -223,14 +278,11 @@ public class NLSHintHelper {
 		return null;
 	}
 
-	public static IStorage getResourceBundle(IJavaProject javaProject, ITypeBinding accessorClass) throws JavaModelException {
-		String resourceBundle= getResourceBundleName(javaProject, accessorClass);
-		if (resourceBundle == null) {
-			return null;
-		}
-		
+	public static IStorage getResourceBundle(IJavaProject javaProject, AccessorClassReference accessorClassReference) throws JavaModelException {
+		String resourceBundle= accessorClassReference.getResourceBundleName();
 		String resourceName= Signature.getSimpleName(resourceBundle) + NLSRefactoring.PROPERTY_FILE_EXT;
 		String packName= Signature.getQualifier(resourceBundle);
+		ITypeBinding accessorClass= accessorClassReference.getBinding();
 		
 		if (accessorClass.isFromSource())
 			return getResourceBundle(javaProject, packName, resourceName);
@@ -245,12 +297,12 @@ public class NLSHintHelper {
 	 * returns it.
 	 * 
 	 * @param javaProject the Java project
-	 * @param accessorBinding the accessor binding
+	 * @param accessorClassReference the accessor class reference
 	 * @return the properties or <code>null</code> if it was not successfully read
 	 */
-	public static Properties getProperties(IJavaProject javaProject, ITypeBinding accessorBinding) {
+	public static Properties getProperties(IJavaProject javaProject, AccessorClassReference accessorClassReference) {
 		try {
-			IStorage storage= NLSHintHelper.getResourceBundle(javaProject, accessorBinding);
+			IStorage storage= NLSHintHelper.getResourceBundle(javaProject, accessorClassReference);
 			return getProperties(storage);
 		} catch (JavaModelException ex) {
 			// sorry no properties

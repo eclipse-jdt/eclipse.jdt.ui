@@ -58,7 +58,7 @@ public class NLSHint {
 		
 		Properties props= null;
 		if (firstAccessInfo != null)
-			props= NLSHintHelper.getProperties(project, firstAccessInfo.getBinding());
+			props= NLSHintHelper.getProperties(project, firstAccessInfo);
 		
 		if (props == null)
 			props= new Properties();
@@ -75,7 +75,7 @@ public class NLSHint {
 					fAccessorPackage= accessorPack;
 				}
 				
-				String fullBundleName= NLSHintHelper.getResourceBundleName(project, accessorClassBinding);
+				String fullBundleName= firstAccessInfo.getResourceBundleName();
 				if (fullBundleName != null) {
 					fResourceBundleName= Signature.getSimpleName(fullBundleName) + NLSRefactoring.PROPERTY_FILE_EXT;
 					String packName= Signature.getQualifier(fullBundleName);

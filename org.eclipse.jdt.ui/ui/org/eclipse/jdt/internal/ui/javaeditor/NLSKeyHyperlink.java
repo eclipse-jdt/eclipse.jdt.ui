@@ -88,7 +88,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 		IStorage propertiesFile= null;
 		try {
 			ITypeBinding typeBinding= fAccessorClassReference.getBinding();
-			propertiesFile= NLSHintHelper.getResourceBundle(typeBinding.getJavaElement().getJavaProject(), typeBinding);
+			propertiesFile= NLSHintHelper.getResourceBundle(typeBinding.getJavaElement().getJavaProject(), fAccessorClassReference);
 		} catch (JavaModelException e) {
 			// Don't open the file
 		}

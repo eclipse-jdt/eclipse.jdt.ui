@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.Region;
 
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -19,11 +20,14 @@ public class AccessorClassReference {
     
     private ITypeBinding fBinding;
     private Region fRegion;
+    private String fResourceBundleName;
     
-    public AccessorClassReference(ITypeBinding typeBinding, Region accessorRegion) {
+    public AccessorClassReference(ITypeBinding typeBinding, String resourceBundleName, Region accessorRegion) {
         super();
-        fBinding = typeBinding;
-        fRegion = accessorRegion;
+        Assert.isNotNull(resourceBundleName);
+        fBinding= typeBinding;
+        fRegion= accessorRegion;
+        fResourceBundleName= resourceBundleName;
     }
     
 	public ITypeBinding getBinding() {
@@ -36,6 +40,10 @@ public class AccessorClassReference {
 
 	public Region getRegion() {
 		return fRegion;
+	}
+	
+	public String getResourceBundleName() {
+		return fResourceBundleName;
 	}
 	
     public boolean equals(Object obj) {

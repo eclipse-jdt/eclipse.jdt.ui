@@ -96,7 +96,7 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		
 		IStorage propertiesFile;
 		try {
-			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref.getBinding());
+			propertiesFile= NLSHintHelper.getResourceBundle(je.getJavaProject(), ref);
 			if (propertiesFile == null)
 				return null;
 		} catch (JavaModelException ex) {

@@ -87,11 +87,11 @@ public class NLSHintHelperTest extends TestCase {
 		CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(classFile, ASTProvider.WAIT_YES, null);
 		AccessorClassReference accessor= NLSHintHelper.getAccessorClassReference(ast, region);
 		assertNotNull(accessor);
-		Properties properties= NLSHintHelper.getProperties(fJProject, accessor.getBinding());
+		Properties properties= NLSHintHelper.getProperties(fJProject, accessor);
 		assertNotNull(properties);
 		assertEquals("Hello World", properties.get("test"));
 		try {
-			assertNotNull(NLSHintHelper.getResourceBundle(fJProject, accessor.getBinding()));
+			assertNotNull(NLSHintHelper.getResourceBundle(fJProject, accessor));
 		} catch (JavaModelException e1) {
 			fail();
 		}
