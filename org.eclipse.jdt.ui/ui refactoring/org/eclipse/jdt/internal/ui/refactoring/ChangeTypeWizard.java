@@ -94,7 +94,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 										  implements IColorProvider {
 		
 		private Color fGrayColor;
-		private HashMap/*<Object, Image>*/ fGrayImages;
+		private HashMap/*<Image color, Image gray>*/ fGrayImages;
 		
 		public ChangeTypeLabelProvider(){
 			fGrayColor= Display.getCurrent().getSystemColor(SWT.COLOR_WIDGET_NORMAL_SHADOW);
@@ -144,11 +144,11 @@ public class ChangeTypeWizard extends RefactoringWizard {
 		 */
 		public Image getImage(Object element) {
 			Image image= super.getImage(element);
-			if (isInvalid(element)) {
-				Image grayImage= (Image) fGrayImages.get(element);
-				if (grayImage == null && image != null) {
+			if (isInvalid(element) && image != null) {
+				Image grayImage= (Image) fGrayImages.get(image);
+				if (grayImage == null) {
 					grayImage= new Image(Display.getCurrent(), image, SWT.IMAGE_GRAY);
-					fGrayImages.put(element, grayImage);
+					fGrayImages.put(image, grayImage);
 				}
 				return grayImage;
 			} else {
