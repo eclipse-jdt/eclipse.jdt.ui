@@ -24,14 +24,18 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -44,6 +48,8 @@ public class ImportOrganizeTest extends CoreTests {
 	private static final Class THIS= ImportOrganizeTest.class;
 	
 	private IJavaProject fJProject1;
+
+	private static final boolean BUG_87929= true;
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -1703,6 +1709,150 @@ public class ImportOrganizeTest extends CoreTests {
 			unit.discardWorkingCopy();
 		}
 	}
+	
+	public void testImportStructureWithSignatures() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        IOException s;\n");
+		buf.append("        URL[][] t;\n");
+		buf.append("        List<SocketAddress> x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		String content2= buf.toString();
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
+		
+		
+		
+		String[] order= new String[] { "java.util", "java.io", "java.net" };
+		int threshold= 99;
+		AST ast= AST.newAST(AST.JLS3);
+		ImportsStructure importsStructure= new ImportsStructure(cu2, order, threshold, true);
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).toSignature();
+			
+			importsStructure.addImportFromSignature(signature, ast);
+		}
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("URL"), "URL".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).toSignature();
+			
+			importsStructure.addImportFromSignature(signature, ast);
+		}
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("List"), "List".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).toSignature();
+			
+			importsStructure.addImportFromSignature(signature, ast);
+		}
+
+		
+		importsStructure.create(true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("import java.net.SocketAddress;\n");
+		buf.append("import java.net.URL;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+		
+	}
+
+	public void testImportStructureWithSignatures2() throws Exception {
+		if (BUG_87929) {
+			return;
+		}
+		
+		
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Map<?, ? extends Set<? super ServerSocket>> z;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		String content2= buf.toString();
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
+		
+		
+		
+		String[] order= new String[] { "java.util", "java.io", "java.net" };
+		int threshold= 99;
+		AST ast= AST.newAST(AST.JLS3);
+		ImportsStructure importsStructure= new ImportsStructure(cu2, order, threshold, true);
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).toSignature();
+			
+			importsStructure.addImportFromSignature(signature, ast);
+		}			
+		
+		importsStructure.create(true, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("import java.net.ServerSocket;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+		
+	}
+
+	
 	
 	public void testOrganizeImportOnRange() throws Exception {
 	
