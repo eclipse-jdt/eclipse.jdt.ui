@@ -32,15 +32,14 @@ import org.eclipse.jdt.ui.JavaUI;
 
 
 public class JavaSearchResultCollector implements IJavaSearchResultCollector {
+
+	private static final String SPACE_MATCHES= " " + JavaPlugin.getResourceString("SearchResultCollector.matches");
 	
 	private IProgressMonitor fMonitor;
 	private IContextMenuContributor fContextMenu;
 	private ISearchResultView fView;
 	private JavaSearchOperation fOperation;
-	private String fDescription;
-	private ImageDescriptor fImageDescriptor;
 	private int fMatchCount= 0;
-	private String SPACE_MATCHES= " " + JavaPlugin.getResourceString("SearchResultCollector.matches");
 	
 	private static class ContextMenuContributor implements IContextMenuContributor {
 		private ElementSearchAction[] fSearchActions= new ElementSearchAction[] {
@@ -120,6 +119,10 @@ public class JavaSearchResultCollector implements IJavaSearchResultCollector {
 
 		if (fView != null)
 			fView.searchFinished();
+
+		// Cut no longer unused references because the collector might be re-used
+		fView= null;
+		fMonitor= null;
 	}
 	
 	/**
