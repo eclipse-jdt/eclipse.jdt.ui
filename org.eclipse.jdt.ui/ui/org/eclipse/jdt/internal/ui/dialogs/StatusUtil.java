@@ -1,4 +1,4 @@
-/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.core.runtime.IStatus;
+/* * (c) Copyright IBM Corp. 2000, 2001. * All Rights Reserved. */package org.eclipse.jdt.internal.ui.dialogs;import org.eclipse.jface.dialogs.DialogPage;import org.eclipse.jface.dialogs.TitleAreaDialog;import org.eclipse.core.runtime.IStatus;
 /** * A utility class to work with IStatus. */
 public class StatusUtil {
 
@@ -57,13 +57,4 @@ public class StatusUtil {
 		page.setMessage(messages[1]);
 	}
 	
-	/**
-	 * Applies the status to a message line
-	 */
-	public static void applyToStatusLine(MessageLine messageLine, IStatus status) {
-		String[] messages= getErrorMessages(status);
-		messageLine.setErrorMessage(messages[0]);
-		messageLine.setMessage(messages[1]);
-	}
-
 }

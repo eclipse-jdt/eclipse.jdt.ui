@@ -61,11 +61,10 @@ public abstract class StatusDialog extends Dialog {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 			updateButtonsEnableState(status);
-			StatusUtil.applyToStatusLine(fStatusLine, status);	
+			fStatusLine.setErrorStatus(status);
 		}
 	}
 	
-	// 1GFCRWW: ITPJUI:ALL - Compile errors in VA/Java
 	/**
 	 * Returns the last status.
 	 */
@@ -131,7 +130,7 @@ public abstract class StatusDialog extends Dialog {
 		fStatusLine= new MessageLine(composite);
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusLine.setMessage(""); //$NON-NLS-1$
+		fStatusLine.setErrorStatus(null); //$NON-NLS-1$
 
 		super.createButtonBar(composite);
 		return composite;

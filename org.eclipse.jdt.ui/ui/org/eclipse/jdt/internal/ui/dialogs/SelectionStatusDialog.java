@@ -6,6 +6,8 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -16,8 +18,6 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.ui.dialogs.SelectionDialog;
-
-import org.eclipse.core.runtime.IStatus;
 
 /**
  * An abstract base class for dialogs with a status bar and ok/cancel buttons.
@@ -103,7 +103,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		fLastStatus= status;
 		if (fStatusLine != null && !fStatusLine.isDisposed()) {
 		    updateButtonsEnableState(status);
-		    StatusUtil.applyToStatusLine(fStatusLine, status);			
+		    fStatusLine.setErrorStatus(status);
 		}
 	}	
 
@@ -152,7 +152,7 @@ public abstract class SelectionStatusDialog extends SelectionDialog {
 		fStatusLine= new MessageLine(composite);
 		fStatusLine.setAlignment(SWT.LEFT);
 		fStatusLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusLine.setMessage(""); //$NON-NLS-1$
+		fStatusLine.setErrorStatus(null); //$NON-NLS-1$
 		
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalIndent= convertWidthInCharsToPixels(1);

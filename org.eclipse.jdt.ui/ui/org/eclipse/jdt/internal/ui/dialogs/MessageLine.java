@@ -4,34 +4,29 @@
  */
 package org.eclipse.jdt.internal.ui.dialogs;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.Composite;
 
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+
 /**
- * A message line. It distinguishs between "normal" messages and errors. 
- * Setting an error message hides a currently displayed message until 
- * <code>clearErrorMessage</code> is called.
+ * A message line displaying a status.
  */
 public class MessageLine extends CLabel {
-
-	public static final RGB RED= new RGB(200, 0, 0);
-	private static RGB fgDefaultErrorRGB= RED;
-
-	private String fMessageText;
-	private String fErrorText;
-
-	private Color fDefaultColor;
-	private RGB fErrorRGB;
-	private Color fErrorColor;
+	
+	private static final RGB ERROR_BACKGROUND_RGB = new RGB(230, 226, 221);
+	
+	private Color fNormalMsgAreaBackground;
+	private Color fErrorMsgAreaBackground;	
 
 	/**
 	 * Creates a new message line as a child of the given parent.
-	 * Error message will be shown in <code>RED</code>.
 	 */
 	public MessageLine(Composite parent) {
 		this(parent, SWT.LEFT);
@@ -39,98 +34,57 @@ public class MessageLine extends CLabel {
 
 	/**
 	 * Creates a new message line as a child of the parent and with the given SWT stylebits.
-	 * Error message will be shown in  <code>RED</code>.
 	 */
 	public MessageLine(Composite parent, int style) {
 		super(parent, style);
-		fDefaultColor= getForeground();
-		fErrorRGB= fgDefaultErrorRGB;
+		fNormalMsgAreaBackground= getBackground();
+		fErrorMsgAreaBackground= null;
+	}
+
+	
+	private Image findImage(IStatus status) {
+		if (status.isOK()) {
+			return null;
+		} else if (status.matches(IStatus.ERROR)) {
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_ERROR);
+		} else if (status.matches(IStatus.WARNING)) {
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_WARNING);
+		} else if (status.matches(IStatus.INFO)) {
+			return JavaPluginImages.get(JavaPluginImages.IMG_OBJS_REFACTORING_INFO);
+		}
+		return null;
 	}
 
 	/**
-	 * Creates a new message line as a child of the parent and with the given SWT stylebits.
-	 * Error message will be shown with in the given rgb color.
+	 * Sets the message and image to the given status.
+	 * <code>null</code> is a valid argument and will set the empty text and no image
 	 */
-	public MessageLine(Composite parent, int style, RGB errorRGB) {
-		super(parent, style);
-		fDefaultColor= getForeground();
-		fErrorRGB= errorRGB;
-	}
-
-	/**
-	 * Clears the currently displayed error message and redisplayes
-	 * the message which was active before the error message was set.
-	 */
-	public void clearErrorMessage() {
-		setErrorMessage(null);
-	}
-
-	/**
-	 * Clears the currently displayed message.
-	 */
-	public void clearMessage() {
-		setMessage(null);
-	}
-
-	/**
-	 * Get the currently displayed error text.
-	 * @return The error message. If no error message is displayed <code>null</code> is returned.
-	 */
-	public String getErrorMessage() {
-		return fErrorText;
-	}
-
-	/**
-	 * Get the currently displayed message.
-	 * @return The message. If no message is displayed <code>null<code> is returned.
-	 */
-	public String getMessage() {
-		return fMessageText;
-	}
-
-	/**
-	 * Sets the default error color used by all message lines.
-	 * Note: a call to this method only affects newly created MessageLines not existing ones. 
-	 */
-	public static void setDefaultErrorColor(RGB color) {
-		fgDefaultErrorRGB= color;
-	}
-
-	/**
-	 * Display the given error message. A currently displayed message
-	 * is saved and will be redisplayed when the error message is cleared.
-	 */
-	public void setErrorMessage(String message) {
-		fErrorText= message;
-
-		if (message == null) {
-			setMessage(fMessageText);
-		} else {
-			if (fErrorColor == null) {
-				fErrorColor= new Color(getDisplay(), fErrorRGB);
-				addDisposeListener(new DisposeListener() {
-					public void widgetDisposed(DisposeEvent e) {
-						fErrorColor.dispose();
-					}
-				});
+	public void setErrorStatus(IStatus status) {
+		if (status != null) {
+			String message= status.getMessage();
+			if (message != null && message.length() > 0) {
+				setText(message);
+				setImage(findImage(status));
+				if (fErrorMsgAreaBackground == null) {
+					fErrorMsgAreaBackground= new Color(getDisplay(), ERROR_BACKGROUND_RGB);
+				}
+				setBackground(fErrorMsgAreaBackground);
+				return;
 			}
-			setForeground(fErrorColor);
-			setText(message);
-		}
+		}		
+		setText("");
+		setImage(null);		
 	}
-
-	/**
-	 * Set the message text. If the message line currently displays an error,
-	 * the message is stored and will be shown after a call to clearErrorMessage
+	
+	/*
+	 * @see Widget#dispose()
 	 */
-	public void setMessage(String message) {
-		fMessageText= message;
-		if (message == null)
-			message= ""; //$NON-NLS-1$
-		if (fErrorText == null) {
-			setForeground(fDefaultColor);
-			setText(message);
+	public void dispose() {
+		if (fErrorMsgAreaBackground != null) {
+			fErrorMsgAreaBackground.dispose();
+			fErrorMsgAreaBackground= null;
 		}
+		super.dispose();
 	}
-
 }
+
