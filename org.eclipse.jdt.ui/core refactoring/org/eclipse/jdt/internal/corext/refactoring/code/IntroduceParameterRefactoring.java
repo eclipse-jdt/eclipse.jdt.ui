@@ -281,15 +281,11 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	 */
 	public String[] guessParameterNames() {
 		LinkedHashSet proposals= new LinkedHashSet(); //retain ordering, but prevent duplicates
-		try {
-			String[] excludedVariableNames= getExcludedVariableNames();
-			if (fSelectedExpression instanceof MethodInvocation){
-				proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, excludedVariableNames));
-			}
-			proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, excludedVariableNames));
-		} catch (JavaModelException e) {
-			// too bad ... no proposals this time
+		String[] excludedVariableNames= getExcludedVariableNames();
+		if (fSelectedExpression instanceof MethodInvocation){
+			proposals.addAll(guessTempNamesFromMethodInvocation((MethodInvocation) fSelectedExpression, excludedVariableNames));
 		}
+		proposals.addAll(guessTempNamesFromExpression(fSelectedExpression, excludedVariableNames));
 		return (String[]) proposals.toArray(new String[proposals.size()]);
 	}
 	
@@ -324,7 +320,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return Arrays.asList(proposals);
 	}
 	
-	private String[] getExcludedVariableNames() throws JavaModelException {
+	private String[] getExcludedVariableNames() {
 		IBinding[] bindings= new ScopeAnalyzer(fSource.getRoot()).getDeclarationsInScope(fSelectedExpression.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		String[] names= new String[bindings.length];
 		for (int i= 0; i < names.length; i++) {
@@ -335,13 +331,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	
 // ----------------------------------------------------------------------
 	
-	private static String getPackageName(ITypeBinding typeBinding) {
-		if (typeBinding.getPackage() != null)
-			return typeBinding.getPackage().getName();
-		else
-			return ""; //$NON-NLS-1$
-	}
-
 	private static String getQualifiedName(ITypeBinding typeBinding) {
 		if (typeBinding.isAnonymous())
 			return getQualifiedName(typeBinding.getSuperclass());
