@@ -6,7 +6,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jface.viewers.CellEditor;

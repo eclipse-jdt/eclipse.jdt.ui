@@ -10,18 +10,14 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.core.refactoring.cus.CopyCompilationUnitChange;
-import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceChange;
+import org.eclipse.jdt.internal.core.refactoring.changes.CopyCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.CopyResourceChange;
-import org.eclipse.jdt.internal.core.refactoring.cus.*;
 
 public class CopyRefactoring extends ReorgRefactoring {
 

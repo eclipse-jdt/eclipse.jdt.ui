@@ -15,9 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
@@ -26,9 +24,9 @@ import org.eclipse.jdt.internal.core.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.IChange;
 import org.eclipse.jdt.internal.core.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.MovePackageChange;
 import org.eclipse.jdt.internal.core.refactoring.changes.MoveResourceChange;
-import org.eclipse.jdt.internal.core.refactoring.cus.MoveCompilationUnitChange;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
 
 public class MoveRefactoring extends ReorgRefactoring {

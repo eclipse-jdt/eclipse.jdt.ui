@@ -13,7 +13,11 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
  * Utility class for Abstract syntax tree handling.
  */
 public class ASTs {
-
+	
+	//no instances
+	private ASTs(){
+	}
+	
 	/**
 	 * Returns the source start of a node independent whether it is a declaration or
 	 * not.

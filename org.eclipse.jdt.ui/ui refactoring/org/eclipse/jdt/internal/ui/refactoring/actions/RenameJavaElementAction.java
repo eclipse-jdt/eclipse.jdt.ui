@@ -1,25 +1,13 @@
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
-import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.reorg.IRefactoringRenameSupport;
 import org.eclipse.jdt.internal.ui.reorg.RefactoringSupportFactory;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.text.ITextSelection;

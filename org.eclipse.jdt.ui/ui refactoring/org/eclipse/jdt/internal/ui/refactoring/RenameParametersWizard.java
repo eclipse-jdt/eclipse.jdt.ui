@@ -3,7 +3,7 @@
  * All Rights Reserved.
  */
 
-package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+package org.eclipse.jdt.internal.ui.refactoring;import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 public class RenameParametersWizard extends RefactoringWizard {

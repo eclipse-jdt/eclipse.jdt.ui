@@ -5,16 +5,10 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameParametersRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GroupContext;
@@ -24,7 +18,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameParametersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jdt.internal.ui.refactoring.undo.RedoRefactoringAction;
 import org.eclipse.jdt.internal.ui.refactoring.undo.UndoRefactoringAction;
-import org.eclipse.jdt.internal.ui.reorg.RenameAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.ISelection;

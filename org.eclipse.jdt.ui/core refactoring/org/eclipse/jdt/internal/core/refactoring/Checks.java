@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.changes.RenameResourceChange;
 
 /**
  * This class defines a set of reusable static checks methods.
@@ -141,22 +142,12 @@ public class Checks {
 	 * @param newName just a simple name - no extension.
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
-		if (resourceExists(renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
+		if (resourceExists(RenameResourceChange.renamedResourcePath(Refactoring.getResource(cu).getFullPath(), newName)))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
 			return new RefactoringStatus();
 	}
-	
-	/**
-	 * changes resource names - changes the name, leaves the extension untouched
-	 * /s/p/A.java renamed to B becomes /s/p/B.java
-	 */
-	public static IPath renamedResourcePath(IPath path, String newName){
-		String oldExtension= path.getFileExtension();
-		String newEnding= oldExtension == null ? "": "." + oldExtension; //$NON-NLS-2$ //$NON-NLS-1$
-		return path.removeFileExtension().removeLastSegments(1).append(newName + newEnding);
-	}
-	
+		
 	public static boolean startsWithLowerCase(String s){
 		if (s == null)
 			return false;

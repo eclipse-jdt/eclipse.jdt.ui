@@ -15,17 +15,17 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.core.refactoring.cus.RenameCompilationUnitRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.fields.RenameFieldRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.methods.RenameMethodRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.packageroots.RenameSourceFolderRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.packages.RenamePackageRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.projects.RenameJavaProjectRefactoring;
-import org.eclipse.jdt.internal.core.refactoring.resources.RenameResourceRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameCompilationUnitRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameFieldRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameJavaProjectRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameMethodRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameResourceRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameSourceFolderRefactoring;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IPreactivatedRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.core.refactoring.text.ITextBufferChangeCreator;
-import org.eclipse.jdt.internal.core.refactoring.types.RenameTypeRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RenameRefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.changes.DocumentTextBufferChangeCreator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.swt.widgets.Shell;
+
 
 public class RefactoringSupportFactory {
 
