@@ -22,7 +22,6 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 
@@ -41,6 +40,7 @@ import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.Templates;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
@@ -122,7 +122,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 	}
 	
 	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException {
-		CompilationUnitContextType contextType= (CompilationUnitContextType) ContextTypeRegistry.getInstance().getContextType(JavaContextType.NAME);
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
 		context.setForceEvaluation(true);

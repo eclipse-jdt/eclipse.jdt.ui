@@ -135,10 +135,10 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		fEditor= editor;
 		fCollector= new ResultCollector();
 		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null) {
 			contextType= new JavaContextType();
-			ContextTypeRegistry.getInstance().add(contextType);
+			JavaPlugin.getTemplateContextRegistry().addContextType(contextType);
 		}
 		if (contextType != null)
 			fTemplateEngine= new TemplateEngine(contextType);

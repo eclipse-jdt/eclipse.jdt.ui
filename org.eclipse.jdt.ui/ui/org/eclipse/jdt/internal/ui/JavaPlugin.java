@@ -41,6 +41,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jface.text.templates.ContextTypeRegistry;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorReference;
@@ -65,6 +67,9 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.util.AllTypesCache;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
@@ -128,6 +133,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.0
 	 */
 	private MockupPreferenceStore fMockupPreferenceStore;
+	/** The template context type registry. */
+	private static ContextTypeRegistry fgContextTypeRegistry;
 
 	
 	public static JavaPlugin getDefault() {
@@ -487,6 +494,23 @@ public class JavaPlugin extends AbstractUIPlugin {
 		menu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));
 		menu.add(new Separator(IContextMenuConstants.GROUP_VIEWER_SETUP));
 		menu.add(new Separator(IContextMenuConstants.GROUP_PROPERTIES));
+	}
+
+	/**
+	 * Returns the template context type registry for the java plugin.
+	 * 
+	 * @return the template context type registry for the java plugin
+	 */
+	public static ContextTypeRegistry getTemplateContextRegistry() {
+		if (fgContextTypeRegistry == null) {
+			fgContextTypeRegistry= new ContextTypeRegistry();
+			
+			fgContextTypeRegistry.addContextType(new JavaContextType());
+			fgContextTypeRegistry.addContextType(new JavaDocContextType());
+			CodeTemplateContextType.registerContextTypes(fgContextTypeRegistry);
+		}
+
+		return fgContextTypeRegistry;
 	}
 
 	/**

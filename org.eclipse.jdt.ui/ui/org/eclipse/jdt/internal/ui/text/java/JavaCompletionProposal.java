@@ -272,7 +272,7 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		}
 	}	
 	
-	private static class ExitPolicy implements IExitPolicy {
+	protected static class ExitPolicy implements IExitPolicy {
 		
 		final char fExitCharacter;
 		

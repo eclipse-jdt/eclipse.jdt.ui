@@ -13,8 +13,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.util.Comparator;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.templates.TemplateProposal;
 
-import org.eclipse.ui.texteditor.templates.TemplateProposal;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 

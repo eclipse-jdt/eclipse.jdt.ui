@@ -24,11 +24,14 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.ContextType;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateTranslator;
@@ -47,7 +50,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -448,12 +450,31 @@ public class JavaContext extends CompilationUnitContext {
 		}
 	
 		try {
+			Position position= new Position(getCompletionOffset(), getCompletionLength());
+			IDocument document= getDocument();
+			final String category= "__template_position_importer" + System.currentTimeMillis(); //$NON-NLS-1$
+			IPositionUpdater updater= new DefaultPositionUpdater(category);
+			document.addPositionCategory(category);
+			document.addPositionUpdater(updater);
+			document.addPosition(position);
+
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings();
 			ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
 			structure.addImport("java.util.Iterator"); //$NON-NLS-1$
 			structure.create(false, null);
 
+			document.removePosition(position);
+			document.removePositionUpdater(updater);
+			document.removePositionCategory(category);
+			
+			setCompletionOffset(position.getOffset());
+			setCompletionLength(position.getLength());
+			
 		} catch (CoreException e) {
+			handleException(null, e);
+		} catch (BadLocationException e) {
+			handleException(null, e);
+		} catch (BadPositionCategoryException e) {
 			handleException(null, e);
 		}
 	}
@@ -463,7 +484,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public static String evaluateTemplate(Template template, ICompilationUnit compilationUnit, int position) throws CoreException, BadLocationException {
 
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType("java"); //$NON-NLS-1$
+		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
 		if (contextType == null)
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, JavaTemplateMessages.getString("JavaContext.error.message"), null)); //$NON-NLS-1$
 

@@ -309,7 +309,7 @@ public class CodeTemplateBlock {
 		}
 		if (selection.size() == 1 && selection.get(0) instanceof Template) {
 			Template template= (Template) selection.get(0);
-			ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {
@@ -361,7 +361,7 @@ public class CodeTemplateBlock {
 	}
 
 	private void export(List selected) {
-		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag());
+		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag(), JavaPlugin.getTemplateContextRegistry());
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
 			if (curr instanceof Template) {

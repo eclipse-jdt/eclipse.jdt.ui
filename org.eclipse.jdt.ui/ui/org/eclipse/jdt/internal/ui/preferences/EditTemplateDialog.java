@@ -157,7 +157,7 @@ public class EditTemplateDialog extends StatusDialog {
 		fContextTypes= contextTypes;
 		fValidationStatus= new StatusInfo();
 		
-		ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+		ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
 		fTemplateProcessor.setContextType(type);
 	}
 	
@@ -259,7 +259,7 @@ public class EditTemplateDialog extends StatusDialog {
 		} else if (w == fContextCombo) {
 			String name= fContextCombo.getText();
 			fTemplate.setContext(name);
-			fTemplateProcessor.setContextType(ContextTypeRegistry.getInstance().getContextType(name));
+			fTemplateProcessor.setContextType(JavaPlugin.getTemplateContextRegistry().getContextType(name));
 		} else if (w == fDescriptionText) {
 			String desc= fDescriptionText.getText();
 			fTemplate.setDescription(desc);
@@ -270,7 +270,7 @@ public class EditTemplateDialog extends StatusDialog {
 		String text= document.get();
 		fTemplate.setPattern(text);
 		fValidationStatus.setOK();
-		ContextType contextType= ContextTypeRegistry.getInstance().getContextType(fTemplate.getContextTypeName());
+		ContextType contextType= JavaPlugin.getTemplateContextRegistry().getContextType(fTemplate.getContextTypeName());
 		if (contextType != null) {
 			String errorMessage= contextType.validate(text);
 			if (errorMessage != null) {
@@ -475,7 +475,7 @@ public class EditTemplateDialog extends StatusDialog {
 	}
 
 	private int getIndex(String context) {
-		ContextTypeRegistry registry= ContextTypeRegistry.getInstance();
+		ContextTypeRegistry registry= JavaPlugin.getTemplateContextRegistry();
 		registry.getContextType(context);
 		
 		if (context == null)

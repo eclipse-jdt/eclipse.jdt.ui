@@ -180,9 +180,9 @@ public abstract class CompilationUnitContextType extends ContextType {
 	protected String validateVariables(TemplateVariable[] variables) {
 		// check for multiple cursor variables		
 		for (int i= 0; i < variables.length; i++) {
-			TemplateVariable position= variables[i];
-			if (position.getType().equals(GlobalVariables.Cursor.NAME)) {
-				if (position.getOffsets().length > 1) {
+			TemplateVariable var= variables[i];
+			if (var.getType().equals(GlobalVariables.Cursor.NAME)) {
+				if (var.getOffsets().length > 1) {
 					return JavaTemplateMessages.getString("ContextType.error.multiple.cursor.variables"); //$NON-NLS-1$
 				}
 			}

@@ -21,15 +21,11 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
@@ -37,6 +33,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.link.LinkedEnvironment;
 import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.jface.text.link.LinkedUIControl;
+import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.GlobalVariables;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
@@ -115,15 +112,7 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 
 		try {
-			IDocument document= viewer.getDocument();
 			
-			Position position= new Position(fRegion.getOffset(), fRegion.getLength());
-			final String category= "__template_position_" + System.currentTimeMillis(); //$NON-NLS-1$
-			IPositionUpdater updater= new DefaultPositionUpdater(category);
-			document.addPositionCategory(category);
-			document.addPositionUpdater(updater);
-			document.addPosition(position);
-
 			fContext.setReadOnly(false);
 			TemplateBuffer templateBuffer= fContext.evaluate(fTemplate);
 			if (templateBuffer == null) {
@@ -131,14 +120,18 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				return;
 			}
 			
-			document.removePosition(position);
-			document.removePositionUpdater(updater);
-			document.removePositionCategory(category);
+			int start, end;
+			if (fContext instanceof DocumentTemplateContext) {
+				DocumentTemplateContext docContext = (DocumentTemplateContext)fContext;
+				start= docContext.getStart();
+				end= docContext.getEnd();
+			} else {
+				start= fRegion.getOffset();
+				end= start + fRegion.getLength();
+			}
 			
-			int start= position.getOffset();
-			int end= position.getOffset() + position.getLength();
-
 			// insert template string
+			IDocument document= viewer.getDocument();
 			String templateString= templateBuffer.getString();	
 			document.replace(start, end - start, templateString);	
 
@@ -178,12 +171,6 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 			openErrorDialog(viewer.getTextWidget().getShell(), e);		    
-			fSelectedRegion= fRegion;
-			
-			
-		} catch (BadPositionCategoryException e) {    
-			JavaPlugin.log(e);
-			openErrorDialog(viewer.getTextWidget().getShell(), e);		    	
 			fSelectedRegion= fRegion;
 		}
 

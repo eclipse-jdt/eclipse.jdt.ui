@@ -209,11 +209,11 @@ public class CodeTemplateContextType extends ContextType {
 			required.add(TYPE_DECLARATION);
 		}
 		for (int i= 0; i < variables.length; i++) {
-			String var= variables[i].getType();
-			if (getResolver(var) == null) {
-				return JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.unknownvariable", var); //$NON-NLS-1$
+			String type= variables[i].getType();
+			if (getResolver(type) == null) {
+				return JavaTemplateMessages.getFormattedString("CodeTemplateContextType.validate.unknownvariable", type); //$NON-NLS-1$
 			}
-			required.remove(var);
+			required.remove(type);
 		}
 		if (!required.isEmpty()) {
 			String missing= (String) required.get(0);
@@ -232,20 +232,20 @@ public class CodeTemplateContextType extends ContextType {
 	}
 
 	public static void registerContextTypes(ContextTypeRegistry registry) {
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODBODY_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORBODY_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.GETTERBODY_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.SETTERBODY_CONTEXTTYPE));		
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CATCHBLOCK_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.METHODBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.GETTERBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.SETTERBODY_CONTEXTTYPE));		
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
 		
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.FIELDCOMMENT_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));		
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.GETTERCOMMENT_CONTEXTTYPE));		
-		registry.add(new CodeTemplateContextType(CodeTemplateContextType.SETTERCOMMENT_CONTEXTTYPE));		
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.FIELDCOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));		
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.GETTERCOMMENT_CONTEXTTYPE));		
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.SETTERCOMMENT_CONTEXTTYPE));		
 	}
 	
 	

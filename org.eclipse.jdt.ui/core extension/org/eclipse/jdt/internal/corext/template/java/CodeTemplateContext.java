@@ -16,7 +16,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateContext;
@@ -27,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeTemplateContext extends TemplateContext {
 	
@@ -34,7 +34,7 @@ public class CodeTemplateContext extends TemplateContext {
 	private IJavaProject fProject;
 
 	public CodeTemplateContext(String contextTypeName, IJavaProject project, String lineDelim) {
-		super(ContextTypeRegistry.getInstance().getContextType(contextTypeName));
+		super(JavaPlugin.getTemplateContextRegistry().getContextType(contextTypeName));
 		fLineDelimiter= lineDelim;
 		fProject= project;
 	}

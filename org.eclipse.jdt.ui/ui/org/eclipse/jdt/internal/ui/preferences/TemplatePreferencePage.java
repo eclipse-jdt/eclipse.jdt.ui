@@ -431,7 +431,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		if (selection.size() == 1) {
 			Template template= (Template) selection.getFirstElement();
-			ContextType type= ContextTypeRegistry.getInstance().getContextType(template.getContextTypeName());
+			ContextType type= JavaPlugin.getTemplateContextRegistry().getContextType(template.getContextTypeName());
 			fTemplateProcessor.setContextType(type);
 			fPatternViewer.getDocument().set(template.getPattern());
 		} else {		
@@ -531,7 +531,7 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 		IStructuredSelection selection= (IStructuredSelection) fTableViewer.getSelection();
 		Object[] templates= selection.toArray();
 		
-		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag());
+		TemplateSet templateSet= new TemplateSet(fTemplates.getTemplateTag(), JavaPlugin.getTemplateContextRegistry());
 		for (int i= 0; i != templates.length; i++)
 			templateSet.add((Template) templates[i]);
 		

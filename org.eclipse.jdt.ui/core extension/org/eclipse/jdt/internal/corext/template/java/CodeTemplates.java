@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 
-import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplateSet;
 
@@ -68,17 +67,11 @@ public class CodeTemplates extends TemplateSet {
 	}
 	
 	private CodeTemplates() {
-		super("codetemplate"); //$NON-NLS-1$
+		super("codetemplate", JavaPlugin.getTemplateContextRegistry()); //$NON-NLS-1$
 		create();
 	}
 	
 	private void create() {
-		// TODO remove once we have a contribution mechanism
-		if (ContextTypeRegistry.getInstance().getContextType("java") == null)
-			ContextTypeRegistry.getInstance().add(new JavaContextType());
-		CodeTemplateContextType.registerContextTypes(ContextTypeRegistry.getInstance());
-		if (ContextTypeRegistry.getInstance().getContextType("javadoc") == null)
-			ContextTypeRegistry.getInstance().add(new JavaDocContextType());
 		
 		try {
 			addFromStream(getDefaultsAsStream(), false, true, fgResourceBundle);
