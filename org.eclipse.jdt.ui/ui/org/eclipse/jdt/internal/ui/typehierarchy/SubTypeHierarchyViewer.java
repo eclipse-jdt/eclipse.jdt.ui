@@ -40,11 +40,7 @@ public class SubTypeHierarchyViewer extends TypeHierarchyViewer {
 	 */
 	public void updateContent() {
 		refresh();
-		if (isMethodFiltering()) {
-			expandToLevel(2);
-		} else {
-			expandAll();
-		}
+		expandAll();
 	}
 	
 	/**

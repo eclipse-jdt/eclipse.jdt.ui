@@ -363,10 +363,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fInputElement= inputElement;
 		if (fInputElement == null) {	
 			clearInput();
-		} else {
-			// turn off member filtering
-			enableMemberFilter(false);			
-			
+		} else {			
 			try {
 				fHierarchyLifeCycle.ensureRefreshedTypeHierarchy(fInputElement);
 			} catch (JavaModelException e) {
@@ -379,7 +376,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (inputElement.getElementType() != IJavaElement.TYPE) {
 				setView(VIEW_ID_TYPE);
 			}
-			
+			// turn off member filtering
+			setMemberFilter(null);
+			fIsEnableMemberFilter= false;
 			if (!fInputElement.equals(prevInput)) {
 				updateHierarchyViewer();
 			}
@@ -388,6 +387,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			updateMethodViewer(root);
 			updateToolbarButtons();
 			updateTitle();
+			enableMemberFilter(false);
 		}
 	}
 	
@@ -801,9 +801,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		for (int i= 0; i < fAllViewers.length; i++) {
 			fAllViewers[i].setMemberFilter(memberFilter);
 		}
-		updateHierarchyViewer();
-		updateTitle();
-		internalSelectType(fSelectedType, true);
+		fIsEnableMemberFilter= (memberFilter != null);
 	}	
 	
 	private IType getSelectableType(IJavaElement elem) {
@@ -888,6 +886,9 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					selected.toArray(memberFilter);
 				}
 				setMemberFilter(memberFilter);
+				updateHierarchyViewer();
+				updateTitle();
+				internalSelectType(fSelectedType, true);	
 			}
 			if (nSelected == 1) {
 				revealElementInEditor(selected.get(0), fMethodsViewer);
@@ -1050,6 +1051,8 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			if (!on) {
 				IType methodViewerInput= (IType) fMethodsViewer.getInput();
 				setMemberFilter(null);
+				updateHierarchyViewer();
+				updateTitle();
 			
 				if (methodViewerInput != null && getCurrentViewer().isElementShown(methodViewerInput)) {
 					// avoid that the method view changes content by selecting the previous input
