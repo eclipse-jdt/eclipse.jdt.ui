@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.core.refactoring.ASTEndVisitAdapter;
 import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
-import org.eclipse.jdt.internal.core.util.HackFinder;
+import org.eclipse.jdt.internal.core.refactoring.IParentTracker;import org.eclipse.jdt.internal.core.util.HackFinder;
 
 /**
  * Checks whether the source range denoted by <code>start</code> and <code>end</code>
@@ -35,6 +35,9 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	static final int BEFORE=	1;
 	static final int SELECTED=	2;
 	static final int AFTER=	      3;
+	
+	// Parent tracking interface
+	private IParentTracker fParentTracker;
 	
 	// The selection's start and end position
 	private ExtendedBuffer fBuffer;
@@ -68,16 +71,32 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	private static final int DO_LENGTH=    "do".length();
 	private static final int ELSE_LENGTH=  "else".length();
 	 
-	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length) {
+	public StatementAnalyzer(ExtendedBuffer buffer, int start, int length, boolean asymetricAssignment) {
 		// System.out.println("Start: " + start + " length: " + length);
 		fBuffer= buffer;
 		Assert.isTrue(fBuffer != null);
 		fSelection= new Selection(start, length);
-		fLocalVariableAnalyzer= new LocalVariableAnalyzer(this);
+		fLocalVariableAnalyzer= new LocalVariableAnalyzer(this, asymetricAssignment);
 		fLocalTypeAnalyzer= new LocalTypeAnalyzer();
 		fExceptionAnalyzer= new ExceptionAnalyzer();
 	}
 
+	//---- Parent tracking ----------------------------------------------------------
+	
+	/**
+	 * Sets the parent tracker to access the parent of a active
+	 * AST node.
+	 */
+	public void setParentTracker(IParentTracker tracker) {
+		fParentTracker= tracker;
+	}
+	
+	private AstNode getParent() {
+		return fParentTracker.getParent();
+	}
+	
+	//---- Precondition checking ----------------------------------------------------
+	
 	/**
 	 * Checks if the refactoring can be activated.
 	 */
@@ -753,7 +772,22 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
 	}
 
 	public boolean visit(SynchronizedStatement synchronizedStatement, BlockScope scope) {
-		return visitStatement(synchronizedStatement, scope);
+		// Include "}" into sourceEnd;
+		synchronizedStatement.sourceEnd++;
+		if (!visitStatement(synchronizedStatement, scope))
+			return false;
+		
+		int nextStart= fBuffer.indexOfStatementCharacter(synchronizedStatement.sourceEnd + 1);
+		if (fMode == BEFORE && fSelection.end < nextStart) {
+			if (fSelection.intersects(synchronizedStatement)) {
+				invalidSelection("Seleciton must either cover whole synchronized statement or parts of the synchronized block");
+			} else {
+				if (fSelection.enclosedBy(synchronizedStatement.block)) {
+					fLastEnd= synchronizedStatement.block.sourceStart;
+				}
+			}
+		}
+		return true;
 	}
 
 	public boolean visit(ThrowStatement throwStatement, BlockScope scope) {

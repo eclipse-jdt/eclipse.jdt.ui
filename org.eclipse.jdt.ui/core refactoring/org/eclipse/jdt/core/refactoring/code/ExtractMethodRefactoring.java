@@ -21,10 +21,10 @@ import org.eclipse.jdt.core.refactoring.text.ITextBufferChangeCreator;
 import org.eclipse.jdt.core.refactoring.text.SimpleReplaceTextChange;
 import org.eclipse.jdt.core.refactoring.text.SimpleTextChange;
 
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.IAbstractSyntaxTreeVisitor;import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.env.IConstants;
 import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.core.refactoring.Assert;
+import org.eclipse.jdt.internal.core.refactoring.ASTParentTrackingAdapter;import org.eclipse.jdt.internal.core.refactoring.Assert;
 import org.eclipse.jdt.internal.core.refactoring.Checks;
 import org.eclipse.jdt.internal.core.refactoring.ExtendedBuffer;
 import org.eclipse.jdt.internal.core.refactoring.TextUtilities;
@@ -44,12 +44,14 @@ import org.eclipse.jdt.internal.core.util.HackFinder;
  */
 public class ExtractMethodRefactoring extends Refactoring{
 
-	private int fTabWidth;
 	private ICompilationUnit fCUnit;
 	private ITextBufferChangeCreator fTextBufferChangeCreator;
 	private int fSelectionStart;
 	private int fSelectionLength;
 	private int fSelectionEnd;
+	private boolean fAsymetricAssignment;
+	private int fTabWidth;
+	private boolean fCallOnDecalrationLine= true;
 	
 	private StatementAnalyzer fStatementAnalyzer;
 	private ExtendedBuffer fBuffer;
@@ -73,7 +75,7 @@ public class ExtractMethodRefactoring extends Refactoring{
 	 * @param accessor a callback object to access the source this refactoring is working on.
 	 */
 	public ExtractMethodRefactoring(ICompilationUnit cu, ITextBufferChangeCreator creator,
-			int selectionStart, int selectionLength) {
+			int selectionStart, int selectionLength, boolean asymetricAssignment, int tabWidth) {
 		fCUnit= cu;
 		Assert.isNotNull(fCUnit);
 		fTextBufferChangeCreator= creator;
@@ -83,6 +85,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fSelectionEnd= fSelectionStart + fSelectionLength - 1;
+		fAsymetricAssignment= asymetricAssignment;
+		fTabWidth= tabWidth;
 	}
 	
 	/**
@@ -101,10 +105,12 @@ public class ExtractMethodRefactoring extends Refactoring{
 				return mergeTextSelectionStatus(result);
 				
 			try {
+				if (!(fCUnit instanceof CompilationUnit)) {
+					result.addFatalError("Internal error: compilation unit has wrong type");
+					return result;
+				}
 				fBuffer= new ExtendedBuffer(fCUnit.getBuffer());
-				fStatementAnalyzer= new StatementAnalyzer(fBuffer, fSelectionStart, fSelectionLength);
-				HackFinder.fixMeSoon("1GA9VPL: ITPJUI:WIN2000 - ICompilationUnit should provide method accept(Visitor)");
-				((CompilationUnit)fCUnit).accept(fStatementAnalyzer);
+				((CompilationUnit)fCUnit).accept(createVisitor());
 			} catch (JavaModelException e) {
 				result.addFatalError(e.getStatus().getMessage());
 				return result;
@@ -118,6 +124,13 @@ public class ExtractMethodRefactoring extends Refactoring{
 		}
 	}
 
+	private IAbstractSyntaxTreeVisitor createVisitor() {
+		fStatementAnalyzer= new StatementAnalyzer(fBuffer, fSelectionStart, fSelectionLength, fAsymetricAssignment);
+		ASTParentTrackingAdapter result= new ASTParentTrackingAdapter(fStatementAnalyzer);
+		fStatementAnalyzer.setParentTracker(result);
+		return result;
+	}
+	
 	/**
 	 * Sets the method name to be used for the extracted method.
 	 *
@@ -186,12 +199,8 @@ public class ExtractMethodRefactoring extends Refactoring{
 		return result;
 	}
 	
-	/**
-	 * Creates the actual change object.
-	 *
-	 * @param pm progress monitor to report progress
-	 * @return the change object.
-	 * @see IChange
+	/* (non-Javadoc)
+	 * Method declared in IRefactoring
 	 */
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		if (fMethodName == null)
@@ -222,7 +231,6 @@ public class ExtractMethodRefactoring extends Refactoring{
 		result.addSimpleTextChange(new SimpleReplaceTextChange("Changed method", fSelectionStart, fSelectionLength, null) {
 			public SimpleTextChange[] adjust(ITextBuffer buffer) {
 				String delimiter= buffer.getLineDelimiter(buffer.getLineOfOffset(methodStart));
-				int indent= TextUtilities.getIndent(buffer.getLineContentOfOffset(methodStart), fTabWidth);	
 				setText(computeCall(buffer, delimiter));
 				return null;
 			}
@@ -362,12 +370,15 @@ public class ExtractMethodRefactoring extends Refactoring{
 		String local= localAnalyzer.getLocalDeclaration();
 		if (local != null) {
 			result.append(local);
-			result.append(delimiter);
-			String firstLine= buffer.getLineContentOfOffset(fSelectionStart);
-			indent= TextUtilities.getIndent(firstLine, fTabWidth);
-			result.append(TextUtilities.createIndentString(indent));
+			if (!fCallOnDecalrationLine) {
+				result.append(";");
+				result.append(delimiter);
+				String firstLine= buffer.getLineContentOfOffset(fSelectionStart);
+				indent= TextUtilities.getIndent(firstLine, fTabWidth);
+				result.append(TextUtilities.createIndentString(indent));
+			}
 		}
-		result.append(localAnalyzer.getCall(fMethodName));
+		result.append(localAnalyzer.getCall(fMethodName, fCallOnDecalrationLine));
 		if (callNeedsSemicolon())
 			result.append(";");
 		if (endsSelectionWithLineDelimiter(lines))

@@ -34,16 +34,23 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private List fFollowingLocalWrites= new ArrayList(2);
 	private List fFollowingLocalReads= new ArrayList(2);
 	
+	private boolean fAsymetricAssignment;
+	private String fAssignment;
 	private String fLocalDeclaration= null;	
 	private String fLocalReturnValueDeclaration= null;
-	private String fLhs= "";
+	private String fLhs= null;
 	private String fReturnStatement= null;
 	private String fReturnType= "void";
 	
 	private List fUsedLocals= new ArrayList(2);
 	
-	public LocalVariableAnalyzer(StatementAnalyzer analyzer) {
+	public LocalVariableAnalyzer(StatementAnalyzer analyzer, boolean asymetricAssignment) {
 		fStatementAnalyzer= analyzer;
+		fAsymetricAssignment= asymetricAssignment;
+		if (fAsymetricAssignment)
+			fAssignment= "= ";
+		else
+			fAssignment= " = ";
 	}
 
 	//---- Analyzing statements ----------------------------------------------------------------
@@ -152,17 +159,32 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 
 	public void checkActivation(RefactoringStatus status) {
 		checkLocalReads(status);
-		List followingLocals= new ArrayList(2);
-		followingLocals.addAll(fFollowingLocalReads);
-		followingLocals.addAll(fFollowingLocalWrites);
+		List followingLocals= computeFollowingLocals();
 		checkLocalWrites(status, followingLocals);
 		checkFollowingLocals(status, followingLocals);
 	}
-	
+
+	private List computeFollowingLocals() {
+		List result= new ArrayList(2);
+		result.addAll(fFollowingLocalReads);
+		for (Iterator iter= fFollowingLocalWrites.iterator(); iter.hasNext(); ) {
+			Object item= iter.next();
+			if (!result.contains(item))
+				result.add(item);
+			
+		}
+		return result;
+	}
+
 	//---- Code generation ----------------------------------------------------------------------
 
-	public String getCall(String methodName) {
-		StringBuffer result= new StringBuffer(fLhs);
+	public String getCall(String methodName, boolean oneLine) {
+		StringBuffer result= new StringBuffer();
+		if (fLhs != null) {
+			if (!oneLine || fLocalDeclaration == null)
+				result.append(fLhs);
+			result.append(fAssignment);	
+		}
 		result.append(methodName);
 		result.append("(");
 		for (int i= 0; i < fUsedLocals.size(); i++) {
@@ -250,7 +272,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 				}
 				// The variable is not part of the read accesses. So we have to create a local variable declaration.
 				if (!fUsedLocals.contains(binding))
-					fLocalReturnValueDeclaration= makeDeclaration(declaration); 
+					fLocalReturnValueDeclaration= makeDeclaration(declaration) + ";"; 
 			}
 		}
 		if (returnDeclaration != null) {
@@ -293,12 +315,12 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 	private void computeReturnType(LocalDeclaration declaration) {
 		TypeReference typeRef= declaration.type;
 		fReturnType= typeRef.toStringExpression(0);
-		fLhs= declaration.name() + "= ";
+		fLhs= declaration.name();
 		fReturnStatement= "return " + declaration.name() + ";";
 	}
 	
 	private String makeDeclaration(LocalDeclaration declaration) {
 		TypeReference typeRef= declaration.type;
-		return typeRef.toStringExpression(0) + " " + declaration.name() + ";";
+		return typeRef.toStringExpression(0) + " " + declaration.name();
 	}		
 }

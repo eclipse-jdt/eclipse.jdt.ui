@@ -39,9 +39,11 @@ public class ExtractMethodWizard extends RefactoringWizard {
 	}
 
 	protected Refactoring doGetRefactoring() {
+		org.eclipse.jdt.internal.ui.util.JdtHackFinder.fixme("Query Preferences for asymetric assignment and tab width");
 		return new ExtractMethodRefactoring(
 			fCUnit, new DocumentTextBufferChangeCreator(fDocumentProvider), 
-			fSelection.getOffset(), fSelection.getLength());
+			fSelection.getOffset(), fSelection.getLength(),
+			true, 4);	// asymertic Assignment and tab with
 	}
 	
 	
