@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -25,8 +27,18 @@ public class InlineTempInputPage extends UserInputWizardPage {
 	}
 
 	public void createControl(Composite parent) {
-		Label label= new Label(parent, SWT.CENTER | SWT.WRAP);
-		setControl(label);
+		initializeDialogUnits(parent);
+		Composite result= new Composite(parent, SWT.NONE);
+		setControl(result);
+		GridLayout layout= new GridLayout();
+		layout.marginWidth= 0; layout.marginHeight= 0;
+		result.setLayout(layout);
+		Label spacer= new Label(result, SWT.NONE);
+		GridData gd= new GridData();
+		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
+		spacer.setLayoutData(gd);
+		Label label= new Label(result, SWT.CENTER | SWT.WRAP);
+		label.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		InlineTempRefactoring refactoring= (InlineTempRefactoring)getRefactoring();
 		int occurences= refactoring.getOccurences();
 		String message;
