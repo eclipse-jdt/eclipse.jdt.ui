@@ -14,17 +14,23 @@ public class CompositeChange extends Change implements ICompositeChange {
 
 	private List fChanges;
 	private IChange fUndoChange;
+	private String fName;
 	
 	public CompositeChange(){
-		this(new ArrayList(5));
+		this("CompositeChange>", new ArrayList(5));
+	}
+		
+	public CompositeChange(String name){
+		this(name, new ArrayList(5));
 	}
 	
-	public CompositeChange(int initialCapacity){
-		this(new ArrayList(initialCapacity));
+	public CompositeChange(String name, int initialCapacity){
+		this(name, new ArrayList(initialCapacity));
 	}
-	
-	private CompositeChange(List changes){
+		
+	private CompositeChange(String name, List changes){
 		fChanges= changes;
+		fName= name;
 	}
 	
 	/* (Non-Javadoc)
@@ -86,7 +92,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 			while (iter.hasNext()){
 				try {
 					IChange each= (IChange)iter.next();
-					each.perform(context, new SubProgressMonitor(pm, 1, SubProgressMonitor.PREPEND_MAIN_LABEL_TO_SUBTASK));
+					each.perform(context, new SubProgressMonitor(pm, 1));
 					undoList.add(each.getUndoChange());
 					context.addPerformedChange(each);
 				} catch (Exception e) {
@@ -111,8 +117,9 @@ public class CompositeChange extends Change implements ICompositeChange {
 		if (!isActive()){
 			fUndoChange= new NullChange();
 		} else{
-			fUndoChange= new CompositeChange(createUndoList(context, pm));
+			fUndoChange= new CompositeChange(fName, createUndoList(context, pm));
 		}	
+		pm.done();
 	}
 	
 	public String toString(){
@@ -126,7 +133,7 @@ public class CompositeChange extends Change implements ICompositeChange {
 	
 	
 	public String getName(){
-		return "Composite Change";
+		return fName;
 	}
 	
 	public IJavaElement getCorrespondingJavaElement(){
