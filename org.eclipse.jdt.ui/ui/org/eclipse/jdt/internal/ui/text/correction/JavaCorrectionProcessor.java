@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.lang.reflect.InvocationTargetException;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +21,6 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
@@ -45,11 +42,11 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 
 import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaAnnotationIterator;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 public class JavaCorrectionProcessor implements IContentAssistProcessor {
@@ -76,9 +73,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			return fgCollator.compare(((ICompletionProposal) o1).getDisplayString(), ((ICompletionProposal) o2).getDisplayString());
 		}
 	}
-	
+		
 	private static IAssistProcessor[] fAssistProcessors= null;
 	private static ICorrectionProcessor[] fCorrectionProcessors= null;
+	private static String fErrorMessage;
 	
 	private static ICorrectionProcessor[] getCorrectionProcessors() {
 		if (fCorrectionProcessors == null) {
@@ -176,10 +174,15 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
 		AssistContext context= new AssistContext(cu, documentOffset, length);
 
+		fErrorMessage= null;
 		ArrayList proposals= new ArrayList();
 		if (model != null) {
 			processProblemAnnotations(context, model, proposals);
 		}
+		if (proposals.isEmpty()) {
+			proposals.add(new ChangeCorrectionProposal(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0, null));  //$NON-NLS-1$
+		}
+		
 		ICompletionProposal[] res= (ICompletionProposal[]) proposals.toArray(new ICompletionProposal[proposals.size()]);
 		Arrays.sort(res, new CorrectionsComparator());
 		return res;
@@ -214,7 +217,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					}
 				}
 			}
-		}
+		}	
 		IProblemLocation[] problemLocations= (IProblemLocation[]) problems.toArray(new IProblemLocation[problems.size()]);
 		collectCorrections(context, problemLocations, proposals);
 		collectAssists(context, problemLocations, proposals);
@@ -226,9 +229,8 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			try {
 				processors[i].process(context, locations, proposals);
 			} catch (Exception e) {
-				String message= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.message"); //$NON-NLS-1$
-				handleExeption(e, message);
-				return;
+				fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.message"); //$NON-NLS-1$
+				JavaPlugin.log(e);
 			}
 		}
 	}
@@ -239,28 +241,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			try {
 				processors[i].process(context, locations, proposals);
 			} catch (Exception e) {
-				String message= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickassist.message"); //$NON-NLS-1$
-				handleExeption(e, message);
-				return;
+				fErrorMessage= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickassist.message"); //$NON-NLS-1$
+				JavaPlugin.log(e);
 			}
 		}
 	}	
-
-	/**
-	 * @param e
-	 */
-	private static void handleExeption(Exception e, String message) {
-		String title= CorrectionMessages.getString("JavaCorrectionProcessor.error.quickfix.title"); //$NON-NLS-1$
-		Shell shell=  JavaPlugin.getActiveWorkbenchShell();
-		if (e instanceof CoreException) {
-			ExceptionHandler.handle((CoreException) e, shell, title, message);
-		} else {
-			if (!(e instanceof InvocationTargetException)) {
-				e= new InvocationTargetException(e);
-			}
-			ExceptionHandler.handle((InvocationTargetException) e, shell, title, message);
-		}
-	}
 
 	/*
 	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
@@ -294,6 +279,6 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		return null;
+		return fErrorMessage;
 	}
 }

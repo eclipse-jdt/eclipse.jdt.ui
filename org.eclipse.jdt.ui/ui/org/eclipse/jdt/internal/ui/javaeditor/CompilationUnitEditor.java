@@ -148,7 +148,8 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 					setStatusLineErrorMessage(msg);
 					return;
 				case CORRECTIONASSIST_PROPOSALS:
-					fCorrectionAssistant.showPossibleCompletions();
+					msg= fCorrectionAssistant.showPossibleCompletions();
+					setStatusLineErrorMessage(msg);
 					return;
 				case UNDO:
 					fIgnoreTextConverters= true;

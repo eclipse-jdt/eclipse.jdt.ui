@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -336,13 +337,14 @@ public class UnresolvedElementsSubProcessor {
 		if (!importEdit.isEmpty()) {
 			root.add(importEdit); //$NON-NLS-1$
 		}
+		String[] arg= { simpleName, Signature.getQualifier(fullName) };
 		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL));
-			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", fullName)); //$NON-NLS-1$
+			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.importtype.description", arg)); //$NON-NLS-1$
 			proposal.setRelevance(relevance + 20);
 		} else {			
 			root.add(SimpleTextEdit.createReplace(node.getStartPosition(), node.getLength(), simpleName)); //$NON-NLS-1$
-			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", simpleName)); //$NON-NLS-1$
+			proposal.setDisplayName(CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.changetype.description", arg)); //$NON-NLS-1$
 			proposal.setRelevance(relevance);
 		}
 		return proposal;
