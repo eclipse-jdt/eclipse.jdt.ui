@@ -42,6 +42,6 @@ public class NonSharedProjectFilter extends ViewerFilter {
 	}
 	
 	private boolean isSharedProject(IProject project) {
-		return RepositoryProvider.isShared(project);
+		return !project.isAccessible() || RepositoryProvider.isShared(project);
 	}
 }
