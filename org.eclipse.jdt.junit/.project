@@ -3,6 +3,7 @@
 	<name>org.eclipse.jdt.junit</name>
 	<comment></comment>
 	<projects>
+		<project>org.eclipse.compare</project>
 		<project>org.eclipse.core.boot</project>
 		<project>org.eclipse.core.resources</project>
 		<project>org.eclipse.core.runtime</project>

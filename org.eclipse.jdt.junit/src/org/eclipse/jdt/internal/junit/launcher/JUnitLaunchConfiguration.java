@@ -59,6 +59,9 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 			argv.add(pa[i]);
 		}
 	
+		argv.add("-version"); //$NON-NLS-1$
+		argv.add("3"); //$NON-NLS-1$
+		
 		argv.add("-port"); //$NON-NLS-1$
 		argv.add(Integer.toString(port));
 		//argv("-debugging");
@@ -110,7 +113,7 @@ public class JUnitLaunchConfiguration extends JUnitBaseLaunchConfiguration {
 	
 	private String[] createClassPath(ILaunchConfiguration configuration) throws CoreException {
 		IPluginRegistry registry= Platform.getPluginRegistry();
-		IPluginDescriptor descriptor= registry.getPluginDescriptor("org.eclipse.jdt.junit.runtime");
+		IPluginDescriptor descriptor= registry.getPluginDescriptor("org.eclipse.jdt.junit.runtime"); //$NON-NLS-1$
 		URL runtimeURL= descriptor.getInstallURL();
 		
 		URL url= JUnitPlugin.getDefault().getDescriptor().getInstallURL();

@@ -21,8 +21,8 @@
       <import plugin="org.eclipse.ui.editors"/>
       <import plugin="org.eclipse.ui"/>
       <import plugin="org.eclipse.core.resources"/>
-	  <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
-	  <import plugin="org.eclipse.core.boot"/>
+      <import plugin="org.eclipse.core.runtime.compatibility" optional="true"/>
+      <import plugin="org.eclipse.core.boot"/>
       <import plugin="org.eclipse.debug.core"/>
       <import plugin="org.eclipse.debug.ui"/>
       <import plugin="org.eclipse.jdt.core"/>
@@ -31,6 +31,7 @@
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.jdt.debug.ui"/>
       <import plugin="org.eclipse.jdt.junit.runtime"/>
+      <import plugin="org.eclipse.compare"/>
    </requires>
 
 
@@ -41,8 +42,8 @@
       <view
             name="%View.label"
             icon="icons/full/cview16/junit.gif"
-            fastViewWidthRatio="0.40"
             category="org.eclipse.jdt.ui.java"
+            fastViewWidthRatio="0.40"
             class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
             id="org.eclipse.jdt.junit.ResultView">
       </view>
@@ -54,8 +55,8 @@
          <view
                relative="org.eclipse.jdt.ui.PackageExplorer"
                visible="false"
-               relationship="stack"
-               id="org.eclipse.jdt.junit.ResultView">
+               id="org.eclipse.jdt.junit.ResultView"
+               relationship="stack">
          </view>
       </perspectiveExtension>
       <perspectiveExtension
@@ -159,8 +160,8 @@
             id="org.eclipse.jdt.junit.wizards.UpdateTestSuite">
          <action
                label="%UpdateSuiteAction.label"
-               tooltip="%UpdateSuiteAction.tooltip"
                class="org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite"
+               tooltip="%UpdateSuiteAction.tooltip"
                enablesFor="1"
                id="updateTestSuite">
          </action>
@@ -175,8 +176,8 @@
          <action
                label="%GotoTestAction.label"
                helpContextId="org.eclipse.jdt.junit.goto_referenced_test_action_context"
-               tooltip="%GotoTestAction.tooltip"
                class="org.eclipse.jdt.internal.junit.ui.GotoReferencedTestAction"
+               tooltip="%GotoTestAction.tooltip"
                menubarPath="navigate/goTo/"
                id="junit.actions.GotoTestAction">
          </action>
@@ -199,8 +200,8 @@
             label="%JUnitShortcut.label"
             icon="icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
-            modes="run, debug"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
+            modes="run, debug"
             id="org.eclipse.jdt.junit.junitShortcut">
          <perspective
                id="org.eclipse.jdt.ui.JavaPerspective">
