@@ -45,10 +45,7 @@ public class AllRefactoringTests {
 		suite.addTest(UseSupertypeWherePossibleTests.suite());
 		
 		//-- generics
-		if (false) {
-			suite.addTest(AugmentRawContainerClientsTests.suite());
-			System.out.println("*** AugmentRawContainerClientsTests disabled! ***");
-		}
+		suite.addTest(AugmentRawContainerClientsTests.suite());
 		
 		//--methods
 		suite.addTest(RenameVirtualMethodInClassTests.suite());

@@ -26,7 +26,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.refactoring.generics.AugmentRawContainerClientsRefactoring;
 
-//TODO: add Test to AllTests
 public class AugmentRawContainerClientsTests extends RefactoringTest {
 
 	private static final Class clazz= AugmentRawContainerClientsTests.class;

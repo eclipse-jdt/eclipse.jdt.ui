@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -47,6 +49,16 @@ public class TypeBindings {
 //TODO: Ask JDT/Core for API for this?
 	
 	public static ITypeBinding mostSpecificCommonType(ITypeBinding[] types) {
+		//workaround for bug 77929 Augment Raw Container Clients is not deterministic
+		Arrays.sort(types, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				if (o1 == null || o1 == null)
+					return 0;
+				else
+					return ((ITypeBinding) o2).getQualifiedName().compareTo(((ITypeBinding) o1).getQualifiedName());
+			}
+		});
+		
 		int length = types.length;
 		int indexOfFirst = -1, actualLength = 0;
 		for (int i = 0; i < length; i++) {
