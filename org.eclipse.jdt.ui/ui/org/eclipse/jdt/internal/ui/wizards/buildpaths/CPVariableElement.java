@@ -60,7 +60,7 @@ public class CPVariableElement {
 	 * @see Object#equals()
 	 */	
 	public boolean equals(Object other) {
-		if (other.getClass().equals(getClass())) {
+		if (other != null && other.getClass().equals(getClass())) {
 			CPVariableElement elem= (CPVariableElement)other;
 			return fName.equals(elem.fName);
 		}

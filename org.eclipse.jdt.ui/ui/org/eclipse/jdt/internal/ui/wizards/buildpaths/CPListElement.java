@@ -197,7 +197,7 @@ public class CPListElement {
 	 * @see Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object other) {
-		if (other != null && other.getClass() == getClass()) {
+		if (other != null && other.getClass().equals(getClass())) {
 			CPListElement elem= (CPListElement)other;
 			return elem.fEntryKind == fEntryKind && elem.fPath.equals(fPath);
 		}

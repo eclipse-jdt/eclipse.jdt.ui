@@ -140,7 +140,7 @@ public class JavaElementImageDescriptor extends CompositeImageDescriptor {
 	 * Method declared on Object.
 	 */
 	public boolean equals(Object object) {
-		if (!JavaElementImageDescriptor.class.equals(object.getClass()))
+		if (object == null || !JavaElementImageDescriptor.class.equals(object.getClass()))
 			return false;
 			
 		JavaElementImageDescriptor other= (JavaElementImageDescriptor)object;
