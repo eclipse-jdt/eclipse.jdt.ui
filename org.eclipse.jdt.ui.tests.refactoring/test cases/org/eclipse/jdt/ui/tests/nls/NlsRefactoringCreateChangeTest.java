@@ -101,14 +101,14 @@ public class NlsRefactoringCreateChangeTest extends TestCase {
     }
 
     private void checkContentOfCu(String message, ICompilationUnit cu, String content) throws Exception {
-        assertEquals(message, content, cu.getBuffer().getContents());
+        RefactoringTest.assertEqualLines(message, content, cu.getBuffer().getContents());
     }
     
     private void checkContentOfFile(String message, IFile file, String content) throws Exception {
         InputStream in = file.getContents();
         String realContent = copyToString(in);
         in.close();
-        assertEquals(message, content, realContent);
+        RefactoringTest.assertEqualLines(message, content, realContent);
     }
     
     private String copyToString(InputStream in) throws Exception {
