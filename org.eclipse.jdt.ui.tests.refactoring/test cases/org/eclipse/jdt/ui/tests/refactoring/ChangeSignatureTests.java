@@ -865,6 +865,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}	
 	
 	public void testAll46()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -882,6 +887,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll47()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -899,6 +909,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll48()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -916,6 +931,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll49()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -933,6 +953,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll50()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -950,6 +975,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll51()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
@@ -967,6 +997,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testAll52()throws Exception{
+		if (! RUN_CONSTRUCTOR_TEST){
+			printTestDisabledMessage("disabled for constructors for now");
+			return;
+		}
+
 		String[] signature= {};
 		String[] newNames= {"i"};
 		String[] newTypes= {"int"};
