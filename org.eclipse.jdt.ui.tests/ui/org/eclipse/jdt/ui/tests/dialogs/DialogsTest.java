@@ -3,9 +3,22 @@ package org.eclipse.jdt.ui.tests.dialogs;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestSuite;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.viewers.ILabelProvider;
+
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.internal.WorkbenchPlugin;
+import org.eclipse.ui.test.harness.DialogCheck;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -27,12 +40,7 @@ import org.eclipse.jdt.testplugin.TestPluginLauncher;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementContentProvider;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.test.harness.DialogCheck;
+import org.eclipse.jdt.ui.tests.core.AddUnimplementedMethodsTest;
 
 public class DialogsTest extends TestCase {
 	
@@ -41,6 +49,19 @@ public class DialogsTest extends TestCase {
 	public static void main(String[] args) {
 		TestPluginLauncher.run(TestPluginLauncher.getLocationFromProperties(), DialogsTest.class, args);
 	}
+
+	public static Test suite() {
+		TestSuite suite= new TestSuite(AddUnimplementedMethodsTest.class.getName());
+		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
+		suite.addTest(new DialogsTest("testMultiElementSelectionDialog"));
+		suite.addTest(new DialogsTest("testTwoPaneSelectionDialog"));
+
+		suite.addTest(new DialogsTest("testElementTreeSelectionDialog"));
+		suite.addTest(new DialogsTest("testElementListSelectionDialog"));
+		suite.addTest(new DialogsTest("testAddExceptionDialog"));
+		return suite;
+	}
+
 
 	public DialogsTest(String name) {
 		super(name);
@@ -60,8 +81,7 @@ public class DialogsTest extends TestCase {
 		IProject project= jproject.getProject();
 
 		OpenTypeSelectionDialog dialog= new OpenTypeSelectionDialog(getShell(), new ProgressMonitorDialog(getShell()), 
-			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, 
-			true, true);
+			SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES);
 	
 		dialog.setTitle(JavaUIMessages.getString("OpenTypeAction.dialogTitle")); //$NON-NLS-1$
 		dialog.setMessage(JavaUIMessages.getString("OpenTypeAction.dialogMessage")); //$NON-NLS-1$
@@ -93,7 +113,7 @@ public class DialogsTest extends TestCase {
 		AllTypesSearchEngine searchEngine= new AllTypesSearchEngine(project.getWorkspace());
 		searchEngine.searchTypes(list, searchScope, IJavaElementSearchConstants.CONSIDER_TYPES, null);
 
-		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider, true, false);
+		MultiElementListSelectionDialog dialog= new MultiElementListSelectionDialog(getShell(), labelProvider);
 		dialog.setTitle(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.title")); //$NON-NLS-1$
 		dialog.setMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.message")); //$NON-NLS-1$
 		dialog.setPageInfoMessage(CodeManipulationMessages.getString("OrganizeImportsOperation.dialog.pageinfo")); //$NON-NLS-1$
@@ -137,10 +157,11 @@ public class DialogsTest extends TestCase {
 	public void testElementListSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		IPackageFragmentRoot root=  JavaProjectHelper.addRTJar(jproject);
-		assert(root != null);
+		assertTrue(root != null);
 		Object[] elements= root.getChildren();
 
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT), false, false);
+		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
+		dialog.setIgnoreCase(false);
 		dialog.setTitle(NewWizardMessages.getString("TypePage.ChoosePackageDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.description")); //$NON-NLS-1$
 		dialog.setEmptyListMessage(NewWizardMessages.getString("TypePage.ChoosePackageDialog.empty")); //$NON-NLS-1$
