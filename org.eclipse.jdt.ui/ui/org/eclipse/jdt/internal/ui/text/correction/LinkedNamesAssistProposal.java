@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
@@ -74,7 +75,7 @@ public class LinkedNamesAssistProposal implements IJavaCompletionProposal, IComp
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
 			// get full ast
-			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, true, null);
+			CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, null);
 
 			ASTNode nameNode= NodeFinder.perform(root, fNode.getStartPosition(), fNode.getLength());
 			final int pos= fNode.getStartPosition();

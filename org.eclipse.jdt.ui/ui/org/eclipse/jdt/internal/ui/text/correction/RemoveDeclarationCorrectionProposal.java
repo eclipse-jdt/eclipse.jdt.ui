@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionProposal {
 
@@ -109,7 +110,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			rewrite.remove(declaration, null);
 		} else { // variable
 			// needs full AST
-			CompilationUnit completeRoot= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), true, null);
+			CompilationUnit completeRoot= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), ASTProvider.WAIT_YES, null);
 
 			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, fName.getStartPosition(), fName.getLength());
 
