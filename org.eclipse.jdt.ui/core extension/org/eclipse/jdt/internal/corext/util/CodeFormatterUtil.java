@@ -97,31 +97,9 @@ public class CodeFormatterUtil {
 		if (OLD_FUNC) {
 			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
 		}
-		
-		int offset= start;
-		int length= end - start;
-		
-		try {
-			// new edit api
-			
-			Document doc= createDocument(string);
+		TextEdit edit= format2(kind, string, start, end - start, indentationLevel, lineSeparator, options);
+		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 
-			Position[] stored= initPositions(doc, positions);
-			TextEdit edit= format2(kind, string, offset, length, indentationLevel, lineSeparator, options);
-			if (edit != null) {
-				edit.apply(doc);
-				readPositions(stored, positions);
-				return doc.get();
-			}
-			JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);
-		}
-		return string;
 	}
 	
 	/**
@@ -132,44 +110,72 @@ public class CodeFormatterUtil {
 			return old_formatter(string, indentationLevel, positions, lineSeparator, options);
 		}
 		
-		// emulate the old functionality with edits
-		try {		
-			Document doc= createDocument(string);
-			Position[] stored= initPositions(doc, positions);
-			
-			TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
-			if (edit != null) {
-				edit.apply(doc);
-				
-				int[] positionCopy= null;
-				if (DEBUG && positions != null) {
-					positionCopy= (int[]) positions.clone();
-				}
-				
-				readPositions(stored, positions);
-				String res= doc.get();
-				
-				if (DEBUG) {
-					String oldFormat= old_formatter(string, indentationLevel, positionCopy, lineSeparator, options);
-					testSame(res, oldFormat, positions, positionCopy);
-				}
-				return res;
-			}
-			JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
-		} catch (MalformedTreeException e) {
-			JavaPlugin.log(e);
-		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		} catch (BadPositionCategoryException e) {
-			JavaPlugin.log(e);
-		}
-		return string;
+		TextEdit edit= format2(node, string, indentationLevel, lineSeparator, options);
+		return getOldAPICompatibleResult(string, edit, indentationLevel, positions, lineSeparator, options);
 	}
 	
+	private static String getOldAPICompatibleResult(String string, TextEdit edit, int indentationLevel, int[] positions, String lineSeparator, Map options) {
+		if (edit != null) {
+			Position[] p= null;
+			
+			if (positions != null) {
+				p= new Position[positions.length];
+				for (int i= 0; i < positions.length; i++) {
+					p[i]= new Position(positions[i], 0);
+				}
+			}
+			String res= evaluateFormatterEdit(string, edit, p);
+			
+			int[] positionCopy= null;
+			if (positions != null) {
+				if (DEBUG) {
+					positionCopy= (int[]) positions.clone();
+				}
+				for (int i= 0; i < positions.length; i++) {
+					Position curr= p[i];
+					positions[i]= curr.getOffset();
+				}
+			}			
+			if (DEBUG) {
+				String oldFormat= old_formatter(string, indentationLevel, positionCopy, lineSeparator, options);
+				testSame(res, oldFormat, positions, positionCopy);
+			}
+			return res;
+		}
+		JavaPlugin.logErrorMessage("format returns null-edit"); //$NON-NLS-1$
+		return string;
+	}
 
+	/**
+	 * Evaluates the edit on the given string.
+	 * @throws IllegalArgumentException If the positions are not inside the string, a
+	 *  IllegalArgumentException is thrown.
+	 */
+	public static String evaluateFormatterEdit(String string, TextEdit edit, Position[] positions) {
+		try {
+			Document doc= createDocument(string, positions);
+			edit.apply(doc, 0);
+			for (int i= 0; i < positions.length; i++) {
+				Assert.isTrue(!positions[i].isDeleted, "Position got deleted"); //$NON-NLS-1$
+			}
+			return doc.get();
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e); // bug in the formatter
+			Assert.isTrue(false, "Fromatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
+		}
+		return null;
+	}
 	
-	
+	/**
+	 * Creates edits that describe how to format the given string. Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * @throws IllegalArgumentException If the offset and length are not inside the string, a
+	 *  IllegalArgumentException is thrown.
+	 */
 	public static TextEdit format2(int kind, String string, int offset, int length, int indentationLevel, String lineSeparator, Map options) {
+		if (offset < 0 || length < 0 || offset + length > string.length()) {
+			throw new IllegalArgumentException("offset or length outside of string. offset: " + offset + ", length: " + length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		}
+		
 		if (OLD_FORMATTER) {
 			return emulateNewWithOld(string, offset, length, indentationLevel, lineSeparator, options);
 		} else {
@@ -184,11 +190,11 @@ public class CodeFormatterUtil {
 	}
 	
 	/**
-	 * Format the source whose kind is described by the passed AST node. This AST node is only used for type tests. It can be
-	 * a dummy node with no content.
+	 * Creates edits that describe how to format the given string. Returns <code>null</code> if the code could not be formatted for the given kind.
+	 * @throws IllegalArgumentException If the offset and length are not inside the string, a
+	 *  IllegalArgumentException is thrown.
 	 */
-	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {		
-
+	public static TextEdit format2(ASTNode node, String str, int indentationLevel, String lineSeparator, Map options) {				
 		int code;
 		String prefix= ""; //$NON-NLS-1$
 		String suffix= ""; //$NON-NLS-1$
@@ -356,41 +362,32 @@ public class CodeFormatterUtil {
 		}
 	}
 	
-	private static Document createDocument(String string) {
+	private static Document createDocument(String string, Position[] positions) throws IllegalArgumentException {
 		Document doc= new Document(string);
-		doc.addPositionCategory(POS_CATEGORY);
-		doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
-			protected boolean notDeleted() {
-				if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
-					fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
-					return false;
+		try {
+			doc.addPositionCategory(POS_CATEGORY);
+			doc.addPositionUpdater(new DefaultPositionUpdater(POS_CATEGORY) {
+				protected boolean notDeleted() {
+					if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
+						fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
+						return false;
+					}
+					return true;
 				}
-				return true;
+			});
+			if (positions != null) {
+				for (int i= 0; i < positions.length; i++) {
+					try {
+						doc.addPosition(POS_CATEGORY, positions[i]);
+					} catch (BadLocationException e) {
+						throw new IllegalArgumentException("Position outside of string. offset: " + positions[i].offset + ", length: " + positions[i].length + ", string size: " + string.length());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+					}
+				}
 			}
-		});
+		} catch (BadPositionCategoryException cannotHappen) {
+			// can not happen: category is correctly set up
+		}
 		return doc;
-	}
-
-	private static Position[] initPositions(Document doc, int[] positions) throws BadLocationException, BadPositionCategoryException {
-		if (positions != null) {
-			Position[] stored= new Position[positions.length];
-			for (int i= 0; i < positions.length; i++) {
-				stored[i]= new Position(positions[i], 0);
-				doc.addPosition(POS_CATEGORY, stored[i]);
-			}
-			return stored;
-		}
-		return null;
-	}
-
-	private static void readPositions(Position[] stored, int[] positions) {
-		if (positions != null) {
-			for (int i= 0; i < positions.length; i++) {
-				Position curr= stored[i];
-				Assert.isTrue(!curr.isDeleted);
-				positions[i]= curr.getOffset();
-			}
-		}
 	}
 	
 }
