@@ -5,11 +5,12 @@
 package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
@@ -34,9 +35,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceManager;
  */
 public class RefactoringSearchEngine {
 
-	private static Comparator fgSearchResultComparator;
-	private static SearchEngine fgSearchEngine= new SearchEngine();
-	
 	//no instances
 	private RefactoringSearchEngine(){
 	}
@@ -57,7 +55,7 @@ public class RefactoringSearchEngine {
 				return pm;
 			};
 		};
-		fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 		ICompilationUnit[] workingCopies= ResourceManager.getWorkingCopies();
 		List result= new ArrayList(matches.size());
 		for (Iterator iter= matches.iterator(); iter.hasNext(); ) {
@@ -88,7 +86,7 @@ public class RefactoringSearchEngine {
 		if (pattern == null)
 			return;
 		Assert.isNotNull(scope, "scope"); //$NON-NLS-1$
-		fgSearchEngine.search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
 	}
 	
 	/**
@@ -101,15 +99,15 @@ public class RefactoringSearchEngine {
 	public static SearchResultGroup[] search(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
 		SearchResultCollector collector= new SearchResultCollector(pm);
 		search(pm, scope, pattern, collector);	
-		List l= collector.getResults();
-		Collections.sort(l, createComparator());
-		List grouped= groupByResource(l);
+		Map grouped= groupByResource(collector.getResults());
 		
-		SearchResultGroup[] result= new SearchResultGroup[grouped.size()];
-		for (int i= 0; i < result.length; i++){
-			List searchResults= (List)grouped.get(i);
-			IResource res= ((SearchResult)searchResults.get(0)).getResource();
-			result[i]= new SearchResultGroup(res, createSearchResultArray(searchResults));
+		SearchResultGroup[] result= new SearchResultGroup[grouped.keySet().size()];
+		int i= 0;
+		for (Iterator iter= grouped.keySet().iterator(); iter.hasNext();) {
+			IResource resource= (IResource)iter.next();
+			List searchResults= (List)grouped.get(resource);
+			result[i]= new SearchResultGroup(resource, createSearchResultArray(searchResults));
+			i++;
 		}
 		return result;
 	}
@@ -118,70 +116,15 @@ public class RefactoringSearchEngine {
 		return (SearchResult[])searchResults.toArray(new SearchResult[searchResults.size()]);
 	}
 	
-	//XXX: should get rid of this
-	public static SearchResultGroup[] customSearch(IProgressMonitor pm, IJavaSearchScope scope, ISearchPattern pattern) throws JavaModelException {
-		SearchEngine engine= fgSearchEngine;
-		fgSearchEngine= new CustomSearchEngine();
-		try{
-			return search(pm, scope, pattern);
-		} finally{
-			fgSearchEngine= engine;
+	private static Map groupByResource(List searchResults){
+		Map grouped= new HashMap(); //IResource -> List of SearchResults
+		for (Iterator iter= searchResults.iterator(); iter.hasNext();) {
+			SearchResult searchResult= (SearchResult) iter.next();
+			if (! grouped.containsKey(searchResult.getResource()))
+				grouped.put(searchResult.getResource(), new ArrayList(1));
+			((List)grouped.get(searchResult.getResource())).add(searchResult);
 		}
-	}
-
-	private static Comparator createComparator() {
-		if (fgSearchResultComparator == null) {
-			fgSearchResultComparator= new Comparator() {
-				public int compare(Object o1, Object o2) {
-					/* it's enough to sort them by starting position
-					 * i sort them backwards (then i can substitute substrings easily)
-					 * i group them by resources
-					 */
-					SearchResult sr1= (SearchResult) o1;
-					SearchResult sr2= (SearchResult) o2;
-
-					if (!(sr2.getResource().equals(sr1.getResource()))) {
-						return sr2.getResource().getFullPath().toString().compareTo(sr1.getResource().getFullPath().toString());
-					}
-					return sr2.getStart() - sr1.getStart();
-				}
-			};
-		}
-		return fgSearchResultComparator;
-	}
-
-	/**
-	 * returns a list of lists of SearchResults (grouped by resource)
-	 */
-	private static List groupByResource(List searchResults){
-		if (searchResults == null || searchResults.isEmpty())
-			return new ArrayList(0); 
-			
-		Iterator iter= searchResults.iterator();
-		List result= new ArrayList(5);
-	
-		List subResult= new ArrayList(3);
-	
-		SearchResult t= (SearchResult)iter.next();
-		IPath tPath= t.getResource().getFullPath();
-		subResult.add(t);
-		
-		boolean same= true;
-		while (iter.hasNext()){
-			SearchResult each= (SearchResult)iter.next();
-			same= each.getResource().getFullPath().equals(tPath);
-			if (same){
-				subResult.add(each);
-			} else {
-				result.add(subResult);
-				subResult= new ArrayList(3);
-				t= each;
-				tPath= t.getResource().getFullPath();
-				subResult.add(t);
-			}
-		}
-		result.add(subResult);
-		return result;
+		return grouped;
 	}
 }
 
