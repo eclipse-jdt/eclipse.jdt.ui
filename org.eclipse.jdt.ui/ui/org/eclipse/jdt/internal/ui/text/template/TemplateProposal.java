@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.corext.template.TemplateContext;
 import org.eclipse.jdt.internal.corext.template.TemplateMessages;
 import org.eclipse.jdt.internal.corext.template.TemplatePosition;
 import org.eclipse.jdt.internal.corext.template.java.JavaContext;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.template.java.JavaTemplateMessages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.IJavaCompletionProposal;
@@ -222,17 +223,21 @@ public class TemplateProposal implements IJavaCompletionProposal {
 	 */
 	public int getRelevance() {
 
-		JavaContext context= (JavaContext) fContext;
-		switch (context.getCharacterBeforeStart()) {
-		// high relevance after whitespace
-		case ' ':
-		case '\r':
-		case '\n':
-		case '\t':
-			return 90;
+		if (fContext instanceof JavaContext) {
+			JavaContext context= (JavaContext) fContext;
+			switch (context.getCharacterBeforeStart()) {
+			// high relevance after whitespace
+			case ' ':
+			case '\r':
+			case '\n':
+			case '\t':
+				return 90;
 
-		default:
-			return 0;
+			default:
+				return 0;
+			}
+		} else {
+			return 90;			
 		}
 	}
 
