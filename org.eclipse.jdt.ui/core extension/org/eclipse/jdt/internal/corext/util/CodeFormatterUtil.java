@@ -155,8 +155,10 @@ public class CodeFormatterUtil {
 		try {
 			Document doc= createDocument(string, positions);
 			edit.apply(doc, 0);
-			for (int i= 0; i < positions.length; i++) {
-				Assert.isTrue(!positions[i].isDeleted, "Position got deleted"); //$NON-NLS-1$
+			if (positions != null) {
+				for (int i= 0; i < positions.length; i++) {
+					Assert.isTrue(!positions[i].isDeleted, "Position got deleted"); //$NON-NLS-1$
+				}
 			}
 			return doc.get();
 		} catch (BadLocationException e) {
