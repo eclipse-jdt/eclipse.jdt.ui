@@ -151,7 +151,6 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 	// Filters
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
-	private Menu fContextMenu;		
 	private IWorkbenchPart fPreviousSelectionProvider;
 	private Object fPreviousSelectedElement;
 			
@@ -268,20 +267,11 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		fViewer.setUseHashlookup(true);
 		fTitleProvider= createTitleProvider();
 		
-		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
-		menuMgr.setRemoveAllWhenShown(true);
-		menuMgr.addMenuListener(this);
-		fContextMenu= menuMgr.createContextMenu(fViewer.getControl());
-		fViewer.getControl().setMenu(fContextMenu);
-		getSite().registerContextMenu(menuMgr, fViewer);
+		createContextMenu();
 		getSite().setSelectionProvider(fViewer);
 
 		createActions(); // call before registering for selection changes
 		addKeyListener();
-
-		// Custom filter group
-		if (fHasCustomFilter)
-			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 
 		if (fMemento != null)
 			restoreState(fMemento);
@@ -316,8 +306,16 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		
 		setHelp();
 	}
+	protected void createContextMenu() {
+		MenuManager menuManager= new MenuManager("#PopupMenu"); //$NON-NLS-1$
+		menuManager.setRemoveAllWhenShown(true);
+		menuManager.addMenuListener(this);
+		Menu contextMenu= menuManager.createContextMenu(fViewer.getControl());
+		fViewer.getControl().setMenu(contextMenu);
+		getSite().registerContextMenu(menuManager, fViewer);
+	}
 
-	private void initDragAndDrop() {
+	protected void initDragAndDrop() {
 		int ops= DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
 		Transfer[] transfers= new Transfer[] {
 			LocalSelectionTransfer.getInstance(), 
@@ -472,18 +470,23 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				fBuildActionGroup= new BuildActionGroup(this),
 				new JavaSearchActionGroup(this)});
 
-		String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
-		Assert.isNotNull(viewId);
 		
-		IPropertyChangeListener titleUpdater= new IPropertyChangeListener() {
-			public void propertyChange(PropertyChangeEvent event) {
-				String property= event.getProperty();
-				if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
-					updateTitle();
-			}
-		};
-		if (fHasWorkingSetFilter)
+		if (fHasWorkingSetFilter) {
+			String viewId= getConfigurationElement().getAttribute("id"); //$NON-NLS-1$
+			Assert.isNotNull(viewId);
+			IPropertyChangeListener titleUpdater= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					String property= event.getProperty();
+					if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property))
+						updateTitle();
+				}
+			};
 			fWorkingSetFilterActionGroup= new WorkingSetFilterActionGroup(fViewer, viewId, getShell(), titleUpdater);
+		}
+	
+		// Custom filter group
+		if (fHasCustomFilter)
+			fCustomFiltersActionGroup= new CustomFiltersActionGroup(this, fViewer);
 	}
 	
 	/**
@@ -681,6 +684,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 	protected final StructuredViewer getViewer() {
 		return fViewer;
+	}
+
+	protected final void setViewer(StructuredViewer viewer){
+		fViewer= viewer; 
 	}
 
 	protected ILabelProvider createLabelProvider() {
@@ -1032,7 +1039,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		return (IResource)element;
 	}
 
-	private void setSelection(ISelection selection, boolean reveal) {
+	void setSelection(ISelection selection, boolean reveal) {
 		if (selection != null && selection.equals(fViewer.getSelection()))
 			return;
 		fProcessSelectionEvents= false;
