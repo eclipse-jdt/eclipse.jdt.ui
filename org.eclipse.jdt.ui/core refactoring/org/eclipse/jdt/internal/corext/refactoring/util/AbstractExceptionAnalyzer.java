@@ -99,7 +99,7 @@ public abstract class AbstractExceptionAnalyzer extends ASTVisitor {
 		if (thrownException == null || thrownException.isPrimitive())
 			return false;
 		
-		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException");
+		ITypeBinding runTimeException= ast.resolveWellKnownType("java.lang.RuntimeException"); //$NON-NLS-1$
 		while (thrownException != null) {
 			if (runTimeException == thrownException)
 				return true;

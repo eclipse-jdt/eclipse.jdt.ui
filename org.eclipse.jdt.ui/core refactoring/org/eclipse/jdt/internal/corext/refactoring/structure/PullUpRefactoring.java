@@ -54,9 +54,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 public class PullUpRefactoring extends Refactoring {
-	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size";
+	private static final String PREF_TAB_SIZE= "org.eclipse.jdt.core.formatter.tabulation.size"; //$NON-NLS-1$
 
 	private final CodeGenerationSettings fPreferenceSettings;
 	private IMember[] fElementsToPullUp;
@@ -80,7 +81,7 @@ public class PullUpRefactoring extends Refactoring {
 	 * @see IRefactoring#getName()
 	 */
 	public String getName() {
-		return "Pull Up";
+		return RefactoringMessages.getString("PullUpRefactoring.Pull_Up"); //$NON-NLS-1$
 	}
 	
 	/**
@@ -96,7 +97,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private IMember[] getMembersToDelete(IProgressMonitor pm){
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			IMember[] matchingFields= getMembersOfType(getMatchingElements(new SubProgressMonitor(pm, 1)), IJavaElement.FIELD);
 			return merge(getOriginals(matchingFields), fMethodsToDelete);
 		} catch (JavaModelException e){
@@ -122,7 +123,7 @@ public class PullUpRefactoring extends Refactoring {
 	//XXX added for performance reasons
 	public ITypeHierarchy getSuperTypeHierarchy(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			if (fCachedSuperTypeHierarchy != null)
 				return fCachedSuperTypeHierarchy;
 			fCachedSuperTypeHierarchy= getSuperType(new SubProgressMonitor(pm, 1)).newTypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -134,7 +135,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	public IType getSuperType(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			if (fCachedSuperType != null)
 				return fCachedSuperType;
 			IType declaringType= getDeclaringType();
@@ -148,7 +149,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	public IMember[] getMatchingElements(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 2);
+			pm.beginTask("", 2); //$NON-NLS-1$
 			Set result= new HashSet();
 			IType superType= getSuperType(new SubProgressMonitor(pm, 1));
 			ITypeHierarchy hierarchy= getSuperTypeHierarchy(new SubProgressMonitor(pm, 1));
@@ -236,7 +237,7 @@ public class PullUpRefactoring extends Refactoring {
 				return result;
 			
 			if (! haveCommonDeclaringType())
-				return RefactoringStatus.createFatalErrorStatus("All selected elements must be declared in the same type.");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.same_declaring_type"));			 //$NON-NLS-1$
 
 			return new RefactoringStatus();
 	}
@@ -246,7 +247,7 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkActivation(IProgressMonitor pm)	throws JavaModelException {
 		try {
-			pm.beginTask("", 3);
+			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 						
 			result.merge(checkDeclaringType(new SubProgressMonitor(pm, 1)));
@@ -255,9 +256,9 @@ public class PullUpRefactoring extends Refactoring {
 				return result;			
 
 			if (getSuperType(new SubProgressMonitor(pm, 1)) == null)
-				return RefactoringStatus.createFatalErrorStatus("Pull up not allowed.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.not_allowed")); //$NON-NLS-1$
 			if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subtypes of binary types.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.subtypes_of_binary_types")); //$NON-NLS-1$
 
 			fElementsToPullUp= getOriginals(fElementsToPullUp);
 			for (int i= 0; i < fElementsToPullUp.length; i++) {
@@ -304,7 +305,7 @@ public class PullUpRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		try{
-			pm.beginTask("", 5);
+			pm.beginTask("", 5); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
@@ -334,21 +335,21 @@ public class PullUpRefactoring extends Refactoring {
 
 			if (member.getElementType() != IJavaElement.METHOD && 
 				member.getElementType() != IJavaElement.FIELD)
-					return RefactoringStatus.createFatalErrorStatus("Pull up is allowed only on fields and methods.");			
+					return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.only_fields_and_methods"));			 //$NON-NLS-1$
 			if (! member.exists())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements that do not exist.");			
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.elements_do_not_exist"));			 //$NON-NLS-1$
 	
 			if (member.isBinary())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on binary elements.");	
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_binary_elements"));	 //$NON-NLS-1$
 
 			if (member.isReadOnly())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on read-only elements.");					
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_read_only_elements"));					 //$NON-NLS-1$
 
 			if (! member.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements with unknown structure.");					
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_unknown_structure"));					 //$NON-NLS-1$
 
 			if (JdtFlags.isStatic(member)) //for now
-				return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on static elements.");
+				return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_static_elements")); //$NON-NLS-1$
 			
 			if (member.getElementType() == IJavaElement.METHOD)
 				return checkMethod((IMethod)member);
@@ -358,41 +359,41 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private static RefactoringStatus checkMethod(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on constructors.");			
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_constructors"));			 //$NON-NLS-1$
 			
 		if (JdtFlags.isAbstract(method))
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on abstract methods.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_abstract_methods")); //$NON-NLS-1$
 			
  		if (JdtFlags.isNative(method)) //for now - move to input preconditions
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on native methods.");				
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_native_methods"));				 //$NON-NLS-1$
 
 		return null;	
 	}
 	
 	private RefactoringStatus checkDeclaringType(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 3);
+		pm.beginTask("", 3); //$NON-NLS-1$
 		IType declaringType= getDeclaringType();
 				
 		if (declaringType.isInterface()) //for now
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on interface members.");
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_interface_members")); //$NON-NLS-1$
 		
-		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object"))
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in java.lang.Object.");	
+		if (JavaModelUtil.getFullyQualifiedName(declaringType).equals("java.lang.Object")) //$NON-NLS-1$
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_java.lang.Object"));	 //$NON-NLS-1$
 
 		if (declaringType.isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in binary types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_binary_types"));	 //$NON-NLS-1$
 
 		if (declaringType.isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in read-only types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_read_only_types"));	 //$NON-NLS-1$
 	
 		if (getSuperType(new SubProgressMonitor(pm, 1)) == null)	
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in this type.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.not_this_type"));	 //$NON-NLS-1$
 			
 		if (getSuperType(new SubProgressMonitor(pm, 1)).isBinary())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of binary types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_subclasses_of_binary_types"));	 //$NON-NLS-1$
 
 		if (getSuperType(new SubProgressMonitor(pm, 1)).isReadOnly())
-			return RefactoringStatus.createFatalErrorStatus("Pull up is not allowed on elements declared in subclasses of read-only types.");	
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getString("PullUpRefactoring.no_subclasses_of_read_only_types"));	 //$NON-NLS-1$
 		
 		return null;
 	}
@@ -408,11 +409,11 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkFinalFields(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", fElementsToPullUp.length);
+		pm.beginTask("", fElementsToPullUp.length); //$NON-NLS-1$
 		for (int i= 0; i < fElementsToPullUp.length; i++) {
 			if (fElementsToPullUp[i].getElementType() == IJavaElement.FIELD && JdtFlags.isFinal(fElementsToPullUp[i])){
 				Context context= JavaSourceContext.create(fElementsToPullUp[i]);
-				result.addWarning("Pulling up final fields will result in compilation errors if they are not initialized on creation or in constructors", context);
+				result.addWarning(RefactoringMessages.getString("PullUpRefactoring.final_fields"), context); //$NON-NLS-1$
 			}
 			pm.worked(1);
 		}
@@ -422,7 +423,7 @@ public class PullUpRefactoring extends Refactoring {
 	
 	private RefactoringStatus checkAccesses(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("Checking referenced elements", 3);
+		pm.beginTask(RefactoringMessages.getString("PullUpRefactoring.checking_referenced_elements"), 3); //$NON-NLS-1$
 		result.merge(checkAccessedTypes(new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedFields(new SubProgressMonitor(pm, 1)));
 		result.merge(checkAccessedMethods(new SubProgressMonitor(pm, 1)));
@@ -642,7 +643,7 @@ public class PullUpRefactoring extends Refactoring {
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		try{
 			fChangeManager= createChangeManager(pm);
-			return new CompositeChange("Pull Up", fChangeManager.getAllChanges());
+			return new CompositeChange(RefactoringMessages.getString("PullUpRefactoring.Pull_Up"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} catch(CoreException e){
 			throw new JavaModelException(e);
 		} finally{
@@ -742,7 +743,7 @@ public class PullUpRefactoring extends Refactoring {
 			importEdit.addImport(JavaModelUtil.getFullyQualifiedName(iType));
 		}
 		if (! importEdit.isEmpty())
-			manager.get(cu).addTextEdit("Update imports", importEdit);
+			manager.get(cu).addTextEdit(RefactoringMessages.getString("PullUpRefactoring.update_imports"), importEdit); //$NON-NLS-1$
 	}
 
 	private static int getTabWidth() {
@@ -766,7 +767,7 @@ public class PullUpRefactoring extends Refactoring {
 			
 		if (JdtFlags.isPrivate(member))
 			return substitutePrivateWithProtected(source);
-		return "protected " + removeLeadingWhiteSpaces(source);
+		return "protected " + removeLeadingWhiteSpaces(source); //$NON-NLS-1$
 	}
 
 	private static String replaceSuperCalls(IMethod method) throws JavaModelException {
@@ -778,24 +779,24 @@ public class PullUpRefactoring extends Refactoring {
 		for (int i= 0; i < superRefOffsert.length; i++) {
 			int start= superRefOffsert[i].getOffset() - originalMethodRange.getOffset();
 			int end= start + superRefOffsert[i].getLength();
-			source.replace(start, end, "this");
+			source.replace(start, end, "this"); //$NON-NLS-1$
 		}
 		return source.toString();
 	}
 	
 	private static String removeLeadingWhiteSpaces(String s){
-		if ("".equals(s))
-			return "";
+		if ("".equals(s)) //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 
-		if ("".equals(s.trim()))	
-			return "";
+		if ("".equals(s.trim()))	 //$NON-NLS-1$
+			return ""; //$NON-NLS-1$
 			
 		int i= 0;
 		while (i < s.length() && Character.isWhitespace(s.charAt(i))){
 			i++;
 		}
 		if (i == s.length())
-			return "";
+			return ""; //$NON-NLS-1$
 		return s.substring(i);
 	}
 	
@@ -816,7 +817,7 @@ public class PullUpRefactoring extends Refactoring {
 		}
 		//must do it this way - unicode
 		int length= scanner.getCurrentTokenSource().length;
-		return  new StringBuffer(methodSource).delete(offset, offset + length).insert(offset, "protected").toString();
+		return  new StringBuffer(methodSource).delete(offset, offset + length).insert(offset, "protected").toString(); //$NON-NLS-1$
 	}
 	
 	private static IMethod getLastMethod(IType type) throws JavaModelException {
