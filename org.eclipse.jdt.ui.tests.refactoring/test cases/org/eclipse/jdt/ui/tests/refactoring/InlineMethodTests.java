@@ -14,6 +14,8 @@
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
  * 	     o bug "Inline refactoring showed bogus error" (see bugzilla
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=42753)
+ *       o inline call that is used in a field initializer 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
@@ -75,7 +77,11 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTest();
 	}
 	
-	public void testFieldInitializer() throws Exception {
+	public void testInvalidFieldInitializer1() throws Exception {
+		performInvalidTest();
+	}
+	
+	public void testInvalidFieldInitializer2() throws Exception {
 		performInvalidTest();
 	}
 	
@@ -138,6 +144,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	}	
 
 	public void testSuper() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testFieldInitializer1() throws Exception {
+		performSimpleTest();
+	}	
+
+	public void testFieldInitializer2() throws Exception {
 		performSimpleTest();
 	}	
 

@@ -7,6 +7,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *       o inline call that is used in a field initializer 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -180,7 +182,6 @@ public class InlineMethodRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
 		fTargetProvider.initialize();
-		InvocationAnalyzer invocationAnalyzer= new InvocationAnalyzer(fSourceProvider);
 		pm.setTaskName(RefactoringCoreMessages.getString("InlineMethodRefactoring.searching")); //$NON-NLS-1$
 		ICompilationUnit[] units= fTargetProvider.getAffectedCompilationUnits(new SubProgressMonitor(pm, 1));
 		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units)));
@@ -207,11 +208,7 @@ public class InlineMethodRefactoring extends Refactoring {
 					Expression[] invocations= fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1));
 					for (int i= 0; i < invocations.length; i++) {
 						Expression invocation= invocations[i];
-						result.merge(inliner.initialize(invocation));
-						if (result.hasFatalError())
-							break;
-						RefactoringStatus targetStatus= invocationAnalyzer.perform(unit, invocation, inliner.getTargetNode(), fTargetProvider.getStatusSeverity());
-						result.merge(targetStatus);
+						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
 						if (result.hasFatalError())
 							break;
 						if (result.getSeverity() < fTargetProvider.getStatusSeverity()) {

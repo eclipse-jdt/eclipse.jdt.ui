@@ -7,6 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
+ *       o inline call that is used in a field initializer 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code.flow;
 
@@ -17,17 +20,14 @@ import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IfStatement;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.WhileStatement;
-
-import org.eclipse.jface.text.IRegion;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jface.text.IRegion;
 
 public class InputFlowAnalyzer extends FlowAnalyzer {
 	
@@ -106,15 +106,8 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 		Assert.isNotNull(fSelection);
 	}
 
-	public FlowInfo perform(MethodDeclaration method) {
-		return doPerform(method);
-	}
-
-	public FlowInfo perform(Initializer initializer) {
-		return doPerform(initializer);
-	}
-
-	protected FlowInfo doPerform(BodyDeclaration node) {
+	public FlowInfo perform(BodyDeclaration node) {
+		Assert.isTrue(!(node instanceof TypeDeclaration));
 		node.accept(this);
 		return getFlowInfo(node);
 	}

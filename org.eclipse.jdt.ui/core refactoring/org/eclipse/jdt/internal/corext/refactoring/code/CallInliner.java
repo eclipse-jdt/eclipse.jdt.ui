@@ -10,8 +10,10 @@
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fixes for:
  *       o bug "inline method - doesn't handle implicit cast" (see
  *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
- *       o bug inline method: compile error (array related) [refactoring] 
+ *       o bug inline method: compile error (array related)
  *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38471)
+ *       o inline call that is used in a field initializer 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -33,6 +35,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -49,6 +52,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -68,7 +72,11 @@ import org.eclipse.jdt.internal.corext.dom.LocalVariableIndex;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 import org.eclipse.jdt.internal.corext.dom.TypeRules;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowContext;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.FlowInfo;
 import org.eclipse.jdt.internal.corext.refactoring.code.flow.InputFlowAnalyzer;
@@ -95,6 +103,9 @@ public class CallInliner {
 	private FlowContext fFlowContext;
 	private FlowInfo fFlowInfo;
 	private CodeScopeBuilder.Scope fInvocationScope;
+	private boolean fFieldInitializer;
+	private List fLocals;
+	private CallContext fContext;
 	
 	private class InlineEvaluator extends HierarchicalASTVisitor {
 		private ParameterData fFormalArgument;
@@ -199,6 +210,7 @@ public class CallInliner {
 		fBuffer= TextBuffer.acquire(getFile(fCUnit));
 		fSourceProvider= provider;
 		fImportEdit= new ImportRewrite(fCUnit, settings);
+		fLocals= new ArrayList(3);
 	}
 
 	public void dispose() {
@@ -217,9 +229,8 @@ public class CallInliner {
 		return fTargetNode;
 	}
 	
-	public RefactoringStatus initialize(BodyDeclaration declaration) {
+	public void initialize(BodyDeclaration declaration) {
 		fBodyDeclaration= declaration;
-		RefactoringStatus result= new RefactoringStatus();
 		fRootScope= CodeScopeBuilder.perform(declaration, fSourceProvider.getDeclaration().resolveBinding());
 		fNumberOfLocals= 0;
 		switch (declaration.getNodeType()) {
@@ -230,23 +241,141 @@ public class CallInliner {
 				fNumberOfLocals= LocalVariableIndex.perform((Initializer)declaration);
 				break;
 		}
-		return result;
 	}
-	
-	public RefactoringStatus initialize(Expression invocation) {
+
+	public RefactoringStatus initialize(Expression invocation, int severity) {
 		RefactoringStatus result= new RefactoringStatus();
 		fInvocation= invocation;
-		fRewriter= new ASTRewrite(ASTNodes.getParent(fInvocation, ASTNode.BLOCK));
+		// field initializer can be inside of a block if used in a local class
+		// but block can't be a child of field initializer
+		ASTNode parentField= ASTNodes.getParent(fInvocation, ASTNode.FIELD_DECLARATION);
+		if(parentField != null) {
+			fRewriter= new ASTRewrite(parentField);
+			fFieldInitializer= true;
+		}
+		else {
+			ASTNode parentBlock= ASTNodes.getParent(fInvocation, ASTNode.BLOCK);
+			Assert.isNotNull(parentBlock);
+			fRewriter= new ASTRewrite(parentBlock);
+		}
 		ASTNode parent= fInvocation.getParent();
-		int nodeType1= parent.getNodeType();
-		if (nodeType1 == ASTNode.EXPRESSION_STATEMENT || nodeType1 == ASTNode.RETURN_STATEMENT) {
+		int nodeType= parent.getNodeType();
+		if (nodeType == ASTNode.EXPRESSION_STATEMENT || nodeType == ASTNode.RETURN_STATEMENT) {
 			fTargetNode= parent;
 		} else {
 			fTargetNode= fInvocation;
 		}
+		
+		flowAnalysis();
+		int callType= fTargetNode.getNodeType();
+		fContext= new CallContext(fInvocationScope, callType, fImportEdit);
+		
+		computeRealArguments();
+		computeReceiver();
+		
+		checkIfUsedInDeclaration(result, severity);
+		if (result.getSeverity() >= severity)
+			return result;
+		checkInvocationContext(result, severity);
+		if (result.getSeverity() >= severity)
+			return result;		
 		return result;
 	}
+
+	private void checkIfUsedInDeclaration(RefactoringStatus result, int severity) {
+		// we don't have support for field initializers yet. Skipping.
+		BodyDeclaration decl= (BodyDeclaration)ASTNodes.getParent(fInvocation, BodyDeclaration.class);
+		if (decl instanceof FieldDeclaration) {
+			// it is allowed to inline a method used for field initialization
+			// if only it consists of single return statement
+			if(fSourceProvider.getNumberOfStatements() > 1) {
+				addEntry(result,
+					RefactoringCoreMessages.getString("CallInliner.field_initializer_simple"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+				return;
+			}
+			if(fLocals.size() > 0) {
+				addEntry(result,
+					RefactoringCoreMessages.getString("CallInliner.field_initialize_new_local"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_FIELD_INITIALIZER, severity);
+				return;
+			}
+		}
+		else if (fSourceProvider.isExecutionFlowInterrupted()) {
+			VariableDeclaration vDecl= (VariableDeclaration)ASTNodes.getParent(fInvocation, VariableDeclaration.class);
+			if (vDecl != null) {
+				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_LOCAL_INITIALIZER, severity);
+			}
+		}
+	}
+
+	private void checkInvocationContext(RefactoringStatus result, int severity) {
+		if (fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			Expression exp= ((MethodInvocation)fInvocation).getExpression();
+			if (exp != null && exp.resolveTypeBinding() == null) {
+				addEntry(result, RefactoringCoreMessages.getString("CallInliner.receiver_type"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_NULL_BINDING, severity);
+			}
+		}
+		int nodeType= fTargetNode.getNodeType();
+		if (nodeType == ASTNode.EXPRESSION_STATEMENT) {
+			if (fSourceProvider.isExecutionFlowInterrupted()) {
+				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
+			}
+		} else if (nodeType == ASTNode.METHOD_INVOCATION) {
+			ASTNode parent= fTargetNode.getParent();
+			if (parent.getNodeType() == ASTNode.ASSIGNMENT || isSingleDeclaration(parent)) {
+				// this is ok
+			} else if (isMultiDeclarationFragment(parent)) {
+				if (!fSourceProvider.isSimpleFunction()) {
+					addEntry(result, RefactoringCoreMessages.getString("CallInliner.multiDeclaration"), //$NON-NLS-1$
+						RefactoringStatusCodes.INLINE_METHOD_INITIALIZER_IN_FRAGEMENT, severity);
+				}
+			} else if (fSourceProvider.getNumberOfStatements() > 1 ) {
+				addEntry(result, RefactoringCoreMessages.getString("CallInliner.simple_functions"), //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_ONLY_SIMPLE_FUNCTIONS, severity);
+			} else if (!fSourceProvider.isSimpleFunction()) {
+				addEntry(result, RefactoringCoreMessages.getString("CallInliner.execution_flow"),  //$NON-NLS-1$
+					RefactoringStatusCodes.INLINE_METHOD_EXECUTION_FLOW, severity);
+			}
+		}		
+	}
+
+	private static boolean isMultiDeclarationFragment(ASTNode node) {
+		int nodeType= node.getNodeType();
+		if (nodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			node= node.getParent();
+			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
+				return vs.fragments().size() > 1;
+			}
+		}
+		return false;
+	}
 	
+	private static boolean isSingleDeclaration(ASTNode node) {
+		int type= node.getNodeType();
+		if (type == ASTNode.SINGLE_VARIABLE_DECLARATION)
+			return true;
+		if (type == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+			node= node.getParent();
+			if (node.getNodeType() == ASTNode.VARIABLE_DECLARATION_STATEMENT) {
+				VariableDeclarationStatement vs= (VariableDeclarationStatement)node;
+				return vs.fragments().size() == 1;
+			}
+		}
+		return false;
+	}
+	
+	private void addEntry(RefactoringStatus result, String message, int code, int severity) {
+		result.addEntry(new RefactoringStatusEntry(
+			message, severity, 
+			JavaStatusContext.create(fCUnit, fInvocation),
+			null, code));
+	}
+
 	private void flowAnalysis() {
 		fInvocationScope= fRootScope.findScope(fTargetNode.getStartPosition(), fTargetNode.getLength());
 		fInvocationScope.setCursor(fTargetNode.getStartPosition());
@@ -255,11 +384,10 @@ public class CallInliner {
 		fFlowContext.setComputeMode(FlowContext.ARGUMENTS);
 		Selection selection= Selection.createFromStartLength(fInvocation.getStartPosition(), fInvocation.getLength());
 		switch (fBodyDeclaration.getNodeType()) {
-			case ASTNode.METHOD_DECLARATION:
-				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((MethodDeclaration)fBodyDeclaration);
-				break;
 			case ASTNode.INITIALIZER:
-				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform((Initializer)fBodyDeclaration);
+			case ASTNode.FIELD_DECLARATION:
+			case ASTNode.METHOD_DECLARATION:
+				fFlowInfo= new InputFlowAnalyzer(fFlowContext, selection).perform(fBodyDeclaration);
 				break;
 			default:
 				Assert.isTrue(false, "Should not happen");			 //$NON-NLS-1$
@@ -267,28 +395,22 @@ public class CallInliner {
 	}
 	
 	public TextEdit perform() throws CoreException {
-		flowAnalysis();
-		int callType= fTargetNode.getNodeType();
-		CallContext context= new CallContext(fInvocationScope, callType, fImportEdit);
 		
-		List locals= new ArrayList(3);
+		String[] blocks= fSourceProvider.getCodeBlocks(fContext);
+		if(!fFieldInitializer) {
+			initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + fLocals.size());
+		}
 		
-		computeRealArguments(context, locals);
-		computeReceiver(context, locals);
-		 		
-		String[] blocks= fSourceProvider.getCodeBlocks(context);
-		initializeInsertionPoint(fSourceProvider.getNumberOfStatements() + locals.size());
-		
-		addNewLocals(locals);
-		replaceCall(callType, blocks);
+		addNewLocals();
+		replaceCall(blocks);
 		
 		MultiTextEdit result= new MultiTextEdit();
-		fRewriter.rewriteNode(fBuffer, result, null);
+		fRewriter.rewriteNode(fBuffer, result);
 		fRewriter.removeModifications();
 		return result;
 	}
 
-	private void computeRealArguments(CallContext context, List locals) {
+	private void computeRealArguments() {
 		List arguments= Invocations.getArguments(fInvocation);
 		String[] realArguments= new String[arguments.size()];
 		for (int i= 0; i < arguments.size(); i++) {
@@ -303,57 +425,57 @@ public class CallInliner {
 			} else {
 				String name= fInvocationScope.createName(parameter.getName(), true);
 				realArguments[i]= name;
-				locals.add(createLocalDeclaration(
+				fLocals.add(createLocalDeclaration(
 					parameter.getTypeBinding(), name, 
 					(Expression)fRewriter.createCopy(expression)));
 			}
 		}
-		context.arguments= realArguments;
+		fContext.arguments= realArguments;
 	}
 	
-	private void computeReceiver(CallContext context, List locals) {
+	private void computeReceiver() {
 		Expression receiver= Invocations.getExpression(fInvocation);
 		if (receiver == null)
 			return;
 		final boolean isName= receiver instanceof Name;
 		if (isName)
-			context.receiverIsStatic= ((Name)receiver).resolveBinding() instanceof ITypeBinding;
+			fContext.receiverIsStatic= ((Name)receiver).resolveBinding() instanceof ITypeBinding;
 		if (ASTNodes.isLiteral(receiver) || isName) {
-			context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+			fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
 			return;
 		}
 		switch(fSourceProvider.getReceiversToBeUpdated()) {
 			case 0:
 				// Make sure we evaluate the current receiver. Best is to assign to
 				// local.
-				locals.add(createLocalDeclaration(
+				fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					fInvocationScope.createName("r", true),  //$NON-NLS-1$
 					(Expression)fRewriter.createCopy(receiver)));
 				return;
 			case 1:
-				context.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
+				fContext.receiver= fBuffer.getContent(receiver.getStartPosition(), receiver.getLength());
 				return;
 			default:
 				String local= fInvocationScope.createName("r", true); //$NON-NLS-1$
-				locals.add(createLocalDeclaration(
+					fLocals.add(createLocalDeclaration(
 					receiver.resolveTypeBinding(), 
 					local, 
 					(Expression)fRewriter.createCopy(receiver)));
-				context.receiver= local;
+				fContext.receiver= local;
 				return;
 		}
 	}
 
-	private void addNewLocals(List locals) {
-		for (Iterator iter= locals.iterator(); iter.hasNext();) {
+	private void addNewLocals() {
+		for (Iterator iter= fLocals.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
 			fRewriter.markAsInserted(element);
 			fStatements.add(fInsertionIndex++, element);
 		}
 	}
 
-	private void replaceCall(int callType, String[] blocks) throws CoreException {
+	private void replaceCall(String[] blocks) throws CoreException {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
@@ -372,7 +494,7 @@ public class CallInliner {
 			// We can inline a call where the declaration is a function and the call itself
 			// is a statement. In this case we have to create a temporary variable if the
 			// returned expression must be evaluated.
-			if (callType == ASTNode.EXPRESSION_STATEMENT && fSourceProvider.hasReturnValue()) {
+			if (fContext.callMode == ASTNode.EXPRESSION_STATEMENT && fSourceProvider.hasReturnValue()) {
 				if (fSourceProvider.mustEvaluateReturnedExpression()) {
 					if (fSourceProvider.returnValueNeedsLocalVariable()) {
 						node= createLocalDeclaration(

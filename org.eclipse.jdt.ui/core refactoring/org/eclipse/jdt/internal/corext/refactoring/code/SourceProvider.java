@@ -8,8 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Dmitry Stalnov (dstalnov@fusionone.com) - contributed fix for
- *       bug "inline method - doesn't handle implicit cast" (see
- *       https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *       o bug "inline method - doesn't handle implicit cast" (see
+ *         https://bugs.eclipse.org/bugs/show_bug.cgi?id=24941).
+ *       o inline call that is used in a field initializer 
+ *         (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=38137)
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
@@ -192,7 +194,7 @@ public class SourceProvider {
 		ASTRewrite rewriter= new ASTRewrite(fDeclaration.getParent());
 		rewriter.markAsRemoved(fDeclaration);
 		MultiTextEdit result= new MultiTextEdit();
-		rewriter.rewriteNode(fBuffer, result, null);
+		rewriter.rewriteNode(fBuffer, result);
 		rewriter.removeModifications();
 		return result;
 	}
@@ -220,7 +222,7 @@ public class SourceProvider {
 		}
 		
 		MultiTextEdit dummy= new MultiTextEdit();
-		fRewriter.rewriteNode(fBuffer, dummy, null);
+		fRewriter.rewriteNode(fBuffer, dummy);
 
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
