@@ -1,0 +1,194 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2002 International Business Machines Corp. and others.
+ * All rights reserved. This program and the accompanying materials 
+ * are made available under the terms of the Common Public License v0.5 
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/cpl-v05.html
+ * 
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ ******************************************************************************/
+package org.eclipse.jdt.internal.ui.refactoring;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.ui.help.WorkbenchHelp;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+
+public class PromoteTempInputPage extends UserInputWizardPage {
+
+	private static final String DESCRIPTION = RefactoringMessages.getString("PromoteTempInputPage.description");//$NON-NLS-1$
+	public static final String PAGE_NAME= "PromoteTempInputPage";//$NON-NLS-1$
+	private static final String[] RADIO_BUTTON_LABELS= {
+						"Field decla&ration",
+						"&Current method",
+						"C&lass constructor(s)"};
+    private static final Integer[] RADIO_BUTTON_DATA= {
+        				new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD),
+        				new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD),
+    					new Integer(PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR)};
+    private Button fDeclareStaticCheckbox;
+    private Button fDeclareFinalCheckbox;
+	private Button[] fInitializeInRadioButtons;
+	
+	public PromoteTempInputPage() {
+		super(PAGE_NAME, true);
+		setDescription(DESCRIPTION);
+	}
+
+	public void createControl(Composite parent) {
+		Composite result= new Composite(parent, SWT.NONE);
+		setControl(result);
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.verticalSpacing= 8;
+		result.setLayout(layout);
+		
+        addVisibilityControl(result);
+        addFieldNameField(result);
+        addInitizeInRadioButtonGroup(result);
+        addDeclareStaticCheckbox(result);
+        addDeclareFinalCheckbox(result);
+				
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.PROMOTE_TEMP_TO_FIELD_WIZARD_PAGE);		
+	}
+
+    private void addFieldNameField(Composite result) {
+        Label nameLabel= new Label(result, SWT.NONE);
+        nameLabel.setText("F&ield name:");
+        nameLabel.setLayoutData(new GridData());
+        
+        final Text nameField= new Text(result, SWT.BORDER | SWT.SINGLE);
+        nameField.setText(getPromoteTempRefactoring().getFieldName());
+        nameField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+        nameField.addModifyListener(new ModifyListener(){
+        	public void modifyText(ModifyEvent e) {
+        		PromoteTempInputPage.this.getPromoteTempRefactoring().setFieldName(nameField.getText());
+        		PromoteTempInputPage.this.updateStatus();
+            }
+        });
+    }
+
+    private void updateStatus() {
+    	setPageComplete(getPromoteTempRefactoring().validateInput());
+	}
+
+    private void addInitizeInRadioButtonGroup(Composite result) {
+        GridData gd;		
+        Group initializeIn= new Group(result, SWT.NONE);
+        initializeIn.setText("Initialize in");
+        initializeIn.setLayout(new GridLayout());
+        gd= new GridData(GridData.FILL_HORIZONTAL);
+        gd.horizontalSpan= 2;
+        initializeIn.setLayoutData(gd);
+        
+        Assert.isTrue(RADIO_BUTTON_LABELS.length == RADIO_BUTTON_DATA.length);
+        fInitializeInRadioButtons= new Button[RADIO_BUTTON_LABELS.length];
+        for (int i= 0; i < RADIO_BUTTON_LABELS.length; i++) {
+        	Integer dataItem= RADIO_BUTTON_DATA[i];
+        	fInitializeInRadioButtons[i]= new Button(initializeIn, SWT.RADIO);
+	        fInitializeInRadioButtons[i].setEnabled(canEnable(dataItem.intValue()));
+	        fInitializeInRadioButtons[i].setText(RADIO_BUTTON_LABELS[i]);
+	        fInitializeInRadioButtons[i].setSelection(dataItem.intValue() == getPromoteTempRefactoring().getInitializeIn());
+	        fInitializeInRadioButtons[i].setLayoutData(new GridData());
+	        fInitializeInRadioButtons[i].setData(dataItem);
+	        final int j= i;
+	        fInitializeInRadioButtons[i].addSelectionListener(new SelectionAdapter(){
+    	    	public void widgetSelected(SelectionEvent e) {
+       	 			getPromoteTempRefactoring().setInitializeIn(getDataAsInt(fInitializeInRadioButtons[j]));
+       	 			updateButtonsEnablement();
+        	    }
+	        });
+        }				
+    }
+
+    private void updateButtonsEnablement() {
+    	fDeclareFinalCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingFinal());
+    	fDeclareStaticCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingStatic());
+    	for (int i= 0; i < fInitializeInRadioButtons.length; i++) {
+	    	fInitializeInRadioButtons[i].setEnabled(canEnable(getDataAsInt(fInitializeInRadioButtons[i])));
+        }
+    }
+    
+    private static int getDataAsInt(Button button){
+    	return ((Integer)button.getData()).intValue();
+    }
+    
+    private boolean canEnable(int initializeIn){
+    	switch(initializeIn){
+    		case PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR:
+    			return getPromoteTempRefactoring().canEnableSettingDeclareInConstructors();
+    		case PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD:
+    			return getPromoteTempRefactoring().canEnableSettingDeclareInFieldDeclaration();
+    		case PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD:
+    			return getPromoteTempRefactoring().canEnableSettingDeclareInMethod();
+    		default: Assert.isTrue(false); return false;		
+    	}
+    }
+
+    public void addDeclareStaticCheckbox(Composite result) {
+        GridData gd;
+        fDeclareStaticCheckbox= new Button(result, SWT.CHECK);
+        fDeclareStaticCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingStatic());
+        fDeclareStaticCheckbox.setSelection(getPromoteTempRefactoring().getDeclareStatic());
+        fDeclareStaticCheckbox.setText("D&eclare field as 'static'");
+        gd= new GridData(GridData.FILL_HORIZONTAL);
+        gd.horizontalSpan= 2;
+        fDeclareStaticCheckbox.setLayoutData(gd);
+        fDeclareStaticCheckbox.addSelectionListener(new SelectionAdapter(){
+        	public void widgetSelected(SelectionEvent e) {
+        		getPromoteTempRefactoring().setDeclareStatic(fDeclareStaticCheckbox.getSelection());
+   	 			updateButtonsEnablement();
+            }
+        });
+    }
+
+    private void addDeclareFinalCheckbox(Composite result) {
+        GridData gd;
+        fDeclareFinalCheckbox= new Button(result, SWT.CHECK);
+        fDeclareFinalCheckbox.setEnabled(getPromoteTempRefactoring().canEnableSettingFinal());
+        fDeclareFinalCheckbox.setSelection(getPromoteTempRefactoring().getDeclareFinal());
+        fDeclareFinalCheckbox.setText("Decl&are field as 'final'");
+        gd= new GridData(GridData.FILL_HORIZONTAL);
+        gd.horizontalSpan= 2;
+        fDeclareFinalCheckbox.setLayoutData(gd);
+        fDeclareFinalCheckbox.addSelectionListener(new SelectionAdapter(){
+        	public void widgetSelected(SelectionEvent e) {
+        		getPromoteTempRefactoring().setDeclareFinal(fDeclareFinalCheckbox.getSelection());
+   	 			updateButtonsEnablement();
+            }
+        });
+    }
+
+    private void addVisibilityControl(Composite result) {
+        int[] availableVisibilities= getPromoteTempRefactoring().getAvailableVisibilities();
+        int currectVisibility= getPromoteTempRefactoring().getVisibility();
+        IVisibilityChangeListener visibilityChangeListener= new IVisibilityChangeListener(){
+        	public void visibilityChanged(int newVisibility) {
+        		getPromoteTempRefactoring().setVisibility(newVisibility);
+            }
+        };
+        Composite visibilityComposite= VisibilityControlUtil.createVisibilityControl(result, visibilityChangeListener, availableVisibilities, currectVisibility);
+        GridData gd= new GridData(GridData.FILL_HORIZONTAL);
+        gd.horizontalSpan= 2;
+        visibilityComposite.setLayoutData(gd);
+    }
+
+	private PromoteTempToFieldRefactoring getPromoteTempRefactoring(){
+		return (PromoteTempToFieldRefactoring)getRefactoring();
+	}
+}
