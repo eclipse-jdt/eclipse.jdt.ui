@@ -71,7 +71,7 @@ public class WorkingCopyUtil {
 		/*
 		 * Explicitly create a new working copy.
 		 */
-		return (ICompilationUnit)(getOriginal(cu).getWorkingCopy());
+		return (ICompilationUnit)(getOriginal(cu).getWorkingCopy(null));
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class WorkingCopyUtil {
 	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(IPackageFragment pack, String cuName) throws JavaModelException{
-		return (ICompilationUnit)pack.getCompilationUnit(cuName).getWorkingCopy();
+		return (ICompilationUnit)pack.getCompilationUnit(cuName).getWorkingCopy(null);
 	}
 
 	/**
