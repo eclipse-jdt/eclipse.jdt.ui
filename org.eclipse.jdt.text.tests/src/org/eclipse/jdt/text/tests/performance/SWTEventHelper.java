@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
+import junit.framework.Assert;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
@@ -63,7 +65,7 @@ public class SWTEventHelper {
 		fgKeyCodeEvent.type= type;
 		fgKeyCodeEvent.keyCode= keyCode;
 		
-		display.post(fgKeyCodeEvent);
+		Assert.assertTrue(display.post(fgKeyCodeEvent));
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
@@ -101,7 +103,7 @@ public class SWTEventHelper {
 		fgKeyCharEvent.type= type;
 		fgKeyCharEvent.character= keyChar;
 		
-		display.post(fgKeyCharEvent);
+		Assert.assertTrue(display.post(fgKeyCharEvent));
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
@@ -112,7 +114,7 @@ public class SWTEventHelper {
 		fgMouseMoveEvent.x= x;
 		fgMouseMoveEvent.y= y;
 		
-		display.post(fgMouseMoveEvent);
+		Assert.assertTrue(display.post(fgMouseMoveEvent));
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
@@ -130,7 +132,7 @@ public class SWTEventHelper {
 		fgMouseButtonEvent.type= type;
 		fgMouseButtonEvent.button= button;
 		
-		display.post(fgMouseButtonEvent);
+		Assert.assertTrue(display.post(fgMouseButtonEvent));
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
