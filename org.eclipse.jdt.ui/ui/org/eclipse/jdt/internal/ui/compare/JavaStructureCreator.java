@@ -20,6 +20,9 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.compare.*;
@@ -143,9 +146,12 @@ public class JavaStructureCreator implements IStructureCreator {
 				buffer= new char[n];
 				contents.getChars(0, n, buffer, 0);
 			}
-			
-			JavaParseTreeBuilder p= new JavaParseTreeBuilder();
-			p.parse(root, buffer);
+						
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(buffer);
+			parser.setFocalPosition(0);
+			CompilationUnit cu= (CompilationUnit) parser.createAST(null);
+			cu.accept(new JavaParseTreeBuilder(root, buffer, true));
 			
 			return root;
 		}
