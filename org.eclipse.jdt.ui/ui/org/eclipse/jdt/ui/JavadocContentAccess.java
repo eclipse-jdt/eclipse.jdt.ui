@@ -8,12 +8,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.javadoc;
-
+package org.eclipse.jdt.ui;
  
-import java.io.IOException;
-
-import org.eclipse.core.runtime.IStatus;
+import java.io.Reader;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,18 +26,25 @@ import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
+import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-
-public class JavaDocAccess {
+/**
+ * Helper needed get the content of a Javadoc comment. 
+ *
+ * @since 3.1
+ */
+public class JavadocContentAccess {
+	
 	/**
-	 * Gets a reader for an IMember's JavaDoc comment
-	 * Returns null if the member does not contain a JavaDoc comment or
-	 * if no source is available.
-	 * @param allowInherited For methods with no comment, the comment of the overridden class
+	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
+	 * The content does contain only the text from the comment without the Javadoc leading star characters.
+	 * Returns null if the member does not contain a Javadoc comment or if no source is available.
+	 * @param member The member to get the Javadoc of.
+	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
 	 */
-	public static JavaDocCommentReader getJavaDoc(IMember member, boolean allowInherited) throws JavaModelException {
+	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
 		if (buf == null) {
 			// no source attachment found
@@ -80,24 +84,13 @@ public class JavaDocAccess {
 		return null;
 	}
 
-
-
-	/**
-	 * Gets a reader for an IMember's JavaDoc comment
-	 * Returns null if the member does not contain a JavaDoc comment or
-	 * if no source is available.
-	 */
-	public static JavaDocCommentReader getJavaDoc(IMember member) throws JavaModelException {
-		return getJavaDoc(member, false);
-	}
-
-	private static JavaDocCommentReader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	private static Reader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);
 		IType[] superTypes= hierarchy.getAllSupertypes(type);
 		for (int i= 0; i < superTypes.length; i++) {
 			IMethod method= JavaModelUtil.findMethod(name, paramTypes, isConstructor, superTypes[i]);
 			if (method != null) {
-				JavaDocCommentReader reader= getJavaDoc(method, false);
+				Reader reader= getContentReader(method, false);
 				if (reader != null) {
 					return reader;
 				}
@@ -105,25 +98,5 @@ public class JavaDocAccess {
 		}
 		return null;
 	}		
-
-	
-	/**
-	 * Gets a text content for an IMember's JavaDoc comment
-	 * Returns null if the member does not contain a JavaDoc comment or
-	 * if no source is available.
-	 */
-	public static String getJavaDocTextString(IMember member, boolean allowInherited) throws JavaModelException {
-		try {
-			SingleCharReader rd= getJavaDoc(member, allowInherited);
-			if (rd != null)
-				return rd.getString();
-				
-		} catch (IOException e) {
-			throw new JavaModelException(e, IStatus.ERROR);
-		}
-		
-		return null;
-	}
-	
 
 }

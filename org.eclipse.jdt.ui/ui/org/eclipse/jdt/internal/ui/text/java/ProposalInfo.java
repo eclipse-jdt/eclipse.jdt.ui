@@ -21,8 +21,10 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavadocContentAccess;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
@@ -105,7 +107,7 @@ public class ProposalInfo {
 		try {
 			IMember member= getMember();
 			if (member != null) {
-				Reader reader= JavaDocAccess.getJavaDoc(member, true);
+				Reader reader= JavadocContentAccess.getContentReader(member, true);
 				if (reader != null) {
 					return new JavaDoc2HTMLTextReader(reader).getString();
 				}

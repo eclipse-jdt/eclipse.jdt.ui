@@ -12,16 +12,17 @@ package org.eclipse.jdt.internal.ui.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.net.URL;
 import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.help.HelpSystem;
 import org.eclipse.help.IContext;
 import org.eclipse.help.IHelpResource;
-
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
@@ -30,13 +31,13 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.JavadocContentAccess;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
-import org.eclipse.jdt.internal.corext.javadoc.SingleCharReader;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
@@ -144,7 +145,7 @@ public class JavadocHelpContext implements IContext {
 	private String retrieveText(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof IMember) {
 			try {
-				SingleCharReader reader= JavaDocAccess.getJavaDoc((IMember) elem, true);
+				Reader reader= JavadocContentAccess.getContentReader((IMember) elem, true);
 				if (reader != null) {
 					HTML2TextReader htmlReader= new HTML2TextReader(reader, null);
 					String str= htmlReader.getString();

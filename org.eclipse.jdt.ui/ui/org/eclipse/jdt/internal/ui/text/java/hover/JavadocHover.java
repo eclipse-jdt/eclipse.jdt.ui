@@ -16,9 +16,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
@@ -62,7 +62,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover {
 				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {
-					reader= JavaDocAccess.getJavaDoc(member, true);
+					reader= JavadocContentAccess.getContentReader(member, true);
 				} catch (JavaModelException ex) {
 					return null;
 				}

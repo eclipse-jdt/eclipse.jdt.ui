@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
-import org.osgi.framework.Bundle;
-
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -65,9 +63,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.javadoc.JavaDocAccess;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -75,6 +73,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
+
+import org.osgi.framework.Bundle;
 
 /**
  * View which shows Javadoc for a given Java element.
@@ -454,7 +454,7 @@ public class JavadocView extends AbstractInfoView {
 //				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {
-					reader= JavaDocAccess.getJavaDoc(member, true);
+					reader= JavadocContentAccess.getContentReader(member, true);
 				} catch (JavaModelException ex) {
 					return null;
 				}
