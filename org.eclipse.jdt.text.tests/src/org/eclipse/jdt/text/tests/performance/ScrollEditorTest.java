@@ -20,6 +20,7 @@ import org.eclipse.test.performance.PerformanceMeter;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
+import org.eclipse.jdt.text.tests.performance.DisplayWaiter.Timeout;
 
 public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 	
@@ -124,28 +125,57 @@ public abstract class ScrollEditorTest extends TextPerformanceTestCase {
 
 	protected abstract String getEditor();
 
-	private void measure(StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
+	private void measure(final StyledText text, ScrollingMode mode, PerformanceMeter performanceMeter, int runs) {
 		Display display= EditorTestHelper.getActiveDisplay();
-		int numberOfLines= text.getLineCount();
-		int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
+		final int numberOfLines= text.getLineCount();
+		final int visibleLinesInViewport= text.getClientArea().height / text.getLineHeight();
 		int operations= mode.computeOperations(numberOfLines, visibleLinesInViewport);
 		
-		for (int i= 0; i < runs; i++) {
-			performanceMeter.start();
-			for (int j= 0; j < operations; j++) {
-				// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
-				SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO);
+		DisplayWaiter waiter= new DisplayWaiter(display, true);
+		try {
+			for (int i= 0; i < runs; i++) {
+				// 1: post scroll events
+				long delay= 3000;
+				Timeout timeout= waiter.restart(delay);
+				performanceMeter.start();
+				for (int j= 0; j < operations && !timeout.hasTimedOut(); j++) {
+					// avoid overhead: assertTrue(text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1);
+					SWTEventHelper.pressKeyCodeCombination(display, mode.SCROLL_COMBO, false);
+					sleepAndRun(display);
+					// average for select & scroll is 30ms/line 
+					// - give it ten time as much to allow for GCs (300ms),
+					// check back every 10 lines == never wait longer than 3s.
+					if (j % 10 == 9)
+						timeout= waiter.restart(delay);
+				}
+				performanceMeter.stop();
+				assertFalse("Failed to receive event within " + delay + "ms.", timeout.hasTimedOut());
+				
+				// 2: wait until the events have been swallowed
+				timeout= waiter.restart(2000);
+				while (!timeout.hasTimedOut() && text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1) {
+					sleepAndRun(display);
+				}
+				assertFalse("Never scrolled to the bottom within 2000ms.\nTopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, timeout.hasTimedOut());
+				
+				// 3: go back home
+				timeout= waiter.restart(2000);
+				SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO, false);
+				while (!timeout.hasTimedOut() && text.getTopIndex() != 0) {
+					sleepAndRun(display);
+				}
+				
+				assertFalse("Never went back to the top within 2000ms.", timeout.hasTimedOut());
+				
+				waiter.hold();
 			}
-			performanceMeter.stop();
-			long timeout= System.currentTimeMillis() + 5000;
-			while (text.getTopIndex() + visibleLinesInViewport < numberOfLines - 1 && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
-			assertTrue("TopIndex: " + text.getTopIndex() + " visibleLines: " + visibleLinesInViewport + " totalLines: " + numberOfLines + " operations: " + operations, text.getTopIndex() + visibleLinesInViewport >= numberOfLines - 1);
-			SWTEventHelper.pressKeyCodeCombination(display, mode.HOME_COMBO);
-			timeout= System.currentTimeMillis() + 5000;
-			while (text.getTopIndex() != 0 && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
-			assertEquals(0, text.getTopIndex());
+		} finally {
+			waiter.stop();
 		}
+	}
+
+	private void sleepAndRun(Display display) {
+		if (display.sleep())
+			EditorTestHelper.runEventQueue(display);
 	}
 }

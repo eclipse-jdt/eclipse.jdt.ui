@@ -122,10 +122,7 @@ public abstract class NonInitialTypingTest extends TextPerformanceTestCase {
 	}
 
 	private synchronized void sleep(int time) {
-		try {
-			wait(time);
-		} catch (InterruptedException e) {
-		}
+		DisplayHelper.sleep(EditorTestHelper.getActiveDisplay(), time);
 	}
 	
 	private int getInsertPosition() throws BadLocationException {

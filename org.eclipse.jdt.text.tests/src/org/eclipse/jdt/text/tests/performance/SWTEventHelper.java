@@ -42,20 +42,28 @@ public class SWTEventHelper {
 			keyCodeUp(display, keyCodes[i], runEventQueue);
 	}
 
+	public static void keyCodeDown(Display display, int keyCode) {
+		keyCodeEvent(display, SWT.KeyDown, keyCode, true);
+	}
+	
 	public static void keyCodeDown(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyDown, keyCode, runEventQueue);
 	}
 
+	public static void keyCodeUp(Display display, int keyCode) {
+		keyCodeEvent(display, SWT.KeyUp, keyCode, true);
+	}
+	
 	public static void keyCodeUp(Display display, int keyCode, boolean runEventQueue) {
 		keyCodeEvent(display, SWT.KeyUp, keyCode, runEventQueue);
 	}
 
-	private static Event sfKeyCodeEvent= new Event();
+	private static Event fgKeyCodeEvent= new Event();
 	public static void keyCodeEvent(Display display, int type, int keyCode, boolean runEventQueue) {
-		sfKeyCodeEvent.type= type;
-		sfKeyCodeEvent.keyCode= keyCode;
+		fgKeyCodeEvent.type= type;
+		fgKeyCodeEvent.keyCode= keyCode;
 		
-		display.post(sfKeyCodeEvent);
+		display.post(fgKeyCodeEvent);
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
@@ -88,23 +96,23 @@ public class SWTEventHelper {
 		keyCharEvent(display, SWT.KeyUp, keyChar, runEventQueue);
 	}
 
-	private static Event sfKeyCharEvent= new Event();
+	private static Event fgKeyCharEvent= new Event();
 	public static void keyCharEvent(Display display, int type, char keyChar, boolean runEventQueue) {
-		sfKeyCharEvent.type= type;
-		sfKeyCharEvent.character= keyChar;
+		fgKeyCharEvent.type= type;
+		fgKeyCharEvent.character= keyChar;
 		
-		display.post(sfKeyCharEvent);
+		display.post(fgKeyCharEvent);
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
 	
-	private static Event sfMouseMoveEvent= new Event();
+	private static Event fgMouseMoveEvent= new Event();
 	public static void mouseMoveEvent(Display display, int x, int y, boolean runEventQueue) {
-		sfMouseMoveEvent.type= SWT.MouseMove;
-		sfMouseMoveEvent.x= x;
-		sfMouseMoveEvent.y= y;
+		fgMouseMoveEvent.type= SWT.MouseMove;
+		fgMouseMoveEvent.x= x;
+		fgMouseMoveEvent.y= y;
 		
-		display.post(sfMouseMoveEvent);
+		display.post(fgMouseMoveEvent);
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}
@@ -117,12 +125,12 @@ public class SWTEventHelper {
 		mouseButtonEvent(display, SWT.MouseUp, button, runEventQueue);
 	}
 
-	private static Event sfMouseButtonEvent= new Event();
+	private static Event fgMouseButtonEvent= new Event();
 	public static void mouseButtonEvent(Display display, int type, int button, boolean runEventQueue) {
-		sfMouseButtonEvent.type= type;
-		sfMouseButtonEvent.button= button;
+		fgMouseButtonEvent.type= type;
+		fgMouseButtonEvent.button= button;
 		
-		display.post(sfMouseButtonEvent);
+		display.post(fgMouseButtonEvent);
 		if (runEventQueue)
 			EditorTestHelper.runEventQueue();
 	}

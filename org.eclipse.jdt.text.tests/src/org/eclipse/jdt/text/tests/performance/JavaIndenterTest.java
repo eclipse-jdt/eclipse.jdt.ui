@@ -72,23 +72,28 @@ public class JavaIndenterTest extends TextPerformanceTestCase {
 	}
 
 	private void measureJavaIndenter(PerformanceMeter performanceMeter, int runs) {
-		IDocument document= EditorTestHelper.getDocument(fEditor);
+		final IDocument document= EditorTestHelper.getDocument(fEditor);
 		Display display= EditorTestHelper.getActiveDisplay();
 		IAction undo= fEditor.getAction(ITextEditorActionConstants.UNDO);
-		int originalNumberOfLines= document.getNumberOfLines();
+		final int originalNumberOfLines= document.getNumberOfLines();
 		for (int i= 0; i < runs; i++) {
+			DisplayHelper helper= new DisplayHelper() {
+				protected boolean condition() {
+					return document.getNumberOfLines() == originalNumberOfLines + 1;
+				}
+			};
 			performanceMeter.start();
 			SWTEventHelper.pressKeyCode(display, SWT.CR, false);
-			long timeout= System.currentTimeMillis() + 5000;			
-			while (originalNumberOfLines + 1 != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
+			boolean success= helper.waitForCondition(display, 5000);
 			performanceMeter.stop();
-			assertEquals(originalNumberOfLines + 1, document.getNumberOfLines());
+			assertTrue(success);
 			runAction(undo);
-			timeout= System.currentTimeMillis() + 1000;
-			while (originalNumberOfLines != document.getNumberOfLines() && System.currentTimeMillis() < timeout)
-				EditorTestHelper.runEventQueue();
-			assertEquals(originalNumberOfLines, document.getNumberOfLines());
+			helper= new DisplayHelper() {
+				protected boolean condition() {
+					return document.getNumberOfLines() == originalNumberOfLines;
+				}
+			};
+			assertTrue(helper.waitForCondition(display, 1000));
 		}
 	}
 
