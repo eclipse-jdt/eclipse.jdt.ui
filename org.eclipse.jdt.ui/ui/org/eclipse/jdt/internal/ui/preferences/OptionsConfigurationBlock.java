@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.swt.SWT;
@@ -415,7 +416,10 @@ public abstract class OptionsConfigurationBlock {
 			}
 			setOptions(actualOptions);
 			if (doBuild) {
-				doFullBuild();
+				boolean res= doFullBuild();
+				if (!res) {
+					return false;
+				}
 			}
 		}
 		return true;
@@ -423,11 +427,11 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected abstract String[] getFullBuildDialogStrings(boolean workspaceSettings);
 		
-	protected void doFullBuild() {
+	protected boolean doFullBuild() {
 		GoToBackProgressMonitorDialog dialog= new GoToBackProgressMonitorDialog(getShell());
 		try {
 			dialog.run(true, true, new IRunnableWithProgress() { 
-				public void run(IProgressMonitor monitor) throws InvocationTargetException {
+				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 					monitor.beginTask("", 2); //$NON-NLS-1$
 					try {
 						if (fProject != null) {
@@ -438,6 +442,8 @@ public abstract class OptionsConfigurationBlock {
 							monitor.setTaskName(PreferencesMessages.getString("OptionsConfigurationBlock.buildall.taskname")); //$NON-NLS-1$
 							JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 2));
 						}
+					} catch (OperationCanceledException e) {
+						throw new InterruptedException();
 					} catch (CoreException e) {
 						throw new InvocationTargetException(e);
 					} finally {
@@ -445,12 +451,15 @@ public abstract class OptionsConfigurationBlock {
 					}
 				}
 			});
+			return true;
 		} catch (InterruptedException e) {
 			// cancelled by user
+			return false;
 		} catch (InvocationTargetException e) {
 			String title= PreferencesMessages.getString("OptionsConfigurationBlock.builderror.title"); //$NON-NLS-1$
 			String message= PreferencesMessages.getString("OptionsConfigurationBlock.builderror.message"); //$NON-NLS-1$
 			ExceptionHandler.handle(e, getShell(), title, message);
+			return false;
 		}
 	}		
 	

@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IProgressMonitorWithBlocking;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
@@ -70,6 +71,8 @@ public class GoToBackProgressMonitorDialog extends IconAndMessageDialog implemen
 			} catch (InvocationTargetException e) {
 				return JavaUIStatus.createError(IStatus.ERROR, "Operation failed.", e); //$NON-NLS-1$
 			} catch (InterruptedException e) {
+				return Status.CANCEL_STATUS;
+			} catch (OperationCanceledException e) {
 				return Status.CANCEL_STATUS;
 			} catch (RuntimeException e) {
 				return JavaUIStatus.createError(IStatus.ERROR, "Operation failed.", e); //$NON-NLS-1$
@@ -613,6 +616,9 @@ public void run(boolean fork, boolean cancelable, IRunnableWithProgress runnable
 		MyJob job= new MyJob(runnable, getShell().getDisplay());
 		job.schedule();
 		job.block();
+		if (progressMonitor.isCanceled()) {
+			throw new InterruptedException();
+		}
 	} finally {
 		finishedRun();
 	}

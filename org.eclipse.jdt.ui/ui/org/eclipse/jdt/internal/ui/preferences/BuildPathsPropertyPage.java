@@ -29,7 +29,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
 import org.eclipse.ui.dialogs.PropertyPage;
@@ -44,6 +43,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.viewsupport.GoToBackProgressMonitorDialog;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
 
@@ -198,7 +198,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			};
 			IRunnableWithProgress op= new WorkbenchRunnableAdapter(runnable, getProject());
 			try {
-				new ProgressMonitorDialog(shell).run(true, true, op);
+				new GoToBackProgressMonitorDialog(shell).run(true, true, op);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.getString("BuildPathsPropertyPage.error.title"); //$NON-NLS-1$
 				String message= PreferencesMessages.getString("BuildPathsPropertyPage.error.message"); //$NON-NLS-1$
