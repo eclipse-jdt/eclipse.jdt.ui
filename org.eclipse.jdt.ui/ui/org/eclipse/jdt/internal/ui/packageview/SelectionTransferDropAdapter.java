@@ -15,6 +15,10 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
 import org.eclipse.swt.dnd.Transfer;
@@ -24,23 +28,20 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
+import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgMoveStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.reorg.CopyRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
 public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implements TransferDropTargetListener {
 
@@ -52,7 +53,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private ISelection fSelection;
 	private AddMethodStubAction fAddMethodStubAction;
 	
-	private static final int DROP_TIME_DIFF_TRESHOLD= 150;
+	private static final long DROP_TIME_DIFF_TRESHOLD= 150;
 
 	public SelectionTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
@@ -122,7 +123,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	}
 	
 	private boolean tooFast(DropTargetEvent event) {
-		return Math.abs(LocalSelectionTransfer.getInstance().getSelectionSetTime() - event.time) < DROP_TIME_DIFF_TRESHOLD;
+		return Math.abs(LocalSelectionTransfer.getInstance().getSelectionSetTime() - (event.time & 0xFFFFFFFFL)) < DROP_TIME_DIFF_TRESHOLD;
 	}	
 
 	public void drop(Object target, DropTargetEvent event) {

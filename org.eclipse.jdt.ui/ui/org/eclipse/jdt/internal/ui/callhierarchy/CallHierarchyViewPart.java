@@ -16,6 +16,10 @@ package org.eclipse.jdt.internal.ui.callhierarchy;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.dnd.Clipboard;
@@ -59,10 +63,23 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.PageBook;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
+import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
+import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
+import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
+import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
+import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
+import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
@@ -71,23 +88,6 @@ import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
-import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
-import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
-import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
-import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
-import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabels;
-import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
-
-import org.eclipse.jdt.internal.corext.callhierarchy.CallHierarchy;
-import org.eclipse.jdt.internal.corext.callhierarchy.CallLocation;
-import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 /**
  * This is the main view for the callers plugin. It builds a tree of callers/callees

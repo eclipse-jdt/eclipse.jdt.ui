@@ -19,6 +19,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
+
 public class BasicSelectionTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
@@ -41,7 +43,7 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 	public void dragStart(DragSourceEvent event) {
 		ISelection selection= fProvider.getSelection();
 		LocalSelectionTransfer.getInstance().setSelection(selection);
-		LocalSelectionTransfer.getInstance().setSelectionSetTime(event.time);
+		LocalSelectionTransfer.getInstance().setSelectionSetTime(event.time & 0xFFFFFFFFL);
 		event.doit= isDragable(selection);
 	}
 	

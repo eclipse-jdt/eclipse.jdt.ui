@@ -16,13 +16,21 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.search.ui.ISearchResultView;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageDeclaration;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.DND;
@@ -44,9 +52,35 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.*;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.IContentProvider;
+import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.OpenEvent;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.StructuredViewer;
 
-import org.eclipse.ui.*;
+import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener2;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IViewSite;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.IWorkingSetManager;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.IShowInSource;
@@ -54,38 +88,15 @@ import org.eclipse.ui.part.ResourceTransfer;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-import org.eclipse.jdt.ui.actions.BuildActionGroup;
-import org.eclipse.jdt.ui.actions.CCPActionGroup;
-import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
-import org.eclipse.jdt.ui.actions.GenerateActionGroup;
-import org.eclipse.jdt.ui.actions.ImportActionGroup;
-import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
-import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
-import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+import org.eclipse.search.ui.ISearchResultView;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
-import org.eclipse.jdt.internal.ui.dnd.LocalSelectionTransfer;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.TransferDragSourceListener;
 import org.eclipse.jdt.internal.ui.dnd.TransferDropTargetListener;
@@ -105,6 +116,22 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+import org.eclipse.jdt.ui.actions.BuildActionGroup;
+import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
+import org.eclipse.jdt.ui.actions.GenerateActionGroup;
+import org.eclipse.jdt.ui.actions.ImportActionGroup;
+import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
+import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
+import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 
 abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISelectionListener, IViewPartInputProvider {
