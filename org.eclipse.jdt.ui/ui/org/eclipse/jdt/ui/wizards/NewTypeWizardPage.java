@@ -27,6 +27,8 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,6 +37,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -536,6 +539,30 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	// -------- UI Creation ---------
 	
 	/**
+	 * Creates the controls for the annotation check box. Expects a <code>GridLayout</code> with at 
+	 * least 4 columns.
+	 * 
+	 * @param composite the parent composite
+	 * @param nColumns number of columns to span
+	 * @param dependency a button to depend on, or <code>null</code>
+	 */
+	protected void createAnnotationControls(Composite composite, int nColumns, final Button dependency) {
+		final Button button= fAddAnnotationButton.getSelectionButton(composite);
+		GridData data= new GridData();
+		data.horizontalSpan= nColumns - 1;
+		data.horizontalAlignment= GridData.FILL;
+		data.horizontalIndent= IDialogConstants.INDENT;
+		button.setLayoutData(data);
+		if (dependency != null) {
+			dependency.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent event) {
+					button.setEnabled(dependency.getSelection() && fUseAddAnnotationButtonValue);
+				}
+			});
+		}
+	}
+	
+	/**
 	 * Creates a separator line. Expects a <code>GridLayout</code> with at least 1 column.
 	 * 
 	 * @param composite the parent composite
@@ -692,8 +719,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		DialogField.createEmptySpace(composite);
 		fAddCommentButton.doFillIntoGrid(composite, nColumns - 1);
-		DialogField.createEmptySpace(composite);
-		fAddAnnotationButton.doFillIntoGrid(composite, nColumns - 1);
 	}
 
 
@@ -1135,6 +1160,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */	
 	public void enableAnnotationControl(boolean useAddAnnotationValue) {
 		fUseAddAnnotationButtonValue= useAddAnnotationValue;
+		fAddAnnotationButton.setEnabled(useAddAnnotationValue);
+		if (!useAddAnnotationValue)
+			fAddAnnotationButton.setSelection(false);
 	}
 	
 	/**
@@ -2244,7 +2272,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public void dispose() {
 		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDCOMMENTS, fAddCommentButton.isSelected());
-		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDANNOTATIONS, fAddAnnotationButton.isSelected());
+		if (fUseAddAnnotationButtonValue)
+			JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDANNOTATIONS, fAddAnnotationButton.isSelected());
 		super.dispose();
 	}
 }
