@@ -204,11 +204,11 @@ public class DeleteTest extends RefactoringTest{
 		verifyDisabled(resources, javaElements);
 	}
 
-	public void testDisabled_defaultPackage() throws Exception{
-		printTestDisabledMessage("enable this case once 38450 is fixed");
+	public void testEnabled_defaultPackage() throws Exception{
+//		printTestDisabledMessage("enable this case once 38450 is fixed");
 		IJavaElement[] javaElements= {getRoot().getPackageFragment("")};
 		IResource[] resources= {};
-		verifyDisabled(resources, javaElements);		
+		verifyEnabled(resources, javaElements);		
 	}
 	
 	public void testDisabled_simpleProject() throws Exception{
