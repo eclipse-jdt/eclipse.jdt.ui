@@ -10,26 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.swt.custom.BusyIndicator;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.MarkerUtilities;
@@ -54,6 +51,8 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
@@ -61,14 +60,10 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 public abstract class FindOccurrencesEngine {
 	
 	public static final String IS_WRITEACCESS= "writeAccess"; //$NON-NLS-1$
 	public static final String IS_VARIABLE= "variable"; //$NON-NLS-1$
-	
-	private IRunnableWithProgress fNullOperation= getNullOperation();
 	
 	private static class SearchGroupByKeyComputer implements IGroupByKeyComputer {
 		public Object computeGroupByKey(IMarker marker) {
@@ -305,11 +300,4 @@ public abstract class FindOccurrencesEngine {
 			}
 		);
 	}
-	
-	private IRunnableWithProgress getNullOperation() {
-		return new IRunnableWithProgress() {
-			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			}
-		};
-	}		
 }
