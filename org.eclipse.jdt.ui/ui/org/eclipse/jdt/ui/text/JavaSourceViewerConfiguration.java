@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.JavaFormattingStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaReconcilingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.JavaStringDoubleClickSelector;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaTextHover;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
@@ -239,9 +240,10 @@ public class JavaSourceViewerConfiguration extends SourceViewerConfiguration {
 	public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType) {
 		if (JavaPartitionScanner.JAVA_DOC.equals(contentType) ||
 				JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT.equals(contentType) ||
-				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType) ||
-				JavaPartitionScanner.JAVA_STRING.equals(contentType))
+				JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT.equals(contentType))
 			return new DefaultTextDoubleClickStrategy();
+		else if (JavaPartitionScanner.JAVA_STRING.equals(contentType))
+			return new JavaStringDoubleClickSelector();
 		return new JavaDoubleClickSelector();
 	}
 
