@@ -42,7 +42,7 @@ public class JavaDocContextType extends CompilationUnitContextType {
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
-		return new JavaContext(this, document, offset, length, compilationUnit);
+		return new JavaDocContext(this, document, offset, length, compilationUnit);
 	}	
 	
 }
