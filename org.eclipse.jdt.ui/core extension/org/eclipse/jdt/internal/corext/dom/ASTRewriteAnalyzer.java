@@ -1123,7 +1123,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			JavaPlugin.log(e);
 		}
 			
-		rewriteRequiredNode(node.getBody()); // statement
+		rewriteRequiredNode(node.getBody()); // body
 		return false;
 	}
 
@@ -1134,7 +1134,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		rewriteRequiredNode(node.getExpression()); // statement
 		
 		Statement thenStatement= node.getThenStatement();
-		rewriteRequiredNode(thenStatement); // statement
+		rewriteRequiredNode(thenStatement); // then statement
 
 		Statement elseStatement= node.getElseStatement();
 		if (elseStatement != null) {
@@ -1159,14 +1159,86 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(ImportDeclaration)
 	 */
 	public boolean visit(ImportDeclaration node) {
-		return super.visit(node);
+		Name name= node.getName();
+		rewriteRequiredNode(name); // statement
+		
+		if (isModified(node)) {
+			ImportDeclaration modifiedNode= (ImportDeclaration) getModifiedNode(node);
+			if (!node.isOnDemand() && modifiedNode.isOnDemand()) {
+				addInsert(name.getStartPosition() + name.getLength(), ".*", "Add on demand");
+			} else if (node.isOnDemand() && !modifiedNode.isOnDemand()) {
+				try {
+					int startPos= name.getStartPosition() + name.getLength();
+					int endPos= ASTResolving.getPositionBefore(getScanner(startPos), ITerminalSymbols.TokenNameSEMICOLON);
+					addDelete(startPos, endPos - startPos, "Remove on demand");
+				} catch (InvalidInputException e) {
+					JavaPlugin.log(e);
+				}
+			}
+		}
+		return false;
 	}
+	
+	private void replaceOperation(int posBeforeOperation, String operation) {
+		try {
+			IScanner scanner= getScanner(posBeforeOperation);
+			scanner.getNextToken(); // op			
+			addReplace(scanner.getCurrentTokenStartPosition(), scanner.getCurrentTokenSource().length, operation, "Replace operator");
+		} catch (InvalidInputException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#visit(InfixExpression)
 	 */
 	public boolean visit(InfixExpression node) {
-		return super.visit(node);
+		Expression leftHand= node.getLeftOperand();
+		int pos= rewriteRequiredNode(leftHand);
+		
+		String operation= node.getOperator().toString();
+		boolean needsNewOperation= false;
+		if (isModified(node)) {
+			InfixExpression.Operator modifiedOp= ((InfixExpression) getModifiedNode(node)).getOperator();
+			String newOperation= modifiedOp.toString();
+			if (!newOperation.equals(operation)) {
+				operation= newOperation;
+				needsNewOperation= true;
+				replaceOperation(pos, operation);
+			}
+		}
+			
+		Expression rightHand= node.getRightOperand();
+		pos= rewriteRequiredNode(rightHand);
+		
+		List extendedOperands= node.extendedOperands();
+		if (needsNewOperation || hasChanges(extendedOperands)) {
+			for (int i= 0; i < extendedOperands.size(); i++) {
+				ASTNode elem= (ASTNode) extendedOperands.get(i);
+				if (isInserted(elem)) {
+					addInsert(pos, " " + operation + " ", "Add operation");
+					addGenerated(pos, 0, elem, getIndent(pos), true);
+				} else {
+					if (needsNewOperation && !isRemoved(elem)) {
+						replaceOperation(pos, operation);
+					}
+					int endPos= elem.getStartPosition() + elem.getLength();
+					if (isReplaced(elem)) {
+						ASTNode replacingNode= getReplacingNode(elem);
+						if (replacingNode == null) {
+							addDelete(pos, endPos - pos, "Delete node");
+						} else {
+							addGenerated(elem.getStartPosition(), elem.getLength(), replacingNode, getIndent(elem.getStartPosition()), true);
+						}
+					}
+					pos= endPos;
+				}
+			}
+		} else {
+			visitList(extendedOperands, 0);
+		}
+		return false;
 	}
 
 	/* (non-Javadoc)

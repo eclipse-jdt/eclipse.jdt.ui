@@ -3,6 +3,8 @@ package org.eclipse.jdt.ui.tests.astrewrite;
 import java.util.Hashtable;
 import java.util.List;
 
+import org.eclipse.core.runtime.QualifiedName;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -19,6 +21,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -502,5 +505,72 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 			
-	
+	public void testImportDeclaration() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("import java.text.*;\n");					
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		ICompilationUnit cu= pack1.createCompilationUnit("Z.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		AST ast= astRoot.getAST();
+		
+		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		List imports= astRoot.imports();
+		assertTrue("Number of imports not 4", imports.size() == 4);
+		
+		{ // rename import
+			ImportDeclaration imp= (ImportDeclaration) imports.get(0);
+			
+			Name name= ast.newName(new String[] { "org", "eclipse", "X" });
+			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+		}
+		{ // change to import on demand
+			ImportDeclaration imp= (ImportDeclaration) imports.get(1);
+			
+			Name name= ast.newName(new String[] { "java", "util" });
+			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+			
+			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
+			modifedNode.setOnDemand(true);
+			
+			ASTRewriteAnalyzer.markAsModified(imp, modifedNode);
+		}
+		{ // change to single import
+			ImportDeclaration imp= (ImportDeclaration) imports.get(2);
+			
+			ImportDeclaration modifedNode= (ImportDeclaration) ast.newImportDeclaration();
+			modifedNode.setOnDemand(false);
+			
+			ASTRewriteAnalyzer.markAsModified(imp, modifedNode);
+		}
+		{ // rename import
+			ImportDeclaration imp= (ImportDeclaration) imports.get(3);
+			
+			Name name= ast.newName(new String[] { "org", "eclipse" });
+			ASTRewriteAnalyzer.markAsReplaced(imp.getName(), name);
+		}		
+		
+				
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, astRoot, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import org.eclipse.X;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.net;\n");
+		buf.append("import org.eclipse.*;\n");			
+		buf.append("public class Z {\n");
+		buf.append("}\n");	
+		assertEqualString(cu.getSource(), buf.toString());
+	}	
 }
