@@ -5,18 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Add imports to a compilation unit.
@@ -49,6 +38,10 @@ public class AddImportsOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}			
+			
 			int nImports= fImports.length;
 			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
 			

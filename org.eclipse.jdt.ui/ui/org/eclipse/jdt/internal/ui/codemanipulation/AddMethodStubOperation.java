@@ -5,17 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Add method stubs to a type (the parent type)
@@ -41,6 +31,10 @@ public class AddMethodStubOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}			
+			
 			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), fInheritedMethods.length + 1);
 			
 			IMethod[] existingMethods= fType.getMethods();

@@ -5,7 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import java.util.ArrayList;import java.util.List;import java.util.Locale;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.IProblemFactory;import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;import org.eclipse.jdt.internal.compiler.SourceElementParser;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
+import java.util.ArrayList;import java.util.List;import java.util.Locale;import org.eclipse.core.resources.IProject;import org.eclipse.core.resources.IResource;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.jface.viewers.ILabelProvider;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IImportDeclaration;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.core.search.IJavaSearchScope;import org.eclipse.jdt.core.search.SearchEngine;import org.eclipse.jdt.ui.IJavaElementSearchConstants;import org.eclipse.jdt.internal.compiler.IProblem;import org.eclipse.jdt.internal.compiler.IProblemFactory;import org.eclipse.jdt.internal.compiler.ISourceElementRequestor;import org.eclipse.jdt.internal.compiler.SourceElementParser;import org.eclipse.jdt.internal.ui.JavaPlugin;import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;import org.eclipse.jdt.internal.ui.preferences.ImportOrganizePreferencePage;import org.eclipse.jdt.internal.ui.util.AllTypesSearchEngine;import org.eclipse.jdt.internal.ui.util.TypeRef;import org.eclipse.jdt.internal.ui.util.TypeRefLabelProvider;
 
 
 public class OrganizeImportsOperation extends WorkspaceModifyOperation {
@@ -45,6 +45,10 @@ public class OrganizeImportsOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}			
+			
 			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
 			
 			String[] references= findTypeReferences(fCompilationUnit);

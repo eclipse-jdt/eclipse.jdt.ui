@@ -213,7 +213,9 @@ public class ImportsStructure {
 			}	
 		} finally {
 			docManager.disconnect();
-			monitor.done();
+			if (monitor != null) {
+				monitor.done();
+			}
 		}
 		IImportDeclaration[] result= new IImportDeclaration[created.size()];
 		created.toArray(result);

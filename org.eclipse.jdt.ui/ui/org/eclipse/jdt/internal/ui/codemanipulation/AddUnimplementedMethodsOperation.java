@@ -6,18 +6,7 @@
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
 
-import java.util.ArrayList;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.util.ArrayList;import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.core.runtime.SubProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.ITypeHierarchy;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Evaluate all unimplemented methods and create them
@@ -40,6 +29,10 @@ public class AddUnimplementedMethodsOperation extends WorkspaceModifyOperation {
 
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}			
+			
 			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 3);
 			
 			ITypeHierarchy hierarchy= fType.newSupertypeHierarchy(new SubProgressMonitor(monitor, 1));

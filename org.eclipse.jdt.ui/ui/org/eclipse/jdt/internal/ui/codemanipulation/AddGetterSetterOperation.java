@@ -5,18 +5,7 @@
  */
 package org.eclipse.jdt.internal.ui.codemanipulation;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.core.runtime.CoreException;import org.eclipse.core.runtime.IProgressMonitor;import org.eclipse.core.runtime.NullProgressMonitor;import org.eclipse.ui.actions.WorkspaceModifyOperation;import org.eclipse.jdt.core.Flags;import org.eclipse.jdt.core.IField;import org.eclipse.jdt.core.IMethod;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.Signature;import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * For a given field, method stubs for getter and setters are created
@@ -72,6 +61,9 @@ public class AddGetterSetterOperation extends WorkspaceModifyOperation {
 	 */
 	public void execute(IProgressMonitor monitor) throws CoreException {
 		try {
+			if (monitor == null) {
+				monitor= new NullProgressMonitor();
+			}
 			monitor.beginTask(JavaPlugin.getResourceString(OP_DESC), 2);
 			
 			String fieldName= fField.getElementName();
