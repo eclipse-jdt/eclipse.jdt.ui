@@ -84,28 +84,15 @@
 			icon="icons/smalllogo.gif">
 		</launchConfigurationTypeImage>	
 	</extension>
-	
-	<extension point = "org.eclipse.debug.ui.launchConfigurationTabs">
-		<launchConfigurationTab
-			id="org.eclipse.jdt.junit.launchConfigurationTab.JUnitMain"
+		
+	<extension point = "org.eclipse.debug.ui.launchConfigurationTabGroups">
+		<launchConfigurationTabGroup
+			id="org.eclipse.jdt.junit.launchConfigurationTabGroup.junit"
 			type ="org.eclipse.jdt.junit.launchconfig"
-			class="org.eclipse.jdt.internal.junit.launcher.JUnitMainTab"
-			name="Main">
-		</launchConfigurationTab>
-		<launchConfigurationTab
-			id="org.eclipse.jdt.junit.launchConfigurationTab.JUnitArguments"
-			type ="org.eclipse.jdt.junit.launchconfig"
-			class="org.eclipse.jdt.internal.junit.launcher.JUnitArgumentsTab"
-			name="Arguments">
-		</launchConfigurationTab>
-		<launchConfigurationTab
-			id="org.eclipse.jdt.junit.launchConfigurationTab.JavaEnvironment"
-			type ="org.eclipse.jdt.junit.launchconfig"
-			class="org.eclipse.jdt.internal.debug.ui.launcher.JavaEnvironmentTab"
-			name="Environment">
-		</launchConfigurationTab>
+			class="org.eclipse.jdt.internal.junit.launcher.JUnitTabGroup">
+		</launchConfigurationTabGroup>
 	</extension>
-	
+
 	<extension point="org.eclipse.ui.newWizards">
 		<category
 		   id = "org.eclipse.jdt.junit"

@@ -167,7 +167,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 					source.replace(start, end, NewTestSuiteCreationWizardPage.getUpdatableString(fSelectedTestCases));
 					buf.replace(range.getOffset(), range.getLength(), source.toString());
 					monitor.worked(1);
-					fTestSuite.reconcile(null);
+					fTestSuite.reconcile();
 					originalContent= buf.getText(0, buf.getLength());
 					monitor.worked(1);
 					String formattedContent=

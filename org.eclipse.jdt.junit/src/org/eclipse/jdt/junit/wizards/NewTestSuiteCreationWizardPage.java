@@ -418,7 +418,7 @@ public class NewTestSuiteCreationWizardPage extends NewTypeWizardPage {
 							end += END_MARKER.length();
 							source.replace(start, end, getUpdatableString());
 							buf.replace(range.getOffset(), range.getLength(), source.toString());
-							cu.reconcile(null);
+							cu.reconcile();  
 							originalContent= buf.getText(0, buf.getLength());
 							monitor.worked(1);
 							String formattedContent=

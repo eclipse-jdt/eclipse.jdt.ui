@@ -352,8 +352,6 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 		} else {
 			initializeDefaults(je, config);
 		}
-		config.setAttribute(IDebugUIConstants.ATTR_TARGET_RUN_PERSPECTIVE, (String)null);
-		config.setAttribute(IDebugUIConstants.ATTR_TARGET_DEBUG_PERSPECTIVE, (String)null);
 	}
 	
 	/**
@@ -406,5 +404,12 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL, vmInstall.getId());
 			config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_VM_INSTALL_TYPE, vmInstall.getVMInstallType().getId());
 		}
+	}
+	
+	/**
+	 * @see ILaunchConfigurationTab#getName()
+	 */
+	public String getName() {
+		return "&Test";
 	}
 }

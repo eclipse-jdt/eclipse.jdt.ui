@@ -46,7 +46,7 @@ public class CounterPanel extends Composite {
 			}
 		});
 	}
-
+ 
 	void disposeIcons() {
 		fErrorIcon.dispose();
 		fFailureIcon.dispose();
