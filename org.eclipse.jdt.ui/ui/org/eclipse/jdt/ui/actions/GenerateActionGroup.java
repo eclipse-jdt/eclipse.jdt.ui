@@ -10,30 +10,35 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.AddBookmarkAction;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
-
-import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a context menu and
@@ -50,6 +55,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private boolean fEditorIsOwner;
 	private IWorkbenchSite fSite;
 	private String fGroupName= IContextMenuConstants.GROUP_SOURCE;
+	private List fRegisteredSelectionListeners;
 	
 	private AddImportOnSelectionAction fAddImport;
 	private OverrideMethodsAction fOverrideMethods;
@@ -57,6 +63,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
 	private AddJavaDocStubAction fAddJavaDocStub;
 	private AddBookmarkAction fAddBookmark;
+	private AddTaskAction fAddTaskAction;
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
@@ -157,6 +164,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddUnimplementedConstructors= new AddUnimplementedConstructorsAction(site);
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddBookmark= new AddBookmarkAction(site.getShell());
+		fAddTaskAction= new AddTaskAction(site);
 		fExternalizeStrings= new ExternalizeStringsAction(site);
 		fFindStringsToExternalize= new FindStringsToExternalizeAction(site);
 		fOrganizeImports= new OrganizeImportsAction(site);
@@ -167,22 +175,31 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
+		fAddTaskAction.update(selection);
+		fOrganizeImports.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
 			fAddBookmark.selectionChanged(ss);
 		} else {
 			fAddBookmark.setEnabled(false);
 		}
-		fOrganizeImports.update(selection);
 		
-		provider.addSelectionChangedListener(fOverrideMethods);
-		provider.addSelectionChangedListener(fAddGetterSetter);
-		provider.addSelectionChangedListener(fAddUnimplementedConstructors);
-		provider.addSelectionChangedListener(fAddJavaDocStub);
-		provider.addSelectionChangedListener(fAddBookmark);
-		provider.addSelectionChangedListener(fExternalizeStrings);
-		provider.addSelectionChangedListener(fFindStringsToExternalize);
-		provider.addSelectionChangedListener(fOrganizeImports);
+		registerSelectionListener(provider, fOverrideMethods);
+		registerSelectionListener(provider, fAddGetterSetter);
+		registerSelectionListener(provider, fAddUnimplementedConstructors);
+		registerSelectionListener(provider, fAddJavaDocStub);
+		registerSelectionListener(provider, fAddBookmark);
+		registerSelectionListener(provider, fExternalizeStrings);
+		registerSelectionListener(provider, fFindStringsToExternalize);
+		registerSelectionListener(provider, fOrganizeImports);
+		registerSelectionListener(provider, fAddTaskAction);
+	}
+	
+	private void registerSelectionListener(ISelectionProvider provider, ISelectionChangedListener listener) {
+		if (fRegisteredSelectionListeners == null)
+			fRegisteredSelectionListeners= new ArrayList(12);
+		provider.addSelectionChangedListener(listener);
+		fRegisteredSelectionListeners.add(listener);
 	}
 	
 	/**
@@ -245,16 +262,13 @@ public class GenerateActionGroup extends ActionGroup {
 	 * Method declared in ActionGroup
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		disposeAction(fOverrideMethods, provider);
-		disposeAction(fAddGetterSetter, provider);
-		disposeAction(fAddUnimplementedConstructors, provider);
-		disposeAction(fAddJavaDocStub, provider);
-		disposeAction(fAddBookmark, provider);
-		disposeAction(fExternalizeStrings, provider);
-		disposeAction(fFindStringsToExternalize, provider);
-		disposeAction(fOrganizeImports, provider);
-		disposeAction(fSurroundWithTryCatch, provider);
+		if (fRegisteredSelectionListeners != null) {
+			ISelectionProvider provider= fSite.getSelectionProvider();
+			for (Iterator iter= fRegisteredSelectionListeners.iterator(); iter.hasNext();) {
+				ISelectionChangedListener listener= (ISelectionChangedListener) iter.next();
+				provider.removeSelectionChangedListener(listener);
+			}
+		}
 		super.dispose();
 	}
 	
@@ -266,6 +280,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmark);
+		actionBar.setGlobalActionHandler(IWorkbenchActionConstants.ADD_TASK, fAddTaskAction);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
@@ -285,10 +300,5 @@ public class GenerateActionGroup extends ActionGroup {
 	private void addAction(IMenuManager menu, IAction action) {
 		if (action != null && action.isEnabled())
 			menu.add(action);
-	}	
-	
-	private void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) {
-		if (action != null)
-			provider.removeSelectionChangedListener(action);
 	}	
 }
