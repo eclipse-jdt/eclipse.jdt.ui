@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -31,10 +32,10 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUn
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CompositeSubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.OrOrSubTypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.PlainTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
@@ -224,6 +225,23 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates a composite subtype constraint variable.
+	 * 
+	 * @param first the first type constraint variable
+	 * @param second the second type constraint variable
+	 */
+	public final void createCompositeSubtypeConstraint(final ConstraintVariable2 first, final ConstraintVariable2 second) {
+		Assert.isNotNull(first);
+		Assert.isNotNull(second);
+		final ITypeConstraint2 constraint= new CompositeSubTypeConstraint2(first, second);
+		if (!fTypeConstraints.contains(constraint)) {
+			fTypeConstraints.add(constraint);
+			setVariableUsage(first, constraint);
+			setVariableUsage(second, constraint);
+		}
+	}
+
+	/**
 	 * Creates a declaring type variable.
 	 * <p>
 	 * A declaring type variable stands for a type where something has been declared.
@@ -273,6 +291,20 @@ public final class SuperTypeConstraintsModel {
 	}
 
 	/**
+	 * Creates an exception variable.
+	 * 
+	 * @param name the name of the thrown exception
+	 * @return the created exception variable
+	 */
+	public final ConstraintVariable2 createExceptionVariable(final Name name) {
+		Assert.isNotNull(name);
+		final ITypeBinding binding= name.resolveTypeBinding();
+		if (isConstrainedType(binding))
+			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(fEnvironment.create(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(name), name)));
+		return null;
+	}
+
+	/**
 	 * Creates an independent type variable.
 	 * <p>
 	 * An independant type variable stands for an arbitrary type.
@@ -307,23 +339,6 @@ public final class SuperTypeConstraintsModel {
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
 		}
 		return null;
-	}
-
-	/**
-	 * Creates an or-or subtype constraint variable.
-	 * 
-	 * @param first the first type constraint variable
-	 * @param second the second type constraint variable
-	 */
-	public final void createOrOrSubtypeConstraint(final ConstraintVariable2 first, final ConstraintVariable2 second) {
-		Assert.isNotNull(first);
-		Assert.isNotNull(second);
-		final ITypeConstraint2 constraint= new OrOrSubTypeConstraint2(first, second);
-		if (!fTypeConstraints.contains(constraint)) {
-			fTypeConstraints.add(constraint);
-			setVariableUsage(first, constraint);
-			setVariableUsage(second, constraint);
-		}
 	}
 
 	/**
