@@ -61,7 +61,7 @@
   </target>
 
   <!-- performance test target -->
-  <target name="performance-suite" if="performance">
+  <target name="performance-suite">
     <property name="jdt-ui-performance-folder" value="${eclipse-home}/jdt_ui_performance_folder"/>
     <delete dir="${jdt-ui-performance-folder}" quiet="true"/>
     <ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
