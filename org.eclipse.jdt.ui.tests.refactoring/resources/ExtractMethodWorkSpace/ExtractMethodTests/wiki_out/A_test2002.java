@@ -9,9 +9,9 @@ public class A_test2002 {
 		System.out.println("i == " + i);
 	}
 	protected int extracted(int i) {
-				
+		
 		System.out.println("i, field == " + i++ +", " + field);
-				
+		
 		return i;
 	}
 }

@@ -1,5 +1,6 @@
 package return_in;
-public class A_test705 {
+
+public class A_test705 {
 	public boolean foo() {
 		/*]*/try {
 			foo();

@@ -1,5 +1,6 @@
 package locals_in;
-public class A_test536 {
+
+public class A_test536 {
 
 	public void bar() {
 		{ int k= 27; k++; }

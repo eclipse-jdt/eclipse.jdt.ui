@@ -1,5 +1,6 @@
 package return_out;
-public class A_test710 {
+
+public class A_test710 {
 	public boolean foo() {
 		int i= 0;
 		/*]*/return extracted(i);/*[*/

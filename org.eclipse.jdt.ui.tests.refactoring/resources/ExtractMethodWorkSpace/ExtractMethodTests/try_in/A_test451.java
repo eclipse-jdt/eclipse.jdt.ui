@@ -9,4 +9,5 @@ public class A_test451 {
 	}
 	
 	public void g() throws java.io.IOException {
-	}}
+	}
+}

@@ -1,5 +1,6 @@
 package expression_out;
-public class A_test608 {
+
+public class A_test608 {
 	
 	public static class Scanner {
 		public int x;

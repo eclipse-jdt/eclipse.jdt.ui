@@ -13,4 +13,5 @@ public class A_test450 {
 		g();
 	}
 	public void g() throws java.io.IOException {
-	}}
+	}
+}

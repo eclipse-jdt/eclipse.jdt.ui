@@ -1,5 +1,6 @@
 package locals_out;
-public class A_test513 {
+
+public class A_test513 {
 	public void foo() {
 		/*]*/int y;
 		int x = extracted();/*[*/

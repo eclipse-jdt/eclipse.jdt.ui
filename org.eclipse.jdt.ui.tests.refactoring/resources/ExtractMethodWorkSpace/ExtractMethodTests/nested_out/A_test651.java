@@ -1,5 +1,6 @@
 package nested_out;
-public class A_test651 {
+
+public class A_test651 {
 	public void foo() {
 		Runnable run= new Runnable() {
 			public void run() {

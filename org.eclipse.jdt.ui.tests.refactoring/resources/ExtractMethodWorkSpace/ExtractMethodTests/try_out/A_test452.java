@@ -1,4 +1,6 @@
-package try_out;import java.io.IOException;
+package try_out;
+
+import java.io.IOException;
 
 public class A_test452 {
 	public void foo() {
@@ -13,4 +15,5 @@ public class A_test452 {
 	}
 	
 	public void g() throws IOException {
-	}}
+	}
+}

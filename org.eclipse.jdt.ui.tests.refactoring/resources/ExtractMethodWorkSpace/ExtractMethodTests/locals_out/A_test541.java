@@ -1,5 +1,6 @@
 package locals_out;
-public class A_test541 {
+
+public class A_test541 {
 	class Inner {
 		public int x;
 	}

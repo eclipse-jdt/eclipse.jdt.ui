@@ -1,5 +1,6 @@
 package locals_out;
-public class A_test537 {
+
+public class A_test537 {
 	public void foo() {
 		final int i= 10;
 		

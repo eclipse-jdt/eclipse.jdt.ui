@@ -10,14 +10,14 @@ public class A_test2003 {
 	}
 
 	protected void extracted(int i) {
-				
+		
 		if (field == 1) {
 			i= 1;
 			System.out.println("i, field == " + i + ", " + field);
 		} else {
 			System.out.println("i, field == " + i + ", " + field);
 		}
-				
+		
 	}
 
 }

@@ -1,5 +1,6 @@
 package expression_in;
-public class A_test615 {
+
+public class A_test615 {
 	class Inner {
 	}
 	public void foo() {
