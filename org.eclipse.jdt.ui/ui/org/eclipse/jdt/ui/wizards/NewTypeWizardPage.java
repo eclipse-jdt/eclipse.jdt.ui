@@ -1539,7 +1539,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		scanner.setSource(template.toCharArray());
 		try {
 			int next= scanner.getNextToken();
-			while (next == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || next == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
+			while (next == ITerminalSymbols.TokenNameCOMMENT_LINE || next == ITerminalSymbols.TokenNameCOMMENT_JAVADOC || next == ITerminalSymbols.TokenNameCOMMENT_BLOCK) {
 				next= scanner.getNextToken();
 			}
 			return next == ITerminalSymbols.TokenNameEOF;
