@@ -5,30 +5,25 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.util.List;
-import org.eclipse.core.resources.IContainer;
 
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageFilter;
 
 /**
- * Filters out all packages and folders
+ * Only selects packages (i.e. IPackageFragments) which are in
+ * the initial packages list and parent types (i.e. package fragment
+ * root, Java project and Java model)
  */
-public class SealPackagesFilter  extends PackageFilter {
+class SealPackagesFilter  extends PackageFilter {
 
-	List fAllowedPackages;	
+	private List fAllowedPackages;	
 
 	public SealPackagesFilter(List packages) {
 		fAllowedPackages= packages;
 	}
-
 	/**
 	 * Returns the result of this filter, when applied to the
 	 * given inputs.
