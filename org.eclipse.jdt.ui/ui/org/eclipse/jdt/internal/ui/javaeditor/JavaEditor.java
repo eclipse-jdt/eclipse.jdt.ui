@@ -100,7 +100,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		// page.setAction("ShowTypeHierarchy", new ShowTypeHierarchyAction(page));
 		page.setAction("OpenImportDeclaration", new OpenImportDeclarationAction(page));
-		page.setAction("ShowInPackageView", new ShowInPackageViewAction(page));
+		page.setAction("ShowInPackageView", new ShowInPackageViewAction(getSite(), page));
 		page.setAction("AddMethodEntryBreakpoint", new AddMethodEntryBreakpointAction(page));
 	
 		return page;

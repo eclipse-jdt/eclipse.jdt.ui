@@ -456,6 +456,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	//---- Problem management -----------------------------------------------------
 	
 	public void acceptProblem(IProblem problem) {
+		if (problem.isWarning())
+			return;
+			
 		reset();
 		fCursorPosition= Integer.MAX_VALUE;
 		fStatus.addFatalError("Compilation error at line " + problem.getSourceLineNumber() + " prevents method extraction: " + problem.getMessage());
@@ -568,10 +571,9 @@ import org.eclipse.jdt.internal.core.refactoring.IParentTracker;
 	}
 	
 	public boolean visit(LocalDeclaration localDeclaration, BlockScope scope) {
-		//XXX: 1GEG3MS: ITPJCORE:WIN2000 - AbstractVariableDeclaration - declarationSourceStart and declarationSourceEnd set to incorrect values
-		// return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
-		// 	localDeclaration, scope);
-		return visitNode(localDeclaration, scope);
+		return visitRange(localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd,
+			localDeclaration, scope);
+		// return visitNode(localDeclaration, scope);
 	}
 
 	public boolean visit(FieldReference fieldReference, BlockScope scope) {

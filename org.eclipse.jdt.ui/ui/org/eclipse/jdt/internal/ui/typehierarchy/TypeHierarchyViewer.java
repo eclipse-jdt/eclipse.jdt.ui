@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.ui.actions.ContextMenuGroup;
 import org.eclipse.jdt.internal.ui.actions.GenerateGroup;
 import org.eclipse.jdt.internal.ui.actions.OpenSourceReferenceAction;
 import org.eclipse.jdt.internal.ui.actions.ShowInPackageViewAction;
-import org.eclipse.jdt.internal.ui.actions.ShowTypeHierarchyAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 import org.eclipse.jdt.internal.ui.wizards.NewGroup;
 
@@ -44,8 +43,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewGroup;
 public abstract class TypeHierarchyViewer extends TreeViewer {
 	
 	private OpenSourceReferenceAction fOpen;
-	
-	private ShowTypeHierarchyAction fShowTypeHierarchyAction;	
+
 	private ShowInPackageViewAction fShowInPackageViewAction;
 		
 	private ContextMenuGroup[] fStandardGroups;
@@ -84,8 +82,7 @@ public abstract class TypeHierarchyViewer extends TreeViewer {
 			}
 		});
 		fOpen.setSelectionProvider(this);
-		fShowTypeHierarchyAction= new ShowTypeHierarchyAction(this);
-		fShowInPackageViewAction= new ShowInPackageViewAction(this);
+		fShowInPackageViewAction= new ShowInPackageViewAction(part.getSite(), this);
 		fStandardGroups= new ContextMenuGroup[] {
 			new JavaSearchGroup(), new NewGroup(), new GenerateGroup()
 		};		
@@ -116,10 +113,8 @@ public abstract class TypeHierarchyViewer extends TreeViewer {
 	 */	
 	public void contributeToContextMenu(IMenuManager menu) {
 		menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpen);
-		if (fShowTypeHierarchyAction.canActionBeAdded()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowTypeHierarchyAction);
-		}
-		menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, new ShowInPackageViewAction(this));
+		if (fShowInPackageViewAction.canOperateOn())
+			menu.appendToGroup(IContextMenuConstants.GROUP_SHOW, fShowInPackageViewAction);
 		ContextMenuGroup.add(menu, fStandardGroups, this);
 	}
 

@@ -23,6 +23,8 @@ public interface IJavaHelpContextIds {
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= PREFIX + "add_unimplemented_methods_action_context";
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= PREFIX + "show_in_packageview_action_context";
 	public static final String SHOW_IN_HIERARCHYVIEW_ACTION= PREFIX + "show_in_hierarchyview_action_context";
+	public static final String FOCUS_ON_SELECTION_ACTION= PREFIX + "focus_on_selection_action";
+	public static final String FOCUS_ON_TYPE_ACTION= PREFIX + "focus_on_type_action";
 	
 	public static final String ADD_IMPORT_ON_SELECTION_ACTION= PREFIX + "add_imports_on_selection_action_context";
 	public static final String ORGANIZE_IMPORTS_ACTION= PREFIX + "organize_imports_action_context";
