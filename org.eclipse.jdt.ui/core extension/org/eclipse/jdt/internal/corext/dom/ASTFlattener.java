@@ -46,6 +46,7 @@ public class ASTFlattener extends GenericVisitor {
 		return formatter.format(getResult(), initialIndentationLevel, null, lineDelimiter);	
 	}
 	
+	
 	/**
 	 * Resets this printer so that it can be used again.
 	 */

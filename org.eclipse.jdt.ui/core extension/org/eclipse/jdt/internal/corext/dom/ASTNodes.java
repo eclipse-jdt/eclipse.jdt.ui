@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 public class ASTNodes {
 
@@ -163,9 +164,7 @@ public class ASTNodes {
 	}
 	
 	public static String asFormattedString(ASTNode node, int indent, String lineDelim) {
-		ASTFlattener flattener= new ASTFlattener();
-		node.accept(flattener);
-		return flattener.getFormattedResult(indent, lineDelim);
+		return CodeFormatterUtil.format(node, asString(node), indent, null, lineDelim, null);
 	}	
 
     /**

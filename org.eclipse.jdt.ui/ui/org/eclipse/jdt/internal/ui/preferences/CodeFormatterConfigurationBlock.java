@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -257,8 +258,8 @@ public class CodeFormatterConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updatePreview() {
-		ICodeFormatter formatter= ToolFactory.createDefaultCodeFormatter(fWorkingValues);
-		fPreviewDocument.set(formatter.format(fPreviewText, 0, null, "\n")); //$NON-NLS-1$
+		String str= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, fPreviewText, 0, null, String.valueOf('\n'), fWorkingValues);
+		fPreviewDocument.set(str);
 	}	
 		
 	private IStatus validatePositiveNumber(String number) {

@@ -84,9 +84,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 			}
 		}
 
-		/**
-		 * @return
-		 */
 		public ArrayList getMarkers() {
 			return fExistingNodes;
 		}

@@ -291,7 +291,7 @@ public final class MemberEdit extends SimpleTextEdit {
 		}		
 
 		if (fUseFormatter) {
-			return CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buffer.toString(), initialIndentationLevel, null, lineDelimiter);
+			return CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buffer.toString(), initialIndentationLevel, null, lineDelimiter, null);
 		}
 		return buffer.toString();
 	}

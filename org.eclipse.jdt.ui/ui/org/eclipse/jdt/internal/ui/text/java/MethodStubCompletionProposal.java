@@ -85,7 +85,7 @@ public class MethodStubCompletionProposal extends JavaTypeCompletionProposal {
 				int lineStart= region.getOffset();
 				int indent= Strings.computeIndent(document.get(lineStart, getReplacementOffset() - lineStart), settings.tabWidth);
 
-				String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim);
+				String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, stub, indent, null, lineDelim, null);
 				
 				if (replacement.endsWith(lineDelim)) {
 					replacement= replacement.substring(0, replacement.length() - lineDelim.length());

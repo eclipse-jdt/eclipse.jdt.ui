@@ -218,7 +218,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}
@@ -303,7 +303,7 @@ public class AddGetterSetterOperation implements IWorkspaceRunnable {
 			else
 				sibling= getInsertPosition();			
 			
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim) + lineDelim;
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, buf.toString(), indent, null, lineDelim, null) + lineDelim;
 			fCreatedAccessors.add(parentType.createMethod(formattedContent, sibling, true, null));
 		}
 	}			

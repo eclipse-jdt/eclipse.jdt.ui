@@ -106,11 +106,11 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndent(document.get(region.getOffset(), region.getLength()), tabWidth);
 		
-		String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, buf.toString(), indent, null, lineDelim);	
-		int start= replacement.indexOf(')');
-		int end= replacement.lastIndexOf('}');
+		String replacement= CodeFormatterUtil.format(CodeFormatterUtil.K_EXPRESSION, buf.toString(), indent, null, lineDelim, null);	
+		int start= replacement.indexOf('(') + 1;
+		int end= replacement.lastIndexOf('}') + 1;
 	
-		setReplacementString(replacement.substring(start, end + 1));
+		setReplacementString(replacement.substring(start, end));
 		
 		int pos= offset;
 		while (pos < document.getLength() && Character.isWhitespace(document.getChar(pos))) {

@@ -1408,7 +1408,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			
 			IBuffer buf= cu.getBuffer();
 			String originalContent= buf.getText(range.getOffset(), range.getLength());
-			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter); 
+			String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, originalContent, indent, null, lineDelimiter, null); 
 			buf.replace(range.getOffset(), range.getLength(), formattedContent);
 			if (!isInnerClass) {
 				String fileComment= getFileComment(cu);

@@ -167,7 +167,7 @@ public class AddMethodStubOperation implements IWorkspaceRunnable {
 						sibling= existingMethods[0];
 					}
 					
-					String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim) + lineDelim;	
+					String formattedContent= CodeFormatterUtil.format(CodeFormatterUtil.K_CLASS_BODY_DECLARATIONS, content, indent, null, lineDelim, null) + lineDelim;	
 					IMethod newMethod= fType.createMethod(formattedContent, sibling, true, null);
 					createdMethods.add(newMethod);
 				} finally {
