@@ -24,7 +24,12 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -124,6 +129,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fSite= editor.getEditorSite();
 		fIsEditorOwner= true;
 		fGroupName= groupName;
+		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(editor);
+		if (input == null || !JavaModelUtil.isOnClasspath(input))
+			return;
+			
 		ISelectionProvider provider= editor.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		

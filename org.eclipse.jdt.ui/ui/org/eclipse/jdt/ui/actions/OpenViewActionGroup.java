@@ -24,10 +24,15 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.dialogs.PropertyDialogAction;
 import org.eclipse.ui.part.Page;
 
-import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds actions to open a new JDT view part or an external 
@@ -78,6 +83,11 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public OpenViewActionGroup(JavaEditor part) {
 		fEditorIsOwner= true;
+		IJavaElement input= SelectionConverter.getInput(part);
+		if (input == null || !JavaModelUtil.isOnClasspath(input)) {
+			fSite= part.getEditorSite();
+			return;
+		}
 
 		fOpenSuperImplementation= new OpenSuperImplementationAction(part);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
@@ -150,9 +160,12 @@ public class OpenViewActionGroup extends ActionGroup {
 	 */
 	public void dispose() {
 		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fOpenSuperImplementation);
-		provider.removeSelectionChangedListener(fOpenExternalJavadoc);
-		provider.removeSelectionChangedListener(fOpenTypeHierarchy);
+		if (fOpenSuperImplementation != null)
+			provider.removeSelectionChangedListener(fOpenSuperImplementation);
+		if (fOpenExternalJavadoc != null)
+			provider.removeSelectionChangedListener(fOpenExternalJavadoc);
+		if (fOpenTypeHierarchy != null)
+			provider.removeSelectionChangedListener(fOpenTypeHierarchy);
 		super.dispose();
 	}
 	
@@ -164,7 +177,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	}
 	
 	private void appendToGroup(IMenuManager menu, IAction action) {
-		if (action.isEnabled())
+		if (action != null && action.isEnabled())
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, action);
 	}
 	

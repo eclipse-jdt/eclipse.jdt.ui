@@ -472,6 +472,21 @@ public class JavaModelUtil {
 	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) throws JavaModelException {
 		return jproject.isOnClasspath(element);
 	}
+	
+	/**
+	 * Tests if the given element is on the class path of its containing project. Handles the case
+	 * that the containing project isn't a Java project.
+	 */
+	public static boolean isOnClasspath(IJavaElement element) {
+		IJavaProject project= element.getJavaProject();
+		if (!project.exists())
+			return false;
+		try {
+			return project.isOnClasspath(element);
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
 
 	/**
 	 * Resolves a type name in the context of the declaring type.

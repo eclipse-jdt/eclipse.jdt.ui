@@ -18,26 +18,31 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.actions.ActionGroup;
+import org.eclipse.ui.actions.AddBookmarkAction;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ConvertLineDelimitersAction;
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.actions.AddBookmarkAction;
 
-import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
@@ -86,6 +91,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fSite= editor.getSite();
 		fEditor= editor;
 		fGroupName= groupName;
+		ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(editor);
+		if (input == null || !JavaModelUtil.isOnClasspath(input))
+			return;
+				
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 	
