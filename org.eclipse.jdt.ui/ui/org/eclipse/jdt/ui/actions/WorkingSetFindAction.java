@@ -8,13 +8,15 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  */
-package org.eclipse.jdt.internal.ui.search;
+package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.actions.*;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 

@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.viewers.IInputSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -25,20 +24,6 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.FindDeclarationsAction;
-import org.eclipse.jdt.internal.ui.search.FindDeclarationsInHierarchyAction;
-import org.eclipse.jdt.internal.ui.search.FindDeclarationsInWorkingSetAction;
-import org.eclipse.jdt.internal.ui.search.FindImplementorsAction;
-import org.eclipse.jdt.internal.ui.search.FindImplementorsInWorkingSetAction;
-import org.eclipse.jdt.internal.ui.search.FindReadReferencesAction;
-import org.eclipse.jdt.internal.ui.search.FindReadReferencesInHierarchyAction;
-import org.eclipse.jdt.internal.ui.search.FindReadReferencesInWorkingSetAction;
-import org.eclipse.jdt.internal.ui.search.FindReferencesAction;
-import org.eclipse.jdt.internal.ui.search.FindReferencesInHierarchyAction;
-import org.eclipse.jdt.internal.ui.search.FindReferencesInWorkingSetAction;
-import org.eclipse.jdt.internal.ui.search.FindWriteReferencesAction;
-import org.eclipse.jdt.internal.ui.search.FindWriteReferencesInHierarchyAction;
-import org.eclipse.jdt.internal.ui.search.FindWriteReferencesInWorkingSetAction;
 import org.eclipse.jdt.internal.ui.search.JavaSearchGroup;
 
 /**

@@ -10,6 +10,11 @@ import java.util.Iterator;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.ui.actions.FindAction;
+import org.eclipse.jdt.ui.actions.FindImplementorsAction;
+import org.eclipse.jdt.ui.actions.FindImplementorsInWorkingSetAction;
+import org.eclipse.jdt.ui.actions.WorkingSetFindAction;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -28,11 +33,11 @@ public class ImplementorsSearchGroup extends JavaSearchSubGroup  {
 	public static final String GROUP_NAME= SearchMessages.getString("group.implementors"); //$NON-NLS-1$
 
 	protected FindAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 2);		
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(new FindImplementorsAction(site));
 		actions.add(new FindImplementorsInWorkingSetAction(site));
 			
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(site, new FindImplementorsInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
@@ -41,11 +46,11 @@ public class ImplementorsSearchGroup extends JavaSearchSubGroup  {
 	}
 
 	protected FindAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 2);		
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 2);		
 		actions.add(new FindImplementorsAction(editor));
 		actions.add(new FindImplementorsInWorkingSetAction(editor));
 			
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(editor, new FindImplementorsInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));

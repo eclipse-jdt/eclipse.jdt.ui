@@ -4,15 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.FindAction;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 

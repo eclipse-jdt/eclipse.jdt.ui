@@ -10,6 +10,12 @@ import java.util.Iterator;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.ui.actions.FindAction;
+import org.eclipse.jdt.ui.actions.FindWriteReferencesAction;
+import org.eclipse.jdt.ui.actions.FindWriteReferencesInHierarchyAction;
+import org.eclipse.jdt.ui.actions.FindWriteReferencesInWorkingSetAction;
+import org.eclipse.jdt.ui.actions.WorkingSetFindAction;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -28,12 +34,12 @@ public class WriteReferencesSearchGroup extends JavaSearchSubGroup  {
 	}
 
 	protected FindAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(site));
 		actions.add(new FindWriteReferencesInHierarchyAction(site));
 		actions.add(new FindWriteReferencesInWorkingSetAction(site));
 
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(site, new FindWriteReferencesInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
@@ -42,12 +48,12 @@ public class WriteReferencesSearchGroup extends JavaSearchSubGroup  {
 	}
 
 	protected FindAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindWriteReferencesAction(editor));
 		actions.add(new FindWriteReferencesInHierarchyAction(editor));
 		actions.add(new FindWriteReferencesInWorkingSetAction(editor));
 
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(editor, new FindWriteReferencesInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));

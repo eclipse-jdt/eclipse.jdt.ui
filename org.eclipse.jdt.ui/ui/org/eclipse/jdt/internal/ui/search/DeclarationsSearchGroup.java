@@ -10,6 +10,12 @@ import java.util.Iterator;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
+import org.eclipse.jdt.ui.actions.FindAction;
+import org.eclipse.jdt.ui.actions.FindDeclarationsAction;
+import org.eclipse.jdt.ui.actions.FindDeclarationsInHierarchyAction;
+import org.eclipse.jdt.ui.actions.FindDeclarationsInWorkingSetAction;
+import org.eclipse.jdt.ui.actions.WorkingSetFindAction;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -28,12 +34,12 @@ public class DeclarationsSearchGroup extends JavaSearchSubGroup  {
 	}
 
 	protected FindAction[] getActions(IWorkbenchSite site) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindDeclarationsAction(site));
 		actions.add(new FindDeclarationsInHierarchyAction(site));
 		actions.add(new FindDeclarationsInWorkingSetAction(site));
 
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(site, new FindDeclarationsInWorkingSetAction(site, workingSets), SearchUtil.toString(workingSets)));
@@ -42,12 +48,12 @@ public class DeclarationsSearchGroup extends JavaSearchSubGroup  {
 	}
 
 	protected FindAction[] getActions(JavaEditor editor) {
-		ArrayList actions= new ArrayList(FindAction.LRU_WORKINGSET_LIST_SIZE + 3);
+		ArrayList actions= new ArrayList(SearchUtil.LRU_WORKINGSET_LIST_SIZE + 3);
 		actions.add(new FindDeclarationsAction(editor));
 		actions.add(new FindDeclarationsInHierarchyAction(editor));
 		actions.add(new FindDeclarationsInWorkingSetAction(editor));
 
-		Iterator iter= FindAction.getLRUWorkingSets().sortedIterator();
+		Iterator iter= SearchUtil.getLRUWorkingSets().sortedIterator();
 		while (iter.hasNext()) {
 			IWorkingSet[] workingSets= (IWorkingSet[])iter.next();
 			actions.add(new WorkingSetFindAction(editor, new FindDeclarationsInWorkingSetAction(editor, workingSets), SearchUtil.toString(workingSets)));

@@ -7,18 +7,21 @@ package org.eclipse.jdt.internal.ui.search;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ui.IEditorInput;
+import org.eclipse.jface.dialogs.IDialogSettings;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -29,18 +32,25 @@ import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * This class contains some utility methods for J Search.
  */
 public class SearchUtil extends JavaModelUtil {
+
+	// LRU working sets
+	static int LRU_WORKINGSET_LIST_SIZE= 3;
+	private static LRUWorkingSetsList fgLRUWorkingSets;
+
+	// Settings store
+	private static final String DIALOG_SETTINGS_KEY= "JavaElementSearchActions"; //$NON-NLS-1$
+	private static final String STORE_LRU_WORKING_SET_NAMES= "lastUsedWorkingSetNames"; //$NON-NLS-1$
+	private static IDialogSettings fgSettingsStore;
 
 	public static IJavaElement getJavaElement(IMarker marker) {
 		try {
@@ -281,5 +291,90 @@ public class SearchUtil extends JavaModelUtil {
 			}
 		}
 		return result;
+	}
+
+	// ---------- LRU working set handling ----------
+
+	/**
+	 * Updates the LRU list of working sets.
+	 * 
+	 * @param workingSets	the workings sets to be added to the LRU list
+	 */
+	public static void updateLRUWorkingSets(IWorkingSet[] workingSets) {
+		if (workingSets == null || workingSets.length < 1)
+			return;
+		
+		getLRUWorkingSets().add(workingSets);
+		saveState();
+	}
+
+	private static void saveState() {
+		IWorkingSet[] workingSets;
+		Iterator iter= fgLRUWorkingSets.iterator();
+		int i= 0;
+		while (iter.hasNext()) {
+			workingSets= (IWorkingSet[])iter.next();
+			String[] names= new String[workingSets.length];
+			for (int j= 0; j < workingSets.length; j++)
+				names[j]= workingSets[j].getName();
+			fgSettingsStore.put(STORE_LRU_WORKING_SET_NAMES + i, names);
+			i++;
+		}
+	}
+
+	public static LRUWorkingSetsList getLRUWorkingSets() {
+		if (fgLRUWorkingSets == null) {
+			restoreState();
+		}
+		return fgLRUWorkingSets;
+	}
+
+	static void restoreState() {
+		fgLRUWorkingSets= new LRUWorkingSetsList(LRU_WORKINGSET_LIST_SIZE);
+		fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (fgSettingsStore == null)
+			fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+		
+		boolean foundLRU= false;
+		for (int i= LRU_WORKINGSET_LIST_SIZE - 1; i >= 0; i--) {
+			String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES + i);
+			if (lruWorkingSetNames != null) {
+				Set workingSets= new HashSet(2);
+				for (int j= 0; j < lruWorkingSetNames.length; j++) {
+					IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[j]);
+					if (workingSet != null) {
+						workingSets.add(workingSet);
+					}
+				}
+				foundLRU= true;
+				if (!workingSets.isEmpty())
+					fgLRUWorkingSets.add((IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()]));
+			}
+		}
+		if (!foundLRU)
+			// try old preference format
+			restoreFromOldFormat();
+	}
+
+	private static void restoreFromOldFormat() {
+		fgLRUWorkingSets= new LRUWorkingSetsList(LRU_WORKINGSET_LIST_SIZE);
+		fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
+		if (fgSettingsStore == null)
+			fgSettingsStore= JavaPlugin.getDefault().getDialogSettings().addNewSection(DIALOG_SETTINGS_KEY);
+
+		boolean foundLRU= false;
+		String[] lruWorkingSetNames= fgSettingsStore.getArray(STORE_LRU_WORKING_SET_NAMES);
+		if (lruWorkingSetNames != null) {
+			for (int i= lruWorkingSetNames.length - 1; i >= 0; i--) {
+				IWorkingSet workingSet= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(lruWorkingSetNames[i]);
+				if (workingSet != null) {
+					foundLRU= true;
+					fgLRUWorkingSets.add(new IWorkingSet[]{workingSet});
+				}
+			}
+		}
+		if (foundLRU)
+			// save in new format
+			saveState();
 	}
 }
