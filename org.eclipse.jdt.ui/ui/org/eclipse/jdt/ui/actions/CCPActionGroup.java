@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.swt.dnd.Clipboard;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.IInputSelectionProvider;
@@ -43,7 +45,8 @@ public class CCPActionGroup extends ActionGroup {
 	private SelectionDispatchAction fCopyAction;
 	private SelectionDispatchAction fPasteAction;
 	private SelectionDispatchAction fCutAction;
-	
+
+	private Clipboard fClipboard;
 	/**
 	 * Creates a new <code>CCPActionGroup</code>.
 	 * 
@@ -59,10 +62,11 @@ public class CCPActionGroup extends ActionGroup {
 
 	private CCPActionGroup(IWorkbenchSite site) {
 		fSite= site;
+		fClipboard= new Clipboard(site.getShell().getDisplay());
 		fActions= new SelectionDispatchAction[] {	
-			fCutAction= ReorgActionFactory.createCutAction(fSite, fSite.getSelectionProvider()),
-			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fSite.getSelectionProvider()),
-			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fSite.getSelectionProvider()),
+			fCutAction= ReorgActionFactory.createCutAction(fSite, fSite.getSelectionProvider(), fClipboard),
+			fCopyAction= ReorgActionFactory.createCopyAction(fSite, fSite.getSelectionProvider(), fClipboard),
+			fPasteAction= ReorgActionFactory.createPasteAction(fSite, fSite.getSelectionProvider(), fClipboard),
 			fDeleteAction= ReorgActionFactory.createDeleteAction(fSite, fSite.getSelectionProvider()),
 		};
 	}
@@ -99,4 +103,16 @@ public class CCPActionGroup extends ActionGroup {
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, fActions[i]);
 		}		
 	}		
+	
+	/*
+	 * @see ActionGroup#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		if (fClipboard != null){
+			fClipboard.dispose();
+			fClipboard= null;
+		}
+	}
+
 }
