@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.ILineTracker;
+import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -87,10 +88,8 @@ public class CodeTemplateContext extends TemplateContext {
 				if (i != 0) {
 					buf.append(lineDelim);
 				}
-				
-				int start= tracker.getLineOffset(i);
-				int end= start + tracker.getLineLength(i);
-				String line= code.substring(start, end);
+				IRegion region = tracker.getLineInformation(i);
+				String line= code.substring(region.getOffset(), region.getOffset() + region.getLength());
 				buf.append(line);
 			}
 			return buf.toString();
