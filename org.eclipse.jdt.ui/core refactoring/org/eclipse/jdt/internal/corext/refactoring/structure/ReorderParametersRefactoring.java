@@ -132,6 +132,8 @@ class ReorderParametersRefactoring extends Refactoring {
 		if (fOldParameterNames == null || fOldParameterNames.length < 2)
 			result.addFatalError(RefactoringCoreMessages.getString("ReorderParametersRefactoring.too_few_parameters"));  //$NON-NLS-1$
 		
+		if (fMethod.isConstructor())
+			result.addFatalError("This refactoring is not implemented for constructors");
 		return result;
 	}
 	

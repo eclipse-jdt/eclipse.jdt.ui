@@ -78,6 +78,10 @@ public class ModifyParametersRefactoring extends Refactoring implements IMultiRe
 	}
 
 	public RefactoringStatus checkPreactivation() throws JavaModelException{
+		//XXX disable for constructors  - brkoen. see bug 23585
+		if (fReorderParameters.getMethod().isConstructor())
+			return RefactoringStatus.createFatalErrorStatus("This refactoring is not implemented for constructors");
+
 		//it is enabled if any of the 2 is enabled
 		RefactoringStatus result= fRenameParameters.checkPreactivation();
 		if (result.isOK())
