@@ -153,5 +153,23 @@ public class ReorderParametersTests extends RefactoringTest {
 	public void test14() throws Exception{
 		helper1(new String[]{"j", "i"}, new String[]{"I", "I"});
 	}
+	
+	public void test15() throws Exception{
+		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+	}
+	
+	public void test16() throws Exception{
+		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+	}
+	
+	public void test17() throws Exception{
+		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+	}
+	
+	public void test18() throws Exception{
+		helper1(new String[]{"b", "i"}, new String[]{"I", "Z"});
+	}
+	
+	
 }
 
