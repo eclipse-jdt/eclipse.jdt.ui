@@ -43,12 +43,9 @@ public class RefactoringWizard extends Wizard {
 	private boolean fPreviewShown;
 	
 	public RefactoringWizard(Refactoring refactoring) {
+		this();
 		Assert.isNotNull(refactoring);
 		fRefactoring= refactoring;
-		setNeedsProgressMonitor(true);
-		setChangeCreationCancelable(true);
-		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	} 
 	
 	public RefactoringWizard(Refactoring refactoring, String defaultPageTitle) {
@@ -68,6 +65,10 @@ public class RefactoringWizard extends Wizard {
 	 * @see #initialize(Refactoring)
 	 */
 	public RefactoringWizard() {
+		setNeedsProgressMonitor(true);
+		setChangeCreationCancelable(true);
+		setWindowTitle(RefactoringMessages.getString("RefactoringWizard.title")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	}
 	
 	/**

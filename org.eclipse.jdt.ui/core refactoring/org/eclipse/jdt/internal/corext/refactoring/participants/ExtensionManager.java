@@ -101,7 +101,7 @@ public class ExtensionManager {
 				if (descriptor.matches(processor, element)) {
 					IRefactoringParticipant participant= (IRefactoringParticipant)shared.get(descriptor);
 					if (participant != null) {
-						((ISharableParticipant)participant).add(element);
+						((ISharableParticipant)participant).addElement(element);
 					} else {
 						participant= descriptor.createParticipant();
 						participant.initialize(processor, element);

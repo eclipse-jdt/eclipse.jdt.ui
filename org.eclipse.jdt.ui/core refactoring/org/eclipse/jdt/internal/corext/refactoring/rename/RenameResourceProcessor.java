@@ -10,99 +10,81 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.Processors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
 
-
-public class RenameResourceRefactoring extends Refactoring implements IRenameRefactoring {
+public class RenameResourceProcessor extends RenameProcessor {
 
 	private IResource fResource;
-	private String fNewName;
-	
-	private RenameResourceRefactoring(IResource resource){
-		Assert.isNotNull(resource); 
-		fResource= resource;
-		fNewName= resource.getName();
+
+	//---- IRenameProcessor methods ---------------------------------------
+		
+	public void initialize(Object element) throws CoreException {
+		Assert.isTrue(element instanceof IResource);
+		fResource= (IResource)element;
+		setNewElementName(fResource.getName());
 	}
 	
-	public static RenameResourceRefactoring create(IResource resource) throws JavaModelException{
-		if (! isAvailable(resource))
-			return null;
-		return new RenameResourceRefactoring(resource);
-	}
-	
-	public static boolean isAvailable(IResource resource) throws JavaModelException{
-		if (resource == null)
+	public boolean isAvailable() throws JavaModelException {
+		if (! fResource.exists())
 			return false;
-		if (! resource.exists())
-			return false;
-		if (! resource.isAccessible())	
+		if (! fResource.isAccessible())	
 			return false;
 		return true;			
 	}
 	
-	/* non java-doc
-	 * @see IRefactoring#getName()
-	 */
-	public String getName() {
-		String message= RefactoringCoreMessages.getFormattedString("RenameResourceRefactoring.rename", //$NON-NLS-1$
-				new String[]{getCurrentName(), fNewName});
+	public String getProcessorName() {
+		String message= RefactoringCoreMessages.getFormattedString("RenameResourceProcessor.name", //$NON-NLS-1$
+				new String[]{getCurrentElementName(), fNewElementName});
 		return message;
 	}
 	
-	public Object getNewElement(){
-		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(fNewName));
+	public Object getElement() {
+		return fResource;
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#setNewName(String)
-	 */
-	public void setNewName(String newName) {
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getNewName()
-	*/
-	public String getNewName(){
-		return fNewName;
-	}
-
-	/* non java-doc
-	 * @see IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentName() {
+	public String getCurrentElementName() {
 		return fResource.getName();
 	}
+	
+	public IResourceModifications getResourceModifications() throws CoreException {
+		return null;	
+	}
 		
-	//--- preconditions 
+	public IProject[] getScope() {
+		return Processors.computeScope(fResource);
+	}
 
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);  //$NON-NLS-1$
-		pm.done();
+	public Object getNewElement() {
+		return ResourcesPlugin.getWorkspace().getRoot().findMember(createNewPath(fNewElementName));
+	}
+
+	//--- Condition checking --------------------------------------------
+
+	public RefactoringStatus checkActivation() throws CoreException {
 		return new RefactoringStatus();
 	}
 	
 	/* non java-doc
 	 * @see IRenameRefactoring#checkNewName()
 	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		IContainer c= fResource.getParent();
 		if (c == null)
@@ -144,7 +126,7 @@ public class RenameResourceRefactoring extends Refactoring implements IRenameRef
 	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RenameResourceChange(fResource, fNewName);
+			return new RenameResourceChange(fResource, fNewElementName);
 		} finally{
 			pm.done();
 		}	

@@ -34,7 +34,7 @@ public class RefactoringScanner {
 	private Set fCommentResults;
 	private Set fStringResults;
 	
-	public RefactoringScanner(){
+	public RefactoringScanner() {
 		this(true, true, true);
 	}
 	

@@ -40,8 +40,6 @@ public class MethodChecks {
 	public static boolean isVirtual(IMethod method) throws JavaModelException {
 		if (method.isConstructor())
 			return false;
-		if (method.getDeclaringType().isInterface())
-			return false;
 		if (JdtFlags.isPrivate(method))	
 			return false;
 		if (JdtFlags.isStatic(method))	
@@ -51,8 +49,6 @@ public class MethodChecks {
 	
 	public static boolean isVirtual(IMethodBinding methodBinding){
 		if (methodBinding.isConstructor())
-			return false;
-		if (methodBinding.getDeclaringClass().isInterface())
 			return false;
 		if (Modifier.isPrivate(methodBinding.getModifiers()))	//TODO is this enough?
 			return false;
@@ -72,6 +68,11 @@ public class MethodChecks {
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, overrides, RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD);
 	}
 	
+	/**
+	 * Checks if the given method is declared in an interface. If the method's declaring type
+	 * is an interface the method returns <code>false</code> if it is only declared in that
+	 * interface.
+	 */
 	public static RefactoringStatus checkIfComesFromInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		IMethod inInterface= MethodChecks.isDeclaredInInterface(method, pm);
 			
@@ -84,6 +85,11 @@ public class MethodChecks {
 		return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, inInterface, RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE);
 	}
 	
+	/**
+	 * Checks if the given method is declared in an interface. If the method's declaring type
+	 * is an interface the method returns <code>false</code> if it is only declared in that
+	 * interface.
+	 */
 	public static IMethod isDeclaredInInterface(IMethod method, IProgressMonitor pm) throws JavaModelException {
 		Assert.isTrue(isVirtual(method));
 		try{	
@@ -97,7 +103,7 @@ public class MethodChecks {
 				IType[] superinterfaces= superTypes.getAllSuperInterfaces(classes[i]);
 				for (int j= 0; j < superinterfaces.length; j++) {
 					IMethod found= Checks.findMethod(method, superinterfaces[j]);
-					if (found != null)
+					if (found != null && !found.equals(method))
 						return found;
 				}
 				subPm.worked(1);
@@ -116,7 +122,7 @@ public class MethodChecks {
 						method.getParameterTypes(), 
 						method.isConstructor());
 		
-		boolean overrides= (found != null && (! JdtFlags.isStatic(found)) && (! JdtFlags.isPrivate(found)));	
+		boolean overrides= (found != null && !found.equals(method) && (! JdtFlags.isStatic(found)) && (! JdtFlags.isPrivate(found)));	
 		if (overrides)
 			return found;
 		else

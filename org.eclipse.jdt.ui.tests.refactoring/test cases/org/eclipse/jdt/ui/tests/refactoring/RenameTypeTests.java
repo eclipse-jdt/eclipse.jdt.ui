@@ -16,22 +16,25 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.boot.BootLoader;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.boot.BootLoader;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -56,8 +59,8 @@ public class RenameTypeTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 		
-	private RenameTypeRefactoring createRefactoring(IType type, String newName) throws JavaModelException{
-		RenameTypeRefactoring ref= RenameTypeRefactoring.create(type);
+	private RenameRefactoring createRefactoring(IType type, String newName) throws CoreException {
+		RenameRefactoring ref= new RenameRefactoring(type);
 		ref.setNewName(newName);
 		return ref;
 	}
@@ -81,11 +84,12 @@ public class RenameTypeTests extends RefactoringTest {
 		IType classA= getType(cu, oldName);
 		
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
-		RenameTypeRefactoring ref= createRefactoring(classA, newName);
-		ref.setUpdateReferences(updateReferences);
-		ref.setUpdateJavaDoc(updateJavaDoc);
-		ref.setUpdateComments(updateComments);
-		ref.setUpdateStrings(updateStrings);
+		RenameRefactoring ref= createRefactoring(classA, newName);
+		RenameTypeProcessor processor= (RenameTypeProcessor)ref.getProcessor();
+		processor.setUpdateReferences(updateReferences);
+		processor.setUpdateJavaDoc(updateJavaDoc);
+		processor.setUpdateComments(updateComments);
+		processor.setUpdateStrings(updateStrings);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
@@ -982,8 +986,9 @@ public class RenameTypeTests extends RefactoringTest {
 		IFile file= project.getFile("build.xml");
 		file.create(new ByteArrayInputStream(content.getBytes()), true, null);
 				
-		IRefactoring ref= createRefactoring(classA, "B");
-		IQualifiedNameUpdatingRefactoring qr= (IQualifiedNameUpdatingRefactoring)ref;
+		RenameRefactoring ref= createRefactoring(classA, "B");
+		
+		IQualifiedNameUpdating qr= (IQualifiedNameUpdating)ref.getProcessor();
 		qr.setUpdateQualifiedNames(true);
 		qr.setFilePatterns("*.xml");
 		

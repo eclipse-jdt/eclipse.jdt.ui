@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  ******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -22,6 +22,11 @@ import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringParticipant;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 
 
@@ -58,14 +63,14 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getNewName()
 	 */
 	public String getNewName() {
-		return fProcessor.getNewName();
+		return fProcessor.getNewElementName();
 	}
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#setNewName(java.lang.String)
 	 */
 	public void setNewName(String newName) {
-		fProcessor.setNewName(newName);
+		fProcessor.setNewElementName(newName);
 	}
 
 
@@ -73,14 +78,18 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getCurrentName()
 	 */
 	public String getCurrentName() {
-		return fProcessor.getCurrentName();
+		return fProcessor.getCurrentElementName();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring#getNewElement()
 	 */
 	public Object getNewElement() throws JavaModelException {
-		return null;
+		try {
+			return fProcessor.getNewElement();
+		} catch (CoreException e) {
+			throw new JavaModelException(e);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -89,7 +98,7 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		try {
-			result.merge(fProcessor.checkNewName(newName));
+			result.merge(fProcessor.checkNewElementName(newName));
 		} catch (CoreException e) {
 			throw new JavaModelException(e);
 		}
@@ -137,30 +146,29 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 	 */
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		pm.beginTask("", 10); //$NON-NLS-1$
 		
 		try {
+			initParticipants();
+			pm.beginTask("", 2 + fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
+			
 			result.merge(fProcessor.checkInput(new SubProgressMonitor(pm, 1)));
 			if (result.hasFatalError())
 				return result;
 				
-			initParticipants(new SubProgressMonitor(pm, 2));
-			IProgressMonitor sub= new SubProgressMonitor(pm, 6);
-			sub.beginTask("", fElementParticipants.length + fDerivedParticipants.length + fResourceParticipants.length); //$NON-NLS-1$
 			
 			for (int i= 0; i < fElementParticipants.length; i++) {
 				IRenameParticipant participant= fElementParticipants[i];
-				participant.setNewName(fProcessor.getNewName());
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, 1)));
+				fProcessor.propagateNewElementNameTo(participant);
+				result.merge(participant.checkInput(new SubProgressMonitor(pm, fElementParticipants.length)));
 			}
 			for (int i= 0; i < fDerivedParticipants.length; i++) {
 				IRenameParticipant participant= fDerivedParticipants[i];
-				participant.setNewName(fProcessor.getNewName());
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, 1)));
+				fProcessor.propagateNewElementNameTo(participant);
+				result.merge(participant.checkInput(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 			}
 			for (int i= 0; i < fResourceParticipants.length; i++) {
 				IRefactoringParticipant participant= fResourceParticipants[i];
-				result.merge(participant.checkInput(new SubProgressMonitor(pm, 1)));
+				result.merge(participant.checkInput(new SubProgressMonitor(pm, fResourceParticipants.length)));
 			}
 		} catch (JavaModelException e) {
 			throw e;
@@ -181,17 +189,17 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 			
 			for (int i= 0; i < fElementParticipants.length; i++) {
 				IRenameParticipant participant= fElementParticipants[i];
-				participant.setNewName(fProcessor.getNewName());
-				result.add(participant.createChange(new SubProgressMonitor(pm, 1)));
+				fProcessor.propagateNewElementNameTo(participant);
+				result.add(participant.createChange(new SubProgressMonitor(pm, fElementParticipants.length)));
 			}
 			for (int i= 0; i < fDerivedParticipants.length; i++) {
 				IRenameParticipant participant= fDerivedParticipants[i];
-				participant.setNewName(fProcessor.getNewName());
-				result.add(participant.createChange(new SubProgressMonitor(pm, 1)));
+				fProcessor.propagateNewElementNameTo(participant);
+				result.add(participant.createChange(new SubProgressMonitor(pm, fDerivedParticipants.length)));
 			}
 			for (int i= 0; i < fResourceParticipants.length; i++) {
 				IRefactoringParticipant participant= fResourceParticipants[i];
-				result.add(participant.createChange(new SubProgressMonitor(pm, 1)));
+				result.add(participant.createChange(new SubProgressMonitor(pm, fResourceParticipants.length)));
 			}
 		} catch (JavaModelException e) {
 			throw e;
@@ -201,16 +209,12 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		return result;		
 	}
 	
-	private void initParticipants(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 2); //$NON-NLS-1$
+	private void initParticipants() throws CoreException {
 		fDerivedParticipants= RenameExtensionManager.getParticipants(fProcessor, fProcessor.getDerivedElements());
-		pm.worked(1);
-		ResourceModifications resourceModifications= fProcessor.getResourceModifications();
+		IResourceModifications resourceModifications= fProcessor.getResourceModifications();
 		if (resourceModifications != null)
 			fResourceParticipants= resourceModifications.getParticipants(fProcessor);
 		else
 			fResourceParticipants= new IRefactoringParticipant[0];
-		pm.worked(2);
-		pm.done();
 	}
 }

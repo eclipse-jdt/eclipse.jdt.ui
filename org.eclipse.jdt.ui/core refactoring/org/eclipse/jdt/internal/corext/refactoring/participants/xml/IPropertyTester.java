@@ -10,8 +10,10 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
+
 
 public interface IPropertyTester extends ITestResult {
 	
-	public int test(Object element, String propertyName, String value);
+	public int test(Object element, String propertyName, String value) throws CoreException;
 }

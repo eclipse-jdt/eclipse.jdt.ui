@@ -16,21 +16,21 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 public abstract class RenameProcessor implements IRenameProcessor {
 
-	private String fNewName;
+	protected String fNewElementName;
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#setNewName(java.lang.String)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#setNewElementName(java.lang.String)
 	 */
-	public void setNewName(String newName) {
+	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
-		fNewName= newName;
+		fNewElementName= newName;
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getNewName()
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getNewElementName()
 	 */
-	public String getNewName() {
-		return fNewName;
+	public String getNewElementName() {
+		return fNewElementName;
 	}
 	
 	/* (non-Javadoc)
@@ -38,5 +38,12 @@ public abstract class RenameProcessor implements IRenameProcessor {
 	 */
 	public Object[] getDerivedElements() throws CoreException {
 		return new Object[0];
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#propagateNewElementNameTo(org.eclipse.jdt.internal.corext.refactoring.participants.IRenameParticipant)
+	 */
+	public void propagateNewElementNameTo(IRenameParticipant participant) {
+		participant.setNewElementName(fNewElementName);
 	}
 }

@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class TypePropertyTester implements IPropertyTester {
+public class TypePropertyTester extends PropertyTester {
 
 	private static final String PROPERTY_HAS_MAIN_TYPE= "hasMainType"; //$NON-NLS-1$
 	
@@ -29,15 +29,11 @@ public class TypePropertyTester implements IPropertyTester {
 		IType type= (IType)element;
 		if (PROPERTY_HAS_MAIN_TYPE.equals(propertyName)) { //$NON-NLS-1$
 			try {
-				return convert(JavaModelUtil.hasMainMethod(type));
+				return testBoolean(value, JavaModelUtil.hasMainMethod(type));
 			} catch (JavaModelException e) {
 				return FALSE;
 			}
 		}
 		return UNKNOWN;
-	}
-
-	private int convert(boolean value) {
-		return value ? TRUE : FALSE;
 	}
 }

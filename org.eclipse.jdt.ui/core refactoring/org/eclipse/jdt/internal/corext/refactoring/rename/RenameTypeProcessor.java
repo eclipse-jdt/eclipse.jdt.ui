@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.participants;
+package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,7 +19,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -35,7 +34,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -59,8 +57,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactory;
-import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
@@ -74,7 +77,6 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 public class RenameTypeProcessor extends RenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
 	
 	private IType fType;
-	private String fNewName;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
 	private QualifiedNameSearchResult fQualifiedNameSearchResult;
@@ -87,210 +89,150 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#initialize(java.lang.Object)
-	 */
-	public void initialize(Object element) throws CoreException {
-		Assert.isNotNull(element);
-		fType= (IType)element;
-		fNewName= fType.getElementName();
+	public IType getType() {
+		return fType;
+	}
+
+	//---- IRefactoringProcessor ---------------------------------------------------
+
+	public void initialize(Object element) {
+		if (element instanceof IType) {
+			fType= (IType)element;
+			setNewElementName(fType.getElementName());
+		}
 		fUpdateReferences= true; //default is yes
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
 		fUpdateStrings= false;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getScope()
-	 */
+	public boolean isAvailable() throws CoreException {
+		if (fType == null)
+			return false;
+		if (! Checks.isAvailable(fType))
+			return false;
+		if (isSpecialCase(fType))
+			return false;
+		return true;
+	}
+	 
+	public String getProcessorName() {
+		return RefactoringCoreMessages.getFormattedString(
+			"RenameTypeRefactoring.name",  //$NON-NLS-1$
+			new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewElementName});
+	}
+	
 	public IProject[] getScope() throws CoreException {
 		return JavaProcessors.computeScope(fType);
 	}
 
-	public boolean isAvailable() {
-		try {
-			if (! Checks.isAvailable(fType))
-				return false;
-			if (isSpecialCase(fType))
-				return false;
-		} catch (JavaModelException e) {
-			return false;
-		}
-		return true;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getElement()
-	 */
 	public Object getElement() {
 		return fType;
 	}
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#getProcessableElements()
-	 */
 	public Object[] getDerivedElements() throws CoreException {
 		if (!isPrimaryType())
 			return super.getDerivedElements();
 		return new Object[] { fType.getCompilationUnit() };
 	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor#getResourceModifications()
-	 */
-	public ResourceModifications getResourceModifications() {
+	
+	public IResourceModifications getResourceModifications() throws CoreException {
 		if (!isPrimaryType())
 			return null;
 		IResource resource= fType.getCompilationUnit().getResource();
 		if (resource == null)
 			return null;
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(resource, fNewName + ".java"); //$NON-NLS-1$
+		result.setRename(resource, fNewElementName + ".java"); //$NON-NLS-1$
 		return result;		
 	}
-		 
-	public Object getNewElement(){
+		
+	//---- IRenameProcessor ----------------------------------------------
+	
+	public String getCurrentElementName(){
+		return fType.getElementName();
+	}
+	
+	public RefactoringStatus checkNewElementName(String newName){
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkTypeName(newName);
+		if (Checks.isAlreadyNamed(fType, newName))
+			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.choose_another_name"));	 //$NON-NLS-1$
+		return result;
+	}
+	
+	public Object getNewElement() {
 		IPackageFragment parent= fType.getPackageFragment();
 		ICompilationUnit cu;
 		if (isPrimaryType())
-			cu= parent.getCompilationUnit(fNewName + ".java"); //$NON-NLS-1$
+			cu= parent.getCompilationUnit(fNewElementName + ".java"); //$NON-NLS-1$
 		else
 			cu= fType.getCompilationUnit();	
-		return cu.getType(fNewName);
+		return cu.getType(fNewElementName);
 	}
-	
-	public IType getType(){
-		return fType;
-	}
-	
-	/*
-	 * @see ITextUpdatingRefactoring#canEnableTextUpdating()
-	 */
+
+	//---- ITextUpdating -------------------------------------------------
+
 	public boolean canEnableTextUpdating() {
 		return true;
 	}
 	
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateJavaDoc()
-	 */
 	public boolean getUpdateJavaDoc() {
 		return fUpdateJavaDoc;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateComments()
-	 */
 	public boolean getUpdateComments() {
 		return fUpdateComments;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateStrings()
-	 */
 	public boolean getUpdateStrings() {
 		return fUpdateStrings;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateJavaDoc(boolean)
-	 */
 	public void setUpdateJavaDoc(boolean update) {
 		fUpdateJavaDoc= update;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateComments(boolean)
-	 */
 	public void setUpdateComments(boolean update) {
 		fUpdateComments= update;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateStrings(boolean)
-	 */
 	public void setUpdateStrings(boolean update) {
 		fUpdateStrings= update;
 	}
-		
-	/* non java-doc
-	 * @see IRenameRefactoring#getNewName
-	 */
-	public String getNewName(){
-		return fNewName;
-	}
 
-	/* non java-doc
-	 * @see IRenameRefactoring#setNewName
-	 */
-	public void setNewName(String newName){
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getCurrentName
-	 */
-	public String getCurrentName(){
-		return fType.getElementName();
-	}
-	
-	public String getProcessorName(){
-		return RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name",  //$NON-NLS-1$
-														new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#setUpdateReferences(boolean)
-	 */	
+	//---- IReferenceUpdating --------------------------------------
+		
 	public void setUpdateReferences(boolean update){
 		fUpdateReferences= update;
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#canUpdateReferences()
-	 */	
 	public boolean canEnableUpdateReferences(){
 		return true;
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#getUpdateReferences()
-	 */	
 	public boolean getUpdateReferences(){
 		return fUpdateReferences;
 	}
 
-	/* non java-doc
-	 * Method declared in IQualifiedNameUpdatingRefactoring
-	 */	
+	//---- IQualifiedNameUpdating ----------------------------------
+
 	public boolean canEnableQualifiedNameUpdating() {
 		return !fType.getPackageFragment().isDefaultPackage() && !(fType.getParent() instanceof IType);
 	}
 	
-	/* non java-doc
-	 * Method declared in IQualifiedNameUpdatingRefactoring
-	 */	
 	public boolean getUpdateQualifiedNames() {
 		return fUpdateQualifiedNames;
 	}
 	
-	/* non java-doc
-	 * Method declared in IQualifiedNameUpdatingRefactoring
-	 */	
 	public void setUpdateQualifiedNames(boolean update) {
 		fUpdateQualifiedNames= update;
 	}
 	
-	/* non java-doc
-	 * Method declared in IQualifiedNameUpdatingRefactoring
-	 */	
 	public String getFilePatterns() {
 		return fFilePatterns;
 	}
 	
-	/* non java-doc
-	 * Method declared in IQualifiedNameUpdatingRefactoring
-	 */	
 	public void setFilePatterns(String patterns) {
 		Assert.isNotNull(patterns);
 		fFilePatterns= patterns;
@@ -298,17 +240,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	
 	//------------- Conditions -----------------
 	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IRenameProcessor#checkActivation()
-	 */
 	public RefactoringStatus checkActivation() throws CoreException {
-		return checkActivation(new NullProgressMonitor());
-	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkActivation
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
 		IType orig= (IType)WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.does_not_exist", //$NON-NLS-1$
@@ -321,27 +253,16 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	}
 
 	/* non java-doc
-	 * @see IRenameRefactoring#checkNewName
-	 */	
-	public RefactoringStatus checkNewName(String newName){
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkTypeName(newName);
-		if (Checks.isAlreadyNamed(fType, newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameTypeRefactoring.choose_another_name"));	 //$NON-NLS-1$
-		return result;
-	}
-
-	/* non java-doc
 	 * @see Refactoring#checkInput
 	 */		
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		Assert.isNotNull(fType, "type"); //$NON-NLS-1$
-		Assert.isNotNull(fNewName, "newName"); //$NON-NLS-1$
+		Assert.isNotNull(fNewElementName, "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		try{
 			pm.beginTask("", 120); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameTypeRefactoring.checking")); //$NON-NLS-1$
-			result.merge(checkNewName(fNewName));
+			result.merge(checkNewElementName(fNewElementName));
 			if (result.hasFatalError())
 				return result;
 			result.merge(Checks.checkIfCuBroken(fType));
@@ -359,7 +280,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 			pm.worked(1);
 		
 			if (mustRenameCU())
-				result.merge(Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName));
+				result.merge(Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewElementName));
 			pm.worked(1);	
 			
 			if (isPrimaryType())
@@ -422,42 +343,38 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e) {
-			throw new JavaModelException(e);
 		} finally {
 			pm.done();
 		}	
 	}
 	
-	private RefactoringStatus checkNewPathValidity() throws JavaModelException{
+	private RefactoringStatus checkNewPathValidity() throws CoreException {
 		IContainer c= ResourceUtil.getResource(fType).getParent();
 		
 		String notRename= RefactoringCoreMessages.getString("RenameTypeRefactoring.will_not_rename"); //$NON-NLS-1$
-		IStatus status= c.getWorkspace().validateName(fNewName, IResource.FILE);
+		IStatus status= c.getWorkspace().validateName(fNewElementName, IResource.FILE);
 		if (status.getSeverity() == IStatus.ERROR)
 			return RefactoringStatus.createWarningStatus(status.getMessage() + ". " + notRename); //$NON-NLS-1$
 		
-		status= c.getWorkspace().validatePath(createNewPath(fNewName), IResource.FILE);
+		status= c.getWorkspace().validatePath(createNewPath(fNewElementName), IResource.FILE);
 		if (status.getSeverity() == IStatus.ERROR)
 			return RefactoringStatus.createWarningStatus(status.getMessage() + ". " + notRename); //$NON-NLS-1$
 
 		return new RefactoringStatus();
 	}
 	
-	private String createNewPath(String newName) throws JavaModelException{
+	private String createNewPath(String newName) throws CoreException{
 		return ResourceUtil.getResource(fType).getFullPath().removeLastSegments(1).append(newName).toString();
 	}
 	
-	private RefactoringStatus checkTypesImportedInCu() throws JavaModelException{
-		IImportDeclaration imp= getImportedType(fType.getCompilationUnit(), fNewName);
+	private RefactoringStatus checkTypesImportedInCu() throws CoreException {
+		IImportDeclaration imp= getImportedType(fType.getCompilationUnit(), fNewElementName);
 		
 		if (imp == null)
 			return null;	
 			
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.imported", //$NON-NLS-1$
-											new Object[]{fNewName, ResourceUtil.getResource(fType).getFullPath()});
+											new Object[]{fNewElementName, ResourceUtil.getResource(fType).getFullPath()});
 		IJavaElement grandParent= imp.getParent().getParent();
 		if (grandParent instanceof ICompilationUnit)
 			return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(imp));
@@ -465,35 +382,35 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return null;	
 	}
 	
-	private RefactoringStatus checkTypesInPackage() throws JavaModelException{
-		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fNewName);
+	private RefactoringStatus checkTypesInPackage() throws CoreException {
+		IType type= Checks.findTypeInPackage(fType.getPackageFragment(), fNewElementName);
 		if (type == null || ! type.exists())
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.exists", //$NON-NLS-1$
-																	new String[]{fNewName, fType.getPackageFragment().getElementName()});
+																	new String[]{fNewElementName, fType.getPackageFragment().getElementName()});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(type));
 	}
 	
-	private RefactoringStatus checkEnclosedTypes() throws JavaModelException{
-		IType enclosedType= findEnclosedType(fType, fNewName);
+	private RefactoringStatus checkEnclosedTypes() throws CoreException {
+		IType enclosedType= findEnclosedType(fType, fNewElementName);
 		if (enclosedType == null)
 			return null;
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.encloses",  //$NON-NLS-1$
-																		new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
+																		new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewElementName});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(enclosedType));
 	}
 	
-	private RefactoringStatus checkEnclosingTypes() throws JavaModelException{
-		IType enclosingType= findEnclosingType(fType, fNewName);
+	private RefactoringStatus checkEnclosingTypes() throws CoreException {
+		IType enclosingType= findEnclosingType(fType, fNewElementName);
 		if (enclosingType == null)
 			return null;
 			
 		String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed",//$NON-NLS-1$
-								new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewName});
+								new String[]{JavaModelUtil.getFullyQualifiedName(fType), fNewElementName});
 		return RefactoringStatus.createErrorStatus(msg, JavaStatusContext.create(enclosingType));
 	}
 	
-	private static IType findEnclosedType(IType type, String newName) throws JavaModelException{
+	private static IType findEnclosedType(IType type, String newName) throws CoreException {
 		IType[] enclosedTypes= type.getTypes();
 		for (int i= 0; i < enclosedTypes.length; i++){
 			if (newName.equals(enclosedTypes[i].getElementName()) || findEnclosedType(enclosedTypes[i], newName) != null)
@@ -513,7 +430,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return null;
 	}
 	
-	private static IImportDeclaration getImportedType(ICompilationUnit cu, String typeName) throws JavaModelException{
+	private static IImportDeclaration getImportedType(ICompilationUnit cu, String typeName) throws CoreException {
 		IImportDeclaration[] imports= cu.getImports();
 		String dotTypeName= "." + typeName; //$NON-NLS-1$
 		for (int i= 0; i < imports.length; i++){
@@ -523,35 +440,35 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return null;
 	}
 	
-	private static boolean isSpecialCase(IType type) throws JavaModelException{
+	private static boolean isSpecialCase(IType type) throws CoreException {
 		return type.getPackageFragment().getElementName().equals("java.lang");	 //$NON-NLS-1$
 	}
 	
-	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
+	private IJavaSearchScope createRefactoringScope() throws CoreException {
 		return RefactoringScopeFactory.create(fType);
 	}
 	
-	private ISearchPattern createSearchPattern() throws JavaModelException{
+	private ISearchPattern createSearchPattern() throws CoreException {
 		return SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
 	}
 	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
+	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException {
 		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 	
-	private RefactoringStatus checkForMethodsWithConstructorNames()  throws JavaModelException{
+	private RefactoringStatus checkForMethodsWithConstructorNames()  throws CoreException{
 		IMethod[] methods= fType.getMethods();
 		for (int i= 0; i < methods.length; i++){
 			if (methods[i].isConstructor())
 				continue;
-			RefactoringStatus check= Checks.checkIfConstructorName(methods[i], methods[i].getElementName(), fNewName);	
+			RefactoringStatus check= Checks.checkIfConstructorName(methods[i], methods[i].getElementName(), fNewElementName);	
 			if (check != null)
 				return check;
 		}
 		return null;
 	}	
 	
-	private RefactoringStatus checkImportedTypes() throws JavaModelException{
+	private RefactoringStatus checkImportedTypes() throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IImportDeclaration[] imports= fType.getCompilationUnit().getImports();	
 		for (int i= 0; i < imports.length; i++)
@@ -559,20 +476,20 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return result;
 	}
 	
-	private RefactoringStatus checkTypesInCompilationUnit() throws JavaModelException{
+	private RefactoringStatus checkTypesInCompilationUnit() throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (! Checks.isTopLevel(fType)){ //the other case checked in checkTypesInPackage
-			IType siblingType= fType.getDeclaringType().getType(fNewName);
+			IType siblingType= fType.getDeclaringType().getType(fNewElementName);
 			if (siblingType.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type_exists", //$NON-NLS-1$
-																		new String[]{fNewName, JavaModelUtil.getFullyQualifiedName(fType.getDeclaringType())});
+																		new String[]{fNewElementName, JavaModelUtil.getFullyQualifiedName(fType.getDeclaringType())});
 				result.addError(msg, JavaStatusContext.create(siblingType));
 			}
 		}
 		return result;
 	}
 	
-	private RefactoringStatus analyseEnclosedTypes() throws JavaModelException{
+	private RefactoringStatus analyseEnclosedTypes() throws CoreException {
 		final ISourceRange typeRange= fType.getSourceRange();
 		final RefactoringStatus result= new RefactoringStatus();
 		CompilationUnit cuNode= AST.parseCompilationUnit(fType.getCompilationUnit(), false);
@@ -583,16 +500,16 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				if (node.getStartPosition() > typeRange.getOffset() + typeRange.getLength())
 					return true;
 		
-				if (fNewName.equals(node.getName().getIdentifier())){
+				if (fNewElementName.equals(node.getName().getIdentifier())){
 					Context	context= JavaStatusContext.create(fType.getCompilationUnit(), node);
 					String msg= null;;
 					if (node.isLocalTypeDeclaration()){
 						msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type", //$NON-NLS-1$
-									new String[]{JavaElementUtil.createSignature(fType), fNewName});
+									new String[]{JavaElementUtil.createSignature(fType), fNewElementName});
 					}	
 					else if (node.isMemberTypeDeclaration()){
 						msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.member_type", //$NON-NLS-1$
-								new String[]{JavaElementUtil.createSignature(fType), fNewName});
+								new String[]{JavaElementUtil.createSignature(fType), fNewElementName});
 					}	
 					if (msg != null)	
 						result.addError(msg, context);
@@ -612,18 +529,18 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return result;
 	}
 	
-	private boolean mustRenameCU() throws JavaModelException{
+	private boolean mustRenameCU() throws CoreException {
 		return Checks.isTopLevel(fType) && (JdtFlags.isPublic(fType));
 	}
 	
-	private static ICompilationUnit getCompilationUnit(IImportDeclaration imp){
+	private static ICompilationUnit getCompilationUnit(IImportDeclaration imp) {
 		return (ICompilationUnit)imp.getParent().getParent();
 	}
 	
-	private void analyzeImportedTypes(IType[] types, RefactoringStatus result, IImportDeclaration imp) throws JavaModelException{
+	private void analyzeImportedTypes(IType[] types, RefactoringStatus result, IImportDeclaration imp) throws CoreException {
 		for (int i= 0; i < types.length; i++) {
 			//could this be a problem (same package imports)?
-			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(fNewName)){
+			if (JdtFlags.isPublic(types[i]) && types[i].getElementName().equals(fNewElementName)){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.name_conflict1", //$NON-NLS-1$
 																			new Object[]{JavaModelUtil.getFullyQualifiedName(types[i]), getFullPath(getCompilationUnit(imp))});
 				result.addError(msg, JavaStatusContext.create(imp));
@@ -631,7 +548,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		}
 	}
 	
-	private static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) throws JavaModelException{
+	private static IJavaElement convertFromImportDeclaration(IImportDeclaration declaration) throws CoreException {
 			if (declaration.isOnDemand()){ 
 				String packageName= declaration.getElementName().substring(0, declaration.getElementName().length() - 2);
 				return JavaModelUtil.findTypeContainer(declaration.getJavaProject(), packageName);
@@ -639,7 +556,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				return JavaModelUtil.findTypeContainer(declaration.getJavaProject(), declaration.getElementName());
 	}
 
-	private void analyzeImportDeclaration(IImportDeclaration imp, RefactoringStatus result) throws JavaModelException{
+	private void analyzeImportDeclaration(IImportDeclaration imp, RefactoringStatus result) throws CoreException{
 		if (!imp.isOnDemand())
 			return; //analyzed earlier
 		
@@ -658,7 +575,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		}
 	}
 	
-	private IFile[] getAllFilesToModify() throws CoreException{
+	private IFile[] getAllFilesToModify() throws CoreException {
 		List result= new ArrayList();
 		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		if (fQualifiedNameSearchResult != null)
@@ -673,7 +590,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	/*
 	 * Analyzes all compilation units in which type is referenced
 	 */
-	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		fReferences= Checks.excludeCompilationUnits(fReferences, result);
 		if (result.hasFatalError())
@@ -686,9 +603,9 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return result;
 	}
 	
-	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws CoreException {
 		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
-		ISearchPattern pattern= SearchEngine.createSearchPattern(fNewName, IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, true);
+		ISearchPattern pattern= SearchEngine.createSearchPattern(fNewElementName, IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, true);
 		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
 		if (cusWithReferencesToConflictingTypes.length == 0)
 			return new RefactoringStatus();
@@ -702,7 +619,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		for (int i= 0; i < intersection.length; i++) {
 			Context context= JavaStatusContext.create(intersection[i]);
 			String message= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.another_type", //$NON-NLS-1$
-				new String[]{fNewName, intersection[i].getElementName()});
+				new String[]{fNewElementName, intersection[i].getElementName()});
 			result.addWarning(message, context);
 		}	
 		return result;
@@ -725,7 +642,7 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 	
-	private static String getFullPath(ICompilationUnit cu) throws JavaModelException{
+	private static String getFullPath(ICompilationUnit cu) throws CoreException{
 		Assert.isTrue(cu.exists());
 		return ResourceUtil.getResource(cu).getFullPath().toString();
 	}
@@ -736,24 +653,25 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 	 * non java-doc
 	 * @see IRefactoring#createChange
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException{
+	public IChange createChange(IProgressMonitor pm) throws CoreException{
 		pm.beginTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.creating_change"), 4); //$NON-NLS-1$
-		CompositeChange builder= new CompositeChange("Java updates");
+		CompositeChange builder= new CompositeChange(
+			RefactoringCoreMessages.getString("Change.javaChanges")); //$NON-NLS-1$
 		builder.addAll(fChangeManager.getAllChanges());
 		if (fQualifiedNameSearchResult != null)
 			builder.addAll(fQualifiedNameSearchResult.getAllChanges());
 		if (willRenameCU())
-			builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewName + ".java")); //$NON-NLS-1$
+			builder.add(new RenameResourceChange(ResourceUtil.getResource(fType), fNewElementName + ".java")); //$NON-NLS-1$
 		pm.worked(1);	
 		return builder;	
 	}
 	
-	private boolean willRenameCU() throws JavaModelException{
+	private boolean willRenameCU() throws CoreException{
 		if (! isPrimaryType())
 			return false;
 		if (! checkNewPathValidity().isOK())
 			return false;
-		if (! Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewName).isOK())
+		if (! Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), fNewElementName).isOK())
 			return false;
 		return true;	
 	}
@@ -766,12 +684,11 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		return fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java");//$NON-NLS-1$
 	}
 	
-	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException{
-		// TODO: need generic text matcher.
-		// TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
+	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
+		TextMatchFinder2.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}
 	
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 7); //$NON-NLS-1$
 			TextChangeManager manager= new TextChangeManager();
@@ -796,14 +713,14 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 		}	
 	}
 	
-	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException{
+	private void addTypeDeclarationUpdate(TextChangeManager manager) throws CoreException {
 		String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update"); //$NON-NLS-1$
 		int typeNameLength= fType.getElementName().length();
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
-		manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(fType.getNameRange().getOffset(), typeNameLength, fNewName));
+		manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(fType.getNameRange().getOffset(), typeNameLength, fNewElementName));
 	}
 	
-	private void addConstructorRenames(TextChangeManager manager) throws CoreException{
+	private void addConstructorRenames(TextChangeManager manager) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fType.getCompilationUnit());
 		IMethod[] methods= fType.getMethods();
 		int typeNameLength= fType.getElementName().length();
@@ -816,12 +733,12 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				 * (checked as a precondition)
 				 */				
 				String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.rename_constructor"); //$NON-NLS-1$
-				manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(methods[i].getNameRange().getOffset(), typeNameLength, fNewName));
+				manager.get(cu).addTextEdit(name, SimpleTextEdit.createReplace(methods[i].getNameRange().getOffset(), typeNameLength, fNewElementName));
 			}
 		}
 	}
 	
-	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
+	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		for (int i= 0; i < fReferences.length; i++){
 			ICompilationUnit cu= fReferences[i].getCompilationUnit();
@@ -836,16 +753,16 @@ public class RenameTypeProcessor extends RenameProcessor implements ITextUpdatin
 				SearchResult searchResult= results[j];
 				int offset= searchResult.getStart();
 				int length= searchResult.getEnd() - searchResult.getStart();
-				manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, fNewName, fType.getElementName()));
+				manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, fNewElementName, fType.getElementName()));
 			}
 			pm.worked(1);
 		}
 	}
 	
-	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
+	private void computeQualifiedNameMatches(IProgressMonitor pm) throws CoreException {
 		IPackageFragment fragment= fType.getPackageFragment();
 		fQualifiedNameSearchResult= QualifiedNameFinder.process(fType.getFullyQualifiedName(),  
-			fragment.getElementName() + "." + fNewName, //$NON-NLS-1$
+			fragment.getElementName() + "." + fNewElementName, //$NON-NLS-1$
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
 	}	
 }

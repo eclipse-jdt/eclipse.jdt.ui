@@ -10,23 +10,16 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-public class RenameCuWizard extends RenameRefactoringWizard2 {
-	public RenameCuWizard() {
+public class RenameSourceFolderWizard extends RenameRefactoringWizard2 {
+	public RenameSourceFolderWizard() {
 		super(
-			RefactoringMessages.getString("RenameCuWizard.defaultPageTitle"), //$NON-NLS-1$
-			RefactoringMessages.getString("RenameCuWizard.inputPage.description"), //$NON-NLS-1$
-			JavaPluginImages.DESC_WIZBAN_REFACTOR_CU,
-			IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE);
+			RefactoringMessages.getString("RenameSourceFolder.defaultPageTitle"), //$NON-NLS-1$
+			RefactoringMessages.getString("RenameSourceFolder.inputPage.description"), //$NON-NLS-1$
+			JavaPluginImages.DESC_WIZBAN_REFACTOR,
+			IJavaHelpContextIds.RENAME_SOURCE_FOLDER_WIZARD_PAGE);
 	}
-	
-	protected RefactoringStatus validateNewName(String newName) {
-		String fullName= newName + ".java";  //$NON-NLS-1$
-		return super.validateNewName(fullName);
-	}	
 }

@@ -10,37 +10,25 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.resources.IFile;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.internal.ui.util.StringMatcher;
+public class FilePropertyTester extends PropertyTester {
 
-
-public class ResourcePropertyTester extends PropertyTester {
-
-	private static final String PROPERTY_NAME= "name";	 //$NON-NLS-1$
-	private static final String PROJECT_NATURE = "projectNature";	 //$NON-NLS-1$
+	private static final String PROPERTY_IS_CU= "isCompilationUnit"; //$NON-NLS-1$
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.properties.IPropertyEvaluator#test(java.lang.Object, java.lang.String, java.lang.String)
 	 */
 	public int test(Object element, String propertyName, String value) {
-		if (!(element instanceof IResource))
+		if (!(element instanceof IFile))
 			return UNKNOWN;
-		IResource resource= (IResource)element;
-		if (PROPERTY_NAME.equals(propertyName)) { //$NON-NLS-1$
-			String fileName= resource.getName();
-			StringMatcher matcher= new StringMatcher(value, false, false);
-			return convert(matcher.match(fileName));
-		} else if (PROJECT_NATURE.equals(propertyName)) {
-			try {
-				IProject proj = resource.getProject();
-				return convert(proj.isAccessible() && proj.hasNature(value));
-			} catch (CoreException e) {
-				return FALSE;		
-			}
+		IFile file= (IFile)element;
+		if (PROPERTY_IS_CU.equals(propertyName)) {
+			IJavaElement jElement= JavaCore.create(file);
+			return testBoolean(value, jElement != null && jElement.exists() && jElement.getElementType() == IJavaElement.COMPILATION_UNIT);
 		}
 		return UNKNOWN;
 	}

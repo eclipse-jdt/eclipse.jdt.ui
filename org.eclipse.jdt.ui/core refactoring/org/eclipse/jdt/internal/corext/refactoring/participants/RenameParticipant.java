@@ -30,7 +30,7 @@ public abstract class RenameParticipant implements IRenameParticipant {
 		return fNewName;
 	}
 	
-	public void setNewName(String name) {
+	public void setNewElementName(String name) {
 		fNewName= name;
 	}
 }

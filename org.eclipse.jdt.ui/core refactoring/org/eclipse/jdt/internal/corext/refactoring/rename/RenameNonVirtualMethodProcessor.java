@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -30,34 +29,17 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
+public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
-	private RenamePrivateMethodRefactoring(IMethod method) {
-		super(method);
+	public boolean isAvailable() throws CoreException {
+		return super.isAvailable() && !MethodChecks.isVirtual(getMethod());
 	}
 	
-	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		if (! isAvailable(method))
-			return null;
-		return new RenamePrivateMethodRefactoring(method);
-	}
-	
-	public static boolean isAvailable(IMethod method) throws JavaModelException{
-		return RenameMethodRefactoring.isAvailable(method) && internalIsAvailable(method);
-	}
-	
-	static boolean internalIsAvailable(IMethod method) throws JavaModelException{
-		return JdtFlags.isPrivate(method);
-	}
 	//----------- preconditions --------------
 	
-	/* non java-doc
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 2); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
@@ -65,12 +47,15 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 			if (result.hasFatalError())
 				return result;
 			
-			IMethod hierarchyMethod= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), getMethod(), getNewName());
+			IMethod hierarchyMethod= hierarchyDeclaresMethodName(
+				new SubProgressMonitor(pm, 1), getMethod(), getNewElementName());
 			
 			if (hierarchyMethod != null){
 				Context context= JavaStatusContext.create(hierarchyMethod);
-				String message= RefactoringCoreMessages.getFormattedString("RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
-																			new String[]{JavaModelUtil.getFullyQualifiedName(getMethod().getDeclaringType()), getNewName()});
+				String message= RefactoringCoreMessages.getFormattedString(
+					"RenamePrivateMethodRefactoring.hierarchy_defines", //$NON-NLS-1$
+					new String[]{JavaModelUtil.getFullyQualifiedName(
+						getMethod().getDeclaringType()), getNewElementName()});
                 result.addError(message, context);
 			}																
 			return result;
@@ -79,10 +64,15 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 		}
 	}
 	
+	/*
+	 * The code below is needed to due bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=39700.
+	 * Declaration in hierarchy doesn't take visibility into account. 
+	 */
+	
 	/* non java-doc
 	 * overriding RenameMethodrefactoring@addOccurrences
 	 */
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(getMethod().getCompilationUnit());
 		addReferenceUpdates(manager.get(cu));
@@ -93,14 +83,14 @@ class RenamePrivateMethodRefactoring extends RenameMethodRefactoring {
 	/* non java-doc
 	 * overriding RenameMethodrefactoring@createSearchPattern
 	 */
-	ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
+	ISearchPattern createSearchPattern(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		ISearchPattern pattern= SearchEngine.createSearchPattern(getMethod(), IJavaSearchConstants.REFERENCES);
 		pm.done();
 		return pattern;
 	}
 	
-	private void addReferenceUpdates(TextChange change) throws JavaModelException{
+	private void addReferenceUpdates(TextChange change) throws CoreException {
 		SearchResultGroup[] grouped= getOccurrences();
 		if (grouped.length == 0)
 			return;

@@ -26,7 +26,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenamePrivateFieldTests extends RefactoringTest {
 
@@ -68,11 +69,12 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName, String typeName,
 							boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameFieldRefactoring ref= RenameFieldRefactoring.create(declaringType.getField(fieldName));
-		ref.setNewName(newFieldName);
-		ref.setRenameGetter(renameGetter);
-		ref.setRenameSetter(renameSetter);
-		RefactoringStatus result= performRefactoring(ref);
+		RenameRefactoring refactoring= new RenameRefactoring(declaringType.getField(fieldName));
+		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		processor.setNewElementName(newFieldName);
+		processor.setRenameGetter(renameGetter);
+		processor.setRenameSetter(renameSetter);
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -92,18 +94,19 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
-		ref.setUpdateReferences(updateReferences);
-		ref.setUpdateJavaDoc(updateJavaDoc);
-		ref.setUpdateComments(updateComments);
-		ref.setUpdateStrings(updateStrings);
-		assertEquals("getter rename enabled", expectedGetterRenameEnabled, ref.canEnableGetterRenaming() == null);
-		assertEquals("setter rename enabled", expectedSetterRenameEnabled, ref.canEnableSetterRenaming() == null);
-		ref.setRenameGetter(renameGetter);
-		ref.setRenameSetter(renameSetter);
-		ref.setNewName(newFieldName);
+		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
+		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		processor.setUpdateReferences(updateReferences);
+		processor.setUpdateJavaDoc(updateJavaDoc);
+		processor.setUpdateComments(updateComments);
+		processor.setUpdateStrings(updateStrings);
+		assertEquals("getter rename enabled", expectedGetterRenameEnabled, processor.canEnableGetterRenaming() == null);
+		assertEquals("setter rename enabled", expectedSetterRenameEnabled, processor.canEnableSetterRenaming() == null);
+		processor.setRenameGetter(renameGetter);
+		processor.setRenameSetter(renameSetter);
+		processor.setNewElementName(newFieldName);
 		
-		RefactoringStatus result= performRefactoring(ref);
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		

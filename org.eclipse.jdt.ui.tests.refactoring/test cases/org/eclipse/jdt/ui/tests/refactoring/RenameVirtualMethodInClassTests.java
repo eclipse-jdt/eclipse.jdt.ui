@@ -24,7 +24,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	
@@ -45,12 +46,13 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 
 	private void helper1_not_available(String methodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		assertTrue(! RenameMethodRefactoring.isAvailable(classA.getMethod(methodName, signatures)));
+		RenameRefactoring ref= new RenameRefactoring(classA.getMethod(methodName, signatures));
+		assertTrue(! ref.isAvailable());
 	}	
 	
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
+		RenameRefactoring ref= new RenameRefactoring(classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -63,9 +65,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameMethodRefactoring ref=  RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
-		ref.setUpdateReferences(updateReferences);
-		ref.setNewName(newMethodName);
+		RenameRefactoring ref= new RenameRefactoring(classA.getMethod(methodName, signatures));
+		RenameMethodProcessor pro=  (RenameMethodProcessor)ref.getProcessor();
+		pro.setUpdateReferences(updateReferences);
+		pro.setNewElementName(newMethodName);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
@@ -306,7 +309,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classB.getMethod("m", new String[]{"I"}));
+		RenameRefactoring ref= new RenameRefactoring(classB.getMethod("m", new String[]{"I"}));
 		ref.setNewName("kk");
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());

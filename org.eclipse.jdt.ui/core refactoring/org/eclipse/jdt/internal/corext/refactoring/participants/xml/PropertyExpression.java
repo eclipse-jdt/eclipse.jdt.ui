@@ -10,6 +10,7 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants.xml;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 
 
@@ -40,7 +41,7 @@ public class PropertyExpression extends Expression {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.Expression#evaluate(java.lang.Object)
 	 */
-	public int evaluate(Object element) {
+	public int evaluate(Object element) throws CoreException {
 		if (PROPERTY_INSTANCE_OF.equals(fName)) {
 			return isInstanceOf(element, fValue) ? ITestResult.TRUE : ITestResult.FALSE;
 		} else {

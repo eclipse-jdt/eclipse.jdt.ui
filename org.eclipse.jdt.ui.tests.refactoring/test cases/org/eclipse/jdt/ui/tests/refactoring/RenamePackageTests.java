@@ -13,15 +13,17 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 
 public class RenamePackageTests extends RefactoringTest {
@@ -42,10 +44,10 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	// -------------
-	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) throws JavaModelException {
-		RenamePackageRefactoring ref= RenamePackageRefactoring.create(pack);
-		ref.setNewName(newName);
-		return ref;
+	private RenameRefactoring createRefactoring(IPackageFragment pack, String newName) throws CoreException {
+		RenameRefactoring result= new RenameRefactoring(pack);
+		result.setNewName(newName);
+		return result;
 	}
 
 	/* non java-doc
@@ -121,8 +123,8 @@ public class RenamePackageTests extends RefactoringTest {
 				}
 			}
 			IPackageFragment thisPackage= packages[0];
-			RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
-			ref.setUpdateReferences(updateReferences);
+			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(updateReferences);
 			performDummySearch();
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
@@ -263,7 +265,7 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 		IPackageFragment thisPackage= packages[0];
 		thisPackage.getCorrespondingResource().setReadOnly(true);
-		RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
 		performDummySearch();
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);

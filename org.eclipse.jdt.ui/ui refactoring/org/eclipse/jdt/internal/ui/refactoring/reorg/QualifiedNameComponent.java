@@ -24,7 +24,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 
 public class QualifiedNameComponent extends Composite {
 

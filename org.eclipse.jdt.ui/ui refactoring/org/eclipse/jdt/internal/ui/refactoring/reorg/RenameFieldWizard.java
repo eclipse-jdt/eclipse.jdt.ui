@@ -8,7 +8,11 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring;
+package org.eclipse.jdt.internal.ui.refactoring.reorg;
+
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -22,30 +26,26 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+public class RenameFieldWizard extends RenameRefactoringWizard2 {
 
-class RenameFieldWizard extends RenameRefactoringWizard {
-
-	public RenameFieldWizard(IRenameRefactoring ref) {
-		super(ref, 
-			RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
-			RefactoringMessages.getString("RenameFieldWizard.message"),   //$NON-NLS-1$
+	public RenameFieldWizard() {
+		super(RefactoringMessages.getString("RenameFieldWizard.defaultPageTitle"),  //$NON-NLS-1$
+			RefactoringMessages.getString("RenameFieldWizard.inputPage.description"),   //$NON-NLS-1$
+			JavaPluginImages.DESC_WIZBAN_REFACTOR_FIELD,
 			IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE);
 	}
 
-	/* non java-doc
-	 * @see RenameRefactoringWizard#createInputPage
-	 */ 
-	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
-		return new RenameFieldInputWizardPage(message, getPageContextHelpId(), initialSetting) {
+	protected RenameInputWizardPage2 createInputPage(String message, String initialSetting) {
+		return new RenameFieldInputWizardPage(message, IJavaHelpContextIds.RENAME_FIELD_WIZARD_PAGE, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				RefactoringStatus result= validateNewName(text);
 				updateGetterSetterLabels();
@@ -54,7 +54,7 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 		};
 	}
 
-	private static class RenameFieldInputWizardPage extends RenameInputWizardPage {
+	private static class RenameFieldInputWizardPage extends RenameInputWizardPage2 {
 
 		private Button fRenameGetter;
 		private Button fRenameSetter;
@@ -83,21 +83,21 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 				
 			fRenameGetter= new Button(composite, SWT.CHECK);
 			fRenameGetter.setEnabled(fGetterRenamingErrorMessage == null);
-			fRenameGetter.setSelection(getRenameFieldRefactoring().getRenameGetter());
+			fRenameGetter.setSelection(getRenameFieldProcessor().getRenameGetter());
 			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameGetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					getRenameFieldRefactoring().setRenameGetter(fRenameGetter.getSelection());
+					getRenameFieldProcessor().setRenameGetter(fRenameGetter.getSelection());
 				}
 			});
 		
 			fRenameSetter= new Button(composite, SWT.CHECK);
 			fRenameSetter.setEnabled(fSetterRenamingErrorMessage == null);
-			fRenameSetter.setSelection(getRenameFieldRefactoring().getRenameSetter());
+			fRenameSetter.setSelection(getRenameFieldProcessor().getRenameSetter());
 			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameSetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					getRenameFieldRefactoring().setRenameSetter(fRenameSetter.getSelection());
+					getRenameFieldProcessor().setRenameSetter(fRenameSetter.getSelection());
 				}
 			});
 		
@@ -123,13 +123,13 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 			if (fGetterRenamingErrorMessage != null)
 				return constructDisabledGetterRenamingLabel(defaultLabel);
 			try {
-				IMethod	getter= getRenameFieldRefactoring().getGetter();
+				IMethod	getter= getRenameFieldProcessor().getGetter();
 				if (getter == null || ! getter.exists())
 					return defaultLabel;
 				String oldGetterName= getter.getElementName();
 				String newGetterName= createNewGetterName();
 				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_getter_to", new String[]{oldGetterName, newGetterName}); //$NON-NLS-1$
-			} catch(JavaModelException e) {
+			} catch(CoreException e) {
 				JavaPlugin.log(e)	;
 				return defaultLabel;			
 			}
@@ -140,13 +140,13 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 			if (fSetterRenamingErrorMessage != null)
 				return constructDisabledSetterRenamingLabel(defaultLabel);
 			try {
-				IMethod	setter= getRenameFieldRefactoring().getSetter();
+				IMethod	setter= getRenameFieldProcessor().getSetter();
 				if (setter == null || ! setter.exists())
 					return defaultLabel;
 				String oldSetterName= setter.getElementName();
 				String newSetterName= createNewSetterName();
 				return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.rename_setter_to", new String[]{oldSetterName, newSetterName});//$NON-NLS-1$
-			} catch(JavaModelException e) {
+			} catch(CoreException e) {
 				JavaPlugin.log(e);
 				return defaultLabel;			
 			}
@@ -165,40 +165,40 @@ class RenameFieldWizard extends RenameRefactoringWizard {
 			return RefactoringMessages.getFormattedString("RenameFieldInputWizardPage.getter_label", keys);			 //$NON-NLS-1$
 		}
 	
-		private String createNewGetterName() throws JavaModelException {
-			return getRenameFieldRefactoring().getNewGetterName();
+		private String createNewGetterName() throws CoreException {
+			return getRenameFieldProcessor().getNewGetterName();
 		}
 	
-		private String createNewSetterName() throws JavaModelException {
-			return getRenameFieldRefactoring().getNewSetterName();
+		private String createNewSetterName() throws CoreException {
+			return getRenameFieldProcessor().getNewSetterName();
 		}
 	
-		private String checkGetterRenamingEnablement(){
+		private String checkGetterRenamingEnablement() {
 			if (fGetterRenamingErrorMessage != null)
 				return  fGetterRenamingErrorMessage;
 			try {
-				fGetterRenamingErrorMessage= getRenameFieldRefactoring().canEnableGetterRenaming();
+				fGetterRenamingErrorMessage= getRenameFieldProcessor().canEnableGetterRenaming();
 				return fGetterRenamingErrorMessage;
-			} catch (JavaModelException e) {
+			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				return ""; //$NON-NLS-1$
 			} 
 		}
 
-		private String checkSetterRenamingEnablement(){
+		private String checkSetterRenamingEnablement() {
 			if (fSetterRenamingErrorMessage != null)
 				return  fSetterRenamingErrorMessage;
 			try {
-				fSetterRenamingErrorMessage= getRenameFieldRefactoring().canEnableSetterRenaming();
+				fSetterRenamingErrorMessage= getRenameFieldProcessor().canEnableSetterRenaming();
 				return fSetterRenamingErrorMessage;
-			} catch (JavaModelException e) {
+			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				return ""; //$NON-NLS-1$
 			} 
 		}
 	
-		private RenameFieldRefactoring getRenameFieldRefactoring(){
-			return (RenameFieldRefactoring)getRefactoring();
+		private RenameFieldProcessor getRenameFieldProcessor() {
+			return (RenameFieldProcessor)((RenameRefactoring)getRefactoring()).getProcessor();
 		}
 	}
 }

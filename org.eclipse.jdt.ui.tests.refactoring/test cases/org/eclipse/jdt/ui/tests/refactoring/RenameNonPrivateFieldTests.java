@@ -26,7 +26,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
@@ -67,9 +68,10 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
-		ref.setNewName(newFieldName);
-		RefactoringStatus result= performRefactoring(ref);
+		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
+		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		processor.setNewElementName(newFieldName);
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -80,10 +82,11 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
-		ref.setNewName(newFieldName);
-		ref.setUpdateReferences(updateReferences);
-		RefactoringStatus result= performRefactoring(ref);
+		RenameRefactoring refactoring= new RenameRefactoring(classA.getField(fieldName));
+		RenameFieldProcessor processor= (RenameFieldProcessor)refactoring.getProcessor();
+		processor.setNewElementName(newFieldName);
+		processor.setUpdateReferences(updateReferences);
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertEquals("was supposed to pass", null, result);
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		

@@ -13,6 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 public interface ISharableParticipant {
 
-	public void add(Object element);
+	public void addElement(Object element);
 
 }

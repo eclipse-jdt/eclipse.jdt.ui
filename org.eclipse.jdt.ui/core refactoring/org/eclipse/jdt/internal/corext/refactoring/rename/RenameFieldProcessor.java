@@ -9,17 +9,21 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
-import org.eclipse.core.resources.IFile;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -36,11 +40,12 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -53,11 +58,10 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-public class RenameFieldRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring, ITextUpdatingRefactoring{
+public class RenameFieldProcessor extends RenameProcessor implements IReferenceUpdating, ITextUpdating {
 	
 	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.getString("RenameFieldRefactoring.declared_in_supertype"); //$NON-NLS-1$
 	private IField fField;
-	private String fNewName;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
@@ -70,10 +74,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 	
-	private RenameFieldRefactoring(IField field){
-		Assert.isNotNull(field);
-		fField= field;
-		fNewName= fField.getElementName();
+	//---- IRefactoringProcessor --------------------------------
+
+	public void initialize(Object field) {
+		if (!(field instanceof IField))
+			return;
+		fField= (IField)field;
+		setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
 		fUpdateJavaDoc= false;
 		fUpdateComments= false;
@@ -83,90 +90,115 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fRenameSetter= false;
 	}
 	
-	public static RenameFieldRefactoring create(IField field) throws JavaModelException{
-		if (! isAvailable(field))
-			return null;
-		return new RenameFieldRefactoring(field);
+	public boolean isAvailable() throws CoreException {
+		if (fField == null)
+			return false;
+		return Checks.isAvailable(fField);
 	}
 	
-	public static boolean isAvailable(IField field) throws JavaModelException{
-		return Checks.isAvailable(field);
+	 public String getProcessorName() {
+		return RefactoringCoreMessages.getFormattedString(
+			"RenameFieldRefactoring.name", //$NON-NLS-1$
+			new String[]{fField.getElementName(), getNewElementName()});
+	 }
+	
+	public IProject[] getScope() throws CoreException {
+		return JavaProcessors.computeScope(fField);
+	}
+
+	public Object getElement() {
+		return fField;
+	}
+
+	public Object[] getDerivedElements() throws CoreException {
+		List result= new ArrayList(2);
+		IMethod method= getGetter();
+		if (fRenameGetter && method != null)
+			result.add(method);
+		method= getSetter();
+		if (fRenameSetter && method != null)
+			result.add(method);
+		return result.toArray();
 	}
 	
-	public Object getNewElement(){
-		return fField.getDeclaringType().getField(fNewName);
+	public IResourceModifications getResourceModifications() {
+		return null;
 	}
 	
-	/*
-	 * @see ITextUpdatingRefactoring#canEnableTextUpdating()
-	 */
+	//---- IRenameProcessor -------------------------------------
+	
+	public final String getCurrentElementName(){
+		return fField.getElementName();
+	}
+	
+	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkFieldName(newName);
+		
+		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(newName)))
+			result.addWarning(RefactoringCoreMessages.getString("RenameFieldRefactoring.should_start_lowercase")); //$NON-NLS-1$
+			
+		if (Checks.isAlreadyNamed(fField, newName))
+			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.another_name")); //$NON-NLS-1$
+		if (fField.getDeclaringType().getField(newName).exists())
+			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.field_already_defined")); //$NON-NLS-1$
+		return result;
+	}
+	
+	public Object getNewElement() {
+		return fField.getDeclaringType().getField(fNewElementName);
+	}
+	
+	//---- ITextUpdating ---------------------------------------------
+	
 	public boolean canEnableTextUpdating() {
 		return true;
 	}
 	
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateJavaDoc()
-	 */
 	public boolean getUpdateJavaDoc() {
 		return fUpdateJavaDoc;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateComments()
-	 */
 	public boolean getUpdateComments() {
 		return fUpdateComments;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#getUpdateStrings()
-	 */
 	public boolean getUpdateStrings() {
 		return fUpdateStrings;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateJavaDoc(boolean)
-	 */
 	public void setUpdateJavaDoc(boolean update) {
 		fUpdateJavaDoc= update;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateComments(boolean)
-	 */
 	public void setUpdateComments(boolean update) {
 		fUpdateComments= update;
 	}
 
-	/*
-	 * @see ITextUpdatingRefactoring#setUpdateStrings(boolean)
-	 */
 	public void setUpdateStrings(boolean update) {
 		fUpdateStrings= update;
 	}
 	
-	/* non java-doc
-	 * IRenameRefactoring#setNewName
-	 */
-	public final void setNewName(String newName){
-		Assert.isNotNull(newName);
-		fNewName= newName;
+	//---- IReferenceUpdating -----------------------------------
+
+	public boolean canEnableUpdateReferences() {
+		return true;
+	}
+
+	public void setUpdateReferences(boolean update) {
+		fUpdateReferences= update;
 	}
 	
-	/* non java-doc
-	 * IRenameRefactoring#getCurrentName
-	 */
-	public final String getCurrentName(){
-		return fField.getElementName();
+	public boolean getUpdateReferences(){
+		return fUpdateReferences;
 	}
-	
-	//-- getter/setter
+		
+	//-- getter/setter --------------------------------------------------
 	
 	/**
 	 * @return Error message or <code>null</code> if getter can be renamed.
 	 */
-	public String canEnableGetterRenaming() throws JavaModelException{
+	public String canEnableGetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
 			return getGetter() == null ? "": null; //$NON-NLS-1$
 			
@@ -183,7 +215,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	/**
 	 * @return Error message or <code>null</code> if setter can be renamed.
 	 */
-	public String canEnableSetterRenaming() throws JavaModelException{
+	public String canEnableSetterRenaming() throws CoreException{
 		if (fField.getDeclaringType().isInterface())
 			return getSetter() == null ? "": null; //$NON-NLS-1$
 			
@@ -213,70 +245,29 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		fRenameSetter= renameSetter;
 	}
 	
-	public IMethod getGetter() throws JavaModelException{
+	public IMethod getGetter() throws CoreException {
 		return GetterSetterUtil.getGetter(fField);
 	}
 	
-	public IMethod getSetter() throws JavaModelException{
+	public IMethod getSetter() throws CoreException {
 		return GetterSetterUtil.getSetter(fField);
 	}
 
-	public String getNewGetterName() throws JavaModelException {
+	public String getNewGetterName() throws CoreException {
 		IMethod primaryGetterCandidate= JavaModelUtil.findMethod(GetterSetterUtil.getGetterName(fField, new String[0]), new String[0], false, fField.getDeclaringType());
 		if (! JavaModelUtil.isBoolean(fField) || (primaryGetterCandidate != null && primaryGetterCandidate.exists()))
-			return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+			return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 		//bug 30906 describes why we need to look for other alternatives here	
-		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewName, fField.getFlags(), false, null);
+		return NamingConventions.suggestGetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), false, null);
 	}
 
-	public String getNewSetterName() throws JavaModelException {
-		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
+	public String getNewSetterName() throws CoreException {
+		return NamingConventions.suggestSetterName(fField.getJavaProject(), fNewElementName, fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
 
-	//----------
-	
-	/* non java-doc
-	 * IRenameRefactoring#getNewName
-	 */	
-	public final String getNewName(){
-		return fNewName;
-	}
-	
-	/* non java-doc
-	 * IRefactoring#getName
-	 */
-	 public String getName(){
-	 	return RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.name", //$NON-NLS-1$
-	 													 new String[]{fField.getElementName(), getNewName()});
-	 }
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#canUpdateReferences()
-	 */
-	public boolean canEnableUpdateReferences() {
-		return true;
-	}
-
-	/* non java-doc
-	 * @see IRenameRefactoring#setUpdateReferences(boolean)
-	 */
-	public void setUpdateReferences(boolean update) {
-		fUpdateReferences= update;
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getUpdateReferences()
-	 */	
-	public boolean getUpdateReferences(){
-		return fUpdateReferences;
-	}
-		
 	// -------------- Preconditions -----------------------
 	
-	/* non java-doc
-	 * Refactoring#checkActivation
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkActivation() throws CoreException{
 		IField orig= (IField)WorkingCopyUtil.getOriginal(fField);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.deleted", //$NON-NLS-1$
@@ -288,27 +279,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return Checks.checkIfCuBroken(fField);
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#checkNewName
-	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkFieldName(newName);
-		
-		if (isInstaceField(fField) && (! Checks.startsWithLowerCase(newName)))
-			result.addWarning(RefactoringCoreMessages.getString("RenameFieldRefactoring.should_start_lowercase")); //$NON-NLS-1$
-			
-		if (Checks.isAlreadyNamed(fField, newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.another_name")); //$NON-NLS-1$
-		if (fField.getDeclaringType().getField(newName).exists())
-			result.addFatalError(RefactoringCoreMessages.getString("RenameFieldRefactoring.field_already_defined")); //$NON-NLS-1$
-		return result;
-	}
-	
-	/* non java-doc
-	 * Refactoring#checkInput
-	 */	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try{
 			pm.beginTask("", 13); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameFieldRefactoring.checking")); //$NON-NLS-1$
@@ -316,7 +287,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			result.merge(Checks.checkIfCuBroken(fField));
 			if (result.hasFatalError())
 				return result;
-			result.merge(checkNewName(fNewName));
+			result.merge(checkNewElementName(fNewElementName));
 			pm.worked(1);
 			result.merge(checkEnclosingHierarchy());
 			pm.worked(1);
@@ -355,17 +326,13 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			fChangeManager= createTextChangeManager(new SubProgressMonitor(pm, 5));
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 		}
 	}
 	
 	//----------
-	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
@@ -374,10 +341,6 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch(CoreException e) {
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 			if (fNewWorkingCopies != null){
@@ -405,30 +368,30 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), newPattern, fNewWorkingCopies);
 	}
 
-	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws JavaModelException {
+	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
 		ISearchPattern oldPattern= SearchEngine.createSearchPattern(fField, IJavaSearchConstants.ALL_OCCURRENCES);				
 		return RefactoringSearchEngine.search(pm, createRefactoringScope(), oldPattern);
 	}
 	
-	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws JavaModelException{
+	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
 		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
 		String fullyTypeName= fField.getDeclaringType().getFullyQualifiedName();
 		for (int i= 0; i < allNewTypes.length; i++) {
 			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getField(fNewName);
+				return allNewTypes[i].getField(fNewElementName);
 		}
 		return null;
 	}
 	
 	//----------
-	private RefactoringStatus checkAccessor(IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+	private RefactoringStatus checkAccessor(IProgressMonitor pm, IMethod existingAccessor, String newAccessorName) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		result.merge(checkAccessorDeclarations(pm, existingAccessor));
 		result.merge(checkNewAccessor(existingAccessor, newAccessorName));
 		return result;
 	}
 	
-	private RefactoringStatus checkNewAccessor(IMethod existingAccessor, String newAccessorName) throws JavaModelException{
+	private RefactoringStatus checkNewAccessor(IMethod existingAccessor, String newAccessorName) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod accessor= JavaModelUtil.findMethod(newAccessorName, existingAccessor.getParameterTypes(), false, fField.getDeclaringType());
 		if (accessor == null || !accessor.exists())
@@ -440,7 +403,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return result;
 	}
 	
-	private RefactoringStatus checkAccessorDeclarations(IProgressMonitor pm, IMethod existingAccessor) throws JavaModelException{
+	private RefactoringStatus checkAccessorDeclarations(IProgressMonitor pm, IMethod existingAccessor) throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		ISearchPattern pattern= SearchEngine.createSearchPattern(existingAccessor, IJavaSearchConstants.DECLARATIONS);
 		IJavaSearchScope scope= SearchEngine.createHierarchyScope(fField.getDeclaringType());
@@ -462,23 +425,24 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return result;
 	}
 	
-	private static boolean isInstaceField(IField field) throws JavaModelException{
+	private static boolean isInstaceField(IField field) throws CoreException{
 		if (field.getDeclaringType().isInterface())
 			return false;
 		else 
 			return ! JdtFlags.isStatic(field);
 	}
 	
-	private RefactoringStatus checkNestedHierarchy(IType type) throws JavaModelException {
+	private RefactoringStatus checkNestedHierarchy(IType type) throws CoreException {
 		IType[] nestedTypes= type.getTypes();
 		if (nestedTypes == null)
 			return null;
 		RefactoringStatus result= new RefactoringStatus();	
 		for (int i= 0; i < nestedTypes.length; i++){
-			IField otherField= nestedTypes[i].getField(getNewName());
+			IField otherField= nestedTypes[i].getField(getNewElementName());
 			if (otherField.exists()){
-				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding", //$NON-NLS-1$
-																			new String[]{fField.getElementName(), getNewName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
+				String msg= RefactoringCoreMessages.getFormattedString(
+					"RenameFieldRefactoring.hiding", //$NON-NLS-1$
+					new String[]{fField.getElementName(), getNewElementName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			result.merge(checkNestedHierarchy(nestedTypes[i]));	
@@ -486,16 +450,16 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return result;
 	}
 	
-	private RefactoringStatus checkEnclosingHierarchy() throws JavaModelException {
+	private RefactoringStatus checkEnclosingHierarchy() throws CoreException {
 		IType current= fField.getDeclaringType();
 		if (Checks.isTopLevel(current))
 			return null;
 		RefactoringStatus result= new RefactoringStatus();
 		while (current != null){
-			IField otherField= current.getField(getNewName());
+			IField otherField= current.getField(getNewElementName());
 			if (otherField.exists()){
 				String msg= RefactoringCoreMessages.getFormattedString("RenameFieldRefactoring.hiding2", //$NON-NLS-1$
-				 															new String[]{getNewName(), JavaModelUtil.getFullyQualifiedName(current)});
+				 															new String[]{getNewElementName(), JavaModelUtil.getFullyQualifiedName(current)});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			current= current.getDeclaringType();
@@ -507,7 +471,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	 * (non java-doc)
 	 * Analyzes all compilation units in which type is referenced
 	 */
-	private RefactoringStatus analyzeAffectedCompilationUnits() throws JavaModelException{
+	private RefactoringStatus analyzeAffectedCompilationUnits() throws CoreException{
 		RefactoringStatus result= new RefactoringStatus();
 		fReferences= Checks.excludeCompilationUnits(fReferences, result);
 		if (result.hasFatalError())
@@ -517,7 +481,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return result;
 	}
 	
-	private IFile[] getAllFilesToModify() throws JavaModelException{
+	private IFile[] getAllFilesToModify() throws CoreException{
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
@@ -529,11 +493,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		return SearchEngine.createSearchPattern(fField, IJavaSearchConstants.REFERENCES);
 	}
 	
-	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
+	private IJavaSearchScope createRefactoringScope() throws CoreException{
 		return RefactoringScopeFactory.create(fField);
 	}
 	
-	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
+	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws CoreException{
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 6), createRefactoringScope(), createSearchPattern());
 	}
 	
@@ -542,9 +506,9 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	/* non java-doc
 	 * IRefactoring#createChange
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try{
-			return new CompositeChange(RefactoringCoreMessages.getString("RenameFieldRefactoring.Rename_Field"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new CompositeChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
@@ -603,11 +567,11 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		}
 	}
 	
-	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws JavaModelException{
-		TextMatchFinder.findTextMatches(pm, createRefactoringScope(), this, manager);
+	private void addTextMatches(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
+		TextMatchFinder2.findTextMatches(pm, createRefactoringScope(), this, manager);
 	}	
 	
-	private void addOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException{
+	private void addOccurrences(IProgressMonitor pm, TextChangeManager manager) throws CoreException {
 		pm.beginTask("", 5);//$NON-NLS-1$
 
 		addDeclarationUpdate(manager);
@@ -620,8 +584,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		addTextMatches(manager, new SubProgressMonitor(pm, 1));
 	}
 	
-	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{
-		TextEdit textEdit= SimpleTextEdit.createReplace(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewName);
+	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{ 
+		TextEdit textEdit= SimpleTextEdit.createReplace(fField.getNameRange().getOffset(), fField.getElementName().length(), fNewElementName);
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fField.getCompilationUnit());
 		manager.get(cu).addTextEdit(RefactoringCoreMessages.getString("RenameFieldRefactoring.Update_field_declaration"), textEdit); //$NON-NLS-1$
 	}
@@ -645,7 +609,7 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 	private TextEdit createTextChange(SearchResult searchResult) {
 		int offset= searchResult.getStart();
 		int length= searchResult.getEnd() - searchResult.getStart();
-		return new UpdateFieldReference(offset, length, fNewName, fField.getElementName());
+		return new UpdateFieldReference(offset, length, fNewElementName, fField.getElementName());
 	}
 
 	//-----------

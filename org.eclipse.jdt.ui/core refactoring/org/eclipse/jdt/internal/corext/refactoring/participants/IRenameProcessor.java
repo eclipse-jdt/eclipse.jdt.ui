@@ -17,11 +17,22 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 public interface IRenameProcessor extends IRefactoringProcessor {
 
-	public String getCurrentName();
+	public String getCurrentElementName();
 	
-	public RefactoringStatus checkNewName(String newName) throws CoreException;
+	public RefactoringStatus checkNewElementName(String newName) throws CoreException;
 	
-	public String getNewName();
+	public void setNewElementName(String newName);
 	
-	public void setNewName(String newName);
+	public String getNewElementName();
+	
+	/**
+	 * Returns the new element. This method must only return a
+	 * valid result iff the refactoring as already been performed.
+	 * Otherwise <code>null<code> can be returned.
+	 * 
+	 * @return the new element 
+	 */
+	public Object getNewElement() throws CoreException;
+	
+	public void propagateNewElementNameTo(IRenameParticipant participant);	
 }

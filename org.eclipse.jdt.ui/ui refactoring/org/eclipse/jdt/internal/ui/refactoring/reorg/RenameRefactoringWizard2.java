@@ -11,7 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -39,18 +39,18 @@ public class RenameRefactoringWizard2 extends RefactoringWizard {
 	/* non java-doc
 	 * @see RefactoringWizard#addUserInputPages
 	 */ 
-	protected void addUserInputPages(){
+	protected void addUserInputPages() {
 		String initialSetting= getRenameRefactoring().getCurrentName();
 		RenameInputWizardPage2 inputPage= createInputPage(fInputPageDescription, initialSetting);
 		inputPage.setImageDescriptor(fInputPageImageDescriptor);
 		addPage(inputPage);
 	}
 
-	private IRenameRefactoring getRenameRefactoring(){
+	private IRenameRefactoring getRenameRefactoring() {
 		return (IRenameRefactoring)getRefactoring();	
 	}
 	
-	private RenameInputWizardPage2 createInputPage(String message, String initialSetting) {
+	protected RenameInputWizardPage2 createInputPage(String message, String initialSetting) {
 		return new RenameInputWizardPage2(message, fPageContextHelpId, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
@@ -58,12 +58,12 @@ public class RenameRefactoringWizard2 extends RefactoringWizard {
 		};
 	}
 	
-	private RefactoringStatus validateNewName(String newName){
+	protected RefactoringStatus validateNewName(String newName) {
 		IRenameRefactoring ref= getRenameRefactoring();
 		ref.setNewName(newName);
 		try{
 			return ref.checkNewName(newName);
-		} catch (JavaModelException e){
+		} catch (CoreException e){
 			//XXX: should log the exception
 			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.getFormattedString("RenameRefactoringWizard.internal_error", msg));//$NON-NLS-1$

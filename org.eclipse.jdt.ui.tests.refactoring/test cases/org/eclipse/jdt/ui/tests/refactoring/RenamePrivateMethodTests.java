@@ -23,7 +23,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenamePrivateMethodTests extends RefactoringTest {
 	
@@ -44,9 +45,9 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
-		ref.setNewName(newMethodName);
-		RefactoringStatus result= performRefactoring(ref);
+		RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
+		refactoring.setNewName(newMethodName);
+		RefactoringStatus result= performRefactoring(refactoring);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
@@ -57,10 +58,11 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
-		ref.setUpdateReferences(updateReferences);
-		ref.setNewName(newMethodName);
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
+		RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+		processor.setUpdateReferences(updateReferences);
+		processor.setNewElementName(newMethodName);
+		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		
 		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
@@ -152,10 +154,10 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classB.getMethod("m", new String[]{"I"}));
-		ref.setNewName("kk");
+		RenameRefactoring refactoring= new RenameRefactoring(classB.getMethod("m", new String[]{"I"}));
+		refactoring.setNewName("kk");
 		
-		assertEquals("was supposed to pass", null, performRefactoring(ref));
+		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		assertEquals("invalid renaming A", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		assertEquals("invalid renaming C", getFileContents(getOutputTestFileName("C")), cuC.getSource());
 		

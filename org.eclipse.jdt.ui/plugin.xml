@@ -2983,12 +2983,25 @@
 <extension-point name="%propertyTesterExtensionPoint" id="propertyTesters"/>
 
 <extension point="org.eclipse.jdt.ui.propertyTesters">
-
   <propertyTester
      id="IResourcePropertyTester"
      type="org.eclipse.core.resources.IResource"
-     properties="name"
+     properties="name, projectNature"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.ResourcePropertyTester"/>
+</extension>
+
+<extension point="org.eclipse.jdt.ui.propertyTesters">     
+  <propertyTester
+     id="org.eclipse.jdt.IFilePropertyTester"
+     type="org.eclipse.core.resources.IFile"
+     properties="isCompilationUnit"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.FilePropertyTester"/>
+     
+  <propertyTester
+     id="IMemberPropertyTester"
+     type="org.eclipse.jdt.core.IMember"
+     properties="isStatic, isPrivate"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.MemberPropertyTester"/>
      
   <propertyTester
      id="ITypePropertyTester"
@@ -2996,24 +3009,65 @@
      properties="hasMainType"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.TypePropertyTester"/>
      
+  <propertyTester
+     id="IMethodPropertyTester"
+     type="org.eclipse.jdt.core.IMethod"
+     properties="isVirtual, declaringType"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.MethodPropertyTester"/>
+     
 </extension>
 
 <extension-point name="%renameProcessorExtensionPoint" id="renameProcessors"/>
 <extension-point name="%renameParticipantsExtensionPoint" id="renameParticipants"/>
+<extension-point name="%createParticipantsExtensionPoint" id="createParticipants"/>
+<extension-point name="%deleteParticipantsExtensionPoint" id="deleteParticipants"/>
 <extension-point name="%moveParticipantsExtensionPoint" id="moveParticipants"/>
+<extension-point name="%copyParticipantsExtensionPoint" id="copyParticipants"/>
 
 <extension point="org.eclipse.jdt.ui.renameProcessors">
   <renameProcessor
-     id="org.eclipse.jdt.renameProcessor.IFile"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameFileProcessor">
+     id="org.eclipse.jdt.renameProcessor.IResource"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor">
      <objectState adaptable="*">
-       <property name="instanceof" value="org.eclipse.core.resources.IFile"/>
+       <property name="instanceof" value="org.eclipse.core.resources.IResource"/>
      </objectState>
+  </renameProcessor>
+</extension>
+  
+<extension point="org.eclipse.jdt.ui.renameProcessors">
+  <renameProcessor
+     id="org.eclipse.jdt.renameProcessor.IJavaProject"
+     override="org.eclipse.jdt.renameProcessor.IResource"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor">
+     <objectState>
+        <or>
+           <property name="instanceof" value="org.eclipse.jdt.core.IJavaProject"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.core.resources.IProject"/>
+              <property name="projectNature" value="org.eclipse.jdt.core.javanature"/>
+           </and>
+        </or>
+	 </objectState>     
+  </renameProcessor>
+  
+  <renameProcessor
+     id="org.eclipse.jdt.renameProcessor.IPackageFragmentRoot"
+     override="org.eclipse.jdt.renameProcessor.IResource"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor">
+     <objectState>
+        <or>
+           <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.core.resources.IFolder"/>
+              <property name="isSourceFolder" value="true"/>
+           </and>
+        </or>
+	 </objectState>     
   </renameProcessor>
   
   <renameProcessor
      id="org.eclipse.jdt.renameProcessor.IPackageFragment"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.RenamePackageProcessor">
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor">
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragment"/>
 	 </objectState>     
@@ -3021,19 +3075,51 @@
   
   <renameProcessor
      id="org.eclipse.jdt.renameProcessor.ICompilationUnit"
-     override="org.eclipse.jdt.renameProcessor.IFile"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameCompilationUnitProcessor">
+     override="org.eclipse.jdt.renameProcessor.IResource"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor">
      <objectState>
-        <property name="instanceof" value="org.eclipse.jdt.core.ICompilationUnit"/>
+        <or>
+           <property name="instanceof" value="org.eclipse.jdt.core.ICompilationUnit"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.core.resources.IFile"/>
+              <property name="isCompilationUnit" value="true"/>
+           </and>
+        </or>
 	 </objectState>     
   </renameProcessor>
   
   <renameProcessor
      id="org.eclipse.jdt.renameProcessor.IType"
      override="org.eclipse.jdt.renameProcessor.IFile"
-     class="org.eclipse.jdt.internal.corext.refactoring.participants.RenameTypeProcessor">
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor">
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IType"/>
+	 </objectState>     
+  </renameProcessor>
+  
+  <renameProcessor
+     id="org.eclipse.jdt.renameProcessor.IField"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor">
+     <objectState>
+        <property name="instanceof" value="org.eclipse.jdt.core.IField"/>
+	 </objectState>     
+  </renameProcessor>
+  
+  <renameProcessor
+     id="org.eclipse.jdt.renameProcessor.NonVirtualMethod"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor">
+     <objectState>
+        <property name="instanceof" value="org.eclipse.jdt.core.IMethod"/>
+        <property name="isVirtual" value="false"/>
+	 </objectState>     
+  </renameProcessor>
+  
+  <renameProcessor
+     id="org.eclipse.jdt.renameProcessor.VirtualMethod"
+     class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor">
+     <objectState>
+        <property name="instanceof" value="org.eclipse.jdt.core.IMethod"/>
+        <property name="isVirtual" value="true"/>
 	 </objectState>     
   </renameProcessor>
 </extension>
@@ -3083,10 +3169,44 @@
 
 <extension point="org.eclipse.jdt.ui.refactoringWizards">
 	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IResource"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameResourceWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor"/>
+		</objectState>
+	</refactoringWizard>
+</extension>
+	
+<extension point="org.eclipse.jdt.ui.refactoringWizards">
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IJavaProject"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameJavaProjectWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor"/>
+		</objectState>
+	</refactoringWizard>
+	
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IPackageFragmentRoot"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameSourceFolderWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor"/>
+		</objectState>
+	</refactoringWizard>
+	
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IPackageFragment"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenamePackageWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor"/>
+		</objectState>
+	</refactoringWizard>
+	
+	<refactoringWizard
 		id="org.eclipse.jdt.renameProcessor.ui.ICompilationUnit"
 		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameCuWizard">
 		<objectState>
-			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.participants.RenameCompilationUnitProcessor"/>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor"/>
 		</objectState>
 	</refactoringWizard>
 	
@@ -3094,7 +3214,26 @@
 		id="org.eclipse.jdt.renameProcessor.ui.IType"
 		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameTypeWizard">
 		<objectState>
-			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.participants.RenameTypeProcessor"/>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor"/>
+		</objectState>
+	</refactoringWizard>	
+	
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IField"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameFieldWizard">
+		<objectState>
+			<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor"/>
+		</objectState>
+	</refactoringWizard>	
+	
+	<refactoringWizard
+		id="org.eclipse.jdt.renameProcessor.ui.IMethod"
+		class="org.eclipse.jdt.internal.ui.refactoring.reorg.RenameMethodWizard">
+		<objectState>
+			<or>
+				<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor"/>
+				<property name="instanceof" value="org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor"/>
+			</or>
 		</objectState>
 	</refactoringWizard>	
 </extension>

@@ -20,15 +20,14 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 
 /**
- * A data structure describing the resource modification resulting from 
- * applying a ceratin refactoring.
+ * A default implementation of <code>IResourceModifications</code>.
  * 
  * @since 3.0
  */
-public class ResourceModifications {
+public class ResourceModifications implements IResourceModifications {
 	
 	private List fCreate;
-	private List fAdd;
+	private List fDelete;
 	
 	private List fMove;
 	private IContainer fMoveTarget;
@@ -39,109 +38,166 @@ public class ResourceModifications {
 	private IResource fRename;
 	private String fNewName;
 	
-	/**
-	 * Returns the list of resources to be added.
-	 * 
-	 * @return the list of resources to be added
-	 */
-	public List getAdd() {
-		return fAdd;
-	}
-
-	/**
-	 * Returns the list of resources to be deleted.
-	 * 
-	 * @return the list of resources to be deleted
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCreate()
 	 */
 	public List getCreate() {
 		return fCreate;
 	}
 
 	/**
-	 * Returns the list of resources to be copied.
+	 * Adds the given resource to the list of resorces 
+	 * to be created.
 	 * 
-	 * @return the list of resources to be copied
+	 * @param add the list of resource to be created
+	 */
+	public void addCreate(IResource create) {
+		if (fCreate == null)
+			fCreate= new ArrayList(2);
+		fCreate.add(create);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getDelete()
+	 */
+	public List getDelete() {
+		return fDelete;
+	}
+
+	/**
+	 * Adds the given resource to the list of resorces 
+	 * to be deleted.
+	 * 
+	 * @param delete the resource to be deleted
+	 */
+	public void addDelete(IResource delete) {
+		if (fDelete == null)
+			fDelete= new ArrayList(2);
+		fDelete.add(delete);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCopy()
 	 */
 	public List getCopy() {
 		return fCopy;
 	}
 
-	/**
-	 * Returns the copy target.
-	 * 
-	 * @return the copy target
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getCopyTarget()
 	 */
 	public IContainer getCopyTarget() {
 		return fCopyTarget;
 	}
 
 	/**
-	 * Returns the list of resources to be moved.
+	 * Adds the given resource to the list of resources
+	 * to be copied.
 	 * 
-	 * @return the list of resources to be moved
+	 * @param copy the resource to be copied
+	 */
+	public void addCopy(IResource copy) {
+		if (fCopy == null)
+			fCopy= new ArrayList(2);
+		fCopy.add(copy);
+	}
+
+	/**
+	 * Sets the copy target.
+	 * 
+	 * @param target the copy target
+	 */
+	public void setCopyTarget(IContainer target) {
+		fCopyTarget= target;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getMove()
 	 */
 	public List getMove() {
 		return fMove;
 	}
 
-	/**
-	 * Returns the move target
-	 * 
-	 * @return the move target
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getMoveTarget()
 	 */
 	public IContainer getMoveTarget() {
 		return fMoveTarget;
 	}
 
 	/**
-	 * Returns the resource to be renamed
+	 * Adds the given resource to the list of resources
+	 * to be moved.
 	 * 
-	 * @return the resourcr to be renamed
+	 * @param move the resource to be moved
+	 */
+	public void addMove(IResource move) {
+		if (fMove == null)
+			fMove= new ArrayList(2);
+		fMove.add(move);
+	}
+
+	/**
+	 * Sets the move target.
+	 * 
+	 * @param target the move target
+	 */
+	public void setMoveTarget(IContainer target) {
+		fMoveTarget= target;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getRename()
 	 */
 	public IResource getRename() {
 		return fRename;
 	}
 
-	/**
-	 * Returns the new name of the resource to be renamed
-	 * 
-	 * @return the new resource name
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getNewName()
 	 */
 	public String getNewName() {
 		return fNewName;
 	}
 	
-	void setCreate(List deleted) {
-		fCreate= deleted;
-	}
-	
-	void setAdd(List added) {
-		fAdd= added;
-	}
-	
-	void setCopy(List copy, IContainer target) {
-		fCopy= copy;
-		fCopyTarget= target;
-	}
-	
-	void setMove(List move, IContainer target) {
-		fMove= move;
-		fMoveTarget= target;
-	}
-	
-	void setRename(IResource rename, String newName) {
+	/**
+	 * Sets the resource to be rename together with its
+	 * new name.
+	 * 
+	 * @param rename the resource to be renamed
+	 * @param newName the new name of the resource
+	 */
+	public void setRename(IResource rename, String newName) {
 		fRename= rename;
 		fNewName= newName;
 	}
 	
-	IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications#getParticipants(org.eclipse.jdt.internal.corext.refactoring.participants.IRefactoringProcessor)
+	 */
+	public IRefactoringParticipant[] getParticipants(IRefactoringProcessor processor) throws CoreException {
 		List result= new ArrayList(5);
+		if (fDelete != null) {
+			IDeleteParticipant[] deletes= DeleteExtensionManager.getParticipants(processor, fDelete.toArray());
+			result.addAll(Arrays.asList(deletes));
+		}
+		if (fCreate != null) {
+			ICreateParticipant[] creates= CreateExtensionManager.getParticipants(processor, fCreate.toArray());
+			result.addAll(Arrays.asList(creates));
+		}
 		if (fMove != null) {
 			IMoveParticipant[] moves= MoveExtensionManager.getParticipants(processor, fMove.toArray());
 			for (int i= 0; i < moves.length; i++) {
 				moves[i].setTarget(fMoveTarget);
 			}
 			result.addAll(Arrays.asList(moves));
+		}
+		if (fCopy != null) {
+			ICopyParticipant[] copies= CopyExtensionManager.getParticipants(processor, fMove.toArray());
+			for (int i= 0; i < copies.length; i++) {
+				copies[i].setTarget(fCopyTarget);
+			}
+			result.addAll(Arrays.asList(copies));
 		}
 		return (IRefactoringParticipant[])result.toArray(new IRefactoringParticipant[result.size()]);
 	}

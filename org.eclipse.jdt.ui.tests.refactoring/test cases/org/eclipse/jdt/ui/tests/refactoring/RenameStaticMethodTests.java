@@ -24,7 +24,8 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameRefactoring;
 
 public class RenameStaticMethodTests extends RefactoringTest {
 	private static final Class clazz= RenameStaticMethodTests.class;
@@ -45,9 +46,10 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		try{
-			RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
-			ref.setNewName(newMethodName);
-			RefactoringStatus result= performRefactoring(ref);
+			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
+			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			processor.setNewElementName(newMethodName);
+			RefactoringStatus result= performRefactoring(refactoring);
 			assertNotNull("precondition was supposed to fail", result);
 		} finally{
 			performDummySearch();
@@ -63,10 +65,11 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType classA= getType(cu, "A");
-			RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
-			ref.setUpdateReferences(updateReferences);
-			ref.setNewName(newMethodName);
-			assertEquals("was supposed to pass", null, performRefactoring(ref));
+			RenameRefactoring refactoring= new RenameRefactoring(classA.getMethod(methodName, signatures));
+			RenameMethodProcessor processor= (RenameMethodProcessor)refactoring.getProcessor();
+			processor.setUpdateReferences(updateReferences);
+			processor.setNewElementName(newMethodName);
+			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 			assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			
 			assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());

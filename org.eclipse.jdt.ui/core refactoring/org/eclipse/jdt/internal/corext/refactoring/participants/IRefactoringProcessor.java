@@ -23,9 +23,9 @@ public interface IRefactoringProcessor {
 	
 	public void initialize(Object element) throws CoreException;
 	
-	public String getProcessorName();
-	
 	public boolean isAvailable() throws CoreException;
+	
+	public String getProcessorName();
 	
 	public IProject[] getScope() throws CoreException;
 	
@@ -33,7 +33,7 @@ public interface IRefactoringProcessor {
 	
 	public Object[] getDerivedElements() throws CoreException;
 	
-	public ResourceModifications getResourceModifications() throws CoreException;
+	public IResourceModifications getResourceModifications() throws CoreException;
 	
 	public RefactoringStatus checkActivation() throws CoreException;
 	

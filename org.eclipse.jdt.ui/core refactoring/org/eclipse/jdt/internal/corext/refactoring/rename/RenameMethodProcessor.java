@@ -16,17 +16,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.IWorkingCopy;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
@@ -39,11 +40,12 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
@@ -52,149 +54,111 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-public abstract class RenameMethodRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring{
+public abstract class RenameMethodProcessor extends RenameProcessor implements IReferenceUpdating {
 	
-	private String fNewName;
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
 	
-	RenameMethodRefactoring(IMethod method) {
-		Assert.isNotNull(method);
-		fMethod= method;
-		fNewName= method.getElementName();
+	protected void setData(RenameMethodProcessor other) {
+		fUpdateReferences= other.fUpdateReferences;
+		fNewElementName= other.fNewElementName;
+	}
+	
+	//---- IRefactoringProcessor --------------------------------
+
+	public void initialize(Object method) {
+		if (!(method instanceof IMethod))
+			return;
+		fMethod= (IMethod)method;
+		setNewElementName(fMethod.getElementName());
 		fUpdateReferences= true;
 	}
 		
-	public static RenameMethodRefactoring create(IMethod method) throws JavaModelException{
-		if (! isAvailable(method))
-			return null;
-		RenameMethodRefactoring refactoring;
-
-		refactoring= RenamePrivateMethodRefactoring.create(method);
-		if (refactoring != null)
-		   return refactoring;
-
-		refactoring= RenameStaticMethodRefactoring.create(method);
-		if (refactoring != null)
-			return refactoring;
-
-		refactoring= RenameVirtualMethodRefactoring.create(method);
-		if (refactoring != null)
-			return refactoring;
-
-		refactoring= RenameMethodInInterfaceRefactoring.create(method);
-		if (refactoring != null)
-			return refactoring;
-
+	public boolean isAvailable() throws CoreException {
+		if (fMethod == null)
+			return false;
+		if (! Checks.isAvailable(fMethod))
+			return false;
+		if (fMethod.isConstructor())
+			return false;
+		if (isSpecialCase(fMethod))
+			return false;
+		return true;
+	}
+	
+	public static RenameMethodProcessor create(IMethod method, RenameMethodProcessor other) throws CoreException {
+//		RenameMethodProcessor result= RenameMethodProcessor.create(method);
+//		if (result != null)
+//			result.setData(other);
+//		return result;
 		return null;
 	}
 	
-	public static boolean isAvailable(IMethod method) throws JavaModelException{
-		if (! Checks.isAvailable(method))
-			return false;
-		if (method.isConstructor())
-			return false;
-		if (isSpecialCase(method))
-			return false;
-		
-		return RenamePrivateMethodRefactoring.internalIsAvailable(method)
-			|| RenameStaticMethodRefactoring.internalIsAvailable(method)
-			|| RenameVirtualMethodRefactoring.internalIsAvailable(method)
-			|| RenameMethodInInterfaceRefactoring.internalIsAvailable(method);
+	public String getProcessorName() {
+		return RefactoringCoreMessages.getFormattedString(
+			"RenameMethodRefactoring.name", //$NON-NLS-1$
+			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	
-	public static RenameMethodRefactoring create(IMethod method, RenameMethodRefactoring other) throws JavaModelException {
-		RenameMethodRefactoring result= RenameMethodRefactoring.create(method);
-		if (result != null)
-			result.setData(other);
-		return result;
+	public IProject[] getScope() throws CoreException {
+		return JavaProcessors.computeScope(fMethod);
+	}
+
+	public Object getElement() {
+		return fMethod;
+	}
+
+	public Object[] getDerivedElements() throws CoreException {
+		// TODO must caclulate ripple ??
+		return new Object[0];
 	}
 	
-	protected void setData(RenameMethodRefactoring other) {
-		fUpdateReferences= other.fUpdateReferences;
-		fNewName= other.fNewName;
+	public IResourceModifications getResourceModifications() {
+		return null;
 	}
 	
-	public Object getNewElement(){
-		return fMethod.getDeclaringType().getMethod(fNewName, fMethod.getParameterTypes());
-	}
+	//---- IRenameProcessor -------------------------------------
 	
-//	/* non java-doc
-//	 * @see Refactoring#checkPreconditions(IProgressMonitor)
-//	 */
-//	public RefactoringStatus checkPreconditions(IProgressMonitor pm) throws JavaModelException{
-//		RefactoringStatus result= checkPreactivation();
-//		if (result.hasFatalError())
-//			return result;
-//		result.merge(super.checkPreconditions(pm));
-//		return result;
-//	}
-//
-	/* non java-doc
-	 * @see IRenameRefactoring#setNewName
-	 */
-	public final void setNewName(String newName){
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getCurrentName
-	 */
-	public final String getCurrentName(){
+	public final String getCurrentElementName(){
 		return fMethod.getElementName();
 	}
 		
-	/* non java-doc
-	 * @see IRenameRefactoring#getNewName
-	 */		
-	public final String getNewName(){
-		return fNewName;
-	}
-		
-	/* non java-doc
-	 * @see IRefactoring#getName
-	 */
-	public String getName(){
-		return RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.name", //$NON-NLS-1$
-															new String[]{fMethod.getElementName(), getNewName()});
+	public final RefactoringStatus checkNewElementName(String newName) {
+		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
+		RefactoringStatus result= Checks.checkMethodName(newName);
+		if (Checks.isAlreadyNamed(fMethod, newName))
+			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
+		return result;
 	}
 	
-	public final IMethod getMethod(){
+	public Object getNewElement() {
+		return fMethod.getDeclaringType().getMethod(fNewElementName, fMethod.getParameterTypes());
+	}
+	
+	public final IMethod getMethod() {
 		return fMethod;
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#canUpdateReferences()
-	 */
+	//---- IReferenceUpdating -----------------------------------
+
 	public boolean canEnableUpdateReferences() {
 		return true;
 	}
 
-	/* non java-doc
-	 * @see IRenameRefactoring#setUpdateReferences(boolean)
-	 */
 	public final void setUpdateReferences(boolean update) {
 		fUpdateReferences= update;
 	}	
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#getUpdateReferences()
-	 */	
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}	
 	
 	//----------- preconditions ------------------
 
-	/*
-	 * non java-doc
-	 * @see Refactoring#checkActivation
-	 */		
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkActivation() throws CoreException { 
 		IMethod orig= getOriginalMethod(fMethod);
 		if (orig == null || ! orig.exists()){
 			String message= RefactoringCoreMessages.getFormattedString("RenameMethodRefactoring.deleted", //$NON-NLS-1$
@@ -209,26 +173,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return result;
 	}
 
-	private static IMethod getOriginalMethod(IMethod method) throws JavaModelException {
+	private static IMethod getOriginalMethod(IMethod method) throws CoreException {
 		return (IMethod)WorkingCopyUtil.getOriginal(method);
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#checkNewName
-	 */
-	public final RefactoringStatus checkNewName(String newName) {
-		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkMethodName(newName);
-		if (Checks.isAlreadyNamed(fMethod, newName))
-			result.addFatalError(RefactoringCoreMessages.getString("RenameMethodRefactoring.same_name")); //$NON-NLS-1$
-		return result;
-	}
-	
-	/*
-	 * non java-doc
-	 * @see Refactoring#checkInput
-	 */	
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			pm.beginTask("", 4); //$NON-NLS-1$
@@ -236,7 +185,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			if (result.hasFatalError())
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.checkingPreconditions")); //$NON-NLS-1$
-			result.merge(checkNewName(fNewName));
+			result.merge(checkNewElementName(fNewElementName));
 			pm.worked(1);
 			
 			pm.setTaskName(RefactoringCoreMessages.getString("RenameMethodRefactoring.taskName.searchingForReferences")); //$NON-NLS-1$
@@ -261,24 +210,20 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3));
 			result.merge(validateModifiesFiles());
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch (CoreException e){	
-			throw new JavaModelException(e);	
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	private IJavaSearchScope createRefactoringScope() throws JavaModelException{
+	private IJavaSearchScope createRefactoringScope() throws CoreException {
 		return RefactoringScopeFactory.create(fMethod);
 	}
 	
-	ISearchPattern createSearchPattern(IProgressMonitor pm) throws JavaModelException{
+	ISearchPattern createSearchPattern(IProgressMonitor pm) throws CoreException {
 		return createSearchPattern(pm, fMethod, null);
 	}
 	
-	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method, IWorkingCopy[] workingCopies) throws JavaModelException{
+	private static ISearchPattern createSearchPattern(IProgressMonitor pm, IMethod method, IWorkingCopy[] workingCopies) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		Set methods= methodsToRename(method, new SubProgressMonitor(pm, 3), workingCopies);
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
@@ -286,11 +231,11 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return RefactoringSearchEngine.createSearchPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 	
-	static Set getMethodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{
+	static Set getMethodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws CoreException {
 		return new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(method, pm, workingCopies)));
 	}
 	
-	private static Set methodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws JavaModelException{
+	private static Set methodsToRename(IMethod method, IProgressMonitor pm, IWorkingCopy[] workingCopies) throws CoreException{
 		HashSet methods= new HashSet();
 		pm.beginTask("", 1); //$NON-NLS-1$
 		methods.add(method);
@@ -303,13 +248,13 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return fOccurrences;	
 	}
 	
-	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
+	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);	 //$NON-NLS-1$
 		ISearchPattern pattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), pattern);	
 	}
 
-	private static boolean isSpecialCase(IMethod method) throws JavaModelException{
+	private static boolean isSpecialCase(IMethod method) throws CoreException {
 		if (  method.getElementName().equals("toString") //$NON-NLS-1$
 			&& (method.getNumberOfParameters() == 0)
 			&& (method.getReturnType().equals("Ljava.lang.String;")  //$NON-NLS-1$
@@ -319,16 +264,16 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		else return (method.isMainMethod());
 	}
 	
-	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName){
+	private static RefactoringStatus checkIfConstructorName(IMethod method, String newName) {
 		return Checks.checkIfConstructorName(method, newName, method.getDeclaringType().getElementName());
 	}
 	
-	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus checkRelatedMethods(IProgressMonitor pm) throws CoreException { 
 		RefactoringStatus result= new RefactoringStatus();
-		for (Iterator iter= getMethodsToRename(fMethod, pm, null).iterator(); iter.hasNext(); ){
+		for (Iterator iter= getMethodsToRename(fMethod, pm, null).iterator(); iter.hasNext(); ) {
 			IMethod method= (IMethod)iter.next();
 			
-			result.merge(checkIfConstructorName(method, fNewName));
+			result.merge(checkIfConstructorName(method, fNewElementName));
 			
 			String[] msgData= new String[]{method.getElementName(), JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())};
 			if (! method.exists()){
@@ -345,7 +290,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return result;	
 	}
 	
-	private IFile[] getAllFilesToModify() throws JavaModelException{
+	private IFile[] getAllFilesToModify() throws CoreException{
 		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
@@ -353,7 +298,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return Checks.validateModifiesFiles(getAllFilesToModify());
 	}
 	
-	private RefactoringStatus analyzeCompilationUnits() throws JavaModelException{
+	private RefactoringStatus analyzeCompilationUnits() throws CoreException{
 		if (fOccurrences.length == 0)
 			return null;
 			
@@ -368,7 +313,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	}
 	
 	//-------
-	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws JavaModelException{
+	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask("", 3); //$NON-NLS-1$
 			
@@ -377,10 +322,6 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			SearchResultGroup[] newOccurrences= getNewOccurrences(new SubProgressMonitor(pm, 1), manager);
 			RefactoringStatus result= RenameAnalyzeUtil.analyzeRenameChanges(manager, oldOccurrences, newOccurrences);
 			return result;
-		} catch (JavaModelException e){
-			throw e;
-		} catch(CoreException e) {
-			throw new JavaModelException(e);
 		} finally{
 			pm.done();
 			if (fNewWorkingCopies != null){
@@ -391,7 +332,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		}
 	}
 
-	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws JavaModelException {
+	private SearchResultGroup[] getOldOccurrences(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		ISearchPattern oldPattern= createSearchPattern(new SubProgressMonitor(pm, 1));
 		return RefactoringSearchEngine.search(new SubProgressMonitor(pm, 1), createRefactoringScope(), oldPattern);
@@ -418,13 +359,13 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		}	
 	}
 	
-	private IMethod getNewMethod(ICompilationUnit newWorkingCopyOfDeclaringCu) throws JavaModelException{
+	private IMethod getNewMethod(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
 		IType[] allNewTypes= newWorkingCopyOfDeclaringCu.getAllTypes();
 		String fullyTypeName= fMethod.getDeclaringType().getFullyQualifiedName();
 		String[] paramTypeSignatures= fMethod.getParameterTypes();
 		for (int i= 0; i < allNewTypes.length; i++) {
 			if (allNewTypes[i].getFullyQualifiedName().equals(fullyTypeName))
-				return allNewTypes[i].getMethod(fNewName, paramTypeSignatures);
+				return allNewTypes[i].getMethod(fNewElementName, paramTypeSignatures);
 		}
 		return null;
 	}
@@ -433,7 +374,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	/**
 	 * @return the found method or <code>null</code>
 	 */
-	private IMethod classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws JavaModelException  {
+	private IMethod classesDeclareMethodName(ITypeHierarchy hier, List classes, IMethod method, String newName)  throws CoreException {
 		IType type= method.getDeclaringType();
 		List subtypes= Arrays.asList(hier.getAllSubtypes(type));
 		
@@ -460,7 +401,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 	/**
 	 * @return the found method or <code>null</code>
 	 */	
-	final IMethod hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws JavaModelException{
+	final IMethod hierarchyDeclaresMethodName(IProgressMonitor pm, IMethod method, String newName) throws CoreException {
 		IType type= method.getDeclaringType();
 		ITypeHierarchy hier= type.newTypeHierarchy(pm);
 		IMethod foundMethod= Checks.findMethod(newName, method.getParameterTypes().length, false, type);
@@ -480,15 +421,15 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				
 	//-------- changes -----
 	
-	public final IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public final IChange createChange(IProgressMonitor pm) throws CoreException {
 		try{
-			return new CompositeChange(RefactoringCoreMessages.getString("RenameMethodRefactoring.rename"), fChangeManager.getAllChanges()); //$NON-NLS-1$
+			return new CompositeChange(RefactoringCoreMessages.getString("Change.javaChanges"), fChangeManager.getAllChanges()); //$NON-NLS-1$
 		} finally{
 			pm.done();
 		}	
 	}
 	
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException{
+	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
 		TextChangeManager manager= new TextChangeManager();
 		
 		/* don't really want to add declaration and references separetely in this refactoring 
@@ -501,7 +442,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return manager;
 	}
 	
-	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
+	void addOccurrences(TextChangeManager manager, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", fOccurrences.length);				 //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
@@ -517,17 +458,17 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		}		
 	}
 	
-	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException{
+	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
 		ICompilationUnit cu= WorkingCopyUtil.getWorkingCopyIfExists(fMethod.getCompilationUnit());
 		TextChange change= manager.get(cu);
 		addDeclarationUpdate(change);
 	}
 	
-	final void addDeclarationUpdate(TextChange change) throws JavaModelException{
-		change.addTextEdit(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewName));  //$NON-NLS-1$
+	final void addDeclarationUpdate(TextChange change) throws CoreException {
+		change.addTextEdit(RefactoringCoreMessages.getString("RenameMethodRefactoring.update_declaration"), SimpleTextEdit.createReplace(fMethod.getNameRange().getOffset(), fMethod.getNameRange().getLength(), fNewElementName));  //$NON-NLS-1$
 	}
 	
 	final TextEdit createTextChange(SearchResult searchResult) {
-		return new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewName, fMethod.getElementName());		
+		return new UpdateMethodReferenceEdit(searchResult.getStart(), searchResult.getEnd() - searchResult.getStart(), fNewElementName, fMethod.getElementName());		
 	}
 }	

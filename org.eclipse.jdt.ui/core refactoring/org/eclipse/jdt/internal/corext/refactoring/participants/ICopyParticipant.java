@@ -10,7 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
+public interface ICopyParticipant extends IRefactoringParticipant {
 
-public interface ICreateParticipant extends IRefactoringParticipant {
+	public void setTarget(Object target);
 
 }

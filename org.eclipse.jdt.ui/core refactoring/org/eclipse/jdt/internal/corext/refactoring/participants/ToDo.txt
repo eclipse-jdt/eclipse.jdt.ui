@@ -27,6 +27,11 @@
   interested in the comupted resource modifications. Can be a property for some
   state XML element.
 
+- handling of UNKNOWN paroperty: 
+  o throw exception
+  o pass to caller
+  currently it is turned into true which is the incorrect thing to do. It must be
+  false anyway.
 
 ======================================= UI ===============================================
   
@@ -39,3 +44,17 @@
   in preview the viewer has to provide the pane.
   
 - Composite change in preview tree. Strip away root composite that have only one child.
+
+- Error and Preview page need customizable help id.
+
+- Refactoring Wizard Page: can't provide dialog settings. Too high up in the hierarchy.
+
+- Wizard should be able to disbale preview. To do so processors and participants must
+  signal if they want to show a preview.
+  
+- RenameRefactoringAction has a hard cast to rename method processor to check for the
+  virtual method case.
+
+=================================== Rename ================================================
+- rename a Java project must be a participant since a project can have more than 
+  one nature. This means we double code from core and there will be different deltas.

@@ -10,116 +10,104 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.participants.IResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.RenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 
 
-public class RenameSourceFolderRefactoring extends Refactoring implements IRenameRefactoring {
+public class RenameSourceFolderProcessor extends RenameProcessor {
 
 	private IPackageFragmentRoot fSourceFolder;
-	private String fNewName;
 	
-	private RenameSourceFolderRefactoring(IPackageFragmentRoot sourceFolder){
-		Assert.isNotNull(sourceFolder); 
-		fSourceFolder= sourceFolder;
-		fNewName= fSourceFolder.getElementName();
+	//---- IRefactoringProcessor ---------------------------------------------------
+
+	public void initialize(Object element) {
+		if (!(element instanceof IPackageFragmentRoot))
+			return;
+		fSourceFolder= (IPackageFragmentRoot)element;
+		setNewElementName(fSourceFolder.getElementName());
 	}
 	
-	public static RenameSourceFolderRefactoring create(IPackageFragmentRoot sourceFolder) throws JavaModelException{
-		if (! isAvailable(sourceFolder))
-			return null;
-		return new RenameSourceFolderRefactoring(sourceFolder);
-	}
-	
-	public static boolean isAvailable(IPackageFragmentRoot sourceFolder) throws JavaModelException{
-		if (! Checks.isAvailable(sourceFolder))
+	public boolean isAvailable() throws CoreException {
+		if (fSourceFolder == null)
+			return false;
+		if (! Checks.isAvailable(fSourceFolder))
 			return false;
 		
-		if (sourceFolder.isArchive())
+		if (fSourceFolder.isArchive())
 			return false;
 		
-		if (sourceFolder.isExternal())	
+		if (fSourceFolder.isExternal())	
 			return false;
 			
-		if (! sourceFolder.isConsistent())	
+		if (! fSourceFolder.isConsistent())	
 			return false;
 		
-		if (sourceFolder.getResource() instanceof IProject)
+		if (fSourceFolder.getResource() instanceof IProject)
 			return false;
 
 		return true;
 	}
 	
-	/* non java-doc
-	 * @see IRefactoring#getName()
-	 */
-	public String getName() {
-		String message= RefactoringCoreMessages.getFormattedString("RenameSourceFolderRefactoring.rename", //$NON-NLS-1$
-					new String[]{fSourceFolder.getElementName(), fNewName});
-		return message;
+	public String getProcessorName() {
+		return RefactoringCoreMessages.getFormattedString(
+			"RenameSourceFolderRefactoring.rename", //$NON-NLS-1$
+			new String[]{fSourceFolder.getElementName(), fNewElementName});
 	}
 	
-	public Object getNewElement() throws JavaModelException{
+	public IProject[] getScope() throws CoreException {
+		return JavaProcessors.computeScope(fSourceFolder);
+	}
+	
+	public Object getElement() {
+		return fSourceFolder;
+	}
+
+	public IResourceModifications getResourceModifications() throws CoreException {
+		ResourceModifications result= new ResourceModifications();
+		result.setRename(fSourceFolder.getResource(), getNewElementName());
+		return result;		
+	}
+		 
+	public Object getNewElement() throws CoreException {
 		IPackageFragmentRoot[] roots= fSourceFolder.getJavaProject().getPackageFragmentRoots();
 		for (int i= 0; i < roots.length; i++) {
-			if (roots[i].getElementName().equals(fNewName))
+			if (roots[i].getElementName().equals(fNewElementName))
 				return roots[i];	
 		}
 		return null;
 	}
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#setNewName(String)
-	 */
-	public void setNewName(String newName) {
-		Assert.isNotNull(newName);
-		fNewName= newName;
-	}
+	//---- IRenameProcessor ----------------------------------------------
 	
-	/* non java-doc
-	 * @see IRenameRefactoring#getNewName()
-	*/
-	public String getNewName(){
-		return fNewName;
-	}
-	
-	/* non java-doc
-	 * @see IRenameRefactoring#getCurrentName()
-	 */
-	public String getCurrentName() {
+	public String getCurrentElementName() {
 		return fSourceFolder.getElementName();
 	}
 			
-	/* non java-doc
-	 * @see Refactoring#checkActivation(IProgressMonitor)
-	 */
-	public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);  //$NON-NLS-1$
-		pm.done();
+	public RefactoringStatus checkActivation() throws CoreException {
 		return new RefactoringStatus();
 	}
 
-	/* non java-doc
-	 * @see IRenameRefactoring#checkNewName()
-	 */
-	public RefactoringStatus checkNewName(String newName) throws JavaModelException {
+	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		if (! newName.trim().equals(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("RenameSourceFolderRefactoring.blank")); //$NON-NLS-1$
@@ -153,7 +141,7 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	/* non java-doc
 	 * @see Refactoring#checkInput(IProgressMonitor)
 	 */
-	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+	public RefactoringStatus checkInput(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new RefactoringStatus();
@@ -167,10 +155,10 @@ public class RenameSourceFolderRefactoring extends Refactoring implements IRenam
 	/* non java-doc
 	 * @see IRefactoring#createChange(IProgressMonitor)
 	 */
-	public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
-			return new RenameSourceFolderChange(fSourceFolder, fNewName);
+			return new RenameSourceFolderChange(fSourceFolder, fNewElementName);
 		} finally{
 			pm.done();
 		}	

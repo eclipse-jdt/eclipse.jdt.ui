@@ -11,6 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.participants;
 
 
-public interface ICreateParticipant extends IRefactoringParticipant {
+public interface IDeleteProcessor {
 
 }

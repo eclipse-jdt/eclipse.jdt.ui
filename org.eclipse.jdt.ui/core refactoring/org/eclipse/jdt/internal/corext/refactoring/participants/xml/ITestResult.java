@@ -24,8 +24,8 @@ public interface ITestResult {
 	public static final int TRUE= 1;
 	
 	/** 
-	 * An expression couldn't be evaluated since the plug-in implementing an
-	 * property or expression isn't loaded yet.
+	 * An expression couldn't be evaluated since the plug-in 
+	 * providing the property tester isn't loaded yet.
 	 */ 
 	public static final int NOT_LOADED= 2;
 	

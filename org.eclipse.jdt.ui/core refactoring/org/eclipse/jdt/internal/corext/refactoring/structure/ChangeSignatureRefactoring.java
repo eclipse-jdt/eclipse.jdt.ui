@@ -419,7 +419,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 			fMethod= orig;
 			
-			if (MethodChecks.isVirtual(fMethod)){
+			if (MethodChecks.isVirtual(fMethod) && !fMethod.getDeclaringType().isInterface()){
 				result.merge(MethodChecks.checkIfComesFromInterface(getMethod(), new SubProgressMonitor(pm, 1)));
 				if (result.hasFatalError())
 					return result;	

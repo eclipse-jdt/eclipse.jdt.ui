@@ -23,17 +23,18 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class PropertyInterface implements IPropertyTester {
+public class PropertyInterface {
 	
 	private static final String EXT_POINT= "propertyTesters"; //$NON-NLS-1$
 	private static final String TYPE= "type"; //$NON-NLS-1$
-	private static final PropertyInterface[] EMPTY_ARRAY= new PropertyInterface[0];
+	private static final IPropertyTester[] EMPTY_PROPERTY_TESTER_ARRAY= new IPropertyTester[0];
+	private static final PropertyInterface[] EMPTY_PROPERTY_INTERFACE_ARRAY= new PropertyInterface[0];
 	
 	private static final Map fInterfaceMap= new HashMap();
 	
-	private static final PropertyInterface FIX_POINT= new PropertyInterface(null) {
+	private static final PropertyInterface END_POINT= new PropertyInterface(null) {
 		public int test(Object o, String name, String value) {
-			return UNKNOWN;
+			return ITestResult.UNKNOWN;
 		}	
 	};
 	
@@ -56,21 +57,21 @@ public class PropertyInterface implements IPropertyTester {
 		return result;
 	}
 	
-	public int test(Object o, String name, String value) {
+	public int test(Object o, String name, String value) throws CoreException {
 		if (fTesters == null)
 			initialize();
 		int result;
 		for (int i= 0; i < fTesters.length; i++) {
-			IPropertyTester evaluator= fTesters[i];
-			if (evaluator == null)
+			IPropertyTester tester= fTesters[i];
+			if (tester == null)
 				continue;
-			result= evaluator.test(o, name, value);
-			if (result <= NOT_LOADED)
+			result= tester.test(o, name, value);
+			if (result <= ITestResult.NOT_LOADED)
 				return result;
 			if (result == PropertyTesterDescriptor.EXCHANGE) {
 				try {
-					fTesters[i]= evaluator= ((PropertyTesterDescriptor)evaluator).create();
-					return evaluator.test(o, name, value);
+					fTesters[i]= tester= ((PropertyTesterDescriptor)tester).create();
+					return tester.test(o, name, value);
 				} catch (CoreException e) {
 					fTesters[i]= null;
 				}
@@ -81,16 +82,16 @@ public class PropertyInterface implements IPropertyTester {
 			if (superClass != null) {
 				fExtends= PropertyInterface.get(superClass);
 			} else {
-				fExtends= FIX_POINT;
+				fExtends= END_POINT;
 			}
 		}
 		result= fExtends.test(o, name, value);
-		if (result != UNKNOWN)
+		if (result != ITestResult.UNKNOWN)
 			return result;		
 		if (fImplements == null) {
 			Class[] interfaces= fType.getInterfaces();
 			if (interfaces.length == 0) {
-				fImplements= EMPTY_ARRAY;
+				fImplements= EMPTY_PROPERTY_INTERFACE_ARRAY;
 			} else {
 				fImplements= new PropertyInterface[interfaces.length];
 				for (int i= 0; i < interfaces.length; i++) {
@@ -100,10 +101,10 @@ public class PropertyInterface implements IPropertyTester {
 		}
 		for (int i= 0; i < fImplements.length; i++) {
 			result= fImplements[i].test(o, name, value);
-			if (result != UNKNOWN)
+			if (result != ITestResult.UNKNOWN)
 				return result;
 		}
-		return UNKNOWN;
+		return ITestResult.UNKNOWN;
 	}
 	
 	private void initialize() {
@@ -119,7 +120,7 @@ public class PropertyInterface implements IPropertyTester {
 				result.add(new PropertyTesterDescriptor(config));
 		}
 		if (result.size() == 0)
-			fTesters= EMPTY_ARRAY;
+			fTesters= EMPTY_PROPERTY_TESTER_ARRAY;
 		else
 			fTesters= (IPropertyTester[])result.toArray(new IPropertyTester[result.size()]);
 	}
