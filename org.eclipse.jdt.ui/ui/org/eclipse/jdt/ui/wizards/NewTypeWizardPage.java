@@ -27,8 +27,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTException;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,7 +35,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.PreferenceDialog;
@@ -229,8 +226,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private final static String PAGE_NAME= "NewTypeWizardPage"; //$NON-NLS-1$
 	
 	private final static String DIALOGSETTINGS_ADDCOMMENTS= "NewTypeWizardPage.add_comments"; //$NON-NLS-1$
-
-	private final static String DIALOGSETTINGS_ADDANNOTATIONS= "NewTypeWizardPage.add_annotations"; //$NON-NLS-1$
 	
 	/** Field ID of the package input field. */
 	protected final static String PACKAGE= PAGE_NAME + ".package";	 //$NON-NLS-1$
@@ -286,10 +281,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 	
 	private SelectionButtonDialogField fAddCommentButton;
-	private SelectionButtonDialogField fAddAnnotationButton;
-	private boolean fUseAddCommentButtonValue;
-	private boolean fUseAddAnnotationButtonValue;
-	// used for compatibilty: Wizards that don't show the comment button control
+	private boolean fUseAddCommentButtonValue; // used for compatibilty: Wizards that don't show the comment button control
 	// will use the preferences settings
 	
 	private IType fCreatedType;
@@ -440,12 +432,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fAddCommentButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addcomment.label")); //$NON-NLS-1$
 		fAddCommentButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDCOMMENTS));
 		
-		fAddAnnotationButton= new SelectionButtonDialogField(SWT.CHECK);
-		fAddAnnotationButton.setLabelText(NewWizardMessages.getString("NewTypeWizardPage.addannotation.label")); //$NON-NLS-1$
-		fAddAnnotationButton.setSelection(JavaPlugin.getDefault().getDialogSettings().getBoolean(DIALOGSETTINGS_ADDANNOTATIONS));
-		
 		fUseAddCommentButtonValue= false; // only used when enabled
-		fUseAddAnnotationButtonValue= true; // only used when enabled
 		
 		fCurrPackageCompletionProcessor= new JavaPackageCompletionProcessor();
 		fEnclosingTypeCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
@@ -537,30 +524,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}		
 	
 	// -------- UI Creation ---------
-	
-	/**
-	 * Creates the controls for the annotation check box. Expects a <code>GridLayout</code> with at 
-	 * least 4 columns.
-	 * 
-	 * @param composite the parent composite
-	 * @param nColumns number of columns to span
-	 * @param dependency a button to depend on, or <code>null</code>
-	 */
-	protected void createAnnotationControls(Composite composite, int nColumns, final Button dependency) {
-		final Button button= fAddAnnotationButton.getSelectionButton(composite);
-		GridData data= new GridData();
-		data.horizontalSpan= nColumns - 1;
-		data.horizontalAlignment= GridData.FILL;
-		data.horizontalIndent= IDialogConstants.INDENT;
-		button.setLayoutData(data);
-		if (dependency != null) {
-			dependency.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent event) {
-					button.setEnabled(dependency.getSelection() && fUseAddAnnotationButtonValue);
-				}
-			});
-		}
-	}
 	
 	/**
 	 * Creates a separator line. Expects a <code>GridLayout</code> with at least 1 column.
@@ -1127,20 +1090,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
-	 * Sets 'Add annotation' checkbox. The value set will only be used when creating source when
-	 * the annotation control is enabled (see {@link #enableAnnotationControl(boolean)}
-	 * 
-	 * @param doAddAnnotations if <code>true</code>, annotations are added.
-	 * @param canBeModified if <code>true</code> check box is
-	 * editable; otherwise it is read-only.
-	 * 	@since 3.1
-	 */	
-	public void setAddAnnotations(boolean doAddAnnotations, boolean canBeModified) {
-		fAddAnnotationButton.setSelection(doAddAnnotations);
-		fAddAnnotationButton.setEnabled(canBeModified);
-	}
-	
-	/**
 	 * Sets to use the 'Add comment' checkbox value. Clients that use the 'Add comment' checkbox
 	 * additionally have to enable the control. This has been added for backwards compatibility.
 	 * 
@@ -1151,19 +1100,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fUseAddCommentButtonValue= useAddCommentValue;
 	}
 	
-	/**
-	 * Sets to use the 'Add annotation' checkbox value. Clients that use the 'Add annotation' checkbox
-	 * additionally have to enable the control. This has been added for backwards compatibility.
-	 * 
-	 * @param useAddAnnotationValue if <code>true</code>, 
-	 * 	@since 3.1
-	 */	
-	public void enableAnnotationControl(boolean useAddAnnotationValue) {
-		fUseAddAnnotationButtonValue= useAddAnnotationValue;
-		fAddAnnotationButton.setEnabled(useAddAnnotationValue);
-		if (!useAddAnnotationValue)
-			fAddAnnotationButton.setSelection(false);
-	}
 	
 	/**
 	 * Returns if comments are added. This method can be overridden by clients.
@@ -1180,21 +1116,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		IJavaProject project= (root != null) ? root.getJavaProject() : null; // use project settings 
 		return StubUtility.doAddComments(project); 
-	}
-	
-	/**
-	 * Returns if annotations are added. This method can be overridden by clients.
-	 * The selection of the annotation control is taken if enabled (see {@link #enableAnnotationControl(boolean)}, otherwise
-	 * the settings as specified in the preferences is used.
-	 * 
-	 * @return Returns <code>true</code> if annotations can be added
-	 * @since 3.1
-	 */	
-	public boolean isAddAnnotations() {
-		if (fUseAddAnnotationButtonValue) {
-			return fAddAnnotationButton.isSelected();
-		}
-		return false;
 	}
 			
 	/**
@@ -2210,7 +2131,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (doUnimplementedMethods) {
-				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, isAddAnnotations(), false, true, true);
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, JavaModelUtil.is50OrHigher(type.getJavaProject()), false, true, true);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
@@ -2272,8 +2193,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public void dispose() {
 		JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDCOMMENTS, fAddCommentButton.isSelected());
-		if (fUseAddAnnotationButtonValue)
-			JavaPlugin.getDefault().getDialogSettings().put(DIALOGSETTINGS_ADDANNOTATIONS, fAddAnnotationButton.isSelected());
 		super.dispose();
 	}
 }
