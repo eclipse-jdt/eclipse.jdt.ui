@@ -40,16 +40,23 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.JFaceResources;
+
+import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
+import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.help.IHelp;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -630,5 +637,20 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				}
 			}						
 		}
+	}
+	
+	/*
+	 * @see JavaEditor#createJavaSourceViewer(Composite, IVerticalRuler, int)
+	 */
+	protected ISourceViewer createJavaSourceViewer(Composite parent, IVerticalRuler ruler, int styles) {
+		// http://dev.eclipse.org/bugs/show_bug.cgi?id=19445
+		return new SourceViewer(parent, ruler, styles) {
+			public boolean requestWidgetToken(IWidgetTokenKeeper requester) {
+				IHelp help= WorkbenchHelp.getHelpSupport();
+				if (help != null && help.isContextHelpDisplayed())
+					return false;
+				return super.requestWidgetToken(requester);
+			}
+		};	
 	}
 }
