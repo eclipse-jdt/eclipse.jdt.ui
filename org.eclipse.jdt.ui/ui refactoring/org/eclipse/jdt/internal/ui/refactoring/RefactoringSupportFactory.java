@@ -260,10 +260,9 @@ public class RefactoringSupportFactory {
 	private static RenameSupport createFieldRename(){
 		return new RenameSupport(){
 			IRenameRefactoring createRefactoring(Object element) {
-				CodeGenerationSettings settings=  JavaPreferencesSettings.getCodeGenerationSettings();
 				String[] prefixes= CodeGenerationPreferencePage.getGetterStetterPrefixes();
 				String[] suffixes= CodeGenerationPreferencePage.getGetterStetterSuffixes();
-				return new RenameFieldRefactoring((IField)element, settings, prefixes, suffixes);
+				return new RenameFieldRefactoring((IField)element, prefixes, suffixes);
 			}
 			public boolean canAddToMenu(IRenameRefactoring refactoring) throws JavaModelException{
 				return ((RenameFieldRefactoring)refactoring).checkPreactivation().isOK();
