@@ -157,7 +157,7 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 	private static String packOrderList(String[] orderList) {
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < orderList.length; i++) {
-			buf.append((String) orderList[i]);
+			buf.append(orderList[i]);
 			buf.append(';');
 		}
 		return buf.toString();
