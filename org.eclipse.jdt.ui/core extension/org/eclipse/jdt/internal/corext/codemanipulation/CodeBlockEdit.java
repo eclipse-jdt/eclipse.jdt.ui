@@ -82,7 +82,7 @@ public final class CodeBlockEdit extends TextEdit {
 		buffer.replace(fRange, createText(buffer));
 	}	
 	
-	private String createText(TextBuffer buffer) {
+	private String createText(TextBuffer buffer) throws CoreException {
 		int tabWidth= CodeFormatterUtil.getTabWidth();
 		final int offset= fRange.getOffset();
 		final int firstLine= buffer.getLineOfOffset(offset);

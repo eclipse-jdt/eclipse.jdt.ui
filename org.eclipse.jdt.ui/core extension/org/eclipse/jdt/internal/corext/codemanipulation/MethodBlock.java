@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -40,7 +42,7 @@ public class MethodBlock extends AbstractCodeBlock {
 		return false;
 	}
 
-	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) {
+	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) throws CoreException {
 		final String dummy= fSignature + " { x(); }"; //$NON-NLS-1$
 		final String placeHolder= "x();"; //$NON-NLS-1$
 		ICodeFormatter formatter= ToolFactory.createCodeFormatter();

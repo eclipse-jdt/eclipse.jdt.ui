@@ -6,6 +6,7 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -185,6 +186,8 @@ public class TextFileChange extends TextChange  {
 	 * Method declared in TextChange
 	 */
 	public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
+		if (pm == null)
+			pm= new NullProgressMonitor();
 		if (!isActive()) {
 			super.perform(context, pm);
 			return;

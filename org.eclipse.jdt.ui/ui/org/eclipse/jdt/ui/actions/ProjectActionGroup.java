@@ -14,6 +14,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -24,6 +25,9 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;
+import org.eclipse.ui.actions.OpenResourceAction;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Adds actions to open and close a project to the global menu bar.
@@ -38,7 +42,7 @@ public class ProjectActionGroup extends ActionGroup {
 
 	private IWorkbenchSite fSite;
 
-	private OpenProjectAction fOpenAction;
+	private OpenResourceAction fOpenAction;
 	private CloseResourceAction fCloseAction;
 
 	/**
@@ -54,16 +58,20 @@ public class ProjectActionGroup extends ActionGroup {
 		ISelectionProvider provider= fSite.getSelectionProvider();
 		ISelection selection= provider.getSelection();
 		
-		fOpenAction= new OpenProjectAction(fSite);
+		fOpenAction= new OpenResourceAction(shell);
 		fCloseAction= new CloseResourceAction(shell);
-		if (selection instanceof IStructuredSelection)
-			fCloseAction.selectionChanged((IStructuredSelection)selection);
+		if (selection instanceof IStructuredSelection) {
+			IStructuredSelection s= (IStructuredSelection)selection;
+			fOpenAction.selectionChanged(s);
+			fCloseAction.selectionChanged(s);
+		}
+		provider.addSelectionChangedListener(fOpenAction);
 		provider.addSelectionChangedListener(fCloseAction);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fOpenAction);
 	}
 	
-	/*
-	 * @see ActionGroup#fillActionBars(IActionBars)
+	/* (non-Javadoc)
+	 * Method declared in ActionGroup
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
@@ -71,11 +79,25 @@ public class ProjectActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.OPEN_PROJECT, fOpenAction);
 	}
 	
+	/* (non-Javadoc)
+	 * Method declared in ActionGroup
+	 */
+	public void fillContextMenu(IMenuManager menu) {
+		super.fillContextMenu(menu);
+		if (fOpenAction.isEnabled())
+			menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fOpenAction);
+		if (fCloseAction.isEnabled())
+		menu.appendToGroup(IContextMenuConstants.GROUP_BUILD, fCloseAction);
+	}
+
+	
 	/*
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		fSite.getSelectionProvider().removeSelectionChangedListener(fCloseAction);
+		ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.removeSelectionChangedListener(fOpenAction);
+		provider.removeSelectionChangedListener(fCloseAction);
 		ResourcesPlugin.getWorkspace().removeResourceChangeListener(fOpenAction);
 		super.dispose();
 	}

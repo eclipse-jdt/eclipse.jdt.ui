@@ -10,6 +10,8 @@
  ******************************************************************************/
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 public abstract class AbstractCodeBlock {
@@ -18,11 +20,11 @@ public abstract class AbstractCodeBlock {
 	 * Fills the content of the code block into the given buffer using the given
 	 * initial indent and and line separator.
 	 */
-	public void fill(StringBuffer buffer, String initialIndent, String lineSeparator) {
+	public void fill(StringBuffer buffer, String initialIndent, String lineSeparator) throws CoreException {
 		fill(buffer, initialIndent, initialIndent, lineSeparator);
 	}
 
-	public abstract void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator);
+	public abstract void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) throws CoreException;
 
 	public abstract boolean isEmpty();
 

@@ -57,6 +57,8 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
  * </p>
  * 
  * @since 2.0
+ * @deprecated Use <tt>org.eclipse.ui.actions.OpenResourceAction</tt> instead;
+ * the package explorer now displays closed projects as well.
  */
 public class OpenProjectAction extends Action implements IResourceChangeListener {
 	
@@ -115,7 +117,7 @@ public class OpenProjectAction extends Action implements IResourceChangeListener
 				ActionMessages.getString("OpenProjectAction.error.message")); //$NON-NLS-1$
 		} catch (InterruptedException e) {
 		}
-		//showWarningDialog(nonJavaProjects);
+		showWarningDialog(nonJavaProjects);
 	}
 	
 	private IWorkspaceRunnable createRunnable(final Object[] projects, final List nonJavaProjects) {

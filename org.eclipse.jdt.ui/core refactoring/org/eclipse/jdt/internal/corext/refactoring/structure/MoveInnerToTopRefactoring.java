@@ -642,7 +642,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		return updatedTypeSourceBuffer.toString();
 	}
 	
-	private String allignSourceBlock(String typeCodeBlock){
+	private String allignSourceBlock(String typeCodeBlock) throws CoreException {
 		CodeBlock cb= new CodeBlock(typeCodeBlock);
 		StringBuffer buffer= new StringBuffer();
 		cb.fill(buffer, "", getLineSeperator()); //$NON-NLS-1$

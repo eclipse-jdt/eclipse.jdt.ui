@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 public class CompositeCodeBlock extends AbstractCodeBlock {
 
 	private List fBlocks= new ArrayList(3);
@@ -25,7 +27,7 @@ public class CompositeCodeBlock extends AbstractCodeBlock {
 		return fBlocks.isEmpty();
 	}
 
-	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) {
+	public void fill(StringBuffer buffer, String firstLineIndent, String indent, String lineSeparator) throws CoreException {
 		int size= fBlocks.size();
 		int lastBlock= size - 1;
 		int inserted= 0;
