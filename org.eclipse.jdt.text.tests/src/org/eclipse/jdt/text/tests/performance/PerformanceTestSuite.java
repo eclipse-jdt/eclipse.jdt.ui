@@ -27,6 +27,7 @@ public class PerformanceTestSuite {
 		suite.addTestSuite(RevertJavaEditorTest.class);
 		suite.addTestSuite(ScrollJavaEditorTest.class);
 		suite.addTestSuite(ToggleCommentTest.class);
+		suite.addTestSuite(UndoJavaEditorTest.class);
 		//$JUnit-END$
 		return suite;
 	}
