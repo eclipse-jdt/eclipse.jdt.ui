@@ -634,7 +634,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 	private TextOperationAction fUndo;
 	private TextOperationAction fRedo;
 	
-	private OpenAction fOpenAction;
 	private CompositeActionGroup fActionGroups;
 	private CCPActionGroup fCCPActionGroup;
 	
@@ -756,8 +755,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		site.setSelectionProvider(fOutlineViewer);
 
 		// we must create the groups after we have set the selection provider to the site
-		fOpenAction= new OpenAction(site);
-		site.getSelectionProvider().addSelectionChangedListener(fOpenAction);
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this), 
 				new ShowActionGroup(this), 
@@ -778,7 +775,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
 		
 		fActionGroups.fillActionBars(bars);
-		bars.setGlobalActionHandler(JdtActionConstants.OPEN, fOpenAction);
 
 		IStatusLineManager statusLineManager= site.getActionBars().getStatusLineManager();
 		if (statusLineManager != null) {
@@ -894,10 +890,6 @@ class JavaOutlinePage extends Page implements IContentOutlinePage {
 		JavaPlugin.createStandardGroups(menu);
 				
 		IStructuredSelection selection= (IStructuredSelection)getSelection();
-		Object element= selection.getFirstElement();
-		if (fOpenAction.isEnabled() && element instanceof IImportDeclaration && !((IImportDeclaration)element).isOnDemand()) {
-			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fOpenAction);
-		}
 		fActionGroups.setContext(new ActionContext(selection));
 		fActionGroups.fillContextMenu(menu);
 	}

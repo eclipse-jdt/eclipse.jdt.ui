@@ -107,12 +107,6 @@ public class OpenAction extends SelectionDispatchAction {
 			return false;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= (Object)iter.next();
-			if (element instanceof IImportDeclaration) {
-				if (((IImportDeclaration)element).isOnDemand()) {
-					return false;
-				}
-				continue;
-			}
 			if (element instanceof ISourceReference)
 				continue;
 			if (element instanceof IResource)
@@ -201,25 +195,7 @@ public class OpenAction extends SelectionDispatchAction {
 	}
 	
 	public Object getElementToOpen(Object object) throws JavaModelException {
-		if (!(object instanceof IJavaElement))
-			return object;
-		
-		IJavaElement element= (IJavaElement)object;
-		switch (element.getElementType()) {
-			case IJavaElement.IMPORT_DECLARATION:
-				// select referenced element: package fragment or cu/classfile of referenced type
-				IImportDeclaration declaration= (IImportDeclaration) element;
-				if (declaration.isOnDemand()) {
-					element= JavaModelUtil.findTypeContainer(element.getJavaProject(), Signature.getQualifier(element.getElementName()));
-				} else {
-					element= element.getJavaProject().findType(element.getElementName());
-				}
-				if (element instanceof IType) {
-					element= (IJavaElement)element.getOpenable();
-				}
-				break;
-		}
-		return element;
+		return object;
 	}	
 	
 	private String getDialogTitle() {
