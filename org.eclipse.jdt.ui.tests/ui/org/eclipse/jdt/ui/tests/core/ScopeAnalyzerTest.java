@@ -726,7 +726,7 @@ public class ScopeAnalyzerTest extends CoreTests {
 			int flags= ScopeAnalyzer.TYPES;
 			IBinding[] res= new ScopeAnalyzer(astRoot).getDeclarationsInScope(offset, flags);
 			
-			assertVariables(res, new String[] { "G1", "G2", "H1", "E", "G", "H"});
+			assertVariables(res, new String[] { "G1", "G2", "H1"});
 		}
 	}	
 	

@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -262,6 +263,14 @@ public class ScopeAnalyzer {
 				ITypeBinding curr= Bindings.getBindingOfParentType(parent);
 				return curr.getSuperclass();
 			default:
+				if (parent instanceof Type) {
+					// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 
+					ASTNode normalizedNode= ASTNodes.getNormalizedNode(parent);
+					if (normalizedNode.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY) {
+						ClassInstanceCreation creation= (ClassInstanceCreation) normalizedNode.getParent();
+						return getBinding(creation.getExpression());
+					}
+				}
 				return null;
 		}
 	}
@@ -466,21 +475,7 @@ public class ScopeAnalyzer {
 			}
 			return true;
 		}
-		
-		public boolean visit(ClassInstanceCreation node) {
-			boolean isInside= isInside(node);
-			
-			// bug 67644: in 'a.new X()', all member types of A are visible as location of X. 
-			if (isInside && hasFlag(TYPES, fFlags) && node.getExpression() != null) {
-				ASTNode nameNode= (node.getAST().apiLevel() >= AST.JLS3) ? (ASTNode) node.getType() : node.getName();
-				ITypeBinding binding= node.getExpression().resolveTypeBinding();
-				if (isInside(nameNode) && binding != null) {
-					addInherited(binding, fFlags & TYPES);
-				}
-			}
-			return isInside;
-		}
-		
+				
 		public boolean visit(SwitchCase node) {
 			// switch on enum allows to use enum constants without qualification
 			if (hasFlag(VARIABLES, fFlags) && !node.isDefault() && isInside(node.getExpression())) {
