@@ -704,8 +704,8 @@ public class NewTestCaseCreationWizardPage extends NewTypeWizardPage {
 	
 	public static void addJUnitToBuildPath(IJavaProject project) throws JavaModelException {
 		IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
-		IPath sourceHome= new Path("ORG_ECLIPSE_JDT_SOURCE_SRC");
-		IPath sourcePath= sourceHome.append("org.junit_3.8.1/junitsrc.zip");
+		IPath sourceHome= new Path("ORG_ECLIPSE_JDT_SOURCE_SRC"); //$NON-NLS-1$
+		IPath sourcePath= sourceHome.append("org.junit_3.8.1/junitsrc.zip"); //$NON-NLS-1$
 		IClasspathEntry entry= JavaCore.newVariableEntry(
 			junitHome.append("junit.jar"),  //$NON-NLS-1$
 			sourcePath,  //$NON-NLS-1$

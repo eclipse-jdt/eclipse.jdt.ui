@@ -96,7 +96,9 @@
             name="%Launch.label"
             delegate="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchConfiguration"
             modes="run, debug"
-            id="org.eclipse.jdt.junit.launchconfig">
+            id="org.eclipse.jdt.junit.launchconfig"
+            sourceLocatorId="org.eclipse.jdt.launching.sourceLocator.JavaSourceLookupDirector"
+            sourcePathComputerId="org.eclipse.jdt.launching.sourceLookup.javaSourcePathComputer">
          <fileExtension
                default="false"
                extension="java">
