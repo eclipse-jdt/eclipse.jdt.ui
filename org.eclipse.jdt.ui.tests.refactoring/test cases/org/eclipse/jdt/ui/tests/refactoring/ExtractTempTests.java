@@ -330,8 +330,8 @@ public class ExtractTempTests extends RefactoringTest {
 	}
 
 	public void test48() throws Exception{
-		printTestDisabledMessage("test for bug#22054");
-//		helper1(4, 16, 4, 32, true, false, "temp");
+//		printTestDisabledMessage("test for bug#22054");
+		helper1(4, 16, 4, 32, true, false, "temp");
 	}
 
 	public void test49() throws Exception{
