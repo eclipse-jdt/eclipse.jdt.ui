@@ -458,7 +458,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/**
 	 * Returns index of the position in the positions, <code>-1</code> if not found.
 	 * @param positions the positions, must be ordered by offset and must not overlap
-	 * @param positionm the position
+	 * @param position the position
 	 * @return the index
 	 */
 	private int indexOf(List positions, Position position) {
@@ -573,7 +573,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	}
 	
 	/**
-	 * @return Returns <code>true</code> iff the current reconcile is cancelled.
+	 * @return Returns <code>true</code> iff the current reconcile is canceled.
 	 * <p>
 	 * NOTE: Also called from background thread.
 	 * </p>
@@ -591,7 +591,7 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	/**
 	 * Set whether or not the current reconcile is canceled.
 	 * 
-	 * @param isCanceled <code>true</code> iff the current reconcile is cancelled
+	 * @param isCanceled <code>true</code> iff the current reconcile is canceled
 	 */
 	public void setCanceled(boolean isCanceled) {
 		IDocument document= fSourceViewer != null ? fSourceViewer.getDocument() : null;
