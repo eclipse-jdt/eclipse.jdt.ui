@@ -49,7 +49,8 @@ class SourceReferenceTestUtil {
 //	}	
 
 	static void copy(Object[] elems, Clipboard clipboard) {
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), clipboard);
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(elems), clipboard);
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(elems), clipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
 		Assert.assertTrue("copy incorrectly disabled", copyAction.isEnabled());
 		copyAction.run();

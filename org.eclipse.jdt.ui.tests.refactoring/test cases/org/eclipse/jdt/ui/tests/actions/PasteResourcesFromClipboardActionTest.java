@@ -26,11 +26,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.ClasspathEntry;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.ui.tests.refactoring.MySetup;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.infra.*;
+import org.eclipse.jdt.ui.tests.refactoring.infra.MockWorkbenchSite;
 
 import org.eclipse.jdt.internal.ui.reorg.ReorgActionFactory;
 
@@ -167,7 +166,9 @@ public class PasteResourcesFromClipboardActionTest extends RefactoringTest{
 	private void doCopy(Object[] copySelection) {
 		if (copySelection == null)
 			return; 
-		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard);
+			
+		SelectionDispatchAction pasteAction= ReorgActionFactory.createPasteAction(new MockWorkbenchSite(copySelection), fClipboard);	
+		SelectionDispatchAction copyAction= ReorgActionFactory.createCopyAction(new MockWorkbenchSite(copySelection), fClipboard, pasteAction);
 		copyAction.update(copyAction.getSelection());
 		assertTrue("copy not enabled", copyAction.isEnabled());
 		copyAction.run();
