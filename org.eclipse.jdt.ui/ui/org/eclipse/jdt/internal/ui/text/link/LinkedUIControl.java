@@ -291,7 +291,7 @@ public class LinkedUIControl {
 
 		public void shellDeactivated(ShellEvent e) {
 // 			TODO reenable after debugging 
-			if (true) return;
+//			if (true) return;
 			
 			// from LinkedPositionUI:
 			
@@ -316,8 +316,6 @@ public class LinkedUIControl {
 				// Post in UI thread since the assistant popup will only get the focus after we lose it.
 				display.asyncExec(new Runnable() {
 					public void run() {
-						// TODO add isDisposed / isUninstalled / hasLeft check? for now: check for content type,
-						// since it gets nullified in leave()
 						if (fIsActive && (fAssistant == null || !fAssistant.hasFocus()))  {
 							leave(ILinkedListener.EXIT_ALL);
 						}
