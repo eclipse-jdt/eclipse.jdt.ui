@@ -16,31 +16,21 @@ import java.util.List;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 
 import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.NamingConventions;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.*;
+
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -51,12 +41,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 public class StubUtility {
@@ -492,7 +481,7 @@ public class StubUtility {
 			return str;
 		}
 			
-		TextBuffer textBuffer= TextBuffer.create(str);
+		IDocument textBuffer= new Document(str);
 		String[] exceptionNames= new String[excTypeSig.length];
 		for (int i= 0; i < excTypeSig.length; i++) {
 			exceptionNames[i]= Signature.toString(excTypeSig[i]);
@@ -500,9 +489,13 @@ public class StubUtility {
 		String returnType= retTypeSig != null ? Signature.toString(retTypeSig) : null;
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
-			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false, lineDelimiter);
+			try {
+				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, false, lineDelimiter);
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+			}
 		}
-		return textBuffer.getContent();
+		return textBuffer.get();
 	}
 
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
@@ -520,7 +513,7 @@ public class StubUtility {
 	
 	
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.SETTERCOMMENT;
@@ -542,7 +535,7 @@ public class StubUtility {
 	}	
 	
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplates.GETTERCOMMENT;
@@ -579,7 +572,7 @@ public class StubUtility {
 	}
 
 	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
 		if (overridden != null) {
@@ -651,7 +644,7 @@ public class StubUtility {
 			return str;
 		}
 			
-		TextBuffer textBuffer= TextBuffer.create(str);
+		IDocument textBuffer= new Document(str);
 		List params= decl.parameters();
 		String[] paramNames= new String[params.size()];
 		for (int i= 0; i < params.size(); i++) {
@@ -666,9 +659,13 @@ public class StubUtility {
 		String returnType= !decl.isConstructor() ? ASTNodes.asString(decl.getReturnType()) : null;
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
-			insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated, lineDelimiter);
+			try {
+				insertTag(textBuffer, tagOffsets[i], position.getLength(), paramNames, exceptionNames, returnType, isDeprecated, lineDelimiter);
+			} catch (BadLocationException e) {
+				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+			}
 		}
-		return textBuffer.getContent();
+		return textBuffer.get();
 	}
 	
 	private static TemplateVariable findTagVariable(TemplateBuffer buffer) {
@@ -682,12 +679,12 @@ public class StubUtility {
 		return null;		
 	}	
 	
-	private static void insertTag(TextBuffer textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated, String lineDelimiter) throws CoreException {
-		TextRegion region= textBuffer.getLineInformationOfOffset(offset);
+	private static void insertTag(IDocument textBuffer, int offset, int length, String[] paramNames, String[] exceptionNames, String returnType, boolean isDeprecated, String lineDelimiter) throws BadLocationException {
+		IRegion region= textBuffer.getLineInformationOfOffset(offset);
 		if (region == null) {
 			return;
 		}
-		String lineStart= textBuffer.getContent(region.getOffset(), offset - region.getOffset());
+		String lineStart= textBuffer.get(region.getOffset(), offset - region.getOffset());
 		
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < paramNames.length; i++) {
