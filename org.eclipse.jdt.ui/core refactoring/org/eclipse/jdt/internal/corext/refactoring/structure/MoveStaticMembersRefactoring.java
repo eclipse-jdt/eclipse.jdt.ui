@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -67,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -208,8 +210,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	}
 	
 	private static boolean isMoveable(IMember member) throws JavaModelException{
+		//Initializers have no bindings -> would need special handling in MoveStaticMemberAnalyzer, etc.
 		if (member.getElementType() != IJavaElement.METHOD && 
-			member.getElementType() != IJavaElement.FIELD)
+			member.getElementType() != IJavaElement.FIELD &&
+			member.getElementType() != IJavaElement.TYPE)
 				return false;
 
 		if (! Checks.isAvailable(member))
@@ -221,17 +225,20 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		if (member.getElementType() == IJavaElement.METHOD && ! JdtFlags.isStatic(member))
 			return false;
 
-		if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
+		if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
 			return false;
 			
-		if (member.getElementType() == IJavaElement.METHOD && ((IMethod)member).isConstructor())
+		if (member.getElementType() == IJavaElement.TYPE && ! JdtFlags.isStatic(member))
+			return false;
+			
+		if (! member.getDeclaringType().isInterface() && ! JdtFlags.isStatic(member))
 			return false;
 			
 		return true;
 	}
 	
 	private static boolean haveCommonDeclaringType(IMember[] members){
-		IType declaringType= members[0].getDeclaringType(); //index safe - checked in constructor
+		IType declaringType= members[0].getDeclaringType(); //index safe - checked in areAllMoveable()
 		for (int i= 0; i < members.length; i++) {
 			if (! declaringType.equals(members[i].getDeclaringType()))
 				return false;			
@@ -265,7 +272,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	public IType getDeclaringType() {
 		//all methods declared in same type - checked in precondition
-		return  fMembersToMove[0].getDeclaringType(); //index safe - checked in constructor
+		return  fMembersToMove[0].getDeclaringType(); //index safe - checked in areAllMoveable()
 	}
 	
 	private IType resolveType(String fullyQualifiedTypeName) throws JavaModelException{
@@ -335,6 +342,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			if (result.hasFatalError())
 				return result;
 						
+			result.merge(checkDestinationInsideTypeToMove());
+			if (result.hasFatalError())
+				return result;
+
 			result.merge(MemberCheckUtil.checkMembersInDestinationType(fMembersToMove, fDestinationType));	
 			if (result.hasFatalError())
 				return result;
@@ -404,6 +415,24 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return result;	
 	}
 	
+	private RefactoringStatus checkDestinationInsideTypeToMove() throws JavaModelException {
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < fMembersToMove.length; i++) {
+			if (! (fMembersToMove[i] instanceof IType))
+				continue;
+			IType type= (IType) fMembersToMove[i];
+			if (fDestinationType.equals(type) || JavaElementUtil.isAncestorOf(type, fDestinationType)) {
+				String message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.inside", //$NON-NLS-1$
+						new String[] {JavaModelUtil.getFullyQualifiedName(type),
+								JavaModelUtil.getFullyQualifiedName(fDestinationType)});
+				Context context= JavaStatusContext.create(fDestinationType.getCompilationUnit(), fDestinationType.getNameRange());
+				result.addFatalError(message, context);
+				return result;
+			}
+		}
+		return result;
+	}
+
 	private RefactoringStatus checkFieldsForInterface() throws JavaModelException {
 		//could be more clever and make field final if it is only written once...
 		RefactoringStatus result= new RefactoringStatus();
@@ -440,17 +469,18 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return result;
 	}
 
+	//XXX - refactor the 3 checkAccessed*Availability() into 1
 	private RefactoringStatus checkAccessedMethodsAvailability(IProgressMonitor pm) throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
 		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, pm);
 		toWorkingCopies(accessedMethods);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedMethods.length; i++) {
-			if (movedElementList.contains(accessedMethods[i]))
+			if (containsAncestorOf(movedElementList, accessedMethods[i]))
 				continue;
 			if (! JdtFlags.isStatic(accessedMethods[i])) //safely ignore non-static 
 				continue;
-			if (! isVisibleFrom(accessedMethods[i], fDestinationType, accessedMethods[i].getDeclaringType())){
+			if (! isVisibleFrom(accessedMethods[i], accessedMethods[i].getDeclaringType(), fDestinationType)){
 				String msg= createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType, false);
 				result.addError(msg, JavaStatusContext.create(accessedMethods[i]));
 			}	
@@ -464,11 +494,11 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		toWorkingCopies(accessedTypes);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedTypes.length; i++) {
-			if (movedElementList.contains(accessedTypes[i]))
+			if (containsAncestorOf(movedElementList, accessedTypes[i]))
 				continue;
 			if (! JdtFlags.isStatic(accessedTypes[i])) //safely ignore non-static 
 				continue;
-			if (! isVisibleFrom(accessedTypes[i], fDestinationType, accessedTypes[i].getDeclaringType())){
+			if (! isVisibleFrom(accessedTypes[i], accessedTypes[i].getDeclaringType(), fDestinationType)){
 				String msg= createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType, false);
 				result.addError(msg, JavaStatusContext.create(accessedTypes[i]));
 			}	
@@ -482,11 +512,11 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		toWorkingCopies(accessedFields);
 		List movedElementList= Arrays.asList(fMembersToMove);
 		for (int i= 0; i < accessedFields.length; i++) {
-			if (movedElementList.contains(accessedFields[i]))
+			if (containsAncestorOf(movedElementList, accessedFields[i]))
 				continue;
 			if (! JdtFlags.isStatic(accessedFields[i])) //safely ignore non-static 
 				continue;
-			if (! isVisibleFrom(accessedFields[i], fDestinationType, accessedFields[i].getDeclaringType())){
+			if (! isVisibleFrom(accessedFields[i], accessedFields[i].getDeclaringType(), fDestinationType)){
 				String msg= createNonAccessibleMemberMessage(accessedFields[i], fDestinationType, false);
 				result.addError(msg, JavaStatusContext.create(accessedFields[i]));
 			}	
@@ -494,16 +524,147 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return result;
 	}
 	
-	private void toWorkingCopies(IMember[] accessedFields) {
+	private boolean containsAncestorOf(List movedElementList, IMember accessedMember) {
+		IJavaElement element= accessedMember;
+		do {
+			if (movedElementList.contains(element))
+				return true;
+			element= element.getParent();
+		} while (element instanceof IMember);
+		return false;
+	}
+
+	private static void toWorkingCopies(IMember[] accessedFields) {
 		for (int i= 0; i < accessedFields.length; i++) {
 			accessedFields[i]= JavaModelUtil.toWorkingCopy(accessedFields[i]);
 		}
 	}
+	
+	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
+		pm.beginTask("Check availability of members after move.", fMembersToMove.length);
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < fMembersToMove.length; i++) {
+			result.merge(checkMovedMemberAvailability(fMembersToMove[i], new SubProgressMonitor(pm, 1)));
+		}
+		pm.done();
+		return result;
+	}
+	
+	private RefactoringStatus checkMovedMemberAvailability(IMember memberToMove, IProgressMonitor pm) throws JavaModelException{
+		RefactoringStatus result= new RefactoringStatus();
+		if (memberToMove instanceof IType) { // recursively check accessibility of member type's members
+			IJavaElement[] typeMembers= ((IType) memberToMove).getChildren();
+			pm.beginTask("", typeMembers.length + 1); //$NON-NLS-1$
+			for (int i= 0; i < typeMembers.length; i++) {
+				if (typeMembers[i] instanceof IInitializer)
+					pm.worked(1);
+				else
+					result.merge(checkMovedMemberAvailability((IMember) typeMembers[i], new SubProgressMonitor(pm, 1)));
+			}
+		} else {
+			pm.beginTask("", 1); //$NON-NLS-1$
+		}
 
-	private static boolean isVisibleFrom(IMember member, IType accessingType, IType newMemberDeclaringType) throws JavaModelException{
+		IType[] blindAccessorTypes= getTypesNotSeeingMovedMember(memberToMove, new SubProgressMonitor(pm, 1));
+		for (int k= 0; k < blindAccessorTypes.length; k++) {
+			String message= createNonAccessibleMemberMessage(memberToMove, blindAccessorTypes[k],/*moved*/true);
+			result.addError(message, JavaStatusContext.create(memberToMove));
+		}
+		pm.done();
+		return result;
+	}
+	
+	private IType[] getTypesNotSeeingMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
+		if (JdtFlags.isPublic(member) && JdtFlags.isPublic(fDestinationType))
+			return new IType[0];
+
+		HashSet blindAccessorTypes= new HashSet(); // referencing, but access to destination type illegal
+		SearchResultGroup[] references= getReferences(member, new SubProgressMonitor(pm, 1));
+		for (int i = 0; i < references.length; i++) {
+			SearchResult[] searchResults= references[i].getSearchResults();
+			for (int k= 0; k < searchResults.length; k++) {
+				SearchResult searchResult= searchResults[k];
+				IJavaElement element= WorkingCopyUtil.getWorkingCopyIfExists(searchResult.getEnclosingElement());
+				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
+				if (type != null //reference can e.g. be an import declaration
+						&& ! blindAccessorTypes.contains(type)
+						&& ! isWithinMemberToMove(searchResult)
+						&& ! isVisibleFrom(member, getDestinationType(), type)) {
+					blindAccessorTypes.add(type);
+				}
+			}
+		}
+		
+		return (IType[]) blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
+	}
+
+	private String createNonAccessibleMemberMessage(IMember member, IType accessingType, boolean moved) throws JavaModelException{
+		//Non-visibility can have various reasons and always displaying all visibility
+		//flags for all enclosing elements would be too heavy. Context reveals exact cause.
+		IType declaringType= moved ? getDestinationType() : getDeclaringType();
+		String message;
+		switch (member.getElementType()){
+			case IJavaElement.FIELD: {
+				if (moved)
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_field", //$NON-NLS-1$ 
+								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
+									JavaModelUtil.getFullyQualifiedName(accessingType),
+									JavaModelUtil.getFullyQualifiedName(declaringType)});
+				else
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_field", //$NON-NLS-1$
+								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
+									JavaModelUtil.getFullyQualifiedName(accessingType)});
+				return message;
+			}			
+			case IJavaElement.METHOD: {
+				if (moved)
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_method", //$NON-NLS-1$
+								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
+									JavaModelUtil.getFullyQualifiedName(accessingType),
+									JavaModelUtil.getFullyQualifiedName(declaringType)});
+				else				 
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_method", //$NON-NLS-1$
+								new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
+									JavaModelUtil.getFullyQualifiedName(accessingType)});
+								 
+				return message;		
+			}			
+			case IJavaElement.TYPE:{
+				if (moved)
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_type", //$NON-NLS-1$
+								new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
+									JavaModelUtil.getFullyQualifiedName(accessingType),
+									JavaModelUtil.getFullyQualifiedName(declaringType)});
+				else
+					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_type", //$NON-NLS-1$
+								new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
+									JavaModelUtil.getFullyQualifiedName(accessingType)});
+				return message;
+			}			
+			default:
+				Assert.isTrue(false);
+				return null;
+		}
+	}
+	
+	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm) throws JavaModelException {
+		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
+		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
+		SearchResultGroup[] references= RefactoringSearchEngine.search(pm, scope, pattern);
+		return references;
+	}
+
+	private static boolean isVisibleFrom(IMember member, IType newMemberDeclaringType, IType accessingType) throws JavaModelException{
 		int memberVisibility= JdtFlags.getLowerVisibility(
 			JdtFlags.getVisibilityCode(member),
 			JdtFlags.getVisibilityCode(newMemberDeclaringType));
+			
+		IType declaringType= newMemberDeclaringType.getDeclaringType();
+		while (declaringType != null) { //get lowest visibility in all parent types of newMemberDeclaringType
+			memberVisibility= JdtFlags.getLowerVisibility(
+					memberVisibility, JdtFlags.getVisibilityCode(declaringType));
+			declaringType= declaringType.getDeclaringType();
+		}
 		
 		switch (memberVisibility) {
 			case Modifier.PRIVATE :
@@ -535,125 +696,10 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		return false;
 	}
 
-	private String createNonAccessibleMemberMessage(IMember member, IType accessingType, boolean moved) throws JavaModelException{
-		IType declaringType= moved ? getDestinationType() : getDeclaringType();
-		String message;
-		switch (member.getElementType()){
-			case IJavaElement.FIELD: {
-				if (moved)
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_field", //$NON-NLS-1$ 
-								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									createAccessModifierString(member),
-									createAccessModifierString(declaringType),
-									JavaModelUtil.getFullyQualifiedName(declaringType),
-									JavaModelUtil.getFullyQualifiedName(accessingType)});
-				else
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_field", //$NON-NLS-1$
-								new String[]{JavaElementUtil.createFieldSignature((IField)member), 
-									createAccessModifierString(member),
-									createAccessModifierString(declaringType),
-									JavaModelUtil.getFullyQualifiedName(declaringType),
-									JavaModelUtil.getFullyQualifiedName(accessingType)});
-				return message;
-			}			
-			case IJavaElement.METHOD: {
-				if (moved)
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_method", //$NON-NLS-1$
-									new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-										createAccessModifierString(member),
-										createAccessModifierString(declaringType),
-										JavaModelUtil.getFullyQualifiedName(declaringType),
-										JavaModelUtil.getFullyQualifiedName(accessingType)});
-				else				 
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_method", //$NON-NLS-1$
-									new String[]{JavaElementUtil.createMethodSignature((IMethod)member),
-										createAccessModifierString(member),
-										createAccessModifierString(declaringType),
-										JavaModelUtil.getFullyQualifiedName(declaringType),
-										JavaModelUtil.getFullyQualifiedName(accessingType)});
-								 
-				return message;		
-			}			
-			case IJavaElement.TYPE:{
-				if (moved)
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.moved_type", //$NON-NLS-1$
-						new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
-							createAccessModifierString(member),
-							createAccessModifierString(declaringType),
-							JavaModelUtil.getFullyQualifiedName(declaringType),
-							JavaModelUtil.getFullyQualifiedName(accessingType)});
-				else
-					message= RefactoringCoreMessages.getFormattedString("MoveMembersRefactoring.accessed_type", //$NON-NLS-1$
-						new String[]{JavaModelUtil.getFullyQualifiedName(((IType)member)), 
-							createAccessModifierString(member),
-							createAccessModifierString(declaringType),
-							JavaModelUtil.getFullyQualifiedName(declaringType),
-							JavaModelUtil.getFullyQualifiedName(accessingType)});
-				return message;
-			}			
-			default:
-				Assert.isTrue(false);
-				return null;
-		}
-	}
-	
-	private static String createAccessModifierString(IMember member) throws JavaModelException{
-		if (JdtFlags.isPublic(member))
-			return RefactoringCoreMessages.getString("MoveMembersRefactoring.public"); //$NON-NLS-1$
-		else if (JdtFlags.isProtected(member))
-			return RefactoringCoreMessages.getString("MoveMembersRefactoring.protected"); //$NON-NLS-1$
-		else if (JdtFlags.isPrivate(member))
-			return RefactoringCoreMessages.getString("MoveMembersRefactoring.private"); //$NON-NLS-1$
-		else	
-			return RefactoringCoreMessages.getString("MoveMembersRefactoring.package-visible"); //$NON-NLS-1$
-	}
-	
-	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fMembersToMove.length); //$NON-NLS-1$
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			IType[] blindAccessorTypes= getTypesNotSeeingMovedMember(fMembersToMove[i], new SubProgressMonitor(pm, 1));
-			for (int k= 0; k < blindAccessorTypes.length; k++) {
-				String message= createNonAccessibleMemberMessage(fMembersToMove[i], blindAccessorTypes[k], true);
-				result.addError(message, JavaStatusContext.create(fMembersToMove[i]));
-			}
-		}
-		pm.done();
-		return result;
-	}
-	
-	private IType[] getTypesNotSeeingMovedMember(IMember member, IProgressMonitor pm) throws JavaModelException {
-		if (JdtFlags.isPublic(member) && JdtFlags.isPublic(fDestinationType))
-			return new IType[0];
-		SearchResultGroup[] references= getReferences(member, pm);
-		if (references.length == 0)
-			return new IType[0];
-		
-		HashSet blindAccessorTypes= new HashSet(); // referencing, but access to destination type illegal
-		for (int i = 0; i < references.length; i++) {
-			SearchResult[] searchResults= references[i].getSearchResults();
-			for (int k= 0; k < searchResults.length; k++) {
-				SearchResult searchResult= searchResults[k];
-				IJavaElement element= searchResult.getEnclosingElement();
-				IType type= (IType) element.getAncestor(IJavaElement.TYPE);
-				if (! blindAccessorTypes.contains(type)
-						&& ! isVisibleFrom(member, type, getDestinationType())
-						&& ! isWithinMemberToMove(searchResult)) {
-					blindAccessorTypes.add(type);
-				}
-			}
-		}
-		return (IType[]) blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
-	}
-
-	private static SearchResultGroup[] getReferences(IMember member, IProgressMonitor pm) throws JavaModelException {
-		IJavaSearchScope scope= RefactoringScopeFactory.create(member);
-		ISearchPattern pattern= SearchEngine.createSearchPattern(member, IJavaSearchConstants.REFERENCES);
-		SearchResultGroup[] references= RefactoringSearchEngine.search(pm, scope, pattern);
-		return references;
-	}
-
 	private boolean isWithinMemberToMove(SearchResult result) throws JavaModelException {
+		ICompilationUnit referenceCU= JavaModelUtil.toWorkingCopy(result.getCompilationUnit());
+		if (! referenceCU.equals(fSource.unit))
+			return false;
 		int referenceStart= result.getStart();
 		for (int i= 0; i < fMembersToMove.length; i++) {
 			if (liesWithin(fMembersToMove[i].getSourceRange(), referenceStart))
@@ -696,7 +742,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 	private void createChange(RefactoringStatus status, IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 4); //$NON-NLS-1$
 		fChange= new CompositeChange(RefactoringCoreMessages.getString("MoveMembersRefactoring.move_members")); //$NON-NLS-1$
-		fTarget= new ASTData(fDestinationType.getCompilationUnit(), true, fPreferences);
+		fTarget= getASTData(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
 			status.addFatalError(RefactoringCoreMessages.getFormattedString(
@@ -720,7 +766,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			ICompilationUnit unit= affectedCUs[i];
 			ASTData ast= getASTData(unit);
 			ReferenceAnalyzer analyzer= new ReferenceAnalyzer(
-				fSourceBinding, targetBinding, fMemberBindings, ast);
+				ast, fMemberBindings, targetBinding, fSourceBinding);
 			ast.root.accept(analyzer);
 			status.merge(analyzer.getStatus());
 			status.merge(Checks.validateEdit(unit));
@@ -737,15 +783,17 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		status.merge(moveMembers(fMemberDeclarations, memberSources));
 		fChange.add(fSource.createChange());
 		status.merge(Checks.validateEdit(fSource.unit));
-		fChange.add(fTarget.createChange());
-		status.merge(Checks.validateEdit(fTarget.unit));
+		if (! fSource.unit.equals(fTarget.unit)) {
+			fChange.add(fTarget.createChange());
+			status.merge(Checks.validateEdit(fTarget.unit));
+		}
 		pm.worked(1);
 	}
 	
 	private ASTData getASTData(ICompilationUnit unit) throws CoreException {
 		if (fSource.unit.equals(unit))
 			return fSource;
-		if (fTarget.unit.equals(unit))
+		if (fTarget != null && fTarget.unit.equals(unit))
 			return fTarget;
 		return new ASTData(unit, true, fPreferences);
 	}
@@ -781,16 +829,16 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
 			typeRefs.addAll(TypeReferenceFinder.perform(declaration));
-			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fSourceBinding, fMemberBindings, target);
+			MovedMemberAnalyzer analyzer= new MovedMemberAnalyzer(fSource, fMemberBindings, fSourceBinding, target);
 			declaration.accept(analyzer);
 			if (getDeclaringType().isInterface() && ! fDestinationType.isInterface()) {
 				FieldDeclaration fieldDecl= (FieldDeclaration) declaration;
 				int psfModifiers= Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL;
 				if ((fieldDecl.getModifiers() & psfModifiers) != psfModifiers) {
-					AST ast= declaration.getAST();
+					AST ast= fieldDecl.getAST();
 					FieldDeclaration modifiedNode= ast.newFieldDeclaration(ast.newVariableDeclarationFragment());
 					modifiedNode.setModifiers(psfModifiers);
-					fSource.rewriter.markAsModified(declaration, modifiedNode);
+					fSource.rewriter.markAsModified(fieldDecl, modifiedNode);
 				}
 			}
 			fSource.rewriter.markAsTracked(declaration, new GroupDescription("moved member declaration"));
@@ -798,7 +846,7 @@ public class MoveStaticMembersRefactoring extends Refactoring {
 			status.merge(analyzer.getStatus()); 
 		}
 		// Adjust imports
-		if (targetNeedsSourceImport)
+		if (targetNeedsSourceImport && (fTarget != fSource))
 			fTarget.imports.addImport(fSourceBinding);
 		for (Iterator iter= typeRefs.iterator(); iter.hasNext();) {
 			ITypeBinding binding= (ITypeBinding)iter.next();

@@ -116,6 +116,15 @@ public class JavaElementUtil {
 		return type.getCompilationUnit().getTypes().length == 1;
 	}
 
+	/** @see org.eclipse.jdt.internal.core.JavaElement#isAncestorOf(org.eclipse.jdt.core.IJavaElement) */
+	public static boolean isAncestorOf(IJavaElement ancestor, IJavaElement child) {
+		IJavaElement parent= child.getParent();
+		while (parent != null && !parent.equals(ancestor)) {
+			parent= parent.getParent();
+		}
+		return parent != null;
+	}
+	
 	public static IMethod[] getAllConstructors(IType type) throws JavaModelException {
 		if (type.isInterface())
 			return new IMethod[0];

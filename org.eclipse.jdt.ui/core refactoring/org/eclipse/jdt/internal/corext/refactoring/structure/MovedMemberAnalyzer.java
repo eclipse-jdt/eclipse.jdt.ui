@@ -22,16 +22,19 @@ import org.eclipse.jdt.core.dom.SimpleName;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
-
+/**
+ * Updates references in moved static members.
+ * Accepts <code>BodyDeclaration</code>s.
+ */
 /* package */ class MovedMemberAnalyzer extends MoveStaticMemberAnalyzer {
+//TODO:
+//	- Reference to type inside moved type:
+//	  - if originally resolved by qualification -> no problem
+//	  - if originally resolved by import -> must add import in target too (qualify if import ambiguous)
 	
-	private ITypeBinding fSource;
-	private ITypeBinding fTarget;
-	
-	public MovedMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast, ITypeBinding source, IBinding[] members, ITypeBinding target) {
-		super(ast, members);
-		fSource= source;
-		fTarget= target;
+	public MovedMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast,
+			IBinding[] members, ITypeBinding source, ITypeBinding target) {
+		super(ast, members, source, target);
 	}
 	
 	public boolean targetNeedsSourceImport() {

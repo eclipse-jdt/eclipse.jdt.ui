@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -20,14 +21,14 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-
+/**
+ * Updates references to moved static members.
+ * Accepts <code>CompilationUnit</code>s.
+ */
 /* package */ class ReferenceAnalyzer extends MoveStaticMemberAnalyzer {
 	
-	private ITypeBinding fTarget;
-	
-	public ReferenceAnalyzer(ITypeBinding source, ITypeBinding target, IBinding[] members, MoveStaticMembersRefactoring.ASTData ast) {
-		super(ast, members);
-		fTarget= target;
+	public ReferenceAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members, ITypeBinding target, ITypeBinding source) {
+		super(ast, members, source, target);
 	}
 	
 	public boolean needsTargetImport() {
@@ -67,6 +68,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 	public boolean visit(QualifiedName node) {
 		if (!isMovedMember(node.resolveBinding()))
 			return super.visit(node);
+		if (node.getParent() instanceof ImportDeclaration) {
+			fAst.imports.removeImport(node.resolveTypeBinding());
+			fAst.imports.addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
+			return false;
+		}
 		rewrite(node, fTarget);
 		return false;
 	}

@@ -38,18 +38,25 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 
 	protected RefactoringStatus fStatus;
 	
+	protected ITypeBinding fSource;
+	protected ITypeBinding fTarget;
 	protected MoveStaticMembersRefactoring.ASTData fAst;
 	protected IBinding[] fMembers;
 	
 	protected boolean fNeedsImport;
+	//TODO: MoveStaticMemberAnalyzer#rewrite... should use ImportRewrite
+	//(result of addImport(..) must be used as type qualifier)
+
 	protected Set fProcessed;
 	
 	protected static final String REFERENCE_UPDATE= RefactoringCoreMessages.getString("MoveMembersRefactoring.referenceUpdate"); //$NON-NLS-1$
 	
-	public MoveStaticMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members) {
+	public MoveStaticMemberAnalyzer(MoveStaticMembersRefactoring.ASTData ast, IBinding[] members, ITypeBinding source, ITypeBinding target) {
 		fStatus= new RefactoringStatus();
 		fAst= ast;
 		fMembers= members;
+		fSource= source;
+		fTarget= target;
 		fProcessed= new HashSet();
 	}
 	
