@@ -27,6 +27,7 @@ import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.help.WorkbenchHelp;
 
+import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -57,34 +58,48 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 	 * @see PreferencePage#createContents
 	 */
 	protected Control createContents(Composite composite) {
+		initializeDialogUnits(composite);
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
 
 		fJarRoot= getJARPackageFragmentRoot();
-		if (fJarRoot != null) {
-			try {
-				IClasspathEntry entry= fJarRoot.getRawClasspathEntry();
-				if (entry == null) {
-					// use a dummy entry to use for initialization
-					entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
-				}
-				IWorkspaceRoot wsroot= fJarRoot.getJavaModel().getWorkspace().getRoot();
-				fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
-				return fSourceAttachmentBlock.createControl(composite);				
-			} catch (CoreException e) {
-				JavaPlugin.log(e.getStatus());
-			}		
+		if (fJarRoot == null) {
+			return createMessageContent(composite, JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
 		}
+		try {
+			IClasspathEntry entry= fJarRoot.getRawClasspathEntry();
+			if (entry == null) {
+				// use a dummy entry to use for initialization
+				entry= JavaCore.newLibraryEntry(fJarRoot.getPath(), null, null);
+			} else if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+				IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), fJarRoot.getJavaProject());
+				String containerName= container != null ? container.getDescription() : entry.getPath().toString();
+				return createMessageContent(composite, JavaUIMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
+			}
+			IWorkspaceRoot wsroot= fJarRoot.getJavaModel().getWorkspace().getRoot();
+			fSourceAttachmentBlock= new SourceAttachmentBlock(wsroot, this, entry);
+			return fSourceAttachmentBlock.createControl(composite);				
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+			return createMessageContent(composite, JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+		}		
+	}
+	
+	private Control createMessageContent(Composite composite, String message) {
 		Composite inner= new Composite(composite, SWT.NONE);
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;		
 		inner.setLayout(layout);
 		
+		GridData gd= new GridData();
+		gd.widthHint= convertWidthInCharsToPixels(80);
+		
 		Label label= new Label(inner, SWT.LEFT + SWT.WRAP);
-		label.setText(JavaUIMessages.getString("SourceAttachmentPropertyPage.noarchive.message")); //$NON-NLS-1$
-		label.setLayoutData(new GridData());
+		label.setText(message);
+		label.setLayoutData(gd);
 		return inner;
 	}
+	
 
 	/*
 	 * @see IPreferencePage#performOk
