@@ -1573,21 +1573,21 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		IJavaElement elem= (IJavaElement)editor.getEditorInput().getAdapter(IJavaElement.class);
 		try {
-			TypeHierarchyViewer currentViewer= getCurrentViewer();
+			//TypeHierarchyViewer currentViewer= getCurrentViewer();
 			if (elem instanceof IClassFile) {
 				IType type= ((IClassFile)elem).getType();
-				if (currentViewer.isElementShown(type)) {
+				//if (currentViewer.isElementShown(type)) {
 					internalSelectType(type, true);
 					updateMethodViewer(type);
-				}
+				//}
 			} else if (elem instanceof ICompilationUnit) {
 				IType[] allTypes= ((ICompilationUnit)elem).getAllTypes();
 				for (int i= 0; i < allTypes.length; i++) {
-					if (currentViewer.isElementShown(allTypes[i])) {
+					//if (currentViewer.isElementShown(allTypes[i])) {
 						internalSelectType(allTypes[i], true);
 						updateMethodViewer(allTypes[i]);
 						return;
-					}
+					//}
 				}
 			}	
 		} catch (JavaModelException e) {
