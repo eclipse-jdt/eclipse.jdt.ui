@@ -1489,12 +1489,37 @@ JavaStructureDiffViewerCreator
 <!-- =========================================================================== -->
 <extension point="org.eclipse.ui.actionDefinitions">
 	<!-- edit -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.goto.next.member" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.enclosing" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.next" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.previous" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.select.last" />
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.goto.next.member"
+		name= "%ActionDefinition.gotoNextMember.name"
+		description="%ActionDefinition.gotoNextMember.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.goto.previous.member"
+		name= "%ActionDefinition.gotoPreviousMember.name"
+		description="%ActionDefinition.gotoPreviousMember.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.select.enclosing"
+		name= "%ActionDefinition.selectEnclosing.name"
+		description="%ActionDefinition.selectEnclosing.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.select.next"
+		name= "%ActionDefinition.selectNext.name"
+		description="%ActionDefinition.selectNext.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.select.previous"
+		name= "%ActionDefinition.selectPrevious.name"
+		description="%ActionDefinition.selectPrevious.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.select.last"
+		name= "%ActionDefinition.selectLast.name"
+		description="%ActionDefinition.selectLast.description"
+	/>
+	
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.proposals" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.content.assist.context.information" />
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals" />
@@ -1513,44 +1538,180 @@ JavaStructureDiffViewerCreator
 	</actionDefinition>	
 
 	<!-- source -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.comment" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.uncomment" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.format" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.import" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.organize.imports" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.override.methods" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.externalize.strings" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.next.problem" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem" />
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.comment"
+		name= "%ActionDefinition.comment.name"
+		description= "%ActionDefinition.comment.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.uncomment"
+		name= "%ActionDefinition.uncomment.name"
+		description= "%ActionDefinition.uncomment.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.format"
+		name= "%ActionDefinition.format.name"
+		description= "%ActionDefinition.format.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.add.import"
+		name= "%ActionDefinition.addImport.name"
+		description= "%ActionDefinition.addImport.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.organize.imports"
+		name= "%ActionDefinition.organizeImports.name"
+		description= "%ActionDefinition.organizeImports.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.surround.with.try.catch"
+		name= "%ActionDefinition.surroundWith.tryCatch.name"
+		description= "%ActionDefinition.surroundWith.tryCatch.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.override.methods"
+		name= "%ActionDefinition.overrideMethods.name"
+		description= "%ActionDefinition.overrideMethods.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.add.unimplemented.constructors"
+		name= "%ActionDefinition.addUnimplementedConstructors.name"
+		description= "%ActionDefinition.addUnimplementedConstructors.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.find.strings.to.externalize"
+		name= "%ActionDefinition.findStringsToExternalize.name"
+		description= "%ActionDefinition.findStringsToExternalize.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.externalize.strings"
+		name= "%ActionDefinition.externalizeStrings.name"
+		description= "%ActionDefinition.externalizeStrings.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.show.next.problem"
+		name= "%ActionDefinition.nextProblem.name"
+		description= "%ActionDefinition.nextProblem.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.show.previous.problem"
+		name= "%ActionDefinition.previousProblem.name"
+		description= "%ActionDefinition.previousProblem.description"
+	/>
 
 	<!-- refactor -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.element" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
-    <actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.constant" />	
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.inline.method" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested" />
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.pull.up"
+		name= "%ActionDefinition.pullUp.name"
+		description= "%ActionDefinition.pullUp.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.rename.element"
+		name= "%ActionDefinition.renameElement.name"
+		description= "%ActionDefinition.renameElement.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters"
+		name= "%ActionDefinition.modifyMethodParameters.name"
+		description= "%ActionDefinition.modifyMethodParameters.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.move.element"
+		name= "%ActionDefinition.moveElement.name"
+		description= "%ActionDefinition.moveElement.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable"
+		name= "%ActionDefinition.extractLocalVariable.name"
+		description= "%ActionDefinition.extractLocalVariable.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.extract.constant"
+		name= "%ActionDefinition.extractConstant.name"
+		description= "%ActionDefinition.extractConstant.description"
+	/>
+    <actionDefinition
+    	id="org.eclipse.jdt.ui.edit.text.java.inline.constant"
+		name= "%ActionDefinition.inlineConstant.name"
+		description= "%ActionDefinition.inlineConstant.description"
+    />	
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable"
+		name= "%ActionDefinition.inlineVariable.name"
+		description= "%ActionDefinition.inlineVariable.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field"
+		name= "%ActionDefinition.selfEncapsulateField.name"
+		description= "%ActionDefinition.selfEncapsulateField.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.extract.method"
+		name= "%ActionDefinition.extractMethod.name"
+		description= "%ActionDefinition.extractMethod.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.inline.method"
+		name= "%ActionDefinition.inlineMethod.name"
+		description= "%ActionDefinition.inlineMethod.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.extract.interface"
+		name= "%ActionDefinition.extractInterface.name"
+		description= "%ActionDefinition.extractInterface.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level"
+		name= "%ActionDefinition.moveInnerToTopLevel.name"
+		description= "%ActionDefinition.moveInnerToTopLevel.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.use.supertype"
+		name= "%ActionDefinition.useSupertype.name"
+		description= "%ActionDefinition.useSupertype.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.promote.local.variable"
+		name= "%ActionDefinition.promoteLocalVariable.name"
+		description= "%ActionDefinition.promoteLocalVariable.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.convert.anonymous.to.nested"
+		name= "%ActionDefinition.convertAnonymousToNested.name"
+		description= "%ActionDefinition.convertAnonymousToNested.description"
+	/>
 
 	<!-- navigate -->
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.editor" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view" />
-	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view" />
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.open.editor"
+		name= "%ActionDefinition.openEditor.name"
+		description= "%ActionDefinition.openEditor.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.open.super.implementation"
+		name= "%ActionDefinition.openSuperImplementation.name"
+		description= "%ActionDefinition.openSuperImplementation.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.open.external.javadoc"
+		name= "%ActionDefinition.openExternalJavadoc.name"
+		description= "%ActionDefinition.openExternalJavadoc.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.open.type.hierarchy"
+		name= "%ActionDefinition.openTypeHierarchy.name"
+		description= "%ActionDefinition.openTypeHierarchy.description"
+	/>
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view"
+		name= "%ActionDefinition.showInPackageView.name"
+		description= "%ActionDefinition.showInPackageView.description"
+	/>	
+	<actionDefinition
+		id="org.eclipse.jdt.ui.edit.text.java.show.in.navigator.view"
+		name= "%ActionDefinition.showInNavigatorView.name"
+		description= "%ActionDefinition.showInNavigatorView.description"
+	/>
 
 	<!-- search -->
 	<actionDefinition id="org.eclipse.jdt.ui.edit.text.java.search.references.in.workspace" />
@@ -1620,15 +1781,15 @@ JavaStructureDiffViewerCreator
 	
 		<!-- refactor -->
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
+		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
+		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
         <accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.constant"/>	
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
@@ -1702,15 +1863,15 @@ JavaStructureDiffViewerCreator
 	
 		<!-- refactor -->
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.pull.up" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
+		<accelerator key="Alt+Shift+R" id="org.eclipse.jdt.ui.edit.text.java.rename.element" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.modify.method.parameters" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.element" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
+		<accelerator key="Alt+Shift+L" id="org.eclipse.jdt.ui.edit.text.java.extract.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.constant" />
         <accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.constant" />		
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
+		<accelerator key="Alt+Shift+I" id="org.eclipse.jdt.ui.edit.text.java.inline.local.variable" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field" />
-		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
+		<accelerator key="Alt+Shift+M" id="org.eclipse.jdt.ui.edit.text.java.extract.method" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.extract.interface" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.move.inner.to.top.level" />
 		<accelerator key="" id="org.eclipse.jdt.ui.edit.text.java.use.supertype" />
