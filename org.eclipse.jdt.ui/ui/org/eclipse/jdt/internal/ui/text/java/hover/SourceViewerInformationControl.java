@@ -17,6 +17,8 @@ import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
@@ -67,7 +69,13 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @since 3.0
 	 */
 	private Label fSeparator; 
-
+	/**
+	 * The font of the optional status text label.
+	 * 
+	 * @since 3.0
+	 */
+	private Font fStatusTextFont;
+	
 	/**
 	 * Creates a default information control with the given shell as parent. The given
 	 * information presenter is used to process the information to be displayed. The given
@@ -153,6 +161,12 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 			// Status field label
 			fStatusField= new Label(composite, SWT.RIGHT);
 			fStatusField.setText(statusFieldText);
+			Font font= fStatusField.getFont();
+			FontData[] fontDatas= font.getFontData();
+			for (int i= 0; i < fontDatas.length; i++)
+				fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
+			fStatusTextFont= new Font(fStatusField.getDisplay(), fontDatas);
+			fStatusField.setFont(fStatusTextFont);
 			GridData gd2= new GridData(GridData.FILL_VERTICAL | GridData.FILL_HORIZONTAL | GridData.HORIZONTAL_ALIGN_BEGINNING | GridData.VERTICAL_ALIGN_BEGINNING);
 			fStatusField.setLayoutData(gd2);
 			fStatusField.setForeground(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
@@ -253,6 +267,9 @@ public class SourceViewerInformationControl implements IInformationControl, IInf
 	 * @see IInformationControl#dispose()
 	 */
 	public void dispose() {
+		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
+			fStatusTextFont.dispose();
+		
 		if (fShell != null) {
 			if (!fShell.isDisposed())
 				fShell.dispose();
