@@ -17,6 +17,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -49,8 +52,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScopeFactor
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 public class InlineConstantRefactoring extends Refactoring {
 
@@ -801,6 +803,10 @@ public class InlineConstantRefactoring extends Refactoring {
 		fSettings= settings;
 	}
 
+	public static boolean isAvailable(IField field) throws JavaModelException {
+		return Checks.isAvailable(field) && JdtFlags.isStatic(field) && JdtFlags.isFinal(field);		
+	}
+	
 	public static InlineConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		InlineConstantRefactoring ref= new InlineConstantRefactoring(cu, selectionStart, selectionLength, settings);
 		if (ref.checkStaticFinalConstantNameSelected().hasFatalError())

@@ -12,6 +12,15 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICodeAssist;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -23,19 +32,12 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICodeAssist;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 public class SelectionConverter {
 
@@ -208,7 +210,7 @@ public class SelectionConverter {
 			return null;
 	}
 
-	private static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
+	public static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
 			if (input instanceof ICodeAssist) {
 				if (input instanceof ICompilationUnit) {
 					ICompilationUnit cunit= (ICompilationUnit)input;
@@ -246,5 +248,54 @@ public class SelectionConverter {
 				return ref;
 		}
 		return null;
+	}
+	
+//	public static IJavaElement[] resolveSelectedElements(IJavaElement input, ITextSelection selection) throws JavaModelException {
+//		IJavaElement enclosing= resolveEnclosingElement(input, selection);
+//		if (enclosing == null)
+//			return EMPTY_RESULT;
+//		if (!(enclosing instanceof ISourceReference))
+//			return EMPTY_RESULT;
+//		ISourceRange sr= ((ISourceReference)enclosing).getSourceRange();
+//		if (selection.getOffset() == sr.getOffset() && selection.getLength() == sr.getLength())
+//			return new IJavaElement[] {enclosing};
+//	}
+	
+	public static IJavaElement resolveEnclosingElement(JavaEditor editor, ITextSelection selection) throws JavaModelException {
+		return resolveEnclosingElement(getInput(editor), selection);
+	}
+	
+	public static IJavaElement resolveEnclosingElement(IJavaElement input, ITextSelection selection) throws JavaModelException {
+		IJavaElement atOffset= null;
+		if (input instanceof ICompilationUnit) {
+			ICompilationUnit cunit= (ICompilationUnit)input;
+			synchronized (cunit) {
+				cunit.reconcile();
+			}
+			atOffset= cunit.getElementAt(selection.getOffset());
+		} else if (input instanceof IClassFile) {
+			IClassFile cfile= (IClassFile)input;
+			atOffset= cfile.getElementAt(selection.getOffset());
+		} else {
+			return null;
+		}
+		if (atOffset == null) {
+			return input;
+		} else {
+			int selectionEnd= selection.getOffset() + selection.getLength();
+			IJavaElement result= atOffset;
+			if (atOffset instanceof ISourceReference) {
+				ISourceRange range= ((ISourceReference)atOffset).getSourceRange();
+				while (range.getOffset() + range.getLength() < selectionEnd) {
+					result= result.getParent();
+					if (! (result instanceof ISourceReference)) {
+						result= input;
+						break;
+					}
+					range= ((ISourceReference)result).getSourceRange();
+				}
+			}
+			return result;
+		}
 	}
 }

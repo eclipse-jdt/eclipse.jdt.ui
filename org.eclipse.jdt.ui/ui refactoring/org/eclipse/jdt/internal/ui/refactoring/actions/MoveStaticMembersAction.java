@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -60,9 +61,6 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 		
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
-	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		try {
 			setEnabled(canEnable(getSelectedMembers(selection)));
@@ -74,16 +72,28 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
-    /*
-     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
-     */
 	public void selectionChanged(ITextSelection selection) {
-		//do nothing, this happens too often
+		setEnabled(true);
 	}
 	
-	/*
-	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
 	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement element= selection.resolveEnclosingElement();
+		if (! (element instanceof IMember))
+			return false;
+		return MoveStaticMembersRefactoring.isAvailable(new IMember[] {(IMember)element});
+	}
+	
 	public void run(IStructuredSelection selection) {
 		try {
 			IMember[] members= getSelectedMembers(selection);
@@ -94,9 +104,6 @@ public class MoveStaticMembersAction extends SelectionDispatchAction{
 		}
 	}
 
-    /*
-     * @see SelectionDispatchAction#run(ITextSelection)
-     */
 	public void run(ITextSelection selection) {
 		try {
 			if (!ActionUtil.isProcessable(getShell(), fEditor))

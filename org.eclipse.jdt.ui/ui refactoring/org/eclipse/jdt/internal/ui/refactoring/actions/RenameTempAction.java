@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -24,6 +26,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameRefactoringWizard;
@@ -57,6 +60,23 @@ public class RenameTempAction extends SelectionDispatchAction {
 	}
 	
 	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			IJavaElement[] elements= selection.resolveElementAtOffset();
+			if (elements.length != 1) {
+				setEnabled(false);
+			} else {
+				setEnabled(RenameTempRefactoring.isAvailable(elements[0]));
+			}
+		} catch (CoreException e) {
+			setEnabled(false);
+		}
 	}
 	
 	public boolean canRun(ITextSelection selection) {

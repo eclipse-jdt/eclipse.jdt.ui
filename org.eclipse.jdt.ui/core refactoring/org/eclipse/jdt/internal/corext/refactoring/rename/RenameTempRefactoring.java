@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -137,7 +138,11 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 		fCu= cu;
 		fNewName= "";//the only thing we can set //$NON-NLS-1$
 	}
-	
+
+	public static boolean isAvailable(IJavaElement element) {
+		return element != null && element.getElementType() == IJavaElement.LOCAL_VARIABLE;
+	}
+
 	public static RenameTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		return new RenameTempRefactoring(cu, selectionStart, selectionLength);
 	}
@@ -339,5 +344,4 @@ public class RenameTempRefactoring extends Refactoring implements IRenameRefacto
 			pm.done();
 		}	
 	}
-
 }

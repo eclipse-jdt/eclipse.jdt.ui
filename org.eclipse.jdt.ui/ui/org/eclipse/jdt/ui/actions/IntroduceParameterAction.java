@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceParameterWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -59,6 +60,29 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+	
+	private boolean canEnable(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) {
+		return selection.resolveInMethodBody() && 
+			IntroduceParameterRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
@@ -71,14 +95,6 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}
 	}
-
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
-	}
-	
 	private static IntroduceParameterRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
 		return IntroduceParameterRefactoring.create(
 			cunit, 
@@ -88,9 +104,5 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 
 	private static RefactoringWizard createWizard(IntroduceParameterRefactoring refactoring) {
 		return new IntroduceParameterWizard(refactoring);
-	}
-	
-	private boolean checkEnabled(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 }

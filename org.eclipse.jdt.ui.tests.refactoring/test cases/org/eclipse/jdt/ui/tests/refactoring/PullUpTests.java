@@ -44,6 +44,10 @@ public class PullUpTests extends RefactoringTest {
 	public static Test suite() {
 		return new MySetup(new TestSuite(clazz));
 	}
+	
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}	
 
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;

@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -18,27 +22,24 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Extract a new interface from a class and tries to use the interface instead 
@@ -75,6 +76,8 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_INTERFACE_ACTION);
 	}
 	
+	//---- structured selection -------------------------------------------
+	
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -89,13 +92,6 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 		}
 	}
 
-    /*
-     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
-     */
-	public void selectionChanged(ITextSelection selection) {
-		//do nothing, this happens too often
-	}
-	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
@@ -108,6 +104,47 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 		}
 	}
 
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		return canRunOn(getSingleSelectedType(selection));
+	}
+	
+	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException{
+		if (selection.isEmpty() || selection.size() != 1) 
+			return null;
+		
+		Object first= selection.getFirstElement();
+		if (first instanceof IType)
+			return (IType)first;
+		if (first instanceof ICompilationUnit)	
+			return JavaElementUtil.getMainType((ICompilationUnit)first);
+		return null;
+	}
+	
+	//---- text selection ---------------------------------------------------
+	
+    /*
+     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+     */
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IType type= RefactoringActions.getEnclosingOrPrimaryType(selection);
+		return ExtractInterfaceRefactoring.isAvailable(type);
+	}
+	
     /*
      * @see SelectionDispatchAction#run(ITextSelection)
      */
@@ -126,40 +163,17 @@ public class ExtractInterfaceAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
-		
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return canRunOn(getSingleSelectedType(selection));
+	
+	private IType getSingleSelectedType() throws JavaModelException {
+		return RefactoringActions.getEnclosingOrPrimaryType(fEditor);
 	}
 	
-	private static IType getSingleSelectedType(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1) 
-			return null;
-			
-		Object first= selection.getFirstElement();
-		if (first instanceof IType)
-			return (IType)first;
-		if (first instanceof ICompilationUnit)	
-			return JavaElementUtil.getMainType((ICompilationUnit)first);
-		return null;
-	}
-	
-	private IType getSingleSelectedType(){
-		IJavaElement[] elements= resolveElements();
-		if (elements.length != 1)
-			return null;
-		if (elements[0] instanceof IType)
-			return (IType)elements[0];
-		return null;
-	}
+	//---- private helper methods ----------------------------------------------------
 	
 	private static boolean canRunOn(IType type) throws JavaModelException {
 		return ExtractInterfaceRefactoring.isAvailable(type);
 	}
 		
-	private IJavaElement[] resolveElements() {
-		return SelectionConverter.codeResolveHandled(fEditor, getShell(),  RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"));  //$NON-NLS-1$
-	}
-
 	private static RefactoringWizard createWizard(ExtractInterfaceRefactoring refactoring){
 		return new ExtractInterfaceWizard(refactoring);
 	}

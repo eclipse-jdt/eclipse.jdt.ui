@@ -14,6 +14,9 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
@@ -21,31 +24,26 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.MoveProjectAction;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 public class ReorgMoveAction extends SelectionDispatchAction {
-
 	public ReorgMoveAction(IWorkbenchSite site) {
 		super(site);
 		setText(ReorgMessages.getString("ReorgMoveAction.3")); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("ReorgMoveAction.4")); //$NON-NLS-1$
-
 		update(getSelection());
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
@@ -71,13 +69,28 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			setEnabled(false);
 		}
 	}
-	
-	/*
-	  * @see SelectionDispatchAction#selectionChanged(ITextSelection)
-	  */
-	 public void selectionChanged(ITextSelection selection) {
-		 //do nothing, this happens too often
-	 }
+
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement element= selection.resolveEnclosingElement();
+		if (element == null)
+			return false;
+		return MoveRefactoring.isAvailable(new IResource[0], new IJavaElement[] {element}, JavaPreferencesSettings.getCodeGenerationSettings());
+	}
 
 	private boolean canEnable(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		return MoveRefactoring.isAvailable(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
@@ -88,13 +101,13 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		action.selectionChanged(selection);
 		return action;
 	}
-	
+
 	private boolean canDelegateToWorkbenchAction(IStructuredSelection selection) {
 		return ReorgUtils.containsOnlyProjects(selection.toList());
 	}
 
 	public void run(IStructuredSelection selection) {
-		if (canDelegateToWorkbenchAction(selection)){
+		if (canDelegateToWorkbenchAction(selection)) {
 			createWorkbenchAction(selection).run();
 			return;
 		}
@@ -102,22 +115,25 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			if (canEnable(resources, javaElements)) 
+			if (canEnable(resources, javaElements))
 				startRefactoring(resources, javaElements);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
+			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"),
+				RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 
-	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
+	private void startRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		MoveRefactoring refactoring= createRefactoring(resources, javaElements);
 		RefactoringWizard wizard= createWizard(refactoring);
 		/*
-		 * We want to get the shell from the refactoring dialog but it's not known at this point, 
-		 * so we pass the wizard and then, once the dialog is open, we will have access to its shell.
+		 * We want to get the shell from the refactoring dialog but it's not
+		 * known at this point, so we pass the wizard and then, once the dialog
+		 * is open, we will have access to its shell.
 		 */
 		refactoring.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
+		new RefactoringStarter().activate(refactoring, wizard, getShell(), RefactoringMessages
+			.getString("OpenRefactoringWizardAction.refactoring"), true); //$NON-NLS-1$
 	}
 
 	private RefactoringWizard createWizard(MoveRefactoring refactoring) {
@@ -127,5 +143,4 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 	private MoveRefactoring createRefactoring(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		return MoveRefactoring.create(resources, javaElements, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
-
 }

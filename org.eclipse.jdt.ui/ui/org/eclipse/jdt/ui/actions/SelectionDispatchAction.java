@@ -23,6 +23,8 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.ui.IWorkbenchSite;
 
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
+
 /**
  * Action that dispatches the <code>IAction#run()</code> and the 
  * <code>ISelectionChangedListener#selectionChanged</code> 
@@ -131,12 +133,26 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	}
 	
 	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		selectionChanged((ITextSelection)selection);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void run(JavaTextSelection selection) {
+		run((ITextSelection)selection);
+	}
+	
+	/**
 	 * Notifies this action that the given text selection has changed.  This default
 	 * implementation calls <code>selectionChanged(ISelection selection)</code>.
 	 * 
 	 * @param selection the new selection
  	 */
-	protected void selectionChanged(ITextSelection selection) {
+	public void selectionChanged(ITextSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
 	
@@ -182,6 +198,8 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	private void dispatchSelectionChanged(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			selectionChanged((IStructuredSelection)selection);
+		} else if (selection instanceof JavaTextSelection) {
+			selectionChanged((JavaTextSelection)selection);
 		} else if (selection instanceof ITextSelection) {
 			selectionChanged((ITextSelection)selection);
 		} else {
@@ -192,7 +210,9 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	private void dispatchRun(ISelection selection) {
 		if (selection instanceof IStructuredSelection) {
 			run((IStructuredSelection)selection);
-		} else if (selection instanceof ITextSelection) {
+		} else if (selection instanceof JavaTextSelection) {
+			run((JavaTextSelection)selection);
+	    } else if (selection instanceof ITextSelection) {
 			run((ITextSelection)selection);
 		} else {
 			run(selection);

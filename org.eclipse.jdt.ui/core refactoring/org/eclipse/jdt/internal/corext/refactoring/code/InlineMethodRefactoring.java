@@ -124,6 +124,10 @@ public class InlineMethodRefactoring extends Refactoring {
 		fDeleteSource= true;
 	}
 	
+	public static boolean isAvailable(IMethod method) throws JavaModelException {
+		return Checks.isAvailable(method);		
+	}
+	
 	public static InlineMethodRefactoring create(ICompilationUnit unit, int offset, int length, CodeGenerationSettings settings) {
 		ASTNode node= getTargetNode(unit, offset, length);
 		if (node == null)

@@ -92,9 +92,13 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fSelectionLength= selectionLength;
 		fSettings= settings;
 		
-		fParameterName= "";
+		fParameterName= ""; //$NON-NLS-1$
 	}
 	
+	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
+		return Checks.isExtractableExpression(selectedNodes, coveringNode);
+	}
+
 	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) throws CoreException {
 		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength, settings);
 	}

@@ -11,33 +11,43 @@
 package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.text.TextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.help.WorkbenchHelp;
+
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.text.TextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * Action that encapsulates the IntroduceFactoryRefactoring refactoring for
  * association with UI entities.
+ * 
  * @author rfuhrer
+ * 
+ * @since 3.0
  */
 public class IntroduceFactoryAction extends SelectionDispatchAction {
 	private CompilationUnitEditor   fEditor;
@@ -68,6 +78,21 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INTRODUCE_FACTORY_ACTION);
 	}
 	
+	//---- structured selection --------------------------------------------------
+	
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			if (JavaModelUtil.filterNotPresentException(e))
+				JavaPlugin.log(e);
+			setEnabled(false);//no ui here - happens on selection changes
+		}
+	}
+
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
@@ -90,6 +115,47 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		}
 	}
 
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		return IntroduceFactoryRefactoring.isAvailable(getSingleSelectedMethod(selection));
+	}
+
+	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
+		if (selection.isEmpty() || selection.size() != 1) 
+			return null;
+		if (selection.getFirstElement() instanceof IMethod)
+			return (IMethod)selection.getFirstElement();
+		return null;
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+
+	private boolean canEnable(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length == 1 && elements[0] instanceof IMethod)
+			return IntroduceFactoryRefactoring.isAvailable((IMethod)elements[0]);
+		return false;
+	}
+	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -106,42 +172,6 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		}
 	}
 
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		return canRunOn(getSingleSelectedMethod(selection));
-	}
-
-	private static boolean canRunOn(IMethod method) throws JavaModelException{
-		return method != null && method.isConstructor();
-	}
-
-	private static IMethod getSingleSelectedMethod(IStructuredSelection selection){
-		if (selection.isEmpty() || selection.size() != 1) 
-			return null;
-		if (selection.getFirstElement() instanceof IMethod)
-			return (IMethod)selection.getFirstElement();
-		return null;
-	}
-
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled(selection));
-	}
-	
-	/*
-	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(canEnable(selection));
-		} catch (JavaModelException e) {
-			if (JavaModelUtil.filterNotPresentException(e))
-				JavaPlugin.log(e);
-			setEnabled(false);//no ui here - happens on selection changes
-		}
-	}
-
 	private static IntroduceFactoryRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) throws CoreException {
 		return IntroduceFactoryRefactoring.create(cunit, 
 				selection.getOffset(), selection.getLength(),
@@ -152,9 +182,5 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		String pageTitle= RefactoringMessages.getString("IntroduceFactoryAction.use_factory"); //$NON-NLS-1$
 
 		return new IntroduceFactoryWizard(refactoring, pageTitle);
-	}
-
-	private boolean checkEnabled(ITextSelection selection) {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 }

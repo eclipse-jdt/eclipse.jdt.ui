@@ -20,6 +20,8 @@ public class RenameExtensionManager {
 	private static ExtensionManager fgInstance= new ExtensionManager("Rename", PROCESSOR_EXT_POINT, PARTICIPANT_EXT_POINT); //$NON-NLS-1$
 	
 	public static boolean hasProcessor(Object[] elements) throws CoreException {
+		if (elements.length == 0)
+			return false;
 		return fgInstance.hasProcessor(fgInstance.createProcessorPool(elements));
 	}
 	

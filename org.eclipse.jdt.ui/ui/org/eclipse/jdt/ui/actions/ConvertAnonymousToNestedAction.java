@@ -10,28 +10,30 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
+import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringActions;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 /**
  * Action to convert an anonymous inner class to a nested class.
@@ -58,14 +60,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.CONVERT_ANONYMOUS_TO_NESTED_ACTION);
 	}
 
-	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, int offset, int length) {
-		return ConvertAnonymousToNestedRefactoring.create(cunit, offset, length);
-	}
-
-	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
-		return new ConvertAnonymousToNestedWizard(refactoring);
-	}
-	
 	public ConvertAnonymousToNestedAction(IWorkbenchSite site) {
 		super(site);
 		fEditor= null;
@@ -80,22 +74,6 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getElement(selection) != null);
-	}
-	
-	private IType getElement(IStructuredSelection selection) {
-		if (selection.size() != 1)
-			return null;
-		Object element= selection.getFirstElement();
-		if (!(element instanceof IType))
-			return null;
-		IType type= (IType)element;
-		try {
-			if (type.isAnonymous())
-				return type;
-		} catch (JavaModelException e) {
-			// fall through
-		}
-		return null;
 	}
 	
 	/* (non-Javadoc)
@@ -114,6 +92,22 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		}
 	}
 
+	private IType getElement(IStructuredSelection selection) {
+		if (selection.size() != 1)
+			return null;
+		Object element= selection.getFirstElement();
+		if (!(element instanceof IType))
+			return null;
+		IType type= (IType)element;
+		try {
+			if (type.isAnonymous())
+				return type;
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return null;
+	}
+	
 	//---- Text selection -----------------------------------------------------------
 	
 	/* (non-Javadoc)
@@ -131,15 +125,33 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled());
+		setEnabled(canEnable(selection));
 	}
 	
-	private boolean checkEnabled() {
+	private boolean canEnable(ITextSelection selection) {
 		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
 	}
 	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IType type= RefactoringActions.getEnclosingType(selection);
+		if (type == null)
+			return false;
+		return ConvertAnonymousToNestedRefactoring.isAvailable(type);
+	}
+	
 	//---- helpers -------------------------------------------------------------------
-
+	
 	private void run(ICompilationUnit unit, int offset, int length) throws JavaModelException {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
@@ -147,5 +159,13 @@ public class ConvertAnonymousToNestedAction extends SelectionDispatchAction {
 		if (refactoring == null)
 			return;
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);
+	}
+	
+	private static ConvertAnonymousToNestedRefactoring createRefactoring(ICompilationUnit cunit, int offset, int length) {
+		return ConvertAnonymousToNestedRefactoring.create(cunit, offset, length);
+	}
+
+	private static RefactoringWizard createWizard(ConvertAnonymousToNestedRefactoring refactoring) {
+		return new ConvertAnonymousToNestedWizard(refactoring);
 	}
 }

@@ -10,27 +10,30 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 
 /**
  * Inlines the value of a local variable at all places where a read reference
@@ -61,12 +64,32 @@ public class InlineTempAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("InlineTempAction.label"));//$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
+	
+	//---- text selection ----------------------------------------------------------
 
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void selectionChanged(ITextSelection selection) {
-		//do nothing
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof ILocalVariable) && InlineTempRefactoring.isAvailable((ILocalVariable)elements[0]);
 	}
 	
 	/* (non-Javadoc)

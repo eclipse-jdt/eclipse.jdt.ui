@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PullUpWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -56,7 +57,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * 
  * @since 2.0
  */
-public class PullUpAction extends SelectionDispatchAction{
+public class PullUpAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
 	
@@ -81,6 +82,8 @@ public class PullUpAction extends SelectionDispatchAction{
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
+	
+	//---- structured selection -----------------------------------------------
 
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
@@ -97,13 +100,6 @@ public class PullUpAction extends SelectionDispatchAction{
 	}
 
 	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(ITextSelection)
-	 */
-	public void selectionChanged(ITextSelection selection) {
-		//do nothing, this happens too often
-	}
-	
-	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
@@ -116,8 +112,35 @@ public class PullUpAction extends SelectionDispatchAction{
 		}
 	}
 
+	//---- text selection -----------------------------------------------------
+	
 	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
+	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+	 */
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement element= selection.resolveEnclosingElement();
+		if (!(element instanceof IMember))
+			return false;
+		return PullUpRefactoring.isAvailable(new IMember[] {(IMember)element});
+	}
+	
+	/*
+	 * @see SelectionDispatchAction#run(ITextSelection)
 	 */
 	public void run(ITextSelection selection) {
 		try {
@@ -135,8 +158,10 @@ public class PullUpAction extends SelectionDispatchAction{
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
+	
+	//---- private helper methods ------------------------------------------------
 		
-	private static IMember[] getSelectedMembers(IStructuredSelection selection){
+	private static IMember[] getSelectedMembers(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return null;
 		
@@ -151,14 +176,15 @@ public class PullUpAction extends SelectionDispatchAction{
 		return PullUpRefactoring.isAvailable(members);
 	}
 			
-	private IMember getSelectedMember() throws JavaModelException{
-		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+	private IMember getSelectedMember() throws JavaModelException {
+		IJavaElement element= SelectionConverter.resolveEnclosingElement(
+			fEditor, (ITextSelection)fEditor.getSelectionProvider().getSelection());
 		if (element == null || ! (element instanceof IMember))
 			return null;
 		return (IMember)element;
 	}
 
-	private static PullUpRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException{
+	private static PullUpRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
 		return PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
@@ -170,7 +196,7 @@ public class PullUpAction extends SelectionDispatchAction{
 		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
-	private static RefactoringWizard createWizard(PullUpRefactoring refactoring){
+	private static RefactoringWizard createWizard(PullUpRefactoring refactoring) {
 		return new PullUpWizard(refactoring);
 	}
 		

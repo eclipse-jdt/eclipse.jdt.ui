@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -72,6 +73,11 @@ public class InlineTempRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
+	}
+	
+	public static boolean isAvailable(ILocalVariable variable) throws JavaModelException {
+		// work around for https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+		return Checks.isAvailable(variable);
 	}
 	
 	public static InlineTempRefactoring create(ICompilationUnit unit, int selectionStart, int selectionLength) {

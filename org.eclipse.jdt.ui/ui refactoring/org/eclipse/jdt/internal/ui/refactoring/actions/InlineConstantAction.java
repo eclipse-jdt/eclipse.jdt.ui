@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -17,27 +22,23 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 /**
  * Inlines a constant.
@@ -67,6 +68,8 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		setText(RefactoringMessages.getString("InlineConstantAction.inline_Constant")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);		
 	}
+	
+	//---- structured selection ---------------------------------------------
 
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
@@ -82,25 +85,14 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		}
 	}
 
-    /*
-     * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
-     */
-	public void selectionChanged(ITextSelection selection) {
-       //do nothing
-    }
-
 	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
 		if (selection.isEmpty() || selection.size() != 1) 
 			return false;
 		
 		Object first= selection.getFirstElement();
-		return (first instanceof IField) && shouldAcceptElement((IField)first);
+		return (first instanceof IField) && InlineConstantRefactoring.isAvailable(((IField)first));
 	}
 
-	private static boolean shouldAcceptElement(IField field) throws JavaModelException {
-		return (! field.isBinary() && JdtFlags.isStatic(field) && JdtFlags.isFinal(field));
-	}
-	
 	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
@@ -116,8 +108,35 @@ public class InlineConstantAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineConstantAction.unexpected_exception"));	 //$NON-NLS-1$
 		}
- 	}	
+	}	
+
+	//---- text selection -----------------------------------------------
 	
+    /*
+     * @see SelectionDispatchAction#selectionChanged(ITextSelection)
+     */
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+    }
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof IField) && InlineConstantRefactoring.isAvailable(((IField)elements[0]));
+	}
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		

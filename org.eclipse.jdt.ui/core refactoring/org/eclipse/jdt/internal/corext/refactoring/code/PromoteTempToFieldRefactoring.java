@@ -14,10 +14,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -47,8 +51,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -111,6 +113,11 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
         fCodeGenerationSettings= codeGenerationSettings;
+	}
+	
+	public static boolean isAvailable(ILocalVariable variable) throws JavaModelException {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+		return Checks.isAvailable(variable);
 	}
 	
 	public static PromoteTempToFieldRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){

@@ -195,6 +195,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private CompilationUnit fFactoryCU;
 
+	public static boolean isAvailable(IMethod method) throws JavaModelException {
+		return Checks.isAvailable(method) && method.isConstructor();
+	}
+	
 	public static IntroduceFactoryRefactoring create(ICompilationUnit cu,
 													 int selectionStart, int selectionLength,
 													 CodeGenerationSettings settings) {

@@ -10,13 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.ui.IWorkbenchSite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -28,6 +22,12 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.text.ITextSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+
 import org.eclipse.jdt.internal.corext.refactoring.participants.RenameExtensionManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -81,6 +82,16 @@ public class RenameJavaElementAction extends SelectionDispatchAction {
 	}
 
 	public void selectionChanged(ITextSelection selection) {
+		if (selection instanceof JavaTextSelection) {
+			try {
+				IJavaElement[] elements= ((JavaTextSelection)selection).resolveElementAtOffset();
+				setEnabled(RenameExtensionManager.hasProcessor(elements));
+			} catch (CoreException e) {
+				setEnabled(false);
+			}
+		} else {
+			setEnabled(true);
+		}
 	}
 		
 	private static boolean canEnable(IStructuredSelection selection) throws CoreException {

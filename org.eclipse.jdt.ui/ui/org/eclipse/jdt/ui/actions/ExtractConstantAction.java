@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -55,16 +56,31 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		setEnabled(SelectionConverter.getInputAsCompilationUnit(fEditor) != null);
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_CONSTANT_ACTION);
 	}
-
-	private static ExtractConstantRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
-																 JavaPreferencesSettings.getCodeGenerationSettings());
-	}
-
-	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
-		return new ExtractConstantWizard(refactoring);
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(canEnable(selection));
 	}
 	
+	private boolean canEnable(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) {
+		return (selection.resolveInInitializer() || selection.resolveInMethodBody()) && 
+			ExtractConstantRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
+	}
+	
+
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
@@ -81,14 +97,12 @@ public class ExtractConstantAction extends SelectionDispatchAction {
 		}	
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled());
+	private static ExtractConstantRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+		return ExtractConstantRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
+																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
-	
-	private boolean checkEnabled() {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+
+	private static RefactoringWizard createWizard(ExtractConstantRefactoring refactoring) {
+		return new ExtractConstantWizard(refactoring);
 	}
 }

@@ -13,21 +13,23 @@ package org.eclipse.jdt.internal.corext.refactoring;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -40,6 +42,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -329,6 +332,25 @@ public class Checks {
 		return checkForMainMethods(cu.getTypes());
 	}
 	
+	//---- Selection checks --------------------------------------------------------------------
+	
+	public static boolean isExtractableExpression(ASTNode[] selectedNodes, ASTNode coveringNode) {
+		ASTNode node= coveringNode;
+		if (selectedNodes != null && selectedNodes.length == 1)
+			node= selectedNodes[0];
+		return isExtractableExpression(node);
+	}
+	
+	public static boolean isExtractableExpression(ASTNode node) {
+		if (! (node instanceof Expression))
+			return false;
+		if (node instanceof Name) {
+			IBinding binding= ((Name)node).resolveBinding();
+			return ! (binding instanceof ITypeBinding);
+		}
+		return true;
+	}
+
 	//---- Private helpers ----------------------------------------------------------------------
 	
 	private static RefactoringStatus checkName(String name, IStatus status) {
@@ -602,21 +624,22 @@ public class Checks {
 		return result;
 	}
 	
-	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException{
+	public static boolean isAvailable(IJavaElement javaElement) throws JavaModelException {
 		if (javaElement == null)
 			return false;
 		if (! javaElement.exists())
 			return false;
 		if (javaElement.isReadOnly())
 			return false;
-		if (!javaElement.isStructureKnown())
+		// work around for https://bugs.eclipse.org/bugs/show_bug.cgi?id=48422
+		if (!(javaElement instanceof ILocalVariable) && !javaElement.isStructureKnown())
 			return false;
 		if (javaElement instanceof IMember && ((IMember)javaElement).isBinary())
 			return false;
 		return true;
 	}
 
-	public static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException{
+	public static IType findTypeInPackage(IPackageFragment pack, String name) throws JavaModelException {
 		Assert.isTrue(pack.exists());
 		Assert.isTrue(!pack.isReadOnly());
 		
@@ -699,6 +722,7 @@ public class Checks {
 		ASTNode anonymous= ASTNodes.getParent(tempDeclaration, AnonymousClassDeclaration.class);	
 		if (anonymous == null)
 			return true;
+		// stupid code. Is to find out if the variable declaration isn't a field.
 		if (ASTNodes.isParent(anonymous, initializer))
 			return false;
 		return true;	

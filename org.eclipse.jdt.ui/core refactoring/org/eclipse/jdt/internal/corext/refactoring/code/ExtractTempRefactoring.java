@@ -126,6 +126,10 @@ public class ExtractTempRefactoring extends Refactoring {
 		fTempName= ""; //$NON-NLS-1$
 	}
 
+	public static boolean isAvailable(ASTNode[] selectedNodes, ASTNode coveringNode) {
+		return Checks.isExtractableExpression(selectedNodes, coveringNode);
+	}
+
 	public static ExtractTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings settings) {
 		return new ExtractTempRefactoring(cu, selectionStart, selectionLength, settings);
 	}

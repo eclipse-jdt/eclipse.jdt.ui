@@ -15,6 +15,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -23,25 +27,22 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PushDownWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Action to push down methods and fields into subclasses.
@@ -81,6 +82,8 @@ public class PushDownAction extends SelectionDispatchAction{
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
 	}
 
+	//---- structured selection -----------------------------------------------
+
 	/*
 	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
 	 */
@@ -96,13 +99,6 @@ public class PushDownAction extends SelectionDispatchAction{
 	}
 
 	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(ITextSelection)
-	 */
-	public void selectionChanged(ITextSelection selection) {
-		//do nothing, this happens too often
-	}
-	
-	/*
 	 * @see SelectionDispatchAction#run(IStructuredSelection)
 	 */
 	public void run(IStructuredSelection selection) {
@@ -115,6 +111,33 @@ public class PushDownAction extends SelectionDispatchAction{
 		}
 	}
 
+	//---- text selection -----------------------------------------------------
+	
+	/*
+	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(ITextSelection)
+	 */
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement element= selection.resolveEnclosingElement();
+		if (!(element instanceof IMember))
+			return false;
+		return PushDownRefactoring.isAvailable(new IMember[] {(IMember)element});
+	}
+	
 	/*
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(ITextSelection)
 	 */
@@ -134,8 +157,10 @@ public class PushDownAction extends SelectionDispatchAction{
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
+	
+	//---- helper methods ---------------------------------------------------
 		
-	private static IMember[] getSelectedMembers(IStructuredSelection selection){
+	private static IMember[] getSelectedMembers(IStructuredSelection selection) {
 		if (selection.isEmpty())
 			return null;
 		
@@ -151,13 +176,14 @@ public class PushDownAction extends SelectionDispatchAction{
 	}
 			
 	private IMember getSelectedMember() throws JavaModelException{
-		IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
+		IJavaElement element= SelectionConverter.resolveEnclosingElement(
+			fEditor, (ITextSelection)fEditor.getSelectionProvider().getSelection());
 		if (element == null || ! (element instanceof IMember))
 			return null;
 		return (IMember)element;
 	}
 
-	private static PushDownRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException{
+	private static PushDownRefactoring createNewRefactoringInstance(IMember[] members) throws JavaModelException {
 		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
@@ -169,7 +195,7 @@ public class PushDownAction extends SelectionDispatchAction{
 		return (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
 	}
 
-	private static RefactoringWizard createWizard(PushDownRefactoring refactoring){
+	private static RefactoringWizard createWizard(PushDownRefactoring refactoring) {
 		return new PushDownWizard(refactoring);
 	}
 

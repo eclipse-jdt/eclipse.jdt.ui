@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -56,13 +57,27 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.EXTRACT_TEMP_ACTION);
 	}
 
-	private static ExtractTempRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
-		return ExtractTempRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
-																 JavaPreferencesSettings.getCodeGenerationSettings());
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(canEnable(selection));
 	}
-
-	private static RefactoringWizard createWizard(ExtractTempRefactoring refactoring) {
-		return new ExtractTempWizard(refactoring);
+	
+	private boolean canEnable(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) {
+		return (selection.resolveInMethodBody() || selection.resolveInInitializer()) && 
+			ExtractTempRefactoring.isAvailable(selection.resolveSelectedNodes(), selection.resolveCoveringNode());
 	}
 	
 	/* (non-Javadoc)
@@ -81,14 +96,12 @@ public class ExtractTempAction extends SelectionDispatchAction {
 		}	
 	}
 
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled());
+	private static ExtractTempRefactoring createRefactoring(ICompilationUnit cunit, ITextSelection selection) {
+		return ExtractTempRefactoring.create(cunit, selection.getOffset(), selection.getLength(), 
+																 JavaPreferencesSettings.getCodeGenerationSettings());
 	}
-	
-	private boolean checkEnabled() {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}	
+
+	private static RefactoringWizard createWizard(ExtractTempRefactoring refactoring) {
+		return new ExtractTempWizard(refactoring);
+	}
 }

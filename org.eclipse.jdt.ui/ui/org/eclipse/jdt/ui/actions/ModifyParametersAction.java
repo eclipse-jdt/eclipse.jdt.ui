@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -96,7 +97,27 @@ public class ModifyParametersAction extends SelectionDispatchAction {
      * @see SelectionDispatchAction#selectionChanged(ITextSelection)
      */
 	public void selectionChanged(ITextSelection selection) {
-		//do nothing, this happens too often
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset(); 
+		if (elements.length != 1)
+			return false;
+		if (! (elements[0] instanceof IMethod))
+			return false;
+		return ChangeSignatureRefactoring.isAvailable((IMethod)elements[0]);
 	}
 	
 	/*

@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -17,25 +22,22 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.code.InlineMethodWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 /**
  * Inlines a method.
@@ -65,11 +67,67 @@ public class InlineMethodAction extends SelectionDispatchAction {
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.INLINE_ACTION);
 	}
 
+	//---- structured selection ----------------------------------------------
+	
 	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
+	 * @see SelectionDispatchAction#selectionChanged(IStructuredSelection)
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+	}
+
+	/*
+	 * @see SelectionDispatchAction#run(IStructuredSelection)
+	 */
+	public void run(IStructuredSelection selection) {
+		try {
+			Assert.isTrue(canEnable(selection));
+
+			Object first= selection.getFirstElement();
+			Assert.isTrue(first instanceof IMethod);
+
+			IMethod method= (IMethod) first;
+			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
+		} catch (JavaModelException e) {
+			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
+		}
+	}
+
+	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
+		if (selection.isEmpty() || selection.size() != 1)
+			return false;
+
+		Object first= selection.getFirstElement();
+		return (first instanceof IMethod) && InlineMethodRefactoring.isAvailable(((IMethod)first));
+	}
+
+	/*
+	 * @see SelectionDispatchAction#selectionChanged(ITextSelection)
 	 */
 	public void selectionChanged(ITextSelection selection) {
-	   //do nothing
+		setEnabled(true);
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof IMethod) && InlineMethodRefactoring.isAvailable(((IMethod)elements[0]));
 	}
 
 	/* (non-Javadoc)
@@ -88,23 +146,6 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	
 	private static RefactoringWizard createWizard(InlineMethodRefactoring refactoring) {
 		return new InlineMethodWizard(refactoring);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
-	public void run(IStructuredSelection selection) {
-		try {
-			Assert.isTrue(canEnable(selection));
-
-			Object first= selection.getFirstElement();
-			Assert.isTrue(first instanceof IMethod);
-
-			IMethod method= (IMethod) first;
-			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, RefactoringMessages.getString("InlineMethodAction.unexpected_exception")); //$NON-NLS-1$
-		}
 	}
 
 	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
@@ -126,28 +167,5 @@ public class InlineMethodAction extends SelectionDispatchAction {
 
 	private void activate(InlineMethodRefactoring refactoring) throws JavaModelException {
 		new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), DIALOG_TITLE, true);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.viewers.IStructuredSelection)
-	 */
-	public void selectionChanged(IStructuredSelection selection) {
-		try {
-			setEnabled(canEnable(selection));
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		}
-	}
-
-	private static boolean canEnable(IStructuredSelection selection) throws JavaModelException{
-		if (selection.isEmpty() || selection.size() != 1)
-			return false;
-
-		Object first= selection.getFirstElement();
-		return (first instanceof IMethod) && shouldAcceptElement((IMethod)first);
-	}
-
-	private static boolean shouldAcceptElement(IMethod method) throws JavaModelException {
-		return ! method.isBinary();
 	}
 }

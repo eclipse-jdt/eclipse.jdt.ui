@@ -72,6 +72,9 @@
   projects and computes the effected languages. This will be consistent with what we do
   for processors.
   
+- rename processor: how do we handle rename polymorphical for renaming temps. This might
+  be a special editor problem. May be we don't allow contributing to temp renames.
+  
 ======================================= UI ===============================================
   
 - UI: Label and image of preview viewer. Must be determined by the change element

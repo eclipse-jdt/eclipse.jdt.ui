@@ -24,6 +24,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -93,6 +94,10 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
         fSelectionStart= selectionStart;
         fSelectionLength= selectionLength;
         fCu= cu;
+    }
+    
+    public static boolean isAvailable(IType type) throws JavaModelException {
+    	return type.isAnonymous();
     }
 
     public static ConvertAnonymousToNestedRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {

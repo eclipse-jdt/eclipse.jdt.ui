@@ -114,6 +114,10 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		checkArgName();
 	}
 	
+	public static boolean isAvailable(IField field) throws JavaModelException {
+		return Checks.isAvailable(field);
+	}
+	
 	public static SelfEncapsulateFieldRefactoring create(IField field) throws JavaModelException {
 		if (Checks.checkAvailability(field).hasFatalError())
 			return null;

@@ -10,25 +10,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.help.WorkbenchHelp;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.PromoteTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 /**
  * Action to convert a local variable to a field.
@@ -66,6 +69,36 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
 	 */		
+	public void selectionChanged(ITextSelection selection) {
+		setEnabled(canEnable(selection));
+	}
+	
+	private boolean canEnable(ITextSelection selection) {
+		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
+	}
+	
+	/**
+	 * Note: This method is for internal use only. Clients should not call this method.
+	 */
+	public void selectionChanged(JavaTextSelection selection) {
+		try {
+			setEnabled(canEnable(selection));
+		} catch (JavaModelException e) {
+			setEnabled(false);
+		}
+	}
+	
+	private boolean canEnable(JavaTextSelection selection) throws JavaModelException {
+		IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof ILocalVariable) && 
+			PromoteTempToFieldRefactoring.isAvailable((ILocalVariable)elements[0]);
+	}
+	
+	/* (non-Javadoc)
+	 * Method declared on SelectionDispatchAction
+	 */		
 	public void run(ITextSelection selection) {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
@@ -78,16 +111,4 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 			ExceptionHandler.handle(e, DIALOG_MESSAGE_TITLE, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$
 		}	
 	}
-
-	/* (non-Javadoc)
-	 * Method declared on SelectionDispatchAction
-	 */		
-	public void selectionChanged(ITextSelection selection) {
-		setEnabled(checkEnabled());
-	}
-	
-	private boolean checkEnabled() {
-		return fEditor != null && SelectionConverter.getInputAsCompilationUnit(fEditor) != null;
-	}
-	
 }

@@ -31,12 +31,15 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -45,6 +48,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
@@ -204,8 +208,27 @@ public class ChangeTypeRefactoring extends Refactoring {
 	public static final short SUPERTYPES_ONLY= 1;
 	public static final short SUPERTYPES_AND_SUBTYPES= 2;
 	private ConstraintVariable fCv;
-	
 
+	public static boolean isAvailable(IJavaElement element) throws JavaModelException {
+		if (element == null || ! element.exists())
+			return false;
+		String returnType= null;
+		if (element instanceof IMethod) {
+			returnType= ((IMethod)element).getReturnType();
+		} else if (element instanceof IField) {
+			returnType= ((IField)element).getTypeSignature();
+		} else if (element instanceof ILocalVariable) {
+			// be optimistic
+			return true;
+		} else if (element instanceof IType) {
+			// be optimistic.
+			return true;
+		}
+		if (PrimitiveType.toCode(Signature.toString(returnType)) != null)
+			return false;
+		return true;
+	}
+	
 	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
 		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
 	}
