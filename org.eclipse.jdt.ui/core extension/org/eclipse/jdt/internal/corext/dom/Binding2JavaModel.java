@@ -60,7 +60,10 @@ public class Binding2JavaModel {
 	 */
 	public static IField find(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		Assert.isTrue(field.isField());
-		IType declaringClass = find(field.getDeclaringClass(), in);
+		ITypeBinding declaringClassBinding = field.getDeclaringClass();
+		if (declaringClassBinding == null)
+			return null;
+		IType declaringClass = find(declaringClassBinding, in);
 		if (declaringClass == null)
 			return null;
 	    IField foundField= declaringClass.getField(field.getName());
