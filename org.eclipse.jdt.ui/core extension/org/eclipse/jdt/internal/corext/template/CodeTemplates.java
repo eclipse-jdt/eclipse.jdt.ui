@@ -51,7 +51,7 @@ public class CodeTemplates extends TemplateSet {
 		return fgTemplates;
 	}
 	
-	public CodeTemplates() {
+	private CodeTemplates() {
 		super("codetemplate"); //$NON-NLS-1$
 		create();
 	}
