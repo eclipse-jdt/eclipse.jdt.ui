@@ -137,6 +137,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 		
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
+			d.setAddMode(true);
 			
 			IDocument document= docManager.getDocument();
 			String type= file.getFileExtension();
