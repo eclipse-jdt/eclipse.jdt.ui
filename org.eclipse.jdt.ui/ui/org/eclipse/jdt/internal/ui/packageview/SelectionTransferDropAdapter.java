@@ -99,14 +99,8 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (tooFast(event)) 
 			return;
 		
-		if (fElements == null) {
-			ISelection s= LocalSelectionTransfer.getInstance().getSelection();
-			if (!(s instanceof IStructuredSelection))
-				return;
-			fSelection= s;	
-			fElements= ((IStructuredSelection)s).toList();
-		}	
-		
+		initializeSelection();
+				
 		try {
 			if (operation == DND.DROP_COPY) {
 				event.detail= handleValidateCopy(target, event);
@@ -121,6 +115,16 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}	
 	}
 
+	protected void initializeSelection(){
+		if (fElements != null)
+			return;
+		ISelection s= LocalSelectionTransfer.getInstance().getSelection();
+		if (!(s instanceof IStructuredSelection))
+			return;
+		fSelection= s;	
+		fElements= ((IStructuredSelection)s).toList();
+	}
+	
 	protected ISelection getSelection(){
 		return fSelection;
 	}
