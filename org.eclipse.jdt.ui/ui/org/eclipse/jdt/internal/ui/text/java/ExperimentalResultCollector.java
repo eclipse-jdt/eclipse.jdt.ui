@@ -25,9 +25,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class ExperimentalResultCollector extends ResultCollector {
 
-	/** The text viewer. */
-	private ITextViewer fViewer;
-
 	private static boolean appendArguments(ITextViewer viewer, int offset) {
 		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -81,7 +78,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS)) {
 			return new ParameterGuessingProposal(
-				new StringBuffer().append(name).append('(').toString(), start, end - start, original.getImage(), original.getDisplayString(), fViewer, relevance,
+				new StringBuffer().append(name).append('(').toString(), start, end - start, original.getImage(), original.getDisplayString(), fTextViewer, relevance,
 				name, parameterTypePackageNames, parameterTypeNames, parameterNames, 
 				fCodeAssistOffset, fCompilationUnit);
 				
@@ -93,7 +90,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 			StringBuffer buffer= new StringBuffer();	
 			buffer.append(name);
 			
-			if (appendArguments(fViewer, start)) {				
+			if (appendArguments(fTextViewer, start)) {				
 				count= parameterNames.length;
 				offsets= new int[count];
 				lengths= new int[count];
@@ -115,14 +112,7 @@ public class ExperimentalResultCollector extends ResultCollector {
 				lengths= new int[0];				
 			}
 			
-			return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fViewer, relevance);
+			return new ExperimentalProposal(buffer.toString(), start, end - start, original.getImage(), original.getDisplayString(), offsets, lengths, fTextViewer, relevance);
 		}
-	}
-
-	/**
-	 * Copied from super class
-	 */
-	public void setViewer(ITextViewer viewer) {
-		fViewer= viewer;
 	}
 }
