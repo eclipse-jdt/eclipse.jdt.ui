@@ -16,7 +16,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
@@ -25,6 +24,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 	private final String PREVIEW=
 	createPreviewHeader("Indentation") +
 	"class Example {" +
+	"  int [] myArray= {1,2,3,4,5,6};" +
 	"  void foo(int parameter) {" +
 	"    switch(parameter) {" +
 	"    case 0: " +
@@ -52,20 +52,20 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(numColumns, false));
 
-		final Group generalGroup= createGroup(numColumns, composite, "General settings");
-		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, Integer.MAX_VALUE);
-//		createNumberPref(generalGroup, numColumns, "Initi&al indentation level:", DefaultCodeFormatterConstants.FORMATTER_INITIAL_INDENTATION_LEVEL, 0, Integer.MAX_VALUE);
-		createNumberPref(generalGroup, numColumns, "De&fault indentation for wrapped lines:", DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, Integer.MAX_VALUE);
-		createCheckboxPref(generalGroup, numColumns, "U&se tab character", DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB});
-		
+		final Group generalGroup= createGroup(numColumns, composite, "Indentation levels");
+		createNumberPref(generalGroup, numColumns, "&Wrapped lines:", DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION, 0, 9999);
+		/**
+		 * TODO: take it in once defaultcodeformatterconstants is updated.
+		 *createNumberPref(generalGroup, numColumns, "&Array intitializers:", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_CONTINUATION_INDENTATION, 0, Integer.MAX_VALUE);
+		 */
 		final Group classGroup = createGroup(numColumns, composite, "Class body");
 		createCheckboxPref(classGroup, numColumns, "Indent de&clarations within class body", DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER, falseTrue);
 
 		final Group blockGroup= createGroup(numColumns, composite, "Block body");
-		createCheckboxPref(blockGroup, numColumns, "Indent statements wit&hin blocks and methods", DefaultCodeFormatterConstants.FORMATTER_INDENT_BLOCK_STATEMENTS, falseTrue);
+		createCheckboxPref(blockGroup, numColumns, "Indent &statements within blocks and methods", DefaultCodeFormatterConstants.FORMATTER_INDENT_BLOCK_STATEMENTS, falseTrue);
 		
 		final Group switchGroup= createGroup(numColumns, composite, "Switch statement");
-		createCheckboxPref(switchGroup, numColumns, "Indent statements within 's&witch' body", DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES, falseTrue);
+		createCheckboxPref(switchGroup, numColumns, "Indent statements wit&hin 'switch' body", DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES, falseTrue);
 		createCheckboxPref(switchGroup, numColumns, "Indent statements within 'case' bod&y", DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH, falseTrue);
 		createCheckboxPref(switchGroup, numColumns, "Indent 'brea&k' statements", DefaultCodeFormatterConstants.FORMATTER_INDENT_BREAKS_COMPARE_TO_CASES, falseTrue);
 		

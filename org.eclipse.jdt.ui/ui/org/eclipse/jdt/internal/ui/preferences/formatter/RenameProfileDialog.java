@@ -71,21 +71,21 @@ public class RenameProfileDialog extends StatusDialog {
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		layout.numColumns= numColumns;
 		
-		final Composite area= new Composite(parent, SWT.NULL);
-		area.setLayout(layout);
+		final Composite composite= new Composite(parent, SWT.NULL);
+		composite.setLayout(layout);
 		
 		// Create "Please enter a new name:" label
 		GridData gd = new GridData();
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
-		fNameLabel = new Label(area, SWT.NONE);
+		fNameLabel = new Label(composite, SWT.NONE);
 		fNameLabel.setText("Please &enter a new name:");
 		fNameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name
 		gd = new GridData( GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
-		fNameText= new Text(area, SWT.SINGLE | SWT.BORDER);
+		fNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fNameText.setText(fProfile.getName());
 		fNameText.setSelection(0, fProfile.getName().length());
 		fNameText.setLayoutData(gd);
@@ -97,7 +97,9 @@ public class RenameProfileDialog extends StatusDialog {
 
 		updateStatus(fOk);
 		
-		return area;
+		applyDialogFont(composite);
+		
+		return composite;
 	}
 
 

@@ -101,7 +101,7 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 		
 		// global group
 		final Group globalGroup= createGroup(numColumns, composite, "Comment Formatting");
-		final CheckboxPreference global= createPref(globalGroup, "Enable comment formatting", PreferenceConstants.FORMATTER_COMMENT_FORMAT);
+		final CheckboxPreference global= createPref(globalGroup, "Enable &comment formatting", PreferenceConstants.FORMATTER_COMMENT_FORMAT);
 
 		// format group
 		final Group formatGroup= createGroup(numColumns, composite, "Format");
@@ -111,13 +111,13 @@ public class CommentsTabPage extends ModifyDialogTabPage {
 
 		// blank lines group
 		final Group blankLinesGroup= createGroup(numColumns, composite, "Blank lines");
-		final CheckboxPreference blankComments= createPref(blankLinesGroup, "Clear blank lines in comments", PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES);
-		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, "Blank line before Javadoc tags", PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS);
+		final CheckboxPreference blankComments= createPref(blankLinesGroup, "Clear &blank lines in comments", PreferenceConstants.FORMATTER_COMMENT_CLEARBLANKLINES);
+		final CheckboxPreference blankJavadoc= createPref(blankLinesGroup, "Blan&k line before Javadoc tags", PreferenceConstants.FORMATTER_COMMENT_SEPARATEROOTTAGS);
 
 		// indentation group
 		final Group indentationGroup= createGroup(numColumns, composite, "Indentation");
-		final CheckboxPreference indentJavadoc= createPref(indentationGroup, "Indent Javado&c tags", PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS);
-		final CheckboxPreference indentDesc= createPref(indentationGroup, "Indent de&scription after @param", PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION);
+		final CheckboxPreference indentJavadoc= createPref(indentationGroup, "Indent Javadoc tag&s", PreferenceConstants.FORMATTER_COMMENT_INDENTROOTTAGS);
+		final CheckboxPreference indentDesc= createPref(indentationGroup, "Indent description a&fter @param", PreferenceConstants.FORMATTER_COMMENT_INDENTPARAMETERDESCRIPTION);
 
 		// new lines group
 		final Group newLinesGroup= createGroup(numColumns, composite, "New lines");

@@ -28,6 +28,7 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	"class Example {" +
 	"  SomeClass fField= new SomeClass() {" +
 	"  };" +
+	"  int [] myArray= {1,2,3,4,5,6};" +
 	"  void bar(int p) {" +
 	"    for (int i= 0; i<10; i++) {" +
 	"    }" +
@@ -75,6 +76,11 @@ public class BracesTabPage extends ModifyDialogTabPage {
 		createBracesCombo(bracesGroup, "Met&hod declaration:", DefaultCodeFormatterConstants.FORMATTER_METHOD_DECLARATION_BRACE_POSITION);
 		createBracesCombo(bracesGroup, "Bloc&ks:", DefaultCodeFormatterConstants.FORMATTER_BLOCK_BRACE_POSITION);
 		createBracesCombo(bracesGroup, "'s&witch...case' statement:", DefaultCodeFormatterConstants.FORMATTER_SWITCH_BRACE_POSITION);
+		
+		/**
+		 * TODO: take it in once defaultcodeformatterconstants is updated.
+		 * createBracesCombo(bracesGroup, "&Array initializer:", DefaultCodeFormatterConstants.FORMATTER_ARRAY_INITIALIZER_BRACE_POSITION);
+		 */
 		
 		return composite;
 	}

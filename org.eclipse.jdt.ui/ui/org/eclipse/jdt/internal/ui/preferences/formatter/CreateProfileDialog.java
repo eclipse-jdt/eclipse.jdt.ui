@@ -72,7 +72,7 @@ public class CreateProfileDialog extends StatusDialog {
 	
 	public void create() {
 		super.create();
-		setTitle("New Profile");
+		setTitle("New Code Formatter Profile");
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -87,21 +87,21 @@ public class CreateProfileDialog extends StatusDialog {
 		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 
-		final Composite area= new Composite(parent, SWT.NONE);
-		area.setLayout(layout);
+		final Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayout(layout);
 		
 		// Create "Profile name:" label
 		gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = numColumns;
 		gd.widthHint= convertWidthInCharsToPixels(60);
-		final Label nameLabel = new Label(area, SWT.WRAP);
+		final Label nameLabel = new Label(composite, SWT.WRAP);
 		nameLabel.setText("Profile name:");
 		nameLabel.setLayoutData(gd);
 		
 		// Create text field to enter name
 		gd = new GridData( GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
-		fNameText= new Text(area, SWT.SINGLE | SWT.BORDER);
+		fNameText= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fNameText.setLayoutData(gd);
 		fNameText.addModifyListener( new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -112,20 +112,20 @@ public class CreateProfileDialog extends StatusDialog {
 		// Create "Initialize settings ..." label
 		gd = new GridData();
 		gd.horizontalSpan = numColumns;
-		Label profileLabel = new Label(area, SWT.WRAP);
+		Label profileLabel = new Label(composite, SWT.WRAP);
 		profileLabel.setText("Initialize settings with the following profile:");
 		profileLabel.setLayoutData(gd);
 		
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= numColumns;
-		fProfileCombo = new Combo(area, SWT.DROP_DOWN | SWT.READ_ONLY);
+		fProfileCombo = new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY);
 		fProfileCombo.setLayoutData(gd);
 		
 		
 		// "Open the edit dialog now"
 		gd= new GridData();
 		gd.horizontalSpan= numColumns;
-		fEditCheckbox= new Button(area, SWT.CHECK);
+		fEditCheckbox= new Button(composite, SWT.CHECK);
 		fEditCheckbox.setText("Open the edit dialog now");
 		fEditCheckbox.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {
@@ -141,7 +141,9 @@ public class CreateProfileDialog extends StatusDialog {
 		fProfileCombo.setText(fProfileManager.getProfile(ProfileManager.DEFAULT_PROFILE).getName());
 		updateStatus(fEmpty);
 		
-		return area;
+		applyDialogFont(composite);
+		
+		return composite;
 	}
 
 

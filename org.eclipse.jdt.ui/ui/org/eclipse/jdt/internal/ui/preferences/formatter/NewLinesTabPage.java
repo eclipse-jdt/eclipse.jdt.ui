@@ -62,7 +62,11 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		createCheckboxPref(newlinesGroup, numColumns, "in empty &class body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_TYPE_DECLARATION, NOTINSERT_INSERT);
 		createCheckboxPref(newlinesGroup, numColumns, "in empty &anonymous class body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANONYMOUS_TYPE_DECLARATION, NOTINSERT_INSERT);
 		createCheckboxPref(newlinesGroup, numColumns, "in empt&y method body", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, NOTINSERT_INSERT);
-		createCheckboxPref(newlinesGroup, numColumns, "in em&pty &block", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, NOTINSERT_INSERT);
+		createCheckboxPref(newlinesGroup, numColumns, "in em&pty block", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, NOTINSERT_INSERT);
+		/**
+		 * TODO: take it in once defaultcodeformatterconstants is updated.
+		 *createCheckboxPref(newlinesGroup, numColumns, "after openin&g brace of array initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_OPENING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT);
+		 */
 		createCheckboxPref(newlinesGroup, numColumns, "be&fore closing brace of array initializer", DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_BEFORE_CLOSING_BRACE_IN_ARRAY_INITIALIZER, NOTINSERT_INSERT);
 		
 		final Group emptyStatementsGroup= createGroup(numColumns, composite, "Empty statements");

@@ -53,7 +53,7 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 	"}";
 	
 	private final int minimumNumberLines= 0;
-	private final int maximumNumberLines= 10000;
+	private final int maximumNumberLines= 99;
 	
 	private final int numColumns= 4;
 	
@@ -83,18 +83,22 @@ public class BlankLinesTabPage extends ModifyDialogTabPage {
 		createBlankLineTextField(group, "After &package declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_PACKAGE);
 		
 		group= createGroup(numColumns, composite, "Blank lines around import declarations");
-		createBlankLineTextField(group, "Before import declaratio&n:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS);
+		createBlankLineTextField(group, "&Before import declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_IMPORTS);
 		createBlankLineTextField(group, "After import de&claration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_AFTER_IMPORTS);
 		
 		group= createGroup(numColumns, composite, "Blank lines within class declarations");
+		/**
+		 * TODO: take it in once defaultcodeformatterconstants is updated.
+		 *createBlankLineTextField(group, "Before &first declaration:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIRST_CLASS_BODY_DECLARATION);
+		 */
 		createBlankLineTextField(group, "Before declarations of the same &kind:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_NEW_CHUNK);
 		createBlankLineTextField(group, "Before member cla&ss declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_MEMBER_TYPE);
-		createBlankLineTextField(group, "Before &field declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD);
+		createBlankLineTextField(group, "Before& field declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_FIELD);
 		createBlankLineTextField(group, "Before met&hod declarations:", DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BEFORE_METHOD);
 
 		createLabel(numColumns, composite,"");
 		
-		group= createGroup(numColumns, composite, "Existing &blank lines");
+		group= createGroup(numColumns, composite, "Existing blank lines");
 		createBlankLineTextField(group, "Number of empt&y lines to preserve:", DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE);
 		return composite;
 	}

@@ -113,6 +113,8 @@ public class AlreadyExistsDialog extends StatusDialog {
 		
 		updateStatus(fDuplicate);
 		
+		applyDialogFont(fComposite);
+		
 		return fComposite;
 	}
 	

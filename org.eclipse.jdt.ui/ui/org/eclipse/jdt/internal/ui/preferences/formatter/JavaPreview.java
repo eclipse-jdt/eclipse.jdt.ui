@@ -34,6 +34,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -147,6 +149,8 @@ public class JavaPreview {
 		
 		
 		fSourceViewer.setRedraw(false);
+		fSourceViewer.getTextWidget().setTabs(getPositiveIntValue((String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE), 0));
+		
 		
 		final Point selection = fSourceViewer.getSelectedRange();		
 
@@ -174,6 +178,18 @@ public class JavaPreview {
 			fSourceViewer.setTopIndex((int)Math.round((top0 * range1) / (double)range0));
 		}
 	}
+	
+	private static int getPositiveIntValue(String string, int defaultValue) {
+	    try {
+	        int i= Integer.parseInt(string);
+	        if (i >= 0) {
+	            return i;
+	        }
+	    } catch (NumberFormatException e) {
+	    }
+	    return defaultValue;
+	}		
+	
 
 	
 	public final Map getWorkingValues() {

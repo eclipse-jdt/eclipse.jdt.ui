@@ -173,13 +173,13 @@ public abstract class ModifyDialogTabPage {
 	
 	protected static class NumberPreference extends Observable {
 		
-		private final Map fPreferences;
+		protected final Map fPreferences;
 		protected final int fMinValue, fMaxValue;
 		
-		private int fSelected;
-		private String fKey;
+		protected int fSelected;
+		protected String fKey;
 		
-		private final Text fNumberText;
+		protected final Text fNumberText;
 		
 		public NumberPreference(Composite composite, int numColumns,
 							   Map preferences, String key, 
@@ -359,7 +359,7 @@ public abstract class ModifyDialogTabPage {
 		
 		final Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayout(createGridLayout(numColumns, false));
-		createLabel(numColumns, composite, "Preview:"); 
+		createLabel(numColumns, composite, "Pre&view:"); 
 		
 		final Control control= fJavaPreview.createContents(composite);
 		final GridData gd= createGridData(numColumns, GridData.FILL_BOTH);

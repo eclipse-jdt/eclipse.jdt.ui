@@ -16,6 +16,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 
@@ -62,7 +63,9 @@ public class OtherSettingsTabPage extends ModifyDialogTabPage {
 		
 		final Group generalGroup= createGroup(numColumns, composite, "General settings");
 		createNumberPref(generalGroup, numColumns, "Maximum line &width:", DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, 0, Integer.MAX_VALUE);
-//		createComboPref(generalGroup, numColumns, "Line delimiter for so&urce files:", DefaultCodeFormatterConstants.FORMATTER_LINE_SEPARATOR, lineDelimiters, lineDelimiterNames);
+		createNumberPref(generalGroup, numColumns, "Tab si&ze:", DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 999);
+		createCheckboxPref(generalGroup, numColumns, "U&se tab character", DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, new String [] {JavaCore.SPACE, JavaCore.TAB});
+		
 
 		final Group typeMemberGroup= createGroup(numColumns, composite, "Alignment of fields in class declarations");
 		createCheckboxPref(typeMemberGroup, numColumns, "Align fields in &columns", DefaultCodeFormatterConstants.FORMATTER_TYPE_MEMBER_ALIGNMENT, multiAlign);
