@@ -120,7 +120,7 @@ public class AddCustomConstructorOperation implements IWorkspaceRunnable {
 				}
 
 				// Allow no collisions with super constructor parameter names
-				String paramName= StubUtility.guessArgumentName(project, accessName, (String[]) excludedNames);
+				String paramName= StubUtility.guessArgumentName(project, accessName, excludedNames);
 
 				excludedNames[superConstructorParamNames.length + i]= new String(paramName);
 				params[i]= paramName;
