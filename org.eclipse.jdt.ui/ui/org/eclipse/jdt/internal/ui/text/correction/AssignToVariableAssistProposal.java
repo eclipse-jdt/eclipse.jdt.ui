@@ -100,6 +100,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		
 		markAsLinked(rewrite, newDeclFrag.getName(), true, KEY_NAME); //$NON-NLS-1$
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE); //$NON-NLS-1$
+		markAsSelection(rewrite, newDecl);
 
 		return rewrite;
 	}
@@ -160,20 +161,24 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
 		rewrite.markAsInsertInOriginal(newTypeDecl, ASTNodeConstants.BODY_DECLARATIONS, newDecl, insertIndex, null);
 
+		ASTNode selectionNode;
 		if (isParamToField) {
 			// assign parameter to field
 			Block body= methodDecl.getBody();
 			ExpressionStatement statement= ast.newExpressionStatement(assignment);
 			int insertIdx=  findAssignmentInsertIndex(body.statements());
 			rewrite.markAsInsertInOriginal(body, ASTNodeConstants.STATEMENTS, statement, insertIdx, null);
+			selectionNode= statement;
 			
 		} else {			
 			rewrite.markAsReplaced(expression, assignment);
+			selectionNode= fNodeToAssign;
 		} 
 		
 		markAsLinked(rewrite, newDeclFrag.getName(), false, KEY_NAME);
 		markAsLinked(rewrite, newDecl.getType(), false, KEY_TYPE);
 		markAsLinked(rewrite, accessName, true, KEY_NAME);
+		markAsSelection(rewrite, selectionNode);
 		
 		return rewrite;		
 	}
