@@ -28,12 +28,14 @@ import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.ui.DebugUITools;
 import org.eclipse.debug.ui.IDebugModelPresentation;
 import org.eclipse.debug.ui.IDebugUIConstants;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.debug.core.IJavaArray;
 import org.eclipse.jdt.debug.core.IJavaBreakpoint;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.jdt.debug.core.IJavaExceptionBreakpoint;
@@ -59,7 +61,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.wizard.WizardDialog;
 import org.eclipse.swt.graphics.Image;
@@ -486,13 +487,13 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			valueString= getResourceString(NO_RETURN_VALUE);
 		}
 		boolean isObject= isObjectValue(signature);
-		boolean isArray= getArrayDimension(signature) > 0 ? true : false;
+		boolean isArray= value instanceof IJavaArray;
 		StringBuffer buffer= new StringBuffer();
 		// Always show type name for objects & arrays (but not Strings)
 		if ((isObject || isArray) && !isString && (refTypeName.length() > 0)) {
 			String qualTypeName= getQualifiedName(refTypeName);
 			if (isArray) {
-				qualTypeName= adjustTypeNameForArrayIndex(qualTypeName, value.getArrayLength());
+				qualTypeName= adjustTypeNameForArrayIndex(qualTypeName, ((IJavaArray)value).getLength());
 			}
 			buffer.append(qualTypeName);
 			buffer.append(' ');
@@ -809,8 +810,8 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			if (item instanceof IJavaBreakpoint) {
 				item= ((IJavaBreakpoint)item).getType();
 			}
-			if (item instanceof IType) {
-				promptForSource((IType)item);
+			if (item instanceof IClassFile) {
+				promptForSource((IClassFile)item);
 			}
 			return EditorUtility.getEditorInput(item);
 		} catch (CoreException e) {
@@ -880,25 +881,6 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 			return buff.toString();
 		}
 		return "";
-	}
-
-	/**
-	 * Given a JNI-style signature for a variable, return the dimension of
-	 * the array the variable represents, or 0 if it is not an array.
-	 */
-	protected int getArrayDimension(String signature) {
-		if (signature == null) {
-			return 0;
-		}
-		int dimCount= 0;
-		for (int i= 0; i < signature.length(); i++) {
-			if (signature.charAt(i) == '[') {
-				dimCount++;
-			} else {
-				break;
-			}
-		}
-		return dimCount;
 	}
 
 	/**
@@ -1180,24 +1162,24 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	}
 
 	/**
-	 * Prompts for source if required
+	 * Prompts for source if required.
 	 */
-	protected void promptForSource(IType type) {
-		if (type.isBinary()) {
+	protected void promptForSource(IClassFile classFile) {
+		try {
+			IType type= classFile.getType();
 			IPackageFragmentRoot root = (IPackageFragmentRoot)type.getClassFile().getParent().getParent();
-			if (root.isArchive()) {
-				try {
-					if (root.getSourceAttachmentPath() == null && SourceAttachmentWizard.isOkToPrompt(root)) {
-						Shell shell = JavaPlugin.getActiveWorkbenchShell();
-						SourceAttachmentWizard wizard= new SourceAttachmentWizard(root);
-						WizardDialog wd = new WizardDialog(shell, wizard);
-						wd.open();
-					}
-				} catch (JavaModelException e) {
+			if (root.isArchive()) {				
+				if (root.getSourceAttachmentPath() == null && SourceAttachmentWizard.isOkToPrompt(root)) {
+					Shell shell = JavaPlugin.getActiveWorkbenchShell();
+					SourceAttachmentWizard wizard= new SourceAttachmentWizard(root);
+					WizardDialog wd = new WizardDialog(shell, wizard);
+					wd.open();
 				}
 			}
+		} catch (JavaModelException e) {
 		}
 	}
+	
 	/**
 	 * When a thread suspends, add it to the thread pool for that
 	 * VM. When a thread resumes, remove it from the thread pool.
