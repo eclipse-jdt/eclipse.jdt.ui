@@ -15,6 +15,7 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 
 	private IStructuredSelection fSelection;
 	private IWorkbench fWorkbench;
+	private	JarPackageReader fReader= null;
 
 	/*
 	 * @see IWorkbenchWindowActionDelegate
@@ -70,14 +71,13 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 		Assert.isLegal(description.isAccessible());
 		Assert.isNotNull(description.getFileExtension());
 		Assert.isLegal(description.getFileExtension().equals(JarPackage.DESCRIPTION_EXTENSION));
-		JarPackageReader reader= null;
 		JarPackage jarPackage= null;
 		try {
-			reader= new JarPackageReader(description.getContents());
-			jarPackage= reader.readXML();
+			fReader= new JarPackageReader(description.getContents());
+			jarPackage= fReader.readXML();
 		} finally {
-			if (reader != null)
-				reader.close();
+			if (fReader != null)
+				fReader.close();
 		}
 		return jarPackage;
 	}
@@ -92,5 +92,9 @@ public abstract class JarPackageActionDelegate implements IWorkbenchWindowAction
 
 	protected IStructuredSelection getSelection() {
 		return fSelection;
+	}
+	
+	protected JarPackageReader getReader() {
+		return fReader;
 	}
 }

@@ -4,13 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.io.BufferedInputStream;import java.io.IOException;import java.io.InputStream;import java.io.ObjectInputStream;import java.util.ArrayList;import java.util.List;import javax.xml.parsers.DocumentBuilder;import javax.xml.parsers.DocumentBuilderFactory;import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.Path;import org.eclipse.jface.util.Assert;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;
+import java.io.BufferedInputStream;import java.io.IOException;import java.io.InputStream;import java.io.ObjectInputStream;import java.util.ArrayList;import java.util.List;import javax.xml.parsers.DocumentBuilder;import javax.xml.parsers.DocumentBuilderFactory;import javax.xml.parsers.ParserConfigurationException;import org.eclipse.core.resources.IFile;import org.eclipse.core.resources.IFolder;import org.eclipse.core.resources.IProject;import org.eclipse.core.runtime.IPath;import org.eclipse.core.runtime.IStatus;import org.eclipse.core.runtime.MultiStatus;import org.eclipse.core.runtime.Path;import org.eclipse.core.runtime.Status;import org.eclipse.jface.util.Assert;import org.w3c.dom.Element;import org.w3c.dom.Node;import org.w3c.dom.NodeList;import org.xml.sax.InputSource;import org.xml.sax.SAXException;import org.eclipse.jdt.core.IJavaElement;import org.eclipse.jdt.core.IPackageFragment;import org.eclipse.jdt.core.IType;import org.eclipse.jdt.core.JavaCore;import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Reads data from an InputStream and returns a JarPackage
  */
@@ -19,6 +13,8 @@ public class JarPackageReader extends Object {
 	private final static String BAD_FORMAT= "Bad format";
 	
 	protected InputStream fInputStream;
+
+	private MultiStatus fWarnings;
 	
 	/**
 	 * Reads a Jar Package from the underlying stream.
@@ -26,6 +22,7 @@ public class JarPackageReader extends Object {
 	public JarPackageReader(InputStream inputStream) {
 		Assert.isNotNull(inputStream);
 		fInputStream= new BufferedInputStream(inputStream);
+		fWarnings= new MultiStatus(JavaPlugin.getPluginId(), 0, "JAR Package Reader Warnings", null);
 	}
 	/**
 	 * Hook for possible subclasses
@@ -187,7 +184,7 @@ public class JarPackageReader extends Object {
 			throw new IOException(BAD_FORMAT + ": Tag 'handleIdentifier' not found or empty");
 		IJavaElement je= JavaCore.create(handleId);
 		if (je == null)
-			System.out.println("Warning: Java element does not exist in workspace");
+			addWarning("Warning: Java element does not exist in workspace", null);
 		else
 			selectedElements.add(je);
 	}
@@ -209,7 +206,7 @@ public class JarPackageReader extends Object {
 				if (je != null && je.getElementType() == IJavaElement.PACKAGE_FRAGMENT)
 					packages.add(je);
 				else
-					System.out.println("Warning: Java element does not exist in workspace");
+					addWarning("Warning: Java element does not exist in workspace", null);
 			}					
 		}
 		return (IPackageFragment[])packages.toArray(new IPackageFragment[packages.size()]);
@@ -222,7 +219,28 @@ public class JarPackageReader extends Object {
 		IJavaElement je= JavaCore.create(handleId);
 		if (je != null && je.getElementType() == IJavaElement.TYPE)
 			return (IType)je;
-		System.out.println("Warning: Main Class type does not exist in workspace");
+		addWarning("Warning: Main Class type does not exist in workspace", null);
 		return null;
+	}
+	/**
+	 * Returns the warnings of this operation. If there are no
+	 * warnings, a status object with IStatus.OK is returned.
+	 *
+	 * @return the status of this operation
+	 */
+	public IStatus getWarnings() {
+		if (fWarnings.getChildren().length == 0)
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null);
+		else
+			return fWarnings;
+	}
+	/**
+	 * Adds a new warning to the list with the passed information.
+	 * Normally the export operation continues after a warning.
+	 * @param	message		the message
+	 * @param	exception	the throwable that caused the warning, or <code>null</code>
+	 */
+	protected void addWarning(String message, Throwable error) {
+		fWarnings.add(new Status(IStatus.WARNING, JavaPlugin.getPluginId(), 0, message, error));
 	}
 }

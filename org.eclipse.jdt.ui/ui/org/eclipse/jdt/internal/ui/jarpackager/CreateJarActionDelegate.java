@@ -4,22 +4,7 @@
  */
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.lang.ClassNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.io.IOException;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
-
-import org.eclipse.swt.widgets.Shell;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import java.lang.reflect.InvocationTargetException;import org.eclipse.core.runtime.IStatus;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.action.IAction;import org.eclipse.jface.dialogs.ProgressMonitorDialog;import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
@@ -41,6 +26,6 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK())
-			ErrorDialog.openError(shell, "JAR Export Problems", null, status);
+			ProblemDialog.open(shell, "JAR Export Problems", null, status);
 	}
 }
