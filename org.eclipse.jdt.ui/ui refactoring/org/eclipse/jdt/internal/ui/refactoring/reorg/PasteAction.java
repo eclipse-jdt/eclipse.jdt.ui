@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,8 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.FileTransfer;
@@ -27,6 +30,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.ISharedImages;
@@ -36,24 +41,47 @@ import org.eclipse.ui.actions.CopyProjectOperation;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.ResourceTransfer;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferences;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.ASTRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
+import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ParentChecker;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.MultiTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class PasteAction extends SelectionDispatchAction{
 
@@ -97,44 +125,37 @@ public class PasteAction extends SelectionDispatchAction{
 		List elements= selection.toList();
 		IResource[] resources= ReorgUtils.getResources(elements);
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-		IPaster paster= createEnabledPaster(availableDataTypes);
-		return paster != null && paster.canPasteOn(javaElements, resources);
+		Paster[] pasters= createEnabledPasters(availableDataTypes);
+		for (int i= 0; i < pasters.length; i++) {
+			if (pasters[i].canPasteOn(javaElements, resources))
+				return true;
+		}
+		return false;
 	}
 	
-	private IPaster createEnabledPaster(TransferData[] availableDataTypes) throws JavaModelException {
-		IPaster paster;
-		
-		paster= new ProjectPaster();
+	private Paster[] createEnabledPasters(TransferData[] availableDataTypes) throws JavaModelException {
+		Paster paster;
+		Shell shell = getShell();
+		List result= new ArrayList(2);
+		paster= new ProjectPaster(shell, fClipboard);
 		if (paster.canEnable(availableDataTypes)) 
-			return paster;
+			result.add(paster);
 		
-		paster= new JavaElementAndResourcePaster();
+		paster= new JavaElementAndResourcePaster(shell, fClipboard);
 		if (paster.canEnable(availableDataTypes)) 
-			return paster;
+			result.add(paster);
 
-		paster= new FilePaster();
+		paster= new TypedSourcePaster(shell, fClipboard);
 		if (paster.canEnable(availableDataTypes)) 
-			return paster;
+			result.add(paster);
+
+		paster= new FilePaster(shell, fClipboard);
+		if (paster.canEnable(availableDataTypes)) 
+			result.add(paster);
 			
-		return null;
+		return (Paster[]) result.toArray(new Paster[result.size()]);
 	}
 
-	private IResource[] getClipboardResources(TransferData[] availableDataTypes) {
-		Transfer transfer= ResourceTransfer.getInstance();
-		if (isAvailable(transfer, availableDataTypes)) {
-			return (IResource[])getContents(fClipboard, transfer, getShell());
-		}
-		return null;
-	}
-
-	private IJavaElement[] getClipboardJavaElements(TransferData[] availableDataTypes) {
-		Transfer transfer= JavaElementTransfer.getInstance();
-		if (isAvailable(transfer, availableDataTypes)) {
-			return (IJavaElement[])getContents(fClipboard, transfer, getShell());
-		}
-		return null;
-	}
-	
 	private static Object getContents(final Clipboard clipboard, final Transfer transfer, Shell shell) {
 		//see bug 33028 for explanation why we need this
 		final Object[] result= new Object[1];
@@ -159,9 +180,14 @@ public class PasteAction extends SelectionDispatchAction{
 			List elements= selection.toList();
 			IResource[] resources= ReorgUtils.getResources(elements);
 			IJavaElement[] javaElements= ReorgUtils.getJavaElements(elements);
-			IPaster paster= createEnabledPaster(availableTypes);
-			if (paster != null && paster.canPasteOn(javaElements, resources))
-				paster.paste(javaElements, resources, availableTypes);
+			Paster[] pasters= createEnabledPasters(availableTypes);
+			for (int i= 0; i < pasters.length; i++) {
+				if (pasters[i].canPasteOn(javaElements, resources)) {
+					pasters[i].paste(javaElements, resources, availableTypes);
+					return;//one is enough
+				}	
+			}
+
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.getString("OpenRefactoringWizardAction.refactoring"), RefactoringMessages.getString("OpenRefactoringWizardAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		} catch(InvocationTargetException e) {
@@ -171,15 +197,56 @@ public class PasteAction extends SelectionDispatchAction{
 		}
 	}
 
-	private interface IPaster{
-		public abstract void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
+	private abstract static class Paster{
+		private final Shell fShell;
+		private final Clipboard fClipboard;
+		protected Paster(Shell shell, Clipboard clipboard){
+			fShell= shell;
+			fClipboard= clipboard;
+		}
+		protected final Shell getShell() {
+			return fShell;
+		}
+		protected final Clipboard getClipboard() {
+			return fClipboard;
+		}
+
+		protected final IResource[] getClipboardResources(TransferData[] availableDataTypes) {
+			Transfer transfer= ResourceTransfer.getInstance();
+			if (isAvailable(transfer, availableDataTypes)) {
+				return (IResource[])getContents(fClipboard, transfer, getShell());
+			}
+			return null;
+		}
+
+		protected final IJavaElement[] getClipboardJavaElements(TransferData[] availableDataTypes) {
+			Transfer transfer= JavaElementTransfer.getInstance();
+			if (isAvailable(transfer, availableDataTypes)) {
+				return (IJavaElement[])getContents(fClipboard, transfer, getShell());
+			}
+			return null;
+		}
+	
+		protected final TypedSource[] getClipboardTypedSources(TransferData[] availableDataTypes) {
+			Transfer transfer= TypedSourceTransfer.getInstance();
+			if (isAvailable(transfer, availableDataTypes)) {
+				return (TypedSource[])getContents(fClipboard, transfer, getShell());
+			}
+			return null;
+		}
+	
+		public abstract void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
 		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
 		public abstract boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources)  throws JavaModelException;
 	}
     
-    private class ProjectPaster implements IPaster{
+    private static class ProjectPaster extends Paster{
     	
-    	public boolean canEnable(TransferData[] availableDataTypes) {
+    	protected ProjectPaster(Shell shell, Clipboard clipboard) {
+			super(shell, clipboard);
+		}
+
+		public boolean canEnable(TransferData[] availableDataTypes) {
 			boolean resourceTransfer= isAvailable(ResourceTransfer.getInstance(), availableDataTypes);
 			boolean javaElementTransfer= isAvailable(JavaElementTransfer.getInstance(), availableDataTypes);
 			if (! javaElementTransfer)
@@ -237,7 +304,11 @@ public class PasteAction extends SelectionDispatchAction{
 		}
     }
     
-    private class FilePaster  implements IPaster{
+    private static class FilePaster extends Paster{
+		protected FilePaster(Shell shell, Clipboard clipboard) {
+			super(shell, clipboard);
+		}
+
 		public void paste(IJavaElement[] javaElements, IResource[] resources, TransferData[] availableTypes) throws JavaModelException {
 			String[] fileData= getClipboardFiles(availableTypes);
 			if (fileData == null)
@@ -299,7 +370,7 @@ public class PasteAction extends SelectionDispatchAction{
 		private String[] getClipboardFiles(TransferData[] availableDataTypes) {
 			Transfer transfer= FileTransfer.getInstance();
 			if (isAvailable(transfer, availableDataTypes)) {
-				return (String[])getContents(fClipboard, transfer, getShell());
+				return (String[])getContents(getClipboard(), transfer, getShell());
 			}
 			return null;
 		}
@@ -307,7 +378,11 @@ public class PasteAction extends SelectionDispatchAction{
 			return new ParentChecker(resources, javaElements).getCommonParent();		
 		}
     }
-    private class JavaElementAndResourcePaster implements IPaster {
+    private static class JavaElementAndResourcePaster extends Paster {
+
+		protected JavaElementAndResourcePaster(Shell shell, Clipboard clipboard) {
+			super(shell, clipboard);
+		}
 
 		private TransferData[] fAvailableTypes;
 
@@ -358,6 +433,265 @@ public class PasteAction extends SelectionDispatchAction{
 		public boolean canEnable(TransferData[] availableTypes) {
 			fAvailableTypes= availableTypes;
 			return isAvailable(JavaElementTransfer.getInstance(), availableTypes) || isAvailable(ResourceTransfer.getInstance(), availableTypes);
+		}
+    }
+    
+    private static class TypedSourcePaster extends Paster{
+
+		protected TypedSourcePaster(Shell shell, Clipboard clipboard) {
+			super(shell, clipboard);
+		}
+		private TransferData[] fAvailableTypes;
+
+		public boolean canEnable(TransferData[] availableTypes) throws JavaModelException {
+			fAvailableTypes= availableTypes;
+			return isAvailable(TypedSourceTransfer.getInstance(), availableTypes);
+		}
+
+		public boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources) throws JavaModelException {
+			if (selectedResources.length != 0)
+				return false;
+			TypedSource[] typedSources= getClipboardTypedSources(fAvailableTypes);				
+			Object destination= getTarget(selectedJavaElements, selectedResources);
+			if (destination instanceof IJavaElement)
+				return ReorgTypedSourcePasteStarter.create(typedSources, (IJavaElement)destination) != null;
+			return false;
+		}
+		
+		public void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException {
+			TypedSource[] typedSources= getClipboardTypedSources(availableTypes);
+			IJavaElement destination= getTarget(selectedJavaElements, selectedResources);
+			ReorgTypedSourcePasteStarter.create(typedSources, destination).run(getShell());		
+		}
+		
+		private static IJavaElement getTarget(IJavaElement[] selectedJavaElements, IResource[] selectedResources) {
+			Assert.isTrue(selectedResources.length == 0);
+			if (selectedJavaElements.length == 1) 
+				return getAsTypeOrCu(selectedJavaElements[0]);
+			Object parent= new ParentChecker(selectedResources, selectedJavaElements).getCommonParent();
+			if (parent instanceof IJavaElement)
+				return getAsTypeOrCu((IJavaElement)parent);
+			return null;
+		}
+		private static IJavaElement getAsTypeOrCu(IJavaElement element) {
+			//try to get type first
+			if (element.getElementType() == IJavaElement.COMPILATION_UNIT || element.getElementType() == IJavaElement.TYPE)
+				return element;
+			IJavaElement ancestorType= element.getAncestor(IJavaElement.TYPE);
+			if (ancestorType != null)
+				return ancestorType;
+			return ReorgUtils.getCompilationUnit(element);
+		}
+		private static class ReorgTypedSourcePasteStarter {
+	
+			private final PasteTypedSourcesRefactoring fPasteRefactoring;
+
+			private ReorgTypedSourcePasteStarter(PasteTypedSourcesRefactoring pasteRefactoring) {
+				Assert.isNotNull(pasteRefactoring);
+				fPasteRefactoring= pasteRefactoring;
+			}
+	
+			public static ReorgTypedSourcePasteStarter create(TypedSource[] typedSources, IJavaElement destination) throws JavaModelException {
+				Assert.isNotNull(typedSources);
+				Assert.isNotNull(destination);
+				PasteTypedSourcesRefactoring pasteRefactoring= PasteTypedSourcesRefactoring.create(typedSources);
+				if (pasteRefactoring == null)
+					return null;
+				if (! pasteRefactoring.setDestination(destination).isOK())
+					return null;
+				return new ReorgTypedSourcePasteStarter(pasteRefactoring);
+			}
+
+			public void run(Shell parent) throws InterruptedException, InvocationTargetException {
+				IRunnableContext context= new ProgressMonitorDialog(parent);
+				new RefactoringExecutionHelper(fPasteRefactoring, RefactoringPreferences.getStopSeverity(), false, parent, context).perform();
+			}
+		}
+		private static class PasteTypedSourcesRefactoring extends Refactoring{
+			
+			private final TypedSource[] fSources;
+			private IJavaElement fDestination;
+			
+			static PasteTypedSourcesRefactoring create(TypedSource[] sources){
+				if (! isAvailable(sources))
+					return null;
+				return new PasteTypedSourcesRefactoring(sources);
+			}
+			public RefactoringStatus setDestination(IJavaElement destination) {
+				fDestination= destination;
+				if (ReorgUtils.getCompilationUnit(destination) == null)
+					return RefactoringStatus.createFatalErrorStatus("A Java file of an element inside a Java file should be selected");
+				if (! destination.exists())
+					return RefactoringStatus.createFatalErrorStatus("The selected element does not exist in the workspace");
+				if (! canPasteAll(destination))
+					return RefactoringStatus.createFatalErrorStatus("The selected element cannot be the destination of this paste operation.");
+				return new RefactoringStatus();
+			}
+			private boolean canPasteAll(IJavaElement destination) {
+				for (int i= 0; i < fSources.length; i++) {
+					if (! canPaste(fSources[i].getType(), destination))
+						return false;
+				}
+				return true;
+			}
+			private static boolean canPaste(int elementType, IJavaElement destination) {
+				IType ancestorType= getAncestorType(destination);
+				if (ancestorType != null)
+					return canPasteToType(elementType);
+				return canPasteToCu(elementType);
+			}
+			private static boolean canPasteToType(int elementType) {
+				return 	elementType == IJavaElement.TYPE || 
+						elementType == IJavaElement.FIELD || 
+						elementType == IJavaElement.INITIALIZER || 
+						elementType == IJavaElement.METHOD;
+			}
+			private static boolean canPasteToCu(int elementType) {
+				return	elementType == IJavaElement.PACKAGE_DECLARATION ||
+						elementType == IJavaElement.TYPE ||
+						elementType == IJavaElement.IMPORT_DECLARATION;
+			}
+			PasteTypedSourcesRefactoring(TypedSource[] sources){
+				Assert.isNotNull(sources);
+				Assert.isTrue(sources.length != 0);
+				fSources= sources;
+			}
+
+			private static boolean isAvailable(TypedSource[] sources) {
+				return sources != null && sources.length > 0;
+			}
+
+			public RefactoringStatus checkActivation(IProgressMonitor pm) throws JavaModelException {
+				return new RefactoringStatus();
+			}
+
+			public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
+				RefactoringStatus result= Checks.validateModifiesFiles(ResourceUtil.getFiles(new ICompilationUnit[]{getDestinationCu()}));
+				return result;
+			}
+
+			public IChange createChange(IProgressMonitor pm) throws JavaModelException {
+				try {
+					CompilationUnit cuNode= AST.parseCompilationUnit(getDestinationCu(), false);
+					ASTRewrite rewrite= new ASTRewrite(cuNode);
+					for (int i= 0; i < fSources.length; i++) {
+						pasteSource(fSources[i], rewrite, cuNode);
+					}
+					TextBuffer textBuffer= TextBuffer.create(getDestinationCu().getBuffer().getContents());
+					TextEdit rootEdit= new MultiTextEdit();
+					rewrite.rewriteNode(textBuffer, rootEdit);
+					CompilationUnitChange change= new CompilationUnitChange("name", getDestinationCu());
+					change.setSave(!getDestinationCu().isWorkingCopy());
+					change.addTextEdit("paste elements", rootEdit);
+					return change;
+				} catch (JavaModelException e) {
+					throw e;
+				} catch (CoreException e) {
+					throw new JavaModelException(e);
+				}
+			}
+			
+			private void pasteSource(TypedSource source, ASTRewrite rewrite, CompilationUnit cuNode) throws CoreException {
+				ASTNode node= createAndInsertNewNode(source, cuNode, rewrite);
+				if (node != null)
+					rewrite.markAsInserted(node);
+			}
+			
+			private ASTNode createAndInsertNewNode(TypedSource source, CompilationUnit cuNode, ASTRewrite rewrite) throws CoreException {
+				ASTNode destinationNode= getDestinationNodeForSourceElement(fDestination, source.getType(), cuNode);
+				if (destinationNode == null) {
+					return null;
+				} else if (destinationNode.getNodeType() == ASTNode.COMPILATION_UNIT) {
+					ASTNode nodeToInsert= createNewNodeToInsertToCu(source, rewrite);
+					insertToCu(nodeToInsert, (CompilationUnit)destinationNode);
+					return nodeToInsert;
+				} else if (destinationNode.getNodeType() == ASTNode.TYPE_DECLARATION){
+					ASTNode nodeToInsert= createNewNodeToInsertToType(source, rewrite);
+					insertToType(nodeToInsert, (TypeDeclaration)destinationNode);
+					return nodeToInsert;
+				} else
+					return null;
+			}
+
+			private static void insertToType(ASTNode node, TypeDeclaration typeDeclaration) {
+				switch(node.getNodeType()){
+					case ASTNode.TYPE_DECLARATION: 
+					case ASTNode.METHOD_DECLARATION: 
+					case ASTNode.FIELD_DECLARATION: 
+					case ASTNode.INITIALIZER: 
+						typeDeclaration.bodyDeclarations().add(ASTNodes.getInsertionIndex((BodyDeclaration)node, typeDeclaration.bodyDeclarations()), node);
+						break;
+					default:
+						Assert.isTrue(false, String.valueOf(node.getNodeType()));
+				}
+			}
+			
+			private static void insertToCu(ASTNode node, CompilationUnit cuNode) {
+				switch(node.getNodeType()){
+					case ASTNode.TYPE_DECLARATION: 
+						cuNode.types().add(ASTNodes.getInsertionIndex((TypeDeclaration)node, cuNode.types()), node);
+						break;
+					case ASTNode.IMPORT_DECLARATION:
+						cuNode.imports().add(node);
+						break;
+					case ASTNode.PACKAGE_DECLARATION:
+						//only insert if none exists
+						if (cuNode.getPackage() == null)
+							cuNode.setPackage((PackageDeclaration)node);
+						break;						
+					default:
+						Assert.isTrue(false, String.valueOf(node.getNodeType()));
+				}
+			}
+			
+			//returns TypeDeclaration, CompilationUnit or null
+			private ASTNode getDestinationNodeForSourceElement(IJavaElement destinationElement, int elementType, CompilationUnit cuNode) throws JavaModelException {
+				IType ancestorType= getAncestorType(destinationElement);
+				if (ancestorType != null)
+					return ASTNodeSearchUtil.getTypeDeclarationNode(ancestorType, cuNode);
+				if (elementType == IJavaElement.TYPE || elementType == IJavaElement.PACKAGE_DECLARATION || elementType == IJavaElement.IMPORT_DECLARATION || elementType == IJavaElement.IMPORT_CONTAINER)
+					return cuNode;
+				return null;	
+			}
+			
+			private static IType getAncestorType(IJavaElement destinationElement) {
+				return destinationElement.getElementType() == IJavaElement.TYPE ? (IType)destinationElement: (IType)destinationElement.getAncestor(IJavaElement.TYPE);
+			}
+			private ASTNode createNewNodeToInsertToCu(TypedSource source, ASTRewrite rewrite) {
+				switch(source.getType()){
+					case IJavaElement.TYPE:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.TYPE_DECLARATION);
+					case IJavaElement.PACKAGE_DECLARATION:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.PACKAGE_DECLARATION);
+					case IJavaElement.IMPORT_DECLARATION:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.IMPORT_DECLARATION);
+					default: Assert.isTrue(false, String.valueOf(source.getType()));
+						return null;
+				}
+			}
+			
+			private ASTNode createNewNodeToInsertToType(TypedSource source, ASTRewrite rewrite) {
+				switch(source.getType()){
+					case IJavaElement.TYPE:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.TYPE_DECLARATION);
+					case IJavaElement.METHOD:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.METHOD_DECLARATION);
+					case IJavaElement.FIELD:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.FIELD_DECLARATION);
+					case IJavaElement.INITIALIZER:
+						return rewrite.createPlaceholder(source.getSource(), ASTRewrite.INITIALIZER);
+					default: Assert.isTrue(false);
+						return null;
+				}
+			}
+			
+			private ICompilationUnit getDestinationCu() {
+				return WorkingCopyUtil.getWorkingCopyIfExists(ReorgUtils.getCompilationUnit(fDestination));
+			}
+
+			public String getName() {
+				return "Paste";
+			}
 		}
     }
 }
