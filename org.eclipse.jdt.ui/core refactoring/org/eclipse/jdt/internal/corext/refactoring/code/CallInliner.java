@@ -523,7 +523,7 @@ public class CallInliner {
 		}
 	}
 
-	private void replaceCall(String[] blocks) throws CoreException {
+	private void replaceCall(String[] blocks) {
 		// Inline empty body
 		if (blocks.length == 0) {
 			if (fNeedsStatement) {
@@ -725,7 +725,7 @@ public class CallInliner {
 		return fBuffer.getContent(node.getStartPosition(), node.getLength());
 	}
 
-	private static IFile getFile(ICompilationUnit cu) throws CoreException {
+	private static IFile getFile(ICompilationUnit cu) {
 		return (IFile)WorkingCopyUtil.getOriginal(cu).getResource();
 	}
 	

@@ -30,7 +30,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class RenamePackageChange extends AbstractJavaElementRenameChange {
 
-	public RenamePackageChange(IPackageFragment pack, String newName) throws JavaModelException{
+	public RenamePackageChange(IPackageFragment pack, String newName) {
 		this(pack.getPath(), pack.getElementName(), newName);
 		Assert.isTrue(!pack.isReadOnly(), "package must not be read only"); //$NON-NLS-1$
 	}

@@ -28,7 +28,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
@@ -85,7 +84,7 @@ public class QualifiedNameFinder {
 	public QualifiedNameFinder() {
 	}
 	
-	public static void process(QualifiedNameSearchResult result, String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) throws JavaModelException {
+	public static void process(QualifiedNameSearchResult result, String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) {
 		if (filePatterns == null || filePatterns.length() == 0) {
 			// Eat progress.
 			monitor.beginTask("", 1); //$NON-NLS-1$
@@ -104,7 +103,7 @@ public class QualifiedNameFinder {
 			collector, new MatchLocator(pattern, true, false)); //$NON-NLS-1$
 	}
 	
-	private static TextSearchScope createScope(String filePatterns, IProject root) throws JavaModelException {
+	private static TextSearchScope createScope(String filePatterns, IProject root) {
 		String[] patterns= splitFilePatterns(filePatterns);
 		TextSearchScope result= new TextSearchScope(""); //$NON-NLS-1$
 		result.add(root);

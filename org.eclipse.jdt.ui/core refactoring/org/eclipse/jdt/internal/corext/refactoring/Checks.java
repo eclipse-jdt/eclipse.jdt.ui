@@ -171,7 +171,7 @@ public class Checks {
 	 * Returns ok status if the new name is ok. This is when no other file with that name exists.
 	 * @param newName 
 	 */
-	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) throws JavaModelException{
+	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
 		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName + ".java"))) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getFormattedString("Checks.cu_name_used", newName));//$NON-NLS-1$
 		else
@@ -589,7 +589,7 @@ public class Checks {
 		}
 	}
 	
-	public static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) throws JavaModelException {
+	public static boolean isClasspathDelete(IPackageFragmentRoot pkgRoot) {
 		IResource res= pkgRoot.getResource();
 		if (res == null)
 			return true;
