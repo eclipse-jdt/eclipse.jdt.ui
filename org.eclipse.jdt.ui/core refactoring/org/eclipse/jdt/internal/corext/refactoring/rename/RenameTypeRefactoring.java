@@ -4,8 +4,10 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.resources.IContainer;
@@ -21,26 +23,21 @@ import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AnonymousLocalTypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.AstNode;
-import org.eclipse.jdt.internal.compiler.ast.LocalTypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.MemberTypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.core.CompilationUnit;
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -52,10 +49,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry.Context;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdatingRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
@@ -69,7 +68,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 
 	private IType fType;
 	private String fNewName;
-	private SearchResultGroup[] fOccurrences;
+	private SearchResultGroup[] fReferences;
 	private boolean fUpdateReferences;
 	
 	private boolean fUpdateJavaDoc;
@@ -301,7 +300,7 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			if (result.hasFatalError())
 				return result;
 							
-			result.merge(analyseEnclosedLocalTypes(fType, fNewName));
+			result.merge(analyseEnclosedTypes());
 			pm.worked(1);
 			// before doing _the really_ expensive analysis
 			if (result.hasFatalError())
@@ -310,9 +309,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			if (! fUpdateReferences)
 				return result;
 										
-			result.merge(Checks.checkAffectedResourcesAvailability(getOccurrences(new SubProgressMonitor(pm, 35))));
+			result.merge(Checks.checkAffectedResourcesAvailability(getReferences(new SubProgressMonitor(pm, 35))));
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
+			
 			result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
 			
 			return result;
@@ -320,7 +320,6 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			pm.done();
 		}	
 	}
-
 		
 	private RefactoringStatus checkNewPathValidity() throws JavaModelException{
 		IContainer c= getResource(fType).getParent();
@@ -440,10 +439,10 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return SearchEngine.createSearchPattern(fType, IJavaSearchConstants.REFERENCES);
 	}
 	
-	private SearchResultGroup[] getOccurrences(IProgressMonitor pm) throws JavaModelException{
+	private SearchResultGroup[] getReferences(IProgressMonitor pm) throws JavaModelException{
 		pm.subTask(RefactoringCoreMessages.getString("RenameTypeRefactoring.searching"));	 //$NON-NLS-1$
-		fOccurrences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
-		return fOccurrences;
+		fReferences= RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
+		return fReferences;
 	}
 	
 	private RefactoringStatus checkForMethodsWithConstructorNames()  throws JavaModelException{
@@ -479,78 +478,42 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		return result;
 	}
 	
-	/*
-	 * Checks if the specified type has locally defined types with the specified names
-	 * and if it declares a native method
-	 */ 	
-	private static RefactoringStatus analyseEnclosedLocalTypes(final IType type, final String newName) throws JavaModelException{
-		final ICompilationUnit cunit= type.getCompilationUnit();
-		final CompilationUnit cu= (CompilationUnit)cunit;
+	private RefactoringStatus analyseEnclosedTypes() throws JavaModelException{
+		final ISourceRange typeRange= fType.getSourceRange();
 		final RefactoringStatus result= new RefactoringStatus();
-		cu.accept(new AbstractSyntaxTreeVisitorAdapter(){
-			public boolean visit(MemberTypeDeclaration typeDeclaration, ClassScope scope) {
-				if ( new String(typeDeclaration.name).equals(newName) 	&& isInType(type.getElementName(), scope)){
-						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_name", //$NON-NLS-1$
-																				new String[]{type.getElementName(), newName});
-						result.addError(msg, JavaSourceContext.create(cunit, createSourceRange(typeDeclaration)));
-					}															
-				if (typeDeclaration.methods != null){
-					for (int i=0; i < typeDeclaration.methods.length; i++){
-						AbstractMethodDeclaration method= typeDeclaration.methods[i];
-						if (method.isNative()){
-							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.local_type_native", type.getElementName());//$NON-NLS-1$
-							result.addWarning(msg, JavaSourceContext.create(cunit, createSourceRange(method)));  
-						}	
+		CompilationUnit cuNode= AST.parseCompilationUnit(fType.getCompilationUnit(), false);
+		cuNode.accept(new ASTVisitor(){
+			public boolean visit(TypeDeclaration node){
+				if (node.getStartPosition() <= typeRange.getOffset())
+					return true;
+				if (node.getStartPosition() > typeRange.getOffset() + typeRange.getLength())
+					return true;
+		
+				if (fNewName.equals(node.getName().getIdentifier())){
+					Context	context= JavaSourceContext.create(fType.getCompilationUnit(), node);
+					String msg= null;;
+					if (node.isLocalTypeDeclaration())
+						msg= "Local Type declared inside '" + JavaElementUtil.createSignature(fType) + "' is named " + fNewName;
+					else if (node.isMemberTypeDeclaration())	
+						msg= "Member Type declared inside '" + JavaElementUtil.createSignature(fType) + "' is named " + fNewName;
+					if (msg != null)	
+						result.addError(msg, context);
+				}
+		
+				MethodDeclaration[] methods= node.getMethods();
+				for (int i= 0; i < methods.length; i++) {
+					if (Modifier.isNative(methods[i].getModifiers())){
+						Context	context= JavaSourceContext.create(fType.getCompilationUnit(), methods[i]);
+						String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", node.getName().getIdentifier());//$NON-NLS-1$
+						result.addWarning(msg, context); 
 					}	
-				}	
-				return true;
-			}
-			
-			public boolean visit(LocalTypeDeclaration typeDeclaration, BlockScope scope) {
-				return visitTypeDeclaration(typeDeclaration, scope);
-			}
-			public boolean visit(AnonymousLocalTypeDeclaration typeDeclaration, BlockScope scope) {
-				return  visitTypeDeclaration(typeDeclaration, scope);
-			}
-			
-			private boolean visitTypeDeclaration(TypeDeclaration typeDeclaration, BlockScope scope) {
-				if (new String(typeDeclaration.name).equals(newName)   && isInType(type.getElementName(), scope)){
-					String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_name", //$NON-NLS-1$
-																					new String[]{type.getElementName(), newName});
-					result.addError(msg, JavaSourceContext.create(cunit, createSourceRange(typeDeclaration)));
-				}																
-						
-				if (typeDeclaration.methods != null){
-					for (int i=0; i < typeDeclaration.methods.length; i++){
-						AbstractMethodDeclaration method= typeDeclaration.methods[i];
-						if (method.isNative()){
-							String msg= RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.enclosed_type_native", type.getElementName());//$NON-NLS-1$
-							result.addWarning(msg, JavaSourceContext.create(cunit, createSourceRange(method))); 
-						}	
-					}	
-				}	
+				}
 				return true;
 			}
 		});
 		return result;
 	}
 	
-	private static SourceRange createSourceRange(AstNode node){
-		return new SourceRange(node.sourceStart, node.sourceEnd - node.sourceStart + 1);
-	}
-	
-	private static boolean isInType(String typeName, Scope scope){
-		Scope current= scope;
-		while (current != null){
-			if (current instanceof ClassScope){
-				if (typeName.equals(new String(((ClassScope)current).referenceContext.name)))
-					return true;
-			}
-			current= current.parent;
-		}
-		return false;
-	}
-
 	private boolean mustRenameCU() throws JavaModelException{
 		return Checks.isTopLevel(fType) && (JdtFlags.isPublic(fType));
 	}
@@ -610,38 +573,68 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
-		fOccurrences= Checks.excludeCompilationUnits(fOccurrences, result);
+		fReferences= Checks.excludeCompilationUnits(fReferences, result);
 		if (result.hasFatalError())
 			return result;
 			
-		result.merge(Checks.checkCompileErrorsInAffectedFiles(fOccurrences));	
+		result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences));	
 		
-		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
-		RenameTypeASTAnalyzer analyzer= new RenameTypeASTAnalyzer(fNewName, fType);
-		for (int i= 0; i < fOccurrences.length ; i++){
-			analyzeCompilationUnit(pm, analyzer, fOccurrences[i], result);
-			pm.worked(1);
-			
-			if (pm.isCanceled())
-				throw new OperationCanceledException();
-		}
+		pm.beginTask("", fReferences.length); //$NON-NLS-1$
+		result.merge(checkConflictingTypes(pm));
 		return result;
+	}
+	
+	
+	private RefactoringStatus checkConflictingTypes(IProgressMonitor pm) throws JavaModelException{
+		IJavaSearchScope scope= RefactoringScopeFactory.create(fType);
+		ISearchPattern pattern= SearchEngine.createSearchPattern(fNewName, IJavaSearchConstants.TYPE, IJavaSearchConstants.ALL_OCCURRENCES, true);
+		ICompilationUnit[] cusWithReferencesToConflictingTypes= RefactoringSearchEngine.findAffectedCompilationUnits(pm, scope, pattern);
+		if (cusWithReferencesToConflictingTypes.length == 0)
+			return new RefactoringStatus();
+		ICompilationUnit[] 	cusWithReferencesToRenamedType= getCus(fReferences);
+
+		ICompilationUnit[] intersection= isIntersectionEmpty(cusWithReferencesToRenamedType, cusWithReferencesToConflictingTypes);
+		if (intersection.length == 0)
+			return new RefactoringStatus();
+		
+		RefactoringStatus result= new RefactoringStatus();
+		for (int i= 0; i < intersection.length; i++) {
+			Context context= JavaSourceContext.create(intersection[i]);
+			result.addWarning("Another type named " + fNewName + " is refenced in '" + intersection[i].getElementName() +"'", context);
+		}	
+		return result;
+	}
+	
+	private static ICompilationUnit[] isIntersectionEmpty(ICompilationUnit[] a1, ICompilationUnit[] a2){
+		Set set1= new HashSet(Arrays.asList(a1));
+		Set set2= new HashSet(Arrays.asList(a2));
+		set1.retainAll(set2);
+		return (ICompilationUnit[]) set1.toArray(new ICompilationUnit[set1.size()]);
+	}
+	
+	private static ICompilationUnit[] getCus(SearchResultGroup[] searchResultGroups){
+		List cus= new ArrayList(searchResultGroups.length);
+		for (int i= 0; i < searchResultGroups.length; i++) {
+			ICompilationUnit cu= getCu(searchResultGroups[i]);
+			if (cu != null)
+				cus.add(cu);
+		}
+		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
+	}
+	
+	private static ICompilationUnit getCu(SearchResultGroup searchResultGroup){
+		IJavaElement je= JavaCore.create(searchResultGroup.getResource());
+		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
+			return (ICompilationUnit)je;
+		else
+			return null;	
 	}
 	
 	private static String getFullPath(ICompilationUnit cu) throws JavaModelException{
 		Assert.isTrue(cu.exists());
 		return getResource(cu).getFullPath().toString();
 	}
-	
-	private void analyzeCompilationUnit(IProgressMonitor pm, RenameTypeASTAnalyzer analyzer, SearchResultGroup searchResults, RefactoringStatus result)  throws JavaModelException {
-		CompilationUnit cu= (CompilationUnit) (JavaCore.create(searchResults.getResource()));
-		pm.subTask(RefactoringCoreMessages.getFormattedString("RenameTypeRefactoring.analyzing", cu.getElementName())); //$NON-NLS-1$
-		if ((! cu.exists()) || (cu.isReadOnly()) || (!cu.isStructureKnown()))
-			return;
-		result.merge(analyzeCompilationUnit(cu));	
-		result.merge(analyzer.analyze(searchResults.getSearchResults(), cu));
-	}
-	
+
 	/* 
 	 * all the analysis that can be done with no AST walking
 	 */
@@ -749,39 +742,39 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fOccurrences.length);
-		for (int i= 0; i < fOccurrences.length; i++){
-			IResource resource= fOccurrences[i].getResource();
+		pm.beginTask("", fReferences.length);
+		for (int i= 0; i < fReferences.length; i++){
+			IResource resource= fReferences[i].getResource();
 			IJavaElement element= JavaCore.create(resource);
 			if (!(element instanceof ICompilationUnit))
 				continue;
 					
 			ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists((ICompilationUnit)element);
 			String name= RefactoringCoreMessages.getString("RenameTypeRefactoring.update_reference");
-			SearchResult[] results= fOccurrences[i].getSearchResults();
+			SearchResult[] results= fReferences[i].getSearchResults();
 
 			for (int j= 0; j < results.length; j++){
 				SearchResult searchResult= results[j];
 				int offset= searchResult.getStart();
 				int length= searchResult.getEnd() - searchResult.getStart();
-				manager.get(wc).addTextEdit(name, new UpdateTypeReference(offset, length, fNewName, fType.getElementName()));
+				manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, fNewName, fType.getElementName()));
 			}
 			pm.worked(1);
 		}
 	}
 
 	//-----------------
-	private static class UpdateTypeReference extends SimpleTextEdit {
+	private static class UpdateTypeReferenceEdit extends SimpleTextEdit {
 	
 		private String fOldName;
 		
-		UpdateTypeReference(int offset, int length, String newName, String oldName) {
+		UpdateTypeReferenceEdit(int offset, int length, String newName, String oldName) {
 			super(offset, length, newName);
 			Assert.isNotNull(oldName);
 			fOldName= oldName;			
 		}
 		
-		private UpdateTypeReference(TextRange range, String newName, String oldName) {
+		private UpdateTypeReferenceEdit(TextRange range, String newName, String oldName) {
 			super(range, newName);
 			Assert.isNotNull(oldName);
 			fOldName= oldName;			
@@ -791,18 +784,15 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		 * @see TextEdit#copy
 		 */
 		public TextEdit copy() {
-			return new UpdateTypeReference(getTextRange().copy(), getText(), fOldName);
+			return new UpdateTypeReferenceEdit(getTextRange().copy(), getText(), fOldName);
 		}
 
 		/* non Java-doc
 		 * @see TextEdit#connect(TextBufferEditor)
 		 */
 		public void connect(TextBufferEditor editor) throws CoreException {
-			TextRange pos= getTextRange();
-			int offset= pos.getOffset() + pos.getLength() - fOldName.length();
-			int length= fOldName.length();
-			TextRange newPos= new TextRange(offset, length);
-			setTextRange(newPos);
+			int offset= getTextRange().getOffset() + getTextRange().getLength() - fOldName.length();
+			setTextRange(new TextRange(offset, fOldName.length()));
 		}
 	}
 }
