@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -73,10 +72,6 @@ public class UnresolvedElementsSubProcessor {
 	}
 	
 	public static void getTypeProposals(ProblemPosition problemPos, int kind, ArrayList proposals) throws CoreException {
-		String[] args= problemPos.getArguments();
-		if (args.length < 1) {
-			return;
-		}
 		
 		ICompilationUnit cu= problemPos.getCompilationUnit();
 		
@@ -121,16 +116,13 @@ public class UnresolvedElementsSubProcessor {
 		String addedCUName= typeName + ".java"; //$NON-NLS-1$
 		if (!JavaConventions.validateCompilationUnitName(addedCUName).matches(IStatus.ERROR)) {
 			IPackageFragment pack= (IPackageFragment) cu.getParent();
-			ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
+			final ICompilationUnit addedCU= pack.getCompilationUnit(addedCUName);
 			if (!addedCU.exists()) {
 				boolean isClass= (kind & SimilarElementsRequestor.CLASSES) != 0;
 				String[] superTypes= (problemPos.getId() != IProblem.ExceptionTypeNotFound) ? null : new String[] { "java.lang.Exception" };
 				
-				CreateCompilationUnitChange change= new CreateCompilationUnitChange(addedCU, isClass, superTypes, settings);
 				String name= CorrectionMessages.getFormattedString("UnresolvedElementsSubProcessor.createtype.description", typeName); //$NON-NLS-1$
-				ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, change, 0);
-				proposal.setElementToOpen(addedCU);
-				proposals.add(proposal);
+				proposals.add(new NewCUCompletionProposal(name, addedCU, isClass, superTypes, 0));
 			}
 		}
 	}
@@ -168,13 +160,11 @@ public class UnresolvedElementsSubProcessor {
 			ICompilationUnit changedCU= type.getCompilationUnit();
 			if (!changedCU.isWorkingCopy()) {
 				changedCU= EditorUtility.getWorkingCopy(changedCU);
-				if (changedCU == null) {
-					// not yet supported, waiting for new working copy support
-					return;
-				}					
-				type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
-				if (type == null) {
-					return; // type does not exist in working copy
+				if (changedCU != null) {
+					type= (IType) JavaModelUtil.findMemberInCompilationUnit(changedCU, type);
+					if (type == null) {
+						return; // type has been removed in working copy
+					}
 				}
 			}
 			

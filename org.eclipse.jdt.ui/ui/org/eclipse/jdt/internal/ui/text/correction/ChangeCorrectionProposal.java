@@ -25,6 +25,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
@@ -41,8 +42,6 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	private Change fChange;
 	private String fName;
 	private int fRelevance;
-	
-	private Object fElementToOpen;
 
 	public ChangeCorrectionProposal(String name, Change change, int relevance) {
 		fName= name;
@@ -70,23 +69,8 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 				change.performed();
 			}
 		}
-		
-		try {
-			if (fElementToOpen != null) {
-				IEditorPart part= EditorUtility.openInEditor(fElementToOpen, true);
-				TextRange range= getRangeToReveal();
-				if (part instanceof ITextEditor && range != null) {
-					((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
-				}
-			}
-		} catch (PartInitException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);			
-		}
 	}
 	
-
 	/*
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
@@ -161,18 +145,6 @@ public class ChangeCorrectionProposal implements ICompletionProposal {
 	 */
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
-	}
-
-	/**
-	 * Sets the revealRange.
-	 * @param revealRange The revealRange to set
-	 */
-	public void setElementToOpen(Object elementToOpen) {
-		fElementToOpen= elementToOpen;
-	}
-	
-	protected TextRange getRangeToReveal() throws CoreException {
-		return null;
 	}
 
 }

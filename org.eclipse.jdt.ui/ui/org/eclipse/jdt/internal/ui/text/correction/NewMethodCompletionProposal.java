@@ -18,10 +18,17 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.texteditor.ITextEditor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -36,7 +43,9 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextRange;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class NewMethodCompletionProposal extends CUCorrectionProposal {
@@ -48,7 +57,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	private MemberEdit fMemberEdit;
 
 	public NewMethodCompletionProposal(String label, MethodInvocation node, ICompilationUnit currCU, IType destType, int relevance) throws CoreException {
-		super(label, destType.getCompilationUnit(), !destType.getCompilationUnit().isWorkingCopy(), relevance);
+		super(label, destType.getCompilationUnit(), false, relevance);
 		
 		fDestType= destType;
 		fCurrCU= currCU;
@@ -56,7 +65,7 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 		
 		fMemberEdit= null;
 	}
-	
+		
 	private boolean isLocalChange() {
 		return fDestType.getCompilationUnit().equals(fCurrCU);
 	}
@@ -93,10 +102,6 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 			changeElement.addTextEdit("Add imports", importEdit); //$NON-NLS-1$
 		}
 		changeElement.addTextEdit("Add method", fMemberEdit); //$NON-NLS-1$
-		
-		if (!isLocalChange()) {
-			setElementToOpen(changedCU);
-		}
 	}
 	
 	
@@ -221,11 +226,25 @@ public class NewMethodCompletionProposal extends CUCorrectionProposal {
 	}
 
 	/* (non-Javadoc)
-	 * @see ChangeCorrectionProposal#getRangeToReveal()
+	 * @see ICompletionProposal#apply(IDocument)
 	 */
-	protected TextRange getRangeToReveal() throws CoreException {
-		CompilationUnitChange change= getCompilationUnitChange();
-		return change.getNewTextRange(fMemberEdit);
+	public void apply(IDocument document) {
+		try {
+			IEditorPart part= null;
+			if (!isLocalChange()) {
+				part= EditorUtility.openInEditor(fDestType.getCompilationUnit(), true);
+			}
+			super.apply(document);
+		
+			if (part instanceof ITextEditor) {
+				TextRange range= getCompilationUnitChange().getNewTextRange(fMemberEdit);		
+				((ITextEditor) part).selectAndReveal(range.getOffset(), range.getLength());
+			}
+		} catch (PartInitException e) {
+			JavaPlugin.log(e);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}		
 	}
 
 }
