@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.textmanipulation.CopySourceEdit;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -28,13 +29,17 @@ public final class CopyIndentedSourceEdit extends CopySourceEdit {
 
 	public CopyIndentedSourceEdit(int offset, int length) {
 		super(offset, length);
-		initialize(0, "", 4); //$NON-NLS-1$
+		initialize(-1, "", 4); //$NON-NLS-1$
 	}
 
 	public void initialize(int sourceIndentLevel, String destIndentString, int tabWidth) {
 		fSourceIndentLevel= sourceIndentLevel;
 		fDestinationIndent= destIndentString;
 		fTabWidth= tabWidth;
+	}
+	
+	public boolean isInitialized() {
+		return fSourceIndentLevel != -1;
 	}
 
 	/* non Java-doc
@@ -48,6 +53,8 @@ public final class CopyIndentedSourceEdit extends CopySourceEdit {
 	}
 
 	protected String computeContent(TextBuffer buffer) {
+		Assert.isTrue(isInitialized(), "CopyIndentedSourceEdit never initialized"); //$NON-NLS-1$
+		
 		String str= super.computeContent(buffer); 
 		
 		int destIndentLevel= Strings.computeIndent(fDestinationIndent, fTabWidth);

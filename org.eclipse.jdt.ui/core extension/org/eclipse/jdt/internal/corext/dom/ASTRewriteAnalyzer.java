@@ -50,6 +50,8 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	private TextEdit fCurrentEdit;
 	private TokenScanner fTokenScanner; // shared scanner
 	private HashMap fNodeRanges;
+	private HashMap fCopySources;
+	
 
 	final TextBuffer fTextBuffer;
 	private final ASTRewrite fRewrite;	
@@ -65,6 +67,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fRewrite= rewrite;
 		fCurrentEdit= rootEdit;
 		fGroupDescriptions= resGroupDescriptions;
+		fCopySources= new HashMap();
 	}
 	
 	final ListRewriter getDefaultRewriter() {
@@ -106,14 +109,21 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		return range;
 	}
 	
-	final private CopyIndentedSourceEdit getSourceCopyEdit(ASTNode node) {
-		CopyIndentedSourceEdit edit= (CopyIndentedSourceEdit) fRewrite.getCopyData(node);
-		if (edit == null) {
-			ISourceRange range= getNodeRange(node, -1);
-			edit= new CopyIndentedSourceEdit(range.getOffset(), range.getLength());
-			fRewrite.setCopyData(node, edit);
+	final private CopyIndentedSourceEdit[] getSourceCopies(ASTNode node) {
+		int count= fRewrite.getCopyCount(node);
+		if (count == 0) {
+			return null;
 		}
-		return edit;
+		CopyIndentedSourceEdit[] edits= (CopyIndentedSourceEdit[]) fCopySources.get(node);
+		if (edits == null) {
+			edits= new CopyIndentedSourceEdit[count];
+			ISourceRange range= getNodeRange(node, -1);
+			for (int i= 0; i < count; i++) {
+				edits[i]= new CopyIndentedSourceEdit(range.getOffset(), range.getLength());
+			}
+			fCopySources.put(node, edits);
+		}
+		return edits;
 	}
 		
 	
@@ -140,11 +150,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	final boolean isModified(ASTNode node) {
 		return fRewrite.isModified(node);
 	}
-	
-	final boolean isCopied(ASTNode node) {
-		return fRewrite.isCopied(node);
-	}
-	
+		
 	final ASTNode getModifiedNode(ASTNode node) {
 		return fRewrite.getModifiedNode(node);
 	}
@@ -236,20 +242,32 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	}
 		
 	final TextEdit doTextCopy(ASTNode copiedNode, int destOffset, int sourceIndentLevel, String destIndentString, int tabWidth, String description) {
-		if (!isCopied(copiedNode)) {
+		CopyIndentedSourceEdit[] edits= getSourceCopies(copiedNode);
+		if (edits == null) {
 			Assert.isTrue(false, "Copy source not annotated" + copiedNode.toString()); //$NON-NLS-1$
 		}
-		CopyIndentedSourceEdit sourceEdit= getSourceCopyEdit(copiedNode);
+		CopyIndentedSourceEdit sourceEdit= null;
+		for (int i= 0; i < edits.length; i++) {
+			if (!edits[i].isInitialized()) {
+				sourceEdit= edits[i];
+				break;
+			}
+		}
+		if (sourceEdit == null) {
+			Assert.isTrue(false, "No copy source available" + copiedNode.toString()); //$NON-NLS-1$
+		}
+
 		sourceEdit.initialize(sourceIndentLevel, destIndentString, tabWidth);
-		
+	
 		CopyTargetEdit targetEdit= new CopyTargetEdit(destOffset, sourceEdit);
 		addEdit(targetEdit);
-		
+	
 		if (description != null) {
 			addDescription(description, sourceEdit);
 			addDescription(description, targetEdit);
 		}
-		return targetEdit;
+		return targetEdit;			
+
 	}
 			
 	private int getPosBeforeSpaces(int pos) {
@@ -802,8 +820,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		if (isCopied(node)) {
+		int count= fRewrite.getCopyCount(node);
+		while (count > 0) {
 			fCurrentEdit= fCurrentEdit.getParent();
+			count--;
 		}
 	}
 
@@ -811,11 +831,14 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		if (isCopied(node)) {
-			TextEdit edit= getSourceCopyEdit(node);
-			addEdit(edit);
-			fCurrentEdit= edit;			
-		}		
+		TextEdit[] edits= getSourceCopies(node);
+		if (edits != null) {
+			for (int i= 0; i < edits.length; i++) {
+				TextEdit edit= edits[i];
+				addEdit(edit);
+				fCurrentEdit= edit;		
+			}
+		}
 	}	
 
 	/* (non-Javadoc)

@@ -92,7 +92,7 @@ public final class ASTRewrite {
 	private ASTNode fRootNode;
 	
 	private HashMap fChangedProperties;
-	private HashMap fCopiedProperties;
+	private HashMap fCopyCounts;
 	private boolean fHasASTModifications;
 	
 	/**
@@ -102,7 +102,7 @@ public final class ASTRewrite {
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 		fChangedProperties= new HashMap();
-		fCopiedProperties= new HashMap();
+		fCopyCounts= new HashMap();
 		fHasASTModifications= false;
 	}
 	
@@ -138,7 +138,7 @@ public final class ASTRewrite {
 			fHasASTModifications= false;
 		}
 		fChangedProperties.clear();
-		fCopiedProperties.clear();
+		fCopyCounts.clear();
 	}
 	
 	/**
@@ -288,12 +288,9 @@ public final class ASTRewrite {
 	 */
 	public final ASTNode createCopy(ASTNode node) {
 		Assert.isTrue(node.getStartPosition() != -1, "Tries to copy a non-existing node"); //$NON-NLS-1$
-		Assert.isTrue(!isCopied(node), "Node used as more than one copy source"); //$NON-NLS-1$
 		assertIsInside(node);
 		
-		ASTCopySource copySource= new ASTCopySource();
-		copySource.data= null;
-		setCopyProperty(node, copySource);
+		incrementCopyCount(node);
 		
 		int placeHolderType= getPlaceholderType(node);
 		if (placeHolderType == UNKNOWN) {
@@ -412,8 +409,12 @@ public final class ASTRewrite {
 		return node.getProperty(COMPOUND_CHILDREN) instanceof List;
 	}
 	
-	public final boolean isCopied(ASTNode node) {
-		return fCopiedProperties.containsKey(node);
+	public final int getCopyCount(ASTNode node) {
+		Integer n= (Integer) fCopyCounts.get(node);
+		if (n != null) {
+			return n.intValue();
+		}
+		return 0;
 	}
 	
 	public final String getDescription(ASTNode node) {
@@ -440,8 +441,9 @@ public final class ASTRewrite {
 		return null;
 	}
 	
-	private final void setCopyProperty(ASTNode node, ASTCopySource copySource) {
-		fCopiedProperties.put(node, copySource);
+	private final void incrementCopyCount(ASTNode node) {
+		int count= getCopyCount(node);
+		fCopyCounts.put(node, new Integer(count + 1));
 	}
 	
 	private final void setChangeProperty(ASTNode node, ASTChange change) {
@@ -451,21 +453,7 @@ public final class ASTRewrite {
 	private final Object getChangeProperty(ASTNode node) {
 		return fChangedProperties.get(node);
 	}
-	
-	/* package */ final void setCopyData(ASTNode node, Object data) {
-		ASTCopySource copySource= (ASTCopySource) fCopiedProperties.get(node);
-		Assert.isTrue(copySource != null, "Node is not marked as copied"); //$NON-NLS-1$
-		copySource.data= data;
-	}
-	
-	/* package */  final Object getCopyData(ASTNode node) {
-		ASTCopySource copySource= (ASTCopySource) fCopiedProperties.get(node);
-		if (copySource != null) {
-			return copySource.data;
-		}
-		return null;
-	}
-	
+		
 	private void assertIsInside(ASTNode node) {
 		int endPos= node.getStartPosition() + node.getLength();
 		if (fRootNode.getStartPosition() > node.getStartPosition() || fRootNode.getStartPosition() + fRootNode.getLength() < endPos) {
@@ -492,7 +480,5 @@ public final class ASTRewrite {
 		public ASTNode modifiedNode;
 	}
 	
-	private static final class ASTCopySource {
-		public Object data; // rewriter specific data
-	}	
+	
 }

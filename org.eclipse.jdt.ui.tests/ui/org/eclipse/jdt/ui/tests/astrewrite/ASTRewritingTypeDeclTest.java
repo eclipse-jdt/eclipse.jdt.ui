@@ -652,7 +652,7 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		proposal.apply(null);
 		
 		buf= new StringBuffer();
-		buf.append("package org.eclipse; // comment\n");
+		buf.append("package org.eclipse;\n");
 		buf.append("public class Z {\n");
 		buf.append("}\n");	
 		assertEqualString(cu.getSource(), buf.toString());
@@ -669,7 +669,6 @@ public class ASTRewritingTypeDeclTest extends ASTRewritingTest {
 		
 		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
 		ASTRewrite rewrite= new ASTRewrite(astRoot);
-		AST ast= astRoot.getAST();
 		
 		assertTrue("Parse errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
 		

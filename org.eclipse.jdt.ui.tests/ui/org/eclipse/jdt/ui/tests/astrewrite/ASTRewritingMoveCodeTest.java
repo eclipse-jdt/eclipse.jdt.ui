@@ -56,7 +56,7 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ASTRewritingMoveCodeTest("testCopyRangeAndReplace"));
+			suite.addTest(new ASTRewritingMoveCodeTest("testMultipleCopiesOfSameNode"));
 			return suite;
 		}
 	}
@@ -730,6 +730,63 @@ public class ASTRewritingMoveCodeTest extends ASTRewritingTest {
 		assertEqualString(cu.getSource(), buf.toString());
 		clearRewrite(rewrite);
 	}
+	
+	public void testMultipleCopiesOfSameNode() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            foo();\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, false);
+		ASTRewrite rewrite= new ASTRewrite(astRoot);
+		assertTrue("Code has errors", (astRoot.getFlags() & ASTNode.MALFORMED) == 0);
+		
+		TypeDeclaration type= findTypeDeclaration(astRoot, "E");
+		MethodDeclaration methodDecl= findMethodDeclaration(type, "foo");
+		{
+			List statements= methodDecl.getBody().statements();
+			IfStatement ifStatement= (IfStatement) statements.get(0);
+			List ifStatementBody= ((Block) ifStatement.getThenStatement()).statements();
+			
+			ASTNode node= (ASTNode) ifStatementBody.get(1);
+			ASTNode placeholder1= rewrite.createCopy(node);
+			rewrite.markAsInserted(placeholder1);
+			statements.add(placeholder1);
+
+			ASTNode placeholder2= rewrite.createCopy(node);
+			rewrite.markAsReplaced((ASTNode) ifStatementBody.get(0), placeholder2);
+		}	
+					
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 10, null);
+		proposal.getCompilationUnitChange().setSave(true);
+		
+		proposal.apply(null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (i == 0) {\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++; // comment\n");
+		buf.append("            i++;\n");
+		buf.append("        }\n");
+		buf.append("        i++; // comment\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+		clearRewrite(rewrite);
+	}	
+	
 	
 	public void testMoveCollapsed() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
