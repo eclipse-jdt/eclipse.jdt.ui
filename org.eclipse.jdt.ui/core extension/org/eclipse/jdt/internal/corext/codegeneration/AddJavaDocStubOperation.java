@@ -24,7 +24,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -133,8 +133,8 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 					String formattedComment= StubUtility.codeFormat(comment, indent, lineDelim);
 					TextRegion region= buffer.getLineInformationOfOffset(curr.getSourceRange().getOffset());
 					if (region != null) {
-						TextPosition position= new TextPosition(region.getOffset(), 0);
-						buffer.replace(position, formattedComment);
+						TextRange range= new TextRange(region.getOffset(), 0);
+						buffer.replace(range, formattedComment);
 					}
 				}
 				monitor.worked(1);

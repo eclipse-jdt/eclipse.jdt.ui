@@ -7,7 +7,7 @@ package org.eclipse.jdt.internal.corext.refactoring.sef;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 
 final class EncapsulateReadAccess extends SimpleTextEdit {
 
@@ -19,15 +19,15 @@ final class EncapsulateReadAccess extends SimpleTextEdit {
 		super(offset, length, getter + "()");
 	}
 	
-	private EncapsulateReadAccess(TextPosition position, String text) {
-		super(position, text);
+	private EncapsulateReadAccess(TextRange range, String text) {
+		super(range, text);
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#getCopy
 	 */
 	public TextEdit copy() {
-		return new EncapsulateReadAccess(getTextPosition().copy(), getText());
+		return new EncapsulateReadAccess(getTextRange().copy(), getText());
 	}	
 }
 

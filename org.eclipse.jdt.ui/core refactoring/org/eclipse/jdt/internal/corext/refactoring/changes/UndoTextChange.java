@@ -9,24 +9,24 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.codemanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
 abstract class UndoTextChange extends AbstractTextChange {
 
-	private IUndoTextEdits fUndoTextEdits;
+	private UndoMemento fUndos;
 
-	public UndoTextChange(String name, int changeKind, IUndoTextEdits undos) {
+	public UndoTextChange(String name, int changeKind, UndoMemento undos) {
 		super(name, changeKind);
-		fUndoTextEdits= undos;
+		fUndos= undos;
 	}
 	
 	protected void addTextEdits(TextBufferEditor editor, boolean copy) throws CoreException {
-		fUndoTextEdits.addTo(editor);
+		editor.add(fUndos);
 	}	
 }
 

@@ -57,7 +57,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction{
 		TextBuffer tb= TextBuffer.acquire(file);
 		TextBufferEditor tbe= new TextBufferEditor(tb);
 		for (int i= 0; i < elems.length; i++) {
-			tbe.addTextEdit(createDeleteEdit(elems[i]));
+			tbe.add(createDeleteEdit(elems[i]));
 		}
 		if (! tbe.canPerformEdits())
 			return; ///XXX can i assert here?

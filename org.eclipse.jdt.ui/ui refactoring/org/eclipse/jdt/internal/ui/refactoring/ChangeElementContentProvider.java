@@ -19,12 +19,12 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 
 /**
  * A default content provider to present a hierarchy of <code>IChange</code>
@@ -36,10 +36,10 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 	
 	private static class OffsetComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			TextEdit s1= ((TextEditChange)o1).getTextEdit();
-			TextEdit s2= ((TextEditChange)o2).getTextEdit();
-			int p1= getOffset(s1);
-			int p2= getOffset(s2);
+			EditChange c1= (EditChange)o1;
+			EditChange c2= (EditChange)o2;
+			int p1= getOffset(c1);
+			int p2= getOffset(c2);
 			if (p1 < p2)
 				return -1;
 			if (p1 > p2)
@@ -114,11 +114,11 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 			CompilationUnitChange cunitChange= (CompilationUnitChange)change;
 			ICompilationUnit cunit= cunitChange.getCompilationUnit();
 			Map map= new HashMap(20);
-			TextEditChange[] changes=getSortedTextEditChanges(cunitChange);
+			EditChange[] changes=getSortedTextEditChanges(cunitChange);
 			for (int i= 0; i < changes.length; i++) {
-				TextEditChange tec= changes[i];
+				EditChange tec= changes[i];
 				try {
-					IJavaElement element= getModifiedJavaElement(tec.getTextEdit(), cunit);
+					IJavaElement element= getModifiedJavaElement(tec, cunit);
 					if (element == cunit) {
 						children.add(new TextEditChangeElement(changeElement, tec));
 					} else {
@@ -131,7 +131,7 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 			}
 			result= (ChangeElement[]) children.toArray(new ChangeElement[children.size()]);
 		} else if (change instanceof TextChange) {
-			TextEditChange[] changes= getSortedTextEditChanges((TextChange)change);
+			EditChange[] changes= getSortedTextEditChanges((TextChange)change);
 			result= new ChangeElement[changes.length];
 			for (int i= 0; i < changes.length; i++) {
 				result[i]= new TextEditChangeElement(changeElement, changes[i]);
@@ -141,8 +141,8 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 		return result; 
 	}
 	
-	private TextEditChange[] getSortedTextEditChanges(TextChange change) {
-		TextEditChange[] result= change.getTextEditChanges();
+	private EditChange[] getSortedTextEditChanges(TextChange change) {
+		EditChange[] result= change.getTextEditChanges();
 		Comparator comparator= new OffsetComparator();
 		Arrays.sort(result, comparator);
 		return result;
@@ -166,8 +166,8 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 		return result;
 	}
 	
-	private IJavaElement getModifiedJavaElement(TextEdit edit, ICompilationUnit cunit) throws JavaModelException {
-		Object element= edit.getModifiedLanguageElement();
+	private IJavaElement getModifiedJavaElement(EditChange edit, ICompilationUnit cunit) throws JavaModelException {
+		Object element= edit.getModifiedElement();
 		if (element instanceof IJavaElement)
 			return (IJavaElement)element;
 		int offset= getOffset(edit);
@@ -176,11 +176,11 @@ public class ChangeElementContentProvider  implements ITreeContentProvider {
 		return cunit.getElementAt(offset);
 	}
 
-	private static int getOffset(TextEdit edit) {
-		TextPosition[] positions= edit.getTextPositions();
-		if (positions == null || positions.length == 0)
+	private static int getOffset(EditChange edit) {
+		TextRange range= edit.getTextRange();
+		if (range == null)
 			return -1;
-		return positions[0].getOffset();
+		return range.getOffset();
 	}	
 }
 

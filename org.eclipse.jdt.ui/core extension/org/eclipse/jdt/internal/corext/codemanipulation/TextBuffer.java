@@ -4,12 +4,11 @@
  */
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
-import java.util.List;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
@@ -20,9 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaStatusConstants;
@@ -47,49 +43,12 @@ public class TextBuffer {
 	}
 	
 	private IDocument fDocument;
-	private PositionUpdater fUpdater;
 	
 	private static final TextBufferFactory fgFactory= new TextBufferFactory();
 	
 	TextBuffer(IDocument document) {
 		fDocument= document;
 		Assert.isNotNull(fDocument);
-		fUpdater= new PositionUpdater();
-		fDocument.addPositionCategory(fUpdater.CATEGORY);
-		fDocument.addPositionUpdater(fUpdater);
-	}
-	
-	/**
-	 * Adds the position to the specified position category of the text buffer.
-	 * A position that has been added to a position category is updated on each
-	 * change applied to the text buffer. Positions may be added multiple times.
-	 * The order of the category is maintained.
-	 *
-	 * @param position the position to be added
-	 * @exception CoreException if position describes an invalid range in this text buffer or if
-	 *		the category is undefined in this text buffer
-	 */
-	public void addPosition(TextPosition position) throws CoreException {
-		try {
-			fDocument.addPosition(fUpdater.CATEGORY, position);
-		} catch (BadPositionCategoryException e) {
-			Assert.isTrue(false, "Should never happen");			
-		} catch (BadLocationException e) {
-			throw new JavaModelException(e, IJavaModelStatusConstants.INDEX_OUT_OF_BOUNDS);
-		}
-	}
-	
-	/**
-	 * Removes the given position from the text buffer.
-	 *
-	 * @param position the position to be removed
-	 */
-	public void removePosition(TextPosition position) {
-		try {
-			fDocument.removePosition(fUpdater.CATEGORY, position);
-		} catch (BadPositionCategoryException e) {
-			Assert.isTrue(false, "Should never happen");
-		}
 	}
 	
 	/**
@@ -293,21 +252,23 @@ public class TextBuffer {
 	/**
 	 * Subsitutes the given text for the specified text position
 	 *
-	 * @param position the text position denoting offset and length of the text to be
-	 * 	replaced
+	 * @param offset the starting offset of the text to be replaced
+	 * @param length the length of the text to be replaced
 	 * @param text the substitution text
      * @exception  CoreException  if the text position [offset, length] is invalid.	 
 	 */
-	public void replace(TextPosition position, String text) throws CoreException {
+	public void replace(int offset, int length, String text) throws CoreException {
 		try {
-			fUpdater.setActiveTextPosition(position);
-			fDocument.replace(position.offset, position.length, text);
-			fUpdater.setActiveTextPosition(null);
+			fDocument.replace(offset, length, text);
 		} catch (BadLocationException e) {
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), JavaStatusConstants.INTERNAL_ERROR, 
-				"Replace failed due to wrong positions", e);
+				"Replace failed due to wrong range [" + offset + "," + length + "]", e);
 			throw new CoreException(s);
 		}	
+	}
+	
+	public void replace(TextRange range, String text) throws CoreException {
+		replace(range.fOffset, range.fLength, text);
 	}
 
 	//---- Special methods used by the <code>TextBufferEditor</code>
@@ -316,28 +277,14 @@ public class TextBuffer {
 	 * Releases this text buffer.
 	 */
 	/* package */ void release() {
-		try {
-			fDocument.removePositionUpdater(fUpdater);
-			Position[] positions= fDocument.getPositions(PositionUpdater.CATEGORY);
-			for (int i= 0; i < positions.length; i++) {
-				fDocument.removePosition(PositionUpdater.CATEGORY, positions[i]);
-			}
-			fDocument.removePositionCategory(fUpdater.CATEGORY);
-		} catch (BadPositionCategoryException e) {
-			Assert.isTrue(false, "Should never happen");
-		}
 	}
 	
-	/**
-	 * Validates if the positions added to this text buffer a valid position ranges. 
-	 */
-	/* package */ boolean validatePositions(List edits) {
-		PositionChecker checker= new PositionChecker(edits, getLength());
-		return checker.perform();
+	/* package */ void registerUpdater(IDocumentListener listener) {
+		fDocument.addDocumentListener(listener);
 	}
-
-	/* package */ void setCurrentTextEdit(TextEdit currentEdit) {
-		fUpdater.setActiveTextEdit(currentEdit);
+	
+	/* package */ void unregisterUpdater(IDocumentListener listener) {
+		fDocument.removeDocumentListener(listener);
 	}
 	
 	//---- Utility methods

@@ -22,9 +22,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -406,8 +406,8 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 			fOldName= oldName;
 		}
 		
-		private UpdateFieldReference(TextPosition position, String newName, String oldName) {
-			super(position, newName);
+		private UpdateFieldReference(TextRange range, String newName, String oldName) {
+			super(range, newName);
 			Assert.isNotNull(oldName);
 			fOldName= oldName;
 		}
@@ -416,16 +416,16 @@ public class RenameFieldRefactoring extends Refactoring implements IRenameRefact
 		 * @see TextEdit#copy
 		 */
 		public TextEdit copy() {
-			return new UpdateFieldReference(getTextPosition().copy(), getText(), fOldName);
+			return new UpdateFieldReference(getTextRange().copy(), getText(), fOldName);
 		}
 		
 		/* non java-doc
-		 * @see TextEdit#connect(TextBuffer)
+		 * @see TextEdit#connect(TextBufferEditor)
 		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextPosition oldPos= getTextPosition();
-			int offset= oldPos.getOffset() + oldPos.getLength() - fOldName.length();
-			setTextPosition(new TextPosition(offset, fOldName.length()));
+		public void connect(TextBufferEditor editor) throws CoreException {
+			TextRange oldRange= getTextRange();
+			int offset= oldRange.getOffset() + oldRange.getLength() - fOldName.length();
+			setTextRange(new TextRange(offset, fOldName.length()));
 		}
 	}
 }

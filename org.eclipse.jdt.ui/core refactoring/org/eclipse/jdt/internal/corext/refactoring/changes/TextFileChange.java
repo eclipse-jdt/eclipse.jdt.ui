@@ -11,8 +11,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeAbortException;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
@@ -24,8 +24,8 @@ public class TextFileChange extends TextChange  {
 		private IFile fFile;
 		private TextBuffer fAcquiredTextBuffer;
 		private int fAcquireCounter;
-		public UndoTextFileChange(String name, IFile file, int changeKind, IUndoTextEdits undos) {
-			super(name, changeKind, undos);
+		public UndoTextFileChange(String name, IFile file, int changeKind, UndoMemento undo) {
+			super(name, changeKind, undo);
 			fFile= file;
 		}
 		public Object getModifiedLanguageElement(){
@@ -49,8 +49,8 @@ public class TextFileChange extends TextChange  {
 		protected TextBuffer createTextBuffer() throws CoreException {
 			return TextBuffer.create(fFile);
 		}
-		protected IChange createReverseChange(IUndoTextEdits edits, int changeKind) {
-			return new UndoTextFileChange(getName(), fFile, changeKind, edits);
+		protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+			return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 		}
 		public void perform(ChangeContext context, IProgressMonitor pm) throws JavaModelException, ChangeAbortException {
 			try{
@@ -130,8 +130,8 @@ public class TextFileChange extends TextChange  {
 	/* non java-doc
 	 * Method declared in TextChange
 	 */
-	protected IChange createReverseChange(IUndoTextEdits undos, int changeKind) {
-		return new UndoTextFileChange(getName(), fFile, changeKind, undos);
+	protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+		return new UndoTextFileChange(getName(), fFile, changeKind, undo);
 	}
 	
 	/* non java-doc

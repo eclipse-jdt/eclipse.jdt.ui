@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -311,11 +311,11 @@ public class ImportsStructure implements IImportsStructure {
 			IFile file= (IFile) cu.getUnderlyingResource();
 			buffer= TextBuffer.acquire(file);
 			
-			TextPosition textPosition= getReplacePositions(buffer);
+			TextRange textRange= getReplaceRange(buffer);
 
-			String replaceString= getReplaceString(buffer, textPosition);
+			String replaceString= getReplaceString(buffer, textRange);
 			if (replaceString != null) {
-				buffer.replace(textPosition, replaceString);
+				buffer.replace(textRange, replaceString);
 			}		
 			if (save) {
 				TextBuffer.commitChanges(buffer, true, null);
@@ -333,23 +333,23 @@ public class ImportsStructure implements IImportsStructure {
 	 * Get the replace positons.
 	 * @param textBuffer The textBuffer
 	 */
-	public TextPosition getReplacePositions(TextBuffer textBuffer) throws JavaModelException {
+	public TextRange getReplaceRange(TextBuffer textBuffer) throws JavaModelException {
 		IImportContainer container= fCompilationUnit.getImportContainer();
 		if (container.exists()) {
 			ISourceRange importSourceRange= container.getSourceRange();
-			return new TextPosition(importSourceRange.getOffset(), importSourceRange.getLength());
+			return new TextRange(importSourceRange.getOffset(), importSourceRange.getLength());
 		} else {
 			int start= getPackageStatementEndPos(textBuffer);
-			return new TextPosition(start, 0);
+			return new TextRange(start, 0);
 		}		
 	}
 	
 	/**
 	 * Returns the replace string or <code>null</code> if no replace is needed.
 	 */
-	public String getReplaceString(TextBuffer textBuffer, TextPosition textPosition) throws JavaModelException {
-		int importsStart=  textPosition.getOffset();
-		int importsLen= textPosition.getLength();
+	public String getReplaceString(TextBuffer textBuffer, TextRange textRange) throws JavaModelException {
+		int importsStart=  textRange.getOffset();
+		int importsLen= textRange.getLength();
 				
 		String lineDelim= textBuffer.getLineDelimiter();
 		

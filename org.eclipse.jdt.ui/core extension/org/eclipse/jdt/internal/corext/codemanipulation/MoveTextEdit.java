@@ -8,60 +8,138 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.internal.core.Assert;
 
 /**
- * A text edit that moves text inside a text buffer. All text positions added by text edits which are enclosed by 
- * the text to be moved are moved as well.
+ * A text edit that moves text inside a text buffer.
  */
-public class MoveTextEdit extends TextEdit {
+public final class MoveTextEdit extends TextEdit {
+	
+	/* package */ static class TargetMark extends NopTextEdit {
+		private MoveTextEdit fMoveTextEdit;
+		public TargetMark(TextRange range, MoveTextEdit edit) {
+			super(range);
+			fMoveTextEdit= edit;
+		}
+		/* package */ MoveTextEdit getMoveTextEdit() {
+			return fMoveTextEdit;
+		}
+		public TextEdit perform(TextBuffer buffer) throws CoreException {
+			fMoveTextEdit.internalPerform(buffer);
+			return super.perform(buffer);
+		}
+		public TextEdit copy() {
+			Assert.isTrue(false, "This should never happen");
+			return super.copy();
+		}
+	}
 
-	private TextPosition fSource;
-	private TextPosition fTarget;
+	private TextRange fTarget;
+	private TextRange fSource;
+	private int fPerformCounter;
 
 	/**
 	 * Creates a new <code>MoveTextEdit</code>. The text edit doesn't support
-	 * overlapping moves. So <code>target &lt;= offset && offset + length - 1 &lt;= target</code>
-	 * must be <code>true</code>
+	 * overlapping moves. So for a <code>MoveTextEdit</code> <code>destination &lt;= offset && 
+	 * offset + length - 1 &lt;= destination</code> must be <code>true</code>.
 	 * 
 	 * @param offset the offset of the text to be moved
 	 * @param length the text length to be moved
-	 * @param target the destination offset
+	 * @param destination the destination offset
 	 */
-	public MoveTextEdit(int offset, int length, int target) {
-		fSource= new TextPosition(offset, length);
-		fTarget= new TextPosition(target, TextPosition.ANCHOR_RIGHT);
-		Assert.isTrue(target <= offset || offset + length - 1 <= target);
+	public MoveTextEdit(int offset, int length, int destination) {
+		Assert.isTrue(destination <= offset || offset + length <= destination);
+		fSource= new TextRange(offset, length);
+		fTarget= new TextRange(destination);
 	}
 
-	protected MoveTextEdit(TextPosition source, TextPosition target) {
+	/**
+	 * Creates a new <code>MoveTextEdit</code> with the given source and target range.
+	 * 
+	 * @param source the source
+	 * @param target the target
+	 */
+	private MoveTextEdit(TextRange source,TextRange target) {
 		fSource= source;
-		Assert.isNotNull(fSource);
 		fTarget= target;
-		Assert.isNotNull(fTarget);
 	}
 	
-	/*
-	 * @see TextEdit#getTextPositions()
+	/**
+	 * Returns the move text edit's source range. This method returns the same range
+	 * as <code>TextEdit#getTextRange()</code>
+	 * 
+	 * @return the edit's source range
 	 */
-	public TextPosition[] getTextPositions() {
-		return new TextPosition[] {fSource, fTarget};
+	public TextRange getSourceRange() {
+		return fSource;
+	}
+	
+	/**
+	 * Returns the move text edit's target range.
+	 * 
+	 * @return the edit's target range
+	 */
+	public TextRange getTargetRange() {
+		return fTarget;
+	}
+	
+	/* non Java-doc
+	 * @see TextEdit#getTextRange()
+	 */
+	public TextRange getTextRange() {
+		return fSource;
 	}
 
-	/*
+	/* non Java-doc
+	 * @see TextEdit#connect(TextBufferEditor)
+	 */
+	public void connect(TextBufferEditor editor) throws CoreException {
+		editor.add(new TargetMark(fTarget, this));
+	}
+	
+	/* non Java-doc
 	 * @see TextEdit#perform(TextBuffer)
 	 */
 	public TextEdit perform(TextBuffer buffer) throws CoreException {
-		String current= buffer.getContent(fSource.getOffset(), fSource.getLength());
-		buffer.replace(fSource, "");
-		buffer.replace(fTarget, current);
-		fSource.setAnchor(TextPosition.ANCHOR_RIGHT);
-		fTarget.setAnchor(TextPosition.NO_ANCHOR);
+		internalPerform(buffer);
 		return new MoveTextEdit(fTarget, fSource);
 	}
 
-	/*
+	/* non Java-doc
 	 * @see TextEdit#copy()
 	 */
 	public TextEdit copy() {
-		return new MoveTextEdit(fSource.getOffset(), fSource.getLength(), fTarget.getOffset());
+		TextRange source= getSourceRange();
+		TextRange target= getTargetRange();
+		return new MoveTextEdit(source.fOffset, source.fLength, target.fOffset);
+	}
+	
+	//---- Helper method ---------------------------------------------------------------------------------
+	
+	private void internalPerform(TextBuffer buffer) throws CoreException {
+		Assert.isTrue(fPerformCounter < 2);
+		if (++fPerformCounter == 2) {
+			TextRange source= getSourceRange();
+			TextRange target= getTargetRange();
+			String current= buffer.getContent(source.fOffset, source.fLength);
+			buffer.replace(source, "");
+			buffer.replace(target, current);
+		}
+	}
+	
+	/* package */ boolean isUpMove() {
+		return fSource.fOffset < fTarget.fOffset;
+	}
+	
+	/* package */ boolean isDownMove() {
+		return fSource.fOffset > fTarget.fOffset;
+	}
+	
+	/* package */ TextRange getChildRange() {
+		int offset= fSource.fOffset;
+		int length= fSource.fLength;
+		int destination= fTarget.fOffset;
+		if (destination <= offset)
+			return new TextRange(destination, offset + length - destination);
+		else
+			return new TextRange(offset, destination - offset);
 	}	
 }
 

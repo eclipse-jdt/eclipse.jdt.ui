@@ -5,19 +5,12 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
-import org.eclipse.jdt.internal.compiler.parser.Scanner;
-import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
-import org.eclipse.jdt.internal.compiler.util.CharOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.DebugUtils;
 
 public class DeleteSourceReferenceEdit extends SimpleTextEdit {
 
@@ -41,10 +34,10 @@ public class DeleteSourceReferenceEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {		
+	public void connect(TextBufferEditor editor) throws CoreException {		
 		setText("");
 		ISourceRange range= SourceReferenceSourceRangeComputer.computeSourceRange(fSourceReference, fCu);
-		setTextPosition(new TextPosition(range.getOffset(), range.getLength()));
+		setTextRange(new TextRange(range));
 	}
 }
 

@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -70,14 +70,14 @@ public class CompilationUnitChange extends TextFileChange {
 		}
 	}
 	
-	public String getPreviewContent(ISourceReference element, TextEditChange[] changes) throws CoreException {
+	public String getPreviewContent(ISourceReference element, EditChange[] changes) throws CoreException {
 		TextBuffer buffer= createTextBuffer();
 		TextBufferEditor editor= new TextBufferEditor(buffer);
 		for (int i= 0; i < changes.length; i++) {
-			TextEditChange change= changes[i];
+			EditChange change= changes[i];
 			Assert.isTrue(change.getTextChange() == this);
 			if (change.isActive())
-				editor.addTextEdit(change.getTextEdit().copy());
+				change.addTo(editor, true);
 		}
 		int oldLength= buffer.getLength();
 		editor.performEdits(new NullProgressMonitor());

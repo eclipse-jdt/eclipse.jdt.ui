@@ -44,16 +44,17 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getModifiedLanguageElement
+	 * @see TextEdit#getModifiedElement
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return fMember;
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {
+	public void connect(TextBufferEditor editor) throws CoreException {
+		TextBuffer buffer= editor.getTextBuffer();
 		int offset= fMember.getSourceRange().getOffset();
 		int length= 0;
 		Scanner scanner= new Scanner();
@@ -73,7 +74,7 @@ public class ChangeVisibilityEdit extends SimpleTextEdit {
 		String text= fVisibility;
 		if (length == 0)
 			text+= " ";
-		setTextPosition(new TextPosition(offset, length));
+		setTextRange(new TextRange(offset, length));
 		setText(text);
 		super.connect(buffer);
 	}	

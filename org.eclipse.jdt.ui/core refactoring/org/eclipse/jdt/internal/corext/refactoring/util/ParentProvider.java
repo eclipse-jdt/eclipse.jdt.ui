@@ -4,6 +4,8 @@
  */
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.List;
+
 import org.eclipse.jdt.internal.compiler.AbstractSyntaxTreeVisitorAdapter;
 import org.eclipse.jdt.internal.compiler.ast.AstNode;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -21,6 +23,13 @@ public class ParentProvider extends AbstractSyntaxTreeVisitorAdapter implements 
 		if (fTracker == null)
 			return null;
 		return fTracker.getParent();
+	}
+	
+	public AstNode[] getParents() {
+		if (fTracker == null)
+			return new AstNode[0];
+		List result= fTracker.getParents();
+		return (AstNode[]) result.toArray(new AstNode[result.size()]);
 	}
 }
 

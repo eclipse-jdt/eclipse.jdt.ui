@@ -33,9 +33,9 @@ import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.core.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -720,8 +720,8 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 			fOldName= oldName;			
 		}
 		
-		private UpdateTypeReference(TextPosition position, String newName, String oldName) {
-			super(position, newName);
+		private UpdateTypeReference(TextRange range, String newName, String oldName) {
+			super(range, newName);
 			Assert.isNotNull(oldName);
 			fOldName= oldName;			
 		}
@@ -730,18 +730,18 @@ public class RenameTypeRefactoring extends Refactoring implements IRenameRefacto
 		 * @see TextEdit#copy
 		 */
 		public TextEdit copy() {
-			return new UpdateTypeReference(getTextPosition().copy(), getText(), fOldName);
+			return new UpdateTypeReference(getTextRange().copy(), getText(), fOldName);
 		}
 
 		/* non Java-doc
-		 * @see TextEdit#connect(TextBuffer)
+		 * @see TextEdit#connect(TextBufferEditor)
 		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextPosition pos= getTextPosition();
+		public void connect(TextBufferEditor editor) throws CoreException {
+			TextRange pos= getTextRange();
 			int offset= pos.getOffset() + pos.getLength() - fOldName.length();
 			int length= fOldName.length();
-			TextPosition newPos= new TextPosition(offset, length);
-			setTextPosition(newPos);
+			TextRange newPos= new TextRange(offset, length);
+			setTextRange(newPos);
 		}
 	}
 }

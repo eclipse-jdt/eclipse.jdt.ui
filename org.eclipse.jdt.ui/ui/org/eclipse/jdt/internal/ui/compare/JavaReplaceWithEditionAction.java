@@ -128,7 +128,7 @@ public class JavaReplaceWithEditionAction extends JavaHistoryAction {
 										CodeFormatterPreferencePage.getTabSize());
 
 				TextBufferEditor editor= new TextBufferEditor(buffer);
-				editor.addTextEdit(edit);
+				editor.add(edit);
 				editor.performEdits(new NullProgressMonitor());
 				
 				TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());

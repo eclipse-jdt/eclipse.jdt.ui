@@ -48,16 +48,17 @@ public class AddMemberEdit extends SimpleTextEdit {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getModifiedLanguageElement
+	 * @see TextEdit#getModifiedElement
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		return fSibling.getParent();
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {
+	public void connect(TextBufferEditor editor) throws CoreException {
+		TextBuffer buffer= editor.getTextBuffer();
 		StringBuffer sb= new StringBuffer();
 		String lineDelimiter= buffer.getLineDelimiter();
 		int offset= computeOffset(buffer);
@@ -72,7 +73,7 @@ public class AddMemberEdit extends SimpleTextEdit {
 			sb.append(lineDelimiter);
 		}
 		String text= sb.toString();
-		setTextPosition(new TextPosition(offset, 0));
+		setTextRange(new TextRange(offset, 0));
 		setText(text);
 		super.connect(buffer);
 	}

@@ -5,18 +5,21 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.tree.TreeNode;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.core.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextEditNode.RootNode;
 
 /**
  * A <code>TextBufferEditor</code> manages a set of <code>TextEdit</code>s and applies
@@ -30,24 +33,17 @@ import org.eclipse.jdt.internal.core.Assert;
  * all text buffer editors working on the same text buffer.
  */
 public class TextBufferEditor {
-	
-	private static class UndoTextEdits implements IUndoTextEdits {
-		private List fUndos;
-		public UndoTextEdits(int size) {
-			fUndos= new ArrayList(size);
-		}
-		public void add(TextEdit undo) {
-			fUndos.add(undo);
-		}
-		public void addTo(TextBufferEditor manipulator) throws CoreException {
-			for (int i= fUndos.size() - 1; i >= 0; i--) {
-				manipulator.addTextEdit((TextEdit)fUndos.get(i));
-			}
-		}
-	}
-	
+		
 	private TextBuffer fBuffer;
 	private List fEdits;
+	private RootNode fRootNode;
+	private int fNumberOfNodes;
+	private int fConnectCount;
+	private int fMode;
+
+	/* package */ static final int UNDEFINED= 	0;
+	/* package */ static final int REDO=				1;
+	/* package */ static final int UNDO=			2;
 
 	/**
 	 * Creates a new <code>TextBufferEditor</code> for the given 
@@ -58,7 +54,7 @@ public class TextBufferEditor {
 	public TextBufferEditor(TextBuffer buffer) {
 		fBuffer= buffer;
 		Assert.isNotNull(fBuffer);
-		fEdits= new ArrayList(5);
+		fEdits= new ArrayList();
 	}
 	
 	/**
@@ -71,23 +67,49 @@ public class TextBufferEditor {
 	}
 	
 	/**
-	 * Adds a <code>TextEdit</code> to this text editor. All added text edits are
-	 * executed by calling <code>performEdits</code>.
+	 * Adds a <code>TextEdit</code> to this text editor.
 	 * 
 	 * @param edit the text edit to be added
-	 * @exception CoreException if the <code>TextEdit</code> can not be added
+	 * @exception CoreException if the text edit can not be added
 	 * 	to this text buffer editor
-	 */	
-	public void addTextEdit(TextEdit edit) throws CoreException {
-		Assert.isNotNull(edit);
-		if (fBuffer == null)
-			throw new JavaModelException(null, IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
-		fEdits.add(edit);
-		edit.connect(fBuffer);
-		TextPosition[] positions= edit.getTextPositions();
-		for (int i= 0; i < positions.length; i++) {
-			fBuffer.addPosition(positions[i]);
+	 */
+	public void add(TextEdit edit) throws CoreException {
+		Assert.isTrue(fMode == UNDEFINED || fMode == REDO);
+		internalAdd(edit);
+		fMode= REDO;
+	}
+		
+	/**
+	 * Adds a <code>MultiTextEdit</code> to this text editor.
+	 * 
+	 * @param edit the multi text edit to be added
+	 * @exception CoreException if the multi text edit can not be added
+	 * 	to this text buffer editor
+	 */
+	public void add(MultiTextEdit edit) throws CoreException {
+		Assert.isTrue(fMode == UNDEFINED || fMode == REDO);
+		TextEdit[] children= edit.getChildren();
+		for (int i= 0; i < children.length; i++) {
+			internalAdd(children[i]);
 		}
+		fMode= REDO;
+	}
+
+	/**
+	 * Adds a <code>UndoMemento</code> to this text editor.
+	 * 
+	 * @param undo the undo memento to be added
+	 * @exception CoreException if the undo memento can not be added
+	 * 	to this text buffer editor
+	 */
+	public void add(UndoMemento undo) throws CoreException {
+		Assert.isTrue(fMode == UNDEFINED);
+		List list= undo.fEdits;
+		// Add them reverse since we are adding undos.
+		for (int i= list.size() - 1; i >= 0; i--) {
+			internalAdd((TextEdit)list.get(i));			
+		}
+		fMode= undo.fMode;
 	}
 	
 	/**
@@ -98,24 +120,24 @@ public class TextBufferEditor {
 	 * 	is a wrong offset or length value of a <code>TextEdit</code>.
 	 */
 	public boolean canPerformEdits() {
-		if (fBuffer == null)
-			return false;
-		if (fEdits.size() == 0)
+		if (fRootNode != null)
 			return true;
-		return fBuffer.validatePositions(fEdits);
+		fRootNode= buildTree();
+		if (fRootNode == null)
+			return false;
+		if (fRootNode.validate(fBuffer.getLength()))
+			return true;
+			
+		fRootNode= null;
+		return false;
 	}
 	
 	/**
 	 * Clears the text buffer editor.
 	 */
 	public void clear() {
-		for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
-			TextEdit edit= (TextEdit) iter.next();
-			TextPosition[] positions= edit.getTextPositions();
-			for (int i= 0; i < positions.length; i++) {
-				fBuffer.removePosition(positions[i]);
-			}
-		}
+		fRootNode= null;
+		fMode= UNDEFINED;
 		fEdits.clear();
 	}
 	
@@ -125,41 +147,65 @@ public class TextBufferEditor {
 	 * 
 	 * @param pm a progress monitor to report progress
 	 * @return an object representing the undo of the executed <code>TextEdit</code>s
-	 * @exception JavaModelException if the edits cannot be executed.
+	 * @exception CoreException if the edits cannot be executed
 	 */
-	public IUndoTextEdits performEdits(IProgressMonitor pm) throws CoreException {
+	public UndoMemento performEdits(IProgressMonitor pm) throws CoreException {
 		if (pm == null)
 			pm= new NullProgressMonitor();
 			
 		int size= fEdits.size();
 		if (size == 0)
-			return new UndoTextEdits(0);
-		if (fBuffer == null)
-			throw new JavaModelException(null, IJavaModelStatusConstants.ELEMENT_DOES_NOT_EXIST);
-
+			return new UndoMemento(fMode == UNDO ? REDO : UNDO);
+			
+		if (fRootNode == null) {
+			fRootNode= buildTree();
+			if (fRootNode == null || !fRootNode.validate(fBuffer.getLength()))
+				throw new JavaModelException(null, IJavaModelStatusConstants.NO_ELEMENTS_TO_PROCESS);
+		}
 		try {
-			UndoTextEdits undo= new UndoTextEdits(size);
-			pm.beginTask("", size + 10);
-			for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
-				TextEdit edit= (TextEdit) iter.next();
-				fBuffer.setCurrentTextEdit(edit);
-				undo.add(edit.perform(fBuffer));
-				pm.worked(1);
-			}
-			for (Iterator iter= fEdits.iterator(); iter.hasNext();) {
-				TextEdit edit= (TextEdit) iter.next();
-				edit.performed();
-				TextPosition[] positions= edit.getTextPositions();
-				for (int i= 0; i < positions.length; i++) {
-					fBuffer.removePosition(positions[i]);
-				}
+			pm.beginTask("", fNumberOfNodes + 10);
+			UndoMemento undo= null;
+			if (fMode == REDO) {
+				undo= fRootNode.performDo(fBuffer, pm);
+				fRootNode.performedDo();
+			} else {
+				undo= fRootNode.performUndo(fBuffer, pm);
+				fRootNode.performedUndo();
 			}
 			pm.worked(10);
 			return undo;
 		} finally {
 			pm.done();
-			fEdits.clear();
+			clear();
 		}
 	}
+	
+	//---- Helper methods ------------------------------------------------------------
+	
+	private RootNode buildTree() {
+		TextEditNode[] nodes= new TextEditNode[fEdits.size()];
+		for (int i= fEdits.size() - 1; i >= 0; i--) {
+			nodes[i]= TextEditNode.create((TextEdit)fEdits.get(i));
+		}
+		fNumberOfNodes= nodes.length;
+		Arrays.sort(nodes, new TextEditNodeComparator());
+		RootNode root= new RootNode(fBuffer.getLength());
+		for (int i= 0; i < nodes.length; i++) {
+			root.add(nodes[i]);
+		}
+		return root;
+	}
+	
+	private void internalAdd(TextEdit edit) throws CoreException {
+		edit.index= fEdits.size();
+		edit.isSynthetic= fConnectCount > 0;
+		try {
+			fConnectCount++;
+			edit.connect(this);
+		} finally {
+			fConnectCount--;
+		}
+		fEdits.add(edit);
+	}	
 }
 

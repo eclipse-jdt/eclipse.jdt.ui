@@ -6,9 +6,9 @@ import org.eclipse.jdt.internal.compiler.parser.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.TerminalSymbols;
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
 /**
@@ -31,23 +31,23 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 	 * @see TextEdit#copy()
 	 */
 	public TextEdit copy() {
-		return new LineEndDeleteTextEdit(getTextPosition().getOffset(), getTextPosition().getLength(), fFullSource);
+		return new LineEndDeleteTextEdit(getTextRange().getOffset(), getTextRange().getLength(), fFullSource);
 	}
 	
 	/*
 	 * @see TextEdit#connect(TextBuffer)
 	 */
-	public void connect(TextBuffer textBuffer) throws JavaModelException{
-		setTextPosition(new TextPosition(getTextPosition().getOffset(), computeLength()));
+	public void connect(TextBufferEditor editor) throws JavaModelException{
+		setTextRange(new TextRange(getTextRange().getOffset(), computeLength()));
 	}
 	
 	private int computeLength() throws JavaModelException{
-		int length= getTextPosition().getLength();
+		int length= getTextRange().getLength();
 		try{	
 			Scanner scanner= new Scanner(true, true); //comments, whitespaces
 			scanner.recordLineSeparator = true;
 			scanner.setSourceBuffer(fFullSource.toCharArray());
-			int start= getTextPosition().getOffset() + length;
+			int start= getTextRange().getOffset() + length;
 			scanner.currentPosition= start;
 			int token = scanner.getNextToken();
 			while (token != TerminalSymbols.TokenNameEOF) {
@@ -59,7 +59,7 @@ class LineEndDeleteTextEdit extends SimpleTextEdit {
 					case Scanner.TokenNameCOMMENT_LINE :
 						break;
 					default:
-						return scanner.currentPosition - getTextPosition().getOffset() - scanner.getCurrentTokenSource().length;
+						return scanner.currentPosition - getTextRange().getOffset() - scanner.getCurrentTokenSource().length;
 				}
 				token = scanner.getNextToken();
 			}

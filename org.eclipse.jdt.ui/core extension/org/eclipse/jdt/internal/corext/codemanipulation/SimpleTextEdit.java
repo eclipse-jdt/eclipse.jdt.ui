@@ -10,30 +10,30 @@ import org.eclipse.jdt.internal.core.Assert;
 
 public abstract class SimpleTextEdit extends TextEdit {
 
-	private TextPosition fPosition;
+	private TextRange fRange;
 	private String fText;
 
-	public static TextEdit createReplace(int offset, int length, String text) {
+	public static SimpleTextEdit createReplace(int offset, int length, String text) {
 		return new SimpleTextEditImpl(offset, length, text);
 	}
 
-	public static TextEdit createInsert(int offset, String text) {
+	public static SimpleTextEdit createInsert(int offset, String text) {
 		return new SimpleTextEditImpl(offset, 0, text);
 	}
 	
-	public static TextEdit createDelete(int offset, int length) {
+	public static SimpleTextEdit createDelete(int offset, int length) {
 		return new SimpleTextEditImpl(offset, length, "");
 	}
 	
 	private final static class SimpleTextEditImpl extends SimpleTextEdit {
-		protected SimpleTextEditImpl(TextPosition position, String text) {
-			super(position, text);
+		protected SimpleTextEditImpl(TextRange range, String text) {
+			super(range, text);
 		}
 		protected SimpleTextEditImpl(int offset, int length, String text) {
 			super(offset, length, text);
 		}
 		public TextEdit copy() {
-			return new SimpleTextEditImpl(getTextPosition().copy(), getText());
+			return new SimpleTextEditImpl(getTextRange().copy(), getText());
 		}	
 	}
 	
@@ -41,15 +41,27 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	protected SimpleTextEdit(int offset, int length, String text) {
-		this(new TextPosition(offset, length), text);
+		this(new TextRange(offset, length), text);
 	}
-	protected SimpleTextEdit(TextPosition position, String text) {
-		fPosition= position;
+	protected SimpleTextEdit(TextRange range, String text) {
+		fRange= range;
 		fText= text;
 	}
 	
 	/**
+	 * Returns the text edit's text
+	 * 
+	 * @return the text edit's text
+	 */
+	public String getText() {
+		return fText;
+	}
+		
+	/**
 	 * Sets the text edit's text
+	 * <p>
+	 * This method should only be called from within the <code>
+	 * connect</code> method.
 	 * 
 	 * @param text the text edit's text
 	 */	
@@ -59,50 +71,32 @@ public abstract class SimpleTextEdit extends TextEdit {
 	}
 	
 	/**
-	 * Returns the text edit's text
+	 * Sets the text edit's range.
+	 * <p>
+	 * This method should only be called from within the <code>
+	 * connect</code> method.
 	 * 
-	 * @return the text edit's text
-	 */
-	protected String getText() {
-		return fText;
-	}
-		
-	/**
-	 * Sets the text edit's position. This method must not be called
-	 * after the this edit has been connected to a <code>ITextBuffer</code>.
-	 * 
-	 * @param length the text edit's position.
+	 * @param range the text edit's range.
 	 */	
-	protected void setTextPosition(TextPosition position) {
-		fPosition= position;
-		Assert.isNotNull(fPosition);
-	}
-	
-	/**
-	 * Returns the text edit's position.
-	 * 
-	 * @return the text edit's position
-	 */
-	protected TextPosition getTextPosition() {
-		return fPosition;
+	protected void setTextRange(TextRange range) {
+		fRange= range;
+		Assert.isNotNull(fRange);
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getTextPositions
+	 * @see TextEdit#getTextRange
 	 */
-	public final TextPosition[] getTextPositions() {
-		if (fPosition == null)
-			return new TextPosition[0];
-		return new TextPosition[] { fPosition };
+	public TextRange getTextRange() {
+		return fRange;
 	}
 	
 	/* non Java-doc
 	 * @see TextEdit#doPerform
 	 */
 	public final TextEdit perform(TextBuffer buffer) throws CoreException {
-		String current= buffer.getContent(fPosition.getOffset(), fPosition.getLength());
-		buffer.replace(fPosition, fText);
-		return new SimpleTextEditImpl(fPosition, current);
+		String current= buffer.getContent(fRange.fOffset, fRange.fLength);
+		buffer.replace(fRange, fText);
+		return new SimpleTextEditImpl(fRange, current);
 	}	
 }
 

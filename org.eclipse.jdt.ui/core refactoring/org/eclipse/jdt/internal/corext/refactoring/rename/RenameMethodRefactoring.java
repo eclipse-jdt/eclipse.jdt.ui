@@ -31,8 +31,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -430,8 +431,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 			fOldName= oldName;			
 		}
 		
-		private UpdateMethodReferenceEdit(TextPosition position, String newName, String oldName) {
-			super(position, newName);
+		private UpdateMethodReferenceEdit(TextRange range, String newName, String oldName) {
+			super(range, newName);
 			Assert.isNotNull(oldName);
 			fOldName= oldName;			
 		}
@@ -440,20 +441,21 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		 * @see TextEdit#copy
 		 */
 		public TextEdit copy() {
-			return new UpdateMethodReferenceEdit(getTextPosition().copy(), getText(), fOldName);
+			return new UpdateMethodReferenceEdit(getTextRange().copy(), getText(), fOldName);
 		}
 
 		/* non Java-doc
-		 * @see TextEdit#connect(TextBuffer)
+		 * @see TextEdit#connect(TextBufferEditor)
 		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextPosition pos= getTextPosition();
-			String oldText= buffer.getContent(pos.getOffset(), pos.getLength());
+		public void connect(TextBufferEditor editor) throws CoreException {
+			TextBuffer buffer= editor.getTextBuffer();
+			TextRange range= getTextRange();
+			String oldText= buffer.getContent(range.getOffset(), range.getLength());
 			String oldMethodName= fOldName;
 			int leftBracketIndex= oldText.indexOf("("); //$NON-NLS-1$
 			if (leftBracketIndex == -1)
 				return; 
-			int offset= pos.getOffset();
+			int offset= range.getOffset();
 			int length= leftBracketIndex;
 			oldText= oldText.substring(0, leftBracketIndex);
 			int theDotIndex= oldText.lastIndexOf("."); //$NON-NLS-1$
@@ -467,7 +469,7 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 				length= oldNameIndex + oldMethodName.length();
 				setText(oldText.substring(0, theDotIndex) + ending);
 			}			
-			setTextPosition(new TextPosition(offset, length));
+			setTextRange(new TextRange(offset, length));
 		}
 	}
 }	

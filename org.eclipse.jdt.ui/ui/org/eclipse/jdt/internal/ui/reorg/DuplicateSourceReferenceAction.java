@@ -66,7 +66,7 @@ class DuplicateSourceReferenceAction extends SourceReferenceAction {
 		TextBuffer tb= TextBuffer.acquire(file);
 		TextBufferEditor tbe= new TextBufferEditor(tb);
 		for (int i= 0; i < elems.length; i++) {
-			tbe.addTextEdit(createDuplicateEdit(elems[i]));
+			tbe.add(createDuplicateEdit(elems[i]));
 		}
 		if (! tbe.canPerformEdits())
 			return; ///XXX can i assert here?

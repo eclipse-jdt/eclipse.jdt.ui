@@ -13,9 +13,9 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
+import org.eclipse.jdt.internal.corext.codemanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.Change;
@@ -86,12 +86,12 @@ public abstract class AbstractTextChange extends Change {
 	/**
 	 * Creates a <code>IChange</code> that can undo this change.
 	 * 
-	 * @param edits the texte edits that can undo the edits performed by this change
+	 * @param edits the text edits that can undo the edits performed by this change
 	 * @param changeKind the change kind of the reverse change. Either <code>
 	 * 	UNDO_CHANGE</code> or </code>REDO_CHANGE</code>
 	 * @return a change that can undo this change
 	 */
-	protected abstract IChange createReverseChange(IUndoTextEdits edits , int changeKind);
+	protected abstract IChange createReverseChange(UndoMemento edits , int changeKind);
 	
 	/**
 	 * Returns <code>true</code> if this change is a reverse change (e.g. an undo
@@ -143,6 +143,6 @@ public abstract class AbstractTextChange extends Change {
 				releaseTextBuffer(editor.getTextBuffer());
 			}
 		}
-	}	
+	}		
 }
 

@@ -7,15 +7,15 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 
 /* package */ class TextEditChangeElement extends ChangeElement {
 	
 	private static final ChangeElement[] fgChildren= new ChangeElement[0];
 	
-	private TextEditChange fChange;
+	private EditChange fChange;
 	
-	public TextEditChangeElement(ChangeElement parent, TextEditChange change) {
+	public TextEditChangeElement(ChangeElement parent, EditChange change) {
 		super(parent);
 		fChange= change;
 		Assert.isNotNull(fChange);
@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditCh
 	 * 
 	 * @return the <code>TextEditChange</code>
 	 */
-	public TextEditChange getTextEditChange() {
+	public EditChange getTextEditChange() {
 		return fChange;
 	}
 		

@@ -10,9 +10,9 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 
 class PasteInCompilationUnitEdit extends SimpleTextEdit {
@@ -45,9 +45,9 @@ class PasteInCompilationUnitEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {	
+	public void connect(TextBufferEditor editor) throws CoreException {	
 		setText(fSource);
-		setTextPosition(new TextPosition(computeOffset(), 0));	
+		setTextRange(new TextRange(computeOffset(), 0));	
 	}
 	
 	private int computeOffset() throws JavaModelException{

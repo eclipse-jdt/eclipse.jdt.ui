@@ -37,8 +37,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.SimpleTextEdit;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextEdit;
-import org.eclipse.jdt.internal.corext.codemanipulation.TextPosition;
+import org.eclipse.jdt.internal.corext.codemanipulation.TextRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -49,8 +50,8 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextFileChange;
-import org.eclipse.jdt.internal.formatter.CodeFormatter;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.formatter.CodeFormatter;
 
 public class NLSRefactoring extends Refactoring {
 	
@@ -850,27 +851,28 @@ public class NLSRefactoring extends Refactoring {
 			super(offset, length, newText);
 		}
 		
-		private AddNLSTagEdit(TextPosition position, String text) {
-			super(position, text);
+		private AddNLSTagEdit(TextRange range, String text) {
+			super(range, text);
 		}
 		
 		/* non Java-doc
 		 * @see TextEdit#getCopy
 		 */
 		public TextEdit copy() {
-			return new AddNLSTagEdit(getTextPosition().copy(), getText());
+			return new AddNLSTagEdit(getTextRange().copy(), getText());
 		}	
 		
 		/* non Java-doc
 		 * @see TextEdit#connect
 		 */
-		public void connect(TextBuffer buffer) throws CoreException {
-			TextPosition pos= getTextPosition();
-			int offset= pos.getOffset();
-			int lineEndOffset= getLineEndOffset(buffer, pos.getOffset());
+		public void connect(TextBufferEditor editor) throws CoreException {
+			TextBuffer buffer= editor.getTextBuffer();
+			TextRange range= getTextRange();
+			int offset= range.getOffset();
+			int lineEndOffset= getLineEndOffset(buffer, range.getOffset());
 			if (lineEndOffset != -1)
 				offset= lineEndOffset;
-			setTextPosition(new TextPosition(offset, pos.getLength()));	
+			setTextRange(new TextRange(offset, range.getLength()));	
 		}
 		
 		private int getLineEndOffset(TextBuffer buffer, int offset){

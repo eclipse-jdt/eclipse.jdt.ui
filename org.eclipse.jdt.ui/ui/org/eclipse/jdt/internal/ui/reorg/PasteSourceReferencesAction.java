@@ -152,7 +152,7 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		int tabWidth= CodeFormatterPreferencePage.getTabSize();
 		for (int i= 0; i < elems.length; i++) {
 			String[] source= new String[]{elems[i].getSource()};
-			tbe.addTextEdit(new MemberEdit(element, style, source, tabWidth));
+			tbe.add(new MemberEdit(element, style, source, tabWidth));
 		}
 		if (! tbe.canPerformEdits())
 			return; ///XXX
@@ -167,7 +167,7 @@ public class PasteSourceReferencesAction extends RefactoringAction {
 		TypedSource[] elems= getClipboardContents();
 		
 		for (int i= 0; i < elems.length; i++) {
-			tbe.addTextEdit(new PasteInCompilationUnitEdit(elems[i].getSource(), elems[i].getType(), unit));
+			tbe.add(new PasteInCompilationUnitEdit(elems[i].getSource(), elems[i].getType(), unit));
 		}
 		if (! tbe.canPerformEdits())
 			return; ///XXX

@@ -71,7 +71,7 @@ public class DeleteSourceReferenceTests extends RefactoringTest {
 		TextBufferEditor tbe= new TextBufferEditor(tb);
 		for (int i= 0; i < elems.length; i++) {
 			ISourceReference iSourceReference= elems[i];
-			tbe.addTextEdit(createDeleteEdit(iSourceReference));	
+			tbe.add(createDeleteEdit(iSourceReference));	
 		}
 		assertTrue("cannot perform", tbe.canPerformEdits());
 		

@@ -41,7 +41,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.ICompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.TextEditChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange.EditChange;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.refactoring.ComparePreviewer.CompareInput;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -197,7 +197,7 @@ public class NewPreviewWizardPage extends RefactoringWizardPage implements IPrev
 						type);
 				}
 			} else if (element instanceof TextEditChangeElement) {
-				TextEditChange tec= ((TextEditChangeElement)element).getTextEditChange();
+				EditChange tec= ((TextEditChangeElement)element).getTextEditChange();
 				TextChange change= tec.getTextChange();
 				if (change instanceof CompilationUnitChange) {
 					ISourceReference sourceReference= findSourceReference(element);
@@ -205,7 +205,7 @@ public class NewPreviewWizardPage extends RefactoringWizardPage implements IPrev
 						CompilationUnitChange cuc= (CompilationUnitChange)change;
 						return new CompareInput(
 							cuc.getCurrentContent(sourceReference),
-							cuc.getPreviewContent(sourceReference, new TextEditChange[] {tec}),
+							cuc.getPreviewContent(sourceReference, new EditChange[] {tec}),
 							ComparePreviewer.JAVA_TYPE);
 					}
 				}
@@ -217,7 +217,7 @@ public class NewPreviewWizardPage extends RefactoringWizardPage implements IPrev
 				PseudoJavaChangeElement pjce= (PseudoJavaChangeElement)element;
 				List l= collectTextEditChanges(pjce);
 				if (l.size() > 0) {
-					TextEditChange[] changes= (TextEditChange[]) l.toArray(new TextEditChange[l.size()]);
+					EditChange[] changes= (EditChange[]) l.toArray(new EditChange[l.size()]);
 					CompilationUnitChange change= (CompilationUnitChange)changes[0].getTextChange();
 					ISourceReference sourceReference= (ISourceReference)pjce.getJavaElement();
 					return new CompareInput(

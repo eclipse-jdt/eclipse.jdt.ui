@@ -6,8 +6,8 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.IUndoTextEdits;
 import org.eclipse.jdt.internal.corext.codemanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.codemanipulation.UndoMemento;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 
@@ -22,15 +22,15 @@ public class TextBufferChange extends TextChange {
 
 	private static class UndoTextBufferChange extends UndoTextChange {
 		private TextBuffer fBuffer;
-		public UndoTextBufferChange(String name, TextBuffer buffer, int changeKind, IUndoTextEdits undos) {
-			super(name, changeKind, undos);
+		public UndoTextBufferChange(String name, TextBuffer buffer, int changeKind, UndoMemento undo) {
+			super(name, changeKind, undo);
 			fBuffer= buffer;
 		}
 		public Object getModifiedLanguageElement(){
 			return null;
 		}
-		protected IChange createReverseChange(IUndoTextEdits edits, int changeKind) {
-			return new UndoTextBufferChange(getName(), fBuffer, changeKind, edits);
+		protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+			return new UndoTextBufferChange(getName(), fBuffer, changeKind, undo);
 		}
 		protected TextBuffer acquireTextBuffer() throws CoreException {
 			return fBuffer;
@@ -66,8 +66,8 @@ public class TextBufferChange extends TextChange {
 	/* non java-doc
 	 * Method declared in TextChange
 	 */
-	protected IChange createReverseChange(IUndoTextEdits edits, int changeKind) {
-		return new UndoTextBufferChange(getName(), fBuffer, changeKind, edits);
+	protected IChange createReverseChange(UndoMemento undo, int changeKind) {
+		return new UndoTextBufferChange(getName(), fBuffer, changeKind, undo);
 	}
 	
 	/* non java-doc

@@ -56,9 +56,9 @@ public class MemberEdit extends SimpleTextEdit {
 	}
 	
 	/* non Java-doc
-	 * @see TextEdit#getModifiedLanguageElement
+	 * @see TextEdit#getModifiedElement
 	 */
-	public Object getModifiedLanguageElement() {
+	public Object getModifiedElement() {
 		if (fInsertionKind == ADD_AT_BEGINNING || fInsertionKind == ADD_AT_END || fInsertionKind == REPLACE)
 			return fMember;
 		return fMember.getParent();
@@ -67,8 +67,8 @@ public class MemberEdit extends SimpleTextEdit {
 	/* non Java-doc
 	 * @see TextEdit#connect
 	 */
-	public void connect(TextBuffer buffer) throws CoreException {		
-		
+	public void connect(TextBufferEditor editor) throws CoreException {		
+		TextBuffer buffer= editor.getTextBuffer();
 		StringBuffer sb= new StringBuffer();
 		String lineDelimiter= buffer.getLineDelimiter();
 
@@ -197,7 +197,7 @@ public class MemberEdit extends SimpleTextEdit {
 		
 		Assert.isTrue(offset >= 0); // we better should have a valid insertion point
 
-		setTextPosition(new TextPosition(offset, length));
+		setTextRange(new TextRange(offset, length));
 		setText(sb.toString());
 		
 		super.connect(buffer);

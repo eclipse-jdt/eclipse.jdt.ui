@@ -178,7 +178,7 @@ public class JavaAddElementFromHistory extends JavaHistoryAction {
 			}
 			
 			TextBufferEditor editor= new TextBufferEditor(buffer);
-			editor.addTextEdit(edit);
+			editor.add(edit);
 			editor.performEdits(new NullProgressMonitor());
 			
 			TextBuffer.commitChanges(buffer, false, new NullProgressMonitor());
