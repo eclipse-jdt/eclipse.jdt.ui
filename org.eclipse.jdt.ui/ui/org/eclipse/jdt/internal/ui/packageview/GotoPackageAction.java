@@ -26,7 +26,7 @@ public class GotoPackageAction extends JavaUIAction {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			SelectionDialog dialog= createAllPackagesDialog(shell);
 			dialog.setTitle("Goto Package");
-			dialog.setMessage("Choose a type (? = any character, * = any string):");
+			dialog.setMessage("Choose a package (? = any character, * = any string):");
 			dialog.open();		
 			Object[] res= dialog.getResult();
 			if (res != null && res.length == 1) 
