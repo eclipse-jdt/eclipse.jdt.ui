@@ -33,7 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 public class JavadocWriter {
 	protected OutputStream fOutputStream;
-	private IJavaProject fProject;
+	private IJavaProject[] fProjects;
 	/**
 	 * Create a JavadocWriter on the given output stream.
 	 * It is the client's responsibility to close the output stream.
@@ -69,9 +69,9 @@ public class JavadocWriter {
 			document.appendChild(project);
 			
 			try {
-				fProject= store.getJavaProject();
-				if(fProject!=null) {
-					project.setAttribute("name", fProject.getCorrespondingResource().getName()); //$NON-NLS-1$
+				fProjects= (IJavaProject[]) store.getJavaProjects().toArray(new IJavaProject[store.getJavaProjects().size()]);
+				if(fProjects.length!= 1) {
+					project.setAttribute("name", fProjects[0].getCorrespondingResource().getName()); //$NON-NLS-1$
 				} else project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch(DOMException e) {
 				project.setAttribute("name", "project_name"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -101,9 +101,10 @@ public class JavadocWriter {
 		
 	}
 
+	//writes ant file, for now only worry about one project
 	private void xmlWriteJavadocStandardParams(JavadocOptionsManager store, Document document ,Element xmlJavadocDesc) throws DOMException, CoreException {
 
-		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination(store.getJavaProject()));
+		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination());
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
 		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use"))); //$NON-NLS-1$
 		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree"))); //$NON-NLS-1$
@@ -133,8 +134,8 @@ public class JavadocWriter {
 		if (!str.equals("")) //$NON-NLS-1$
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 			
-		if (fProject != null) { //it should never equal null
-			String hrefs = store.getLinks(fProject);
+		if (fProjects.length != 0) { //it should never equal null
+			String hrefs = store.getDependencies();
 			StringTokenizer tokenizer = new StringTokenizer(hrefs, ";"); //$NON-NLS-1$
 			while (tokenizer.hasMoreElements()) {
 				String href = (String) tokenizer.nextElement();
