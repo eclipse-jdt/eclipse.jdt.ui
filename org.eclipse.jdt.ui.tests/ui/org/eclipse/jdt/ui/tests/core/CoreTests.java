@@ -42,7 +42,8 @@ public class CoreTests extends TestCase {
 		suite.addTest(TypeInfoTest.allTests());	
 		suite.addTest(CallHierarchyTest.allTests());
 		suite.addTest(ScopeAnalyzerTest.allTests());
-		suite.addTest(PartialASTTest.allTests());	
+		suite.addTest(PartialASTTest.allTests());
+		suite.addTest(CodeCompletionTest.allTests());
 		return new ProjectTestSetup(suite);
 	}
 
@@ -136,6 +137,10 @@ public class CoreTests extends TestCase {
 			}
 			assertTrue(buf.toString(), false);
 		}				
+	}
+	
+	public static void assertNumberOf(String name, int is, int expected) {
+		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
 	}
 	
 }
