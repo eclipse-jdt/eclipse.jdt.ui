@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.*;
 	}
 	
 	public void endVisit(ArrayType node) {
-		fResult.append("[]");
+		fResult.append("[]"); //$NON-NLS-1$
 	}
 	
 	public boolean visit(PrimitiveType node) {

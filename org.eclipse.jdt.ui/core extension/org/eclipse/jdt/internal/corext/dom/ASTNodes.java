@@ -44,8 +44,8 @@ public class ASTNodes {
 	
 	private static final int[] MODIFIERS= {Modifier.PUBLIC, Modifier.PROTECTED, Modifier.PRIVATE, Modifier.ABSTRACT, Modifier.STATIC,
 		Modifier.FINAL, Modifier.TRANSIENT, Modifier.VOLATILE, Modifier.NATIVE, Modifier.SYNCHRONIZED, Modifier.STRICTFP };
-	private static final String[] MODIFIER_STRINGS= { "public", "protected", "private", "abstract", "static", 
-		"final", "transient", "volatile", "native", "synchronized", "strictfp" };
+	private static final String[] MODIFIER_STRINGS= { "public", "protected", "private", "abstract", "static",  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
+		"final", "transient", "volatile", "native", "synchronized", "strictfp" }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
 
 	private ASTNodes() {
 		// no instance;
@@ -61,7 +61,7 @@ public class ASTNodes {
 		for (int i= 0; i < MODIFIERS.length; i++) {
 			if ((mod & MODIFIERS[i]) != 0) {
 				if (counter++ > 0)
-					result.append(" ");
+					result.append(" "); //$NON-NLS-1$
 				result.append(MODIFIER_STRINGS[i]);
 			}
 		}
@@ -141,7 +141,7 @@ public class ASTNodes {
 				return false;
 			}
 			public void endVisit(ArrayType node) {
-				buffer.append("[]");
+				buffer.append("[]"); //$NON-NLS-1$
 			}
 		};
 		type.accept(visitor);

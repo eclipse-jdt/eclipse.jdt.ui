@@ -39,7 +39,7 @@ public class Bindings {
 			ITypeBinding parameter= parameters[i];
 			result.append(parameter.getName());
 			if (i < lastComma)
-				result.append(", ");
+				result.append(", "); //$NON-NLS-1$
 		}
 		result.append(')');
 		return result.toString();
@@ -120,23 +120,23 @@ public class Bindings {
 		if (binding.isPrimitive()) {
 			PrimitiveType.Code code= null;
 			String name= binding.getName();
-			if (name.equals("int"))
+			if (name.equals("int")) //$NON-NLS-1$
 				code= PrimitiveType.INT;
-			else if (name.equals("char"))
+			else if (name.equals("char")) //$NON-NLS-1$
 				code= PrimitiveType.CHAR;
-			else if (name.equals("boolean"))
+			else if (name.equals("boolean")) //$NON-NLS-1$
 				code= PrimitiveType.BOOLEAN;
-			else if (name.equals("short"))
+			else if (name.equals("short")) //$NON-NLS-1$
 				code= PrimitiveType.SHORT;
-			else if (name.equals("long"))
+			else if (name.equals("long")) //$NON-NLS-1$
 				code= PrimitiveType.LONG;
-			else if (name.equals("float"))
+			else if (name.equals("float")) //$NON-NLS-1$
 				code= PrimitiveType.FLOAT;
-			else if (name.equals("double"))
+			else if (name.equals("double")) //$NON-NLS-1$
 				code= PrimitiveType.DOUBLE;
-			else if (name.equals("byte"))
+			else if (name.equals("byte")) //$NON-NLS-1$
 				code= PrimitiveType.BYTE;
-			else if (name.equals("void"))
+			else if (name.equals("void")) //$NON-NLS-1$
 				code= PrimitiveType.VOID;
 			return ast.newPrimitiveType(code);
 		} else if (binding.isArray()) {
