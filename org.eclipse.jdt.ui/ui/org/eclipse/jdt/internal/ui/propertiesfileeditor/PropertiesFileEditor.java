@@ -110,4 +110,15 @@ public class PropertiesFileEditor extends TextEditor {
 		}
 		return super.getAdapter(adapter);
 	}
+
+	/*
+	 * @see org.eclipse.ui.texteditor.StatusTextEditor#updateStatusField(java.lang.String)
+	 */
+	protected void updateStatusField(String category) {
+		super.updateStatusField(category);
+		if (getEditorSite() != null) {
+			getEditorSite().getActionBars().getStatusLineManager().setMessage(null);
+			getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
+		}
+	}
 }

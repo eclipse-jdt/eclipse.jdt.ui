@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -20,7 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.Status;
 
@@ -32,6 +32,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.window.Window;
@@ -146,9 +147,9 @@ public class OpenAction extends SelectionDispatchAction {
 		private List fResult;
 		private IProgressMonitor fProgressMonitor;
 		
-		public ResultCollector(List result) {
+		public ResultCollector(List result, IProgressMonitor progressMonitor) {
 			fResult= result;
-			fProgressMonitor= new NullProgressMonitor();
+			fProgressMonitor= progressMonitor;
 		}
 		
 		public void aboutToStart() throws CoreException {
@@ -203,13 +204,10 @@ public class OpenAction extends SelectionDispatchAction {
 		return fEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#run(org.eclipse.jface.text.ITextSelection)
-	 */
 	public void run(ITextSelection selection) {
 		if (!checkEnabled(selection))
 			return;
-
+	
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		
@@ -250,7 +248,10 @@ public class OpenAction extends SelectionDispatchAction {
 			if (resource != null)
 				references= search(resource.getProject(), key);
 			
-			if (references == null || references.length == 0) {
+			if (references == null)
+				return; // canceled by the user
+			
+			if (references.length == 0) {
 				String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageNoResult"); //$NON-NLS-1$
 				showErrorInStatusLine(message);
 				return;
@@ -349,16 +350,37 @@ public class OpenAction extends SelectionDispatchAction {
 		getShell().getDisplay().beep();
 	}
 	
-	private static KeyReference[] search(IResource scope, String key) {
+	/**
+	 * Searches references to the given key in the given scope.
+	 * 
+	 * @param scope the scope
+	 * @param key the properties key
+	 * @return the references or <code>null</code> if the search has been canceled by the user
+	 */
+	private KeyReference[] search(final IResource scope, final String key) {
 		if (key == null)
 			return new KeyReference[0];
-		
-		List result= new ArrayList(5);
-		ResultCollector collector= new ResultCollector(result);
-		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(ResourcesPlugin.getWorkspace(), 
-				createScope(scope), false,
-				collector, new MatchLocator(key, true, false));
+
+		final List result= new ArrayList(5);
+
+		try {
+			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
+				new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						ResultCollector collector= new ResultCollector(result, monitor);
+						TextSearchEngine engine= new TextSearchEngine();
+						engine.search(ResourcesPlugin.getWorkspace(), 
+								createScope(scope), false,
+								collector, new MatchLocator(key, true, false));
+					}
+				}
+			);
+		} catch (InvocationTargetException ex) {
+			String message= PropertiesFileEditorMessages.getString("OpenAction.error.messageErrorSearchingKey"); //$NON-NLS-1$
+			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex.getTargetException())));
+		} catch (InterruptedException ex) {
+			return null; // canceled
+		}
 		
 		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
 	}
