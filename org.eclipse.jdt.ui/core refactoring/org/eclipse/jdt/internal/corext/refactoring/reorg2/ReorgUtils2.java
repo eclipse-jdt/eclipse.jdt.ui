@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 
-class ReorgUtils2 {
+public class ReorgUtils2 {
 
 	//workaround for bug 18311
 	private static final ISourceRange fgUnknownRange= new SourceRange(-1, 0);
@@ -65,17 +66,39 @@ class ReorgUtils2 {
 				element.getAncestor(IJavaElement.COMPILATION_UNIT) != null;
 	}
 	
+	/**
+	 * May be <code>null</code>.
+	 */
 	public static ICompilationUnit getCompilationUnit(IJavaElement javaElement){
 		if (javaElement instanceof ICompilationUnit)
 			return (ICompilationUnit) javaElement;
 		return (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 	}
-	
+
+	/**
+	 * some of the returned elements may be <code>null</code>.
+	 */
+	public static ICompilationUnit[] getCompilationUnits(IJavaElement[] javaElements){
+		ICompilationUnit[] result= new ICompilationUnit[javaElements.length];
+		for (int i= 0; i < javaElements.length; i++) {
+			result[i]= getCompilationUnit(javaElements[i]);
+		}
+		return result;
+	}
+		
 	public static IResource getResource(IJavaElement element){
 		if (element instanceof ICompilationUnit)
 			return JavaModelUtil.toOriginal((ICompilationUnit)element).getResource();
 		else
 			return element.getResource();
+	}
+	
+	public static IResource[] getResources(IJavaElement[] elements) {
+		IResource[] result= new IResource[elements.length];
+		for (int i= 0; i < elements.length; i++) {
+			result[i]= ReorgUtils2.getResource(elements[i]);
+		}
+		return result;
 	}
 	
 	public static String getName(IResource resource) {
@@ -262,11 +285,28 @@ class ReorgUtils2 {
 		return (IJavaElement[]) union.toArray(new IJavaElement[union.size()]);
 	}	
 
+	public static IResource[] union(IResource[] set1, IResource[] set2) {
+		Set union= new HashSet(set1.length + set2.length);
+		union.addAll(Arrays.asList(set1));
+		union.addAll(Arrays.asList(set2));
+		return (IResource[]) union.toArray(new IResource[union.size()]);
+	}	
+
 	public static Set union(Set set1, Set set2){
 		Set union= new HashSet(set1.size() + set2.size());
 		union.addAll(set1);
 		union.addAll(set2);
 		return union;
+	}
+
+	public static IType[] getMainTypes(IJavaElement[] javaElements) throws JavaModelException {
+		List result= new ArrayList();
+		for (int i= 0; i < javaElements.length; i++) {
+			IJavaElement element= javaElements[i];
+			if (element instanceof IType && JavaElementUtil.isMainType((IType)element))
+				result.add(element);
+		}
+		return (IType[]) result.toArray(new IType[result.size()]);
 	}
 	
 }
