@@ -76,9 +76,8 @@ public class BasicSelectionTransferDragAdapter extends DragSourceAdapter impleme
 	 * @see org.eclipse.swt.dnd.DragSourceListener#dragFinished
 	 */	
 	public void dragFinished(DragSourceEvent event) {
-		// We assume that the drop target listener has done all
-		// the work.
-		Assert.isTrue(event.detail == DND.DROP_NONE);
+		// Make sure we don't have to do any remaining work
+		Assert.isTrue(event.detail != DND.DROP_MOVE);
 		LocalSelectionTransfer.getInstance().setSelection(null);
 		LocalSelectionTransfer.getInstance().setSelectionSetTime(0);
 	}	
