@@ -293,6 +293,11 @@ public class MoveMembersTests extends RefactoringTest {
 		fieldMethodHelper_passingTest(new String[]{"odd"}, new String[0], new String[0][0]);
 	}
 
+	public void test32() throws Exception{ //test for bug 41734, 41691
+		printTestDisabledMessage("test for 41734");
+		//fieldMethodHelper_passingTest(new String[0], new String[]{"m"}, new String[][]{new String[0]});
+	}
+
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodHelper_failingTest(new String[0], 
