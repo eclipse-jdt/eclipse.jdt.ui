@@ -43,7 +43,7 @@ public class StructureSelectionAction extends TextSelectionAction {
 		try{
 			if (! cu.isStructureKnown())
 				return oldSourceRange;
-			CompilationUnit root= AST.parseCompilationUnit(cu, true);
+			CompilationUnit root= AST.parseCompilationUnit(cu, false);
 			Selection selection= Selection.createFromStartLength(oldSourceRange.getOffset(), oldSourceRange.getLength());
 			StructureSelectionAnalyzer selAnalyzer= new StructureSelectionAnalyzer(selection, true);
 			root.accept(selAnalyzer);
