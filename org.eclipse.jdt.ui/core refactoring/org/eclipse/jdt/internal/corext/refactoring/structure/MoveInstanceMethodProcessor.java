@@ -798,7 +798,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 
 		public final boolean visit(final SimpleName node) {
 			Assert.isNotNull(node);
-			if (isFieldAccess(node) && !Bindings.equals(node.resolveBinding(), fTarget)) {
+			if (isFieldAccess(node) && !isTargetAccess(node)) {
 				fResult.add(node);
 				fStatus.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("MoveInstanceMethodProcessor.this_reference"), JavaStatusContext.create(fMethod.getCompilationUnit(), node))); //$NON-NLS-1$
 			}
@@ -940,6 +940,31 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		if (!variable.isField())
 			return false;
 		return !Modifier.isStatic(variable.getModifiers());
+	}
+
+	/**
+	 * Is the specified name a target access?
+	 * 
+	 * @param name the name to check
+	 * @return <code>true</code> if this name is a target access, <code>false</code> otherwise
+	 */
+	protected boolean isTargetAccess(final Name name) {
+		Assert.isNotNull(name);
+		final IBinding binding= name.resolveBinding();
+		if (Bindings.equals(fTarget, binding))
+			return true;
+		final ASTNode parent= name.getParent();
+		if (parent instanceof QualifiedName) {
+			final QualifiedName qualified= (QualifiedName) parent;
+			if (qualified.getQualifier() != null)
+				return isTargetAccess(qualified.getQualifier());
+		} else if (parent instanceof FieldAccess) {
+			final FieldAccess access= (FieldAccess) parent;
+			final Expression expression= access.getExpression();
+			if (expression instanceof Name)
+				return isTargetAccess((Name) expression);
+		}
+		return false;
 	}
 
 	/** The candidate targets */
