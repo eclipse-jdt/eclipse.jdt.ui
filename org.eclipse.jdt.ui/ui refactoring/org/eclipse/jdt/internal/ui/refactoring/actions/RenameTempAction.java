@@ -12,6 +12,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTempRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -64,7 +65,10 @@ public class RenameTempAction extends SelectionDispatchAction {
 	
 	protected void run(ITextSelection selection) {
 		try{
-			Refactoring refactoring= createRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection);
+			ICompilationUnit input= SelectionConverter.getInputAsCompilationUnit(fEditor);
+			if (!ActionUtil.isProcessable(getShell(), input))
+				return;
+			Refactoring refactoring= createRefactoring(input, selection);
 			new RefactoringStarter().activate(refactoring, createWizard(refactoring), getShell(), fDialogMessageTitle, false);
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, fDialogMessageTitle, RefactoringMessages.getString("NewTextRefactoringAction.exception")); //$NON-NLS-1$

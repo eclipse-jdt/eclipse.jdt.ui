@@ -11,6 +11,7 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -86,7 +87,7 @@ public class InlineAction extends SelectionDispatchAction {
 	 */
 	protected void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit();
-		if (cu == null)
+		if (cu == null || !ActionUtil.isProcessable(getShell(), cu))
 			return;
 
 		if (fInlineTemp.isEnabled() && tryInlineTemp(cu, selection))

@@ -25,6 +25,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -107,6 +108,8 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	}
 
 	private void run(int selectionOffset, int selectionLength, ICompilationUnit cu) {
+		if (!ActionUtil.isProcessable(getShell(), cu))
+			return;
 		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
 			cu, selectionOffset, selectionLength,
 			JavaPreferencesSettings.getCodeGenerationSettings());
