@@ -169,17 +169,20 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
      */
     private FormText createFormText(Composite parent, String text) {
         FormToolkit toolkit= new FormToolkit(getShell().getDisplay());
-        FormText formText = toolkit.createFormText(parent, true);
         try {
-            formText.setText(text, true, false);
-        } catch (SWTException e) {
-            formText.setText(e.getMessage(), false, false);
-        }
-        formText.marginHeight= 2;
-        formText.setBackground(null);
-        formText.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
-        toolkit.dispose();
-        return formText;
+        	FormText formText= toolkit.createFormText(parent, true);
+			try {
+			    formText.setText(text, true, false);
+			} catch (SWTException e) {
+			    formText.setText(e.getMessage(), false, false);
+			}
+			formText.marginHeight= 2;
+			formText.setBackground(null);
+			formText.setLayoutData(new TableWrapData(TableWrapData.FILL_GRAB));
+			return formText;
+		} finally {
+	        toolkit.dispose();
+		}
     }
     
     /**
