@@ -261,7 +261,6 @@ public class PackageExplorerPart extends ViewPart
 			if (isFlatLayout())
 				return super.isExpandable(parent);
 			
-			List list= new ArrayList();
 			ViewerFilter[] filters= fViewer.getFilters();
 			Object[] children= ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
 			for (int i = 0; i < children.length; i++) {
