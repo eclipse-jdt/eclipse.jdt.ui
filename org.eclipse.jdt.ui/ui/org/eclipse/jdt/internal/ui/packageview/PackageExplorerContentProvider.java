@@ -6,7 +6,10 @@ package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -23,6 +26,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IJavaElement;
@@ -108,6 +112,16 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 			if (parentElement instanceof IProject) 
 				return ((IProject)parentElement).members();
+							
+			if (parentElement instanceof IJavaProject) {
+				IJavaProject project= (IJavaProject)parentElement;
+				Object[] roots= getPackageFragmentRoots(project);
+				return rootsAndContainers(project, roots);
+			}
+
+			if (parentElement instanceof ClassPathContainer)
+				return getContainerPackageFragmentRoots((ClassPathContainer)parentElement);
+				
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
@@ -117,6 +131,37 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			return getWithParentsResources(packageFragments, parentElement);
 		} else
 			return super.getChildren(parentElement);
+	}
+
+	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) { //throws JavaModelException {
+		List result= new ArrayList(roots.length);
+		Set containers= new HashSet(roots.length);
+		for (int i= 0; i < roots.length; i++) {
+			if (roots[i] instanceof IPackageFragmentRoot) {
+				IPackageFragmentRoot root= (IPackageFragmentRoot)roots[i];
+				IClasspathEntry entry= null;
+				try {
+					entry= root.getRawClasspathEntry();
+				} catch (JavaModelException e) {
+					continue;
+				}
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) 
+					containers.add(entry);
+				else
+					result.add(root);
+			} else {
+				result.add(roots[i]);
+			}
+		}
+		for (Iterator each= containers.iterator(); each.hasNext();) {
+			IClasspathEntry element= (IClasspathEntry) each.next();
+			result.add(new ClassPathContainer(project, element));
+		}		
+		return result.toArray();
+	}
+
+	private Object[] getContainerPackageFragmentRoots(ClassPathContainer container) throws JavaModelException {
+		return container.getPackageFragmentRoots();
 	}
 
 	private Object[] getNonJavaProjects(IJavaModel model) throws JavaModelException {
