@@ -132,12 +132,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				CPListElement selElement= (CPListElement) selElements.get(0);
 				IPath attachPath= selElement.getSourceAttachmentPath();
 				IPath attachRoot= selElement.getSourceAttachmentRootPath();
-				URL jdocLocation= selElement.getJavaDocLocation();
 				
-				SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getPath(), attachPath, attachRoot, jdocLocation);
+				SourceAttachmentDialog dialog= new SourceAttachmentDialog(getShell(), selElement.getPath(), attachPath, attachRoot);
 				if (dialog.open() == dialog.OK) {
 					selElement.setSourceAttachment(dialog.getSourceAttachmentPath(), dialog.getSourceAttachmentRootPath());
-					selElement.setJavaDocLocation(dialog.getJavaDocLocation());
 					fLibrariesList.refresh();
 					fClassPathList.refresh();
 				}
@@ -168,7 +166,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		private boolean canDoSourceAttachment(List selElements) {
 			if (selElements != null && selElements.size() == 1) {
 				CPListElement elem= (CPListElement) selElements.get(0);
-				return (!(elem.getResource() instanceof IFolder));
+				return (elem.getEntryKind() == IClasspathEntry.CPE_LIBRARY
+					&&	!(elem.getResource() instanceof IFolder)); 
 			}
 			return false;
 		}
@@ -326,7 +325,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}	
 	
 	private CPListElement newCPLibraryElement(IResource res) {
-		return new CPListElement(JavaCore.newLibraryEntry(res.getFullPath()), res);
+		return new CPListElement(IClasspathEntry.CPE_LIBRARY, res.getFullPath(), res);
 	};
 
 	
@@ -353,7 +352,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			if (file != null) {
 				path= file.getFullPath();  // modify path if internal
 			}
-			elems[i]= new CPListElement(JavaCore.newLibraryEntry(path), file);
+			elems[i]= new CPListElement(IClasspathEntry.CPE_LIBRARY, path, file);
 		}
 		fDialogSettings.put(IUIConstants.DIALOGSTORE_LASTEXTJAR, filterPath.toOSString());
 		
@@ -365,9 +364,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		VariableSelectionDialog dialog= new VariableSelectionDialog(getShell(), existing);
 		if (dialog.open() == dialog.OK) {
-			IPath res= dialog.getVariable();
-			IClasspathEntry entry= JavaCore.newVariableEntry(res);
-			return new CPListElement[] { new CPListElement(entry, null) };
+			IPath path= dialog.getVariable();
+			return new CPListElement[] { new CPListElement(IClasspathEntry.CPE_VARIABLE, path, null) };
 		}
 		return null;
 	}
@@ -377,12 +375,12 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		
 		private SourceAttachmentBlock fSourceAttachmentBlock;
 				
-		public SourceAttachmentDialog(Shell parent, IPath jarPath, IPath sourceFile, IPath prefix, URL jdocLocation) {
+		public SourceAttachmentDialog(Shell parent, IPath jarPath, IPath sourceFile, IPath prefix) {
 			super(parent);
 			setTitle(JavaPlugin.getFormattedString(DIALOG_SOURCE_ANNOT + ".title", jarPath.toString()));
 			
 			IProject proj= fCurrJProject.getProject();
-			fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, jarPath, sourceFile, prefix, jdocLocation);
+			fSourceAttachmentBlock= new SourceAttachmentBlock(proj, this, jarPath, sourceFile, prefix);
 		}
 				
 		protected Control createDialogArea(Composite parent) {
@@ -408,10 +406,6 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		public IPath getSourceAttachmentRootPath() {
 			return fSourceAttachmentBlock.getSourceAttachmentRootPath();
 		}
-		
-		public URL getJavaDocLocation() {
-			return fSourceAttachmentBlock.getJavaDocLocation();
-		}		
 		
 	}
 	

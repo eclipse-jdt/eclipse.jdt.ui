@@ -42,7 +42,13 @@ public class CPVariableElement {
 	public void setName(String name) {
 		fName= name;
 	}
-
-
-
+	
+	
+	public boolean equals(Object other) {
+		if (other.getClass().equals(getClass())) {
+			CPVariableElement elem= (CPVariableElement)other;
+			return fName.equals(elem.fName);
+		}
+		return false;
+	}
 }

@@ -174,7 +174,7 @@ public class SourceLookupPropertyPage extends JavaProjectPropertyPage {
 	
 	private List getProjectsOnClassPath(IJavaProject project) throws JavaModelException {
 		IJavaModel jm= project.getJavaModel();
-		IClasspathEntry[] cp= project.getClasspath();
+		IClasspathEntry[] cp= project.getResolvedClasspath(true);
 		ArrayList l= new ArrayList();
 		
 		for (int i= 0; i < cp.length; i++) {

@@ -51,7 +51,7 @@ public class SourceAttachmentBlock {
 	private Control fSWTWidget;
 	
 	
-	public SourceAttachmentBlock(IProject project, IStatusChangeListener context, IPath jarFileName, IPath filename, IPath prefix, URL jdocLocation) {
+	public SourceAttachmentBlock(IProject project, IStatusChangeListener context, IPath jarFileName, IPath filename, IPath prefix) {
 		fContext= context;
 		fCurrProject= project;
 		
@@ -83,7 +83,7 @@ public class SourceAttachmentBlock {
 		fNameStatusInfo= new StatusInfo();
 		fJavaDocStatusInfo= new StatusInfo();
 		
-		init(filename, prefix, jdocLocation);
+		init(filename, prefix, null);
 	}
 	
 	/*
@@ -127,12 +127,12 @@ public class SourceAttachmentBlock {
 		}
 	}
 	
-	/**
-	 * Gets the Java Doc location chosen by the user
-	 */
-	public URL getJavaDocLocation() {
-		return fJavaDocLocation;
-	}	
+	///**
+	// * Gets the Java Doc location chosen by the user
+	// */
+	//public URL getJavaDocLocation() {
+	//	return fJavaDocLocation;
+	//}	
 	
 	/**
 	 * Creates the control
@@ -162,12 +162,12 @@ public class SourceAttachmentBlock {
 		fPrefixField.doFillIntoGrid(composite, 3);
 		fPrefixField.getTextControl(null).setEditable(false);
 
-		DialogField.createEmptySpace(composite, 1);
-		Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
-		jdocDescription.setText(JavaPlugin.getResourceString(JAVADOC + ".description"));
-		DialogField.createEmptySpace(composite, 1);
+		//DialogField.createEmptySpace(composite, 1);
+		//Label jdocDescription= new Label(composite, SWT.LEFT + SWT.WRAP);
+		//jdocDescription.setText(JavaPlugin.getResourceString(JAVADOC + ".description"));
+		//DialogField.createEmptySpace(composite, 1);
 			
-		fJavaDocField.doFillIntoGrid(composite, 3);
+		//fJavaDocField.doFillIntoGrid(composite, 3);
 		
 		fFileNameField.postSetFocusOnDialogField(parent.getDisplay());
 		return composite;

@@ -284,7 +284,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private CPListElement newCPSourceElement(IResource res) {
 		Assert.isNotNull(res);
-		return new CPListElement(JavaCore.newSourceEntry(res.getFullPath()), res);
+		return new CPListElement(IClasspathEntry.CPE_SOURCE, res.getFullPath(), res);
 	}
 	
 	/**

@@ -10,11 +10,12 @@ import java.net.URL;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 
-import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IClasspathEntry;import org.eclipse.jdt.core.JavaCore;
 
 public class CPListElement {
 			
-	private IClasspathEntry fEntry;
+	private int fEntryKind;
+	private IPath fPath;
 	private IResource fResource;
 	
 	private IPath fSourceAttachmentPath;
@@ -22,23 +23,33 @@ public class CPListElement {
 	
 	private URL fJavaDocLocation;
 					
-	public CPListElement(IClasspathEntry entry, IResource res) {
-		fEntry= entry;
+	public CPListElement(int entryKind, IPath path, IResource res) {
+		fEntryKind= entryKind;
+		fPath= path;
 		fSourceAttachmentPath= null;
 		fSourceAttachmentPrefix= null;
 		fResource= res;
 	}
 	
 	public IClasspathEntry getClasspathEntry() {
-		return fEntry;
+		switch (fEntryKind) {
+			case IClasspathEntry.CPE_SOURCE:
+				return JavaCore.newSourceEntry(fPath);
+			case IClasspathEntry.CPE_LIBRARY:
+				return JavaCore.newLibraryEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix);
+			case IClasspathEntry.CPE_PROJECT:
+				return JavaCore.newProjectEntry(fPath);
+			default: // IClasspathEntry.CPE_VARIABLE:
+				return JavaCore.newVariableEntry(fPath, fSourceAttachmentPath, fSourceAttachmentPrefix);
+		}
 	}
 	
 	public IPath getPath() {
-		return fEntry.getPath();
+		return fPath;
 	}
 	
 	public int getEntryKind() {
-		return fEntry.getEntryKind();
+		return fEntryKind;
 	}
 
 	/**
@@ -62,13 +73,6 @@ public class CPListElement {
 	}
 	
 	/**
-	 * Sets the JavaDoc documentation location
-	 */
-	public void setJavaDocLocation(URL jdocLocation) {
-		fJavaDocLocation= jdocLocation;
-	}
-
-	/**
 	 * Gets the current path prefix used when accessing the source attachment
 	 * @see org.eclipse.jdt.core.IPackageFragmentRoot#getSourceAttachmentPath	 
 	 * @return The source attachment prefix
@@ -86,18 +90,12 @@ public class CPListElement {
 	}
 
 	/**
-	 * Returns the location of the JavaDoc documentation
-	 */	
-	public URL getJavaDocLocation() {
-		return fJavaDocLocation;
-	}
-
-	/**
 	 * @see Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object other) {
 		if (other.getClass() == getClass()) {
-			return fEntry.equals(((CPListElement)other).getClasspathEntry());
+			CPListElement elem= (CPListElement)other;
+			return elem.fEntryKind == fEntryKind && elem.fPath == fPath;
 		}
 		return false;
 	}

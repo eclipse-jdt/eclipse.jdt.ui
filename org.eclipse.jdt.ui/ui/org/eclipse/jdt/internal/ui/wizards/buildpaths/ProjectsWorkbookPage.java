@@ -59,8 +59,7 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 			for (int i= 0; i < jprojects.length; i++) {
 				IProject proj= jprojects[i].getProject();
 				if (!existingProjects.contains(proj)) {
-					IClasspathEntry cpentry= JavaCore.newProjectEntry(proj.getFullPath());
-					projects.add(new CPListElement(cpentry, proj));
+					projects.add(new CPListElement(IClasspathEntry.CPE_PROJECT, proj.getFullPath(), proj));
 				}
 			}	
 						

@@ -6,11 +6,13 @@ public class VariableBlock {
 	private static final String PAGE_NAME= "VariableBlock";
 	
 	private static final String VARS= PAGE_NAME + ".vars";
+	private static final String RESERVED= PAGE_NAME + ".reserved";
 	
 	private static final String ADD= VARS + ".add.button";
 	private static final String EDIT= VARS + ".edit.button";
 	
 	private ListDialogField fVariablesList;
+	private ListDialogField fReservedList;
 	
 	/**
 	 * Constructor for VariableBlock
@@ -20,12 +22,21 @@ public class VariableBlock {
 			JavaPlugin.getResourceString(ADD), JavaPlugin.getResourceString(EDIT)
 		};			
 		
+		ArrayList reserved= new ArrayList(3);
+		reserved.add(new CPVariableElement(ClasspathVariablesPreferencePage.JDKLIB_VARIABLE, null));
+				
 		VariablesAdapter adapter= new VariablesAdapter();
 		
-		fVariablesList= new ListDialogField(adapter, buttonLabels, new CPVariableElementLabelProvider(), 0);
+		CPVariableElementLabelProvider labelProvider= new CPVariableElementLabelProvider();
+		
+		fVariablesList= new ListDialogField(adapter, buttonLabels, labelProvider, 0);
 		fVariablesList.setDialogFieldListener(adapter);
 		fVariablesList.setLabelText(JavaPlugin.getResourceString(VARS + ".label"));
 		fVariablesList.setRemoveButtonLabel(JavaPlugin.getResourceString(VARS + ".remove.button"));
+
+		fReservedList= new ListDialogField(adapter, null, labelProvider, 0);
+		fReservedList.setDialogFieldListener(adapter);
+		fReservedList.setLabelText(JavaPlugin.getResourceString(RESERVED + ".label"));
 		
 		String[] entries= JavaCore.getClasspathVariableNames();
 		ArrayList elements= new ArrayList(entries.length);
@@ -34,19 +45,20 @@ public class VariableBlock {
 			IPath entryPath= JavaCore.getClasspathVariable(name);
 			if (entryPath != null) {
 				CPVariableElement elem= new CPVariableElement(name, entryPath);
-				if (!ClasspathVariablesPreferencePage.JDKLIB_VARIABLE.equals(name)) {
+				if (!reserved.contains(elem)) {
 					elements.add(elem);
 				}
 			} else {
 				JavaPlugin.log(new Exception("classpath variable not found: " + name));
 			}
 		}
-		fVariablesList.addElements(elements);
+		fVariablesList.setElements(elements);
+		fReservedList.setElements(reserved);
 	}
 
 	public Control createContents(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList }, true, 420, 0);
+		LayoutUtil.doDefaultLayout(composite, new DialogField[] { fVariablesList, fReservedList }, true, 420, 0);
 		return composite;
 	}
 	
@@ -84,6 +96,7 @@ public class VariableBlock {
 	
 	private void editEntries(CPVariableElement entry) {
 		List existingEntries= fVariablesList.getElements();
+		existingEntries.addAll(fReservedList.getElements());
 
 		VariableCreationDialog dialog= new VariableCreationDialog(getShell(), entry, existingEntries);
 		if (dialog.open() != dialog.OK) {
