@@ -23,7 +23,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.osgi.service.prefs.BackingStoreException;
+
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -51,6 +56,10 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -203,6 +212,12 @@ public class CodeTemplateBlock {
 		fProject= project;
 		
 		fTemplateStore= new ProjectTemplateStore(project);
+		try {
+			fTemplateStore.load();
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		}
+		
 		fTemplateProcessor= new TemplateVariableProcessor();
 		
 		CodeTemplateAdapter adapter= new CodeTemplateAdapter();
@@ -227,7 +242,10 @@ public class CodeTemplateBlock {
 		
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK | SWT.WRAP);
 		fCreateJavaDocComments.setLabelText(PreferencesMessages.getString("CodeTemplateBlock.createcomment.label")); //$NON-NLS-1$
-		fCreateJavaDocComments.setSelection(PreferenceConstants.getPreferenceStore().getBoolean(PREF_JAVADOC_STUBS));
+
+		IJavaProject javaProject= project != null ? JavaCore.create(project) : null;
+		boolean createComments= Boolean.valueOf(PreferenceConstants.getPreference(PREF_JAVADOC_STUBS, javaProject)).booleanValue();
+		fCreateJavaDocComments.setSelection(createComments);
 		
 		fCodeTemplateTree.selectFirstElement();	
 	}
@@ -494,21 +512,28 @@ public class CodeTemplateBlock {
 	}
 	
 	public boolean performOk(boolean enabled) {
-		IPreferenceStore prefs= PreferenceConstants.getPreferenceStore();
-		prefs.setValue(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
-		JavaPlugin.getDefault().savePluginPreferences();
+		IEclipsePreferences node;
 		if (fProject != null) {
 			TemplatePersistenceData[] templateData= fTemplateStore.getTemplateData();
 			for (int i= 0; i < templateData.length; i++) {
 				fTemplateStore.setProjectSpecific(templateData[i], enabled);
 			}
+			node= new ProjectScope(fProject).getNode(JavaUI.ID_PLUGIN);
+		} else {
+			node= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
 		}
+		node.putBoolean(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
+
 		try {
 			fTemplateStore.save();
+			node.flush();
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 			openWriteErrorDialog(e);
-		}	
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+			openWriteErrorDialog(e);
+		}
 		return true;
 	}
 	
