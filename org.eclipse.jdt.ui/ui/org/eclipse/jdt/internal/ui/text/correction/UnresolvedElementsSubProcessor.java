@@ -266,7 +266,7 @@ public class UnresolvedElementsSubProcessor {
 				if (methodDeclaration.thrownExceptions().contains(selectedNode)) {
 					kind= SimilarElementsRequestor.CLASSES;
 				} else if (selectedNode.equals(methodDeclaration.getReturnType())) {
-					kind= SimilarElementsRequestor.REF_TYPES | SimilarElementsRequestor.VOIDTYPE;
+					kind= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
 				}
 				break;
 			case ASTNode.INSTANCEOF_EXPRESSION:
