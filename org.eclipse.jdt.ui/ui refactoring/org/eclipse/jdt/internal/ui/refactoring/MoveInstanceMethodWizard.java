@@ -26,7 +26,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -76,16 +75,13 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		protected static final String PAGE_NAME= "MoveInstanceMethodPage"; //$NON-NLS-1$
 
 		/** The inline method references button */
-		protected Button fInlineButton= null;
+		protected Button fCreateDelegator= null;
 
 		/** The method name text field */
 		protected Text fMethodNameField= null;
 
 		/** The current method name status */
 		protected RefactoringStatus fMethodNameStatus= new RefactoringStatus();
-
-		/** The remove method declaration button */
-		protected Button fRemoveButton= null;
 
 		/** The target name text field */
 		protected Text fTargetNameField= null;
@@ -221,46 +217,27 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data.horizontalSpan= 2;
 			label.setLayoutData(data);
 
-			fInlineButton= new Button(control, SWT.CHECK);
-			fInlineButton.setSelection(DEFAULT_INLINE_SETTING);
-			fInlineButton.setEnabled(true);
-			fInlineButton.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Inline_button_name")); //$NON-NLS-1$
-			fInlineButton.addSelectionListener(new SelectionAdapter() {
+			fCreateDelegator= new Button(control, SWT.CHECK);
+			fCreateDelegator.setSelection(DEFAULT_CREATE_DELEGATOR_SETTING);
+			fCreateDelegator.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Create_button_name")); //$NON-NLS-1$
+			fCreateDelegator.addSelectionListener(new SelectionAdapter() {
 
 				public final void widgetDefaultSelected(final SelectionEvent event) {
 					widgetSelected(event);
 				}
 
 				public final void widgetSelected(final SelectionEvent event) {
-					fRemoveButton.setEnabled(fInlineButton.getSelection());
-					if (!fInlineButton.getSelection())
-						fRemoveButton.setSelection(false);
-					fProcessor.setInlineDelegator(fInlineButton.getSelection());
+					fProcessor.setInlineDelegator(!fCreateDelegator.getSelection());
+					fProcessor.setRemoveDelegator(!fCreateDelegator.getSelection());
 				}
 			});
 
 			data= new GridData();
 			data.horizontalSpan= 2;
-			fInlineButton.setLayoutData(data);
+			fCreateDelegator.setLayoutData(data);
 
-			fRemoveButton= new Button(control, SWT.CHECK);
-			fRemoveButton.setSelection(DEFAULT_REMOVE_SETTING);
-			fRemoveButton.setEnabled(DEFAULT_INLINE_SETTING);
-			fRemoveButton.setText(RefactoringMessages.getString("MoveInstanceMethodPage.Remove_button_name")); //$NON-NLS-1$
-			fRemoveButton.addSelectionListener(new SelectionAdapter() {
-
-				public final void widgetSelected(final SelectionEvent event) {
-					fProcessor.setRemoveDelegator(fRemoveButton.getSelection());
-				}
-			});
-
-			fProcessor.setInlineDelegator(DEFAULT_INLINE_SETTING);
-			fProcessor.setRemoveDelegator(DEFAULT_REMOVE_SETTING);
-
-			data= new GridData();
-			data.horizontalSpan= 2;
-			data.horizontalIndent= IDialogConstants.INDENT;
-			fRemoveButton.setLayoutData(data);
+			fProcessor.setInlineDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
+			fProcessor.setRemoveDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
 
 			Dialog.applyDialogFont(control);
 			WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
@@ -342,11 +319,8 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		}
 	}
 
-	/** The default inline setting */
-	protected static boolean DEFAULT_INLINE_SETTING= true;
-
-	/** The default remove setting */
-	protected static boolean DEFAULT_REMOVE_SETTING= true;
+	/** The default create delegator setting */
+	protected static boolean DEFAULT_CREATE_DELEGATOR_SETTING= false;
 
 	/** The associated move instance method processor */
 	protected final MoveInstanceMethodProcessor fProcessor;
