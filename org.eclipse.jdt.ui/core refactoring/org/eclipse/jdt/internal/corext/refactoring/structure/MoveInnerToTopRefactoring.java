@@ -319,7 +319,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			TypeParameter parameter= null;
 			for (final Iterator iterator= ((TypeDeclaration) declaration).typeParameters().iterator(); iterator.hasNext();) {
 				parameter= (TypeParameter) iterator.next();
-				binding= (ITypeBinding) parameter.resolveBinding();
+				binding= parameter.resolveBinding();
 				if (binding != null && !map.containsKey(binding.getKey()))
 					map.put(binding.getKey(), binding);
 			}

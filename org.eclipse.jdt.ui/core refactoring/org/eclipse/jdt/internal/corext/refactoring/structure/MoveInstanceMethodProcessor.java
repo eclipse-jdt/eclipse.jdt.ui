@@ -306,7 +306,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			TypeParameter parameter= null;
 			for (final Iterator iterator= declaration.typeParameters().iterator(); iterator.hasNext();) {
 				parameter= (TypeParameter) iterator.next();
-				binding= (ITypeBinding) parameter.resolveBinding();
+				binding= parameter.resolveBinding();
 				if (binding != null)
 					fBindings.add(binding.getKey());
 			}

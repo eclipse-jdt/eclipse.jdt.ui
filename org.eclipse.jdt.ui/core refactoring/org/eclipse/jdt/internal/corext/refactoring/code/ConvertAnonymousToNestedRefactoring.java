@@ -401,7 +401,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 				TypeParameter parameter= null;
 				for (final Iterator iterator= declaration.typeParameters().iterator(); iterator.hasNext();) {
 					parameter= (TypeParameter) iterator.next();
-					binding= (ITypeBinding) parameter.resolveBinding();
+					binding= parameter.resolveBinding();
 					if (binding != null)
 						list.add(binding);
 				}
