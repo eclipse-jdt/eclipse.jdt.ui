@@ -15,38 +15,20 @@ import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.IFileBuffer;
-import org.eclipse.core.filebuffers.IFileBufferListener;
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.jdt.astview.ASTViewImages;
 import org.eclipse.jdt.astview.ASTViewPlugin;
 import org.eclipse.jdt.astview.EditorUtility;
 import org.eclipse.jdt.astview.NodeFinder;
 import org.eclipse.jdt.astview.TreeInfoCollector;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IOpenable;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IProblemRequestor;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.IFileBuffer;
+import org.eclipse.core.filebuffers.IFileBufferListener;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
@@ -67,11 +49,13 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.ListenerList;
+import org.eclipse.jface.viewers.*;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -82,6 +66,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
@@ -101,6 +86,24 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
+
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IProblemRequestor;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
@@ -337,15 +340,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 			// not interesting
 		}
 	}
-	
+		
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_USE_RECONCILER= "use_reconciler"; //$NON-NLS-1$
+	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
+	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
+
 	
 	private TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fFocusAction;
 	private Action fRefreshAction;
 	private Action fUseReconcilerAction;
+	private Action fCreateBindingsAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
 	private Action fClearAction;
@@ -363,6 +370,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	
 	private boolean fDoLinkWithEditor;
 	private boolean fDoUseReconciler;
+	private boolean fCreateBindings;
 	private Object fPreviousDouble;
 	
 	private ListenerMix fSuperListener;
@@ -373,12 +381,23 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fAddToTrayAction;
 	private ISelectionChangedListener fTrayUpdater;
 	private Action fDeleteAction;
+
 	
 	public ASTView() {
 		fSuperListener= null;
-		fDoLinkWithEditor= ASTViewPlugin.getDefault().getDialogSettings().getBoolean(SETTINGS_LINK_WITH_EDITOR);
-		fDoUseReconciler= ASTViewPlugin.getDefault().getDialogSettings().getBoolean(SETTINGS_USE_RECONCILER);
+		IDialogSettings dialogSettings= ASTViewPlugin.getDefault().getDialogSettings();
+		fDoLinkWithEditor= dialogSettings.getBoolean(SETTINGS_LINK_WITH_EDITOR);
+		fDoUseReconciler= dialogSettings.getBoolean(SETTINGS_USE_RECONCILER);
+		fCreateBindings= !dialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
 		fCurrentASTLevel= AST.JLS2;
+		try {
+			int level= dialogSettings.getInt(SETTINGS_JLS);
+			if (level == AST.JLS2 || level == AST.JLS3) {
+				fCurrentASTLevel= level;
+			}
+		} catch (NumberFormatException e) {
+			// ignore
+		}
 	}
 	
 	/*(non-Javadoc)
@@ -502,7 +521,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			}
 		} else {
 			ASTParser parser= ASTParser.newParser(astLevel);
-			parser.setResolveBindings(true);
+			parser.setResolveBindings(fCreateBindings);
 			if (input instanceof ICompilationUnit) {
 				parser.setSource((ICompilationUnit) input);
 			} else {
@@ -535,8 +554,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 	 * @see org.eclipse.ui.IWorkbenchPart#dispose()
 	 */
 	public void dispose() {
-		ASTViewPlugin.getDefault().getDialogSettings().put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
-		ASTViewPlugin.getDefault().getDialogSettings().put(SETTINGS_USE_RECONCILER, fDoUseReconciler);
+		IDialogSettings dialogSettings= ASTViewPlugin.getDefault().getDialogSettings();
+		dialogSettings.put(SETTINGS_LINK_WITH_EDITOR, fDoLinkWithEditor);
+		dialogSettings.put(SETTINGS_USE_RECONCILER, fDoUseReconciler);
+		dialogSettings.put(SETTINGS_NO_BINDINGS, !fCreateBindings);
+		dialogSettings.put(SETTINGS_JLS, fCurrentASTLevel);
 		
 		if (fSuperListener != null) {
 			if (fEditor != null) {
@@ -573,6 +595,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer.setLabelProvider(new ASTViewLabelProvider());
 		fViewer.addSelectionChangedListener(fSuperListener);
 		fViewer.addDoubleClickListener(fSuperListener);
+		fViewer.addFilter(new ViewerFilter() {
+			public boolean select(Viewer viewer, Object parentElement, Object element) {
+				if (!fCreateBindings && element instanceof Binding)
+					return false;
+				return true;
+			}
+		});
+		
 		
 		ViewForm trayForm= new ViewForm(fSash, SWT.NONE);
 		Label label= new Label(trayForm, SWT.NONE);
@@ -676,6 +706,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 		manager.add(new Separator());
 		manager.add(fUseReconcilerAction);
+		manager.add(fCreateBindingsAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
 	}
@@ -742,6 +773,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fUseReconcilerAction.setChecked(fDoUseReconciler);
 		fUseReconcilerAction.setToolTipText("Use Reconciler to create AST"); //$NON-NLS-1$
 		fUseReconcilerAction.setEnabled(true);
+		
+		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performCreateBindings();
+			}
+		};
+		fCreateBindingsAction.setChecked(fCreateBindings);
+		fCreateBindingsAction.setToolTipText("Create Bindings"); //$NON-NLS-1$
+		fCreateBindingsAction.setEnabled(true);
 
 		fFocusAction = new Action() {
 			public void run() {
@@ -1010,6 +1050,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 	
 	protected void performUseReconciler() {
 		fDoUseReconciler= fUseReconcilerAction.isChecked();
+		performRefresh();
+	}
+	
+	protected void performCreateBindings() {
+		fCreateBindings= fCreateBindingsAction.isChecked();
 		performRefresh();
 	}
 	

@@ -26,10 +26,13 @@ public class BindingProperty extends ASTAttribute {
 
 	public BindingProperty(Binding parent, String name, String value) {
 		fParent= parent;
-		if (value.length() > 0)
+		if (value == null) {
+			fName= name + ": null"; //$NON-NLS-1$
+		} else if (value.length() > 0) {
 			fName= name + ": '" + value + "'"; //$NON-NLS-1$ //$NON-NLS-2$
-		else 
+		} else {
 			fName= name + ": (empty string)"; //$NON-NLS-1$
+		}
 		fValues= null;
 	}
 	
