@@ -7,10 +7,12 @@ package org.eclipse.jdt.internal.ui.dialogs;
 import org.eclipse.core.runtime.IStatus;import org.eclipse.swt.graphics.Image;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Label;import org.eclipse.swt.widgets.Shell;import org.eclipse.jface.dialogs.ErrorDialog;import org.eclipse.jface.resource.JFaceResources;
 
 /**
- * A dialog to display errors and warnings to the user, as contained in an
- * <code>IStatus</code> object.  If the status contains additional detailed
- * information then a Details button is automatically supplied, which shows
- * or hides an error details viewer when pressed by the user.
+ * Overrides <code>ErrorDialog</code> to provide a dialog with
+ * the image that corresponds to the <code>IStatus</code>.
+ * 
+ * This behavior should be implemented in the ErrorDialog itself,
+ * see: 1GJU7TK: ITPUI:WINNT - DCR: ErrorDialog should not always show the error icon
+ * The class can be removed when the above PR is fixed
  *
  * @see org.eclipse.core.runtime.IStatus
  */
@@ -20,14 +22,6 @@ public class ProblemDialog extends ErrorDialog {
 	
 	/**
 	 * Creates a problem dialog.
-	 * Note that the dialog will have no visual representation (no widgets)
-	 * until it is told to open.
-	 * <p>
-	 * Normally one should use <code>openDialog</code> to create and open one of these.
-	 * This constructor is useful only if the error object being displayed contains child
-	 * items <it>and</it> you need to specify a mask which will be used to filter the
-	 * displaying of these children.
-	 * </p>
 	 *
 	 * @param parentShell the shell under which to create this dialog
 	 * @param dialogTitle the title to use for this dialog,
@@ -35,12 +29,13 @@ public class ProblemDialog extends ErrorDialog {
 	 * @param message the message to show in this dialog, 
 	 *   or <code>null</code> to indicate that the error's message should be shown
 	 *   as the primary message
+	 * @param image the image to be used
 	 * @param status the error to show to the user
 	 * @param displayMask the mask to use to filter the displaying of child items,
 	 *   as per <code>IStatus.matches</code>
 	 * @see org.eclipse.core.runtime.IStatus#matches
 	 */
-	public ProblemDialog(
+	protected ProblemDialog(
 			Shell parent,
 			String title,
 			String message,
@@ -50,16 +45,16 @@ public class ProblemDialog extends ErrorDialog {
 		super(parent, title, message, status, displayMask);
 		fImage= image;
 	}
-	/* (non-Javadoc)
-	 * Method declared on Dialog.
-	 * Creates and returns the contents of the upper part 
-	 * of the dialog (above the button bar).
+
+	/* 
+	 * Overrides method declared on Dialog.
 	 */
 	protected Control createDialogArea(Composite parent) {
-		// create composite
-		Composite composite = (Composite)super.createDialogArea(parent);
+		Composite composite= (Composite)super.createDialogArea(parent);
+		if (fImage == null)
+			return composite;
 
-		// find the label
+		// find the label that contains the image
 		Control[] kids= composite.getChildren();
 		int childCount= kids.length;
 		Label label= null;
@@ -72,15 +67,11 @@ public class ProblemDialog extends ErrorDialog {
 			}
 			i++;
 		}
-		if (i < childCount && label != null) {
-			// set image
-			if (fImage != null) {
-				fImage.setBackground(label.getBackground());
-				label.setImage(fImage);
-			}
-		}
+		if (i < childCount && label != null)
+			label.setImage(fImage);
 		return composite;
 	}
+
 	/**
 	 * Opens a warning dialog to display the given warning.  Use this method if the
 	 * warning object being displayed does not contain child items, or if you
@@ -101,6 +92,7 @@ public class ProblemDialog extends ErrorDialog {
 	public static int open(Shell parent, String title, String message, IStatus status) {
 		return open(parent, title, message, status, IStatus.OK | IStatus.INFO | IStatus.WARNING | IStatus.ERROR);
 	}
+
 	/**
 	 * Opens a dialog to display either an error or warning dialog.  Use this method if the
 	 * status being displayed contains child items <it>and</it> you wish to
