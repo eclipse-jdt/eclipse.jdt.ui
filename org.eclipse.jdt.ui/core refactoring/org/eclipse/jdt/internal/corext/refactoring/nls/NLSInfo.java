@@ -136,7 +136,7 @@ public class NLSInfo {
 		return null;
 	}
 
-	public String getResourceBundle(NLSElement nlsElement) throws JavaModelException {
+	private String getResourceBundle(NLSElement nlsElement) throws JavaModelException {
 		ITypeBinding accessorClass= getAccessorClass(nlsElement);
 		return getResourceBundle(accessorClass, getPackageOfAccessorClass(accessorClass));
 	}
@@ -163,6 +163,10 @@ public class NLSInfo {
 	public IFile getResourceBundleFile(NLSElement nlsElement) {
 		try {
 			String resourceBundle= getResourceBundle(nlsElement);
+			if (resourceBundle == null) {
+				return null;
+			}
+			
 			IPackageFragment packageFragment= getResourceBundlePackage(resourceBundle);
 			if (packageFragment != null) {
 				IPath path= packageFragment.getPath().append(getResourceNamePartHelper(resourceBundle));
@@ -249,7 +253,7 @@ public class NLSInfo {
 		}
 	}
 
-	public static String getPackagePartHelper(String fullyQualifiedResource) {
+	private static String getPackagePartHelper(String fullyQualifiedResource) {
 		int propertyDot= fullyQualifiedResource.lastIndexOf('.');
 		int lastPackageDot= fullyQualifiedResource.lastIndexOf('.', propertyDot - 1);
 		if (lastPackageDot == -1) {

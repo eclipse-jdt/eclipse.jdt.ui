@@ -28,8 +28,10 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.help.WorkbenchHelp;
+import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -39,6 +41,9 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
@@ -46,6 +51,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -207,16 +213,22 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 	}
 
 	protected void browseForAccessorClass() {
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(getShell(), new JavaElementLabelProvider());
+		IProgressService service= PlatformUI.getWorkbench().getProgressService();
+		IPackageFragmentRoot root= fAccessorPackage.getSelectedFragmentRoot();
+		
+		IJavaSearchScope scope= root != null ? SearchEngine.createJavaSearchScope(new IJavaElement[] { root }) : SearchEngine.createWorkspaceScope();
+		
+		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), service, IJavaSearchConstants.CLASS, scope);
 		dialog.setIgnoreCase(false);
 		dialog.setTitle(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Accessor_Selection")); //$NON-NLS-1$
 		dialog.setMessage(NLSUIMessages.getString("NLSAccessorConfigurationDialog.Choose_the_accessor_file")); //$NON-NLS-1$
-		dialog.setElements(createAccessorListInput());
-		dialog.setFilter(fAccessorClassName.getText());
+		dialog.setFilter("*Messages"); //$NON-NLS-1$
 		if (dialog.open() == Window.OK) {
 			IType selectedType= (IType) dialog.getFirstResult();
-			if (selectedType != null)
+			if (selectedType != null) {
 				fAccessorClassName.setText(selectedType.getElementName());
+				fAccessorPackage.setSelected(selectedType.getPackageFragment());
+			}
 		}
 
 
@@ -233,29 +245,6 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			for (int i= 0; i < nonjava.length; i++) {
 				if (isPropertyFile(nonjava[i]))
 					result.add(nonjava[i]);
-			}
-			return result.toArray();
-
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.getString("NLSAccessorConfigurationDialog.externalizing"), NLSUIMessages //$NON-NLS-1$
-					.getString("NLSAccessorConfigurationDialog.exception")); //$NON-NLS-1$
-			return new Object[0];
-		}
-	}
-
-	private Object[] createAccessorListInput() {
-		try {
-
-			IPackageFragment fPkgFragment= fAccessorPackage.getSelected();
-			if (fPkgFragment == null)
-				return new Object[0];
-			List result= new ArrayList(1);
-			ICompilationUnit[] elements= fPkgFragment.getCompilationUnits();
-			for (int i= 0; i < elements.length; i++) {
-				IType type= elements[i].findPrimaryType();
-				if ((type != null) && !type.isInterface()) {
-					result.add(type);
-				}
 			}
 			return result.toArray();
 

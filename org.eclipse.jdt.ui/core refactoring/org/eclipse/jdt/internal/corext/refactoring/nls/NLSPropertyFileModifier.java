@@ -35,7 +35,7 @@ public class NLSPropertyFileModifier {
 
 	public static Change create(NLSSubstitution[] nlsSubstitutions, IPath propertyFilePath) throws CoreException {
 
-		String name= NLSMessages.getFormattedString("NLSrefactoring.Append_to_property_file", propertyFilePath.toString()); //$NON-NLS-1$
+		String name= NLSMessages.getFormattedString("NLSPropertyFileModifier.change.name", propertyFilePath.toString()); //$NON-NLS-1$
 		TextChange textChange= null;
 		// TODO: check should not be necessary
 		if (!Checks.resourceExists(propertyFilePath)) {
@@ -77,7 +77,7 @@ public class NLSPropertyFileModifier {
 					KeyValuePair newPair= new KeyValuePair(substitution.getKey(), substitution.getValue());
 					TextEdit edit= model.replace(initialPair, newPair);
 					if (edit != null) {
-						TextChangeCompatibility.addTextEdit(textChange, "NLSRefactoring.replace_entry", edit); //$NON-NLS-1$
+						TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.replace_entry", substitution.getKey()), edit); //$NON-NLS-1$
 					}
 				}
 			}
@@ -93,7 +93,7 @@ public class NLSPropertyFileModifier {
 				KeyValuePair curr= new KeyValuePair(substitution.getKey(), substitution.getValue());
 				
 				InsertEdit insert= model.insert(curr);
-				String message= NLSMessages.getFormattedString("NLSRefactoring.add_entry", curr.getKey()); //$NON-NLS-1$
+				String message= NLSMessages.getFormattedString("NLSPropertyFileModifier.add_entry", curr.getKey()); //$NON-NLS-1$
 				TextChangeCompatibility.addTextEdit(textChange, message, insert);
 			}
 		}
@@ -105,7 +105,7 @@ public class NLSPropertyFileModifier {
 			if (substitution.hasStateChanged() && (substitution.getInitialState() == NLSSubstitution.EXTERNALIZED)) {
 				if (substitution.getInitialValue() != null) {
 					TextEdit edit= model.remove(substitution.getKey());
-					TextChangeCompatibility.addTextEdit(textChange, "NLSRefactoring.remove_entry", edit); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(textChange, NLSMessages.getFormattedString("NLSPropertyFileModifier.remove_entry", substitution.getKey()), edit); //$NON-NLS-1$
 				}
 			}
 		}

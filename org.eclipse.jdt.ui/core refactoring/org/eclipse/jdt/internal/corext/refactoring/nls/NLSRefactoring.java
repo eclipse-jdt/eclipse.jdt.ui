@@ -132,7 +132,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	public String getName() {
-		return NLSMessages.getFormattedString("NLSrefactoring.compilation_unit", fCu.getElementName());//$NON-NLS-1$
+		return NLSMessages.getFormattedString("NLSRefactoring.compilation_unit", fCu.getElementName());//$NON-NLS-1$
 	}
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -148,7 +148,7 @@ public class NLSRefactoring extends Refactoring {
 		checkParameters();
 		try {
 
-			pm.beginTask(NLSMessages.getString("NLSrefactoring.checking"), 7); //$NON-NLS-1$
+			pm.beginTask(NLSMessages.getString("NLSRefactoring.checking"), 7); //$NON-NLS-1$
 
 			RefactoringStatus result= new RefactoringStatus();
 
@@ -183,7 +183,7 @@ public class NLSRefactoring extends Refactoring {
 				throw new OperationCanceledException();
 
 			if (!propertyFileExists() && willModifyPropertyFile()) {
-				String msg= NLSMessages.getFormattedString("NLSrefactoring.will_be_created", getPropertyFilePath().toString()); //$NON-NLS-1$
+				String msg= NLSMessages.getFormattedString("NLSRefactoring.will_be_created", getPropertyFilePath().toString()); //$NON-NLS-1$
 				result.addInfo(msg);
 			}
 			pm.worked(1);
@@ -272,7 +272,7 @@ public class NLSRefactoring extends Refactoring {
 			return null;
 
 		RefactoringStatus result= new RefactoringStatus();
-		result.addFatalError(NLSMessages.getString("NLSrefactoring.nothing_to_do")); //$NON-NLS-1$
+		result.addFatalError(NLSMessages.getString("NLSRefactoring.nothing_to_do")); //$NON-NLS-1$
 		return result;
 	}
 
@@ -285,16 +285,16 @@ public class NLSRefactoring extends Refactoring {
 
 		RefactoringStatus result= new RefactoringStatus();
 		if (pattern.trim().length() == 0) {//$NON-NLS-1$ 
-			result.addError(NLSMessages.getString("NLSrefactoring.pattern_empty")); //$NON-NLS-1$
+			result.addError(NLSMessages.getString("NLSRefactoring.pattern_empty")); //$NON-NLS-1$
 		}
 
 		if (pattern.indexOf(KEY) == -1) {
-			String msg= NLSMessages.getFormattedString("NLSrefactoring.pattern_does_not_contain", KEY); //$NON-NLS-1$
+			String msg= NLSMessages.getFormattedString("NLSRefactoring.pattern_does_not_contain", KEY); //$NON-NLS-1$
 			result.addWarning(msg);
 		}
 
 		if (pattern.indexOf(KEY) != pattern.lastIndexOf(KEY)) {
-			String msg= NLSMessages.getFormattedString("NLSrefactoring.Only_the_first_occurrence_of", KEY);//$NON-NLS-1$
+			String msg= NLSMessages.getFormattedString("NLSRefactoring.Only_the_first_occurrence_of", KEY);//$NON-NLS-1$
 			result.addWarning(msg);
 		}
 
@@ -320,11 +320,11 @@ public class NLSRefactoring extends Refactoring {
 				if (s != null) {
 					if (!s.equals(substitution.getValue())) {
 						String[] args= {key, substitution.getValue()};
-						String msg= NLSMessages.getFormattedString("NLSrefactoring.already_exists", args); //$NON-NLS-1$
+						String msg= NLSMessages.getFormattedString("NLSRefactoring.already_exists", args); //$NON-NLS-1$
 						result.addFatalError(msg);
 					} else {
 						String[] args= {key, s};
-						String msg= NLSMessages.getFormattedString("NLSrefactoring.already_in_bundle", args); //$NON-NLS-1$
+						String msg= NLSMessages.getFormattedString("NLSRefactoring.already_in_bundle", args); //$NON-NLS-1$
 						result.addWarning(msg);
 					}
 				}
@@ -411,12 +411,12 @@ public class NLSRefactoring extends Refactoring {
 		for (int i= 0; i < toTranslate.length; i++) {
 			NLSSubstitution each= toTranslate[i];
 			if (!hasSameValue(value, each)) {
-				String msg= NLSMessages.getFormattedString("NLSrefactoring.duplicated", each.getKey());//$NON-NLS-1$
+				String msg= NLSMessages.getFormattedString("NLSRefactoring.duplicated", each.getKey());//$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(msg);
 			}
 		}
 		String[] args= {toTranslate[0].getKey(), value};
-		String msg= NLSMessages.getFormattedString("NLSrefactoring.reused", args); //$NON-NLS-1$
+		String msg= NLSMessages.getFormattedString("NLSRefactoring.reused", args); //$NON-NLS-1$
 		return RefactoringStatus.createWarningStatus(msg);
 	}
 
@@ -446,7 +446,7 @@ public class NLSRefactoring extends Refactoring {
 		RefactoringStatus result= new RefactoringStatus();
 
 		if (key == null)
-			result.addFatalError(NLSMessages.getString("NLSrefactoring.null")); //$NON-NLS-1$
+			result.addFatalError(NLSMessages.getString("NLSRefactoring.null")); //$NON-NLS-1$
 
 		if (key.startsWith("!") || key.startsWith("#")) { //$NON-NLS-1$ //$NON-NLS-2$
 			RefactoringStatusContext context= new JavaStringStatusContext(key, new SourceRange(0, 0));
@@ -454,14 +454,14 @@ public class NLSRefactoring extends Refactoring {
 		}
 
 		if ("".equals(key.trim())) //$NON-NLS-1$
-			result.addFatalError(NLSMessages.getString("NLSrefactoring.empty")); //$NON-NLS-1$
+			result.addFatalError(NLSMessages.getString("NLSRefactoring.empty")); //$NON-NLS-1$
 
 		final String[] UNWANTED_STRINGS= {" ", ":", "\"", "\\", "'", "?", "="}; //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-5$ //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
 		//feature in resource bundle - does not work properly if keys have ":"
 		for (int i= 0; i < UNWANTED_STRINGS.length; i++) {
 			if (key.indexOf(UNWANTED_STRINGS[i]) != -1) {
 				String[] args= {key, UNWANTED_STRINGS[i]};
-				String msg= NLSMessages.getFormattedString("NLSrefactoring.should_not_contain", args); //$NON-NLS-1$
+				String msg= NLSMessages.getFormattedString("NLSRefactoring.should_not_contain", args); //$NON-NLS-1$
 				result.addError(msg);
 			}
 		}
