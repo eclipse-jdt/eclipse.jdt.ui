@@ -56,7 +56,6 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 
 	/** Preference keys for the preferences in this block */
-	private static final Key PREF_SPELLING_CHECK_SPELLING= getJDTUIKey(PreferenceConstants.SPELLING_CHECK_SPELLING);
 	private static final Key PREF_SPELLING_IGNORE_DIGITS= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_DIGITS);
 	private static final Key PREF_SPELLING_IGNORE_MIXED= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_MIXED);
 	private static final Key PREF_SPELLING_IGNORE_SENTENCE= getJDTUIKey(PreferenceConstants.SPELLING_IGNORE_SENTENCE);
@@ -287,33 +286,24 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 		user.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		allControls.add(user);
 
-		String label= PreferencesMessages.getString("SpellingPreferencePage.enable.label"); //$NON-NLS-1$
-		final Button master= addCheckBox(user, label, PREF_SPELLING_CHECK_SPELLING, trueFalse, 0);
-		allControls.add(master);
-
-		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.digits.label"); //$NON-NLS-1$
-		Control slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_DIGITS, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		String label= PreferencesMessages.getString("SpellingPreferencePage.ignore.digits.label"); //$NON-NLS-1$
+		Control slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_DIGITS, trueFalse, 0);
 		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.mixed.label"); //$NON-NLS-1$
-		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_MIXED, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_MIXED, trueFalse, 0);
 		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.sentence.label"); //$NON-NLS-1$
-		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SENTENCE, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_SENTENCE, trueFalse, 0);
 		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.upper.label"); //$NON-NLS-1$
-		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_UPPER, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_UPPER, trueFalse, 0);
 		allControls.add(slave);
 
 		label= PreferencesMessages.getString("SpellingPreferencePage.ignore.url.label"); //$NON-NLS-1$
-		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 20);
-		createSelectionDependency(master, slave);
+		slave= addCheckBox(user, label, PREF_SPELLING_IGNORE_URLS, trueFalse, 0);
 		allControls.add(slave);
 
 		final Group engine= new Group(composite, SWT.NONE);
@@ -382,7 +372,7 @@ public class SpellingConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private static Key[] getAllKeys() {
-		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_CHECK_SPELLING, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
+		return new Key[] { PREF_SPELLING_USER_DICTIONARY, PREF_SPELLING_IGNORE_DIGITS, PREF_SPELLING_IGNORE_MIXED, PREF_SPELLING_IGNORE_SENTENCE, PREF_SPELLING_IGNORE_UPPER, PREF_SPELLING_IGNORE_URLS, PREF_SPELLING_LOCALE, PREF_SPELLING_PROPOSAL_THRESHOLD, PREF_SPELLING_ENABLE_CONTENTASSIST };
 	}
 
 	/*
