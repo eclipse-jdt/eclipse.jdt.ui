@@ -387,6 +387,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		fStandardActionGroups.fillActionBars(actionBars);
 		
 		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
+		actionBars.setGlobalActionHandler(IWorkbenchActionConstants.BOOKMARK, fAddBookmarkAction);
 		ReorgGroup.addGlobalReorgActions(actionBars, getSelectionProvider());
 	}
 	
@@ -575,7 +576,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		// fShowTypeHierarchyAction= new ShowTypeHierarchyAction(provider);
 		fShowNavigatorAction= new ShowInNavigatorAction(provider);
 		fAddBookmarkAction= new AddBookmarkAction(getShell());
-		
+		provider.addSelectionChangedListener(fAddBookmarkAction);
+
 		fStandardGroups= new ContextMenuGroup[] {
 			new BuildGroup(),
 			new ReorgGroup(),
@@ -730,10 +732,10 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 * Links to editor (if option enabled)
 	 */
 	private void handleSelectionChanged(SelectionChangedEvent event) {
-		IStructuredSelection sel= (IStructuredSelection) event.getSelection();
+		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
 		//updateGlobalActions(sel);
 		fZoomInAction.update();
-		linkToEditor(sel);
+		linkToEditor(selection);
 	}
 
 	public void selectReveal(ISelection selection) {
