@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
@@ -44,8 +45,8 @@ public class MoveMembersTests extends RefactoringTest {
 	}
 
 	//---
-	private static MoveStaticMembersRefactoring createRefactoring(IMember[] members){
-		return new MoveStaticMembersRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
+	private static MoveStaticMembersRefactoring createRefactoring(IMember[] members) throws JavaModelException{
+		return MoveStaticMembersRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 	
 	protected void setUp() throws Exception {
@@ -107,6 +108,10 @@ public class MoveMembersTests extends RefactoringTest {
 			IMethod[] methods= TestUtil.getMethods(typeA, methodNames, signatures);
 		
 			MoveStaticMembersRefactoring ref= createRefactoring(TestUtil.merge(methods, fields));
+			if (ref == null){
+				assertEquals(errorLevel, RefactoringStatus.FATAL);
+				return;
+			}
 			ref.setDestinationTypeFullyQualifiedName(destinationTypeName);
 		
 			RefactoringStatus result= performRefactoring(ref);

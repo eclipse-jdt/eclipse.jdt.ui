@@ -47,7 +47,7 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 
 	protected void performTest(IPackageFragment packageFragment, String name, String outputFolder, int mode) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, name);
-		SurroundWithTryCatchRefactoring refactoring= new SurroundWithTryCatchRefactoring(unit, 
+		SurroundWithTryCatchRefactoring refactoring= SurroundWithTryCatchRefactoring.create(unit, 
 			getTextSelection(unit.getSource()), JavaPreferencesSettings.getCodeGenerationSettings(), null);
 		refactoring.setSaveChanges(true);
 		String out= null;

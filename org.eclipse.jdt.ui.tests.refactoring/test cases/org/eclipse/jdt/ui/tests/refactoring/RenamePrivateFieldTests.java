@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -62,15 +61,6 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		JavaCore.setOptions(options);	
 	}
 
-	private CodeGenerationSettings getSettings(){
-		CodeGenerationSettings settings= new CodeGenerationSettings();
-		settings.createComments= true;
-		settings.createNonJavadocComments= true;
-		settings.importOrder= new String[]{"java", "javax", "com"};
-		settings.importThreshold= 99;
-		return settings;
-	}
-	
 	private String getPrefixes(){
 		return "f";
 	}
@@ -78,7 +68,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 	private void helper1_0(String fieldName, String newFieldName, String typeName,
 							boolean renameGetter, boolean renameSetter) throws Exception{
 		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName));
+		RenameFieldRefactoring ref= RenameFieldRefactoring.create(declaringType.getField(fieldName));
 		ref.setNewName(newFieldName);
 		ref.setRenameGetter(renameGetter);
 		ref.setRenameSetter(renameSetter);
@@ -102,7 +92,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 											boolean expectedGetterRenameEnabled, boolean expectedSetterRenameEnabled) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
 		ref.setUpdateReferences(updateReferences);
 		ref.setUpdateJavaDoc(updateJavaDoc);
 		ref.setUpdateComments(updateComments);

@@ -77,7 +77,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		String source= unit.getSource();
 		int[] selection= getSelection(source);
-		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(
+		ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(
 			unit, selection[0], selection[1],
 			JavaPreferencesSettings.getCodeGenerationSettings());
 		refactoring.setMethodName("extracted");

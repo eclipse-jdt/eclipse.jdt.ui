@@ -104,7 +104,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 						  	
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+        PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 
 		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
 		assertTrue("activation was supposed to be successful", activationResult.isOK());
@@ -137,7 +137,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 						  int expectedSeverity) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);						  	
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+        PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());	
         ref.setFieldName(newName);
@@ -166,7 +166,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
   						  boolean expectedCanEnableInitInConstructors) throws Exception{
 		ICompilationUnit cu= createCUfromEnablementTestFile(getPackageP());
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-        PromoteTempToFieldRefactoring ref= new PromoteTempToFieldRefactoring(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
+        PromoteTempToFieldRefactoring ref= PromoteTempToFieldRefactoring.create(cu, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings());
 		RefactoringStatus result= ref.checkActivation(new NullProgressMonitor());
 		ref.setFieldName(newName);
         ref.setDeclareFinal(declareFinal);

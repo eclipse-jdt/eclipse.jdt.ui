@@ -54,8 +54,8 @@ public class PushDownTests extends RefactoringTest {
 		return REFACTORING_PATH;
 	}
 
-	private static PushDownRefactoring createRefactoring(IMember[] members){
-		return new PushDownRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings());
+	private static PushDownRefactoring createRefactoring(IMember[] members) throws JavaModelException{
+		return PushDownRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private PushDownRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
@@ -71,7 +71,7 @@ public class PushDownTests extends RefactoringTest {
 		IMember[] selectedMembers= TestUtil.merge(selectedFields, selectedMethods);
 		
 		PushDownRefactoring ref= createRefactoring(selectedMembers);
-		assertTrue("preactivation", ref.checkPreactivation().isOK());
+//		assertTrue("preactivation", ref.checkPreactivation().isOK());
 		assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 		
 		prepareForInputCheck(ref, selectedMethods, selectedFields, namesOfMethodsToPullUp, signaturesOfMethodsToPullUp, namesOfFieldsToPullUp, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract);
@@ -176,7 +176,7 @@ public class PushDownTests extends RefactoringTest {
 			IMember[] selectedMembers= TestUtil.merge(selectedFields, selectedMethods);
 		
 			PushDownRefactoring ref= createRefactoring(selectedMembers);
-			assertTrue("preactivation", ref.checkPreactivation().isOK());
+//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertEquals("activation was expected to fail", expectedSeverity, ref.checkActivation(new NullProgressMonitor()).getSeverity());
 		} finally{
 			performDummySearch();
@@ -211,7 +211,7 @@ public class PushDownTests extends RefactoringTest {
 
 			IMember[] members= TestUtil.merge(methods, fields);
 			PushDownRefactoring ref= createRefactoring(members);
-			assertTrue("preactivation", ref.checkPreactivation().isOK());
+//			assertTrue("preactivation", ref.checkPreactivation().isOK());
 			assertTrue("activation", ref.checkActivation(new NullProgressMonitor()).isOK());
 
 			ref.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());

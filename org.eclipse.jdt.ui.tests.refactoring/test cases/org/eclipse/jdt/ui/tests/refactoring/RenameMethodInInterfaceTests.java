@@ -46,7 +46,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(interfaceI.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(interfaceI.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -59,7 +59,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(interfaceI.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(interfaceI.getMethod(methodName, signatures));
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
@@ -84,14 +84,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
-		helper2_0(methodName, newMethodName, signatures, shouldPass, true);
-	}
-	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
-		helper2_0(methodName, newMethodName, signatures, true);
-	}
-	
 	private void helper2(boolean updateReferences) throws Exception{
 		helper2_0("m", "k", new String[0], true, updateReferences);
 	}
@@ -100,12 +92,6 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper2(true);
 	}
 	
-	private void helper2_fail() throws Exception{
-		printTestDisabledMessage("search engine bug");
-		helper2_0("m", "k", new String[0], false);
-	}
-	
-
 	/********tests************/
 	public void testFail0() throws Exception{
 		helper1();

@@ -68,7 +68,7 @@ public class RenameTempTests extends RefactoringTest{
 
 	private void helper1(String newName, boolean updateReferences, ISourceRange selection, ICompilationUnit cu) throws Exception{
 //		IType classA= getType(cu, "A");
-		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
 		
@@ -110,7 +110,7 @@ public class RenameTempTests extends RefactoringTest{
 	}
 
 	private void failTestHelper(String newName, boolean updateReferences, ICompilationUnit cu, ISourceRange selection) throws JavaModelException {
-		RenameTempRefactoring ref= new RenameTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		RenameTempRefactoring ref= RenameTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newName);
 		

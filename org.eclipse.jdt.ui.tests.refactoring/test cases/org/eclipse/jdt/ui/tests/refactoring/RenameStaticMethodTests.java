@@ -45,7 +45,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 			IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
 		try{
-			RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+			RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
 			ref.setNewName(newMethodName);
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);
@@ -63,7 +63,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType classA= getType(cu, "A");
-			RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+			RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
 			ref.setUpdateReferences(updateReferences);
 			ref.setNewName(newMethodName);
 			assertEquals("was supposed to pass", null, performRefactoring(ref));

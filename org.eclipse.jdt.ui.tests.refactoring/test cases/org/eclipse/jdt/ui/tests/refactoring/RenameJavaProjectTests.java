@@ -56,7 +56,7 @@ public class RenameJavaProjectTests extends RefactoringTest {
 
 			 JavaProjectHelper.addRTJar(p1);
 			 
-			 RenameJavaProjectRefactoring ref= new RenameJavaProjectRefactoring(p1);
+			 RenameJavaProjectRefactoring ref= RenameJavaProjectRefactoring.create(p1);
 			 ref.setNewName(newProjectName);
 			 RefactoringStatus result= performRefactoring(ref);
 			 assertEquals("not expected to fail", null, result);

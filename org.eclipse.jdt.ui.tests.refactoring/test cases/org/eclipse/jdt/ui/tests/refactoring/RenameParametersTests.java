@@ -10,10 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -59,32 +57,16 @@ public class RenameParametersTests extends RefactoringTest{
 		return fileName + getSimpleTestFileName(canRename, input);
 	}
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-	
 	//------------
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canRename, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canRename, input), getFileContents(getTestFileName(canRename, input)));
 	}
 	
-	private static Map createRenamings(IMethod method, String[] newNames) throws Exception{
-		Map result= new HashMap();
-		String[] oldNames= method.getParameterNames();
-		for (int i = 0; i < oldNames.length; i++) {
-			result.put(oldNames[i], newNames[i]);
-		}
-		return result;
-	}
-	
-	private void helper1(String[] newNames, String[] signature, boolean updateReferences) throws Exception{
+	private void helper1(String[] newNames, String[] signature) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		//ref.setUpdateReferences(updateReferences);
 		//ref.setNewParameterNames(newNames);
 		//ref.setNewNames(createRenamings(method, newNames));
@@ -101,15 +83,11 @@ public class RenameParametersTests extends RefactoringTest{
 		assertEquals("invalid renaming", getFileContents(getTestFileName(true, false)), newcu.getSource());
 	}
 	
-	private void helper1(String[] newNames, String[] signature) throws Exception{
-		helper1(newNames, signature, true);
-	}
-	
 	private void helper2(String[] newNames, String[] signature) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		//DebugUtils.dump("classA" + classA);
 		IMethod method= classA.getMethod("m", signature);
-		ChangeSignatureRefactoring ref= new ChangeSignatureRefactoring(method, JavaPreferencesSettings.getCodeGenerationSettings());
+		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings());
 		modifyInfos(ref.getParameterInfos(), newNames);
 		
 		RefactoringStatus result= performRefactoring(ref);

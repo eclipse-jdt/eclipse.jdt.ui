@@ -82,7 +82,7 @@ public class ExtractTempTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, String guessedTempName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
+		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 		                                                       JavaPreferencesSettings.getCodeGenerationSettings());
 																
 		RefactoringStatus activationResult= ref.checkActivation(new NullProgressMonitor());	
@@ -113,7 +113,7 @@ public class ExtractTempTests extends RefactoringTest {
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName, int expectedStatus) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractTempRefactoring ref= new ExtractTempRefactoring(cu, selection.getOffset(), selection.getLength(), 
+		ExtractTempRefactoring ref= ExtractTempRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
 																									JavaPreferencesSettings.getCodeGenerationSettings());
 		
 		ref.setReplaceAllOccurrences(replaceAll);

@@ -85,11 +85,11 @@ public class ReorgTests extends RefactoringTest {
 	
 	//--- activation tests 
 	private void checkActivation(List elements, boolean expected)throws Exception{
-		CopyRefactoring ref= new CopyRefactoring(elements, new MockCopyQueries(), null);
-		assertEquals("copy", expected, ref.checkActivation(new NullProgressMonitor()).isOK());		
+		CopyRefactoring ref= CopyRefactoring.create(elements, new MockCopyQueries(), null);
+		assertEquals("copy", expected, ref != null);		
 		
-		MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
-		assertEquals("move", expected, moveRef.checkActivation(new NullProgressMonitor()).isOK());		
+		MoveRefactoring moveRef= MoveRefactoring.create(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+		assertEquals("move", expected, moveRef != null);		
 	}
 	
 	public void testActivation0() throws Exception{
@@ -223,7 +223,7 @@ public class ReorgTests extends RefactoringTest {
 			p1= getRoot().createPackageFragment("p1", false, null);
 			folder= createFolder("f");
 			
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
 			assertEquals("copy2", true, copyRef.isValidDestination(getPackageP()));
@@ -232,7 +232,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 	
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+			MoveRefactoring moveRef= MoveRefactoring.create(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
 			assertEquals("moveRef2", false, moveRef.isValidDestination(getPackageP()));
@@ -265,7 +265,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(cu2);
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
@@ -275,7 +275,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy5", false, copyRef.isValidDestination(getRtJar()));
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 			
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+			MoveRefactoring moveRef= MoveRefactoring.create(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef0a", false, moveRef.isValidDestination(cu2));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
@@ -311,7 +311,7 @@ public class ReorgTests extends RefactoringTest {
 			folder= createFolder("f");
 			
 			p1= getRoot().createPackageFragment("p1", false, null);
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			assertEquals("copy0", true, copyRef.isValidDestination(cu));
 			assertEquals("copy0a", true, copyRef.isValidDestination(cu2));
 			assertEquals("copy1", true, copyRef.isValidDestination(p1));
@@ -322,7 +322,7 @@ public class ReorgTests extends RefactoringTest {
 			assertEquals("copy6", true, copyRef.isValidDestination(folder));
 			assertEquals("copy7", true, copyRef.isValidDestination(file));
 			
-			MoveRefactoring moveRef= new MoveRefactoring(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
+			MoveRefactoring moveRef= MoveRefactoring.create(elements, JavaPreferencesSettings.getCodeGenerationSettings(), null);
 			assertEquals("moveRef0", false, moveRef.isValidDestination(cu));
 			assertEquals("moveRef0a", false, moveRef.isValidDestination(cu2));
 			assertEquals("moveRef1", true, moveRef.isValidDestination(p1));
@@ -360,7 +360,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(folder);
 			
 			p2= JavaProjectHelper.createJavaProject("P2", "bin");
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			copyRef.setDestination(p2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);
@@ -398,7 +398,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(srcFolder);
 			
 			p2= JavaProjectHelper.createJavaProject("P2", "bin");
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			copyRef.setDestination(p2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);
@@ -438,7 +438,7 @@ public class ReorgTests extends RefactoringTest {
 			elements.add(pack);
 			
 			srcFolder2= JavaProjectHelper.addSourceContainer(MySetup.getProject(), "src2");
-			CopyRefactoring copyRef= new CopyRefactoring(elements, new MockCopyQueries(), null);
+			CopyRefactoring copyRef= CopyRefactoring.create(elements, new MockCopyQueries(), null);
 			copyRef.setDestination(srcFolder2);
 			assertTrue("copy read-only", copyRef.checkActivation(new NullProgressMonitor()).isOK());
 			RefactoringStatus status= performRefactoring(copyRef);

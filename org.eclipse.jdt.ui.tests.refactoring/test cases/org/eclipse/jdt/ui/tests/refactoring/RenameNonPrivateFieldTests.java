@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.base.ChangeContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -47,10 +46,6 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		return REFACTORING_PATH;
 	}
 
-	private CodeGenerationSettings getSettings(){
-		return new CodeGenerationSettings();
-	}
-
 	protected void setUp() throws Exception {
 		super.setUp();
 		Hashtable options= JavaCore.getOptions();
@@ -72,7 +67,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	
 	private void helper1_0(String fieldName, String newFieldName) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
 		ref.setNewName(newFieldName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -85,7 +80,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	private void helper2(String fieldName, String newFieldName, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		RenameFieldRefactoring ref= RenameFieldRefactoring.create(classA.getField(fieldName));
 		ref.setNewName(newFieldName);
 		ref.setUpdateReferences(updateReferences);
 		RefactoringStatus result= performRefactoring(ref);

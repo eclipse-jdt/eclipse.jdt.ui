@@ -44,7 +44,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 
 	private void helper1_0(String methodName, String newMethodName, String[] signatures) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
 		ref.setNewName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
@@ -57,7 +57,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classA.getMethod(methodName, signatures));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classA.getMethod(methodName, signatures));
 		ref.setUpdateReferences(updateReferences);
 		ref.setNewName(newMethodName);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
@@ -152,7 +152,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		ICompilationUnit cuC= createCUfromTestFile(getPackageP(), "C");
 		
 		IType classB= getType(cu, "B");
-		RenameMethodRefactoring ref= RenameMethodRefactoring.createInstance(classB.getMethod("m", new String[]{"I"}));
+		RenameMethodRefactoring ref= RenameMethodRefactoring.create(classB.getMethod("m", new String[]{"I"}));
 		ref.setNewName("kk");
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));

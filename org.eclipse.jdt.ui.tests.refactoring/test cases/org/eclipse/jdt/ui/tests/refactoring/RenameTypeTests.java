@@ -26,6 +26,7 @@ import org.eclipse.core.boot.BootLoader;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -56,8 +57,8 @@ public class RenameTypeTests extends RefactoringTest {
 		return getType(createCUfromTestFile(pack, className), className);
 	}
 		
-	private RenameTypeRefactoring createRefactoring(IType type, String newName){
-		RenameTypeRefactoring ref= new RenameTypeRefactoring(type);
+	private RenameTypeRefactoring createRefactoring(IType type, String newName) throws JavaModelException{
+		RenameTypeRefactoring ref= RenameTypeRefactoring.create(type);
 		ref.setNewName(newName);
 		return ref;
 	}
@@ -94,10 +95,6 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	private void helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
 		helper2_0(oldName, oldName, newName, newCUName, updateReferences, false, false, false);
-	}
-	
-	private void helper2_0(String oldName, String newName, String newCUName) throws Exception{
-		helper2_0(oldName, newName, newCUName, true);
 	}
 	
 	private void helper2(String oldName, String newName, boolean updateReferences) throws Exception{

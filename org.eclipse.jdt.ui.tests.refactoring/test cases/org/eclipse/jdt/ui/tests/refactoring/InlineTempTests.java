@@ -53,13 +53,6 @@ public class InlineTempTests extends RefactoringTest {
 		return fileName + getSimpleTestFileName(canInline, input);
 	}
 	
-	private String getFailingTestFileName(){
-		return getTestFileName(false, false);
-	}
-	private String getPassingTestFileName(boolean input){
-		return getTestFileName(true, input);
-	}
-
 	protected ICompilationUnit createCUfromTestFile(IPackageFragment pack, boolean canInline, boolean input) throws Exception {
 		return createCU(pack, getSimpleTestFileName(canInline, input), getFileContents(getTestFileName(canInline, input)));
 	}
@@ -72,7 +65,7 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper1(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -96,10 +89,12 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper2(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, selection.getOffset(), selection.getLength());
 		
-		RefactoringStatus result= performRefactoring(ref);
-		assertNotNull("precondition was supposed to fail", result);		
+		if (ref != null){
+			RefactoringStatus result= performRefactoring(ref);
+			assertNotNull("precondition was supposed to fail", result);		
+		}
 	}
 	
 	private void helper2(int startLine, int startColumn, int endLine, int endColumn) throws Exception{

@@ -80,7 +80,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
 		IType clas= parentClas.getType(className);
 				
-		MoveInnerToTopRefactoring ref= new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 			assertTrue("name should be ok ", ref.checkEnclosingInstanceName(enclosingInstanceName).isOK());
@@ -110,7 +110,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
 		IType clas= parentClas.getType(className);
 				
-		MoveInnerToTopRefactoring ref= new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings());
+		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings());
 		if (enclosingInstanceName != null){
 			ref.setEnclosingInstanceName(enclosingInstanceName);
 		}	

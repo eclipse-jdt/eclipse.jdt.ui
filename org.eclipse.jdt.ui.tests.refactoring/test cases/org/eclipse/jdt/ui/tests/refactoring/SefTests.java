@@ -72,7 +72,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
+		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field, settings);
 		RefactoringStatus status= refactoring.checkPreconditions(pm);
 		assertTrue(!status.hasFatalError());
 		IChange change= refactoring.createChange(pm);
@@ -100,7 +100,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
 
 
-		SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field, settings);
+		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field, settings);
 		RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
 		assertTrue(status.hasError());
 	}	

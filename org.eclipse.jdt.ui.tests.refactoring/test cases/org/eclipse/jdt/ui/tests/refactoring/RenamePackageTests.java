@@ -15,6 +15,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -40,8 +41,8 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	// -------------
-	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) {
-		RenamePackageRefactoring ref= new RenamePackageRefactoring(pack);
+	private RenamePackageRefactoring createRefactoring(IPackageFragment pack, String newName) throws JavaModelException {
+		RenamePackageRefactoring ref= RenamePackageRefactoring.create(pack);
 		ref.setNewName(newName);
 		return ref;
 	}
