@@ -255,7 +255,16 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 
 			// creating closing peer character
 			case '(':
-			case '[':			
+				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS) &&
+					(command.offset == document.getLength() ||
+					Character.isWhitespace(document.getChar(command.offset))))
+				{
+					command.doit= false;
+					document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
+				}
+				break;
+
+			case '[':
 				if (preferenceStore.getBoolean(CompilationUnitEditor.CLOSE_BRACKETS)) {
 					command.doit= false;
 					document.replace(command.offset, 0, String.valueOf(getClosingCharacter(character)));
