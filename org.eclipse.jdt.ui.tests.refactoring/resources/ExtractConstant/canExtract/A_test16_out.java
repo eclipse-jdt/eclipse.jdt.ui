@@ -1,11 +1,11 @@
 //5, 20 -> 5, 27   AllowLoadtime == false
 package p;
 class A {
-    private static final boolean RED= isRed();
+	private static final boolean CONSTANT= isRed();
 	void f() {
-        boolean i= RED;
-    }
-    static boolean isRed(){
-        return 5==1;
-    }
+		boolean i= CONSTANT;
+	}
+	static boolean isRed(){
+		return 5==1;
+	}
 }
