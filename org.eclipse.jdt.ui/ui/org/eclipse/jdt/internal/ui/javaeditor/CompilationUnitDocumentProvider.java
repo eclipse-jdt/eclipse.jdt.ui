@@ -468,13 +468,16 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 								
 							Position position= createPositionFromProblem(problem);
 							if (position != null) {
-								
-								ProblemAnnotation annotation= new ProblemAnnotation(problem, cu);
-								overlayMarkers(position, annotation);								
-								fGeneratedAnnotations.add(annotation);
-								addAnnotation(annotation, position, false);
-								
-								temporaryProblemsChanged= true;
+								try {
+									ProblemAnnotation annotation= new ProblemAnnotation(problem, cu);
+									addAnnotation(annotation, position, false);
+									overlayMarkers(position, annotation);								
+									fGeneratedAnnotations.add(annotation);
+									
+									temporaryProblemsChanged= true;
+								} catch (BadLocationException x) {
+									// ignore invalid position
+								}
 							}
 						}
 						
@@ -590,9 +593,10 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider {
 			/*
 			 * @see AnnotationModel#addAnnotation(Annotation, Position, boolean)
 			 */
-			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) {
-				fCurrentEvent.annotationAdded(annotation);
+			protected void addAnnotation(Annotation annotation, Position position, boolean fireModelChanged) throws BadLocationException {
 				super.addAnnotation(annotation, position, fireModelChanged);
+
+				fCurrentEvent.annotationAdded(annotation);
 				
 				Object cached= fReverseMap.get(position);
 				if (cached == null)
