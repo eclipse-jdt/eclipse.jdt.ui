@@ -22,7 +22,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportEdit;
@@ -74,10 +73,33 @@ public class LocalCorrectionsSubProcessor {
 				nodeToCast= frag.getInitializer();
 			}
 		}
-
-		ASTRewriteCorrectionProposal castProposal= getCastProposal(context, castType, nodeToCast);
-		if (castProposal != null) {
-			proposals.add(castProposal);
+		{
+			ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
+			
+			String label;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 1, image); //$NON-NLS-1$
+			String simpleCastType= proposal.addImport(castType);
+			
+			if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changecast.description", castType); //$NON-NLS-1$
+				CastExpression expression= (CastExpression) nodeToCast;
+				rewrite.markAsReplaced(expression.getType(), rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE));
+			} else {
+				label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
+				
+				Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
+				Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
+				CastExpression castExpression= astRoot.getAST().newCastExpression();
+				castExpression.setExpression(expressionCopy);
+				castExpression.setType(typeCopy);
+				
+				rewrite.markAsReplaced(nodeToCast, castExpression);
+			}
+			proposal.setDisplayName(label);
+			proposal.ensureNoModifications();
+			
+			proposals.add(proposal);
 		}
 		
 		// change method return statement to actual type
@@ -127,81 +149,6 @@ public class LocalCorrectionsSubProcessor {
 			}
 		}
 			
-	}
-	
-
-	private static boolean canCast(String castTarget, ITypeBinding bindingToCast) {
-		int arrStart= castTarget.indexOf('[');
-		if (arrStart != -1) {
-			if (!bindingToCast.isArray()) {
-				return "java.lang.Object".equals(bindingToCast.getQualifiedName()); //$NON-NLS-1$
-			}
-			castTarget= castTarget.substring(0, arrStart);
-			bindingToCast= bindingToCast.getElementType();
-			if (bindingToCast.isPrimitive()) {
-				return false; // can't cast arrays of primitive types into each other
-			}
-		}
-		
-		Code targetCode= PrimitiveType.toCode(castTarget);
-		if (bindingToCast.isPrimitive()) {
-			Code castCode= PrimitiveType.toCode(bindingToCast.getName());
-			if (castCode == targetCode) {
-				return true;
-			}
-			return (targetCode != null && targetCode != PrimitiveType.BOOLEAN && castCode != PrimitiveType.BOOLEAN);
-		} else {
-			return targetCode == null;
-		}
-	}
-	
-	
-
-	public static ASTRewriteCorrectionProposal getCastProposal(ICorrectionContext context, String castType, Expression nodeToCast) throws CoreException {
-		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding != null && !canCast(castType, binding)) {
-			return null;
-		}
-		
-		ICompilationUnit cu= context.getCompilationUnit();
-		CompilationUnit astRoot= context.getASTRoot();
-		
-		ASTRewrite rewrite= new ASTRewrite(nodeToCast.getParent());
-		
-		String label;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("", cu, rewrite, 1, image); //$NON-NLS-1$
-		String simpleCastType= proposal.addImport(castType);
-		
-		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
-			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.changecast.description", castType); //$NON-NLS-1$
-			CastExpression expression= (CastExpression) nodeToCast;
-			rewrite.markAsReplaced(expression.getType(), rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE));
-		} else {
-			label= CorrectionMessages.getFormattedString("LocalCorrectionsSubProcessor.addcast.description", castType); //$NON-NLS-1$
-			
-			Expression expressionCopy= (Expression) rewrite.createCopy(nodeToCast);
-			int nodeType= nodeToCast.getNodeType();
-			
-			if (nodeType == ASTNode.INFIX_EXPRESSION || nodeType == ASTNode.CONDITIONAL_EXPRESSION 
-				|| nodeType == ASTNode.ASSIGNMENT || nodeType == ASTNode.INSTANCEOF_EXPRESSION) {
-				// nodes have weaker precedence than cast
-				ParenthesizedExpression parenthesizedExpression= astRoot.getAST().newParenthesizedExpression();
-				parenthesizedExpression.setExpression(expressionCopy);
-				expressionCopy= parenthesizedExpression;
-			}
-			
-			Type typeCopy= (Type) rewrite.createPlaceholder(simpleCastType, ASTRewrite.TYPE);
-			CastExpression castExpression= astRoot.getAST().newCastExpression();
-			castExpression.setExpression(expressionCopy);
-			castExpression.setType(typeCopy);
-			
-			rewrite.markAsReplaced(nodeToCast, castExpression);
-		}
-		proposal.setDisplayName(label);
-		proposal.ensureNoModifications();
-		
-		return proposal;
 	}
 	
 	public static void addUncaughtExceptionProposals(ICorrectionContext context, List proposals) throws CoreException {
