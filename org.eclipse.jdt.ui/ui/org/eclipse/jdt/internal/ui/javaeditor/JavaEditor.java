@@ -72,6 +72,7 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.ITextViewerExtension2;
 import org.eclipse.jface.text.ITextViewerExtension3;
+import org.eclipse.jface.text.ITextViewerExtension4;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
@@ -984,14 +985,19 @@ public abstract class JavaEditor extends StatusTextEditor implements IViewPartIn
 				fTextOperationAction.run();
 				return;
 			}
-				
+			
+			if (sourceViewer instanceof ITextViewerExtension4)  {
+				ITextViewerExtension4 extension4= (ITextViewerExtension4) sourceViewer;
+				extension4.moveFocusToWidgetToken();
+			}
+			
 			if (! (sourceViewer instanceof ITextViewerExtension2)) {
 				fTextOperationAction.run();
 				return;
 			}
 				
 			ITextViewerExtension2 textViewerExtension2= (ITextViewerExtension2) sourceViewer;
-
+			
 			// does a text hover exist?
 			ITextHover textHover= textViewerExtension2.getCurrentTextHover();
 			if (textHover == null) {
