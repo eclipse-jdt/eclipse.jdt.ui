@@ -90,6 +90,8 @@ public class RefreshAction extends SelectionDispatchAction {
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
 					return false;
+				if (resource.getType() == IResource.PROJECT && !((IProject)resource).isOpen())
+					return false;
 			} else {
 				return false;
 			}
