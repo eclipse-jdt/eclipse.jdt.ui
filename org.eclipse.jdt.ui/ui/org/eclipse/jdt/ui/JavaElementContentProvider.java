@@ -342,7 +342,12 @@ public class JavaElementContentProvider implements ITreeContentProvider, IElemen
 		
 	private Object[] getPackageFragments(IPackageFragmentRoot root) throws JavaModelException {
 		IJavaElement[] fragments= root.getChildren();
-		return ArrayUtility.merge(fragments, root.getNonJavaResources());
+		// workaround for 1GE2T86: ITPJUI:WIN2000 - Null pointer exception in packages view
+		// getNonJavaResources sometimes returns null!
+		Object[] nonJavaResources= root.getNonJavaResources();
+		if (nonJavaResources == null)
+			return fragments;
+		return ArrayUtility.merge(fragments, nonJavaResources);
 	}
 	
 	private Object[] getNonProjectPackageFragmentRoots(IJavaProject project) throws JavaModelException {
