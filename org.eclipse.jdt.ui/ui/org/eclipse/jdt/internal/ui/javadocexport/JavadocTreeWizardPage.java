@@ -61,16 +61,10 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 public class JavadocTreeWizardPage extends JavadocWizardPage {
 
-	private JavadocProjectContentProvider fProjectContentProvider;
-	private JavaElementLabelProvider fProjectLabelProvider;
 	private CheckboxTreeAndListGroup fInputGroup;
 
 	protected IWorkspaceRoot fRoot;
 	protected String fWorkspace;
-
-	private final String DOCUMENT_DIRECTORY= "doc"; //$NON-NLS-1$
-
-	private File fTempFile;
 
 	//private JavadocTreeViewerFilter fFilter;
 
@@ -90,7 +84,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	private Label fVisibilityLabel;
 	private Label fDescriptionLabel;
 
-	private String fDialogSectionName;
 	protected String fVisibilitySelection;
 	protected boolean fDocletSelected;
 
@@ -339,24 +332,6 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	public boolean getCustom() {
 		return fCustomButton.getSelection();
-	}
-
-	private String getDestinationText() {
-		Object[] els= fInputGroup.getAllCheckedTreeItems().toArray();
-
-		try {
-			for (int i= 0; i < els.length; i++) {
-				if (els[i] instanceof IJavaProject) {
-					IJavaProject iJavaProject= (IJavaProject) els[i];
-					IPath p= iJavaProject.getProject().getLocation();
-					if (p != null)
-						return p.addTrailingSeparator().append(DOCUMENT_DIRECTORY).toOSString();
-				}
-			}
-		} catch (NullPointerException e) {
-			return ""; //$NON-NLS-1$
-		}
-		return ""; //$NON-NLS-1$
 	}
 
 	private void setOptionSetSettings() {

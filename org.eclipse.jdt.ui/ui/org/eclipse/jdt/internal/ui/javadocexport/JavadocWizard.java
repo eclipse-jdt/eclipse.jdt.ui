@@ -208,6 +208,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 				case NO_TO_ALL :
 					j= projects.length;
 					break;
+				case NO :
 				default :
 					break;
 			}

@@ -111,7 +111,6 @@ public abstract class JavadocWizardPage extends NewElementWizardPage {
 	protected static class EnableSelectionAdapter extends SelectionAdapter {
 		private Control[] fEnable;
 		private Control[] fDisable;
-		private boolean single;
 
 		protected EnableSelectionAdapter(Control[] enable, Control[] disable) {
 			super();
