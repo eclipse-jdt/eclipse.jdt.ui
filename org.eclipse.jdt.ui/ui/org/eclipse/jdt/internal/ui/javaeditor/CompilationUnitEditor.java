@@ -695,8 +695,10 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	public void doSave(IProgressMonitor progressMonitor) {
 		
 		IDocumentProvider p= getDocumentProvider();
-		if (p == null)
+		if (p == null) {
+			// editor has been closed
 			return;
+		}
 			
 		if (p.isDeleted(getEditorInput())) {
 			
@@ -868,6 +870,11 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 			
 		IDocumentProvider provider= getDocumentProvider();
+		if (provider == null) {
+			// editor has been programmatically closed while the dialog was open
+			return;
+		}
+		
 		if (provider.isDeleted(input) && original != null) {
 			String message= JavaEditorMessages.getFormattedString("CompilationUnitEditor.warning.save.delete", new Object[] { original.getName() }); //$NON-NLS-1$
 			dialog.setErrorMessage(null);
@@ -900,7 +907,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		boolean success= false;
 		try {
 			
-			getDocumentProvider().aboutToChange(newInput);
+			provider.aboutToChange(newInput);
 			new ProgressMonitorDialog(shell).run(false, true, op);
 			success= true;
 			
@@ -916,7 +923,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 			}
 						
 		} finally {
-			getDocumentProvider().changed(newInput);
+			provider.changed(newInput);
 			if (success)
 				setInput(newInput);
 		}
