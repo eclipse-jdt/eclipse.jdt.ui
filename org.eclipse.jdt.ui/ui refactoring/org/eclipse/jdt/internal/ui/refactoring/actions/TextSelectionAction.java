@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import experiments.*;
 
 abstract public class TextSelectionAction extends Action implements IUpdate, IWorkbenchWindowActionDelegate {
 	
