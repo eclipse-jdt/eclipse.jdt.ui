@@ -17,12 +17,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceManipulation;
 import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
@@ -33,22 +35,16 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteFromClasspathChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DeleteSourceManipulationChange;
 
 public class DeleteRefactoring extends Refactoring {
 	
 	private List fElements;
-	private boolean fDeleteProjectContents;
 	private boolean fCheckIfUsed;
 	
 	public DeleteRefactoring(List elements){
 		Assert.isNotNull(elements);
 		fElements= elements;
-	}
-	
-	public void setDeleteProjectContents(boolean delete){
-		fDeleteProjectContents= delete;
 	}
 	
 	public List getElementsToDelete(){
@@ -200,10 +196,6 @@ public class DeleteRefactoring extends Refactoring {
 		};
 	}
 	
-	private boolean deleteProjectContents(IProject project){
-		return fDeleteProjectContents;
-	}
-	
 	private IChange createDeleteChange(Object o) throws JavaModelException {
 		//the sequence is important here
 		
@@ -240,9 +232,8 @@ public class DeleteRefactoring extends Refactoring {
 			
 		if (res instanceof IFolder)	
 			return createDeleteChange((IFolder)res, false);
-			
-		if (res instanceof IProject)
-			return new DeleteProjectChange((IProject)res, deleteProjectContents((IProject)res));
+		
+		Assert.isTrue(! (res instanceof IProject));
 			
 		return new NullChange();
 	}

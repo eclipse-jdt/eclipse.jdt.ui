@@ -29,9 +29,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Action for deleting elements in a delete target.
  */
 class JdtDeleteResourceAction extends ReorgAction {
-	private boolean fDeleteProjectContent;
-
-	public JdtDeleteResourceAction(ISelectionProvider provider) {
+	public JdtDeleteResourceAction(ISelectionProvider provider) {
 		super(ReorgMessages.getString("deleteAction.label"), provider); //$NON-NLS-1$
 		setDescription(ReorgMessages.getString("deleteAction.description")); //$NON-NLS-1$
 	}
@@ -47,13 +45,11 @@ class JdtDeleteResourceAction extends ReorgAction {
 
 		DeleteRefactoring refactoring= new DeleteRefactoring(getStructuredSelection().toList());
 		
-		fDeleteProjectContent= false;
 		if (!confirmDelete())
 			return;
 
 		if (hasReadOnlyResources() && !isOkToDeleteReadOnly()) 
 			return;
-		refactoring.setDeleteProjectContents(fDeleteProjectContent);
 		try{
 			MultiStatus status= ReorgAction.perform(refactoring);
 			if (!status.isOK()) {
