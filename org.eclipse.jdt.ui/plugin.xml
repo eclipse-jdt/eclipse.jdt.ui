@@ -531,10 +531,6 @@
 <extension
 	point="org.eclipse.compare.structureCreators">
 	<structureCreator
-		extensions="java"
-		class="org.eclipse.jdt.internal.ui.compare.JavaStructureCreator">
-	</structureCreator>
-	<structureCreator
 		extensions="jar"
 		class="org.eclipse.jdt.internal.ui.compare.JarStructureCreator">
 	</structureCreator>
@@ -564,6 +560,15 @@
 	</viewer>
 </extension>
 
+<extension
+	point="org.eclipse.compare.structureMergeViewers">
+	<structureMergeViewer
+         extensions="java"
+         class="org.eclipse.jdt.internal.ui.compare.JavaStructureDiffViewerCreator">
+	</structureMergeViewer>
+</extension>
+
+JavaStructureDiffViewerCreator
 <!-- End Java Compare -->
 
 <!-- =========================================================================== -->
