@@ -4,10 +4,9 @@
 public interface IJarExportRunnable extends IRunnableWithProgress {
 
 	/**
-	 * Returns the status of this operation.
-	 * If there were any errors, the result is a status object containing
-	 * individual status objects for each error.
-	 * If there were no errors, the result is a status object with error code <code>OK</code>.
+	 * Returns the current status of this operation.
+	 * The result is a status object which may contain individual
+	 * nested status objects.	 * <p>	 * Clients may call this method during the operation and add	 * additional status information.	 * </p>
 	 *
 	 * @return the status of this operation
 	 */
