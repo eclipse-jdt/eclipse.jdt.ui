@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -24,11 +25,16 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportContainer;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -37,11 +43,13 @@ import org.eclipse.jdt.core.search.ISearchPattern;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultCollector;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
@@ -58,7 +66,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResul
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
+import org.eclipse.jdt.internal.corext.textmanipulation.TextRegion;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 
@@ -66,7 +76,18 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	private IPackageFragment fPackage;
 	private String fNewName;
+
+	/** references to fPackage */
 	private SearchResultGroup[] fOccurrences;
+	/** other IPackageFragments with fPackage's name (*ex*cluding fPackage) */
+	private IPackageFragment[] fNamesakePackages;
+	/** references in CUs from fOccurrences and fPackage to types in namesake packages
+	 * <p>mutable List of SearchResultGroup */
+	private List fReferencesToTypesInNamesakes;
+	/** references in namesake packages to types in fPackage
+	 * <p>mutable List of SearchResultGroup */
+	private List fReferencesToTypesInPackage;
+
 	private TextChangeManager fChangeManager;
 	private QualifiedNameSearchResult fQualifiedNameSearchResult;
 	
@@ -258,7 +279,7 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException{
 		try{
-			pm.beginTask("", 15); //$NON-NLS-1$
+			pm.beginTask("", 16); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkNewName(fNewName));
@@ -282,7 +303,12 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 				
 			if (fUpdateReferences){
 				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.searching"));	 //$NON-NLS-1$
-				fOccurrences= getReferences(new SubProgressMonitor(pm, 6));	
+				fOccurrences= getReferences(new SubProgressMonitor(pm, 5));	
+				//fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47509
+				fNamesakePackages= getNamesakePackages(fPackage.getElementName(), new SubProgressMonitor(pm, 1));
+				fReferencesToTypesInPackage= getReferencesToTypesInPackage(new SubProgressMonitor(pm, 1));
+				fReferencesToTypesInNamesakes= getReferencesToTypesInNamesakes(new SubProgressMonitor(pm, 1));
+				//END fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47509
 				pm.setTaskName(RefactoringCoreMessages.getString("RenamePackageRefactoring.checking")); //$NON-NLS-1$
 				result.merge(analyzeAffectedCompilationUnits());
 				pm.worked(1);
@@ -323,6 +349,87 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 		return RefactoringSearchEngine.search(pm, createRefactoringScope(), createSearchPattern());
 	}
 		
+	private IPackageFragment[] getNamesakePackages(String name, IProgressMonitor pm) throws JavaModelException {
+		IJavaSearchScope scope= RefactoringScopeFactory.create(fPackage);
+		ISearchPattern pattern= SearchEngine.createSearchPattern(name, IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, true);
+		SearchResultCollector collector= new SearchResultCollector(pm);
+		new SearchEngine().search(ResourcesPlugin.getWorkspace(), pattern, scope, collector);
+
+		List results= collector.getResults();
+		List packageFragments= new ArrayList();
+		for (Iterator iter= results.iterator(); iter.hasNext();) {
+			SearchResult result= (SearchResult) iter.next();
+			IJavaElement enclosingElement= result.getEnclosingElement();
+			if (enclosingElement instanceof IPackageFragment) {
+				IPackageFragment pack= (IPackageFragment) enclosingElement;
+				if (! fPackage.equals(pack))
+					packageFragments.add(pack);
+			}
+		}
+		return (IPackageFragment[]) packageFragments.toArray(new IPackageFragment[packageFragments.size()]);
+	}
+	
+	private List getReferencesToTypesInNamesakes(IProgressMonitor pm) throws JavaModelException {
+		if (fNamesakePackages.length == 0) {
+			pm.done();
+			return new ArrayList(0);
+		}
+		IType[] typesToSearch= getTypesInPackages(fNamesakePackages);
+		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pm, getScopeForReferencesToTypesInNamesakes(), pattern);
+		return new ArrayList(Arrays.asList(results));
+	}
+
+	private IJavaSearchScope getScopeForReferencesToTypesInNamesakes() {
+		List scopeList= new ArrayList();
+		List namesakePackages= Arrays.asList(fNamesakePackages);
+		for (int i= 0; i < fOccurrences.length; i++) {
+			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
+			if (cu == null)
+				continue;
+			IPackageFragment pack= (IPackageFragment) cu.getParent();
+			if (pack == null) //should not happen
+				continue;
+			if (! namesakePackages.contains(pack))
+				scopeList.add(cu);
+		}
+		scopeList.add(fPackage);
+		return SearchEngine.createJavaSearchScope((IJavaElement[]) scopeList.toArray(new IJavaElement[scopeList.size()])); 
+	}
+	
+	private IType[] getTypesInPackages(IPackageFragment[] packageFragments) throws JavaModelException {
+		List types= new ArrayList();
+		for (int i= 0; i < packageFragments.length; i++) {
+			IPackageFragment pack= packageFragments[i];
+			addContainedTypes(pack, types);
+		}
+		return (IType[]) types.toArray(new IType[types.size()]);
+	}
+
+	private void addContainedTypes(IPackageFragment pack, List typesCollector) throws JavaModelException {
+		IJavaElement[] children= pack.getChildren();
+		for (int c= 0; c < children.length; c++) {
+			IJavaElement child= children[c];
+			if (child instanceof ICompilationUnit) {
+				typesCollector.addAll(Arrays.asList(((ICompilationUnit) child).getTypes()));
+			}
+		}
+	}
+
+	private List getReferencesToTypesInPackage(IProgressMonitor pm) throws JavaModelException {
+		if (fNamesakePackages.length == 0) {
+			pm.done();
+			return new ArrayList(0);
+		}
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(fNamesakePackages);
+		List types= new ArrayList();
+		addContainedTypes(fPackage, types);
+		IType[] typesToSearch= (IType[]) types.toArray(new IType[types.size()]);
+		ISearchPattern pattern= RefactoringSearchEngine.createSearchPattern(typesToSearch, IJavaSearchConstants.REFERENCES);
+		SearchResultGroup[] results= RefactoringSearchEngine.search(pm, scope, pattern);
+		return new ArrayList(Arrays.asList(results));
+	}
+
 	private RefactoringStatus checkForMainMethods() throws JavaModelException{
 		ICompilationUnit[] cus= fPackage.getCompilationUnits();
 		RefactoringStatus result= new RefactoringStatus();
@@ -506,21 +613,180 @@ public class RenamePackageRefactoring extends Refactoring implements IRenameRefa
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", fOccurrences.length); //$NON-NLS-1$
+		pm.beginTask("", fOccurrences.length + fReferencesToTypesInPackage.size() + fReferencesToTypesInNamesakes.size()); //$NON-NLS-1$
 		for (int i= 0; i < fOccurrences.length; i++){
 			ICompilationUnit cu= fOccurrences[i].getCompilationUnit();
 			if (cu == null)
 				continue;
 			String name= RefactoringCoreMessages.getString("RenamePackageRefactoring.update_reference"); //$NON-NLS-1$
 			ICompilationUnit wc= 	WorkingCopyUtil.getWorkingCopyIfExists(cu);
+			SearchResult updatedImport= null; 
 			SearchResult[] results= fOccurrences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				manager.get(wc).addTextEdit(name, createTextChange(results[j]));
+				SearchResult result= results[j];
+				manager.get(wc).addTextEdit(name, createTextChange(result));
+				if (isImport(result) && updatedImport == null)
+					updatedImport= result;
+			}
+			if (fNamesakePackages.length != 0) {
+				SearchResultGroup typeRefsRequiringNewNameImport= extractGroupFor(cu, fReferencesToTypesInPackage);
+				SearchResultGroup typeRefsRequiringOldNameImport= extractGroupFor(cu, fReferencesToTypesInNamesakes);
+				addImportUpdatesForNamesakes(manager, pm, cu, typeRefsRequiringNewNameImport, typeRefsRequiringOldNameImport, updatedImport);
 			}
 			pm.worked(1);
 		}	
+
+		if (fNamesakePackages.length != 0) {
+			for (Iterator iter= fReferencesToTypesInPackage.iterator(); iter.hasNext();) {
+				SearchResultGroup namesakeReferencesToPackage= (SearchResultGroup) iter.next();
+				ICompilationUnit cu= namesakeReferencesToPackage.getCompilationUnit();
+				if (cu == null)
+					continue;
+				SearchResultGroup referencesToTypesInNamesakes= extractGroupFor(cu, fReferencesToTypesInNamesakes);
+				addImportUpdatesForNamesakes(manager, pm, cu, namesakeReferencesToPackage, referencesToTypesInNamesakes, null);
+			}
+			for (Iterator iter= fReferencesToTypesInNamesakes.iterator(); iter.hasNext();) {
+				SearchResultGroup referencesToTypesInNamesakes= (SearchResultGroup) iter.next();
+				ICompilationUnit cu= referencesToTypesInNamesakes.getCompilationUnit();
+				if (cu == null)
+					continue;
+				addImportUpdatesForNamesakes(manager, pm, cu, null, referencesToTypesInNamesakes, null);
+			}
+		}
+		pm.done();
 	}
 	
+	/**
+	 * Adds necessary qualified imports for unqualified type references before updatedImport.
+	 * @param typeRefsRequiringNewNameImport can be null
+	 * @param typeRefsRequiringOldNameImport can be null
+	 * @param updatedImport SearchResult for IImportDeclaration (insertion point for new updates), can be null
+	 */
+	private void addImportUpdatesForNamesakes(TextChangeManager manager, IProgressMonitor pm, ICompilationUnit cu,
+				SearchResultGroup typeRefsRequiringNewNameImport, SearchResultGroup typeRefsRequiringOldNameImport,
+				SearchResult updatedImport) throws CoreException {
+		StringBuffer imports= new StringBuffer();
+		if (typeRefsRequiringNewNameImport != null) {
+			imports.append(getNewImports(cu, fNewName, typeRefsRequiringNewNameImport));
+			pm.worked(1);
+		}
+		if (typeRefsRequiringOldNameImport != null) {
+			imports.append(getNewImports(cu, fPackage.getElementName(), typeRefsRequiringOldNameImport));
+			pm.worked(1);
+		}
+		if (imports.length() == 0)
+			return;
+
+		String name= RefactoringCoreMessages.getString("MoveCuUpdateCreator.update_imports"); //$NON-NLS-1$
+		String delim= StubUtility.getLineDelimiterUsed(cu);
+		int start= 0;
+		if (updatedImport != null) {
+			IImportDeclaration importDecl= (IImportDeclaration) updatedImport.getEnclosingElement();
+			start= importDecl.getSourceRange().getOffset();
+		} else {
+			start= getImportContainerStart(cu);
+			if (start == -1) {
+				start= getPackageDeclarationEnd(cu);
+				if (start != 0) {
+					imports.insert(0, delim);
+				}
+			}
+		}
+		TextEdit edit= SimpleTextEdit.createInsert(start, imports.toString());
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		manager.get(wc).addTextEdit(name, edit);
+	}
+	
+	/** @return start position, or -1 iff not found */
+	private static int getImportContainerStart(ICompilationUnit cu) throws CoreException {
+		IImportContainer importContainer= cu.getImportContainer();
+		if (importContainer.exists()) {
+			ISourceRange range= importContainer.getSourceRange();
+			if (range != null)
+				return range.getOffset();
+		}
+		return -1;
+	}
+	
+	private static int getPackageDeclarationEnd(ICompilationUnit cu) throws CoreException {
+		IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
+		if (packDecls != null && packDecls.length > 0) {
+			TextBuffer buffer= TextBuffer.create(cu.getSource());
+			ISourceRange range= packDecls[0].getSourceRange();
+			int line= buffer.getLineOfOffset(range.getOffset() + range.getLength());
+			TextRegion region= buffer.getLineInformation(line + 1);
+			if (region != null) {
+				return region.getOffset();
+			}
+		}
+		return 0;
+	}
+	
+	private String getNewImports(ICompilationUnit cu, String packageName, SearchResultGroup typeRefs) throws JavaModelException {
+		String[] types= getQualifiedTypesToImport(packageName, typeRefs);
+		StringBuffer imports= new StringBuffer();
+		String delim= StubUtility.getLineDelimiterUsed(cu);
+		for (int i= 0; i < types.length; i++) {
+			imports.append("import ").append(types[i]).append(';').append(delim);//$NON-NLS-1$
+		}
+		return imports.toString();
+	}
+	
+	/**
+	 * @return String[] of fully qualified types. These types must be added as explicit import statements.
+	 */
+	private String[] getQualifiedTypesToImport(String qualification, SearchResultGroup group) throws JavaModelException {
+		SearchResult[] results= group.getSearchResults();
+		ICompilationUnit cu= group.getCompilationUnit();
+		if (cu == null)
+			return new String[0];
+		
+		ICompilationUnit wc= WorkingCopyUtil.getWorkingCopyIfExists(cu);
+		Set toImport= new HashSet();
+		Set alreadyImported= new HashSet();
+		for (int i= 0; i < results.length; i++) {
+			SearchResult result= results[i];
+			IJavaElement element= result.getEnclosingElement();
+			if (element instanceof IImportDeclaration) {
+				IImportDeclaration importDeclaration= (IImportDeclaration) element;
+				if (! importDeclaration.isOnDemand()) {
+					alreadyImported.add(importDeclaration.getElementName());
+				}
+			} else {
+				String reference= wc.getBuffer().getText(result.getStart(), result.getEnd() - result.getStart());
+				if (! reference.startsWith(fPackage.getElementName())) { // doesn't work if qualification contains comment or \\u characters
+					int dotPos= reference.indexOf('.');
+					if (dotPos == -1) { 
+						toImport.add(qualification + '.' + reference);
+					} else {
+						toImport.add(qualification + '.' + reference.substring(0, dotPos));
+					}
+				}
+			}
+		}
+		toImport.removeAll(alreadyImported);
+		return (String[]) toImport.toArray(new String[toImport.size()]);
+	}
+	
+
+	private static boolean isImport(SearchResult searchResult) throws JavaModelException {
+		return searchResult.getEnclosingElement() instanceof IImportDeclaration;
+	}
+		
+	/** Removes the found SearchResultGroup from the list iff found.
+	 *  @param searchResultGroups List of SearchResultGroup
+	 *  @return the SearchResultGroup for cu, or null iff not found */
+	private static SearchResultGroup extractGroupFor(ICompilationUnit cu, List searchResultGroups) {
+		for (Iterator iter= searchResultGroups.iterator(); iter.hasNext();) {
+			SearchResultGroup group= (SearchResultGroup) iter.next();
+			if (cu.equals(group.getCompilationUnit())) {
+				iter.remove();
+				return group;
+			}
+		}
+		return null;
+	}
+
 	private void computeQualifiedNameMatches(IProgressMonitor pm) throws JavaModelException {
 		fQualifiedNameSearchResult= QualifiedNameFinder.process(fPackage.getElementName(), fNewName, 
 			fFilePatterns, fPackage.getJavaProject().getProject(), pm);

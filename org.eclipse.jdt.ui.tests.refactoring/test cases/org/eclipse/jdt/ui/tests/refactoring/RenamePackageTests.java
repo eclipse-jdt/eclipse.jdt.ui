@@ -15,11 +15,13 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 
 public class RenamePackageTests extends RefactoringTest {
@@ -35,6 +37,10 @@ public class RenamePackageTests extends RefactoringTest {
 		return new MySetup(new TestSuite(clazz));
 	}
 
+	public static Test setUpTest(Test someTest) {
+		return new MySetup(someTest);
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -159,6 +165,69 @@ public class RenamePackageTests extends RefactoringTest {
 		helper2(packageNames, packageFileNames, newPackageName, true);
 	}
 	
+	/**
+	 * @param newPackageName the new package name for packageNames[0][0]
+	 */
+	private void helper3(String[] rootNames, String[][] packageNames, String newPackageName, String[][][] typeNames) throws Exception{
+		IPackageFragmentRoot[] roots= new IPackageFragmentRoot[rootNames.length];
+		try{
+			ICompilationUnit[][][] cus=new ICompilationUnit[rootNames.length][][]; 
+			IPackageFragment thisPackage= null;
+
+			for (int r= 0; r < roots.length; r++) {
+				roots[r]= JavaProjectHelper.addSourceContainer(getRoot().getJavaProject(), rootNames[r]);
+				IPackageFragment[] packages= new IPackageFragment[packageNames[r].length];
+				cus[r]= new ICompilationUnit[packageNames[r].length][];
+				for (int pa= 0; pa < packageNames[r].length; pa++){
+					packages[pa]= roots[r].createPackageFragment(packageNames[r][pa], true, null);
+					cus[r][pa]= new ICompilationUnit[typeNames[r][pa].length];
+					if (r == 0 && pa == 0)
+						thisPackage= packages[pa];
+					for (int typ= 0; typ < typeNames[r][pa].length; typ++){
+						cus[r][pa][typ]= createCUfromTestFile(packages[pa], typeNames[r][pa][typ],
+							rootNames[r] + "/" + packageNames[r][pa].replace('.', '/') + "/");
+					}
+				}
+			}
+			
+			RenamePackageRefactoring ref= createRefactoring(thisPackage, newPackageName);
+			ref.setUpdateReferences(true);
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("preconditions were supposed to pass", null, result);
+			
+			//---
+			
+			assertTrue("package not renamed", ! roots[0].getPackageFragment(packageNames[0][0]).exists());
+			IPackageFragment newPackage= roots[0].getPackageFragment(newPackageName);
+			assertTrue("new package does not exist", newPackage.exists());
+			
+			for (int r = 0; r < typeNames.length; r++) {
+				for (int pa= 0; pa < typeNames[r].length; pa++){
+					String packageName= (r == 0 && pa == 0) 
+						? rootNames[r] + "/" + newPackageName.replace('.', '/') + "/"
+						: rootNames[r] + "/" + packageNames[r][pa].replace('.', '/') + "/";
+					for (int typ= 0; typ < typeNames[r][pa].length; typ++){
+						String s1= getFileContents(getOutputTestFileName(typeNames[r][pa][typ], packageName));
+						ICompilationUnit cu= (r == 0 && pa == 0)
+							? newPackage.getCompilationUnit(typeNames[r][pa][typ] + ".java")
+							: cus[r][pa][typ];
+						//DebugUtils.dump("cu:" + cu.getElementName());		
+						String s2= cu.getSource();
+						
+						//DebugUtils.dump("expected:" + s1);
+						//DebugUtils.dump("was:" + s2);
+						assertEquals("invalid update in file " + cu.toString(), s1,	s2);
+					}
+				}
+			}
+		} finally{
+			performDummySearch();
+			for (int r = 0; r < rootNames.length; r++) {
+				JavaProjectHelper.removeSourceContainer(getRoot().getJavaProject(), rootNames[r]);
+			}
+		}	
+	}
+
 	// ---------- tests -------------	
 	public void testFail0() throws Exception{
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");
@@ -266,6 +335,62 @@ public class RenamePackageTests extends RefactoringTest {
 		IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
 		assertTrue("new package does not exist", newPackage.exists());
 		assertTrue("new package should be read-only", newPackage.getCorrespondingResource().isReadOnly());
+	}
+	
+	public void testImportFromMultiRoots1() throws Exception {
+		helper3(new String[]{"srcPrg", "srcTest"}, 
+			new String[][] {
+							new String[]{"p.p"},
+							new String[]{"p.p", "tests"}
+							},
+			"q",
+			new String[][][] {
+							  new String[][] {new String[]{"A"}},
+							  new String[][] {new String[]{"ATest"}, new String[]{"AllTests"}}
+							  }
+			);
+	}
+	
+	public void testImportFromMultiRoots2() throws Exception {
+		helper3(new String[]{"srcPrg", "srcTest"}, 
+			new String[][] {
+							new String[]{"p.p"},
+							new String[]{"p.p", "tests"}
+							},
+			"q",
+			new String[][][] {
+							  new String[][] {new String[]{"A"}},
+							  new String[][] {new String[]{"ATest", "TestHelper"}, new String[]{"AllTests", "QualifiedTests"}}
+							  }
+			);
+	}
+
+	public void testImportFromMultiRoots3() throws Exception {
+		helper3(new String[]{"srcPrg", "srcTest"}, 
+			new String[][] {
+							new String[]{"p.p"},
+							new String[]{"p.p"}
+							},
+			"q",
+			new String[][][] {
+							  new String[][] {new String[]{"ToQ"}},
+							  new String[][] {new String[]{"Ref"}}
+							  }
+			);
+	}
+
+	public void testImportFromMultiRoots4() throws Exception {
+		helper3(new String[]{"srcPrg", "srcTest"}, 
+			new String[][] {
+							new String[]{"p"},
+							new String[]{"p"}
+		},
+		"a.b.c",
+		new String[][][] {
+						  new String[][] {new String[]{"A", "B"}},
+						  new String[][] {new String[]{"ATest"}}
+		}
+		);
 	}
 	
 }
