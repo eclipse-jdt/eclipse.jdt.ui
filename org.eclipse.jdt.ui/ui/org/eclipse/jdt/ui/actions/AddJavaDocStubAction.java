@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 
@@ -110,6 +111,10 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		
 		try {
 			ICompilationUnit cu= members[0].getCompilationUnit();
+			if (!ActionUtil.isProcessable(getShell(), cu)) {
+				return;
+			}
+			
 			// open the editor, forces the creation of a working copy
 			IEditorPart editor= EditorUtility.openInEditor(cu);
 			
