@@ -9,9 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.internal.junit.util.*;
 import org.eclipse.jdt.internal.ui.dialogs.ISelectionValidator;
-import org.eclipse.jdt.internal.ui.dialogs.SelectionStatusDialog;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -34,6 +32,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
+import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 /**
  * A dialog with checked table viewer.
