@@ -908,11 +908,13 @@ public class PushDownRefactoring extends Refactoring {
 		List result= new ArrayList(members.size());
 		for (Iterator iter= members.iterator(); iter.hasNext(); ) {
 			IMember member= (IMember)iter.next();
-			ASTNode declarationNode;
+			ASTNode declarationNode= null;
 			if (member instanceof IField)
 				declarationNode= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField)member, cuNode);
-			else
-				declarationNode= ASTNodeSearchUtil.getDeclarationNode(member, cuNode);
+			else if (member instanceof IType)
+				declarationNode= ASTNodeSearchUtil.getTypeDeclarationNode((IType)member, cuNode);
+			else if (member instanceof IMethod)
+				declarationNode= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod)member, cuNode);
 			if (declarationNode != null)
 				result.add(declarationNode);
 		}
