@@ -57,7 +57,10 @@ public class ResultCollector implements ICompletionRequestor {
 	
 	private int fUserReplacementLength;
 
-	/* Is eating code assist enabled or disabled? PR #3666 */
+	/*
+	 * Is eating code assist enabled or disabled? PR #3666
+	 * When eating is enabled, JavaCompletionProposal must be revisited: PR #5533
+	 */
 	private boolean fPreventEating= true;	
 	
 	/*
