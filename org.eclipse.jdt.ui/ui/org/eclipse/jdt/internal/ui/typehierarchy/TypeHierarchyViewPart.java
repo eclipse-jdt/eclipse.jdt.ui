@@ -1131,7 +1131,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		if (viewerIndex < fAllViewers.length && fCurrentViewerIndex != viewerIndex) {			
 			fCurrentViewerIndex= viewerIndex;
 			
-			updateHierarchyViewer(false);
+			updateHierarchyViewer(true);
 			if (fInputElement != null) {
 				ISelection currSelection= getCurrentViewer().getSelection();
 				if (currSelection == null || currSelection.isEmpty()) {
@@ -1261,27 +1261,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			}
 		}
 	}	
-	
-
-	
-	/**
-	 * Determines the input element to be used initially .
-	 */	
-	private IJavaElement determineInputElement() {
-		Object input= getSite().getPage().getInput();
-		if (input instanceof IJavaElement) { 
-			IJavaElement elem= (IJavaElement) input;
-			if (elem instanceof IMember) {
-				return elem;
-			} else {
-				int kind= elem.getElementType();
-				if (kind == IJavaElement.JAVA_PROJECT || kind == IJavaElement.PACKAGE_FRAGMENT_ROOT || kind == IJavaElement.PACKAGE_FRAGMENT) {
-					return elem;
-				}
-			}
-		} 
-		return null;	
-	}
 	
 	/*
 	 * @see IViewPart#init
