@@ -11,7 +11,6 @@ Contributors:
 
 package org.eclipse.jdt.internal.ui.preferences;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.StringTokenizer;
 
@@ -100,7 +99,7 @@ class JavaEditorHoverConfigurationBlock {
 		hoverComposite.setLayoutData(gd);
 
 		Label label= new Label(hoverComposite, SWT.NONE);
-		label.setText("&Hover key modifier preferences:");
+		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.hoverPreferences")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -133,7 +132,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Enabled checkbox		
 		fEnableField= new Button(stylesComposite, SWT.CHECK);
-		fEnableField.setText("&Enabled");
+		fEnableField.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.enabled")); //$NON-NLS-1$
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalAlignment= GridData.BEGINNING;
 		gd.horizontalSpan= 2;
@@ -152,24 +151,24 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Text field for modifier string
 		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText("Key &Modifier:");
+		label.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.keyModifier")); //$NON-NLS-1$
 		fModifierEditor= new Text(stylesComposite, SWT.BORDER);
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		fModifierEditor.setLayoutData(gd);
 
-		// XXX: work in progress
 		fModifierEditor.addKeyListener(new KeyListener() {
-			boolean isModifier;
+			private boolean isModifierCandidate;
 			public void keyPressed(KeyEvent e) {
-				isModifier= e.keyCode > 0 && e.character == 0 && e.stateMask == 0;
+				isModifierCandidate= e.keyCode > 0 && e.character == 0 && e.stateMask == 0;
 			}
 		
 			public void keyReleased(KeyEvent e) {
-				if (isModifier && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
+				if (isModifierCandidate && e.stateMask > 0 && e.stateMask == e.stateMask && e.character == 0) {// && e.time -time < 1000) {
 					String text= fModifierEditor.getText();
 					if (text.length() > 0)
-						text= text + " + ";
-					text= text + Action.findModifierString(e.stateMask);
+						text= PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.appendModifier", new String[] {text, Action.findModifierString(e.stateMask)}); //$NON-NLS-1$
+					else
+						text= Action.findModifierString(e.stateMask);
 					fModifierEditor.setText(text);
 					fModifierEditor.setSelection(text.length(), text.length());
 				}
@@ -184,7 +183,7 @@ class JavaEditorHoverConfigurationBlock {
 
 		// Description
 		Label descriptionLabel= new Label(stylesComposite, SWT.LEFT);
-		descriptionLabel.setText("Description:");
+		descriptionLabel.setText(PreferencesMessages.getString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.description")); //$NON-NLS-1$
 		gd= new GridData(GridData.VERTICAL_ALIGN_BEGINNING);
 		gd.horizontalSpan= 2;
 		descriptionLabel.setLayoutData(gd);
@@ -283,7 +282,7 @@ class JavaEditorHoverConfigurationBlock {
 		fHoverConfigs[i].fModifierString= modifiers;
 		fHoverConfigs[i].fStateMask= JavaEditorTextHoverDescriptor.computeStateMask(modifiers);
 		if (fHoverConfigs[i].fIsEnabled && fHoverConfigs[i].fStateMask == -1)
-			fStatus= new StatusInfo(StatusInfo.ERROR, "Modifier '" + fHoverConfigs[i].fModifierString + "' is not valid.");
+			fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.modifierIsNotValid", fHoverConfigs[i].fModifierString)); //$NON-NLS-1$
 		else
 			fStatus= new StatusInfo();
 		updateStatus();
@@ -335,9 +334,9 @@ class JavaEditorHoverConfigurationBlock {
 				String label= getContributedHovers()[i].getLabel();
 				Integer stateMask= new Integer(fHoverConfigs[i].fStateMask);
 				if (fHoverConfigs[i].fStateMask == -1)
-					fStatus= new StatusInfo(StatusInfo.ERROR, "Modifier '" + fHoverConfigs[i].fModifierString + "' for '" + label + "' hover is not valid.");
+					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.modifierIsNotValidForHover", new String[] {fHoverConfigs[i].fModifierString, label})); //$NON-NLS-1$
 				else if (stateMasks.containsKey(stateMask))
-					fStatus= new StatusInfo(StatusInfo.ERROR, "'" + label + "' hover uses the same modifier as '" +  stateMasks.get(stateMask) + "' hover.");
+					fStatus= new StatusInfo(StatusInfo.ERROR, PreferencesMessages.getFormattedString("JavaEditorHoverConfigurationBlock.JavaEditorHoverConfigurationBlock.duplicateModifier", new String[] {label, (String)stateMasks.get(stateMask)})); //$NON-NLS-1$
 				else
 					stateMasks.put(stateMask, label);
 			}

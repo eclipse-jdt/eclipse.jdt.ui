@@ -1295,7 +1295,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 				status= StatusUtil.getMoreSevere(s, status);
 			}
 		}	
-		status= StatusUtil.getMoreSevere(status, fJavaEditorHoverConfigurationBlock.getStatus());
+		status= StatusUtil.getMoreSevere(fJavaEditorHoverConfigurationBlock.getStatus(), status);
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
 	}
