@@ -3,9 +3,6 @@
  * All Rights Reserved.
  */
 package org.eclipse.jdt.internal.core.refactoring.rename;
-
-import java.util.HashSet;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -154,24 +151,6 @@ class RenameVirtualMethodRefactoring extends RenameMethodRefactoring {
 		return null;
 	}
 	
-	
-	/* non java-doc
-	 * declared in RenameMethodRefactoring#getMethodsToRename
-	 */
-	Set getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException {
-		Set methods= new HashSet();
-		IType type= method.getDeclaringType();
-		ITypeHierarchy hier= type.newTypeHierarchy(pm);
-		IType[] subtypes= hier.getAllSubtypes(type);
-		for (int i= 0; i < subtypes.length; i++){
-			IMethod subMethod= Checks.findMethod(method, subtypes[i]);
-			if (subMethod != null){
-				methods.add(subMethod);
-			}
-		}
-		return methods;
-	}
-		
 	private boolean classesDeclareOverridingNativeMethod(IType[] classes) throws JavaModelException{
 		for (int i= 0; i < classes.length; i++){
 			IMethod[] methods= classes[i].getMethods();

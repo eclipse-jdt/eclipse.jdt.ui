@@ -237,10 +237,8 @@ public abstract class RenameMethodRefactoring extends Refactoring implements IRe
 		return pattern;
 	}
 	
-	Set getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
-		//method has been added in the caller	
-		pm.done();
-		return new HashSet(0);
+	final Set getMethodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
+		return new HashSet(Arrays.asList(RippleMethodFinder.getRelatedMethods(method, pm)));
 	}
 	
 	private final Set methodsToRename(IMethod method, IProgressMonitor pm) throws JavaModelException{
