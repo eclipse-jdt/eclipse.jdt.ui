@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -326,7 +325,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	    initializer.accept(localTypeAnalyer);
 	    //do not create a list - it is not shown in a dialog anyway.
 	    //can optimize here to not walk the whole expression but only until 1 match is found
-	    if (! localTypeAnalyer.getLocalTypeUsageNodes().isEmpty())
+	    if (! localTypeAnalyer.getUsageOfEnclosingNodes().isEmpty())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("PromoteTempToFieldRefactoring.uses_types_declared_locally")); //$NON-NLS-1$
         return null;
     }
@@ -717,28 +716,49 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
     }
 
     private static class LocalTypeAndVariableUsageAnalyzer extends HierarchicalASTVisitor{
-    	private final List fLocalTypes= new ArrayList(0);
-    	public List getLocalTypeUsageNodes(){
-    		return fLocalTypes;
+    	private final List fLocalDefinitions= new ArrayList(0); // List of IBinding (Variable and Type)
+    	private final List fLocalReferencesToEnclosing= new ArrayList(0); // List of ASTNodes
+    	public List getUsageOfEnclosingNodes(){
+    		return fLocalReferencesToEnclosing;
     	}
-		public boolean visit(Type node) {
-	  		ITypeBinding typeBinding= node.resolveBinding();
-	  		if (typeBinding != null && typeBinding.isLocal())
-	  			fLocalTypes.add(node);
-			return super.visit(node); 
-		}
-		public boolean visit(Name node) {
+		public boolean visit(SimpleName node) {
 			ITypeBinding typeBinding= node.resolveTypeBinding();
-			if (typeBinding != null && typeBinding.isLocal())
-				fLocalTypes.add(node);
-			else {
-				IBinding binding= node.resolveBinding();
-				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
-					fLocalTypes.add(node);
-				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
-					fLocalTypes.add(node);
+			if (typeBinding != null && typeBinding.isLocal()) {
+				if (node.isDeclaration()) {
+					fLocalDefinitions.add(typeBinding);
+				} else if (! fLocalDefinitions.contains(typeBinding)) {
+					fLocalReferencesToEnclosing.add(node);
+				}
 			}
-            return super.visit(node);
-        }
+			IBinding binding= node.resolveBinding();
+			if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField()) {
+				if (node.isDeclaration()) {
+					fLocalDefinitions.add(binding);
+				} else if (! fLocalDefinitions.contains(binding)) {
+					fLocalReferencesToEnclosing.add(node);
+				}
+			}
+			return super.visit(node);
+//		
+//		public boolean visit(Type node) {
+//	  		ITypeBinding typeBinding= node.resolveBinding();
+//	  		if (typeBinding != null && typeBinding.isLocal() && !fLocalDefinitions.contains(typeBinding))
+//	  			fLocalReferencesToEnclosing.add(node);
+//			return super.visit(node); 
+//		}
+//		public boolean visit(Name node) {
+//			ITypeBinding typeBinding= node.resolveTypeBinding();
+//			if (typeBinding != null && typeBinding.isLocal())
+//				fLocalTypes.add(node);
+//			else {
+//				IBinding binding= node.resolveBinding();
+//				if (binding != null && binding.getKind() == IBinding.TYPE && ((ITypeBinding)binding).isLocal())
+//					fLocalTypes.add(node);
+//				else if (binding != null && binding.getKind() == IBinding.VARIABLE && ! ((IVariableBinding)binding).isField())
+//					fLocalTypes.add(node);
+//			}
+//            return super.visit(node);
+//        }
+		}
     }    
 }

@@ -511,7 +511,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 	}
 	
 	public void test18() throws Exception{
-		printTestDisabledMessage("regression test for bug 39363");
+		//printTestDisabledMessage("regression test for bug 39363");
 		if (true) return;
 		int accessModifier= Modifier.PRIVATE;
 		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_CONSTRUCTOR;
@@ -534,5 +534,13 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         boolean declareFinal= false;
         boolean declareStatic= false;
 		passHelper(4, 24, 4, 24, "fDoubleDim", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
+	public void test21() throws Exception{ //test for https://bugs.eclipse.org/bugs/show_bug.cgi?id=47798
+        int accessModifier= Modifier.PRIVATE;
+        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+        boolean declareFinal= true;
+        boolean declareStatic= true;
+		passHelper(4, 17, 4, 18, "fgX", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 }
