@@ -457,9 +457,9 @@ public class JarPackage implements java.io.Serializable {
 	public boolean canCreateJar(Shell parent) {		File file= getJarLocation().toFile();
 		if (getJarLocation().toFile().canWrite() && allowOverwrite())
 			return true;		else if ((getJarLocation().toFile().canWrite() && !allowOverwrite()) && parent != null)
-			return askForOverwritePermission(parent);					// Test if directory exists		String path= file.getAbsolutePath();		int separatorIndex = path.lastIndexOf(File.separator);		if (separatorIndex == -1) // ie.- default dir, which is fine			return true;		File directory= new File(path.substring(0, separatorIndex));		if (!directory.exists()) {			if (askToCreateDirectory(parent))				return directory.mkdirs();		}		return true;
+			return askForOverwritePermission(parent, getJarLocation().toOSString());					// Test if directory exists		String path= file.getAbsolutePath();		int separatorIndex = path.lastIndexOf(File.separator);		if (separatorIndex == -1) // ie.- default dir, which is fine			return true;		File directory= new File(path.substring(0, separatorIndex));		if (!directory.exists()) {			if (askToCreateDirectory(parent))				return directory.mkdirs();		}		return true;
 	}
-	/**
+	/**	 * Checks if the description file can be overwritten.	 * If the JAR package setting does not allow to overwrite the description	 * then a dialog will ask the user again.	 * 	 * @param	parent	the parent for the dialog,	 * 			or <code>null</code> if no dialog should be presented	 * @return	<code>true</code> if it is OK to create the JAR	 */	public boolean canOverwriteDescription(Shell parent) {		if (getDescriptionFile().isAccessible() && allowOverwrite())			return true;		return askForOverwritePermission(parent, getDescriptionFile().getFullPath().toString());	}	/**	 * Checks if the manifest file can be overwritten.	 * If the JAR package setting does not allow to overwrite the manifest	 * then a dialog will ask the user again.	 * 	 * @param	parent	the parent for the dialog,	 * 			or <code>null</code> if no dialog should be presented	 * @return	<code>true</code> if it is OK to create the JAR	 */	public boolean canOverwriteManifest(Shell parent) {		if (getManifestFile().isAccessible() && allowOverwrite())			return true;		return askForOverwritePermission(parent, getManifestFile().getFullPath().toString());	}	/**
 	 * Returns human readable form of this JarPackage
 	 * @return a human readable representation of this JAR package
 	 */
@@ -480,7 +480,7 @@ public class JarPackage implements java.io.Serializable {
 		}
 		return out.toString();
 	}
-	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, "Confirm Create", "The location for the JAR file does not exist. Would you like to create it?");	}	private boolean askForOverwritePermission(final Shell parent) {		return queryDialog(parent, "Confirm Replace", "The JAR '" + getJarLocation().toOSString() + "' already exists.\nDo you want to overwrite it?");	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
+	private boolean askToCreateDirectory(final Shell parent) {		return queryDialog(parent, "Confirm Create", "The location for the JAR file does not exist. Would you like to create it?");	}	private boolean askForOverwritePermission(final Shell parent, String filePath) {		if (parent == null)			return false;		return queryDialog(parent, "Confirm Replace", "The file '" + filePath + "' already exists.\nDo you want to overwrite it?");	}	private boolean queryDialog(final Shell parent, final String title, final String message) {
 		
 		class DialogReturnValue {
 			boolean value;
