@@ -108,31 +108,34 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 	}		
 
 	public Object[] getChildren(Object parentElement) {
+		Object[] children= NO_CHILDREN;
 		try {
 			if (parentElement instanceof IJavaModel) 
 				return concatenate(getJavaProjects((IJavaModel)parentElement), getNonJavaProjects((IJavaModel)parentElement));
 
-			if (parentElement instanceof IProject) 
-				return ((IProject)parentElement).members();
-							
-			if (parentElement instanceof IJavaProject) {
-				IJavaProject project= (IJavaProject)parentElement;
-				Object[] roots= getPackageFragmentRoots(project);
-				return rootsAndContainers(project, roots);
-			}
-
 			if (parentElement instanceof ClassPathContainer)
 				return getContainerPackageFragmentRoots((ClassPathContainer)parentElement);
 				
+			if (parentElement instanceof IProject) 
+				return ((IProject)parentElement).members();
+					
+			if (needsToDelegate(parentElement)) {
+				Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
+				children= getWithParentsResources(packageFragments, parentElement);
+			} else {
+				children= super.getChildren(parentElement);
+			}
+	
+			if (parentElement instanceof IJavaProject) {
+				IJavaProject project= (IJavaProject)parentElement;
+				return rootsAndContainers(project, children);
+			}
+			else
+				return children;
+
 		} catch (CoreException e) {
 			return NO_CHILDREN;
 		}
-		
-		if (needsToDelegate(parentElement)) {
-			Object[] packageFragments= fPackageFragmentProvider.getChildren(parentElement);
-			return getWithParentsResources(packageFragments, parentElement);
-		} else
-			return super.getChildren(parentElement);
 	}
 
 	private Object[] rootsAndContainers(IJavaProject project, Object[] roots) { //throws JavaModelException {
