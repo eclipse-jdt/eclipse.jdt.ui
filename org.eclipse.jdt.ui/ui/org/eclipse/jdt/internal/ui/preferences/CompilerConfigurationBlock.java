@@ -252,11 +252,13 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_local_variable_hiding.label"); //$NON-NLS-1$
 		addComboBox(styleComposite, label, PREF_PB_LOCAL_VARIABLE_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
+		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
+		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_special_param_hiding.label"); //$NON-NLS-1$
+		addCheckBox(styleComposite, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, indent);
+
 		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_field_hiding.label"); //$NON-NLS-1$
 		addComboBox(styleComposite, label, PREF_PB_FIELD_HIDING, errorWarningIgnore, errorWarningIgnoreLabels, 0);
 
-		label= PreferencesMessages.getString("CompilerConfigurationBlock.pb_special_param_hiding.label"); //$NON-NLS-1$
-		addCheckBox(styleComposite, label, PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD, enabledDisabled, 0);
 
 		return styleComposite;
 	}
