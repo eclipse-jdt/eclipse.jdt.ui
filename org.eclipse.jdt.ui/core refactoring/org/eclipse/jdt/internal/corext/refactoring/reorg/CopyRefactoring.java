@@ -11,20 +11,34 @@ import java.util.Set;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.ISearchPattern;
+import org.eclipse.jdt.core.search.SearchEngine;
+
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.CompositeChange;
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResult;
+import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.IChange;
 import org.eclipse.jdt.internal.corext.refactoring.base.Refactoring;
@@ -33,7 +47,13 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.AddToClasspathChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyPackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CopyResourceChange;
+import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.refactoring.rename.UpdateTypeReferenceEdit;
+import org.eclipse.jdt.internal.corext.refactoring.util.DebugUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
+import org.eclipse.jdt.internal.corext.textmanipulation.SimpleTextEdit;
 
 public class CopyRefactoring extends ReorgRefactoring {
 
@@ -143,16 +163,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 		}	
 	}
 
-	IChange createChange(ICompilationUnit cu) throws JavaModelException{
-		Object dest= getDestinationForCusAndFiles(getDestination());
-		if (dest instanceof IPackageFragment)
-			return new CopyCompilationUnitChange(cu, (IPackageFragment)dest, createNewName(cu, (IPackageFragment)dest));
-
-		Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
-		return new CopyResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, createNewName(ResourceUtil.getResource(cu), (IContainer)dest));
-	}
-	
-	IChange createChange(IPackageFragmentRoot root) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IPackageFragmentRoot root) throws JavaModelException{
 		IResource res= root.getUnderlyingResource();
 		IProject project= getDestinationForSourceFolders(getDestination());
 		IJavaProject javaProject= JavaCore.create(project);
@@ -166,7 +177,7 @@ public class CopyRefactoring extends ReorgRefactoring {
 		return result;
 	}
 	
-	IChange createChange(IPackageFragment pack) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IPackageFragment pack) throws JavaModelException{
 		IPackageFragmentRoot root= getDestinationForPackages(getDestination());
 		String newName= createNewName(pack, root);
 		if (newName == null || JavaConventions.validatePackageName(newName).getSeverity() < IStatus.ERROR)
@@ -181,8 +192,83 @@ public class CopyRefactoring extends ReorgRefactoring {
 		}	
 	}
 	
-	IChange createChange(IResource res) throws JavaModelException{
+	IChange createChange(IProgressMonitor pm, IResource res) throws JavaModelException{
 		IContainer dest= getDestinationForResources(getDestination());
 		return new CopyResourceChange(res, dest, createNewName(res, dest));
+	}
+	
+	IChange createChange(IProgressMonitor pm, ICompilationUnit cu) throws JavaModelException{
+			Object dest= getDestinationForCusAndFiles(getDestination());
+			if (dest instanceof IPackageFragment){
+				String newName= createNewName(cu, (IPackageFragment)dest);
+				CopyCompilationUnitChange simpleCopy= new CopyCompilationUnitChange(cu, (IPackageFragment)dest, newName);
+				if (newName == null || newName.equals(cu.getElementName()) || cu.findPrimaryType() == null)
+					return simpleCopy;
+				
+				try {
+					CompositeChange composite= new CompositeChange();
+					String newTypeName= newName.substring(0, newName.length() - ".java".length()); //$NON-NLS-1$
+					IPath newPath= ResourceUtil.getResource(cu).getParent().getFullPath().append(newName);				
+					composite.add(new CreateTextFileChange(newPath, getCopiedFileSource(pm, cu, newTypeName)));
+					return composite;
+				}catch(CoreException e) {
+					return simpleCopy; //fallback - no ui here
+				}
+			}	else {
+				Assert.isTrue(dest instanceof IContainer);//this should be checked before - in preconditions
+				return new CopyResourceChange(ResourceUtil.getResource(cu), (IContainer)dest, createNewName(ResourceUtil.getResource(cu), (IContainer)dest));
+			}		
+	}
+
+	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {
+		ICompilationUnit wc= WorkingCopyUtil.getNewWorkingCopy(cu);
+		TextChangeManager manager= createChangeManager(pm, wc, newTypeName);
+		return manager.get(wc).getPreviewContent();
+	}
+	
+	private static TextChangeManager createChangeManager(IProgressMonitor pm, ICompilationUnit wc, String newName) throws CoreException {
+		TextChangeManager manager= new TextChangeManager();
+		SearchResultGroup refs= getReferences(wc, pm);
+		if (refs == null)
+			return manager;
+		IResource resource= refs.getResource();
+		IJavaElement element= JavaCore.create(resource);
+		if (!(element instanceof ICompilationUnit))
+			return manager;
+				
+		String name= RefactoringCoreMessages.getString("CopyRefactoring.update_ref"); //$NON-NLS-1$
+		SearchResult[] results= refs.getSearchResults();
+		for (int j= 0; j < results.length; j++){
+			SearchResult searchResult= results[j];
+			int offset= searchResult.getStart();
+			int length= searchResult.getEnd() - searchResult.getStart();
+			manager.get(wc).addTextEdit(name, new UpdateTypeReferenceEdit(offset, length, newName, wc.findPrimaryType().getElementName()));
+		}
+		return manager;
+	}
+	
+	private static SearchResultGroup getReferences(ICompilationUnit wc, IProgressMonitor pm) throws JavaModelException{
+		pm.subTask(RefactoringCoreMessages.getString("CopyRefactoring.searching")); //$NON-NLS-1$
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[]{wc});
+		ISearchPattern pattern= createSearchPattern(wc.findPrimaryType());
+		SearchResultGroup[] groups= RefactoringSearchEngine.search(pm, scope, pattern, new ICompilationUnit[]{wc});
+		Assert.isTrue(groups.length <= 1); //just 1 file or none
+		if (groups.length == 0)
+			return null;
+		else	
+			return groups[0];
+	}
+	
+	private static 	ISearchPattern createSearchPattern(IType type) throws JavaModelException{
+		ISearchPattern pattern= SearchEngine.createSearchPattern(type, IJavaSearchConstants.ALL_OCCURRENCES);
+		IMethod[] methods= type.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethod method= methods[i];
+			if (method.isConstructor()){
+				ISearchPattern newPattern= SearchEngine.createSearchPattern(method, IJavaSearchConstants.DECLARATIONS);
+				pattern= SearchEngine.createOrSearchPattern(pattern, newPattern);
+			}	
+		}
+		return pattern;
 	}
 }
