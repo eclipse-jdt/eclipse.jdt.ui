@@ -201,27 +201,11 @@ public class ReturnTypeSubProcessor {
 		BodyDeclaration decl= ASTResolving.findParentBodyDeclaration(selectedNode);
 		if (decl instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) decl;
-			if (methodDecl.getName().equals(selectedNode)) {
-				Block block= methodDecl.getBody();
-				if (block == null) {
-					return;
-				}
-				
-				ASTRewrite rewrite= new ASTRewrite(astRoot);
-				
-				List statements= block.statements();
-				ReturnStatement returnStatement= block.getAST().newReturnStatement();
-				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
-				statements.add(returnStatement);
-				rewrite.markAsInserted(returnStatement);
-				
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Add return statement", cu, rewrite, 10, image);
-				proposals.add(proposal);
-			} else if (selectedNode instanceof ReturnStatement) {
+			
+ 			if (selectedNode instanceof ReturnStatement) {
 				ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 				if (returnStatement.getExpression() == null) {
-					ASTRewrite rewrite= new ASTRewrite(astRoot);
+					ASTRewrite rewrite= new ASTRewrite(methodDecl);
 					
 					Expression expression= ASTResolving.getInitExpression(methodDecl.getReturnType());
 					returnStatement.setExpression(expression);
@@ -230,10 +214,32 @@ public class ReturnTypeSubProcessor {
 					}
 					
 					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal("Change return statement", cu, rewrite, 10, image);
+					String label= CorrectionMessages.getString("ReturnTypeSubProcessor.changereturnstatement.description");					
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 10, image);
 					proposals.add(proposal);
 				}
-			}
+ 			} else {
+				Block block= methodDecl.getBody();
+				if (block == null) {
+					return;
+				}
+				AST ast= methodDecl.getAST();
+				ASTRewrite rewrite= new ASTRewrite(methodDecl);
+				
+				List statements= block.statements();
+				ReturnStatement returnStatement= ast.newReturnStatement();
+				returnStatement.setExpression(ASTResolving.getInitExpression(methodDecl.getReturnType()));
+				statements.add(returnStatement);
+				rewrite.markAsInserted(returnStatement);
+				
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				String label= CorrectionMessages.getString("ReturnTypeSubProcessor.addreturnstatement.description");
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 10, image);
+				proposals.add(proposal);
+			} 
+				
+				
+				
 		}
 	
 	}
