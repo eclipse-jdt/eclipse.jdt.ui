@@ -13,11 +13,12 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class PrettySignature {
+public class PatternStrings {
 
 	public static String getSignature(IJavaElement element) {
 		if (element == null)
@@ -27,7 +28,7 @@ public class PrettySignature {
 				case IJavaElement.METHOD:
 					return getMethodSignature((IMethod)element);
 				case IJavaElement.TYPE:
-					return JavaElementLabels.getElementLabel(element, JavaElementLabels.T_FULLY_QUALIFIED);
+					return getTypeSignature((IType) element);
 				case IJavaElement.FIELD:
 					return getFieldSignature((IField) element);
 				default:
@@ -55,13 +56,12 @@ public class PrettySignature {
 		buffer.append('(');
 		
 		String[] types= method.getParameterTypes();
-		if (types.length > 0)
-			buffer.append(Signature.toString(types[0]));
-		for (int i= 1; i < types.length; i++) {
-			buffer.append(", "); //$NON-NLS-1$
-			buffer.append(Signature.toString(types[i]));
+		for (int i= 0; i < types.length; i++) {
+			if (i > 0)
+				buffer.append(", "); //$NON-NLS-1$
+			String typeSig= Signature.toString(types[0]);
+			buffer.append(typeSig);
 		}
-		
 		buffer.append(')');
 		
 		return buffer.toString();
@@ -71,8 +71,11 @@ public class PrettySignature {
 		return getUnqualifiedMethodSignature(method, true);
 	}
 
+	public static String getTypeSignature(IType field) {
+		return JavaElementLabels.getElementLabel(field, JavaElementLabels.T_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS);
+	}	
+	
 	public static String getFieldSignature(IField field) {
 		return JavaElementLabels.getElementLabel(field, JavaElementLabels.F_FULLY_QUALIFIED);
-
 	}	
 }

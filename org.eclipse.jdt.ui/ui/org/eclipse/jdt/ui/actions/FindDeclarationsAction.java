@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
-import org.eclipse.jdt.internal.ui.search.PrettySignature;
+import org.eclipse.jdt.internal.ui.search.PatternStrings;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
@@ -83,13 +83,13 @@ public class FindDeclarationsAction extends FindAction {
 	}
 	
 	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
-		if (element.getElementType() == IJavaElement.METHOD) {
+		if (element.getElementType() == IJavaElement.METHOD) { // waiting for bug 80264 to use an ElementQuerySpecification
 			IMethod method= (IMethod)element;
 			int searchFor= IJavaSearchConstants.METHOD;
 			if (method.isConstructor())
 				searchFor= IJavaSearchConstants.CONSTRUCTOR;
 			IType type= getType(element);
-			String pattern= PrettySignature.getUnqualifiedMethodSignature(method);
+			String pattern= PatternStrings.getUnqualifiedMethodSignature(method);
 			return new JavaSearchQuery(new PatternQuerySpecification(pattern, searchFor, true, getLimitTo(), getScope(type), getScopeDescription(type)));
 		}
 		else

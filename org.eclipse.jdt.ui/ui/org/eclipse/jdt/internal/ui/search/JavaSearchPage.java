@@ -54,6 +54,7 @@ import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -803,27 +804,27 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 					return new SearchPatternData(TYPE, DECLARATIONS, true, element.getElementName(), element);
 				}
 				case IJavaElement.TYPE:
-					return new SearchPatternData(TYPE, REFERENCES, true, PrettySignature.getSignature(element), element);
+					return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature((IType) element), element);
 				case IJavaElement.COMPILATION_UNIT: {
 					IType mainType= ((ICompilationUnit) element).findPrimaryType();
 					if (mainType != null) {
-						return new SearchPatternData(TYPE, REFERENCES, true, PrettySignature.getSignature(element), mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType);
 					}
 					break;
 				}
 				case IJavaElement.CLASS_FILE: {
 					IType mainType= ((IClassFile) element).getType();
 					if (mainType.exists()) {
-						return new SearchPatternData(TYPE, REFERENCES, true, PrettySignature.getSignature(element), mainType);
+						return new SearchPatternData(TYPE, REFERENCES, true, PatternStrings.getTypeSignature(mainType), mainType);
 					}
 					break;
 				}
 				case IJavaElement.FIELD:
-					return new SearchPatternData(FIELD, REFERENCES, true, PrettySignature.getSignature(element), element);
+					return new SearchPatternData(FIELD, REFERENCES, true, PatternStrings.getFieldSignature((IField) element), element);
 				case IJavaElement.METHOD:
 					IMethod method= (IMethod) element;
 					int searchFor= method.isConstructor() ? CONSTRUCTOR : METHOD;
-					return new SearchPatternData(searchFor, REFERENCES, true, PrettySignature.getMethodSignature(method), element);
+					return new SearchPatternData(searchFor, REFERENCES, true, PatternStrings.getMethodSignature(method), element);
 			}
 			
 		} catch (JavaModelException e) {

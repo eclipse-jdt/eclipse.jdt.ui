@@ -93,7 +93,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
-import org.eclipse.jdt.internal.ui.search.PrettySignature;
+import org.eclipse.jdt.internal.ui.search.PatternStrings;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -227,7 +227,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				Object[] types= dialog.getResult();
 				if (types != null && types.length > 0) {
 					fWrapperClass= (IType) types[0];
-					fWrapperClassCombo.setText(PrettySignature.getSignature(fWrapperClass));
+					fWrapperClassCombo.setText(PatternStrings.getSignature(fWrapperClass));
 					pattern= getWrapperClassName();
 				}
 			}
@@ -342,7 +342,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		});
 		fWrapperClassCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				if (fWrapperClass != null && !PrettySignature.getSignature(fWrapperClass).equals(fWrapperClassCombo.getText()))
+				if (fWrapperClass != null && !PatternStrings.getSignature(fWrapperClass).equals(fWrapperClassCombo.getText()))
 					fWrapperClass= null;
 				getContainer().setPerformActionEnabled(fWrapperClassCombo.getText().length() > 0 && fPropertyFileText.getText().length() > 0);
 			}
@@ -420,7 +420,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		fPropertyFileText.setText(values.propertyFileName);
 		fWrapperClass= values.wrapperClass;
 		if (fWrapperClass != null)
-			fWrapperClassCombo.setText(PrettySignature.getSignature(fWrapperClass));
+			fWrapperClassCombo.setText(PatternStrings.getSignature(fWrapperClass));
 		else
 			fWrapperClassCombo.setText(values.wrapperClassName); //$NON-NLS-1$
 	}
@@ -568,7 +568,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 					ExceptionHandler.handle(ex, NLSSearchMessages.getString("Search.Error.javaElementAccess.title"), NLSSearchMessages.getString("Search.Error.javaElementAccess.message")); //$NON-NLS-2$ //$NON-NLS-1$
 					break;
 				}
-				pattern= PrettySignature.getMethodSignature((IMethod) element);
+				pattern= PatternStrings.getMethodSignature((IMethod) element);
 				break;
 		}
 		if (searchFor == TYPE && pattern != null) {
@@ -722,7 +722,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		Object[] types= dialog.getResult();
 		if (types != null && types.length > 0) {
 			fWrapperClass= (IType) types[0];
-			fWrapperClassCombo.setText(PrettySignature.getSignature(fWrapperClass));
+			fWrapperClassCombo.setText(PatternStrings.getSignature(fWrapperClass));
 		}
 	}
 
