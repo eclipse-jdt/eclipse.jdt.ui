@@ -41,7 +41,6 @@ import org.eclipse.jdt.internal.ui.text.JavaWordDetector;
  */
 public final class JavaCodeScanner extends AbstractJavaScanner {
 
-	
 	/**
 	 * Rule to detect java operators.
 	 * 
@@ -184,11 +183,11 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			IToken token= super.evaluate(scanner, word);
 
 			if (fEnable) {
-				if (fCurrentVersion.equals(fVersion) || token.isUndefined())
+				if (fCurrentVersion.compareTo(fVersion) >= 0 || token.isUndefined())
 					return token;
 				return fDefaultToken;
 			} else {
-				if (fCurrentVersion.equals(fVersion))
+				if (fCurrentVersion.compareTo(fVersion) >= 0)
 					return Token.UNDEFINED;
 					
 				return token;
@@ -215,7 +214,9 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		"while" //$NON-NLS-1$
 	};
 	
-	private static String[] fgNewKeywords= { "assert" }; //$NON-NLS-1$
+	private static final String RETURN= "return"; //$NON-NLS-1$
+	private static String[] fgJava14Keywords= { "assert" }; //$NON-NLS-1$
+	private static String[] fgJava15Keywords= { "enum" }; //$NON-NLS-1$
 	
 	private static String[] fgTypes= { "void", "boolean", "char", "byte", "short", "strictfp", "int", "long", "float", "double" }; //$NON-NLS-1$ //$NON-NLS-5$ //$NON-NLS-7$ //$NON-NLS-6$ //$NON-NLS-8$ //$NON-NLS-9$  //$NON-NLS-10$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-2$
 	
@@ -231,7 +232,8 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		IJavaColorConstants.JAVA_OPERATOR
 	};
 	
-	private VersionedWordMatcher fVersionedWordMatcher;
+	private VersionedWordMatcher fJava14WordMatcher;
+	private VersionedWordMatcher fJava15WordMatcher;
 
 	/**
 	 * Creates a Java code scanner
@@ -273,23 +275,30 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for new keywords, 4077
 		String version= getPreferenceStore().getString(SOURCE_VERSION);
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		fVersionedWordMatcher= new VersionedWordMatcher(token, "1.4", true, version); //$NON-NLS-1$
+		fJava14WordMatcher= new VersionedWordMatcher(token, "1.4", true, version); //$NON-NLS-1$
 		
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
-		for (int i=0; i<fgNewKeywords.length; i++)
-			fVersionedWordMatcher.addWord(fgNewKeywords[i], token);
+		for (int i=0; i<fgJava14Keywords.length; i++)
+			fJava14WordMatcher.addWord(fgJava14Keywords[i], token);
 
-		combinedWordRule.addWordMatcher(fVersionedWordMatcher);
+		combinedWordRule.addWordMatcher(fJava14WordMatcher);
+
+		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
+		fJava15WordMatcher= new VersionedWordMatcher(token, "1.5", true, version); //$NON-NLS-1$
+		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
+		for (int i=0; i<fgJava15Keywords.length; i++)
+			fJava15WordMatcher.addWord(fgJava15Keywords[i], token);
+
+		combinedWordRule.addWordMatcher(fJava15WordMatcher);
 
 		// Add rule for operators and brackets
 		token= getToken(IJavaColorConstants.JAVA_OPERATOR);
 		rules.add(new OperatorRule(token));
 		
-		
 		// Add word rule for keyword 'return'.
 		CombinedWordRule.WordMatcher returnWordRule= new CombinedWordRule.WordMatcher();
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
-		returnWordRule.addWord("return", token);  //$NON-NLS-1$
+		returnWordRule.addWord(RETURN, token);  //$NON-NLS-1$
 		combinedWordRule.addWordMatcher(returnWordRule);
 
 		// Add word rule for method names.
@@ -332,8 +341,10 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 			if (value instanceof String) {
 				String s= (String) value;
 	
-				if (fVersionedWordMatcher != null)
-					fVersionedWordMatcher.setCurrentVersion(s);			
+				if (fJava14WordMatcher != null)
+					fJava14WordMatcher.setCurrentVersion(s);
+				if (fJava15WordMatcher != null)
+					fJava15WordMatcher.setCurrentVersion(s);
 			}
 			
 		} else if (super.affectsBehavior(event)) {
