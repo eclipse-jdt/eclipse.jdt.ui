@@ -203,7 +203,7 @@ public class JarFileExportOperation implements IRunnableWithProgress {
 					addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.ioErrorDuringClassFileLookup", classFile.getLocation().toFile()), ex); //$NON-NLS-1$
 					continue;
 				}
-				if (cfReader != null) {
+				if (cfReader != null) {					if (cfReader.sourceFileName() == null) {						addWarning(JarPackagerMessages.getFormattedString("JarFileExportOperation.classFileWithoutSourceFileAttribute", classFile.getLocation().toFile()), null); //$NON-NLS-1$						continue;					}
 					String javaName= new String(cfReader.sourceFileName());
 					Object classFiles= map.get(javaName);
 					if (classFiles == null) {
