@@ -81,7 +81,7 @@ public class Binding2JavaModel {
 		IJavaElement element= scope.findElement(getPathToCompilationUnit(type.getPackage(), typeElements[0]));
 		IType candidate= null;
 		if (element instanceof ICompilationUnit) {
-			candidate= ((ICompilationUnit)element).getType(typeElements[0]);
+			candidate= JavaModelUtil.toWorkingCopy((ICompilationUnit)element).getType(typeElements[0]);
 		} else if (element instanceof IClassFile) {
 			candidate= ((IClassFile)element).getType();
 		} else if (element == null){
