@@ -117,12 +117,12 @@ public class JavaDeleteProcessor extends DeleteProcessor {
 	
 	protected IRefactoringParticipant[] getMappedParticipants(SharableParticipants shared) throws CoreException {
 		ResourceModifications modifications= new ResourceModifications();
-		for (int i= 0; i < fJavaElements.length; i++) {
-			IJavaElement element= fJavaElements[i];
+		for (int p= 0; p < fJavaElements.length; p++) {
+			IJavaElement element= fJavaElements[p];
 			if (element instanceof IPackageFragment) {
-				ICompilationUnit[] children= ((IPackageFragment)fJavaElements[i]).getCompilationUnits();
-				for (int j= 0; j < children.length; j++) {
-					IResource resource= children[i].getResource();
+				ICompilationUnit[] children= ((IPackageFragment)element).getCompilationUnits();
+				for (int c= 0; c < children.length; c++) {
+					IResource resource= children[c].getResource();
 					if (resource != null) {
 						modifications.addDelete(resource);
 					}
