@@ -79,7 +79,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	}
 	
 	protected boolean supportsProjectSpecificOptions() {
-		return true;
+		return false;
 	}
 	
 	protected boolean offerLink() {
@@ -123,7 +123,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 			Label horizontalLine= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 			horizontalLine.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, 2, 1));
 
-		} else if (offerLink()) {
+		} else if (supportsProjectSpecificOptions() && offerLink()) {
 			fChangeWorkspaceSettings= createLink(parent);
 			fChangeWorkspaceSettings.setText(PreferencesMessages.getString("PropertyAndPreferencePage.showprojectspecificsettings.label")); //$NON-NLS-1$
 			fChangeWorkspaceSettings.setLayoutData(new GridData(SWT.END, SWT.CENTER, true, false));
