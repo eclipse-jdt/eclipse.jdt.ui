@@ -32,15 +32,16 @@ import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
-
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
-import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.GoToNextPreviousMemberAction;
+import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
 
 /**
  * Common base class for action contributors for Java editors.
@@ -117,7 +118,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			}
 		}
 		
-		
 	private List fRetargetToolbarActions= new ArrayList();
 	private List fPartListeners= new ArrayList();
 	
@@ -151,18 +151,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fRetargetToolbarActions.add(a);
 		markAsPartListener(a);
 		
-		a= new RetargetToolbarAction(b, "NextError.", IJavaEditorActionConstants.NEXT_ERROR, false); //$NON-NLS-1$
-		a.setActionDefinitionId("org.eclipse.ui.navigate.next"); //$NON-NLS-1$
-		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
-		fRetargetToolbarActions.add(a);
-		markAsPartListener(a);
-		
-		a= new RetargetToolbarAction(b, "PreviousError.", IJavaEditorActionConstants.PREVIOUS_ERROR, false); //$NON-NLS-1$
-		a.setActionDefinitionId("org.eclipse.ui.navigate.previous"); //$NON-NLS-1$
-		a.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
-		fRetargetToolbarActions.add(a);
-		markAsPartListener(a);
-		
 		fRetargetShowJavaDoc= new RetargetAction(JdtActionConstants.SHOW_JAVA_DOC, JavaEditorMessages.getString("ShowJavaDoc.label")); //$NON-NLS-1$
 		fRetargetShowJavaDoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.SHOW_JAVADOC);
 		markAsPartListener(fRetargetShowJavaDoc);
@@ -172,11 +160,9 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
 		fPreviousError.setActionDefinitionId("org.eclipse.ui.navigate.previous"); //$NON-NLS-1$
-		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setActionDefinitionId("org.eclipse.ui.navigate.next"); //$NON-NLS-1$
-		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
@@ -223,12 +209,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		super.init(bars, page);
 		
 		// register actions that have a dynamic editor. 
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousError);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousError);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
 		
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavaDoc);
 	}

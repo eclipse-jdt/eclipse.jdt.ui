@@ -715,7 +715,7 @@
 
 
 <!-- =========================================================================== -->
-<!-- Refactoring (for action set see below                                       -->
+<!-- Refactoring (for action set see below)                                      -->
 <!-- =========================================================================== -->
 
 <extension
@@ -1502,6 +1502,46 @@
 </extension>
 
 <!-- End Java contributions for Search view -->
+
+<!-- Begin Java editor action set 
+<extension point="org.eclipse.ui.actionSets">
+	<actionSet
+		id="org.eclipse.jdt.ui.JavaEditorActionSet"
+        label="Java editor Action Set"
+		visible="false"
+		description="Java editor action set">
+		<action id="org.eclipse.jdt.ui.actions.gotoPreviousAnnotation"
+			toolbarPath="org.eclipse.ui.workbench.navigate/history.group"
+			label="Go to Previous Annotation"
+            style="pulldown"
+            retarget="true"
+			tooltip="Go to Previous Annotation"
+			icon="icons/full/etool16/prev_nav.gif"
+            disabledIcon="icons/full/dtool16/prev_nav.gif"
+            hoverIcon="icons/full/ctool16/prev_nav.gif"			
+			class="org.eclipse.jdt.internal.ui.javaeditor.GotoErrorAction"/>
+
+		<action id="org.eclipse.jdt.ui.actions.gotoNextAnnotation"
+			toolbarPath="org.eclipse.ui.workbench.navigate/history.group"
+			label="Go to Next Annotation"
+            style="pulldown"
+            retarget="true"
+			tooltip="Go to Next Annotation"
+			icon="icons/full/etool16/next_nav.gif"
+            disabledIcon="icons/full/dtool16/next_nav.gif"
+            hoverIcon="icons/full/ctool16/next_nav.gif"			
+			class="org.eclipse.jdt.internal.ui.javaeditor.GotoErrorAction"/>
+    </actionSet>
+</extension>
+-->
+
+<extension point="org.eclipse.ui.actionSetPartAssociations">
+	<actionSetPartAssociation 
+		targetID="org.eclipse.ui.edit.text.actionSet.navigation">
+		<part id="org.eclipse.jdt.ui.CompilationUnitEditor"/>
+		<part id="org.eclipse.jdt.ui.ClassFileEditor"/>
+	</actionSetPartAssociation>
+</extension>
 
 <extension
 	point="org.eclipse.ui.popupMenus">         

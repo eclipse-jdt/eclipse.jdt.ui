@@ -41,6 +41,7 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -71,6 +72,7 @@ import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
@@ -807,9 +809,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		
 		fTogglePresentation= new TogglePresentationAction();
 		fPreviousError= new GotoErrorAction("PreviousError.", false); //$NON-NLS-1$
-		fPreviousError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_PREV_ERROR);
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
-		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
 		fUndo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.UNDO);
 		fRedo= (TextOperationAction) fEditor.getAction(ITextEditorActionConstants.REDO);
@@ -1011,9 +1011,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextError);
 		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
 		bars.setGlobalActionHandler(IJavaEditorActionConstants.TOGGLE_PRESENTATION, fTogglePresentation);
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=18968
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.PREVIOUS_ERROR, fPreviousError);
-		bars.setGlobalActionHandler(IJavaEditorActionConstants.NEXT_ERROR, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextError);
+		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousError);
+		
 		
 		fActionGroups.fillActionBars(bars);
 
