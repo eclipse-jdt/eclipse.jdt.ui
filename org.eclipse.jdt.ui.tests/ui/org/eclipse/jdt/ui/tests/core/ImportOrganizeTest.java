@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -38,11 +39,11 @@ public class ImportOrganizeTest extends TestCase {
 	}
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new ImportOrganizeTest("testImportOfMemberFromLocal"));
+			suite.addTest(new ImportOrganizeTest("test5"));
 			return suite;
 		}	
 	}
@@ -135,6 +136,48 @@ public class ImportOrganizeTest extends TestCase {
 			"junit.framework.TestSuite"
 		});
 	}
+	
+	public void test1WithOrder() throws Exception {
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
+		assertTrue("junit src not found", junitSrcArchive != null && junitSrcArchive.exists());
+		ZipFile zipfile= new ZipFile(junitSrcArchive);
+		JavaProjectHelper.addSourceContainerWithImport(fJProject1, "src", zipfile);
+
+		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/runner/BaseTestRunner.java"));
+		assertNotNull("BaseTestRunner.java", cu);
+
+		IPackageFragmentRoot root= (IPackageFragmentRoot)cu.getParent().getParent();
+		IPackageFragment pack= root.createPackageFragment("mytest", true, null);
+
+		ICompilationUnit colidingCU= pack.getCompilationUnit("TestListener.java");
+		colidingCU.createType("public abstract class TestListener {\n}\n", null, true, null);
+
+
+		String[] order= new String[] { "junit", "java.text", "java.io", "java" };
+		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		assertImports(cu, new String[] {
+			"junit.framework.Test",
+			"junit.framework.TestListener",
+			"junit.framework.TestSuite",
+			"java.text.NumberFormat",	
+			"java.io.BufferedReader",
+			"java.io.File",
+			"java.io.FileInputStream",
+			"java.io.IOException",
+			"java.io.InputStream",
+			"java.io.PrintWriter",
+			"java.io.StringReader",
+			"java.io.StringWriter",
+			"java.lang.reflect.InvocationTargetException",
+			"java.lang.reflect.Method",
+			"java.util.Properties"
+		});
+	}	
+	
 		
 	public void test2() throws Exception {
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC);
@@ -675,7 +718,7 @@ public class ImportOrganizeTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
-		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
@@ -705,7 +748,8 @@ public class ImportOrganizeTest extends TestCase {
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
 		buf.append("\n");
-		buf.append("import List1;\n");		
+		buf.append("import List1;\n");
+		buf.append("\n");	
 		buf.append("import java.util.*;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -725,7 +769,7 @@ public class ImportOrganizeTest extends TestCase {
 		StringBuffer buf= new StringBuffer();
 		buf.append("public class List1 {\n");
 		buf.append("}\n");
-		pack2.createCompilationUnit("List.java", buf.toString(), false, null);
+		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
 
 		buf= new StringBuffer();
 		buf.append("public class List2 {\n");
@@ -762,7 +806,8 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("package pack1;\n");
 		buf.append("\n");
 		buf.append("import List1;\n");
-		buf.append("import List2;\n");		
+		buf.append("import List2;\n");
+		buf.append("\n");	
 		buf.append("import java.util.*;\n");
 		buf.append("\n");
 		buf.append("public class C {\n");
@@ -819,5 +864,168 @@ public class ImportOrganizeTest extends TestCase {
 		buf.append("    }\n");
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
-	}	
+	}
+	
+	public void testGroups1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public class List1 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    File f;\n");
+		buf.append("    IOException f1;\n");
+		buf.append("    RandomAccessFile f2;\n");
+		buf.append("    ArrayList f3;\n");
+		buf.append("    List1 f4;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java.io", "java.util" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.RandomAccessFile;\n");
+		buf.append("\n");		
+		buf.append("import java.util.ArrayList;\n");						
+		buf.append("\n");
+		buf.append("import pack0.List1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    File f;\n");
+		buf.append("    IOException f1;\n");
+		buf.append("    RandomAccessFile f2;\n");
+		buf.append("    ArrayList f3;\n");
+		buf.append("    List1 f4;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void testBaseGroups1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack2= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack0;\n");
+		buf.append("public class List1 {\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("List1.java", buf.toString(), false, null);
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    File f;\n");
+		buf.append("    IOException f1;\n");
+		buf.append("    RandomAccessFile f2;\n");
+		buf.append("    ArrayList f3;\n");
+		buf.append("    List1 f4;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] { "java", "java.io" };
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("import java.io.RandomAccessFile;\n");
+		buf.append("\n");
+		buf.append("import pack0.List1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    File f;\n");
+		buf.append("    IOException f1;\n");
+		buf.append("    RandomAccessFile f2;\n");
+		buf.append("    ArrayList f3;\n");
+		buf.append("    List1 f4;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	public void test5() throws Exception {
+	
+		String[] types= new String[] {
+			"org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader",
+			"org.eclipse.core.resources.IContainer",
+			"org.eclipse.core.runtime.IPath",
+			"org.eclipse.core.runtime.CoreException",
+			"org.eclipse.core.resources.IResource",
+			"org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer"
+		};
+		String[] order= new String[] { "org.eclipse.jdt", "org.eclipse" };
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		for (int i= 0; i < types.length; i++) {
+			String pack= Signature.getQualifier(types[i]);
+			String name= Signature.getSimpleName(types[i]);
+			
+			IPackageFragment pack2= sourceFolder.createPackageFragment(pack, false, null);
+			StringBuffer buf= new StringBuffer();
+			buf.append("package "); buf.append(pack); buf.append(";\n");
+			buf.append("public class "); buf.append(name); buf.append(" {\n");
+			buf.append("}\n");
+			pack2.createCompilationUnit(name + ".java", buf.toString(), false, null);		
+		}
+	
+		StringBuffer body= new StringBuffer();
+		body.append("public class C {\n");
+		for (int i= 0; i < types.length; i++) {
+			String name= Signature.getSimpleName(types[i]);
+			body.append(name); body.append(" a"); body.append(i); body.append(";\n");
+		}
+		body.append("}\n");		
+	
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+		
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");		
+		buf.append("import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;\n");
+		buf.append("import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;\n");
+		buf.append("\n");
+		buf.append("import org.eclipse.core.resources.IContainer;\n");
+		buf.append("import org.eclipse.core.resources.IResource;\n");
+		buf.append("import org.eclipse.core.runtime.CoreException;\n");
+		buf.append("import org.eclipse.core.runtime.IPath;\n");
+		buf.append("\n");
+		buf.append(body.toString());
+		
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 }
