@@ -289,5 +289,42 @@ public class Strings {
 		return -1;
 	}
 	
+	/**
+	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
+	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
+	 * the middle of a line)	 */
+	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent) {
+		try {
+			ILineTracker tracker= new DefaultLineTracker();
+			tracker.set(code);
+			int nLines= tracker.getNumberOfLines();
+			if (nLines == 1) {
+				return code;
+			}
+			
+			StringBuffer buf= new StringBuffer();
+			
+			for (int i= 0; i < nLines; i++) {
+				IRegion region= tracker.getLineInformation(i);
+				int start= region.getOffset();
+				int end= start + region.getLength();
+				String line= code.substring(start, end);
+				
+				if (i == 0) {  // no indent for first line (contained in the formatted string)
+					buf.append(line);
+				} else { // no new line after last line
+					buf.append(tracker.getLineDelimiter(i - 1));
+					buf.append(newIndent); 
+					buf.append(trimIndent(line, codeIndentLevel, tabWidth));
+				}
+			}
+			return buf.toString();
+		} catch (BadLocationException e) {
+			// can not happen
+			return code;
+		}
+	}	
+	
+	
 }
 

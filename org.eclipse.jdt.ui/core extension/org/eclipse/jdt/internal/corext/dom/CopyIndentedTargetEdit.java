@@ -42,38 +42,8 @@ public final class CopyIndentedTargetEdit extends CopyTargetEdit {
 		if (destIndentLevel == fSourceIndentLevel) {
 			return str;
 		}
-		
-		try {
-			ILineTracker tracker= new DefaultLineTracker();
-			tracker.set(str);
-			int nLines= tracker.getNumberOfLines();
-			if (nLines == 1) {
-				return str;
-			}
-			
-			StringBuffer buf= new StringBuffer();
-			
-			for (int i= 0; i < nLines; i++) {
-				IRegion region= tracker.getLineInformation(i);
-				int start= region.getOffset();
-				int end= start + region.getLength();
-				String line= str.substring(start, end);
-				
-				if (i == 0) {  // no indent for first line (contained in the formatted string)
-					buf.append(line);
-				} else { // no new line after last line
-					buf.append(tracker.getLineDelimiter(i - 1));
-					buf.append(fDestinationIndent); 
-					buf.append(Strings.trimIndent(line, fSourceIndentLevel, fTabWidth));
-					
-				}
-			}
-			return buf.toString();
-		} catch (BadLocationException e) {
-			// can't happen
-			JavaPlugin.log(e);
-		}
-		return str;	
+		return Strings.changeIndent(str, fSourceIndentLevel, fTabWidth, fDestinationIndent);
 	}
+
 	
 }

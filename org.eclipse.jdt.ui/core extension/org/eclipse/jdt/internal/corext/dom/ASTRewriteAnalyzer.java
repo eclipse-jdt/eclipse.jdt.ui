@@ -68,6 +68,10 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		fGroupDescriptions= resGroupDescriptions;
 	}
 	
+	public static Object createSourceCopy(ASTNode node) {
+		return new CopySourceEdit(node.getStartPosition(), node.getLength());
+	}
+	
 	private boolean isChanged(ASTNode node) {
 		return isInserted(node) || isRemoved(node) || isReplaced(node);
 	}
@@ -547,7 +551,7 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 		node.accept(flattener);
 		String formatted= flattener.getFormattedResult(initialIndentLevel, fTextBuffer.getLineDelimiter());
 		
-		ASTWithExistingFlattener.ExistingNodeMarker[] markers= flattener.getExistingNodeMarkers();
+		ASTWithExistingFlattener.NodeMarker[] markers= flattener.getNodeMarkers();
 		
 		int tabWidth= CodeFormatterUtil.getTabWidth();
 		int currPos= 0;
@@ -557,15 +561,21 @@ public class ASTRewriteAnalyzer extends ASTVisitor {
 			}
 		}
 		for (int i= 0; i < markers.length; i++) {
-			ASTNode movedNode= markers[i].existingNode;
 			int offset= markers[i].offset;
 			
 			String insertStr= formatted.substring(currPos, offset);
 			doTextInsert(insertOffset, insertStr, description);
 			String destIndentString=  Strings.getIndentString(getCurrentLine(formatted, offset), tabWidth);
 			
-			int srcIndentLevel= getIndent(movedNode.getStartPosition());
-			doTextCopy(movedNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+			Object data= markers[i].data;
+			if (data instanceof ASTNode) {
+				ASTNode existingNode= (ASTNode) data;
+				int srcIndentLevel= getIndent(existingNode.getStartPosition());
+				doTextCopy(existingNode, insertOffset, srcIndentLevel, destIndentString, tabWidth, description);
+			} else if (data instanceof String) {
+				String str= Strings.changeIndent((String) data, 0, tabWidth, destIndentString); 
+				doTextInsert(insertOffset, str, description);
+			}
 		
 			currPos= offset + markers[i].length;
 		}

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jdt.core.ICodeFormatter;
 import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -29,30 +30,29 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 
 	private static final String KEY= "ExistingASTNode";
 
-	public static class ExistingNodeMarker {
-		public ASTNode existingNode;
+	public static class NodeMarker {
+		public Object data;
 		public int offset;
-		public int length;
+		public int length;		
 	}
 	
-	public static ASTNode getPlaceholder(ASTNode existingNode) {
+	public static ASTNode getPlaceholder(AST ast, Object data, ASTNode existingNode) {
 		ASTNode placeHolder;
 		if (existingNode instanceof Expression) {
-			placeHolder= existingNode.getAST().newSimpleName("z");
+			placeHolder= ast.newSimpleName("z");
 		} else if (existingNode instanceof Statement) {
 			if (existingNode.getNodeType() == ASTNode.BLOCK) {
-				placeHolder= existingNode.getAST().newBlock();
+				placeHolder= ast.newBlock();
 			} else {
-				placeHolder= existingNode.getAST().newReturnStatement();
+				placeHolder= ast.newReturnStatement();
 			}
 		} else if (existingNode instanceof BodyDeclaration) {
-			placeHolder= existingNode.getAST().newInitializer();
+			placeHolder= ast.newInitializer();
 		} else {
 			return null;
 		}
-		
-		ExistingNodeMarker marker= new ExistingNodeMarker();
-		marker.existingNode= existingNode;
+		NodeMarker marker= new NodeMarker();
+		marker.data= data;
 		marker.offset= -1;
 		marker.length= 0;
 		
@@ -60,8 +60,8 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		return placeHolder;
 	}
 	
-	private static ExistingNodeMarker getMarker(ASTNode node) {
-		return (ExistingNodeMarker) node.getProperty(KEY);
+	private static NodeMarker getMarker(ASTNode node) {
+		return (NodeMarker) node.getProperty(KEY);
 	} 
 	
 	private ArrayList fExistingNodes;
@@ -79,8 +79,8 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 		fExistingNodes.clear();
 	}
 	
-	public ExistingNodeMarker[] getExistingNodeMarkers() {
-		return (ExistingNodeMarker[]) fExistingNodes.toArray(new ExistingNodeMarker[fExistingNodes.size()]);
+	public NodeMarker[] getNodeMarkers() {
+		return (NodeMarker[]) fExistingNodes.toArray(new NodeMarker[fExistingNodes.size()]);
 	}
 	
 	/**
@@ -91,7 +91,7 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 */	
 	public String getFormattedResult(int initialIndentationLevel, String lineDelimiter) {
 		int tabWidth= CodeFormatterUtil.getTabWidth();
-		ExistingNodeMarker[] markers= getExistingNodeMarkers();
+		NodeMarker[] markers= getNodeMarkers();
 		int nExistingNodes= markers.length;
 
 		int[] positions= new int[nExistingNodes*2];
@@ -118,7 +118,7 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#preVisit(ASTNode)
 	 */
 	public void preVisit(ASTNode node) {
-		ExistingNodeMarker marker= getMarker(node);
+		NodeMarker marker= getMarker(node);
 		if (marker != null) {
 			marker.offset= fResult.length();
 			fExistingNodes.add(marker);
@@ -129,7 +129,7 @@ public class ASTWithExistingFlattener extends ASTFlattener {
 	 * @see org.eclipse.jdt.core.dom.ASTVisitor#postVisit(ASTNode)
 	 */
 	public void postVisit(ASTNode node) {
-		ExistingNodeMarker marker= getMarker(node);
+		NodeMarker marker= getMarker(node);
 		if (marker != null) {
 			marker.length= fResult.length() - marker.offset;
 		}

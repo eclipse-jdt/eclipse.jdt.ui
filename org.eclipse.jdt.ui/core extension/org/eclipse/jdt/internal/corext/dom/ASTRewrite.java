@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.corext.dom;
 import java.util.Collection;
 import java.util.HashMap;
 
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -72,7 +73,7 @@ public class ASTRewrite {
 	private static final String COPYSOURCEKEY= "ASTCopySource";
 	
 	private ASTNode fRootNode;
-	
+		
 	public ASTRewrite(ASTNode node) {
 		fRootNode= node;
 	}
@@ -195,12 +196,18 @@ public class ASTRewrite {
 	 */
 	public final ASTNode createCopyTarget(ASTNode node) {
 		Assert.isTrue(node.getProperty(COPYSOURCEKEY) == null, "Node used as more than one copy source");
-		CopySourceEdit edit= new CopySourceEdit(node.getStartPosition(), node.getLength());
-		node.setProperty(COPYSOURCEKEY, edit);
-		return ASTWithExistingFlattener.getPlaceholder(node);
+		Object copySource= ASTRewriteAnalyzer.createSourceCopy(node);
+		node.setProperty(COPYSOURCEKEY, copySource);
+		return ASTWithExistingFlattener.getPlaceholder(node.getAST(), node, node);
+	}
+	
+	/**
+	 * Creates a target node for a node to be moved or copied. A target node can be inserted or used
+	 * to replace at the target position. 
+	 */
+	public final ASTNode createCopyTarget(String code, ASTNode similarNode) {
+		return ASTWithExistingFlattener.getPlaceholder(fRootNode.getAST(), code, similarNode);
 	}	
-	
-	
 	public final boolean isInserted(ASTNode node) {
 		return node.getProperty(CHANGEKEY) instanceof ASTInsert;
 	}
