@@ -1,4 +1,4 @@
-/*******************************************************************************
+/*
  * Copyright (c) 2000, 2003 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials 
  * are made available under the terms of the Common Public License v1.0
@@ -23,6 +23,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
@@ -32,7 +33,7 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 /**
  * The wizard base class for JUnit creation wizards.
  */
-public abstract class JUnitWizard extends Wizard {
+public abstract class JUnitWizard extends Wizard implements INewWizard {
 
 	private IWorkbench fWorkbench;
 	protected static String DIALOG_SETTINGS_KEY= "JUnitWizards"; //$NON-NLS-1$
@@ -40,6 +41,7 @@ public abstract class JUnitWizard extends Wizard {
 
 	public JUnitWizard() {
 		setNeedsProgressMonitor(true);
+		initializeDefaultPageImageDescriptor();
 	}
 	
 	/*
@@ -111,4 +113,6 @@ public abstract class JUnitWizard extends Wizard {
 		}
 		setDialogSettings(wizardSettings);
 	}
+
+	protected abstract void initializeDefaultPageImageDescriptor();
 }
