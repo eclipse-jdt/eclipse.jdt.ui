@@ -119,7 +119,7 @@ public class NLSSourceModifierTest extends TestCase {
             	doc.get());
     }
     
-    /**
+    /*
      * TODO: the key should be 0
      */
     public void testFromNotTranslatedToTranslated() throws Exception {

@@ -82,7 +82,7 @@ public class NLSHintTest extends TestCase {
         JavaProjectHelper.clear(javaProject, ProjectTestSetup.getDefaultClasspath());        
     }
     
-    /**
+    /*
      * documents bug 57622.
      */
     public void testNlsedButNotTranslated() throws Exception {
@@ -97,7 +97,7 @@ public class NLSHintTest extends TestCase {
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
     
-    /**
+    /*
      * documents bug 59074
      */
     public void testLooksLikeAccessor() throws Exception {
@@ -115,7 +115,7 @@ public class NLSHintTest extends TestCase {
         assertEquals(pack, hint.getResourceBundlePackage());
    }
     
-    /**
+    /*
      * nlsed-String must be an argument of method.
      */
     public void testNoAccessorClassHint1() throws Exception {
@@ -130,7 +130,7 @@ public class NLSHintTest extends TestCase {
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
        
-    /**
+    /*
      * method has no necessary static modifier. 
      */
     public void testNoAccessorClassHint2() throws Exception {
@@ -153,7 +153,7 @@ public class NLSHintTest extends TestCase {
         assertEquals("Messages", hint.getAccessorClassName());    		 
     }
 
-    /**
+    /*
      * accessor class does not exist.
      */
     public void testNoAccessorClassHint3() throws Exception {

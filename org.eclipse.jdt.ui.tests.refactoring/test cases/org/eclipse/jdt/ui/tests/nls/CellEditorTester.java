@@ -20,9 +20,6 @@ import org.eclipse.jdt.internal.ui.refactoring.nls.MultiStateCellEditor;
 
 public class CellEditorTester extends TestCase {
 
-	/**
-	 * Constructor for CellEditorTester
-	 */
 	public CellEditorTester(String name) {
 		super(name);
 	}
