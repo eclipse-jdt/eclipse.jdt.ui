@@ -22,11 +22,9 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterManager;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
@@ -216,11 +214,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	public static boolean isDebug() {
 		return getDefault().isDebugging();
 	}
-	
-	/* package */ static IPath getInstallLocation() {
-		return new Path(getDefault().getDescriptor().getInstallURL().getFile());
-	}
-	
+		
 	public static ImageDescriptorRegistry getImageDescriptorRegistry() {
 		return getDefault().internalGetImageDescriptorRegistry();
 	}
