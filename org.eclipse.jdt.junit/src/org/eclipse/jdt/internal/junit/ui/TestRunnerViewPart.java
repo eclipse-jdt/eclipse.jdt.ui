@@ -231,6 +231,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 
 		public void run() {
 			stopTest();
+			setEnabled(false);
 		}
 	}
 
