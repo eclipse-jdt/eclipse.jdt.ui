@@ -20,6 +20,7 @@ import org.eclipse.jface.text.ITextViewerExtension;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.AbstractTextEditor;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -50,7 +51,7 @@ public class ScrollAnnotatedJavaEditorTest extends ScrollEditorTest {
 	protected void setUp(IEditorPart editor) throws Exception {
 		super.setUp(editor);
 		createAnnotations(editor);
-		EditorTestHelper.joinJobs(1000, 20000, 100);
+		EditorTestHelper.joinBackgroundActivities((AbstractTextEditor) editor);
 		setWarmUpRuns(WARM_UP_RUNS);
 		setMeasuredRuns(MEASURED_RUNS);
 	}

@@ -198,7 +198,7 @@ public class EditorTestHelper {
 
 	public static void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
 		joinBackgroundActivities();
-		joinReconciler(sourceViewer, 0, Long.MAX_VALUE, 500);
+		joinReconciler(sourceViewer, 500, 0, 500);
 	}
 	
 	public static void joinBackgroundActivities() throws CoreException {
