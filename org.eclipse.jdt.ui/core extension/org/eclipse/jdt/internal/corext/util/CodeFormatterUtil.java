@@ -12,7 +12,17 @@ package org.eclipse.jdt.internal.corext.util;
 
 import java.util.Map;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.Preferences;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.BadPositionCategoryException;
+import org.eclipse.jface.text.DefaultPositionUpdater;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 
 import org.eclipse.jdt.core.CodeFormatter;
 import org.eclipse.jdt.core.ICodeFormatter;
@@ -21,7 +31,6 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.*;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.formatter.FormattingPreferences;
 
 
@@ -29,6 +38,7 @@ import org.eclipse.jdt.internal.formatter.FormattingPreferences;
 public class CodeFormatterUtil {
 	
 	public static boolean OLD_FORMATTER= true;
+	public static boolean NEW_EDIT_API= false;
 	
 	public static final int K_UNKNOWN= -1;
 	public static final int K_EXPRESSION = CodeFormatter.K_EXPRESSION;
@@ -85,14 +95,66 @@ public class CodeFormatterUtil {
 		return formatter.format(string, indentationLevel, positions, lineSeparator);
 	}
 	
+	
+	
 	private static String new_format(int kind, String string, int indentationLevel, int[] positions, String lineSeparator, Map options) {
-		FormattingPreferences preferences= FormattingPreferences.getDefault();
-		if (options == null) {
-			options= JavaCore.getOptions();
+		try {
+			/* old api
+			    FormattingPreferences preferences= FormattingPreferences.getDefault();
+				if (options == null) {
+					options= JavaCore.getOptions();
+				}
+				convertOldOptionsToPreferences(options, preferences);
+				return new DefaultCodeFormatter(preferences).format(kind, string, indentationLevel, positions, lineSeparator, options);
+			*/
+			// new edit api
+			String cat= "myCategory"; //$NON-NLS-1$
+			
+			Document doc= new Document(string);
+			doc.addPositionCategory(cat);
+			doc.addPositionUpdater(new DefaultPositionUpdater(cat) {
+				protected boolean notDeleted() {
+					if (fOffset < fPosition.offset && (fPosition.offset + fPosition.length < fOffset + fLength)) {
+						fPosition.offset= fOffset + fLength; // deleted positions: set to end of remove
+					}
+					return false;
+				}
+			});
+
+			Position[] stored= null;
+			if (positions != null) {
+				stored= new Position[positions.length];
+				for (int i= 0; i < positions.length; i++) {
+					stored[i]= new Position(positions[i], 0);
+					doc.addPosition(cat, stored[i]);
+				}
+			}
+			TextEdit edit= new_api(kind, string, null, indentationLevel, lineSeparator);
+			if (edit == null) {
+				return string;
+			}
+			edit.apply(doc);
+			if (positions != null) {
+				stored= new Position[positions.length];
+				for (int i= 0; i < positions.length; i++) {
+					Position curr= stored[i];
+					Assert.isTrue(!curr.isDeleted);
+					positions[i]= curr.getOffset();
+				}
+			}
+			return doc.get();
+		} catch (MalformedTreeException e) {
+		} catch (BadLocationException e) {
+		} catch (BadPositionCategoryException e) {
 		}
-		convertOldOptionsToPreferences(options, preferences);
-		return new DefaultCodeFormatter(preferences).format(kind, string, indentationLevel, positions, lineSeparator, options);
+		return string;
 	}
+	
+	private static TextEdit new_api(int kind, String string, IRegion region, int indentationLevel, String lineSeparator) {
+		// TODO To be implemented by jdt.core
+		return null;
+	}
+
 		
 	/*
 	 * emulate the fomat substring with the old formatter
