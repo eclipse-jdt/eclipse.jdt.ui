@@ -152,6 +152,12 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     		pm.done();
     	}
     }
+
+    private void initializeDefaults() {
+    	fVisibility= Modifier.PRIVATE;
+    	fClassName= "";
+    	fDeclareFinal= true;
+    }
     
 	private void initAST(){
 		fCompilationUnitNode= AST.parseCompilationUnit(fCu, true);
@@ -183,20 +189,31 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		return (AnonymousClassDeclaration)ASTNodes.getParent(node, AnonymousClassDeclaration.class);
     }
     
-    private void initializeDefaults() {
-    	fVisibility= Modifier.PRIVATE;
-    	fClassName= "";
-    	fDeclareFinal= true;
-    }
-
 	public RefactoringStatus validateInput(){
 		RefactoringStatus result= Checks.checkTypeName(fClassName);
 		if (result.hasFatalError())
 			return result;
+			
 		if (fClassNamesUsed.contains(fClassName))
-			return RefactoringStatus.createFatalErrorStatus("Nested type with that name already exists");//XXX
+			return RefactoringStatus.createFatalErrorStatus("Nested type with that name already exists");
+		
+		if (fClassName.equals(getSuperConstructorBinding().getDeclaringClass().getName()))	
+			return RefactoringStatus.createFatalErrorStatus("Choose another name");
+		
+		if (classNameHidesEnclosingType())
+			return RefactoringStatus.createFatalErrorStatus("Class name hides an enclosing type name");
 		return result;	
 	}
+	
+    private boolean classNameHidesEnclosingType() {
+    	ITypeBinding type= getTypeDeclaration().resolveBinding();
+    	while(type != null){
+	    	if (fClassName.equals(type.getName()))
+    			return true;
+	    	type= type.getDeclaringClass();
+    	}
+        return false;
+    }
 
     /*
      * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(org.eclipse.core.runtime.IProgressMonitor)
@@ -243,7 +260,6 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     private ASTNode createNewClassInstanceCreation(ASTRewrite rewrite) {
     	ClassInstanceCreation newClassCreation= getAST().newClassInstanceCreation();
     	newClassCreation.setAnonymousClassDeclaration(null);
-//    	newClassCreation.setExpression(expression);//XXX ???
 		newClassCreation.setName(getAST().newSimpleName(fClassName));
 		copyArguments(rewrite, newClassCreation);
         addArgumentsForLocalsUsedInInnerClass(rewrite, newClassCreation);
