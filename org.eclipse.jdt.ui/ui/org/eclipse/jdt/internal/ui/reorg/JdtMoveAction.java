@@ -1,10 +1,9 @@
 package org.eclipse.jdt.internal.ui.reorg;
 
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.List;
-
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -16,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -26,6 +26,9 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
+
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.MoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgRefactoring;
@@ -33,11 +36,11 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.refactoring.CheckConditionsOperation;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardDialog;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringErrorDialogUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public class JdtMoveAction extends ReorgDestinationAction {
 
@@ -121,18 +124,30 @@ public class JdtMoveAction extends ReorgDestinationAction {
 	 * @see ReorgDestinationAction#doReorg(ReorgRefactoring) 
 	 */
 	void doReorg(ReorgRefactoring refactoring) throws JavaModelException{
-		if (!fShowPreview){
-			//XXX - pm
-			RefactoringStatus status= refactoring.checkPreconditions(new NullProgressMonitor());
-			if (status.hasFatalError())
-				RefactoringErrorDialogUtil.open(ReorgMessages.getString("JdtMoveAction.move"), status);//$NON-NLS-1$
-			else	
-				super.doReorg(refactoring);
+		if (fShowPreview){		
+			//XX incorrect help
+			RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
+	        wizard.setChangeCreationCancelable(false);
+			new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
+			return;	
+		}
+	
+        CheckConditionsOperation runnable= new CheckConditionsOperation(refactoring, CheckConditionsOperation.PRECONDITIONS);
+        try {
+			new ProgressMonitorDialog(getShell()).run(false, false, runnable);
+		} catch (InvocationTargetException e) {
+			ExceptionHandler.handle(e, getShell(), ReorgMessages.getString("JdtMoveAction.move"), ReorgMessages.getString("JdtMoveAction.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 			return;
-		}	
-		//XX incorrect help
-		RefactoringWizard wizard= new RefactoringWizard(refactoring, ReorgMessages.getString("JdtMoveAction.move"), IJavaHelpContextIds.MOVE_CU_ERROR_WIZARD_PAGE); //$NON-NLS-1$
-		new RefactoringWizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard).open();	
+		} catch (InterruptedException e) {
+			Assert.isTrue(false); //cannot happen - not cancelable
+		}
+		RefactoringStatus status= runnable.getStatus();           
+		if (status == null)
+			return;
+		if (status.hasFatalError())
+			RefactoringErrorDialogUtil.open(ReorgMessages.getString("JdtMoveAction.move"), status);//$NON-NLS-1$
+		else
+			super.doReorg(refactoring);
 	}
 	
 	private void moveProject(IStructuredSelection selection){

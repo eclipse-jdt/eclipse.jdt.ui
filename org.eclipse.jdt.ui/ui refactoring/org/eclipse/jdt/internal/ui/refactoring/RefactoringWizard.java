@@ -57,7 +57,7 @@ public class RefactoringWizard extends Wizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR);
 	}
 
-	protected void setChangeCreationCancelable(boolean isChangeCreationCancelable){
+	public void setChangeCreationCancelable(boolean isChangeCreationCancelable){
 		fIsChangeCreationCancelable= isChangeCreationCancelable;
 	}
 	
