@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 
 <!-- ======================================================================= -->
-<!-- This plugin provides basic VCM functionality to the Eclipse Java UI	     -->
+<!-- This plugin provides basic VCM functionality to the Eclipse Java UI     -->
 <!-- ======================================================================= -->
 <plugin
 	name = "Java Development Tools VCM UI"
