@@ -24,8 +24,8 @@ public class TypeRules {
 
 	/**
 	 * Tests if a two primitive types are assign compatible
-	 * @param typeToAssign The binding of the type to assign
-	 * @param definedType The type of the object that is assigned
+	 * @param toAssignCode The binding of the type to assign
+	 * @param definedTypeCode The type of the object that is assigned
 	 * @return boolean Returns true if definedType = typeToAssign is true
 	 */
 	public static boolean canAssignPrimitive(PrimitiveType.Code toAssignCode, PrimitiveType.Code definedTypeCode) {
@@ -192,7 +192,7 @@ public class TypeRules {
 	/**
 	 * Tests if a two types are cast compatible
 	 * @param castType The binding of the type to cast to
-	 * @param definedType The binding ef the expression to cast.
+	 * @param bindingToCast The binding ef the expression to cast.
 	 * @return boolean Returns true if (castType) bindingToCast is a valid cast expression (can be unnecessary, but not invalid).
 	 */
 	public static boolean canCast(ITypeBinding castType, ITypeBinding bindingToCast) {
