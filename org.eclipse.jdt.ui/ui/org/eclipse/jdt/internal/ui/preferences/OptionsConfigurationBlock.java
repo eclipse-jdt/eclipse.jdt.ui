@@ -45,6 +45,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
 
@@ -157,6 +158,7 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 	
+	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 	
 	private Map fWorkingValues;
 
@@ -396,6 +398,8 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 	
+	
+	
 	protected ExpandableComposite createStyleSection(Composite parent, String label, int nColumns) {
 		final ExpandableComposite excomposite= new ExpandableComposite(parent, SWT.NONE, ExpandableComposite.TWISTIE | ExpandableComposite.CLIENT_INDENT);
 		excomposite.setText(label);
@@ -411,22 +415,30 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		});
-		
 		fExpandedComposites.add(excomposite);
 		return excomposite;
 	}
 	
-	protected void updateSectionStyle(ExpandableComposite excomposite) {
-		//excomposite.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
-		if (excomposite.isExpanded()) {
-			for (int i= 0; i < fExpandedComposites.size(); i++) {
-				ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
-				if (curr != excomposite && excomposite.isExpanded()) {
-					curr.setExpanded(false);
-				}
+	protected void restoreSectionExpansionStates(IDialogSettings settings) {
+		for (int i= 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite excomposite= (ExpandableComposite) fExpandedComposites.get(i);
+			if (settings == null) {
+				excomposite.setExpanded(i == 0); // only expand the first node by default
+			} else {
+				excomposite.setExpanded(settings.getBoolean(SETTINGS_EXPANDED + String.valueOf(i)));
 			}
-			
 		}
+	}
+	
+	protected void storeSectionExpansionStates(IDialogSettings settings) {
+		for (int i= 0; i < fExpandedComposites.size(); i++) {
+			ExpandableComposite curr= (ExpandableComposite) fExpandedComposites.get(i);
+			settings.put(SETTINGS_EXPANDED + String.valueOf(i), curr.isExpanded());
+		}
+	}
+	
+	
+	protected void updateSectionStyle(ExpandableComposite excomposite) {
 	}
 	
 	protected ImageHyperlink createHelpLink(Composite parent, final String link) {
