@@ -29,8 +29,10 @@ public class MemberFilter extends ViewerFilter {
 	public static final int FILTER_NONPUBLIC= 1;
 	public static final int FILTER_STATIC= 2;
 	public static final int FILTER_FIELDS= 4;
+	public static final int FILTER_LOCALTYPES= 8;
 	
 	private int fFilterProperties;
+
 
 	/**
 	 * Modifies filter and add a property to filter for
@@ -65,6 +67,10 @@ public class MemberFilter extends ViewerFilter {
 			if (hasFilter(FILTER_FIELDS) && element instanceof IField) {
 				return false;
 			}
+			if (hasFilter(FILTER_LOCALTYPES) && element instanceof IType && ((IType) element).isLocal()) {
+				return false;
+			}
+			
 			if (element instanceof IMember) {
 				IMember member= (IMember)element;
 				if (member.getElementName().startsWith("<")) { // filter out <clinit> //$NON-NLS-1$

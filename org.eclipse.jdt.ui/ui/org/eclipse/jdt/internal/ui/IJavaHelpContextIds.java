@@ -40,6 +40,8 @@ public interface IJavaHelpContextIds {
 	public static final String FILTER_PUBLIC_ACTION= 											PREFIX + "filter_public_action"; //$NON-NLS-1$
 	public static final String FILTER_FIELDS_ACTION= 											PREFIX + "filter_fields_action"; //$NON-NLS-1$
 	public static final String FILTER_STATIC_ACTION= 											PREFIX + "filter_static_action"; //$NON-NLS-1$
+	public static final String FILTER_LOCALTYPES_ACTION=											PREFIX + "filter_localtypes_action"; //$NON-NLS-1$
+	
 	public static final String SHOW_INHERITED_ACTION= 										PREFIX + "show_inherited_action"; //$NON-NLS-1$
 	public static final String SHOW_SUPERTYPES= 												PREFIX + "show_supertypes_action"; //$NON-NLS-1$
 	public static final String SHOW_SUBTYPES= 													PREFIX + "show_subtypes_action"; //$NON-NLS-1$
@@ -77,6 +79,7 @@ public interface IJavaHelpContextIds {
 
 	public static final String OPEN_JAVA_BROWSING_PERSPECTIVE_ACTION= 			PREFIX + "open_java_browsing_perspective_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_ACTION= 											PREFIX + "open_project_action"; //$NON-NLS-1$
+
 	public static final String OPEN_TYPE_ACTION= 												PREFIX + "open_type_action"; //$NON-NLS-1$
 	public static final String OPEN_TYPE_IN_HIERARCHY_ACTION= 							PREFIX + "open_type_in_hierarchy_action"; //$NON-NLS-1$
 	public static final String ADD_JAVADOC_STUB_ACTION= 									PREFIX + "add_javadoc_stub_action"; //$NON-NLS-1$

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.MemberFilterAction;
 /**
  * Action Group that contributes filter buttons for a view parts showing 
  * methods and fields. Contributed filters are: hide fields, hide static
- * members and hide non-public members.
+ * members hide non-public members and hide local types.
  * <p>
  * The action group installs a filter on a structured viewer. The filter is connected 
  * to the actions installed in the view part's toolbar menu and is updated when the 
@@ -52,9 +52,13 @@ public class MemberFilterActionGroup extends ActionGroup {
 	public static final int FILTER_STATIC= MemberFilter.FILTER_STATIC;
 	public static final int FILTER_FIELDS= MemberFilter.FILTER_FIELDS;
 	
+	/** @since 3.0 */
+	public static final int FILTER_LOCALTYPES= MemberFilter.FILTER_LOCALTYPES;
+	
 	private static final String TAG_HIDEFIELDS= "hidefields"; //$NON-NLS-1$
 	private static final String TAG_HIDESTATIC= "hidestatic"; //$NON-NLS-1$
 	private static final String TAG_HIDENONPUBLIC= "hidenonpublic"; //$NON-NLS-1$
+	private static final String TAG_HIDELOCALTYPES= "hidelocaltypes"; //$NON-NLS-1$
 	
 	private MemberFilterAction[] fFilterActions;
 	private MemberFilter fFilter;
@@ -96,6 +100,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 		boolean doHideFields= store.getBoolean(getPreferenceKey(FILTER_FIELDS));
 		boolean doHideStatic= store.getBoolean(getPreferenceKey(FILTER_STATIC));
 		boolean doHidePublic= store.getBoolean(getPreferenceKey(FILTER_NONPUBLIC));
+		boolean doHideLocalTypes= store.getBoolean(getPreferenceKey(FILTER_LOCALTYPES));
 
 		fFilter= new MemberFilter();
 		if (doHideFields)
@@ -103,7 +108,9 @@ public class MemberFilterActionGroup extends ActionGroup {
 		if (doHideStatic)
 			fFilter.addFilter(FILTER_STATIC);			
 		if (doHidePublic)
-			fFilter.addFilter(FILTER_NONPUBLIC);		
+			fFilter.addFilter(FILTER_NONPUBLIC);
+		if (doHideLocalTypes)
+			fFilter.addFilter(FILTER_LOCALTYPES);		
 	
 		// fields
 		String title= ActionMessages.getString("MemberFilterActionGroup.hide_fields.label"); //$NON-NLS-1$
@@ -128,9 +135,18 @@ public class MemberFilterActionGroup extends ActionGroup {
 		hideNonPublic.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.description")); //$NON-NLS-1$
 		hideNonPublic.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_nonpublic.tooltip")); //$NON-NLS-1$
 		JavaPluginImages.setLocalImageDescriptors(hideNonPublic, "public_co.gif"); //$NON-NLS-1$
-	
+
+		// local types
+		title= ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.label"); //$NON-NLS-1$
+		helpContext= IJavaHelpContextIds.FILTER_LOCALTYPES_ACTION;
+		MemberFilterAction hideLocalTypes= new MemberFilterAction(this, title, FILTER_LOCALTYPES, helpContext, doHideLocalTypes);
+		hideLocalTypes.setDescription(ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.description")); //$NON-NLS-1$
+		hideLocalTypes.setToolTipText(ActionMessages.getString("MemberFilterActionGroup.hide_localtypes.tooltip")); //$NON-NLS-1$
+		JavaPluginImages.setLocalImageDescriptors(hideLocalTypes, "localtypes_co.gif"); //$NON-NLS-1$
+
+		
 		// order corresponds to order in toolbar
-		fFilterActions= new MemberFilterAction[] { hideFields, hideStatic, hideNonPublic };
+		fFilterActions= new MemberFilterAction[] { hideFields, hideStatic, hideNonPublic, hideLocalTypes };
 		
 		fViewer.addFilter(fFilter);
 	}
@@ -191,7 +207,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * Returns <code>true</code> if the given filter is installed.
 	 * 
 	 * @param filterProperty the filter to be tested. Valid values are <code>FILTER_FIELDS</code>, 
-	 * <code>FILTER_PUBLIC</code>, and <code>FILTER_PRIVATE</code> as defined by this action 
+	 * <code>FILTER_PUBLIC</code>, <code>FILTER_PRIVATE</code> and <code>FILTER_LOCALTYPES</code> as defined by this action 
 	 * group
 	 */	
 	public boolean hasMemberFilter(int filterProperty) {
@@ -207,6 +223,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 		memento.putString(TAG_HIDEFIELDS, String.valueOf(hasMemberFilter(FILTER_FIELDS)));
 		memento.putString(TAG_HIDESTATIC, String.valueOf(hasMemberFilter(FILTER_STATIC)));
 		memento.putString(TAG_HIDENONPUBLIC, String.valueOf(hasMemberFilter(FILTER_NONPUBLIC)));
+		memento.putString(TAG_HIDELOCALTYPES, String.valueOf(hasMemberFilter(FILTER_NONPUBLIC)));
 	}
 	
 	/**
@@ -218,11 +235,12 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 */	
 	public void restoreState(IMemento memento) {
 		setMemberFilters(
-			new int[] {FILTER_FIELDS, FILTER_STATIC, FILTER_NONPUBLIC},
+			new int[] {FILTER_FIELDS, FILTER_STATIC, FILTER_NONPUBLIC, FILTER_LOCALTYPES},
 			new boolean[] {
 				Boolean.valueOf(memento.getString(TAG_HIDEFIELDS)).booleanValue(),
 				Boolean.valueOf(memento.getString(TAG_HIDESTATIC)).booleanValue(),
-				Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue()
+				Boolean.valueOf(memento.getString(TAG_HIDENONPUBLIC)).booleanValue(),
+				Boolean.valueOf(memento.getString(TAG_HIDELOCALTYPES)).booleanValue()
 			}, false);
 	}
 	
@@ -244,6 +262,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 		tbm.add(fFilterActions[0]); // fields
 		tbm.add(fFilterActions[1]); // static
 		tbm.add(fFilterActions[2]); // public
+		tbm.add(fFilterActions[3]); // local types
 	}
 	
 	/**
@@ -260,10 +279,12 @@ public class MemberFilterActionGroup extends ActionGroup {
 			menu.prependToGroup(filters, fFilterActions[0]); // fields
 			menu.prependToGroup(filters, fFilterActions[1]); // static
 			menu.prependToGroup(filters, fFilterActions[2]); // public
+			menu.prependToGroup(filters, fFilterActions[3]); // local types
 		} else {
 			menu.add(fFilterActions[0]); // fields
 			menu.add(fFilterActions[1]); // static
 			menu.add(fFilterActions[2]); // public
+			menu.add(fFilterActions[3]); // local types
 		}
 	}
 	
