@@ -88,7 +88,7 @@ public class OpenAction extends SelectionDispatchAction {
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction.
 	 */
-	public void selectionChanged(ITextSelection selection) {
+	protected void selectionChanged(ITextSelection selection) {
 	}
 
 	/* (non-Javadoc)

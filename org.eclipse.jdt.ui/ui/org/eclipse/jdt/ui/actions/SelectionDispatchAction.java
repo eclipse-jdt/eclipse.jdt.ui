@@ -133,7 +133,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * 
 	 * @param selection the new selection
  	 */
-	public void selectionChanged(ITextSelection selection) {
+	protected void selectionChanged(ITextSelection selection) {
 		selectionChanged((ISelection)selection);
 	}
 	
