@@ -72,7 +72,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJavaProject1, ProjectTestSetup.getDefaultClasspath());
 	}
-					
+			
 	
 	public void testSearchInWorkingCopies() throws Exception {
 	
@@ -102,9 +102,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 		cu3.createType(buf.toString(), null, true, null);
 		
 		
-		// empty array when USE_WORKING_COPY_OWNERS is true
-		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-		List result= doSearchForReferences("A", JavaUI.getSharedWorkingCopiesOnClasspath());
+		List result= doSearchForReferences("A", null);
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 
 		
@@ -113,19 +111,17 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String replacedString= "//Here";
 			
-			int offset= document.search(0, replacedString, true, true, false);
+			int offset= document.get().indexOf(replacedString);
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
-			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-			result= doSearchForReferences("A", workingCopies);
+			result= doSearchForReferences("A", null);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 
 			//save
 			part.doSave(null);
 
-			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-			result= doSearchForReferences("A", workingCopies);
+			result= doSearchForReferences("A", null);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 
 			
@@ -133,8 +129,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 		
-		workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-		result= doSearchForReferences("A", workingCopies);
+		result= doSearchForReferences("A", null);
 		assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 	}
 	
@@ -165,10 +160,8 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 		ICompilationUnit cu3= pack2.getCompilationUnit("C.java");
 		cu3.createType(buf.toString(), null, true, null);
 		
-		// empty array when USE_WORKING_COPY_OWNERS is true
-		IWorkingCopy[] workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();	
 		
-		List result= doSearchForReferences("A", workingCopies);
+		List result= doSearchForReferences("A", null);
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 
 		
@@ -177,12 +170,11 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String replacedString= "//Here";
 			
-			int offset= document.search(0, replacedString, true, true, false);
+			int offset= document.get().indexOf(replacedString);
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
-			workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-			result= doSearchForReferences("A", workingCopies);
+			result= doSearchForReferences("A", null);
 			assertTrue("Should contain 2 references, contains: " + result.size(), result.size() == 2);
 					
 			ICompilationUnit wcopy= (ICompilationUnit) cu2.getWorkingCopy(); // create sand box working copy
@@ -193,12 +185,8 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 				source= source.substring(0, offset) + source.substring(offset + replacedString.length()); // remove reference
 				wcopy.getBuffer().setContents(source);
 	
-				workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-				IWorkingCopy[] newWorkingCopies= new IWorkingCopy[workingCopies.length + 1];
-				System.arraycopy(workingCopies, 0, newWorkingCopies, 0, workingCopies.length);
-				newWorkingCopies[workingCopies.length]= wcopy;
 				
-				result= doSearchForReferences("A", newWorkingCopies);
+				result= doSearchForReferences("A", wcopy);
 				assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 				
 				// no save
@@ -209,19 +197,32 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			JavaPlugin.getActivePage().closeAllEditors(false);
 		}
 		
-		workingCopies= JavaUI.getSharedWorkingCopiesOnClasspath();
-		result= doSearchForReferences("A", workingCopies);
+		result= doSearchForReferences("A", null);
 		assertTrue("Should contain 1 references, contains: " + result.size(), result.size() == 1);
 	}
 	
-
-	private static boolean BUG_43300= true;
 	
-	private List doSearchForReferences(String ref, IWorkingCopy[] workingCopies) throws JavaModelException {
-		SearchEngine engine= new SearchEngine(workingCopies);
-		if (BUG_43300 && workingCopies.length == 0) {
-			engine= new SearchEngine();
+	private List doSearchForReferences(String ref, ICompilationUnit wcopy) throws JavaModelException {
+		IWorkingCopy[] allWorkingCopies;
+		if (wcopy == null) {
+			if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+				allWorkingCopies= new ICompilationUnit[0];
+			} else {
+				allWorkingCopies= JavaUI.getSharedWorkingCopies();
+			}			
+
+		} else {
+			if (JavaPlugin.USE_WORKING_COPY_OWNERS) {
+				allWorkingCopies= new ICompilationUnit[] { wcopy };
+			} else {
+				IWorkingCopy[] copies= JavaUI.getSharedWorkingCopies();
+				allWorkingCopies= new ICompilationUnit[copies.length + 1];
+				System.arraycopy(copies, 0, allWorkingCopies, 0, copies.length);
+				allWorkingCopies[copies.length]= wcopy;
+			}
 		}
+		
+		SearchEngine engine= new SearchEngine(allWorkingCopies);
 		
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		SearchResultCollector collector= new SearchResultCollector(null);
@@ -249,7 +250,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String replacedString= "//Here";
 			
-			int offset= document.search(0, replacedString, true, true, false);
+			int offset= document.get().indexOf(replacedString);
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
@@ -296,7 +297,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String replacedString= "//Here";
 			
-			int offset= document.search(0, replacedString, true, true, false);
+			int offset= document.get().indexOf(replacedString);
 			
 			document.replace(offset, replacedString.length(), "A a;");
 			
@@ -345,7 +346,7 @@ public class PrimaryWorkingCopyTest extends CoreTests {
 			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
 			String replacedString= "//Here";
 			
-			int offset= document.search(0, replacedString, true, true, false);
+			int offset= document.get().indexOf(replacedString);
 			
 			document.replace(offset, replacedString.length(), "A a;");
 					
