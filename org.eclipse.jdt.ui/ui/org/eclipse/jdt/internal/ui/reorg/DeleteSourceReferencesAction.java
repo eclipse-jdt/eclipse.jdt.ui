@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -85,7 +86,7 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		return new IRunnableWithProgress(){
             public void run(IProgressMonitor pm) throws InvocationTargetException, InterruptedException {
             	try {
-                    performDeletion(selection, pm);
+                    JavaCore.run(createDeleteRunnable(selection), pm);
                 } catch (CoreException e) {
                 	throw new InvocationTargetException(e);
                 } finally {
@@ -95,36 +96,40 @@ public class DeleteSourceReferencesAction extends SourceReferenceAction {
 		};
 	}
 	
-	private void performDeletion(IStructuredSelection selection, IProgressMonitor pm) throws CoreException{
-		Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
-        int size= mapping.keySet().size();
-		pm.beginTask(ReorgMessages.getString("DeleteSourceReferenceAction.deleting"), 3 * size); //$NON-NLS-1$
+	private IWorkspaceRunnable createDeleteRunnable(final IStructuredSelection selection){
+		return new IWorkspaceRunnable(){
+			public void run(IProgressMonitor pm) throws CoreException {
+				Map mapping= SourceReferenceUtil.groupByFile(getElementsToProcess(selection)); //IFile -> List of ISourceReference (elements from that file)
+				int size= mapping.keySet().size();
+				pm.beginTask(ReorgMessages.getString("DeleteSourceReferenceAction.deleting"), 3 * size); //$NON-NLS-1$
 		
-		if (areAllFilesReadOnly(mapping)){
-			String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
-			String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
-			MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, label);
-			return;
-		}	
+				if (areAllFilesReadOnly(mapping)){
+					String title= ReorgMessages.getString("DeleteSourceReferencesAction.title"); //$NON-NLS-1$
+					String label= ReorgMessages.getString("DeleteSourceReferencesAction.read_only");  //$NON-NLS-1$
+					MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), title, label);
+					return;
+				}	
 				
-		List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
+				List emptyCuList= Arrays.asList(getCusLeftEmpty(mapping));
 		
-		for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
-			IFile file= (IFile)iter.next();
-			if (emptyCuList.contains(JavaCore.create(file))) //do not delete in these files
-				continue;
-			if (isReadOnly(file))
-				continue;
-			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
-		}
+				for (Iterator iter= mapping.keySet().iterator(); iter.hasNext();) {
+					IFile file= (IFile)iter.next();
+					if (emptyCuList.contains(JavaCore.create(file))) //do not delete in these files
+						continue;
+					if (isReadOnly(file))
+						continue;
+					deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
+				}
 		
-		ICompilationUnit[] notDeleted= deleteEmptyCus(mapping, new SubProgressMonitor(pm, size));
-		for (int i= 0; i < notDeleted.length; i++) {
-			IFile file= (IFile)notDeleted[i].getResource();
-			if (isReadOnly(file))
-				continue;
-			deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
-		}		
+				ICompilationUnit[] notDeleted= deleteEmptyCus(mapping, new SubProgressMonitor(pm, size));
+				for (int i= 0; i < notDeleted.length; i++) {
+					IFile file= (IFile)notDeleted[i].getResource();
+					if (isReadOnly(file))
+						continue;
+					deleteAll(mapping, file, new SubProgressMonitor(pm, 1));
+				}		
+			}
+		};
 	}
 
 	private static boolean isReadOnly(IFile file){
