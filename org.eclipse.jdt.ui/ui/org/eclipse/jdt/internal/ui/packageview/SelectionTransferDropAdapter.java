@@ -126,7 +126,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	}
 	
 	private void handleDropMove(final Object target, DropTargetEvent event) {
-		MoveAction action= new MoveAction(getViewer(), "#MOVE") {
+		MoveAction action= new MoveAction(getViewer(), "#MOVE") { //$NON-NLS-1$
 			protected Object selectDestination(IJavaElement root, List elements, Shell shell) {
 				return target;
 			}
@@ -163,7 +163,7 @@ public class SelectionTransferDropAdapter extends JdtTreeViewerDropAdapter imple
 	}		
 	
 	private void handleDropCopy(final Object target, DropTargetEvent event) {
-		CopyAction action= new CopyAction(getViewer(), "#COPY") {
+		CopyAction action= new CopyAction(getViewer(), "#COPY") { //$NON-NLS-1$
 			protected Object selectDestination(IJavaElement root, List elements, Shell shell) {
 				return target;
 			}

@@ -54,10 +54,6 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtility;
 public class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragSourceListener {
 	
 	private ISelectionProvider fProvider;
-	private ResourceBundle fBundle= JavaPlugin.getResourceBundle();
-	
-	private final static String PREFIX= "PackageViewer.dragAndDrop.fileDrag.";
-	private final static String ERROR_PREFIX= PREFIX + "error.";
 	
 	public FileTransferDragAdapter(ISelectionProvider provider) {
 		fProvider= provider;
@@ -124,7 +120,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(JavaPlugin.getResourceString(PREFIX + "deleting"), elements.size());
+					monitor.beginTask(PackagesMessages.getString("DragAdapter.deleting"), elements.size()); //$NON-NLS-1$
 					MultiStatus status= createMultiStatus();
 					Iterator iter= elements.iterator();
 					while(iter.hasNext()) {
@@ -168,7 +164,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 		WorkspaceModifyOperation op= new WorkspaceModifyOperation() {
 			public void execute(IProgressMonitor monitor) throws CoreException {
 				try {
-					monitor.beginTask(JavaPlugin.getResourceString(PREFIX + "refreshing"), roots.size());
+					monitor.beginTask(PackagesMessages.getString("DragAdapter.refreshing"), roots.size()); //$NON-NLS-1$
 					MultiStatus status= createMultiStatus();
 					Iterator iter= roots.iterator();
 					while (iter.hasNext()) {
@@ -215,7 +211,7 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 	
 	private MultiStatus createMultiStatus() {
 		return new MultiStatus(JavaPlugin.getPluginId(), 
-			IStatus.OK, JavaPlugin.getResourceString(ERROR_PREFIX + "message"), null);
+			IStatus.OK, PackagesMessages.getString("DragAdapter.problem"), null); //$NON-NLS-1$
 	}
 	
 	private void runOperation(IRunnableWithProgress op, boolean fork, boolean cancelable) {
@@ -223,8 +219,10 @@ public class FileTransferDragAdapter extends DragSourceAdapter implements Transf
 			Shell parent= JavaPlugin.getActiveWorkbenchShell();
 			new ProgressMonitorDialog(parent).run(fork, cancelable, op);
 		} catch (InvocationTargetException e) {
-			if (!ExceptionHandler.handle(e, fBundle, ERROR_PREFIX))
-				ExceptionHandler.log(e, fBundle, ERROR_PREFIX);
+			String message= PackagesMessages.getString("DragAdapter.problem"); //$NON-NLS-1$
+			String title= PackagesMessages.getString("DragAdapter.problemTitle"); //$NON-NLS-1$
+			if (!ExceptionHandler.handle(e, title, message))
+				ExceptionHandler.log(e, message);
 		} catch (InterruptedException e) {
 			// Do nothing. Operation has been canceled by user.
 		}

@@ -14,8 +14,7 @@ public class AddBookmarkAction extends JavaUIAction {
 	/**
 	 * The id of this action.
 	 */
-	public static final String ID = PlatformUI.PLUGIN_ID + ".AddBookmarkAction";
-	//$NON-NLS-1$
+	public static final String ID = PlatformUI.PLUGIN_ID + ".AddBookmarkAction"; //$NON-NLS-1$
 
 	private ISelectionProvider fSelectionProvider;
 

@@ -37,8 +37,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ShowInNavigatorAction extends SelectionProviderAction {
 	
 	public ShowInNavigatorAction(ISelectionProvider viewer) {
-		super(viewer, "Show in &Navigator");
-		setDescription("Show the selected object(s) in the navigator view");
+		super(viewer, PackagesMessages.getString("ShowInNavigator.label")); //$NON-NLS-1$
+		setDescription(PackagesMessages.getString("ShowInNavigator.description")); //$NON-NLS-1$
 	}
 
 	/**
@@ -62,7 +62,7 @@ public class ShowInNavigatorAction extends SelectionProviderAction {
 				((ISetSelectionTarget)view).selectReveal(selection);
 			}
 		} catch (PartInitException e) {
-			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), "Can't open navigator", e.getMessage());
+			MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(), PackagesMessages.getString("ShowInNavigator.error"), e.getMessage()); //$NON-NLS-1$
 		}
 	}
 		

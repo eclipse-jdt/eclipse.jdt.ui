@@ -8,14 +8,11 @@ import java.util.ArrayList;import java.util.HashSet;import java.util.List;imp
 
 public class GotoPackageAction extends JavaUIAction {
 	
-	private static final String PREFIX= "GotoTypeAction.";
-	private static final String DIALOG_PREFIX= PREFIX + "dialog.";
-	private static final String ERROR_OPEN_PREFIX= PREFIX + "error.open.";
 	private PackageExplorerPart fPackageExplorer;
 	private EmptyInnerPackageFilter fFilter;
 	
 	public GotoPackageAction(PackageExplorerPart part) {
-		super("&Package...");
+		super(PackagesMessages.getString("GotoPackage.action.label")); //$NON-NLS-1$
 		fPackageExplorer= part;
 		fFilter= new EmptyInnerPackageFilter();
 	}
@@ -24,8 +21,8 @@ public class GotoPackageAction extends JavaUIAction {
 		try {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			SelectionDialog dialog= createAllPackagesDialog(shell);
-			dialog.setTitle("Goto Package");
-			dialog.setMessage("Choose a package (? = any character, * = any string):");
+			dialog.setTitle(PackagesMessages.getString("GotoPackage.dialog.title")); //$NON-NLS-1$
+			dialog.setMessage(PackagesMessages.getString("GotoPackage.dialog.message")); //$NON-NLS-1$
 			dialog.open();		
 			Object[] res= dialog.getResult();
 			if (res != null && res.length == 1) 

@@ -89,11 +89,11 @@ class FiltersContentProvider implements IStructuredContentProvider {
 				for(int i = 0; i < extensions.length; i++){
 					IConfigurationElement [] configElements = extensions[i].getConfigurationElements();
 					for(int j = 0; j < configElements.length; j++){
-						String pattern = configElements[j].getAttribute("pattern");
+						String pattern = configElements[j].getAttribute("pattern"); //$NON-NLS-1$
 						if (pattern != null)
 							fgDefinedFilters.add(pattern);
-						String selected = configElements[j].getAttribute("selected");
-						if (selected != null && selected.equalsIgnoreCase("true"))
+						String selected = configElements[j].getAttribute("selected"); //$NON-NLS-1$
+						if (selected != null && selected.equalsIgnoreCase("true")) //$NON-NLS-1$
 							fgDefaultFilters.add(pattern);
 					}
 				}

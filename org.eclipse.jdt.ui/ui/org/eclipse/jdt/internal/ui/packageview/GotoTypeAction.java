@@ -8,13 +8,10 @@ import org.eclipse.jdt.core.ICompilationUnit;import org.eclipse.jdt.core.IJavaE
 
 public class GotoTypeAction extends OpenJavaElementAction {
 	
-	private static final String PREFIX= "GotoTypeAction.";
-	private static final String DIALOG_PREFIX= PREFIX + "dialog.";
-	private static final String ERROR_OPEN_PREFIX= PREFIX + "error.open.";
 	private PackageExplorerPart fPackageExplorer;
 	
 	public GotoTypeAction(PackageExplorerPart part) {
-		super(JavaPlugin.getResourceBundle(), PREFIX);
+		super(PackagesMessages.getString("GotoType.action.label")); //$NON-NLS-1$
 		fPackageExplorer= part;
 	}
 
@@ -26,12 +23,14 @@ public class GotoTypeAction extends OpenJavaElementAction {
 			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell),
 				SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false);
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, JavaPlugin.getResourceBundle(), ERROR_OPEN_PREFIX);
+			String title= PackagesMessages.getString("GotoType.dialog.title"); //$NON-NLS-1$
+			String message= PackagesMessages.getString("GotoType.error.message"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, title, message);
 			return;
 		}
 	
-		dialog.setTitle(JavaPlugin.getResourceString(DIALOG_PREFIX + "title"));
-		dialog.setMessage(JavaPlugin.getResourceString(DIALOG_PREFIX + "message"));
+		dialog.setTitle(PackagesMessages.getString("GotoType.dialog.title")); //$NON-NLS-1$
+		dialog.setMessage(PackagesMessages.getString("GotoType.dialog.message")); //$NON-NLS-1$
 		if (dialog.open() == IDialogConstants.CANCEL_ID) {
 			return;
 		}

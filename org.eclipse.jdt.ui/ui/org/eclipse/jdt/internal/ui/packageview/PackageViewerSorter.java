@@ -135,7 +135,7 @@ public class PackageViewerSorter extends ViewerSorter {
 			root= (IPackageFragmentRoot)((IPackageFragment)object).getParent();
 		if (object instanceof IPackageFragmentRoot)
 			root= (IPackageFragmentRoot)object;
-		Assert.isNotNull(root, "expects a PackageFragment or PackageFragmentRoot");
+		Assert.isNotNull(root, PackagesMessages.getString("Sorter.expectPackage")); //$NON-NLS-1$
 		
 		try {
 			if (fClassPath == null)

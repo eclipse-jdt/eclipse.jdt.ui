@@ -10,9 +10,6 @@ import java.io.File;import java.lang.reflect.InvocationTargetException;import 
  * Adapter to handle file drop from other applications like Windows Explorer.
  */ 
 public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements IOverwriteQuery, TransferDropTargetListener {
-
-	private final static String PREFIX= "PackageViewer.dragAndDrop.fileDrop.";
-	private final static String ERROR_PREFIX= PREFIX + "error.";
 	
 	public FileTransferDropAdapter(AbstractTreeViewer viewer) {
 		super(viewer, SWT.NONE);
@@ -30,8 +27,8 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 		final int[] result= { Dialog.CANCEL };
 		control.getDisplay().syncExec(new Runnable() {
 			public void run() {
-				String title= JavaPlugin.getResourceString(PREFIX + "override.title");
-				String msg= JavaPlugin.getFormattedString(PREFIX + "override.message", file);
+				String title= PackagesMessages.getString("DropAdapter.question"); //$NON-NLS-1$
+				String msg= PackagesMessages.getFormattedString("DropAdapter.alreadyExists", file); //$NON-NLS-1$
 				String[] options= {IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL, IDialogConstants.YES_TO_ALL_LABEL, IDialogConstants.CANCEL_LABEL};
 				MessageDialog dialog= new MessageDialog(control.getShell(), title, null, msg, MessageDialog.QUESTION, options, 0);
 				result[0]= dialog.open();
@@ -94,9 +91,10 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 			try {
 				dialog.run(true, true, op);
 			} catch (InvocationTargetException e) {
-				ResourceBundle bundle= JavaPlugin.getResourceBundle();
-				if (!ExceptionHandler.handle(e, bundle, ERROR_PREFIX)) {
-					ExceptionHandler.log(e, bundle, ERROR_PREFIX);
+				String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
+				String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
+				if (!ExceptionHandler.handle(e, title, message)) {
+					ExceptionHandler.log(e, message);
 				}
 				return;
 			} catch (InterruptedException e) {
@@ -106,9 +104,11 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 			// failure.
 			IStatus status= op.getStatus();
 			if (! status.isOK()) {
+				String title= PackagesMessages.getString("DropAdapter.errorTitle"); //$NON-NLS-1$
+				String message= PackagesMessages.getString("DropAdapter.errorMessage"); //$NON-NLS-1$
 				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell(),
-					JavaPlugin.getResourceString(ERROR_PREFIX + "title"),
-					JavaPlugin.getResourceString(ERROR_PREFIX + "message"),
+					title,
+					message,
 					status, IStatus.ERROR | IStatus.WARNING);
 				return;
 			}
@@ -131,12 +131,12 @@ public class FileTransferDropAdapter extends JdtTreeViewerDropAdapter implements
 			IPath path= new Path(file);
 			String error= null;
 			if (path.equals(target)) {
-				error= JavaPlugin.getFormattedString(ERROR_PREFIX + "identical.message", target.lastSegment());
+				error= PackagesMessages.getFormattedString("DropAdapter.errorSame", target.lastSegment()); //$NON-NLS-1$
 			} else if (path.isPrefixOf(target)) {
-				error= JavaPlugin.getFormattedString(ERROR_PREFIX + "parent.message", path.lastSegment());
+				error= PackagesMessages.getFormattedString("DropAdapter.errorSubfolder", path.lastSegment()); //$NON-NLS-1$
 			}
 			if (error != null) {
-				MessageDialog.openError(shell, JavaPlugin.getResourceString(ERROR_PREFIX + "title"), error);
+				MessageDialog.openError(shell, PackagesMessages.getString("DropAdapter.errorTitle"), error); //$NON-NLS-1$
 				return new ArrayList(0);
 			}
 			// A copy onto itself ?

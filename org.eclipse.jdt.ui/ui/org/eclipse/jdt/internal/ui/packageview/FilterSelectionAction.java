@@ -6,9 +6,6 @@ import org.eclipse.jface.viewers.TreeViewer;import org.eclipse.swt.widgets.Shel
  */
 class FilterSelectionAction extends SelectionProviderAction {
 
-	private static final String FILTER_ERROR_MESSAGE = "Unable to create filter.";
-	private static final String FILTER_TOOL_TIP = "Apply the defined filters";
-	private static final String FILTER_SELECTION_MESSAGE = "Select filters to apply";
 	
 	private PackageExplorerPart fPackagesView; 
 	private Shell fShell;
@@ -21,7 +18,7 @@ class FilterSelectionAction extends SelectionProviderAction {
 	 */
 	public FilterSelectionAction(Shell shell, PackageExplorerPart packagesView, String label) {
 		super(packagesView.getViewer(), label);
-		setToolTipText(FILTER_TOOL_TIP);
+		setToolTipText(PackagesMessages.getString("FilterSelectionAction.apply.toolTip")); //$NON-NLS-1$
 		setEnabled(true);
 		fShell= shell;
 		fPackagesView= packagesView;
@@ -40,7 +37,7 @@ class FilterSelectionAction extends SelectionProviderAction {
 				fPackagesView.getViewer(),
 				contentProvider,
 				new LabelProvider(),
-				FILTER_SELECTION_MESSAGE);
+				PackagesMessages.getString("FilterSelectionAction.apply.label")); //$NON-NLS-1$
 	
 		dialog.setInitialSelections(contentProvider.getInitialSelections());
 		dialog.open();

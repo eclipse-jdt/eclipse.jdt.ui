@@ -40,9 +40,9 @@ class ShowLibrariesAction extends SelectionProviderAction {
 	private void updateToolTipText() {
 		LibraryFilter filter= fPackagesView.getLibraryFilter();
 		if (filter.getShowLibraries())
-			setToolTipText("Hide referenced libraries");
+			setToolTipText(PackagesMessages.getString("ShowLibraries.hideReferencedLibs")); //$NON-NLS-1$
 		else 
-			setToolTipText("Show referenced libraries");
+			setToolTipText(PackagesMessages.getString("ShowLibraries.showReferencedLibs")); //$NON-NLS-1$
 	}
 	
 	/**

@@ -18,28 +18,17 @@ import java.net.MalformedURLException;import java.net.URL;import java.util.Arr
 public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget, IMenuListener, IPackagesViewPart {
 	
 	public final static String VIEW_ID= JavaUI.ID_PACKAGES;
-	
-	private final static String EMPTY_FILTER= "PackageViewer.filter_empty.";
-	private final static String WIZARDS_ADD= "PackageViewer.wizards_add";
-	private final static String WIZARDS_ADD_PROJECT= "PackageViewer.wizards_add_project";
-	private final static String WIZARDS_ADD_PACKAGE= "PackageViewer.wizards_add_package";
-	private final static String WIZARDS_ADD_CLASS= "PackageViewer.wizards_add_class";
-	private final static String WIZARDS_ADD_INTERFACE= "PackageViewer.wizards_add_interface";		
-	private final static String WIZARDS_ADD_PACKAGEROOT= "PackageViewer.wizards_add_packageroot";
-		
-	private final static String OPEN_TYPEHIERARCHY_TITLE= "PackageViewer.open_typehierarchy.title";
-	private final static String OPEN_TYPEHIERARCHY_DESC= "PackageViewer.open_typehierarchy.description";	
-	
+				
 	// Persistance tags.
-	static final String TAG_SELECTION= "selection";
-	static final String TAG_EXPANDED= "expanded";
-	static final String TAG_ELEMENT= "element";
-	static final String TAG_PATH= "path";
-	static final String TAG_VERTICAL_POSITION= "verticalPosition";
-	static final String TAG_HORIZONTAL_POSITION= "horizontalPosition";
-	static final String TAG_FILTERS = "filters";
-	static final String TAG_FILTER = "filter";
-	static final String TAG_SHOWLIBRARIES = "showLibraries";
+	static final String TAG_SELECTION= "selection"; //$NON-NLS-1$
+	static final String TAG_EXPANDED= "expanded"; //$NON-NLS-1$
+	static final String TAG_ELEMENT= "element"; //$NON-NLS-1$
+	static final String TAG_PATH= "path"; //$NON-NLS-1$
+	static final String TAG_VERTICAL_POSITION= "verticalPosition"; //$NON-NLS-1$
+	static final String TAG_HORIZONTAL_POSITION= "horizontalPosition"; //$NON-NLS-1$
+	static final String TAG_FILTERS = "filters"; //$NON-NLS-1$
+	static final String TAG_FILTER = "filter"; //$NON-NLS-1$
+	static final String TAG_SHOWLIBRARIES = "showLibraries"; //$NON-NLS-1$
 
 	private JavaElementPatternFilter fPatternFilter= new JavaElementPatternFilter();
 	private LibraryFilter fLibraryFilter= new LibraryFilter();
@@ -64,10 +53,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	private GotoPackageAction fGotoPackageAction;
 	private AddBookmarkAction fAddBookmarkAction;
 
- 	
-	private static final String SELECT_FILTERS_LABEL = "&Filters...";
  	private FilterSelectionAction fFilterAction;
-	private static final String SHOW_LIBRARIES_LABEL = "Show Referenced &Libraries";
  	private ShowLibrariesAction fShowLibrariesAction;
 
 	private IMemento fMemento;
@@ -169,7 +155,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		initRefreshKey();
 		updateTitle();
 		
-		MenuManager menuMgr= new MenuManager("#PopupMenu");
+		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(this);
 		fContextMenu= menuMgr.createContextMenu(fViewer.getTree());
@@ -252,7 +238,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		if (element instanceof IResource) {
 			IPath path= ((IResource) element).getFullPath();
 			if (path.isRoot()) {
-				return "Packages";
+				return PackagesMessages.getString("PackageExplorer.title"); //$NON-NLS-1$
 			}
 			else {
 				return path.makeRelative().toString();
@@ -339,7 +325,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	}
 
 	 void addGotoMenu(IMenuManager menu) {
-		MenuManager gotoMenu= new MenuManager("G&o To");
+		MenuManager gotoMenu= new MenuManager(PackagesMessages.getString("PackageExplorer.gotoTitle")); //$NON-NLS-1$
 		menu.appendToGroup(IContextMenuConstants.GROUP_GOTO, gotoMenu);
 		gotoMenu.add(fBackAction);
 		gotoMenu.add(fForwardAction);
@@ -365,8 +351,8 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		
 		fDeleteAction= new DeleteAction(provider);
 		fRefreshAction= new RefreshAction(getShell());
-		fFilterAction = new FilterSelectionAction(getShell(), this, SELECT_FILTERS_LABEL);
-		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, SHOW_LIBRARIES_LABEL);
+		fFilterAction = new FilterSelectionAction(getShell(), this, PackagesMessages.getString("PackageExplorer.filters")); //$NON-NLS-1$
+		fShowLibrariesAction = new ShowLibrariesAction(getShell(), this, PackagesMessages.getString("PackageExplorer.referencedLibs")); //$NON-NLS-1$
 		
 		//&&&
 		fBackAction= new BackAction(fFrameList);
@@ -380,23 +366,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		actionService.setGlobalActionHandler(IWorkbenchActionConstants.DELETE, fDeleteAction);
 	}
 	
-	/**
-	 * Returns the image descriptor with the given relative path.
-	 */
-	ImageDescriptor getImageDescriptor(String relativePath) {
-		try {
-			URL installURL= JavaPlugin.getDefault().getDescriptor().getInstallURL();
-			URL url= new URL(installURL, "icons/full/" + relativePath);
-			return ImageDescriptor.createFromURL(url);
-		}
-		catch (MalformedURLException e) {
-			// should not happen
-			return ImageDescriptor.getMissingImageDescriptor();
-		}
-	}
 
 	private void addRefactoring(IMenuManager menu){
-		MenuManager refactoring= new MenuManager("&Refactor");
+		MenuManager refactoring= new MenuManager(PackagesMessages.getString("PackageExplorer.refactoringTitle"));  //$NON-NLS-1$
 		ContextMenuGroup.add(refactoring, new ContextMenuGroup[] { new RefactoringGroup() }, fViewer);
 		if (!refactoring.isEmpty())
 			menu.appendToGroup(IContextMenuConstants.GROUP_REORGANIZE, refactoring);
@@ -410,7 +382,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 
 		if ((resource instanceof IContainer)) {			
 			// Create a menu flyout.
-			MenuManager submenu = new MenuManager("Open Perspective");
+			MenuManager submenu = new MenuManager(PackagesMessages.getString("PackageExplorer.openPerspective")); //$NON-NLS-1$
 			submenu.add(new OpenPerspectiveMenu(getSite().getWorkbenchWindow(), resource));
 			menu.appendToGroup(IContextMenuConstants.GROUP_OPEN, submenu);
 		}
@@ -429,7 +401,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 			return; 
 
 		// Create a menu flyout.
-		MenuManager submenu= new MenuManager("Open &With");
+		MenuManager submenu= new MenuManager(PackagesMessages.getString("PackageExplorer.openWith")); //$NON-NLS-1$
 		submenu.add(new OpenWithMenu(getSite().getPage(), (IFile) resource));
 
 		// Add the submenu.
@@ -664,9 +636,9 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		}
 		//save library filter
 		boolean showLibraries= getLibraryFilter().getShowLibraries();
-		String show= "true";
+		String show= "true"; //$NON-NLS-1$
 		if (!showLibraries)
-			show= "false";
+			show= "false"; //$NON-NLS-1$
 		memento.putString(TAG_SHOWLIBRARIES, show);
 	}
 
@@ -816,7 +788,7 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 		//restore library
 		String show= fMemento.getString(TAG_SHOWLIBRARIES);
 		if (show != null)
-			getLibraryFilter().setShowLibraries(show.equals("true"));
+			getLibraryFilter().setShowLibraries(show.equals("true")); //$NON-NLS-1$
 		else 
 			initFilterFromPreferences();		
 	}
@@ -833,14 +805,16 @@ public class PackageExplorerPart extends ViewPart implements ISetSelectionTarget
 	 */ 
 	void updateTitle() {		
 		Object input= getViewer().getInput();
-		String viewName= getConfigurationElement().getAttribute("name");
+		String viewName= getConfigurationElement().getAttribute("name"); //$NON-NLS-1$
 		if (input == null
 			|| (input instanceof IJavaModel)) {
 			setTitle(viewName);
-			setTitleToolTip("");
+			setTitleToolTip(""); //$NON-NLS-1$
 		} else {
 			ILabelProvider labelProvider = (ILabelProvider) getViewer().getLabelProvider();
-			setTitle(viewName + ": " + labelProvider.getText(input));
+			String inputText= labelProvider.getText(input);
+			String title= PackagesMessages.getFormattedString("PackageExplorer.argTitle", new String[] { viewName, inputText }); //$NON-NLS-1$
+			setTitle(title);
 			setTitleToolTip(getToolTipText(input));
 		} 
 	}

@@ -9,8 +9,8 @@ class JavaElementPatternFilter extends ViewerFilter {
 	private String[] fPatterns;
 	private StringMatcher[] fMatchers;
 	
-	static String COMMA_SEPARATOR = ",";
-	static String FILTERS_TAG= "javaElementFilters";
+	static String COMMA_SEPARATOR = ","; //$NON-NLS-1$
+	static String FILTERS_TAG= "javaElementFilters"; //$NON-NLS-1$
 	
 	/**
 	 * Creates a new resource pattern filter.

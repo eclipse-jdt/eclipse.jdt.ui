@@ -34,15 +34,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
  * Open a resource (ClassFile, CompilationUnit, or ordinary resource) 
  * from the PackageViewer
  */
-public class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {
-	
-	private final static String ERROR_OPEN_JAVA= "OpenResourceAction.openJava.error.";
-	private final static String ERROR_OPEN_CLASS= "OpenResourceAction.openClass.error.";
-	
+public class OpenResourceAction extends SelectionProviderAction implements ISelectionChangedListener {	
 	
 	public OpenResourceAction(ISelectionProvider provider) {
-		super(provider, "&Open");
-		setDescription("Edit the file");
+		super(provider, PackagesMessages.getString("OpenResource.action.label")); //$NON-NLS-1$
+		setDescription(PackagesMessages.getString("OpenResource.action.description")); //$NON-NLS-1$
 	}
 	
 	public void run() {
@@ -58,33 +54,29 @@ public class OpenResourceAction extends SelectionProviderAction implements ISele
 			} catch (JavaModelException x) {
 				
 				JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
-					IJavaUIStatus.INTERNAL_ERROR, JavaPlugin.getResourceString(ERROR_OPEN_JAVA + "log"), x));
+					IJavaUIStatus.INTERNAL_ERROR, PackagesMessages.getString("OpenResource.error.message"), x)); //$NON-NLS-1$
 				
 				ErrorDialog.openError(shell, 
-					JavaPlugin.getResourceString(ERROR_OPEN_JAVA + "title"), 
-					JavaPlugin.getResourceString(ERROR_OPEN_JAVA + "message"), 
+					PackagesMessages.getString("OpenResource.error.title"), //$NON-NLS-1$
+					PackagesMessages.getString("OpenResource.error.messageProblems"),  //$NON-NLS-1$
 					x.getStatus());
 			
 			} catch (PartInitException x) {
 								
 				String name= null;
-				String key= null;
 				
 				if (element instanceof IClassFile) {
 					name= ((IClassFile) element).getElementName();
-					key= ERROR_OPEN_CLASS;
 				} else if (element instanceof ICompilationUnit) {
 					name= ((ICompilationUnit) element).getElementName();
-					key= ERROR_OPEN_JAVA;
 				} else if (element instanceof IResource) {
 					name= ((IResource) element).getName();
-					key= ERROR_OPEN_JAVA;
 				}
 				
-				if (name != null && key != null) {
+				if (name != null) {
 					MessageDialog.openError(JavaPlugin.getActiveWorkbenchShell(),
-						JavaPlugin.getResourceString(key + "title"), 
-						JavaPlugin.getFormattedString(key + "message", 
+						PackagesMessages.getString("OpenResource.error.messageProblems"),  //$NON-NLS-1$
+						PackagesMessages.getFormattedString("OpenResource.error.messageArgs",  //$NON-NLS-1$
 							new String[] { name, x.getMessage() } ));			
 				}
 			}
