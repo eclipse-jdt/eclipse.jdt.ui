@@ -367,7 +367,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/* (non - Javadoc)
-	 * Method declared in Plugin
+	 * Method declared in plug-in
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
@@ -383,13 +383,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 				}
 			});
 		}
-	
 
-		installPreferenceStoreBackwardsCompatibility();
-		
-		if (!getPreferenceStore().getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
-			JavaDocLocations.migrateToClasspathAttributes();
-		}
+		ensurePreferenceStoreBackwardsCompatibility();
 		
 		AllTypesCache.initialize();
 		
@@ -400,7 +395,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * Installs backwards compatibility for the preference store.
 	 */
-	private void installPreferenceStoreBackwardsCompatibility() {
+	private void ensurePreferenceStoreBackwardsCompatibility() {
 
 		/*
 		 * Installs backwards compatibility: propagate the Java editor font from a
@@ -465,6 +460,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		getPreferenceStore().setValue(
 			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
 			RefactoringCore.getConditionCheckingFailedSeverity());
+		
+		if (!getPreferenceStore().getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
+			JavaDocLocations.migrateToClasspathAttributes();
+		}
 	}
 	
 	/**
