@@ -4,7 +4,7 @@
  */
 
 package org.eclipse.jdt.internal.ui.refactoring;
-import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;import org.eclipse.jdt.internal.ui.util.JdtHackFinder;public class RenameParametersWizardPage extends UserInputWizardPage{
+import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import org.eclipse.swt.events.ModifyEvent;import org.eclipse.swt.events.ModifyListener;import org.eclipse.swt.events.SelectionAdapter;import org.eclipse.swt.events.SelectionEvent;import org.eclipse.swt.layout.GridData;import org.eclipse.swt.layout.GridLayout;import org.eclipse.swt.widgets.Composite;import org.eclipse.swt.widgets.Control;import org.eclipse.swt.widgets.Table;import org.eclipse.swt.widgets.TableColumn;import org.eclipse.swt.widgets.TableItem;import org.eclipse.swt.widgets.Text;import org.eclipse.jface.viewers.ColumnWeightData;import org.eclipse.jface.viewers.TableLayout;import org.eclipse.ui.help.DialogPageContextComputer;import org.eclipse.ui.help.WorkbenchHelp;import org.eclipse.jdt.core.JavaModelException;import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;import org.eclipse.jdt.internal.core.refactoring.methods.RenameParametersRefactoring;import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;import org.eclipse.jdt.internal.ui.util.ExceptionHandler;public class RenameParametersWizardPage extends UserInputWizardPage{
 
 	private Table fTable;
 	private TableItem[] fItems;
@@ -42,10 +42,7 @@ import org.eclipse.swt.SWT;import org.eclipse.swt.custom.TableEditor;import or
 		try{
 			 oldNames= ref.getMethod().getParameterNames();
 		} catch (JavaModelException e){
-			JdtHackFinder.fixme("1GCZLPL: ITPJUI:WINNT - ExceptionHandler::handle - should accept null as message");
-			String msg= e.getMessage();
-			if (msg == null) msg= "";
-			ExceptionHandler.handle(e, "JavaModelException", msg);
+			ExceptionHandler.handle(e, "Refactoring", "Internal error. See log for details.");
 			oldNames= new String[]{""};
 		}
 		return oldNames;
