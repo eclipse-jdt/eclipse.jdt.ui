@@ -46,21 +46,25 @@ public abstract class MessageInputPage extends UserInputWizardPage{
 		GridLayout layout= new GridLayout();
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
+		layout.numColumns= 2;
 		result.setLayout(layout);
 		Label spacer= new Label(result, SWT.NONE);
 		GridData gd= new GridData();
+		gd.horizontalSpan= 2;
 		gd.heightHint= convertHeightInCharsToPixels(1) / 2;
 		gd.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
 		spacer.setLayoutData(gd);
-		Composite labelComposite= new Composite(result, SWT.NONE);
-		labelComposite.setLayoutData(new GridData());
-		GridLayout labelLayout= new GridLayout();
-		labelLayout.numColumns= 2;
-		labelComposite.setLayout(labelLayout);
-		Label imageLabel= new Label(labelComposite, SWT.LEFT);
+		Label imageLabel= new Label(result, SWT.LEFT);
 		imageLabel.setImage(getMessageImage());
-		Label textLabel= new Label(labelComposite, SWT.LEFT | SWT.WRAP);
-		textLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		GridData imagelabelGridData = new GridData(GridData.VERTICAL_ALIGN_CENTER);
+		imagelabelGridData.heightHint= convertHeightInCharsToPixels(3);
+		imageLabel.setLayoutData(imagelabelGridData);
+		
+		Label textLabel= new Label(result, SWT.LEFT | SWT.WRAP);
+		GridData labelGridData = new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_CENTER);
+		labelGridData.heightHint= convertHeightInCharsToPixels(3);
+		
+		textLabel.setLayoutData(labelGridData);
 		textLabel.setText(getMessageString());
 		Dialog.applyDialogFont(result);
 	}
