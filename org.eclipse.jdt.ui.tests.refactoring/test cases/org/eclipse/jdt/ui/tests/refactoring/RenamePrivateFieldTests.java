@@ -54,14 +54,22 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		return new String[0];
 	}
 	
-	private void helper1_0(String fieldName, String newFieldName) throws Exception{
-		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
-		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
+	private void helper1_0(String fieldName, String newFieldName, String typeName,
+							boolean renameGetter, boolean renameSetter) throws Exception{
+		IType declaringType= getType(createCUfromTestFile(getPackageP(), "A"), typeName);
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(declaringType.getField(fieldName), getSettings(), getPrefixes(), getSuffixes());
 		ref.setNewName(newFieldName);
+		ref.setRenameGetter(renameGetter);
+		ref.setRenameSetter(renameSetter);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
+	private void helper1_0(String fieldName, String newFieldName) throws Exception{
+		helper1_0(fieldName, newFieldName, "A", false, false);
+	}
+	
+	//--
 	private void helper1() throws Exception{
 		helper1_0("f", "g");
 	}
@@ -138,6 +146,22 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		helper1();
 	}
 	
+	public void testFail7() throws Exception{
+		helper1();
+	}
+	
+	public void testFail8() throws Exception{
+		helper1_0("gg", "f", "A", false, false);
+	}	
+
+	public void testFail9() throws Exception{
+		helper1_0("y", "e", "getE", true, true);
+	}	
+
+	public void testFail10() throws Exception{
+		helper1_0("y", "e", "setE", true, true);
+	}	
+	
 	// ------ 
 	public void test0() throws Exception{
 		helper2();
@@ -157,6 +181,5 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 
 	public void test4() throws Exception{
 		helper2("fMe", "fYou", true, false, false, false, true, true);
-	}	
-	
+	}		
 }
