@@ -6,7 +6,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
@@ -21,7 +20,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameJavaProjectRefactoring extends Refactoring implements IRenameRefactoring, IReferenceUpdatingRefactoring {
 
-	private IJavaProject fProject;
+	private final IJavaProject fProject;
 	private String fNewName;
 	private boolean fUpdateReferences;
 	
@@ -29,6 +28,7 @@ public class RenameJavaProjectRefactoring extends Refactoring implements IRename
 		Assert.isNotNull(project); 
 		fProject= project;
 		fNewName= project.getElementName();
+		fUpdateReferences= false;
 	}
 	
 	public Object getNewElement() throws JavaModelException{
