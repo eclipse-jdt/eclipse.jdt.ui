@@ -166,11 +166,6 @@ public class UnresolvedElementsSubProcessor {
 		// new method
 		String typeName= problemPos.getArguments()[0];
 		
-		Expression senderExpr= invocationNode.getExpression();
-		if (senderExpr != null) {
-			ITypeBinding resolve= senderExpr.resolveTypeBinding();
-			resolve.isClass();
-		}
 		IType type= JavaModelUtil.findType(cu.getJavaProject(), typeName);
 		if (type != null && type.getCompilationUnit() != null) {
 			ICompilationUnit changedCU= type.getCompilationUnit();
