@@ -66,7 +66,11 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 	}
 	
 	private void addNodeOffset(AstNode node){
-		fOffsetsFound.add(new Integer(node.sourceStart));
+		addOffset(node.sourceStart);
+	}
+	
+	private void addOffset(int offset){
+		fOffsetsFound.add(new Integer(offset));	
 	}
 	
 	private boolean withinMethod(AstNode node){
@@ -90,8 +94,12 @@ class ParameterOffsetFinder extends AbstractRefactoringASTAnalyzer{
 		if (! fIncludeReferences)
 			return true;
 		
-		if  (isParameterMatch(singleNameReference))
-			addNodeOffset(singleNameReference);
+		if  (isParameterMatch(singleNameReference)){
+			//XXX workaround for bug#9001
+			int length= singleNameReference.sourceEnd - singleNameReference.sourceStart + 1;
+			int bracketCount= (length - singleNameReference.token.length) / 2;
+			addOffset(singleNameReference.sourceStart + bracketCount);
+		}	
 		return true;
 	}
 	
