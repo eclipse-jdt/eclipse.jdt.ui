@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.IImportContainer;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -260,7 +261,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}		
 	
 		TypeReferenceRequestor requestor= new TypeReferenceRequestor(references, inportEndPos);
-		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory(), new CompilerOptions());
+		SourceElementParser parser= new SourceElementParser(requestor, new DefaultProblemFactory(), new CompilerOptions(JavaCore.getOptions()));
 		if (cu instanceof org.eclipse.jdt.internal.compiler.env.ICompilationUnit) {
 			parser.parseCompilationUnit((org.eclipse.jdt.internal.compiler.env.ICompilationUnit)cu, true);
 		}	

@@ -154,7 +154,7 @@ public class JavaStructureCreator implements IStructureCreator {
 				}
 			};
 			JavaParseTreeBuilder builder= new JavaParseTreeBuilder(root, buffer);
-			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory(), new CompilerOptions());
+			SourceElementParser parser= new SourceElementParser(builder, new ProblemFactory(), new CompilerOptions(JavaCore.getOptions()));
 			try {
 				parser.parseCompilationUnit(builder, false);
 			} catch (ParseError ex) {
