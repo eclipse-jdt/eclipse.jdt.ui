@@ -1648,6 +1648,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected abstract class NextSubWordAction extends TextNavigationAction {
 
 		private JavaWordIterator fIterator= new JavaWordIterator();
+
 		/**
 		 * Creates a new next sub-word action.
 		 * 
@@ -1655,7 +1656,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 */
 		protected NextSubWordAction(int code) {
 			super(getSourceViewer().getTextWidget(), code);
-			
 		}
 
 		/*
@@ -1675,8 +1675,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			
 			int next= fIterator.following(position);
-			if (next != BreakIterator.DONE)
+			if (next != BreakIterator.DONE) {
 				setCaretPosition(next);
+				getTextWidget().showSelection();
+				fireSelectionChanged();
+			}
 				
 		}
 
@@ -1809,8 +1812,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			int position= widgetOffset2ModelOffset(viewer, viewer.getTextWidget().getCaretOffset());
 			
 			int previous= fIterator.preceding(position);
-			if (previous != BreakIterator.DONE)
+			if (previous != BreakIterator.DONE) {
 				setCaretPosition(previous);
+				getTextWidget().showSelection();
+				fireSelectionChanged();
+			}
 				
 		}
 
