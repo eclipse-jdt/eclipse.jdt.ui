@@ -21,6 +21,16 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
 <pre>
 - The Package Explorer's built-in filters (fields, non-public members and static
   members) have been moved to the filter dialog (View menu > Filters...).
+- Formatting has been extended to also format Javadoc if it is specified in the Java
+  preferences. The preferences can be found on the Java Code Formatting preference page.
+- "Format Element" is a new formatting action which formats the element at the cursor position. This
+  is either a Javadoc comment, a method, a type, etc.
+- "Correct Indent" bound to Ctrl+I in the default key binding corrects the line indentation
+  of the selected lines.
+- The Java editors use docment providers which retrieve their documents from the file buffers manager. Thus
+  ther is how document updating between Java editors and Default text editors if they have been opened on the
+  same file.
+- The Java editors update the status line and the problems/tasks view according to the current caret position.
 </pre>
 ========== Eclipse Build Input September 30rd 2003 ==========<br>
 <pre>
