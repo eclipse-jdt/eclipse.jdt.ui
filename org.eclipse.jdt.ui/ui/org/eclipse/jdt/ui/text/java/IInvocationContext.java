@@ -17,26 +17,24 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 public interface IInvocationContext {
 
 	/**
-	 * Returns the current compilation unit
+	 * @return Returns the current compilation unit
 	 */
 	ICompilationUnit getCompilationUnit();
 
 	/**
-	 * Returns the length of the current selection
-	 * @return int
+	 * @return Returns the length of the current selection
 	 */
 	int getSelectionLength();
 	
 	/**
-	 * Returns the offset of the current selection
-	 * @return int
+	 * @return Returns the offset of the current selection
 	 */
 	int getSelectionOffset();
 		
 	/**
 	 * Creates an partial AST on the compilation unit and the selection offset. Te returned AST is shared and must
 	 * not be modified (or modifications must be reverted back again)
-	 * @return CompilationUnit
+	 * @return Returns the root of the AST corresponding to the current compilation unit.
 	 */
 	CompilationUnit getASTRoot();
 
