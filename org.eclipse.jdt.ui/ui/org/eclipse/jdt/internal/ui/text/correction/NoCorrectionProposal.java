@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.swt.graphics.Image;
+
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.refactoring.NullChange;
@@ -21,7 +23,7 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	private ProblemPosition fProblemPosition;
 
 	public NoCorrectionProposal(ProblemPosition problemPosition) {
-		super("No correction available", new NullChange(), 0);
+		super(CorrectionMessages.getString("NoCorrectionProposal.description"), new NullChange(), 0);
 		fProblemPosition= problemPosition;
 	}
 
@@ -30,6 +32,11 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
+		//return showDebugInfo();
+		return null;
+	}
+		
+	private String showDebugInfo() {	
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p><b>"); //$NON-NLS-1$
 		buf.append(getErrorCode(fProblemPosition.getId()));
@@ -78,5 +85,9 @@ public class NoCorrectionProposal extends ChangeCorrectionProposal {
 		return buf.toString();
 	}
 
+
+	public Image getImage() {
+		return null;
+	}
 
 }
