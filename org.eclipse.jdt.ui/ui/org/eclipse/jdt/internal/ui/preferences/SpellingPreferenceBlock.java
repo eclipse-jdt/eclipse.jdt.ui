@@ -29,49 +29,88 @@ import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 public class SpellingPreferenceBlock implements ISpellingPreferenceBlock {
 	
 	private class NullStatusChangeListener implements IStatusChangeListener {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
+		 */
 		public void statusChanged(IStatus status) {
 		}
 	}
 
 	private class StatusChangeListenerAdapter implements IStatusChangeListener {
+		
 		private IPreferenceStatusMonitor fMonitor;
+		
 		public StatusChangeListenerAdapter(IPreferenceStatusMonitor monitor) {
 			super();
 			fMonitor= monitor;
 		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener#statusChanged(org.eclipse.core.runtime.IStatus)
+		 */
 		public void statusChanged(IStatus status) {
 			fMonitor.statusChanged(status);
 		}
 	}
 
 	private SpellingConfigurationBlock fBlock= new SpellingConfigurationBlock(new NullStatusChangeListener(), null);
+	
 	private Control fControl;
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#createControl(org.eclipse.swt.widgets.Composite)
+	 */
 	public Control createControl(Composite parent) {
 		fControl= fBlock.createContents(parent);
 		return fControl;
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#initialize(org.eclipse.ui.texteditor.spelling.IPreferenceStatusMonitor)
+	 */
 	public void initialize(IPreferenceStatusMonitor statusMonitor) {
 		fBlock.fContext= new StatusChangeListenerAdapter(statusMonitor);
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#canPerformOk()
+	 */
 	public boolean canPerformOk() {
 		return true;
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performOk()
+	 */
 	public void performOk() {
 		fBlock.performOk(true);
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performDefaults()
+	 */
 	public void performDefaults() {
 		fBlock.performDefaults();
 	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#performRevert()
+	 */
+	public void performRevert() {
+		fBlock.performRevert();
+	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#dispose()
+	 */
 	public void dispose() {
 		fBlock.dispose();
 	}
 
+	/*
+	 * @see org.eclipse.ui.texteditor.spelling.ISpellingPreferenceBlock#setEnabled(boolean)
+	 */
 	public void setEnabled(boolean enabled) {
 		fBlock.setEnabled(enabled);
 	}
