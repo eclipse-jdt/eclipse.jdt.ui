@@ -11,7 +11,7 @@ import org.eclipse.jdt.internal.ui.actions.StructuredSelectionProvider;
 public class ReorderParametersActionDelegate extends RefactoringActionDelegate {
 
 	public ReorderParametersActionDelegate() {
-		super("Reorder Method Parameters", "Operation unavailable on the current selection. Select a method with more than one parameter.");
+		super("Modify Method Parameters", "Operation unavailable on the current selection. Select a declaration or a reference to a source method with parameters.");
 	}
 
 	/* (non-Javadoc)
