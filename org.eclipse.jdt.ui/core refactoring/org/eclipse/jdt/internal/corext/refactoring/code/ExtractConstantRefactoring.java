@@ -183,9 +183,17 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private static String convertNonLettersToUnderscores(String string) {
+		if (string.length() == 0)
+			return ""; //$NON-NLS-1$
+		
 		StringBuffer result= new StringBuffer(string.length());
-		for (int i= 0; i < string.length(); i++) {
-			if (Character.isLetter(string.charAt(i)))
+		if (Character.isJavaIdentifierStart(string.charAt(0)))
+			result.append(string.charAt(0));
+		else
+			result.append(UNDERSCORE);
+		
+		for (int i= 1; i < string.length(); i++) {
+			if (Character.isJavaIdentifierPart(string.charAt(i)))
 				result.append(string.charAt(i));
 			else
 				result.append(UNDERSCORE);
