@@ -289,7 +289,8 @@ public class JavaIndenter {
 	/**
 	 * Returns the reference position regarding to indentation for <code>offset</code>,
 	 * or <code>NOT_FOUND</code>. This method calls
-	 * {@link #findReferencePosition(int, boolean) findReferencePosition(offset, false)}
+	 * {@link #findReferencePosition(int, int) findReferencePosition(offset, nextChar)} where
+	 * <code>nextChar</code> is the next character after <code>offset</code>.
 	 * 
 	 * @param offset the offset for which the reference is computed
 	 * @return the reference statement relative to which <code>offset</code>
@@ -1187,9 +1188,9 @@ public class JavaIndenter {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
 			if (DefaultCodeFormatterConstants.TRUE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH)))
-				return 0;
-			else
 				return prefBlockIndent();
+			else
+				return 0;
 		}
 		
 		return 0; // sun standard
@@ -1206,9 +1207,9 @@ public class JavaIndenter {
 		Plugin plugin= JavaCore.getPlugin();
 		if (plugin != null) {
 			if (DefaultCodeFormatterConstants.TRUE.equals(JavaCore.getOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES)))
-				return 0;
-			else
 				return prefBlockIndent();
+			else
+				return 0;
 		}
 		
 		return prefBlockIndent(); // sun standard
