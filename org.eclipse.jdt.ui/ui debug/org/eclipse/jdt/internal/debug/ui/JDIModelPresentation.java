@@ -1056,7 +1056,6 @@ public class JDIModelPresentation extends LabelProvider implements IDebugModelPr
 	
 	protected String getWatchpointText(IJavaWatchpoint watchpoint) throws CoreException {
 		
-		boolean showQualified= isShowQualifiedNames();
 		String lineInfo= getLineBreakpointText(watchpoint);
 
 		String state= null;

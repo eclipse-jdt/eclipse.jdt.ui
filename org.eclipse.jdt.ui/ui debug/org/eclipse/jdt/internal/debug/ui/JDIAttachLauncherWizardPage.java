@@ -209,7 +209,7 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	 */
 	protected void createTerminateGroup(Composite parent) {
 		// add empty label
-		Label l= new Label(parent, SWT.NONE);
+		new Label(parent, SWT.NONE);
 		
 		// add terminate check box
 		fAllowTerminateButton= new Button(parent, SWT.CHECK);
@@ -221,7 +221,6 @@ public class JDIAttachLauncherWizardPage extends WizardPage implements Listener 
 	 * @see Listener
 	 */
 	public void handleEvent(Event ev) {
-		Widget source= ev.widget;
 		boolean valid= validatePage();
 		if (valid) {
 			setErrorMessage(null);
