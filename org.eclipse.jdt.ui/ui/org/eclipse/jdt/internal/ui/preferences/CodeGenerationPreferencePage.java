@@ -41,7 +41,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	private static final String PREF_GETTERSETTER_SUFFIX= JavaUI.ID_PLUGIN + ".gettersetter.suffix.list"; //$NON-NLS-1$
 
 	private static final String PREF_JAVADOC_STUBS= JavaUI.ID_PLUGIN + ".javadoc"; //$NON-NLS-1$
-	private static final String PREF_SEE_COMMENTS= JavaUI.ID_PLUGIN + ".seecomments"; //$NON-NLS-1$
+	private static final String PREF_NON_JAVADOC_COMMENTS= JavaUI.ID_PLUGIN + ".seecomments"; //$NON-NLS-1$
 	private static final String PREF_FILE_COMMENTS= JavaUI.ID_PLUGIN + ".filecomments"; //$NON-NLS-1$
 
 
@@ -74,7 +74,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	
 	public static boolean doNonJavaDocSeeComments() {
 		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
-		return prefs.getBoolean(PREF_SEE_COMMENTS);
+		return prefs.getBoolean(PREF_NON_JAVADOC_COMMENTS);
 	}
 	
 	public static boolean doFileComments() {
@@ -103,7 +103,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		prefs.setDefault(PREF_GETTERSETTER_PREFIX, "f, fg, _, m_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_GETTERSETTER_SUFFIX, "_"); //$NON-NLS-1$
 		prefs.setDefault(PREF_JAVADOC_STUBS, true);
-		prefs.setDefault(PREF_SEE_COMMENTS, true);
+		prefs.setDefault(PREF_NON_JAVADOC_COMMENTS, false);
 		prefs.setDefault(PREF_FILE_COMMENTS, true);
 	}
 	
@@ -113,7 +113,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 	private StringDialogField fGetterSetterSuffix;
 	
 	private SelectionButtonDialogField fCreateJavaDocComments;
-	private SelectionButtonDialogField fCreateSeeComments;
+	private SelectionButtonDialogField fCreateNonJavadocComments;
 	private SelectionButtonDialogField fCreateFileComments;
 	
 	private IStatus fGetterSetterPrefixStatus;
@@ -151,8 +151,8 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		fCreateJavaDocComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateJavaDocComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.javadoc_comment.label")); //$NON-NLS-1$
 		
-		fCreateSeeComments= new SelectionButtonDialogField(SWT.CHECK);
-		fCreateSeeComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.see_comment.label"));				 //$NON-NLS-1$
+		fCreateNonJavadocComments= new SelectionButtonDialogField(SWT.CHECK);
+		fCreateNonJavadocComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.see_comment.label"));				 //$NON-NLS-1$
 	
 		fCreateFileComments= new SelectionButtonDialogField(SWT.CHECK);
 		fCreateFileComments.setLabelText(JavaUIMessages.getString("CodeGenerationPreferencePage.file_comment.label"));				 //$NON-NLS-1$
@@ -173,7 +173,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		}
 		fGetterSetterPrefix.setText(str);
 		fCreateJavaDocComments.setSelection(prefs.getBoolean(PREF_JAVADOC_STUBS));
-		fCreateSeeComments.setSelection(prefs.getBoolean(PREF_SEE_COMMENTS));
+		fCreateNonJavadocComments.setSelection(prefs.getBoolean(PREF_NON_JAVADOC_COMMENTS));
 		fCreateFileComments.setSelection(prefs.getBoolean(PREF_FILE_COMMENTS));
 	}
 	
@@ -206,7 +206,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		javaDocLabel.doFillIntoGrid(composite, 2);
 		
 		fCreateJavaDocComments.doFillIntoGrid(composite, 2);
-		fCreateSeeComments.doFillIntoGrid(composite, 2);
+		fCreateNonJavadocComments.doFillIntoGrid(composite, 2);
 		fCreateFileComments.doFillIntoGrid(composite, 2);
 		
 		(new Separator()).doFillIntoGrid(composite, 2, 4);
@@ -298,7 +298,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		prefs.setValue(PREF_USE_GETTERSETTER_PREFIX, fUseGetterSetterPrefix.isSelected());
 		prefs.setValue(PREF_GETTERSETTER_PREFIX, fGetterSetterPrefix.getText());
 		prefs.setValue(PREF_JAVADOC_STUBS, fCreateJavaDocComments.isSelected());
-		prefs.setValue(PREF_SEE_COMMENTS, fCreateSeeComments.isSelected());
+		prefs.setValue(PREF_NON_JAVADOC_COMMENTS, fCreateNonJavadocComments.isSelected());
 		prefs.setValue(PREF_FILE_COMMENTS, fCreateFileComments.isSelected());
 		return super.performOk();
 	}	
@@ -321,7 +321,7 @@ public class CodeGenerationPreferencePage extends PreferencePage implements IWor
 		}
 		fGetterSetterPrefix.setText(str);
 		fCreateJavaDocComments.setSelection(prefs.getDefaultBoolean(PREF_JAVADOC_STUBS));
-		fCreateSeeComments.setSelection(prefs.getDefaultBoolean(PREF_SEE_COMMENTS));		
+		fCreateNonJavadocComments.setSelection(prefs.getDefaultBoolean(PREF_NON_JAVADOC_COMMENTS));		
 		fCreateFileComments.setSelection(prefs.getDefaultBoolean(PREF_FILE_COMMENTS));
 		super.performDefaults();
 	}	

@@ -247,6 +247,8 @@ public class StubUtility {
 		buf.append("/*");
 		if (!nonJavaDocComment) {
 			buf.append('*');
+		} else {
+			buf.append(" (non-Javadoc)");
 		}
 		buf.append("\n * @see "); //$NON-NLS-1$
 		buf.append(declaringTypeName);
