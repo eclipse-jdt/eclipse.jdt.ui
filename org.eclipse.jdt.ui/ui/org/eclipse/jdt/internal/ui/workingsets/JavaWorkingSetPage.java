@@ -322,7 +322,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			else
 				fTree.setGrayChecked(element, false);
 			if (isExpandable(element))
-				setSubtreeChecked(element, state, checkExpandedState);
+				setSubtreeChecked(element, state, true);
 		}
 	}
 
