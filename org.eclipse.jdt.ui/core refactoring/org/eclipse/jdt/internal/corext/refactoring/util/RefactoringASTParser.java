@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -31,16 +32,22 @@ public class RefactoringASTParser {
 	}
 	
 	public static final String SOURCE_PROPERTY= "org.eclipse.jdt.ui.refactoring.ast_source"; //$NON-NLS-1$
-	
+
 	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings) {
 		return parse(unit, resolveBindings, null);
 	}
-	
+
 	public CompilationUnit parse(ICompilationUnit unit, boolean resolveBindings, IProgressMonitor pm) {
+		return parse(unit, null, resolveBindings, pm);
+	}
+
+	public CompilationUnit parse(ICompilationUnit unit, WorkingCopyOwner owner, boolean resolveBindings, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
 		fParser.setSource(unit);
+		if (owner != null)
+			fParser.setWorkingCopyOwner(owner);
 		fParser.setCompilerOptions(getCompilerOptions(unit));
-		CompilationUnit result= (CompilationUnit)fParser.createAST(pm);
+		CompilationUnit result= (CompilationUnit) fParser.createAST(pm);
 		result.setProperty(SOURCE_PROPERTY, unit);
 		return result;
 	}
