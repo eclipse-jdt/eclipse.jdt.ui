@@ -442,6 +442,21 @@ public class JavaStructureCreator implements IStructureCreator {
 	 * code from the local history.
 	 */
 	static boolean hasEdition(IJavaElement je) {
-		return JavaCompareUtilities.getJavaElementID(je) != null;
+
+		if (je instanceof IMember && ((IMember)je).isBinary())
+			return false;
+			
+		switch (je.getElementType()) {
+		case JavaElement.COMPILATION_UNIT:
+		case JavaElement.TYPE:
+		case JavaElement.FIELD:
+		case JavaElement.METHOD:
+		case JavaElement.INITIALIZER:
+		case JavaElement.PACKAGE_DECLARATION:
+		case JavaElement.IMPORT_CONTAINER:
+		case JavaElement.IMPORT_DECLARATION:
+			return true;
+		}
+		return false;
 	}
 }
