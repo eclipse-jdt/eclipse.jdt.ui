@@ -34,7 +34,7 @@ public class JavaModelUtil {
 	 * @param jproject The java project to search in
 	 * @param str The fully qualified name (type name with enclosing type names and package (all separated by dots))
 	 * @return The type found, or null if not existing
-	 * The method does not find inner types. Waiting for a Java Core solution
+	 * The method only finds top level types and its inner types. Waiting for a Java Core solution
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName) throws JavaModelException {
 		String pathStr= fullyQualifiedName.replace('.', '/') + ".java"; //$NON-NLS-1$
@@ -66,6 +66,7 @@ public class JavaModelUtil {
 	 * @param pack The package name
 	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
 	 * @return the type found, or null if not existing
+	 * The method only finds top level types and its inner types. Waiting for a Java Core solution
 	 */	
 	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
 		// should be supplied from java core
@@ -508,7 +509,7 @@ public class JavaModelUtil {
 	
 	/**
 	 * Finds a method implementation in a type's classhierarchy. The search is bottom-up, so this
-	 * returns the overwritten method. Does not find method in intrefaces.
+	 * returns the overridden method. Does not find method in interfaces.
 	 * This searches for a method with a name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
