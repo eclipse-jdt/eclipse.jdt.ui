@@ -282,6 +282,18 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 		/** The key modifier mask. */
 		private int fKeyModifierMask;
 
+		/**
+		 * Style ranges before link mode.
+		 * @since 3.0
+		 */
+		private StyleRange[] fOldStyleRanges;
+		/**
+		 * Link mode style ranges region.
+		 * @since 3.0
+		 */
+		IRegion fOldStyleRangeRegion;
+
+		
 		public void deactivate() {
 			deactivate(false);
 		}
@@ -467,7 +479,11 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				
 				try {
 					StyledText text= viewer.getTextWidget();
-					text.redrawRange(offset, length, true);
+					// Removes style
+					text.replaceStyleRanges(fOldStyleRangeRegion.getOffset(), fOldStyleRangeRegion.getLength(), fOldStyleRanges);
+//					text.replaceStyleRanges(offset, length, fOldStyleRanges);
+					// Causes underline to disappear
+					text.redrawRange(offset, length, false);
 				} catch (IllegalArgumentException x) {
 					JavaPlugin.log(x);
 				}
@@ -569,7 +585,7 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				return;
 
 			repairRepresentation();
-
+			
 			StyledText text= viewer.getTextWidget();
 			if (text == null || text.isDisposed())
 				return;
@@ -592,18 +608,41 @@ public abstract class JavaEditor extends ExtendedTextEditor implements IViewPart
 				length= region.getLength();
 			}
 			
-			StyleRange oldStyleRange= text.getStyleRangeAtOffset(offset);
-			Color foregroundColor= fColor;
-			Color backgroundColor= oldStyleRange == null ? text.getBackground() : oldStyleRange.background;
-			int fontStyle= oldStyleRange== null ? SWT.NORMAL : oldStyleRange.fontStyle;
-			StyleRange styleRange= new StyleRange(offset, length, foregroundColor, backgroundColor, fontStyle);
-			text.setStyleRange(styleRange);
-
-			text.redrawRange(offset, length, true);
+			fOldStyleRanges = text.getStyleRanges(offset, length);
+			fOldStyleRangeRegion= new Region(offset, length);
+			
+			applyForgroundStyle(text, offset, length);
+			text.redrawRange(offset, length, false);
 
 			fActiveRegion= region;
 		}
-
+		
+		private void applyForgroundStyle(StyledText fTextWidget, int offset, int length) {
+			StyleRange[] styleRanges= fTextWidget.getStyleRanges(offset, length);
+			ArrayList newStyleRanges= new ArrayList(styleRanges.length + 10); 
+			int rangeOffset= offset;
+			for (int i= 0, max= styleRanges.length; i < max; i++) {
+				StyleRange sr= styleRanges[i]; 
+				if (rangeOffset < sr.start) {
+					// Unstyled range
+					StyleRange usr= new StyleRange(rangeOffset, sr.start - rangeOffset, fColor, null);
+					newStyleRanges.add(usr);
+				}
+				rangeOffset= sr.start + sr.length;
+				// Important: Must create a new one
+				sr= new StyleRange(sr.start, sr.length, fColor, sr.background, sr.fontStyle);
+				newStyleRanges.add(sr);
+			}
+			int endOffset= offset + length;
+			if (rangeOffset < endOffset) {
+				// Last unstyled range
+				StyleRange usr= new StyleRange(rangeOffset, endOffset - rangeOffset, fColor, null);
+				newStyleRanges.add(usr);
+			}
+			styleRanges= (StyleRange[])newStyleRanges.toArray(new StyleRange[newStyleRanges.size()]);
+			fTextWidget.replaceStyleRanges(offset, length, styleRanges);
+		}
+		
 		private void activateCursor(ISourceViewer viewer) {
 			StyledText text= viewer.getTextWidget();
 			if (text == null || text.isDisposed())
