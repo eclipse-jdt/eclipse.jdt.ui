@@ -163,6 +163,14 @@ public class SelectionConverter {
 		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
 		return manager.getWorkingCopy(input);			
 	}
+	
+	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
+		Object editorInput= SelectionConverter.getInput(editor);
+		if (editorInput instanceof ICompilationUnit)
+			return (ICompilationUnit)editorInput;
+		else
+			return null;
+	}
 
 	private static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
 			if (input instanceof ICodeAssist) {
