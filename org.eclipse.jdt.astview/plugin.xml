@@ -45,6 +45,27 @@
             category="org.eclipse.ui.category.views"
             id="org.eclipse.jdt.astview.views.ASTView">
       </command>
+      
+      <keyBinding
+            string="Alt+Shift+Q A"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.astview.views.ASTView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Alt+Shift+Q A"
+            scope="org.eclipse.ui.globalScope"
+            command=""
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <keyBinding
+            platform="carbon"
+            string="Command+Alt+Q A"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.astview.views.ASTView"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
    </extension>
 
 </plugin>
