@@ -16,16 +16,14 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 
-import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
+import org.eclipse.debug.ui.IDebugUIConstants;import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 /**
  * Caution: this implementation is a layer breaker and contains some "shortcuts"
  */
 public class JavaTextHover implements ITextHover {
-	
-	private final static String DEBUG_PERSPECTIVE= "org.eclipse.dt.internal.ui.DebugLayout";
-	
+		
 	class EditorWatcher implements IPartListener {
 		
 		/**
@@ -96,7 +94,7 @@ public class JavaTextHover implements ITextHover {
 			
 			if (fCurrentPerspective == null || fCurrentPerspective != newPerspective) {
 				fCurrentPerspective= newPerspective;
-				if (DEBUG_PERSPECTIVE.equals(fCurrentPerspective))
+				if (IDebugUIConstants.ID_DEBUG_PERSPECTIVE.equals(fCurrentPerspective))
 					fImplementations= new ITextHover[] { 
 						new JavaDebugHover(fEditor) 
 					};
