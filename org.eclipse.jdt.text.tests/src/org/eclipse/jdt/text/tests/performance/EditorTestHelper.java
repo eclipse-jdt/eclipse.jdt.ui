@@ -92,6 +92,12 @@ public class EditorTestHelper {
 			runEventQueue(editor);
 	}
 	
+	public static void closeEditor(IEditorPart editor) {
+		IWorkbenchPage page= getActivePage();
+		if (page != null)
+			page.closeEditor(editor, false);
+	}
+	
 	public static void closeAllEditors() {
 		IWorkbenchPage page= getActivePage();
 		if (page != null)
