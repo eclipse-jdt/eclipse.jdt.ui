@@ -139,16 +139,16 @@ public class ChkpiiTests extends TestCase {
 		// Get some path inside a plug-in
 		String filePath= toLocation(getClass().getResource("ignoreFiles.txt"));
 
-		StringTokenizer tokenizer= new StringTokenizer(filePath, File.pathSeparator);
+		StringTokenizer tokenizer= new StringTokenizer(filePath, File.separator);
 		String path= tokenizer.nextToken();
 		while (tokenizer.hasMoreTokens()) {
 			String token= tokenizer.nextToken();
-			if (token.equals("bin"))
+			if (token.equals("org.eclipse.jdt.ui.tests"))
 				break;
 			
-			path= path + File.pathSeparator + token; 
+			path= path + File.separator + token; 
 		}
-		return path + File.pathSeparator;
+		return path + File.separator;
 	}
 
 	/**
