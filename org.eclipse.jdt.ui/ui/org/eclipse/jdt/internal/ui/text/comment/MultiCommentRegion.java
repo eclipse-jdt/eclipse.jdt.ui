@@ -68,6 +68,7 @@ public class MultiCommentRegion extends CommentRegion implements ICommentTagCons
 
 		final boolean blank= next.hasAttribute(COMMENT_BLANKLINE);
 
+		// TODO does not work for TestCase.java: <br>1) is not wrapped
 		if (next.getLength() <= 2 && !blank && !isCommentWord(next))
 			return true;
 
