@@ -1,0 +1,142 @@
+/*
+ * (c) Copyright IBM Corp. 2000, 2001.
+ * All Rights Reserved.
+ */
+package org.eclipse.jdt.ui.tests.refactoring;
+
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.core.refactoring.base.ChangeContext;
+import org.eclipse.jdt.internal.core.refactoring.base.Refactoring;
+import org.eclipse.jdt.internal.core.refactoring.base.RefactoringStatus;
+import org.eclipse.jdt.internal.core.refactoring.rename.RenameFieldRefactoring;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.TestExceptionHandler;
+
+public class RenamePrivateFieldTests extends RefactoringTest {
+
+	private static final Class clazz= RenamePrivateFieldTests.class;
+	private static final String REFACTORING_PATH= "RenamePrivateField/";
+
+	public RenamePrivateFieldTests(String name) {
+		super(name);
+	}
+
+	public static Test suite() {
+		TestSuite suite= new TestSuite(clazz.getName());
+		suite.addTest(noSetupSuite());
+		return new MySetup(suite);
+	}
+
+	public static Test noSetupSuite() {
+		return new TestSuite(clazz);
+	}
+
+	protected String getRefactoringPath() {
+		return REFACTORING_PATH;
+	}
+
+	private void helper1_0(String fieldName, String newFieldName) throws Exception{
+		IType classA= getType(createCUfromTestFile(getPackageP(), "A"), "A");
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		ref.setNewName(newFieldName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertNotNull("precondition was supposed to fail", result);
+	}
+	
+	private void helper1() throws Exception{
+		helper1_0("f", "g");
+	}
+	
+	private void helper2(String fieldName, String newFieldName) throws Exception{
+		helper2(fieldName, newFieldName, true, false, false, false);
+	}
+	
+	private void helper2(String fieldName, String newFieldName, boolean updateReferences,  boolean updateJavaDoc, 
+											boolean updateComments, boolean updateStrings) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
+		IType classA= getType(cu, "A");
+		RenameFieldRefactoring ref= new RenameFieldRefactoring(classA.getField(fieldName));
+		ref.setUpdateReferences(updateReferences);
+		ref.setUpdateJavaDoc(updateJavaDoc);
+		ref.setUpdateComments(updateComments);
+		ref.setUpdateStrings(updateStrings);
+		ref.setNewName(newFieldName);
+		RefactoringStatus result= performRefactoring(ref);
+		assertEquals("was supposed to pass", null, result);
+		assertEquals("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
+		
+		assertTrue("anythingToUndo", Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !Refactoring.getUndoManager().anythingToRedo());
+		
+		Refactoring.getUndoManager().performUndo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+		assertEquals("invalid undo", getFileContents(getInputTestFileName("A")), cu.getSource());
+
+		assertTrue("! anythingToUndo", !Refactoring.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", Refactoring.getUndoManager().anythingToRedo());
+		
+		Refactoring.getUndoManager().performRedo(new ChangeContext(new TestExceptionHandler()), new NullProgressMonitor());
+		assertEquals("invalid redo", getFileContents(getOutputTestFileName("A")), cu.getSource());
+	}
+	
+	private void helper2() throws Exception{
+		helper2(true);
+	}
+	
+	private void helper2(boolean updateReferences) throws Exception{
+		helper2("f", "g", updateReferences, false, false, false);
+	}
+
+	//--------- tests ----------	
+	public void testFail0() throws Exception{
+		helper1();
+	}
+	
+	public void testFail1() throws Exception{
+		helper1();
+	}
+	
+	public void testFail2() throws Exception{
+		helper1();
+	}
+	
+	public void testFail3() throws Exception{
+		helper1();
+	}
+	
+	public void testFail4() throws Exception{
+		helper1();
+	}
+	
+	public void testFail5() throws Exception{
+		helper1();
+	}	
+	
+	public void testFail6() throws Exception{
+		helper1();
+	}
+	
+	// ------ 
+	public void test0() throws Exception{
+		helper2();
+	}
+	
+	public void test1() throws Exception{
+		helper2();
+	}
+
+	public void test2() throws Exception{
+		helper2(false);
+	}	
+	
+	public void test3() throws Exception{
+		helper2("f", "gg", true, true, true, true);
+	}	
+	
+}
