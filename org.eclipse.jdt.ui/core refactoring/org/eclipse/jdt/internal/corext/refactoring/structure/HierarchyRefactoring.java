@@ -12,12 +12,13 @@ package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
-import org.eclipse.core.resources.IFile;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -58,6 +60,9 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -66,12 +71,13 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -201,6 +207,33 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected static String createMethodLabel(final IMethod method) {
 		return JavaElementUtil.createMethodSignature(method);
+	}
+
+	protected static FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit unit, final IField field, final TypeVariableMaplet[] mapping, final IProgressMonitor monitor, final RefactoringStatus status, final int modifiers) throws JavaModelException {
+		final VariableDeclarationFragment oldFieldFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, unit);
+		final VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
+		newFragment.setExtraDimensions(oldFieldFragment.getExtraDimensions());
+		if (oldFieldFragment.getInitializer() != null) {
+			Expression newInitializer= null;
+			if (mapping.length > 0)
+				newInitializer= createPlaceholderForExpression(oldFieldFragment.getInitializer(), field.getCompilationUnit(), mapping, rewrite);
+			else
+				newInitializer= createPlaceholderForExpression(oldFieldFragment.getInitializer(), field.getCompilationUnit(), rewrite);
+			newFragment.setInitializer(newInitializer);
+		}
+		newFragment.setName(((SimpleName) ASTNode.copySubtree(rewrite.getAST(), oldFieldFragment.getName())));
+		final FieldDeclaration newField= rewrite.getAST().newFieldDeclaration(newFragment);
+		final FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, unit);
+		copyJavadocNode(rewrite, field, oldField, newField);
+		newField.modifiers().addAll(ASTNodeFactory.newModifiers(rewrite.getAST(), modifiers));
+		Type oldType= oldField.getType();
+		Type newType= null;
+		if (mapping.length > 0) {
+			newType= createPlaceholderForType(oldType, field.getCompilationUnit(), mapping, rewrite);
+		} else
+			newType= createPlaceholderForType(oldType, field.getCompilationUnit(), rewrite);
+		newField.setType(newType);
+		return newField;
 	}
 
 	protected static Expression createPlaceholderForExpression(final Expression expression, final ICompilationUnit declaringCu, final ASTRewrite rewrite) throws JavaModelException {
@@ -428,7 +461,7 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		return true;
 	}
 
-	protected IType fCachedDeclaringType;
+	protected final Map fCachedMembersReferences= new HashMap(2);
 
 	protected IType[] fCachedReferencedTypes;
 
@@ -436,90 +469,35 @@ public abstract class HierarchyRefactoring extends Refactoring {
 
 	protected final CodeGenerationSettings fCodeGenerationSettings;
 
+	protected IType fDeclaringType;
+
 	protected IMember[] fMembersToMove;
 
 	protected HierarchyRefactoring(final IMember[] members, final CodeGenerationSettings settings) {
 		Assert.isNotNull(members);
 		Assert.isNotNull(settings);
-
 		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 		fCodeGenerationSettings= settings;
 	}
 
-	protected boolean canBeAccessedFrom(final IMember member, final IType targetType, final ITypeHierarchy targetTypeHierarchy) throws JavaModelException {
+	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {
 		Assert.isTrue(!(member instanceof IInitializer));
 
-		if (!member.exists())
-			return false;
-
-		if (targetType.equals(member.getDeclaringType()))
-			return true;
-
-		if (targetType.equals(member))
-			return true;
-
-		if (JdtFlags.isPrivate(member))
-			return false;
-
-		if (member instanceof IMethod) {
-			final IMethod method= (IMethod) member;
-			final IMethod stub= targetType.getMethod(method.getElementName(), method.getParameterTypes());
-			if (stub.exists())
-				return true;
-		}
-
-		if (member.getDeclaringType() == null) {
-
-			if (!(member instanceof IType))
-				return false;
-
-			if (JdtFlags.isPublic(member))
-				return true;
-
-			if (!JdtFlags.isPackageVisible(member))
-				return false;
-
-			if (JavaModelUtil.isSamePackage(((IType) member).getPackageFragment(), targetType.getPackageFragment()))
-				return true;
-
-			return targetTypeHierarchy.contains(member.getDeclaringType());
-		}
-
-		final IType declaringType= member.getDeclaringType();
-
-		if (!canBeAccessedFrom(declaringType, targetType, targetTypeHierarchy))
-			return false;
-
-		if (declaringType.equals(getDeclaringType()))
-			return false;
-
-		if (JdtFlags.isPublic(member))
-			return true;
-
-		if (JavaModelUtil.isSamePackage(declaringType.getPackageFragment(), targetType.getPackageFragment()))
-			return true;
-
-		return JdtFlags.isProtected(member) && targetTypeHierarchy.contains(declaringType);
+		return member.exists();
 	}
 
 	protected RefactoringStatus checkDeclaringType(final IProgressMonitor monitor) throws JavaModelException {
 		final IType type= getDeclaringType();
-
 		if (type.isEnum())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.enum_members")); //$NON-NLS-1$
-			
 		if (type.isAnnotation())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.annotation_members")); //$NON-NLS-1$
-
 		if (type.isInterface())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.interface_members")); //$NON-NLS-1$
-
 		if (type.isBinary())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.members_of_binary")); //$NON-NLS-1$
-
 		if (type.isReadOnly())
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.getString("HierarchyRefactoring.members_of_read-only")); //$NON-NLS-1$
-
 		return new RefactoringStatus();
 	}
 
@@ -539,69 +517,31 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	}
 
 	protected void copyParameters(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
-		SingleVariableDeclaration newParam= null;
+		SingleVariableDeclaration newDeclaration= null;
 		for (int index= 0, size= oldMethod.parameters().size(); index < size; index++) {
-			SingleVariableDeclaration oldParam= (SingleVariableDeclaration) oldMethod.parameters().get(index);
+			SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) oldMethod.parameters().get(index);
 			if (mapping.length > 0)
-				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, unit, mapping, rewrite);
+				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, mapping, rewrite);
 			else
-				newParam= createPlaceholderForSingleVariableDeclaration(oldParam, unit, rewrite);
-			newMethod.parameters().add(index, newParam);
+				newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, rewrite);
+			newMethod.parameters().add(index, newDeclaration);
 		}
 	}
 
 	protected void copyReturnType(final ASTRewrite rewrite, final ICompilationUnit unit, final MethodDeclaration oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
 		Type newReturnType= null;
-		Type oldReturnType= oldMethod.getReturnType2();
 		if (mapping.length > 0)
-			newReturnType= createPlaceholderForType(oldReturnType, unit, mapping, rewrite);
+			newReturnType= createPlaceholderForType(oldMethod.getReturnType2(), unit, mapping, rewrite);
 		else
-			newReturnType= createPlaceholderForType(oldReturnType, unit, rewrite);
+			newReturnType= createPlaceholderForType(oldMethod.getReturnType2(), unit, rewrite);
 		newMethod.setReturnType2(newReturnType);
 	}
 
-	protected FieldDeclaration createNewFieldDeclarationNode(final ASTRewrite rewrite, final CompilationUnit declaringCuNode, final IField field, final TypeVariableMaplet[] mapping, final IProgressMonitor pm, final RefactoringStatus status, int modifiers) throws JavaModelException {
-		VariableDeclarationFragment oldFieldFragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, declaringCuNode);
-		VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
-		newFragment.setExtraDimensions(oldFieldFragment.getExtraDimensions());
-		Expression initializer= oldFieldFragment.getInitializer();
-		if (initializer != null) {
-			Expression newInitializer= null;
-			if (mapping.length > 0)
-				newInitializer= createPlaceholderForExpression(initializer, field.getCompilationUnit(), mapping, rewrite);
-			else
-				newInitializer= createPlaceholderForExpression(initializer, field.getCompilationUnit(), rewrite);
-			newFragment.setInitializer(newInitializer);
-		}
-		newFragment.setName(((SimpleName) ASTNode.copySubtree(rewrite.getAST(), oldFieldFragment.getName())));
-		FieldDeclaration newField= rewrite.getAST().newFieldDeclaration(newFragment);
-		FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, declaringCuNode);
-		copyJavadocNode(rewrite, field, oldField, newField);
-		newField.modifiers().addAll(ASTNodeFactory.newModifiers(rewrite.getAST(), modifiers));
-
-		Type oldType= oldField.getType();
-		ICompilationUnit cu= field.getCompilationUnit();
-		Type newType= null;
-		if (mapping.length > 0) {
-			newType= createPlaceholderForType(oldType, cu, mapping, rewrite);
-		} else
-			newType= createPlaceholderForType(oldType, cu, rewrite);
-		newField.setType(newType);
-		return newField;
-	}
-
-	protected IFile[] getAllFilesToModify() {
-		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
-	}
-
 	public IType getDeclaringType() {
-		if (fCachedDeclaringType != null)
-			return fCachedDeclaringType;
-
-		Assert.isTrue(fMembersToMove.length > 0);
-		fCachedDeclaringType= (IType) WorkingCopyUtil.getOriginal(fMembersToMove[0].getDeclaringType());
-
-		return fCachedDeclaringType;
+		if (fDeclaringType != null)
+			return fDeclaringType;
+		fDeclaringType= (IType) WorkingCopyUtil.getOriginal(fMembersToMove[0].getDeclaringType());
+		return fDeclaringType;
 	}
 
 	public IMember[] getMembersToMove() {
@@ -623,7 +563,46 @@ public abstract class HierarchyRefactoring extends Refactoring {
 		return fCachedReferencedTypes;
 	}
 
-	protected RefactoringStatus validateModifiesFiles() {
-		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
+	protected boolean hasNonMovedReferences(final IMember member, final IProgressMonitor monitor, final RefactoringStatus status) throws JavaModelException {
+		if (!fCachedMembersReferences.containsKey(member)) {
+			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES));
+			engine.setFiltering(true, true);
+			engine.setStatus(status);
+			engine.setScope(RefactoringScopeFactory.create(member));
+			engine.searchPattern(new SubProgressMonitor(monitor, 1));
+			fCachedMembersReferences.put(member, engine.getResults());
+		}
+		final SearchResultGroup[] groups= (SearchResultGroup[]) fCachedMembersReferences.get(member);
+		if (groups.length == 0)
+			return false;
+		else if (groups.length > 1)
+			return true;
+		final ICompilationUnit unit= groups[0].getCompilationUnit();
+		if (!getDeclaringType().getCompilationUnit().equals(unit))
+			return true;
+		final SearchMatch[] matches= groups[0].getSearchResults();
+		for (int index= 0; index < matches.length; index++) {
+			if (!isMovedReference(matches[index]))
+				return true;
+		}
+		return false;
+	}
+
+	protected boolean isMovedReference(final SearchMatch match) throws JavaModelException {
+		ISourceRange range= null;
+		for (int index= 0; index < fMembersToMove.length; index++) {
+			range= fMembersToMove[index].getSourceRange();
+			if (range.getOffset() <= match.getOffset() && range.getOffset() + range.getLength() >= match.getOffset())
+				return true;
+		}
+		return false;
+	}
+
+	protected boolean needsVisibilityAdjustment(final IMember member, final boolean references, final IProgressMonitor monitor, RefactoringStatus status) throws JavaModelException {
+		if (JdtFlags.isPublic(member) || JdtFlags.isProtected(member))
+			return false;
+		if (!references)
+			return true;
+		return hasNonMovedReferences(member, monitor, status);
 	}
 }
