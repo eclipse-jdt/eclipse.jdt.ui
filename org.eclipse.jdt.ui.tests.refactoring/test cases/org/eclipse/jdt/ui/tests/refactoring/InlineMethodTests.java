@@ -453,4 +453,8 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testHierarchyOverloadedPrivate() throws Exception {
 		performCastTest();
 	}
+
+	public void testReceiverCast() throws Exception {
+		performCastTest();
+	}
 }
