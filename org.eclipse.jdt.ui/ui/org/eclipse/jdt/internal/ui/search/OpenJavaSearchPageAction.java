@@ -4,22 +4,25 @@
  */
 package org.eclipse.jdt.internal.ui.search;
 
-import org.eclipse.jface.action.Action;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 import org.eclipse.search.ui.SearchUI;
 
-import org.eclipse.search.internal.ui.SearchPlugin;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Opens the Search Dialog.
+ * Opens the Search Dialog and brings the Java search page to front
  */
-public class OpenJavaSearchPageAction extends Action implements IWorkbenchWindowActionDelegate {
+public class OpenJavaSearchPageAction implements IWorkbenchWindowActionDelegate {
+
+	private static final String JAVA_SEARCH_PAGE_ID= "org.eclipse.jdt.ui.JavaSearchPage"; //$NON-NLS-1$
+
 	private IWorkbenchWindow fWindow;
 
 	public OpenJavaSearchPageAction() {
@@ -30,36 +33,25 @@ public class OpenJavaSearchPageAction extends Action implements IWorkbenchWindow
 	}
 
 	public void run(IAction action) {
-		run();
-	}
-
-	public void run() {
-		if (getWindow().getActivePage() == null) {
-			SearchPlugin.beep();
+		if (fWindow == null || fWindow.getActivePage() == null) {
+			beep();
+			JavaPlugin.logErrorMessage("Could not open the search dialog - for some reason the window handle was null"); //$NON-NLS-1$
 			return;
 		}
-		SearchUI.openSearchDialog(getWindow(), "org.eclipse.jdt.ui.JavaSearchPage"); //$NON-NLS-1$
+		SearchUI.openSearchDialog(fWindow, JAVA_SEARCH_PAGE_ID);
 	}
 
 	public void selectionChanged(IAction action, ISelection selection) {
 		// do nothing since the action isn't selection dependent.
 	}
 
-	private ISelection getSelection() {
-		return getWindow().getSelectionService().getSelection();
-	}
-	
-	private IEditorPart getEditorPart() {
-		return getWindow().getActivePage().getActiveEditor();
-	}
-
-	private IWorkbenchWindow getWindow() {
-		if (fWindow == null)
-			fWindow= SearchPlugin.getActiveWorkbenchWindow();
-		return fWindow;
-	}
-
 	public void dispose() {
 		fWindow= null;
 	}
+
+	protected void beep() {
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		if (shell != null && shell.getDisplay() != null)
+			shell.getDisplay().beep();
+	}	
 }
