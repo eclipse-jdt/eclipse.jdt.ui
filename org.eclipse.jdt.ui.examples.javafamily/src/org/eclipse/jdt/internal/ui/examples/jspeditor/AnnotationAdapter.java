@@ -9,10 +9,12 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 
-package org.eclipse.text.reconcilerpipe;
+package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.source.IAnnotationExtension;
+import org.eclipse.jface.text.reconciler.IReconcileResult;
+
+import org.eclipse.ui.texteditor.IAnnotationExtension;
 
 
 

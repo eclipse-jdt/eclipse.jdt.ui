@@ -19,26 +19,25 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
+import org.eclipse.jface.text.reconciler.IReconcileStep;
+import org.eclipse.jface.text.reconciler.IReconcileResult;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension;
+import org.eclipse.jface.text.reconciler.DocumentAdapter;
 import org.eclipse.jface.text.source.Annotation;
-import org.eclipse.jface.text.source.IAnnotationExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
+import org.eclipse.ui.texteditor.IAnnotationExtension;
 import org.eclipse.ui.texteditor.ITextEditor;
-
-import org.eclipse.text.reconcilerpipe.AnnotationAdapter;
-import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
-import org.eclipse.text.reconcilerpipe.IReconcileResult;
-import org.eclipse.text.reconcilerpipe.TextModelAdapter;
 
 /**
  * Reconciling strategy for Java parts in JSP files.
@@ -47,21 +46,21 @@ import org.eclipse.text.reconcilerpipe.TextModelAdapter;
  */
 public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
-	private IReconcilePipeParticipant fFirstParticipant;
+	private IReconcileStep fFirstStep;
 	private ITextEditor fTextEditor;
 	private IProgressMonitor fProgressMonitor;
 	
 	public JspReconcilingStrategy(ISourceViewer sourceViewer, ITextEditor textEditor) {
 		fTextEditor= textEditor;
-		IReconcilePipeParticipant javaParticipant= new JavaReconcilePipeParticipant(getFile());
-		fFirstParticipant= new Jsp2JavaReconcilePipeParticipant(javaParticipant);
+		IReconcileStep javaReconcileStep= new JavaReconcileStep(getFile());
+		fFirstStep= new Jsp2JavaReconcileStep(javaReconcileStep);
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategy#setDocument(org.eclipse.jface.text.IDocument)
 	 */
 	public void setDocument(IDocument document) {
-		fFirstParticipant.setInputModel(new TextModelAdapter(document));
+		fFirstStep.setInputModel(new DocumentAdapter(document));
 	}
 	
 	/*
@@ -69,7 +68,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	 */
 	public void reconcile(DirtyRegion dirtyRegion, IRegion subRegion) {
 		removeTemporaryAnnotations();
-		process(fFirstParticipant.reconcile(dirtyRegion, subRegion));
+		process(fFirstStep.reconcile(dirtyRegion, subRegion));
 	}
 	
 	/*
@@ -77,14 +76,14 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	 */
 	public void reconcile(IRegion partition) {
 		removeTemporaryAnnotations();
-		process(fFirstParticipant.reconcile(partition));
+		process(fFirstStep.reconcile(partition));
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#setProgressMonitor(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public void setProgressMonitor(IProgressMonitor monitor) {
-		fFirstParticipant.setProgressMonitor(monitor);
+		fFirstStep.setProgressMonitor(monitor);
 		fProgressMonitor= monitor;
 		
 	}
@@ -93,7 +92,7 @@ public class JspReconcilingStrategy implements IReconcilingStrategy, IReconcilin
 	 * @see org.eclipse.jface.text.reconciler.IReconcilingStrategyExtension#initialReconcile()
 	 */
 	public void initialReconcile() {
-		fFirstParticipant.reconcile(null);
+		fFirstStep.reconcile(null);
 		
 	}
 

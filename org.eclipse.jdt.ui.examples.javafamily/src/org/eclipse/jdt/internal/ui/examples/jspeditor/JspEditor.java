@@ -11,11 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
-import org.eclipse.jface.text.source.DefaultAnnotationAccess;
 import org.eclipse.jface.text.source.IAnnotationAccess;
 
 import org.eclipse.ui.editors.text.FileDocumentProvider;
 import org.eclipse.ui.editors.text.TextEditor;
+
+import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
+import org.eclipse.ui.texteditor.MarkerAnnotationPreferences;
 
 
 /**
@@ -26,12 +28,20 @@ import org.eclipse.ui.editors.text.TextEditor;
 public class JspEditor extends TextEditor {
 
 	/**
+	 * The annotation preferences.
+	 * @since 2.1
+	 */
+	private MarkerAnnotationPreferences fAnnotationPreferences;
+
+	/**
 	 * Creates a new JSP editor.
 	 */
 	public JspEditor() {
 		super();
 		setSourceViewerConfiguration(new JspSourceViewerConfiguration(this));
 		setDocumentProvider(new FileDocumentProvider());
+		fAnnotationPreferences= new MarkerAnnotationPreferences();
+		
 		
 		/*
 		 * FIXME:
@@ -45,6 +55,14 @@ public class JspEditor extends TextEditor {
 	 * @see TextEditor#createAnnotationAccess()
 	 */
 	protected IAnnotationAccess createAnnotationAccess() {
-		return new DefaultAnnotationAccess();
+		return new DefaultMarkerAnnotationAccess(fAnnotationPreferences);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextEditor#dispose()
+	 */
+	public void dispose() {
+		super.dispose();
+		fAnnotationPreferences= null;
 	}
 }

@@ -16,20 +16,19 @@ import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.reconciler.AbstractReconcileStep;
 import org.eclipse.jface.text.reconciler.DirtyRegion;
-import org.eclipse.jface.text.source.IAnnotationExtension;
-import org.eclipse.jface.text.source.TemporaryAnnotation;
+import org.eclipse.jface.text.reconciler.IReconcileStep;
+import org.eclipse.jface.text.reconciler.IReconcileResult;
+import org.eclipse.jface.text.reconciler.IReconcilableModel;
+import org.eclipse.jface.text.reconciler.DocumentAdapter;
 
-import org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant;
-import org.eclipse.text.reconcilerpipe.AnnotationAdapter;
-import org.eclipse.text.reconcilerpipe.IReconcilePipeParticipant;
-import org.eclipse.text.reconcilerpipe.IReconcileResult;
-import org.eclipse.text.reconcilerpipe.ITextModel;
-import org.eclipse.text.reconcilerpipe.TextModelAdapter;
+import org.eclipse.ui.texteditor.IAnnotationExtension;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -47,17 +46,17 @@ import org.eclipse.jdt.internal.core.BufferManager;
 
 
 /**
- * This reconcile pipe participant has a Java source document as 
+ * This reconcile step has a Java source document as 
  * input model and maintains a Java working copy as its model.
  * <p>
  * FIXME: We do not destroy the temporary working copy at the end.
  *         There are two ways to fix this:
  *         1. destroy it after each reconcile call ==> no internal model anylonger
- * 		   2. add life-cycle to reconcile pipe participants (at least dispose/destroy)
+ * 		   2. add life-cycle to reconcile steps (at least dispose/destroy)
  * </p>
  * @since 3.0
  */
-public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipant {
+public class JavaReconcileStep extends AbstractReconcileStep {
 
 	private static class TemporaryWorkingCopyOwner extends WorkingCopyOwner  {
 
@@ -100,7 +99,7 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 			else if (fProblem.isWarning())
 				type= TemporaryAnnotation.WARNING;
 				
-			return new TemporaryAnnotation(type, fProblem.getMessage());
+			return new TemporaryAnnotation(IMarker.PROBLEM, type, fProblem.getMessage());
 		}
 		
 		private Position createPositionFromProblem() {
@@ -203,7 +202,7 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	/**
 	 * Adapts an <code>ICompilationUnit</code> to the <code>ITextModel</code> interface.
 	 */
-	class CompilationUnitAdapter implements ITextModel {
+	class CompilationUnitAdapter implements IReconcilableModel {
 		
 		private ICompilationUnit fCompilationUnit;
 		
@@ -221,9 +220,9 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	private WorkingCopyOwner fTemporaryWorkingCopyOwner;
 
 	/**
-	 * Creates the last reconcile participant of the pipe.
+	 * Creates the last reconcile step of the pipe.
 	 */
-	public JavaReconcilePipeParticipant(IFile jspFile) {
+	public JavaReconcileStep(IFile jspFile) {
 		Assert.isNotNull(jspFile);
 		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
 		try {
@@ -234,11 +233,11 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	}
 
 	/**
-	 * Creates an intermediate reconcile participant which adds
-	 * the given participant to the pipe.
+	 * Creates an intermediate reconcile step which adds
+	 * the given step to the pipe.
 	 */
-	public JavaReconcilePipeParticipant(IReconcilePipeParticipant participant, IFile jspFile) {
-		super(participant);
+	public JavaReconcileStep(IReconcileStep step, IFile jspFile) {
+		super(step);
 		Assert.isNotNull(jspFile);
 		fTemporaryWorkingCopyOwner= new TemporaryWorkingCopyOwner();
 		try {
@@ -249,10 +248,10 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	}
 
 	/*
-	 * @see org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant#reconcileModel(org.eclipse.jface.text.reconciler.DirtyRegion, org.eclipse.jface.text.IRegion)
+	 * @see AbstractReconcileStep#reconcileModel(DirtyRegion, IRegion)
 	 */
 	protected IReconcileResult[] reconcileModel(DirtyRegion dirtyRegion, IRegion subRegion) {
-		Assert.isTrue(getInputModel() instanceof TextModelAdapter, "wrong model"); //$NON-NLS-1$
+		Assert.isTrue(getInputModel() instanceof DocumentAdapter, "wrong model"); //$NON-NLS-1$
 
 		ICompilationUnit cu= fWorkingCopy.getCompilationUnit(); 
 		// Cannot reconcile if CU could not be built
@@ -270,7 +269,7 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 		}
 		
 		if (buffer != null)
-			buffer.setContents(((TextModelAdapter)getInputModel()).getDocument().get());
+			buffer.setContents(((DocumentAdapter)getInputModel()).getDocument().get());
 
 		try {
 			synchronized (cu) {
@@ -288,9 +287,9 @@ public class JavaReconcilePipeParticipant extends AbstractReconcilePipeParticipa
 	}
 
 	/*
-	 * @see org.eclipse.text.reconcilerpipe.AbstractReconcilePipeParticipant#getModel()
+	 * @see AbstractReconcileStep#getModel()
 	 */
-	public ITextModel getModel() {
+	public IReconcilableModel getModel() {
 		return fWorkingCopy;
 	}
 	
