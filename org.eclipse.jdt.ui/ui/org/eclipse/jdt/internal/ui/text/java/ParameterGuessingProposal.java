@@ -132,28 +132,32 @@ public class ParameterGuessingProposal extends JavaCompletionProposal {
 		
 			super.apply(document, trigger, offset);
 
-			if (LinkedPositionManager.hasActiveManager(document)) {
-				fSelectedRegion= (positionOffsets.length == 0)
-					? new Region(baseOffset + replacementString.length(), 0)
-					: new Region(baseOffset + positionOffsets[0], positionLengths[0]);
-			
-			} else {
-				LinkedPositionManager manager= new LinkedPositionManager(document);
-				for (int i= 0; i != parameterCount; i++) {
-					int positionOffset= baseOffset + positionOffsets[i];
-					String type= TYPE + i;
-					if (fChoices[i].length == 0) {
-						manager.addPosition(positionOffset, positionLengths[i], type);
-					} else {
-						manager.addPosition(positionOffset, positionLengths[i], type, fChoices[i]);
-					}
-				}
+			if (parameterCount > 0) {
+				if (LinkedPositionManager.hasActiveManager(document)) {
+					fSelectedRegion= (positionOffsets.length == 0)
+						? new Region(baseOffset + replacementString.length(), 0)
+						: new Region(baseOffset + positionOffsets[0], positionLengths[0]);
 				
-				LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
-				editor.setFinalCaretOffset(baseOffset + replacementString.length());
-				editor.enter();
-	
-				fSelectedRegion= editor.getSelectedRegion();	
+				} else {
+					LinkedPositionManager manager= new LinkedPositionManager(document);
+					for (int i= 0; i != parameterCount; i++) {
+						int positionOffset= baseOffset + positionOffsets[i];
+						String type= TYPE + i;
+						if (fChoices[i].length == 0) {
+							manager.addPosition(positionOffset, positionLengths[i], type);
+						} else {
+							manager.addPosition(positionOffset, positionLengths[i], type, fChoices[i]);
+						}
+					}
+					
+					LinkedPositionUI editor= new LinkedPositionUI(fViewer, manager);
+					editor.setFinalCaretOffset(baseOffset + replacementString.length());
+					editor.enter();
+		
+					fSelectedRegion= editor.getSelectedRegion();	
+				}
+			} else {
+				fSelectedRegion= new Region(baseOffset + replacementString.length(), 0);
 			}
 
 		} catch (BadLocationException e) {

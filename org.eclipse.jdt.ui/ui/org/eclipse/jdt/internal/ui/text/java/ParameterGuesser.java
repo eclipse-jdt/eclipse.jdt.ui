@@ -167,7 +167,7 @@ public class ParameterGuesser {
 			char c;
 			while (index > 0 && (c= source.charAt(index - 1)) != '{' && c != ';')
 				index--;
-			return index;
+			return Math.min(index + 1, source.length());
 		}
 
 		/**
