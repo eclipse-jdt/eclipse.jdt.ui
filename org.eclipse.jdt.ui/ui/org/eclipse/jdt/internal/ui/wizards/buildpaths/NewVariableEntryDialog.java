@@ -11,13 +11,14 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -27,6 +28,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
+import org.eclipse.jface.viewers.ViewerSorter;
 
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -37,10 +40,13 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-public class NewVariableEntryDialog extends Dialog {
+public class NewVariableEntryDialog extends StatusDialog {
 
 	private class VariableSelectionListener implements IDoubleClickListener, ISelectionChangedListener {
 		public void doubleClick(DoubleClickEvent event) {
@@ -52,96 +58,6 @@ public class NewVariableEntryDialog extends Dialog {
 		}
 	}
 	
-	private static class FileLabelProvider extends LabelProvider {
-	
-		private final Image IMG_FOLDER= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
-		private final Image IMG_FILE= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
-	
-		public Image getImage(Object element) {
-			if (element instanceof File) {
-				File curr= (File) element;
-				if (curr.isDirectory()) {
-					return IMG_FOLDER;
-				} else {
-					return IMG_FILE;
-				}
-			}
-			return null;
-		}
-	
-		public String getText(Object element) {
-			if (element instanceof File) {
-				return ((File) element).getName();
-			}
-			return super.getText(element);
-		}
-	}
-	
-	private static class FileContentProvider implements ITreeContentProvider {
-		
-		private final Object[] EMPTY= new Object[0];
-	
-		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof File) {
-				File[] children= ((File) parentElement).listFiles();
-				if (children != null) {
-					return children;
-				}
-			}
-			return EMPTY;
-		}
-	
-		public Object getParent(Object element) {
-			if (element instanceof File) {
-				return ((File) element).getParentFile();
-			}
-			return null;
-		}
-	
-		public boolean hasChildren(Object element) {
-			return getChildren(element).length > 0;
-		}
-	
-		public Object[] getElements(Object element) {
-			return getChildren(element);
-		}
-	
-		public void dispose() {
-		}
-	
-		public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		}
-	
-	}
-	
-	private static class ExtensionValidator implements ISelectionStatusValidator {
-		
-		private boolean fAllowMulitple;
-		
-		public ExtensionValidator(boolean allowMultiple) {
-			fAllowMulitple= allowMultiple;
-		}
-		
-		
-		public IStatus validate(Object[] selection) {
-			int nSelected= selection.length;
-			if ((!fAllowMulitple && nSelected != 1) || nSelected == 0) {
-				return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
-			}
-			for (int i= 0; i < selection.length; i++) {
-				Object curr= selection[i];
-				if (curr instanceof File) {
-					File file= (File) curr;
-					if (!file.isFile() || !ArchiveFileFilter.isArchivePath(new Path(file.getName()))) {
-						return new StatusInfo(StatusInfo.ERROR, "");  //$NON-NLS-1$
-					}
-				}
-			}
-			return new StatusInfo();
-		}
-	}	
-	
-
 	private final int EXTEND_ID= IDialogConstants.CLIENT_ID;
 
 	private VariableBlock fVariableBlock;
@@ -150,18 +66,18 @@ public class NewVariableEntryDialog extends Dialog {
 	private Button fOkButton;
 	
 	private IPath[] fResultPaths;
-	
-	private IPath fExistingPath;
 	private String fTitle;
 	
 	private boolean fFirstInvocation= true;
 	
 			
-	public NewVariableEntryDialog(Shell parent, String title, IPath existingPath) {
+	public NewVariableEntryDialog(Shell parent, String title) {
 		super(parent);
-		fVariableBlock= new VariableBlock(false, existingPath == null ? null : existingPath.segment(0));
+		int shellStyle= getShellStyle();
+		setShellStyle(shellStyle | SWT.MAX | SWT.RESIZE);
+		
+		fVariableBlock= new VariableBlock(false, null);
 		fResultPaths= null;
-		fExistingPath= existingPath;
 		fTitle= title;
 	}
 	
@@ -175,12 +91,19 @@ public class NewVariableEntryDialog extends Dialog {
 	}	
 			
 	protected Control createDialogArea(Composite parent) {
+		initializeDialogUnits(parent);
 		VariableSelectionListener listener= new VariableSelectionListener();
 		
-		Composite composite= (Composite)super.createDialogArea(parent);
-		fVariableBlock.createContents(composite);
+		Composite composite= (Composite) super.createDialogArea(parent);
+		Control control= fVariableBlock.createContents(composite);
+		GridData data= new GridData(GridData.FILL_BOTH);
+		data.widthHint= convertWidthInCharsToPixels(80);
+		data.heightHint= convertHeightInCharsToPixels(15);
+		control.setLayoutData(data);
+		
 		fVariableBlock.addDoubleClickListener(listener);
 		fVariableBlock.addSelectionChangedListener(listener);
+		
 		return composite;
 	}
 	
@@ -217,6 +140,7 @@ public class NewVariableEntryDialog extends Dialog {
 	
 	private void doSelectionChanged() {
 		boolean isValidSelection= true;
+		StatusInfo status= new StatusInfo();
 		
 		List selected= fVariableBlock.getSelectedElements();
 		int nSelected= selected.size();
@@ -224,54 +148,36 @@ public class NewVariableEntryDialog extends Dialog {
 		boolean canExtend= false;
 		
 		if (nSelected > 0) {
-			if (fExistingPath != null && nSelected != 1) {
-				isValidSelection= false;
-			} else {
-				fResultPaths= new Path[nSelected];
-				for (int i= 0; i < nSelected; i++) {
-					CPVariableElement curr= (CPVariableElement) selected.get(i);
-					fResultPaths[i]= new Path(curr.getName());
-					if (!curr.getPath().toFile().isFile()) {
-						isValidSelection= false;
-					}
-						
+			fResultPaths= new Path[nSelected];
+			for (int i= 0; i < nSelected; i++) {
+				CPVariableElement curr= (CPVariableElement) selected.get(i);
+				fResultPaths[i]= new Path(curr.getName());
+				if (!curr.getPath().toFile().isFile()) {
+					isValidSelection= false;
+					status.setInfo(NewWizardMessages.getString("NewVariableEntryDialog.info.isfolder")); //$NON-NLS-1$
 				}
 			}
 		} else {
 			isValidSelection= false;
+			status.setInfo(NewWizardMessages.getString("NewVariableEntryDialog.info.noselection")); //$NON-NLS-1$
 		}
+		if (isValidSelection && nSelected > 1) {
+			String str= NewWizardMessages.getFormattedString("NewVariableEntryDialog.info.selected", String.valueOf(nSelected)); //$NON-NLS-1$
+			status.setInfo(str);
+		}
+		
 		fExtensionButton.setEnabled(nSelected == 1 && !isValidSelection);
 		fOkButton.setEnabled(isValidSelection);
-		
-		if (fFirstInvocation) {
-			fFirstInvocation= false;
-			if (fExistingPath != null && fExistingPath.segmentCount() > 1 && nSelected == 1) {
-				IPath resolved= JavaCore.getResolvedVariablePath(fExistingPath);
-				if (resolved != null && resolved.toFile().exists()) {
-					buttonPressed(EXTEND_ID);
-				}
-			}
-		}
+		updateStatus(status);
 	}
 	
 	private IPath[] chooseExtensions(CPVariableElement elem) {
 		File file= elem.getPath().toFile();
 
-		ILabelProvider lp= new FileLabelProvider();
-		ITreeContentProvider cp= new FileContentProvider();
-
-		ElementTreeSelectionDialog dialog= new ElementTreeSelectionDialog(getShell(), lp, cp);
+		JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), true);
 		dialog.setTitle(NewWizardMessages.getString("NewVariableEntryDialog.ExtensionDialog.title")); //$NON-NLS-1$
 		dialog.setMessage(NewWizardMessages.getFormattedString("NewVariableEntryDialog.ExtensionDialog.description", elem.getName())); //$NON-NLS-1$
 		dialog.setInput(file);
-		dialog.setValidator(new ExtensionValidator(fExistingPath == null));
-
-		if (fExistingPath != null) {
-			IPath resolved= JavaCore.getResolvedVariablePath(fExistingPath);
-			if (resolved != null) {
-				dialog.setInitialSelection(resolved.toFile());
-			}
-		}
 		if (dialog.open() == dialog.OK) {
 			Object[] selected= dialog.getResult();
 			IPath[] paths= new IPath[selected.length];

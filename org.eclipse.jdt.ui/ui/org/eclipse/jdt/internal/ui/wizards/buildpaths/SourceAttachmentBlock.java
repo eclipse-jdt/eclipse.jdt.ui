@@ -483,32 +483,38 @@ public class SourceAttachmentBlock {
 	 */
 	private IPath chooseExtJarFile() {
 		IPath currPath= new Path(fFileNameField.getText());
-		
 		if (currPath.isEmpty()) {
 			currPath= fJARPath;
-		}
-		IPath resolvedPath= currPath;
+		}		
 		if (fIsVariableEntry) {
-			resolvedPath= getResolvedPath(currPath);
-			if (resolvedPath == null) {
-				resolvedPath= Path.EMPTY;
+			IPath resolvedPath= getResolvedPath(currPath);
+			File initialSelection= resolvedPath != null ? resolvedPath.toFile() : null;
+			
+			String currVariable= currPath.segment(0);
+			JARFileSelectionDialog dialog= new JARFileSelectionDialog(getShell(), false);
+			dialog.setTitle(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.title")); //$NON-NLS-1$
+			dialog.setMessage(NewWizardMessages.getString("SourceAttachmentBlock.extvardialog.description")); //$NON-NLS-1$
+			dialog.setInput(fFileVariablePath.toFile());
+			dialog.setInitialSelection(initialSelection);
+			if (dialog.open() == dialog.OK) {
+				File result= (File) dialog.getResult()[0];
+				IPath returnPath= new Path(result.getPath()).makeAbsolute();
+				return modifyPath(returnPath, currVariable);
 			}
-		}
-		if (ArchiveFileFilter.isArchivePath(resolvedPath)) {
-			resolvedPath= resolvedPath.removeLastSegments(1);
-		}
-	
-		FileDialog dialog= new FileDialog(getShell());
-		dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
-		dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
-		dialog.setFilterPath(resolvedPath.toOSString());
-		String res= dialog.open();
-		if (res != null) {
-			IPath returnPath= new Path(res).makeAbsolute();
-			if (fIsVariableEntry) {
-				returnPath= modifyPath(returnPath, currPath.segment(0));
+		} else {
+			
+			if (ArchiveFileFilter.isArchivePath(currPath)) {
+				currPath= currPath.removeLastSegments(1);
 			}
-			return returnPath;
+		
+			FileDialog dialog= new FileDialog(getShell());
+			dialog.setText(NewWizardMessages.getString("SourceAttachmentBlock.extjardialog.text")); //$NON-NLS-1$
+			dialog.setFilterExtensions(new String[] {"*.jar;*.zip"}); //$NON-NLS-1$
+			dialog.setFilterPath(currPath.toOSString());
+			String res= dialog.open();
+			if (res != null) {
+				return new Path(res).makeAbsolute();
+			}
 		}
 		return null;
 	}

@@ -106,7 +106,7 @@ public class BuildPathsBlock {
 	private IStatusChangeListener fContext;
 	private Control fSWTWidget;	
 	
-	private boolean fShowSourceFolderPage;
+	private int fPageIndex;
 	
 	private SourceContainerWorkbookPage fSourceContainerPage;
 	private ProjectsWorkbookPage fProjectsPage;
@@ -114,11 +114,11 @@ public class BuildPathsBlock {
 	
 	private BuildPathBasePage fCurrPage;
 		
-	public BuildPathsBlock(IWorkspaceRoot root, IStatusChangeListener context, boolean showSourceFolders) {
-		fWorkspaceRoot= root;
+	public BuildPathsBlock(IStatusChangeListener context, int pageToShow) {
+		fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
 		fContext= context;
 		
-		fShowSourceFolderPage= showSourceFolders;
+		fPageIndex= pageToShow;
 		
 		
 		fSourceContainerPage= null;
@@ -173,11 +173,6 @@ public class BuildPathsBlock {
 		TabFolder folder= new TabFolder(composite, SWT.NONE);
 		folder.setLayout(new TabFolderLayout());	
 		folder.setLayoutData(new GridData(GridData.FILL_BOTH));
-		folder.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				tabChanged(e.item);
-			}	
-		});
 		
 		ImageRegistry imageRegistry= JavaPlugin.getDefault().getImageRegistry();
 		
@@ -235,14 +230,13 @@ public class BuildPathsBlock {
 	
 		editorcomp.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
-		if (fShowSourceFolderPage) {
-			folder.setSelection(0);
-			fCurrPage= fSourceContainerPage;
-		} else {
-			folder.setSelection(3);
-			fCurrPage= ordpage;
-			fClassPathList.selectFirstElement();
-		}
+		folder.setSelection(fPageIndex);
+		fCurrPage= (BuildPathBasePage) folder.getItem(fPageIndex).getData();
+		folder.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				tabChanged(e.item);
+			}	
+		});		
 
 		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.BUILD_PATH_BLOCK);				
 		return composite;
@@ -411,7 +405,11 @@ public class BuildPathsBlock {
 			entries[i]= currElement.getClasspathEntry();
 		}
 		return entries;
-	}	
+	}
+	
+	public int getPageIndex() {
+		return fPageIndex;
+	}
 	
 	
 	// -------- evaluate default settings --------
@@ -789,7 +787,8 @@ public class BuildPathsBlock {
 	
 	private void tabChanged(Widget widget) {
 		if (widget instanceof TabItem) {
-			BuildPathBasePage newPage= (BuildPathBasePage) ((TabItem) widget).getData();
+			TabItem tabItem= (TabItem) widget;
+			BuildPathBasePage newPage= (BuildPathBasePage) tabItem.getData();
 			if (fCurrPage != null) {
 				List selection= fCurrPage.getSelection();
 				if (!selection.isEmpty()) {
@@ -797,6 +796,7 @@ public class BuildPathsBlock {
 				}
 			}
 			fCurrPage= newPage;
+			fPageIndex= tabItem.getParent().getSelectionIndex();
 		}
 	}		
 }

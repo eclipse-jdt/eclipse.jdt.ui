@@ -7,7 +7,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -19,6 +18,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 
@@ -43,6 +43,10 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock;
  */
 public class BuildPathsPropertyPage extends PropertyPage implements IStatusChangeListener {
 		
+		
+	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage";
+	private static final String INDEX= "pageIndex";
+		
 	private BuildPathsBlock fBuildPathsBlock;
 	
 	/*
@@ -64,12 +68,22 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		}
 	}
 	
+	private IDialogSettings getSettings() {
+		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();
+		IDialogSettings pageSettings= javaSettings.getSection(PAGE_SETTINGS);
+		if (pageSettings == null) {
+			pageSettings= javaSettings.addNewSection(PAGE_SETTINGS);
+			pageSettings.put(INDEX, 3);
+		}
+		return pageSettings;
+	}
+	
+	
 	/**
 	 * Content for valid projects.
 	 */
 	private Control createWithJava(Composite parent, IProject project) {
-		IWorkspaceRoot root= JavaPlugin.getWorkspace().getRoot();
-		fBuildPathsBlock= new BuildPathsBlock(root, this, false);
+		fBuildPathsBlock= new BuildPathsBlock(this, getSettings().getInt(INDEX));
 		fBuildPathsBlock.init(JavaCore.create(project), null, null);
 		return fBuildPathsBlock.createControl(parent);
 	}
@@ -116,13 +130,15 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 			JavaPlugin.log(e);
 		}
 		return false;
-	}	
+	}
 	
 	/*
 	 * @see IPreferencePage#performOk
 	 */
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
+			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
+			
 			Shell shell= getControl().getShell();
 			IRunnableWithProgress runnable= new IRunnableWithProgress() {
 				public void run(IProgressMonitor monitor)	throws InvocationTargetException, InterruptedException {
@@ -155,6 +171,16 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.IPreferencePage#performCancel()
+	 */
+	public boolean performCancel() {
+		if (fBuildPathsBlock != null) {
+			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
+		}
+		return super.performCancel();
 	}
 
 }

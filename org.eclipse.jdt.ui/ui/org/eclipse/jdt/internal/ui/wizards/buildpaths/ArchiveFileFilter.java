@@ -69,14 +69,20 @@ public class ArchiveFileFilter extends ViewerFilter {
 	public static boolean isArchivePath(IPath path) {
 		String ext= path.getFileExtension();
 		if (ext != null && ext.length() != 0) {
-			for (int i= 0; i < fgArchiveExtensions.length; i++) {
-				if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
-					return true;
-				}
+			return isArchiveFileExtension(ext);
+		}
+		return false;
+	}
+	
+	public static boolean isArchiveFileExtension(String ext) {
+		for (int i= 0; i < fgArchiveExtensions.length; i++) {
+			if (ext.equalsIgnoreCase(fgArchiveExtensions[i])) {
+				return true;
 			}
 		}
 		return false;
-	}		
+	}
+			
 	
 			
 }

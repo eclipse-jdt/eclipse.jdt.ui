@@ -4,12 +4,15 @@
  */
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import org.eclipse.swt.graphics.Image;
-
 import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.LabelProvider;
+
+import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -19,11 +22,14 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class CPVariableElementLabelProvider extends LabelProvider {
 	
 	private Image fVariableImage;
+	private Image fJARImage;
+	private Image fFolderImage;
 	private boolean fShowResolvedVariables;
 	
 	public CPVariableElementLabelProvider(boolean showResolvedVariables) {
 		ImageRegistry reg= JavaPlugin.getDefault().getImageRegistry();
-		fVariableImage= reg.get(JavaPluginImages.IMG_OBJS_ENV_VAR);
+		fJARImage= reg.get(JavaPluginImages.IMG_OBJS_EXTJAR);
+		fFolderImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FOLDER);
 		fShowResolvedVariables= showResolvedVariables;
 	}
 	
@@ -32,7 +38,12 @@ public class CPVariableElementLabelProvider extends LabelProvider {
 	 */
 	public Image getImage(Object element) {
 		if (element instanceof CPVariableElement) {
-			return fVariableImage;
+			CPVariableElement curr= (CPVariableElement) element;
+			IPath path= curr.getPath();
+			if (path.toFile().isFile()) {
+				return fJARImage;
+			}
+			return fFolderImage;
 		}
 		return super.getImage(element);
 	}

@@ -86,7 +86,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 			}
 		};
 
-		fBuildPathsBlock= new BuildPathsBlock(root, listener, true);
+		fBuildPathsBlock= new BuildPathsBlock(listener, 0);
 		
 		fProjectModified= true;
 		fOutputLocation= null;

@@ -13,8 +13,6 @@ package org.eclipse.jdt.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -31,7 +29,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -76,7 +73,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 			}
 		};
 
-		fBuildPathsBlock= new BuildPathsBlock(ResourcesPlugin.getWorkspace().getRoot(), listener, true);
+		fBuildPathsBlock= new BuildPathsBlock(listener, 0);
 	}
 	
 	/**

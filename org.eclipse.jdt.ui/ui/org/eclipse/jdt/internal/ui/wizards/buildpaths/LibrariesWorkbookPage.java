@@ -63,9 +63,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogFie
 
 public class LibrariesWorkbookPage extends BuildPathBasePage {
 	
-
-
-	
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
 	
@@ -507,24 +504,39 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 	
 	private CPListElement[] openVariableSelectionDialog(CPListElement existing) {
-		String title= (existing == null) ? NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title") : NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"); //$NON-NLS-1$ //$NON-NLS-2$
-		IPath existingPath= (existing == null) ? null : existing.getPath();
-		
-		NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), title, existingPath);
-		if (dialog.open() == dialog.OK) {
+		if (existing == null) {
+			NewVariableEntryDialog dialog= new NewVariableEntryDialog(getShell(), "");
+			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.new.title"));
+			if (dialog.open() == dialog.OK) {
+				List existingElements= fLibrariesList.getElements();
+				
+				IPath[] paths= dialog.getResult();
+				ArrayList result= new ArrayList();
+				for (int i = 0; i < paths.length; i++) {
+					CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, paths[i], null);
+					IPath resolvedPath= JavaCore.getResolvedVariablePath(paths[i]);
+					elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
+					if (!existingElements.contains(elem)) {
+						result.add(elem);
+					}
+				}
+				return (CPListElement[]) result.toArray(new CPListElement[result.size()]);
+			}
+		} else {
 			List existingElements= fLibrariesList.getElements();
-			
-			IPath[] paths= dialog.getResult();
-			ArrayList result= new ArrayList();
-			for (int i = 0; i < paths.length; i++) {
-				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, paths[i], null);
-				IPath resolvedPath= JavaCore.getResolvedVariablePath(paths[i]);
-				elem.setIsMissing((resolvedPath == null) || !resolvedPath.toFile().exists());
-				if (!existingElements.contains(elem)) {
-					result.add(elem);
+			ArrayList existingPaths= new ArrayList(existingElements.size());
+			for (int i= 0; i < existingElements.size(); i++) {
+				CPListElement elem= (CPListElement) existingElements.get(i);
+				if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+					existingPaths.add(elem.getPath());
 				}
 			}
-			return (CPListElement[]) result.toArray(new CPListElement[result.size()]);
+			EditVariableEntryDialog dialog= new EditVariableEntryDialog(getShell(), existing.getPath(), existingPaths);
+			dialog.setTitle(NewWizardMessages.getString("LibrariesWorkbookPage.VariableSelectionDialog.edit.title"));
+			if (dialog.open() == dialog.OK) {
+				CPListElement elem= new CPListElement(fCurrJProject, IClasspathEntry.CPE_VARIABLE, dialog.getPath(), null);
+				return new CPListElement[] { elem };
+			}
 		}
 		return null;
 	}
