@@ -1,3 +1,5 @@
+package org.eclipse.jdt.ui.tests.all;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
