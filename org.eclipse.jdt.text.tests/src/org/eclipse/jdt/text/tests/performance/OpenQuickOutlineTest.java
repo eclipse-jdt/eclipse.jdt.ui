@@ -107,7 +107,7 @@ public class OpenQuickOutlineTest extends TextPerformanceTestCase {
 			performanceMeter.stop();
 		Shell shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertEquals("", shell.getText());
-		shell.close();
+		shell.dispose();
 		shell= EditorTestHelper.getActiveDisplay().getActiveShell();
 		assertFalse("".equals(shell.getText()));
 	}
