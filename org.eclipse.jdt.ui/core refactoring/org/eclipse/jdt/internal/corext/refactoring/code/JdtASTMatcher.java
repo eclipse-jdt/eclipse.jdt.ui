@@ -1,9 +1,11 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.internal.corext.Assert;
 
-class JdtASTMatcher extends ASTMatcher {
+public class JdtASTMatcher extends ASTMatcher {
 
 	public boolean match(SimpleName node, Object other) {
 		boolean isomorphic= super.match(node, other);
@@ -15,5 +17,12 @@ class JdtASTMatcher extends ASTMatcher {
 		if (node.resolveTypeBinding() != name.resolveTypeBinding())
 			return false;
 		return true;	
+	}
+	
+	public static boolean doNodesMatch(ASTNode one, ASTNode other) {
+		Assert.isNotNull(one);
+		Assert.isNotNull(other);
+		
+		return one.subtreeMatch(new JdtASTMatcher(), other);
 	}
 }
