@@ -20,7 +20,7 @@ class FilterWorkingSetAction extends SelectionProviderAction {
 	/*
 	 * Implementation of method defined on <code>IAction</code>.
 	 */
-	public void run() {		SelectionDialog dialog= SearchUI.createWorkingSetDialog(fShell);		IWorkingSet workingSet= fPackagesView.getWorkingSetFilter().getWorkingSet();		if (workingSet != null)			dialog.setInitialSelections(new IWorkingSet[] {workingSet});		if (dialog.open() == dialog.OK) {			IWorkingSet ws= (IWorkingSet)dialog.getResult()[0]; 			fPackagesView.setWorkingSet(ws);			fPackagesView.getViewer().getControl().setRedraw(false);
+	public void run() {		SelectionDialog dialog= SearchUI.createWorkingSetDialog(fShell);		IWorkingSet workingSet= fPackagesView.getWorkingSetFilter().getWorkingSet();		if (workingSet != null)			dialog.setInitialSelections(new IWorkingSet[] {workingSet});		if (dialog.open() == dialog.OK) {			Object[] result= dialog.getResult();			IWorkingSet ws= null;			if (result.length == 1)				ws= (IWorkingSet)result[0];			fPackagesView.setWorkingSet(ws);			fPackagesView.getViewer().getControl().setRedraw(false);
 			fPackagesView.getViewer().refresh();
 			fPackagesView.getViewer().getControl().setRedraw(true);		}		setChecked(fPackagesView.getWorkingSetFilter().getWorkingSet() != null);	}
 }
