@@ -142,7 +142,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new DefaultInformationControl(parent, SWT.TOOL, new HTMLTextPresenter(true), getTooltipAffordanceString());
+				return new DefaultInformationControl(parent, SWT.NONE, new HTMLTextPresenter(true), getTooltipAffordanceString());
 			}
 		};
 	}
