@@ -142,4 +142,11 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
+	 */
+	protected void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+
+	}
+
 }

@@ -283,5 +283,12 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#addNewTypeParameters(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, java.util.List, java.util.List)
+	 */
+	protected void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
+		
+	}
+
 
 }

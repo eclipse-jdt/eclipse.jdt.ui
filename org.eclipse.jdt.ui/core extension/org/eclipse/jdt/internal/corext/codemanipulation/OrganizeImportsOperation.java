@@ -107,7 +107,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private boolean needsImport(ITypeBinding typeBinding, SimpleName ref) {
 			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
-				return false; // no imports for anonymous, local, primitive types
+				return false; // no imports for anonymous, local, primitive types or parameters types
 			}
 			int modifiers= typeBinding.getModifiers();
 			if (Modifier.isPrivate(modifiers)) {

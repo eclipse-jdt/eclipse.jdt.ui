@@ -87,10 +87,10 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		if (newTypeDecl != null) {
 			ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 			
+			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
+			
 			ChildListPropertyDescriptor property= fSenderBinding.isAnonymous() ? AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY : TypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 			List members= (List) newTypeDecl.getStructuralProperty(property);
-			
-			MethodDeclaration newStub= getStub(rewrite, newTypeDecl);
 			
 			int insertIndex;
 			if (isConstructor()) {
@@ -116,9 +116,11 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 		
 		decl.setConstructor(isConstructor());
 		ASTNodeFactory.addModifiers(ast, evaluateModifiers(targetTypeDecl), decl.modifiers());
-		decl.setName(newNameNode);
 		
 		ArrayList takenNames= new ArrayList();
+		addNewTypeParameters(rewrite, takenNames, decl.typeParameters());
+		
+		decl.setName(newNameNode);
 		
 		IVariableBinding[] declaredFields= fSenderBinding.getDeclaredFields();
 		for (int i= 0; i < declaredFields.length; i++) { // avoid to take parameter names that are equal to field names
@@ -194,6 +196,8 @@ public abstract class AbstractMethodCompletionProposal extends LinkedCorrectionP
 	}
 	
 	protected abstract boolean isConstructor();
+
+	protected abstract void addNewTypeParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
 	protected abstract void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException;
 	protected abstract void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException;
 
