@@ -13,16 +13,23 @@ package org.eclipse.jdt.text.tests.performance;
 
 import java.util.ArrayList;
 
+import junit.framework.Assert;
+
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.jobs.IJobManager;
 import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.text.tests.Accessor;
 
@@ -51,10 +58,15 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -163,6 +175,10 @@ public class EditorTestHelper {
 	public static Display getActiveDisplay() {
 		IWorkbenchWindow window= getActiveWorkbenchWindow();
 		return window != null ? window.getShell().getDisplay() : null;
+	}
+
+	public static void joinBackgroundActivities(AbstractTextEditor editor) throws CoreException {
+		joinBackgroundActivities(getSourceViewer(editor));
 	}
 
 	public static void joinBackgroundActivities(SourceViewer sourceViewer) throws CoreException {
@@ -355,5 +371,15 @@ public class EditorTestHelper {
 		if (value != oldValue)
 			preferenceStore.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, value);
 		return oldValue;
+	}
+
+	public static IJavaProject createJavaProject(String project, String linkedSourceFolder) throws CoreException, JavaModelException {
+		IJavaProject javaProject= JavaProjectHelper.createJavaProject(project, "bin");
+		Assert.assertNotNull("JRE is null", JavaProjectHelper.addRTJar(javaProject));
+		IFolder folder= ResourceHelper.createLinkedFolder((IProject) javaProject.getUnderlyingResource(), new Path("src"), JdtTextTestPlugin.getDefault(), new Path(linkedSourceFolder));
+		Assert.assertNotNull(folder);
+		Assert.assertTrue(folder.exists());
+		JavaProjectHelper.addSourceContainer(javaProject, "src");
+		return javaProject;
 	}
 }

@@ -11,21 +11,11 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import java.util.Enumeration;
-
-import junit.extensions.TestDecorator;
-import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Path;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
-
-import org.eclipse.core.filebuffers.tests.ResourceHelper;
 
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.PerformanceMeter;
@@ -34,22 +24,26 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
+/**
+ * Measurements of the {@link org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy}.
+ * 
+ * @since 3.1
+ */
+
+public class JavaDocIndentStrategyTest extends TextPerformanceTestCase implements ITextEditorTestCase {
 	
-	private static class Setup extends TestSetup {
+	private static class Setup extends EditorTestSetup {
 
 		private static final String PROJECT= "JavaDocIndentStrategyTest";
 		
@@ -64,48 +58,26 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
 		}
 		
 		protected void setUp() throws Exception {
-			super.setUp();
-			fJavaProject= JavaProjectHelper.createJavaProject(PROJECT, "bin");
-			assertNotNull("JRE is null", JavaProjectHelper.addRTJar(fJavaProject));
-			
-			IProject project= (IProject) fJavaProject.getUnderlyingResource();
-			IFolder folder= ResourceHelper.createLinkedFolder(project, new Path("src"), JdtTextTestPlugin.getDefault(), new Path(LINKED_FOLDER));
-			assertNotNull(folder);
-			assertTrue(folder.exists());
-			JavaProjectHelper.addSourceContainer(fJavaProject, "src");
-			
-			AbstractTextEditor editor= (AbstractTextEditor) EditorTestHelper.openInEditor(ResourceTestHelper.findFile("/" + PROJECT + "/src/" + FILE), true);
-			SourceViewer sourceViewer= EditorTestHelper.getSourceViewer(editor);
-			assertTrue(EditorTestHelper.joinReconciler(sourceViewer, 0, 10000, 100));
-			Test test= getTest();
-			setEditor(test, editor);
-			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			store.setValue(PreferenceConstants.EDITOR_CLOSE_JAVADOCS, true);
 			store.setValue(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS, true);
+			
+			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
+			super.setUp();
 		}
 
-		private void setEditor(Test test, AbstractTextEditor editor) {
-			if (test instanceof JavaDocIndentStrategyTest)
-				((JavaDocIndentStrategyTest) test).setEditor(editor);
-			else if (test instanceof TestDecorator)
-				setEditor(((TestDecorator) test).getTest(), editor);
-			else if (test instanceof TestSuite)
-				for (Enumeration iter= ((TestSuite) test).tests(); iter.hasMoreElements();)
-					setEditor((Test) iter.nextElement(), editor);
+		protected String getFile() {
+			return "/" + PROJECT + "/src/" + FILE;
 		}
 
 		protected void tearDown () throws Exception {
-			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-			store.setToDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
-			store.setToDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS);
-
-			EditorTestHelper.closeAllEditors();
-			
+			super.tearDown();
 			if (fJavaProject != null)
 				JavaProjectHelper.delete(fJavaProject);
 			
-			super.tearDown();
+			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+			store.setToDefault(PreferenceConstants.EDITOR_CLOSE_JAVADOCS);
+			store.setToDefault(PreferenceConstants.EDITOR_ADD_JAVADOC_TAGS);
 		}
 	}
 	
@@ -140,6 +112,14 @@ public class JavaDocIndentStrategyTest extends TextPerformanceTestCase {
 		setMeasuredRuns(MEASURED_RUNS);
 	}
 
+	/**
+	 * Places the caret behind a Javadoc prefix after which the declaration
+	 * of a method with many arguments and declared exceptions follows and
+	 * measures the time it takes to auto edit when entering a newline. See
+	 * also <code>testResources/javaDocIndentStrategyTest1/Test.java<code>.
+	 * 
+	 * @throws Exception
+	 */
 	public void testJavaDocIndentStrategy() throws Exception {
 		int destOffset= EditorTestHelper.getDocument(fEditor).getLineOffset(LINE) + COLUMN;
 		measureJavaDocIndentStrategy(destOffset, getNullPerformanceMeter(), getWarmUpRuns());
