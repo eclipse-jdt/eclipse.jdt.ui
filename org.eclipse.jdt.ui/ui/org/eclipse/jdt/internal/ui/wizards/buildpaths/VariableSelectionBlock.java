@@ -157,7 +157,7 @@ public class VariableSelectionBlock {
 		IPath path= getResolvedPath();
 		if (path != null) {			if (findPath(path)) {
 				status.setError(NewWizardMessages.getString("VariableSelectionBlock.error.pathexists")); //$NON-NLS-1$
-			} else if (!path.toFile().exists()) {				status.setWarning(NewWizardMessages.getString("VariableSelectionBlock.warning.pathnotexists")); //$NON-NLS-1$			}		} else {			status.setWarning(NewWizardMessages.getString("VariableSelectionBlock.warning.pathnotexists")); //$NON-NLS-1$		}
+			} else if (!path.toFile().isFile()) {				status.setWarning(NewWizardMessages.getString("VariableSelectionBlock.warning.pathnotexists")); //$NON-NLS-1$			}		} else {			status.setWarning(NewWizardMessages.getString("VariableSelectionBlock.warning.pathnotexists")); //$NON-NLS-1$		}
 		return status;
 	}
 	

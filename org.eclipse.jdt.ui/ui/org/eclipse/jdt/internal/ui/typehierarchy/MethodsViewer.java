@@ -137,7 +137,11 @@ public class MethodsViewer extends TableViewer implements IProblemChangedListene
 		final TableColumn column= new TableColumn(table, SWT.NULL | SWT.MULTI | SWT.FULL_SELECTION);
 		table.addControlListener(new ControlAdapter() {
 			public void controlResized(ControlEvent e) {
-				column.setWidth(table.getSize().x-2*table.getBorderWidth());
+				int width= table.getSize().x- 2*table.getBorderWidth();
+				if (width < 0) {
+					width= 0;
+				}
+				column.setWidth(width);
 			}
 		});
 

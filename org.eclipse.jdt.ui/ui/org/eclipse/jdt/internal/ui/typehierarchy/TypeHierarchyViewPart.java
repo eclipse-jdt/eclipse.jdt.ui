@@ -373,9 +373,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		
 		ISelectionChangedListener selectionChangedListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				if (!fIsEnableMemberFilter) {
-					typeSelectionChanged(event.getSelection());
-				}
+				typeSelectionChanged(event.getSelection());
 			}
 		};
 		
@@ -766,7 +764,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				}
 				if (types.size() == 1) {
 					IType selectedType= (IType)types.get(0);
-					if (!selectedType.equals(fMethodsViewer.getInput())) {
+					if (!fIsEnableMemberFilter && !selectedType.equals(fMethodsViewer.getInput())) {
 						updateMethodViewer(selectedType);
 					}
 				} else if (types.size() == 0) {
@@ -776,7 +774,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 					revealElementInEditor(selected.get(0));
 				}
 			} else {
-				if (fMethodsViewer.getInput() != null) {
+				if (!fIsEnableMemberFilter && fMethodsViewer.getInput() != null) {
 					updateMethodViewer(null);
 				}
 			}

@@ -182,7 +182,14 @@ public class ListDialogField extends DialogField {
 			fTableControl.setEnabled(isEnabled());
 			if (fSelectionWhenEnabled != null) {
 				postSetSelection(fSelectionWhenEnabled);
-			}		
+			}
+			fTableColumn.getDisplay().asyncExec(new Runnable() {
+				public void run() {
+					if (fTableColumn != null && !fTableColumn.isDisposed()) {
+						fTableColumn.pack();
+					}
+				}
+			});
 		}
 		return fTableControl;
 	}
