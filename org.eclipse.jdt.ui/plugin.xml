@@ -599,7 +599,7 @@
       <!-- linked annotations -->
 	  <specification
             annotationType="org.eclipse.jdt.ui.link.master"
-            colorPreferenceValue="180,215,255"
+            colorPreferenceValue="70,100,165"
             colorPreferenceKey="linked.focus.color"
             isGoToPreviousNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="linked.focus.navigation.previous"
@@ -614,7 +614,7 @@
             textPreferenceValue="true"
             textPreferenceKey="linked.focus.text"
             highlightPreferenceKey="linked.focus.highlight"
-            highlightPreferenceValue="true"
+            highlightPreferenceValue="false"
             textStylePreferenceKey="linked.focus.text.style"
             textStylePreferenceValue="BOX"
             verticalRulerPreferenceKey="linked.focus.verticalruler"
@@ -647,7 +647,7 @@
       </specification>      
       <specification
             annotationType="org.eclipse.jdt.ui.link.target"
-            colorPreferenceValue="252,255,150"
+            colorPreferenceValue="70,100,165"
             colorPreferenceKey="linked.target.color"
             isGoToPreviousNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="linked.target.navigation.previous"
@@ -671,7 +671,7 @@
       </specification>
       <specification
             annotationType="org.eclipse.jdt.ui.link.exit"
-            colorPreferenceValue="252,255,150"
+            colorPreferenceValue="0,180,0"
             colorPreferenceKey="linked.exit.color"
             isGoToPreviousNavigationTarget="false"
             isGoToPreviousNavigationTargetKey="linked.exit.navigation.previous"

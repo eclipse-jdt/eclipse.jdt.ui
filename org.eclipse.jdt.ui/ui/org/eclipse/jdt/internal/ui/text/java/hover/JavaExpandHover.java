@@ -37,10 +37,14 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
 
+import org.eclipse.ui.texteditor.AnnotationPreference;
+import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
+
 import org.eclipse.ui.internal.texteditor.AnnotationExpandHover;
 import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl;
 import org.eclipse.ui.internal.texteditor.AnnotationExpansionControl.AnnotationHoverInput;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
@@ -51,12 +55,13 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
  * @since 3.0
  */
 public class JavaExpandHover extends AnnotationExpandHover {
+	/** Id of the no breakpoint fake annotation */
 	public static final String NO_BREAKPOINT_ANNOTATION= "org.eclipse.jdt.internal.ui.NoBreakpointAnnotation"; //$NON-NLS-1$
 
 	private static class NoBreakpointAnnotation extends Annotation implements IAnnotationPresentation {
 		
 		NoBreakpointAnnotation() {
-			super(NO_BREAKPOINT_ANNOTATION, false, "Double click to add a breakpoint"); //$NON-NLS-1$
+			super(NO_BREAKPOINT_ANNOTATION, false, "Add a breakpoint");
 		}
 		
 		/*
@@ -69,9 +74,13 @@ public class JavaExpandHover extends AnnotationExpandHover {
 		}
 	}
 	
+	private AnnotationPreferenceLookup fLookup= new AnnotationPreferenceLookup();
+	
 	/**
 	 * @param ruler
 	 * @param listener
+	 * @param doubleClickListener
+	 * @param access
 	 */
 	public JavaExpandHover(IVerticalRulerInfo ruler, IAnnotationListener listener, IDoubleClickListener doubleClickListener, IAnnotationAccess access) {
 		super(ruler, listener, doubleClickListener, access);
@@ -121,7 +130,13 @@ public class JavaExpandHover extends AnnotationExpandHover {
 			if (annotation instanceof IJavaAnnotation && annotation instanceof IAnnotationPresentation)
 				if (((IJavaAnnotation) annotation).getImage(display) == null)
 					continue;
-			
+				
+			AnnotationPreference pref= fLookup.getAnnotationPreference(annotation);
+			if (pref != null) {
+				String key= pref.getVerticalRulerPreferenceKey();
+				if (key != null && !JavaPlugin.getDefault().getPreferenceStore().getBoolean(key))
+					continue;
+			}
 			
 			Position position= model.getPosition(annotation);
 			if (position == null)
