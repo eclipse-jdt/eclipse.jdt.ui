@@ -317,6 +317,13 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 					typeParameterNames[i]= "<"+typeParameters[i].getElementName()+">"; //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				addProposals(argument, typeParameterNames, JavaPluginImages.IMG_MISC_DEFAULT);
+			} else if (elem instanceof IType) {
+				ITypeParameter[] typeParameters= ((IType) elem).getTypeParameters();
+				String[] typeParameterNames= new String[typeParameters.length];
+				for (int i= 0; i < typeParameters.length; i++) {
+					typeParameterNames[i]= "<"+typeParameters[i].getElementName()+">"; //$NON-NLS-1$ //$NON-NLS-2$
+				}
+				addProposals(argument, typeParameterNames, JavaPluginImages.IMG_MISC_DEFAULT);
 			}
 			return true;
 		} else if ("@throws".equals(tag) || "@exception".equals(tag)) { //$NON-NLS-2$ //$NON-NLS-1$
