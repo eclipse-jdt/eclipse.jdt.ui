@@ -23,7 +23,7 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.IWorkbenchWizard;
-import org.eclipse.ui.internal.NewProjectAction; // using internal class (PR: 6095)
+import org.eclipse.ui.actions.NewProjectAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -187,7 +187,8 @@ public abstract class AbstractOpenWizardAction extends Action implements IWorkbe
 			String title= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.title");
 			String message= JavaUIMessages.getString("AbstractOpenWizardAction.noproject.message");
 			if (MessageDialog.openQuestion(shell, title, message)) {
-				(new NewProjectAction()).run();	// using internal class (PR: 6095)
+				IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+				(new NewProjectAction(window)).run();	// using internal class (PR: 6095)
 				return workspace.getRoot().getProjects().length != 0;
 			}
 			return false;
