@@ -32,15 +32,5 @@ public class PerformanceTestSuite extends TestSuite {
 		addTestSuite(UndoJavaEditorTest.class);
 		addTestSuite(UndoTextEditorTest.class);
 		addTestSuite(OpenQuickOutlineTest.class);
-		addTestSuite(ScrollJavaEditorTest.class);
-		addTestSuite(ScrollTextEditorTest.class);
-		addTestSuite(JavaIndenterTest.class);
-		addTestSuite(NonInitialTypingTest.class);
-		addTestSuite(OpenPreferencePageTest.class);
-		addTestSuite(ScrollAnnotatedJavaEditorTest.class);
-		// TODO: enable when Bug 72244: "Posting mouse events locks up event handling" is fixed
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=72244
-//		addTestSuite(MouseScrollJavaEditorTest.class);
-//		addTestSuite(MouseScrollTextEditorTest.class);
 	}
 }
