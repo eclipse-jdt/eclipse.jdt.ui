@@ -23,9 +23,10 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.Context;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaSourceContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
-import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusEntry;
+import org.eclipse.jdt.internal.corext.refactoring.base.StringContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.corext.textmanipulation.TextEdit;
@@ -59,7 +60,7 @@ public class RefactoringAnalyzeUtil {
 		for (int i= 0; i < problemNodes.length; i++) {
 			//FIX ME incorrect - needs backlinking see http://bugs.eclipse.org/bugs/show_bug.cgi?id=11646
 			//see also http://bugs.eclipse.org/bugs/show_bug.cgi?id=12035
-			RefactoringStatusEntry.Context context= JavaSourceContext.create(modifiedWorkingCopy, new SourceRange(0,0));
+			Context context= JavaSourceContext.create(modifiedWorkingCopy, new SourceRange(0,0));
 			result.addError(RefactoringCoreMessages.getString("RefactoringAnalyzeUtil.name_collision") + problemNodes[i].getIdentifier(), context); //$NON-NLS-1$
 		}
 		return result;
@@ -118,7 +119,12 @@ public class RefactoringAnalyzeUtil {
 		Message[] newErrorMessages= ASTNodes.getMessages(newCUNode, ASTNodes.INCLUDE_ALL_PARENTS);
 		for (int i= 0; i < newErrorMessages.length; i++) {
 			if (! oldErrorMessages.contains(newErrorMessages[i].getMessage())){
-				RefactoringStatusEntry.Context context= JavaSourceContext.create(wc, new SourceRange(newErrorMessages[i].getSourcePosition(),0));
+				Context context;
+				try {
+					context= new StringContext(wc.getSource(), new SourceRange(newErrorMessages[i].getSourcePosition(), 0));
+				} catch (JavaModelException e) {
+					context= null;
+				}
 				subResult.addError(newErrorMessages[i].getMessage(), context);
 			}	
 		}
