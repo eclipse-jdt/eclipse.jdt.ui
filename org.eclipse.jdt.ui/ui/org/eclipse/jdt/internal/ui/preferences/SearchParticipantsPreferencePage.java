@@ -124,6 +124,10 @@ public class SearchParticipantsPreferencePage extends PreferencePage implements 
 		String idString= JavaPlugin.getDefault().getPreferenceStore().getDefaultString(STORE_ACTIVE_PARTICIPANTS);
 		return createActiveParticipants(idString);
 	}
+	
+	public static boolean hasAnyParticipants() {
+		return Platform.getPluginRegistry().getConfigurationElementsFor(JavaSearchPage.PARTICIPANT_EXTENSION_POINT).length > 0;
+	}
 
 	private static Map createActiveParticipants(String idList) {
 		String[] ids= unpackOrderList(idList);

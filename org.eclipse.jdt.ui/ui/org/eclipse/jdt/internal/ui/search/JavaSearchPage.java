@@ -524,6 +524,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 	}
 
 	private void createParticipants(Composite result) {
+		if (!SearchParticipantsPreferencePage.hasAnyParticipants())
+			return;
 		Button selectParticipants= new Button(result, SWT.PUSH);
 		selectParticipants.setText(SearchMessages.getString("SearchPage.select_participants.label")); //$NON-NLS-1$
 		GridData gd= new GridData();
