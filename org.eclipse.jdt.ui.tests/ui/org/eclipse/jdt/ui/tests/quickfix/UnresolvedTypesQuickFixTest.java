@@ -726,7 +726,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("@Targ\n");
+		buf.append("@Xyz\n");
 		buf.append("public interface E {\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -738,15 +738,15 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		
 		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
 		String preview1= getWizardPreviewContent(newCUWizard);
-				
+		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");			
-		buf.append("public @interface Targ {\n");
+		buf.append("public @interface Xyz {\n");
 		buf.append("\n");	
 		buf.append("}\n");
 		String expected1= buf.toString();
-		
+	
 		assertEqualStringsIgnoreOrder(new String[] { preview1 }, new String[] { expected1 });		
 	}
 	
