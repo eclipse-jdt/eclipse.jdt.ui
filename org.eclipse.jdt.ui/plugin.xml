@@ -3029,6 +3029,12 @@
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.FolderPropertyTester"/>
      
   <propertyTester
+     id="IJavaElementPropertyTester"
+     type="org.eclipse.jdt.core.IJavaElement"
+     properties="isAvailable"
+     class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.JavaElementPropertyTester"/>
+     
+  <propertyTester
      id="IMemberPropertyTester"
      type="org.eclipse.jdt.core.IMember"
      properties="isStatic, isPrivate"
@@ -3043,7 +3049,7 @@
   <propertyTester
      id="IMethodPropertyTester"
      type="org.eclipse.jdt.core.IMethod"
-     properties="isVirtual, declaringType, isConstructor"
+     properties="isVirtual, declaringType, isConstructor, isMainMethod"
      class="org.eclipse.jdt.internal.corext.refactoring.participants.xml.MethodPropertyTester"/>
      
 </extension>
@@ -3072,7 +3078,10 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameJavaProjectProcessor">
      <objectState>
         <or>
-           <property name="instanceof" value="org.eclipse.jdt.core.IJavaProject"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.jdt.core.IJavaProject"/>
+              <property name="isAvailable" value="true"/>
+            </and>
            <and>
               <property name="instanceof" value="org.eclipse.core.resources.IProject"/>
               <property name="projectNature" value="org.eclipse.jdt.core.javanature"/>
@@ -3087,7 +3096,10 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameSourceFolderProcessor">
      <objectState>
         <or>
-           <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragmentRoot"/>
+              <property name="isAvailable" value="true"/>
+           </and>
            <and>
               <property name="instanceof" value="org.eclipse.core.resources.IFolder"/>
               <property name="isSourceFolder" value="true"/>
@@ -3102,6 +3114,7 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor">
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IPackageFragment"/>
+        <property name="isAvailable" value="true"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -3111,7 +3124,10 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor">
      <objectState>
         <or>
-           <property name="instanceof" value="org.eclipse.jdt.core.ICompilationUnit"/>
+           <and>
+              <property name="instanceof" value="org.eclipse.jdt.core.ICompilationUnit"/>
+              <property name="isAvailable" value="true"/>
+           </and>
            <and>
               <property name="instanceof" value="org.eclipse.core.resources.IFile"/>
               <property name="isCompilationUnit" value="true"/>
@@ -3126,6 +3142,7 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor">
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IType"/>
+        <property name="isAvailable" value="true"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -3134,6 +3151,7 @@
      class="org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor">
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IField"/>
+        <property name="isAvailable" value="true"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -3144,6 +3162,8 @@
         <property name="instanceof" value="org.eclipse.jdt.core.IMethod"/>
         <property name="isVirtual" value="false"/>
         <property name="isConstructor" value="false"/>
+        <property name="isMainMethod" value="false"/>
+        <property name="isAvailable" value="true"/>
 	 </objectState>     
   </renameProcessor>
   
@@ -3153,6 +3173,7 @@
      <objectState>
         <property name="instanceof" value="org.eclipse.jdt.core.IMethod"/>
         <property name="isVirtual" value="true"/>
+        <property name="isAvailable" value="true"/>
 	 </objectState>     
   </renameProcessor>
 </extension>

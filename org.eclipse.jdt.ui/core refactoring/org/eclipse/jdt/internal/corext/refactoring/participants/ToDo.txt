@@ -57,6 +57,10 @@
   called "org.eclipse.core.resource.simpleNature". Otherwise the user has to specify the
   empty nature string in XML.
 
+- THE LRU optimazation only works for elements which have a processor. If no processor
+  is available we always check all rename processor which can be many. We need some
+  other optimazations as well.
+  
 ======================================= UI ===============================================
   
 - UI: Label and image of preview viewer. Must be determined by the change element

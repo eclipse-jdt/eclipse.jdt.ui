@@ -21,6 +21,7 @@ public class MethodPropertyTester extends PropertyTester {
 	private static final String PROPERTY_IS_VIRTUAL= "isVirtual"; //$NON-NLS-1$
 	private static final String PROPERTY_DECLARING_TYPE= "declaringType"; //$NON-NLS-1$
 	private static final String PROPERTY_IS_CONSTRUCTOR= "isConstructor";  //$NON-NLS-1$
+	private static final String PROPERTY_IS_MAIN_METHOD= "isMainMethod";  //$NON-NLS-1$
 	
 	public int test(Object element, String propertyName, String value) throws CoreException {
 		IMethod method= (IMethod)element;
@@ -30,6 +31,8 @@ public class MethodPropertyTester extends PropertyTester {
 			convert(Expression.isInstanceOf(method, value));
 		} else if (PROPERTY_IS_CONSTRUCTOR.equals(propertyName)) {
 			return testBoolean(value, method.isConstructor());
+		} else if (PROPERTY_IS_MAIN_METHOD.equals(propertyName)) {
+			return testBoolean(value, method.isMainMethod());
 		}
 		return UNKNOWN;
 	}

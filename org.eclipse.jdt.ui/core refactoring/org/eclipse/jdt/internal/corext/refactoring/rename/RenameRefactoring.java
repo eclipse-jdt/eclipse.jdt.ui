@@ -223,4 +223,14 @@ public class RenameRefactoring extends Refactoring implements IAdaptable, IRenam
 		else
 			fResourceParticipants= new IRefactoringParticipant[0];
 	}
+	
+	/* non java-doc
+	 * for debugging only
+	 */
+	public String toString() {
+		if (isAvailable())
+			return getName();
+		else
+			return "No refactoring available to process: " + fElement;
+	}
 }
