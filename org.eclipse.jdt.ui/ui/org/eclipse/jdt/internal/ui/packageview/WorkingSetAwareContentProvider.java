@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -140,13 +141,11 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 		return first;
 	}
 	
-	/* package */ void postRefresh(Object root, int relation, Object affectedElement) {
-		super.postRefresh(root, relation, affectedElement);
+	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
 		if (relation == GRANT_PARENT) {
 			Object parent= internalGetParent(affectedElement);
-			Object[] allParents= fWorkingSetModel.getAllParents(parent);
-			for (int i= 0; i < allParents.length; i++) {
-				super.postRefresh(allParents[i], ORIGINAL, allParents[i]);
+			if (parent != null) {
+				toRefresh.addAll(Arrays.asList(fWorkingSetModel.getAllParents(parent)));
 			}
 		}
 	}
@@ -154,12 +153,14 @@ public class WorkingSetAwareContentProvider extends PackageExplorerContentProvid
 	private void workingSetModelChanged(PropertyChangeEvent event) {
 		String property= event.getProperty();
 		Object newValue= event.getNewValue();
+		List toRefresh= new ArrayList(1);
 		if (WorkingSetModel.CHANGE_WORKING_SET_MODEL_CONTENT.equals(property)) {
-			postRefresh(fWorkingSetModel, ORIGINAL, fWorkingSetModel);
+			toRefresh.add(fWorkingSetModel);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_CONTENT_CHANGE.equals(property)) {
-			postRefresh(newValue, ORIGINAL, newValue);
+			toRefresh.add(newValue);
 		} else if (IWorkingSetManager.CHANGE_WORKING_SET_NAME_CHANGE.equals(property)) {
-			postRefresh(newValue, ORIGINAL, newValue);
+			toRefresh.add(newValue);
 		}
+		postRefresh(toRefresh, true);
 	}
 }

@@ -582,15 +582,21 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 
 		return false;
 	}
-	
-	/* package */ void postRefresh(Object root, int relation, Object affectedElement) {
+
+	private void postRefresh(Object root, int relation, Object affectedElement) {
 		// JFace doesn't refresh when object isn't part of the viewer
 		// Therefore move the refresh start down to the viewer's input
 		if (isParent(root, fInput)) 
 			root= fInput;
-		postRefresh(root, true);
+		List toRefresh= new ArrayList(1);
+		toRefresh.add(root);
+		augmentElementToRefresh(toRefresh, relation, affectedElement);
+		postRefresh(toRefresh, true);
 	}
 	
+	protected void augmentElementToRefresh(List toRefresh, int relation, Object affectedElement) {
+	}
+
 	boolean isParent(Object root, Object child) {
 		Object parent= getParent(child);
 		if (parent == null)
@@ -599,17 +605,20 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			return true;
 		return isParent(root, parent);
 	}
-	
-	/* package */ void postRefresh(final Object root, final boolean updateLabels) {
+
+	/* package */ void postRefresh(final List toRefresh, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
-				if (ctrl != null && !ctrl.isDisposed()){
-					fViewer.refresh(root, updateLabels);
+				if (ctrl != null && !ctrl.isDisposed()) {
+					for (Iterator iter= toRefresh.iterator(); iter.hasNext();) {
+						fViewer.refresh(iter.next(), updateLabels);
+					}
 				}
 			}
 		});
 	}
+
 	private void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
@@ -633,7 +642,7 @@ class PackageExplorerContentProvider extends StandardJavaElementContentProvider 
 			}
 		});
 	}
-	
+
 	private void postProjectStateChanged(final Object root) {
 		postRunnable(new Runnable() {
 			public void run() {
