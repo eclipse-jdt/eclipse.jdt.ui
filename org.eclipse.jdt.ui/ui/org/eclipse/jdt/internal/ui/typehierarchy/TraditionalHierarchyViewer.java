@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
 /**
  * A TypeHierarchyViewer that looks like the type hierarchy view of VA/Java:
@@ -74,7 +75,13 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 						if (input.isInterface()) {
 							return new Object[] { input };
 						} else {
-							return hierarchy.getRootClasses(); // will be java.lang.Object
+							IType[] roots= hierarchy.getRootClasses();
+							for (int i= 0; i < roots.length; i++) {
+								if ("java.lang.Object".equals(JavaModelUtil.getFullyQualifiedName(roots[i]))) {
+									return new Object[] { roots[i] };
+								}
+							} 
+							return roots; // a problem with the hierarchy
 						}
 					} catch (JavaModelException e) {
 						JavaPlugin.log(e);
