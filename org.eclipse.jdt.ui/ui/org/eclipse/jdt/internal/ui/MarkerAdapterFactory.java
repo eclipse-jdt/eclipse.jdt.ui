@@ -4,7 +4,6 @@
  */
 package org.eclipse.jdt.internal.ui;
 
-
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.search.ui.ISearchPageScoreComputer;
@@ -12,7 +11,7 @@ import org.eclipse.search.ui.ISearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 
 /**
- * Implements basic UI support for markers.
+ * Adapter factory to support basic UI operations for markers.
  */
 public class MarkerAdapterFactory implements IAdapterFactory {
 	
@@ -20,7 +19,7 @@ public class MarkerAdapterFactory implements IAdapterFactory {
 		ISearchPageScoreComputer.class
 	};
 	
-	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+	private ISearchPageScoreComputer fSearchPageScoreComputer;
 	
 	public Class[] getAdapterList() {
 		return PROPERTIES;
@@ -28,7 +27,13 @@ public class MarkerAdapterFactory implements IAdapterFactory {
 	
 	public Object getAdapter(Object element, Class key) {
 		if (ISearchPageScoreComputer.class.equals(key))
-			return fSearchPageScoreComputer;
+			return getSearchPageScoreComputer();
 		return null;
+	}
+	
+	private ISearchPageScoreComputer getSearchPageScoreComputer() {
+		if (fSearchPageScoreComputer == null)
+			fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+		return fSearchPageScoreComputer;
 	}
 }

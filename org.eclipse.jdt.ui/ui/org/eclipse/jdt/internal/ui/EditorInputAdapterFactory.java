@@ -6,43 +6,34 @@ package org.eclipse.jdt.internal.ui;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.views.properties.IPropertySource;
-
 import org.eclipse.search.ui.ISearchPageScoreComputer;
-
-import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 
 /**
- * Implements basic UI support for Java elements.
- * Implements handle to persistent support for Java elements.
+ * Adapter factory to support basic UI operations for for editor inputs.
  */
 public class EditorInputAdapterFactory implements IAdapterFactory {
 	
 	private static Class[] PROPERTIES= new Class[] {
-		ISearchPageScoreComputer.class,
+		ISearchPageScoreComputer.class
 	};
 	
-	private ISearchPageScoreComputer fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+	private ISearchPageScoreComputer fSearchPageScoreComputer;
 
 	public Class[] getAdapterList() {
 		return PROPERTIES;
 	}
 	
 	public Object getAdapter(Object element, Class key) {
-		
-		IEditorInput java= (IEditorInput) element;
-		
-		if (ISearchPageScoreComputer.class.equals(key)) {
-			return fSearchPageScoreComputer;
-		}
-		
+		if (ISearchPageScoreComputer.class.equals(key))
+			return getSearchPageScoreComputer();
 		return null;
 	}
 	
-	private IPropertySource getProperties(IJavaElement element) {
-		return new JavaElementProperties(element);
+	private ISearchPageScoreComputer getSearchPageScoreComputer() {
+		if (fSearchPageScoreComputer == null)
+			fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
+		return fSearchPageScoreComputer;
 	}
 }

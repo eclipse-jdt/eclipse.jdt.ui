@@ -26,14 +26,13 @@ public class JavaWorkbenchAdapter implements IWorkbenchAdapter {
 			try {
 				return ((IParent)o).getChildren();
 			} catch(JavaModelException e) {
-				// fall through
+				JavaPlugin.logErrorMessage(getClass().getName() + ": Error getting children for: " + o); //$NON-NLS-1$
 			}
 		}
 		return ArrayUtility.getEmptyArray();
 	}
 
 	public ImageDescriptor getImageDescriptor(Object object) {
-		// XXX: 1G5XYUD: ITPUI:WIN2000 - DCR - Need a generic way to access the label and image of an element
 		return null;
 	}
 
