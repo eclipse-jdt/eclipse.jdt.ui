@@ -706,7 +706,7 @@ public class PullUpRefactoring extends Refactoring {
 			RefactoringStatus result= new RefactoringStatus();
 			result.merge(checkFinalFields(new SubProgressMonitor(pm, 1)));
 			result.merge(checkAccesses(new SubProgressMonitor(pm, 1)));
-			result.merge(MemberCheckUtil.checkMembersInDestinationType(getMembersToBeCreatedInTargetClass(), getTargetClass()));
+			result.merge(checkMembersInDestinationType());
 			pm.worked(1);
 			result.merge(checkMembersInSubclasses(new SubProgressMonitor(pm, 1)));
 			result.merge(checkIfSkippingOverElements(new SubProgressMonitor(pm, 1)));
@@ -728,6 +728,15 @@ public class PullUpRefactoring extends Refactoring {
 			pm.done();
 		}	
 	}
+	private RefactoringStatus checkMembersInDestinationType() throws JavaModelException {
+		IMember[] membersToBeCreatedInTargetClass = getMembersToBeCreatedInTargetClass();
+		List newMembersInDesitnationType= new ArrayList(membersToBeCreatedInTargetClass.length);
+		newMembersInDesitnationType.addAll(Arrays.asList(membersToBeCreatedInTargetClass));
+		newMembersInDesitnationType.removeAll(Arrays.asList(fMethodsToDelete));
+		IMember[] members= (IMember[]) newMembersInDesitnationType.toArray(new IMember[newMembersInDesitnationType.size()]);
+		return MemberCheckUtil.checkMembersInDestinationType(members, getTargetClass());
+	}
+	
 	private void clearManagers() {
 		fAstManager.clear();
 		fImportEditManager.clear();
