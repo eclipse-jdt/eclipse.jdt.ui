@@ -334,13 +334,11 @@ public class GenerateActionGroup extends ActionGroup {
 	 */
 	public void fillContextMenu(IMenuManager menu) {
 		super.fillContextMenu(menu);
-		String shortCut= null; //$NON-NLS-1$
+		String menuText= ActionMessages.getString("SourceMenu.label"); //$NON-NLS-1$
 		if (fQuickAccessAction != null) {
-			shortCut= fQuickAccessAction.getShortCutString(); //$NON-NLS-1$
-		}		
-		IMenuManager subMenu= new MenuManager(
-			ActionMessages.getString("SourceMenu.label") + (shortCut != null ? "\t" + shortCut : ""), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			MENU_ID); 
+			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
+		}
+		IMenuManager subMenu= new MenuManager(menuText, MENU_ID); 
 		int added= 0;
 		if (isEditorOwner()) {
 			added= fillEditorSubMenu(subMenu);

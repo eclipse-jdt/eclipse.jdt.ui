@@ -92,7 +92,7 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
-	private FindOccurrencesInFileAction(IWorkbenchSite site) {
+	public FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);
 		ISelection selection= getSelection();
 		if (selection instanceof IStructuredSelection) {

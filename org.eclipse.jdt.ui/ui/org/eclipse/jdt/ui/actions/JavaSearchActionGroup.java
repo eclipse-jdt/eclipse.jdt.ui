@@ -10,18 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import org.eclipse.jdt.internal.ui.actions.FindExceptionOccurrences;
-import org.eclipse.jdt.internal.ui.actions.FindImplementOccurrencesAction;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jface.action.GroupMarker;
-import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.util.Assert;
+
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -29,6 +23,11 @@ import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
 /**
  * Action group that adds the Java search actions to a context menu and
@@ -43,17 +42,14 @@ import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 public class JavaSearchActionGroup extends ActionGroup {
 
 	private JavaEditor fEditor;
-	private IWorkbenchSite fSite;
 
 	private ReferencesSearchGroup fReferencesGroup;
 	private ReadReferencesSearchGroup fReadAccessGroup;
 	private WriteReferencesSearchGroup fWriteAccessGroup;
 	private DeclarationsSearchGroup fDeclarationsGroup;
 	private ImplementorsSearchGroup fImplementorsGroup;
+	private OccurrencesSearchGroup fOccurrencesGroup;
 	
-	private FindOccurrencesInFileAction fOccurrencesInFileAction;
-	private FindExceptionOccurrences fExceptionOriginatorsAction;
-	private FindImplementOccurrencesAction fFindImplementorOccurrencesAction;
 	
 	/**
 	 * Creates a new <code>JavaSearchActionGroup</code>. The group 
@@ -64,8 +60,6 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public JavaSearchActionGroup(IViewPart part) {
 		this(part.getViewSite());
-		fOccurrencesInFileAction= new FindOccurrencesInFileAction(part);
-		part.getViewSite().getSelectionProvider().addSelectionChangedListener(fOccurrencesInFileAction);
 	}
 	
 	/**
@@ -77,8 +71,6 @@ public class JavaSearchActionGroup extends ActionGroup {
 	 */
 	public JavaSearchActionGroup(Page page) {
 		this(page.getSite());
-		fOccurrencesInFileAction= new FindOccurrencesInFileAction(page);
-		page.getSite().getSelectionProvider().addSelectionChangedListener(fOccurrencesInFileAction);
 	}
 
 	/**
@@ -87,16 +79,13 @@ public class JavaSearchActionGroup extends ActionGroup {
 	public JavaSearchActionGroup(JavaEditor editor) {
 		Assert.isNotNull(editor);
 		fEditor= editor;
-		fSite= fEditor.getSite();
 		
 		fReferencesGroup= new ReferencesSearchGroup(fEditor);
 		fReadAccessGroup= new ReadReferencesSearchGroup(fEditor);
 		fWriteAccessGroup= new WriteReferencesSearchGroup(fEditor);
 		fDeclarationsGroup= new DeclarationsSearchGroup(fEditor);
 		fImplementorsGroup= new ImplementorsSearchGroup(fEditor);
-		fOccurrencesInFileAction= new FindOccurrencesInFileAction(fEditor);
-		fExceptionOriginatorsAction= new FindExceptionOccurrences(fEditor);
-		fFindImplementorOccurrencesAction= new FindImplementOccurrencesAction(fEditor);
+		fOccurrencesGroup= new OccurrencesSearchGroup(fEditor);
 	}
 
 	private JavaSearchActionGroup(IWorkbenchSite site) {
@@ -105,7 +94,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fWriteAccessGroup= new WriteReferencesSearchGroup(site);
 		fDeclarationsGroup= new DeclarationsSearchGroup(site);
 		fImplementorsGroup= new ImplementorsSearchGroup(site);
-		fSite= site;
+		fOccurrencesGroup= new OccurrencesSearchGroup(site);
 	}
 
 	/* 
@@ -117,6 +106,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup.setContext(context);
 		fReadAccessGroup.setContext(context);
 		fWriteAccessGroup.setContext(context);
+		fOccurrencesGroup.setContext(context);
 	}
 
 	/* 
@@ -129,9 +119,7 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup.fillActionBars(actionBar);
 		fReadAccessGroup.fillActionBars(actionBar);
 		fWriteAccessGroup.fillActionBars(actionBar);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_OCCURRENCES_IN_FILE, fOccurrencesInFileAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_EXCEPTION_OCCURRENCES, fExceptionOriginatorsAction);
-		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_IMPLEMENT_OCCURRENCES, fFindImplementorOccurrencesAction);
+		fOccurrencesGroup.fillActionBars(actionBar);
 	}
 	
 	/* 
@@ -148,8 +136,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 				fImplementorsGroup.fillContextMenu(menu);
 				fReadAccessGroup.fillContextMenu(menu);
 				fWriteAccessGroup.fillContextMenu(menu);
-				addAction(menu, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);		
 			}
+			fOccurrencesGroup.fillContextMenu(menu);
 
 		} else {
 			IMenuManager target= menu;
@@ -166,13 +154,10 @@ public class JavaSearchActionGroup extends ActionGroup {
 			fImplementorsGroup.fillContextMenu(target);
 			fReadAccessGroup.fillContextMenu(target);
 			fWriteAccessGroup.fillContextMenu(target);
+			fOccurrencesGroup.fillContextMenu(target);
 			
-			if (searchSubMenu != null) {
+			if (searchSubMenu != null)
 				searchSubMenu.add(new Separator());
-				addAction(target, fOccurrencesInFileAction);
-			} else {
-				addAction(target, IContextMenuConstants.GROUP_SEARCH, fOccurrencesInFileAction);
-			}
 			
 			// no other way to find out if we have added items.
 			if (searchSubMenu != null && searchSubMenu.getItems().length > 2) {		
@@ -190,18 +175,8 @@ public class JavaSearchActionGroup extends ActionGroup {
 		fImplementorsGroup.dispose();
 		fReadAccessGroup.dispose();
 		fWriteAccessGroup.dispose();
-		if (fOccurrencesInFileAction != null)
-			fSite.getSelectionProvider().removeSelectionChangedListener(fOccurrencesInFileAction);
+		fOccurrencesGroup.dispose();
+
 		super.dispose();
 	}
-	
-	private void addAction(IMenuManager manager, IAction action) {
-		if (action != null && action.isEnabled())
-			manager.add(action);
-	}
-	
-	private void addAction(IMenuManager manager, String group, IAction action) {
-		if (action != null && action.isEnabled())
-			manager.appendToGroup(group, action);
-	}	
 }

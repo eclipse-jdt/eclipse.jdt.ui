@@ -10,10 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -22,14 +22,19 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
+import org.eclipse.jdt.internal.ui.search.FindOccurrencesEngine;
 
  
 /**
@@ -54,11 +59,16 @@ public class FindExceptionOccurrences extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
-	private FindExceptionOccurrences(IWorkbenchSite site) {
+	public FindExceptionOccurrences(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindExceptionOccurrences.text")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("FindExceptionOccurrences.toolTip")); //$NON-NLS-1$
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_EXCEPTION_OCCURRENCES);
+		
+		ISelection selection= getSelection();
+		if (selection instanceof IStructuredSelection) {
+			setEnabled(getMember((IStructuredSelection)selection) != null);		
+		}
 	}
 	
 	//---- Text Selection ----------------------------------------------------------------------
@@ -98,5 +108,25 @@ public class FindExceptionOccurrences extends SelectionDispatchAction {
 		if (statusLine != null) 
 			statusLine.setMessage(true, msg, null); 
 		shell.getDisplay().beep();
+	}
+	
+	private IMember getMember(IStructuredSelection selection) {
+		if (selection.size() != 1)
+			return null;
+		Object o= selection.getFirstElement();
+		if (o instanceof IMember) {
+			IMember member= (IMember)o;
+			IClassFile file= member.getClassFile();
+			if (file != null) {
+				try {
+					if (file.getSourceRange() != null)
+						return member;
+				} catch (JavaModelException e) {
+					return null;
+				}
+			}
+			return member;
+		}
+		return null;
 	}
 }

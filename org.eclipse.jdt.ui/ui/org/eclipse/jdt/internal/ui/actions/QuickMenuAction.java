@@ -90,12 +90,28 @@ public abstract class QuickMenuAction extends Action {
 	protected abstract void fillMenu(IMenuManager menu);
 	
 	/**
-	 * Returns the short cut assigned to the sub menu or <code>null</code> if
+	 * Adds the shortcut to the given menu text and returns it.
+	 * 
+	 * @param menuText the menu text
+	 * @return the menu text with the shortcut
+	 * @since 3.1
+	 */
+	public String addShortcut(String menuText) {
+		String shortcut= getShortcutString();
+		if (menuText == null || shortcut == null)
+			return menuText;
+		
+		String[] args= new String[] { menuText, shortcut};
+		return ActionMessages.getFormattedString("QuickMenuAction.menuTextWithShortcut", args); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Returns the shortcut assigned to the sub menu or <code>null</code> if
 	 * no short cut is assigned.
 	 * 
-	 * @return the short cut as a human readable string or <code>null</code>
+	 * @return the shortcut as a human readable string or <code>null</code>
 	 */
-	public String getShortCutString() {
+	private String getShortcutString() {
 		final ICommandManager commandManager = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
 		final ICommand command = commandManager.getCommand(getActionDefinitionId());
 		if (command.isDefined()) {

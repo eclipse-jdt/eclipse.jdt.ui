@@ -566,6 +566,34 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 */
 	public static final String SEARCH_IMPLEMENTORS_IN_PROJECT= "org.eclipse.jdt.ui.edit.text.java.search.implementors.in.project"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the search -> occurrences in file quick menu action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"</code>).
+	 * @since 3.1
+	 */
+	public static final String SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU= "org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the search -> occurrences in file > elements action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"</code>).
+	 * @since 3.1
+	 */
+	public static final String SEARCH_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> occurrences in file > exceptions action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"</code>).
+	 * @since 3.1
+	 */
+	public static final String SEARCH_EXCEPTION_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"; //$NON-NLS-1$
+
+	/**
+	 * Action definition ID of the search -> occurrences in file > implements action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"</code>).
+	 * @since 3.1
+	 */
+	public static final String SEARCH_IMPLEMENT_OCCURRENCES_IN_FILE= "org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"; //$NON-NLS-1$
 
 	// miscellaneous
 	

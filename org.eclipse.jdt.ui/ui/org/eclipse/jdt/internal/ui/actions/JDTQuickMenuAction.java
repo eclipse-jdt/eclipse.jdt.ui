@@ -19,19 +19,19 @@ import org.eclipse.jface.text.ITextViewerExtension5;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.JavaWordFinder;
 
 
 public abstract class JDTQuickMenuAction extends QuickMenuAction { 
 	
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	
 	public JDTQuickMenuAction(String commandId) {
 		super(commandId);
 	}
 
-	public JDTQuickMenuAction(CompilationUnitEditor editor, String commandId) {
+	public JDTQuickMenuAction(JavaEditor editor, String commandId) {
 		super(commandId);
 		fEditor= editor;
 	}

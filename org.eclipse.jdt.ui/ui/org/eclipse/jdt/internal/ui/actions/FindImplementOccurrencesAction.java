@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IEditorInput;
@@ -19,7 +22,9 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -53,10 +58,14 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		setEnabled(getEditorInput(editor) != null);
 	}
 	
-	private FindImplementOccurrencesAction(IWorkbenchSite site) {
+	public FindImplementOccurrencesAction(IWorkbenchSite site) {
 		super(site);
 		setText(ActionMessages.getString("FindImplementOccurrencesAction.text")); //$NON-NLS-1$
 		setToolTipText(ActionMessages.getString("FindImplementOccurrencesAction.toolTip")); //$NON-NLS-1$
+		ISelection selection= getSelection();
+		if (selection instanceof IStructuredSelection) {
+			setEnabled(getMember((IStructuredSelection)selection) != null);		
+		}
 		WorkbenchHelp.setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
 	}
 	
@@ -97,5 +106,25 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		if (statusLine != null) 
 			statusLine.setMessage(true, msg, null); 
 		shell.getDisplay().beep();
+	}
+
+	private IMember getMember(IStructuredSelection selection) {
+		if (selection.size() != 1)
+			return null;
+		Object o= selection.getFirstElement();
+		if (o instanceof IMember) {
+			IMember member= (IMember)o;
+			IClassFile file= member.getClassFile();
+			if (file != null) {
+				try {
+					if (file.getSourceRange() != null)
+						return member;
+				} catch (JavaModelException e) {
+					return null;
+				}
+			}
+			return member;
+		}
+		return null;
 	}
 }

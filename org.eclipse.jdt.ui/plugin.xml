@@ -2004,6 +2004,38 @@
          </action>
 <!-- context menu group  -->
          <menu
+               label="%occurrencesSubMenu.label"
+               path="org.eclipse.search.menu/contextMenuActionsGroup"
+               id="occurrencesSubMenu">
+            <separator
+                  name="group1">
+            </separator>
+         </menu>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
+               label="%ImplementOccurrences.label"
+               retarget="true"
+               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
+               allowLabelUpdate="true"
+               id="org.eclipse.jdt.ui.actions.ImplementOccurrences">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
+               label="%ExceptionOccurrences.label"
+               retarget="true"
+               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
+               allowLabelUpdate="true"
+               id="org.eclipse.jdt.ui.actions.ExceptionOccurrences">
+         </action>
+         <action
+               definitionId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+               label="%OccurrencesInFile.label"
+               retarget="true"
+               menubarPath="org.eclipse.search.menu/occurrencesSubMenu/group1"
+               allowLabelUpdate="true"
+               id="org.eclipse.jdt.ui.actions.OccurrencesInFile">
+         </action>
+         <menu
                label="%writeAccessSubMenu.label"
                path="org.eclipse.search.menu/contextMenuActionsGroup"
                id="writeAccessSubMenu">
@@ -2194,31 +2226,6 @@
                menubarPath="org.eclipse.search.menu/referencesSubMenu/group1"
                allowLabelUpdate="true"
                id="org.eclipse.jdt.ui.actions.ReferencesInWorkspace">
-         </action>
-<!-- Occurrences menu group  -->
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.implement.occurrences"
-               label="%ImplementOccurrences.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ImplementOccurrences">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.exception.occurrences"
-               label="%ExceptionOccurrences.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.ExceptionOccurrences">
-         </action>
-         <action
-               definitionId="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
-               label="%OccurrencesInFile.label"
-               retarget="true"
-               menubarPath="org.eclipse.search.menu/internalOccurrencesGroup"
-               allowLabelUpdate="true"
-               id="org.eclipse.jdt.ui.actions.OccurrencesInFile">
          </action>
       </actionSet>
    </extension>
@@ -4063,15 +4070,15 @@
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <command
-            name="%ActionDefinition.occurrencesInFile.name"
-            description="%ActionDefinition.occurrencesInFile.description"
+            name="%ActionDefinition.occurrencesInFile.quickMenu.name"
+            description="%ActionDefinition.occurrencesInFile.quickMenu.description"
             category="org.eclipse.search.ui.category.search"
-            id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file">
+            id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu">
       </command>
       <keyBinding
             string="Ctrl+Shift+U"
             scope="org.eclipse.ui.globalScope"
-            command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
+            command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
       </keyBinding>
       <keyBinding
@@ -4084,6 +4091,18 @@
       <keyBinding
             platform="carbon"
             string="Command+Shift+U"
+            scope="org.eclipse.ui.globalScope"
+            command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file.quickMenu"
+            configuration="org.eclipse.ui.defaultAcceleratorConfiguration">
+      </keyBinding>
+      <command
+            name="%ActionDefinition.occurrencesInFile.name"
+            description="%ActionDefinition.occurrencesInFile.description"
+            category="org.eclipse.search.ui.category.search"
+            id="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file">
+      </command>
+      <keyBinding
+            string=""
             scope="org.eclipse.ui.globalScope"
             command="org.eclipse.jdt.ui.edit.text.java.search.occurrences.in.file"
             configuration="org.eclipse.ui.defaultAcceleratorConfiguration">

@@ -453,13 +453,11 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private void addRefactorSubmenu(IMenuManager menu) {
-		String shortCut= null; //$NON-NLS-1$
+		String menuText= ActionMessages.getString("RefactorMenu.label"); //$NON-NLS-1$
 		if (fQuickAccessAction != null) {
-			shortCut= fQuickAccessAction.getShortCutString(); //$NON-NLS-1$
+			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
 		}
-		IMenuManager refactorSubmenu= new MenuManager(
-			ActionMessages.getString("RefactorMenu.label") + (shortCut != null ? "\t" + shortCut : ""), //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			MENU_ID);  
+		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);  
 		if (fEditor != null) {
 			IJavaElement element= SelectionConverter.getInput(fEditor);
 			if (element != null && ActionUtil.isOnBuildPath(element)) {
