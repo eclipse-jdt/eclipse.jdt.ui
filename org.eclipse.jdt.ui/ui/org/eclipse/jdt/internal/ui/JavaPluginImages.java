@@ -351,6 +351,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_TOOL_NEWPACKROOT= create(T_ETOOL, "newpackfolder_wiz.gif"); 		//$NON-NLS-1$
 
 	public static final ImageDescriptor DESC_TOOL_CLASSPATH_ORDER= create(T_OBJ, "cp_order_obj.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_ELCL_COLLAPSEALL= create(T_ELCL, "collapseall.gif"); //$NON-NLS-1$
 
 	// Keys for correction proposal. We have to put the image into the registry since "code assist" doesn't
 	// have a life cycle. So no change to dispose icons.
@@ -383,6 +384,19 @@ public class JavaPluginImages {
 	 */ 
 	public static Image get(String key) {
 		return getImageRegistry().get(key);
+	}
+	
+	/**
+	 * Returns the image descriptor for the given key in this registry. Might be called in a non-UI thread.
+	 * 
+	 * @param key the image's key
+	 * @return the image descriptor for the given key
+	 */ 
+	public static ImageDescriptor getDescriptor(String key) {
+		if (fgAvoidSWTErrorMap != null && fgImageRegistry == null) {
+			return (ImageDescriptor) fgAvoidSWTErrorMap.get(key);
+		}
+		return getImageRegistry().getDescriptor(key);
 	}
 	
 	/**
