@@ -65,7 +65,7 @@ public class WorkingCopyUtil {
 
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
-	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.ICompilationUnit#discardWorkingCopy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu) throws JavaModelException{
 		/*
@@ -76,7 +76,7 @@ public class WorkingCopyUtil {
 
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
-	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.ICompilationUnit#discardWorkingCopy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(ICompilationUnit cu, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
 		/*
@@ -88,7 +88,7 @@ public class WorkingCopyUtil {
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
 	 * A cu with the specified name may or may not exist in the package.
-	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.ICompilationUnit#discardWorkingCopy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(IPackageFragment pack, String cuName) throws JavaModelException{
 		return pack.getCompilationUnit(cuName).getWorkingCopy(null);
@@ -97,7 +97,7 @@ public class WorkingCopyUtil {
 	/**
 	 * Creates a <em>new</em> working copy and the caller is responsible for destroying it.
 	 * A cu with the specified name may or may not exist in the package.
-	 * @see org.eclipse.jdt.core.IWorkingCopy#destroy()
+	 * @see org.eclipse.jdt.core.ICompilationUnit#discardWorkingCopy()
 	 */
 	public static ICompilationUnit getNewWorkingCopy(IPackageFragment pack, String cuName, WorkingCopyOwner owner, IProgressMonitor pm) throws JavaModelException{
 		return pack.getCompilationUnit(cuName).getWorkingCopy(owner, null, pm);
