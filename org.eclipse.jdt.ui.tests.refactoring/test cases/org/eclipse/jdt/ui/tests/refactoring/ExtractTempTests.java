@@ -11,6 +11,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.tests.refactoring.infra.SourceCompareUtil;
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatus;
@@ -99,7 +100,7 @@ public class ExtractTempTests extends RefactoringTest {
 		String newCuName= getSimpleTestFileName(true, true);
 		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
 		assertTrue(newCuName + " does not exist", newcu.exists());
-		assertEquals("incorrect extraction", getFileContents(getTestFileName(true, false)), newcu.getSource());
+		SourceCompareUtil.compare(newcu.getSource(), getFileContents(getTestFileName(true, false)));
 	}
 	
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean makeFinal, String tempName) throws Exception{
@@ -382,6 +383,26 @@ public class ExtractTempTests extends RefactoringTest {
 	public void test57() throws Exception{
 //		printTestDisabledMessage("test for bug 24808");
 		helper1(8, 30, 8, 54, true, false, "newVariable");
+	}	
+
+	public void test58() throws Exception{
+//		printTestDisabledMessage("test for bug 30304");
+		helper1(7, 14, 7, 30, true, false, "temp");
+	}	
+
+	public void test59() throws Exception{
+//		printTestDisabledMessage("test for bug 30304");
+		helper1(7, 17, 7, 18, true, false, "temp");
+	}	
+
+	public void test60() throws Exception{
+//		printTestDisabledMessage("test for bug 30304");
+		helper1(7, 17, 7, 18, true, false, "temp");
+	}	
+
+	public void test61() throws Exception{
+//		printTestDisabledMessage("test for bug 30304");
+		helper1(7, 17, 7, 18, true, false, "temp");
 	}	
 		
 	// -- testing failing preconditions
