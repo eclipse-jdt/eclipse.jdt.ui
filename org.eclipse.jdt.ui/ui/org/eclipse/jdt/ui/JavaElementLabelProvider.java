@@ -140,6 +140,17 @@ public class JavaElementLabelProvider extends LabelProvider {
 	// map images for JarEntryFiles, key = extension - value = image
 	// the cached images will be disposed wen the label provider is disposed.
 	private Map fJarImageMap= new HashMap(10);
+
+	/**
+	 * Creates a new label provider with <code>SHOW_DEFAULT</code> flag.
+	 *
+	 * @see #SHOW_DEFAULT
+	 * @since 2.0
+	 */
+	public JavaElementLabelProvider() {
+		this(SHOW_DEFAULT);
+	}
+
 	/**
 	 * Creates a new label provider.
 	 *
