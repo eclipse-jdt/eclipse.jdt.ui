@@ -73,7 +73,6 @@ import org.eclipse.ui.help.WorkbenchHelp;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ContentAssistAction;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IStatusField;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
@@ -365,7 +364,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 				return new ExitFlags(LinkedPositionUI.COMMIT, true);
 			
 			case ';':
-				if (fSmartTyping)
+				if (getInsertMode() == SMART_INSERT)
 					return new ExitFlags(LinkedPositionUI.COMMIT, true);
 				// else fall through
 				
@@ -458,7 +457,7 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		 */
 		public void verifyKey(VerifyEvent event) {			
 
-			if (!event.doit || !isSmartTyping())
+			if (!event.doit || getInsertMode() != SMART_INSERT)
 				return;
 				
 			final ISourceViewer sourceViewer= getSourceViewer();
@@ -591,8 +590,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 	private int fRememberedElementOffset;
 	/** The bracket inserter. */
 	private BracketInserter fBracketInserter= new BracketInserter();
-	/** The editor's smart typing state. */
-	private boolean fSmartTyping;
 
 	/** The standard action groups added to the menu */
 	private GenerateActionGroup fGenerateActionGroup;
@@ -611,9 +608,6 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		fSavePolicy= null;
 			
 		fJavaEditorErrorTickUpdater= new JavaEditorErrorTickUpdater(this);		
-
-		// smart typing
-		setSmartTyping(JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_TYPING));
 	}
 	
 	/*
@@ -1268,46 +1262,4 @@ public class CompilationUnitEditor extends JavaEditor implements IReconcilingPar
 		
 		return oldExtension.equals(newExtension);
 	}
-	
-	/**
-	 * Returns the editor's smart typing state.
-	 * @return <code>true</code> if the editor is in smart typing mode, <code>false</code>
-	 * otherwise.
-	 */
-	public boolean isSmartTyping() {
-		return fSmartTyping;
-	}
-
-	/**
-	 * Sets the editor's smart typing state.
-	 * @param smart the new smart typing state.
-	 */
-	public void setSmartTyping(boolean smart) {
-		if (smart != fSmartTyping) {
-			fSmartTyping= smart;
-			updateStatusField(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);
-		}
-	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updateStatusFields()
-	 */
-	protected void updateStatusFields() {
-		super.updateStatusFields();
-		updateStatusField(IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING);
-	}
-	
-	/*
-	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#updateStatusField(java.lang.String)
-	 */
-	protected void updateStatusField(String category) {
-		if (IJavaEditorActionConstants.STATUS_CATEGORY_SMART_TYPING.equals(category)) {
-			IStatusField field= getStatusField(category);
-			if (field != null)
-				field.setText(fSmartTyping ? JavaEditorMessages.getString("ToggleSmartTypingAction.Smart.label") : JavaEditorMessages.getString("ToggleSmartTypingAction.Raw.label"));  //$NON-NLS-1$//$NON-NLS-2$
-		} else {
-			super.updateStatusField(category);
-		}
-	}
-
 }

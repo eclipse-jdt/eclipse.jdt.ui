@@ -31,6 +31,7 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
@@ -54,7 +55,6 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
@@ -839,9 +839,9 @@ public class JavaAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
 			IEditorPart part= page.getActiveEditor(); 
-			if (part instanceof CompilationUnitEditor) {
-				CompilationUnitEditor editor= (CompilationUnitEditor) part;
-				return editor.isSmartTyping();
+			if (part instanceof ITextEditorExtension3) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
+				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
 			}
 		}
 		return false;

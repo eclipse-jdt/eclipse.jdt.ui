@@ -30,6 +30,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,7 +49,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+
 
 /**
  * Auto indent strategy for java doc comments
@@ -262,9 +263,9 @@ public class JavaDocAutoIndentStrategy extends DefaultAutoIndentStrategy {
 		IWorkbenchPage page= JavaPlugin.getActivePage();
 		if (page != null)  {
 			IEditorPart part= page.getActiveEditor(); 
-			if (part instanceof CompilationUnitEditor) {
-				CompilationUnitEditor editor= (CompilationUnitEditor) part;
-				return editor.isSmartTyping();
+			if (part instanceof ITextEditorExtension3) {
+				ITextEditorExtension3 extension= (ITextEditorExtension3) part;
+				return extension.getInsertMode() == ITextEditorExtension3.SMART_INSERT;
 			}
 		}
 		return false;

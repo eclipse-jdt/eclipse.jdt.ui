@@ -23,6 +23,7 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.texteditor.ITextEditorExtension2;
+import org.eclipse.ui.texteditor.ITextEditorExtension3;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -93,8 +94,8 @@ public class SmartSemicolonAutoEditStrategy implements IAutoEditStrategy {
 		IEditorPart part= page.getActiveEditor(); 
 		if (!(part instanceof CompilationUnitEditor)) return;
 		CompilationUnitEditor editor= (CompilationUnitEditor)part;
-		if (!editor.isSmartTyping() || !editor.isEditable()) return;
-		ITextEditorExtension2 extension= (ITextEditorExtension2)editor.getAdapter(ITextEditorExtension2.class);
+		if (editor.getInsertMode() != ITextEditorExtension3.SMART_INSERT || !editor.isEditable()) return;
+		ITextEditorExtension2 extension= (ITextEditorExtension2) editor.getAdapter(ITextEditorExtension2.class);
 		if (extension != null && !extension.validateEditorInputState()) return;
 		
 		// 1: find concerned line / position in java code, location in statement
