@@ -76,21 +76,33 @@ public class NameProposer {
 		}
 		return name;
 	}
+
+	public String proposeParameterName(String paramType) {
+		String name= Signature.getSimpleName(paramType);
+		int arrIndex= name.indexOf('[');
+		if (arrIndex != -1) {
+			name= name.substring(0, arrIndex);
+		}
+
+		char firstLetter= name.charAt(0);
+		if (Character.isUpperCase(firstLetter)) {
+			StringBuffer nameBuffer= new StringBuffer();
+			nameBuffer.append(Character.toLowerCase(firstLetter));
+			nameBuffer.append(name.substring(1));
+			if (arrIndex != -1) {
+				nameBuffer.append('s');
+			}
+			if (JavaConventions.validateFieldName(name).isOK()) {
+				return nameBuffer.toString();
+			}
+		}
+		return String.valueOf(Character.toLowerCase(firstLetter));
+	}
 	
 	public String[] proposeParameterNames(String[] paramTypes) {
 		String[] res= new String[paramTypes.length];
 		for (int i= 0; i < paramTypes.length; i++) {
-			String name= Signature.getSimpleName(paramTypes[i]);
-			
-			char firstLetter= name.charAt(0);
-			if (Character.isUpperCase(firstLetter)) {
-				name= String.valueOf(Character.toLowerCase(firstLetter)) + name.substring(1);
-				if (!JavaConventions.validateFieldName(name).isOK()) {
-					name= String.valueOf(Character.toLowerCase(firstLetter));
-				}	
-			} else {
-				name= String.valueOf(firstLetter);
-			}
+			String name= proposeParameterName(paramTypes[i]);
 			for (int k= 0; k < i; k++) {
 				if (res[k].equals(name)) {
 					res[k]= res[k] + k;
