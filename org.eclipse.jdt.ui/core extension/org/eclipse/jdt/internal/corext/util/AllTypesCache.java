@@ -190,7 +190,10 @@ public class AllTypesCache {
 			
 			final ArrayList typesFound= new ArrayList(fSizeHint);
 
-			class RequestorAbort extends RuntimeException { }
+			class RequestorAbort extends RuntimeException {
+				// No really serializable
+				private static final long serialVersionUID= 1L; 
+			}
 		
 			ITypeNameRequestor requestor= new TypeInfoRequestor(typesFound) {
 				protected boolean inScope(char[] packageName) {
@@ -508,6 +511,8 @@ public class AllTypesCache {
 	 */
 	public static boolean isIndexUpToDate() {
 		class TypeFoundException extends RuntimeException {
+			// No really serializable
+			private static final long serialVersionUID= 1L;
 		}
 		ITypeNameRequestor requestor= new ITypeNameRequestor() {
 			public void acceptClass(char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
