@@ -1852,7 +1852,7 @@ class InstanceMethodMover {
 
 	public RefactoringStatus checkInitialState(IProgressMonitor pm) {
 		try{
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			return fMethodToMove.checkCanBeMoved();
 		}finally{
 			pm.done();
@@ -1860,7 +1860,7 @@ class InstanceMethodMover {
 	}
 
 	public RefactoringStatus checkInput(IProgressMonitor pm) throws JavaModelException {
-		pm.beginTask("", 1);
+		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			Assert.isNotNull(fNewReceiver, "New receiver must be chosen before checkInput(..) is called."); //$NON-NLS-1$
 			return fNewReceiver.checkMoveOfMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
@@ -1871,7 +1871,7 @@ class InstanceMethodMover {
 
 	public IChange createChange(IProgressMonitor pm) throws CoreException {
 		try{		
-			pm.beginTask("", 1);
+			pm.beginTask("", 1); //$NON-NLS-1$
 			return fNewReceiver.moveMethodToMe(fMethodToMove, fNewMethodName, fOriginalReceiverParameterName, fInlineDelegator, fRemoveDelegator);
 		}finally{
 			pm.done();
