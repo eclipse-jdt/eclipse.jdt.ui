@@ -119,7 +119,7 @@ class SearchUtil extends JavaModelUtil {
 		if (workingCopy != null) {
 			if (reconcile) {
 				synchronized (workingCopy) {
-					workingCopy.reconcile(null);
+					workingCopy.reconcile();
 					return SearchUtil.findInCompilationUnit((ICompilationUnit)workingCopy, element);
 				}
 			} else {
