@@ -591,7 +591,7 @@ public class JavaEditorPreferencePage extends PreferencePage implements IWorkben
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		editorComposite.setLayoutData(gd);		
 
-		fHighlightingColorListViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER);
+		fHighlightingColorListViewer= new TableViewer(editorComposite, SWT.SINGLE | SWT.V_SCROLL | SWT.BORDER | SWT.FULL_SELECTION);
 		fHighlightingColorListViewer.setLabelProvider(new ColorListLabelProvider());
 		fHighlightingColorListViewer.setContentProvider(new ColorListContentProvider());
 		fHighlightingColorListViewer.setSorter(new WorkbenchViewerSorter());
