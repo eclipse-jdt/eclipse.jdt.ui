@@ -18,6 +18,7 @@ public class AllTests {
 	public static Test suite ( ) {
 		TestSuite suite= new TestSuite("All Reorg Tests");
 		suite.addTest(DeleteTest.suite());
+		suite.addTest(CopyToClipboardActionTest.suite());
 		return suite;
 	}
 
