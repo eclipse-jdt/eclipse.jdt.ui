@@ -59,8 +59,6 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	 * @see PreferencePage#createControl(Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
-
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();		
 		
@@ -76,6 +74,14 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		Dialog.applyDialogFont(result);
 		return result;
 	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.BUILD_PATH_PROPERTY_PAGE);
+	}	
 	
 	private IDialogSettings getSettings() {
 		IDialogSettings javaSettings= JavaPlugin.getDefault().getDialogSettings();

@@ -42,12 +42,20 @@ public class ClasspathVariablesPreferencePage extends PreferencePage implements 
 		setDescription(PreferencesMessages.getString("ClasspathVariablesPreferencePage.description")); //$NON-NLS-1$
 		noDefaultAndApplyButton();
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
+	}	
 
 	/*
 	 * @see PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
 	 */
 	protected Control createContents(Composite parent) {
-		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.CP_VARIABLES_PREFERENCE_PAGE);
 		Control result= fVariableBlock.createContents(parent);
 		Dialog.applyDialogFont(result);
 		return result;

@@ -64,6 +64,7 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 			setDescription(PreferencesMessages.getString("JavadocConfigurationPropertyPage.IsIncorrectElement.description")); //$NON-NLS-1$
 
 		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 	}
 
 	/*
@@ -84,7 +85,6 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 		
 		fJavadocConfigurationBlock= new JavadocConfigurationBlock(getShell(), this, initialLocation);
 		Control control= fJavadocConfigurationBlock.createContents(parent);
-		WorkbenchHelp.setHelp(control, IJavaHelpContextIds.JAVADOC_CONFIGURATION_PROPERTY_PAGE);
 		control.setVisible(elem != null);
 
 		Dialog.applyDialogFont(control);

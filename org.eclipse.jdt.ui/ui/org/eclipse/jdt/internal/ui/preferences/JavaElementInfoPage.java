@@ -41,6 +41,19 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  * Copied from the ResourceInfoPage
  */
 public class JavaElementInfoPage extends PropertyPage {
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.JAVA_ELEMENT_INFO_PAGE);
+	}		
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#createContents(org.eclipse.swt.widgets.Composite)
+	 */
 	protected Control createContents(Composite parent) {
 		// ensure the page has no special buttons
 		noDefaultAndApplyButton();
@@ -127,7 +140,6 @@ public class JavaElementInfoPage extends PropertyPage {
 				packageName.setText(location.toOSString());				
 			}
 		}
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.JAVA_ELEMENT_INFO_PAGE);		
 		Dialog.applyDialogFont(composite);		
 		return composite;
 	}

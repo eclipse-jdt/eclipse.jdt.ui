@@ -59,22 +59,32 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 
 	public SourceAttachmentPropertyPage() {
 	}
+
+	/*
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);
+	}		
 	
 	/*
 	 * @see PreferencePage#createContents
 	 */
 	protected Control createContents(Composite composite) {
 		initializeDialogUnits(composite);
-		WorkbenchHelp.setHelp(composite, IJavaHelpContextIds.SOURCE_ATTACHMENT_PROPERTY_PAGE);		
-
+		Control result= createPageContent(composite);
+		Dialog.applyDialogFont(result);
+		return result;
+	}
+	
+	private Control createPageContent(Composite composite) {
 		try {
 			fRoot= getJARPackageFragmentRoot();
 			if (fRoot == null || fRoot.getKind() != IPackageFragmentRoot.K_BINARY) {
-				Control result= createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
-				Dialog.applyDialogFont(result);		
-				return result;
+				return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
 			}
-
+	
 			IPath containerPath= null;
 			IJavaProject jproject= fRoot.getJavaProject();
 			IClasspathEntry entry= fRoot.getRawClasspathEntry();
@@ -88,23 +98,18 @@ public class SourceAttachmentPropertyPage extends PropertyPage implements IStatu
 					if (entry == null) {
 						IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 						String containerName= container != null ? container.getDescription() : containerPath.toString();
-						Control result= createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
-						Dialog.applyDialogFont(result);		
-						return result;
+						return createMessageContent(composite, PreferencesMessages.getFormattedString("SourceAttachmentPropertyPage.containerentry.message", containerName));  //$NON-NLS-1$
 					}
 				}
 			}
 			fSourceAttachmentBlock= new SourceAttachmentBlock(this, entry, containerPath, jproject);
-			Control result= fSourceAttachmentBlock.createControl(composite);				
-			Dialog.applyDialogFont(result);
-			return result;		
+			return fSourceAttachmentBlock.createControl(composite);				
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
-			Control result= createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
-			Dialog.applyDialogFont(result);
-			return result;		
-		}		
+			return createMessageContent(composite, PreferencesMessages.getString("SourceAttachmentPropertyPage.noarchive.message"));  //$NON-NLS-1$
+		}
 	}
+	
 	
 	private Control createMessageContent(Composite composite, String message) {
 		Composite inner= new Composite(composite, SWT.NONE);

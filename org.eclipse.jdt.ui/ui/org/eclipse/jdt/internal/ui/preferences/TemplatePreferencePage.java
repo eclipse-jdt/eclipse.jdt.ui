@@ -137,6 +137,15 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		fTemplates= Templates.getInstance();
 	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	 */
+	public void createControl(Composite parent) {
+		super.createControl(parent);
+		WorkbenchHelp.setHelp(getControl(), IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
+	}	
 
 	/*
 	 * @see PreferencePage#createContents(Composite)
@@ -318,8 +327,6 @@ public class TemplatePreferencePage extends PreferencePage implements IWorkbench
 
 		updateButtons();
         configureTableResizing(innerParent, buttons, table, column1, column2, column3);
-
-		WorkbenchHelp.setHelp(parent, IJavaHelpContextIds.TEMPLATE_PREFERENCE_PAGE);
 		
 		Dialog.applyDialogFont(parent);		
 		return parent;
