@@ -138,11 +138,20 @@ public final class ProjectTemplateStore {
 			fProjectStore.restoreDefaults();
 		}
 	}
+	
 	public void save() throws IOException {
 		if (fProjectStore == null) {
 			fInstanceStore.save();
 		} else {
 			fProjectStore.save();
+		}
+	}
+	
+	public void revertChanges() throws IOException {
+		if (fProjectStore != null) {
+			// nothing to do
+		} else {
+			fInstanceStore.load();
 		}
 	}
 }
