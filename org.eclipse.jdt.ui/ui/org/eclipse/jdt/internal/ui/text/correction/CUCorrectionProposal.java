@@ -252,24 +252,29 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		for (int i= 0; i < linked.length; i++) {
 			GroupDescription curr= linked[i];
 			String name= curr.getName(); // name used as key for link mode proposals & as kind for linked mode
-			IRegion range= change.getNewTextRange(curr.getTextEdits());
-			if (range != null && name != null) {
-				ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
-				if (linkedModeProposals != null && linkedModeProposals.length > 1) {
-					manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
-				} else {
-					manager.addPosition(range.getOffset(), range.getLength(), name);
-				}
-				if (i == 0) {
-					editor.setInitialOffset(range.getOffset());
+			TextEdit[] textEdits= curr.getTextEdits();
+			if (name != null && textEdits.length > 0) {
+				IRegion range= change.getNewTextRange(textEdits);
+				if (range != null) {	// all edits could be deleted
+					ICompletionProposal[] linkedModeProposals= getLinkedModeProposals(name);
+					if (linkedModeProposals != null && linkedModeProposals.length > 1) {
+						manager.addPosition(range.getOffset(), range.getLength(), name, linkedModeProposals);
+					} else {
+						manager.addPosition(range.getOffset(), range.getLength(), name);
+					}
+					if (i == 0) {
+						editor.setInitialOffset(range.getOffset());
+					}
 				}
 			}
 		}
 			
 		if (selection != null) {
-			IRegion range= change.getNewTextRange(selection.getTextEdits());
-			if (range != null) {
-				editor.setFinalCaretOffset(range.getOffset() + range.getLength());
+			TextEdit[] textEdits= selection.getTextEdits();
+			if (textEdits.length > 0) {
+				IRegion range= change.getNewTextRange(textEdits);
+				if (range != null)
+					editor.setFinalCaretOffset(range.getOffset() + range.getLength());
 			}					
 		} else {
 			int cursorPosition= viewer.getSelectedRange().x;
