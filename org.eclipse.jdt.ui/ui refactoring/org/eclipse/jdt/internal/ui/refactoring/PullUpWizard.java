@@ -39,9 +39,11 @@ public class PullUpWizard extends RefactoringWizard {
 	private void setPageTitle() throws JavaModelException {
 		IType initialSetting= getPullUpRefactoring().getDeclaringType();
 		IType superType= getPullUpRefactoring().getSuperType(new NullProgressMonitor());
-		setPageTitle(getPageTitle() + " members declared in: " 
-							 + JavaModelUtil.getFullyQualifiedName(initialSetting)
-		                     + " to: " + JavaModelUtil.getFullyQualifiedName(superType));
+		String title= RefactoringMessages.getFormattedString("PullUpWizard.pageTitleKey", //$NON-NLS-1$
+			new String[]{getPageTitle(), 
+						 JavaModelUtil.getFullyQualifiedName(initialSetting),
+						 JavaModelUtil.getFullyQualifiedName(superType)});
+		setPageTitle(title);
 	}
 	
 	private PullUpRefactoring getPullUpRefactoring(){

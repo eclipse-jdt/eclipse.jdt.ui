@@ -240,7 +240,9 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}
 
 	private void updateTypeHierarchyLabel(){
-		fTypeHierarchyLabel.setText("&Type Hierarchy. Selected " + getCheckedMethods().length + " method(s) to delete.");
+		String message= RefactoringMessages.getFormattedString("PullUpInputPage.hierarchyLabal", //$NON-NLS-1$
+						new Integer(getCheckedMethods().length).toString());
+		fTypeHierarchyLabel.setText(message);
 	}	
 	
 	private void createTreeAndSourceViewer(Composite superComposite) {
@@ -390,7 +392,7 @@ public class PullUpInputPage extends UserInputWizardPage {
 		try{	
 			showInSourceViewer((ISourceReference)first);
 		} 	catch (JavaModelException e){
-			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), "See log"); //$NON-NLS-1$
+			ExceptionHandler.handle(e, RefactoringMessages.getString("PullUpInputPage.pull_up1"), RefactoringMessages.getString("PullUpInputPage.see_log")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -425,11 +427,13 @@ public class PullUpInputPage extends UserInputWizardPage {
 	}
 
 	private static String createLabelText(ISourceReference entry) {
-		if (entry instanceof IMethod)
-			return "&Source of method: '" + ((IMethod)entry).getElementName()+ "' declared in type '" + JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType()) + "'";
-		else if (entry instanceof IType)	
-			return  "&Source of type: '" + JavaModelUtil.getFullyQualifiedName((IType)entry) + "'";
-		else
+		if (entry instanceof IMethod){
+			return RefactoringMessages.getFormattedString("PullUpInputPage.method", //$NON-NLS-1$
+					 new String[]{((IMethod)entry).getElementName(), JavaModelUtil.getFullyQualifiedName(((IMethod)entry).getDeclaringType())});
+		} else if (entry instanceof IType) {	
+			return  RefactoringMessages.getFormattedString("PullUpInputPage.type",  //$NON-NLS-1$
+					JavaModelUtil.getFullyQualifiedName((IType)entry));
+		} else
 			return ""; //$NON-NLS-1$
 	}
 	

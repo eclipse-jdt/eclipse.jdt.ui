@@ -45,8 +45,12 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	}
 	
 	public void setVisible(boolean visible){
-		if (visible)
-			setDescription(getMoveRefactoring().getMovedMembers().length + " member(s) from \'" + JavaModelUtil.getFullyQualifiedName(getMoveRefactoring().getDeclaringType()) + "\'.");
+		if (visible){
+			String message= RefactoringMessages.getFormattedString("MoveMembersInputPage.descriptionKey", //$NON-NLS-1$
+				new String[]{new Integer(getMoveRefactoring().getMovedMembers().length).toString(),
+						 	 JavaModelUtil.getFullyQualifiedName(getMoveRefactoring().getDeclaringType())});
+			setDescription(message);
+		}	
 		super.setVisible(visible);	
 	}
 	
@@ -58,14 +62,14 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		composite.setLayout(gl);
 		
 		Label label= new Label(composite, SWT.NONE);
-		label.setText("&Select destination type:");
+		label.setText(RefactoringMessages.getString("MoveMembersInputPage.destination")); //$NON-NLS-1$
 		label.setLayoutData(new GridData());
 		
 		fTextField= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
 		Button button= new Button(composite, SWT.PUSH);
-		button.setText("&Browse...");
+		button.setText(RefactoringMessages.getString("MoveMembersInputPage.browse")); //$NON-NLS-1$
 		button.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(new SelectionAdapter(){
@@ -91,7 +95,7 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		try {
 			getMoveRefactoring().setDestinationTypeFullyQualifiedName(fTextField.getText());
 		} catch(JavaModelException e) {
-			ExceptionHandler.handle(e, "Move Member", "Unexpected exception. See log for details.");
+			ExceptionHandler.handle(e, RefactoringMessages.getString("MoveMembersInputPage.move_Member"), RefactoringMessages.getString("MoveMembersInputPage.exception")); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -134,10 +138,10 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 		int elementKinds= IJavaSearchConstants.CLASS | IJavaSearchConstants.INTERFACE;
 		IJavaSearchScope scope= createWorkspaceSourceScope();
 		TypeSelectionDialog dialog= new TypeSelectionDialog(getShell(), getWizard().getContainer(), elementKinds, scope);
-		dialog.setTitle("Choose Type");
-		dialog.setMessage("&Choose a type (? = any character, * = any string):");
-		dialog.setUpperListLabel("&Matching types:");
-		dialog.setLowerListLabel("&Qualifier:");
+		dialog.setTitle(RefactoringMessages.getString("MoveMembersInputPage.choose_Type")); //$NON-NLS-1$
+		dialog.setMessage(RefactoringMessages.getString("MoveMembersInputPage.dialogMessage")); //$NON-NLS-1$
+		dialog.setUpperListLabel(RefactoringMessages.getString("MoveMembersInputPage.upperListLabel")); //$NON-NLS-1$
+		dialog.setLowerListLabel(RefactoringMessages.getString("MoveMembersInputPage.lowerListLabel")); //$NON-NLS-1$
 		dialog.setMatchEmptyString(false);
 		dialog.setFilter(createInitialFilter());
 		if (dialog.open() == Dialog.CANCEL)
@@ -147,10 +151,10 @@ public class MoveMembersInputPage extends UserInputWizardPage {
 	}
 
 	private String createInitialFilter() {
-		if (! fTextField.getText().trim().equals(""))
+		if (! fTextField.getText().trim().equals("")) //$NON-NLS-1$
 			return fTextField.getText();
 		else
-			return "A";	
+			return RefactoringMessages.getString("MoveMembersInputPage.initialFiler");	 //$NON-NLS-1$
 	}
 	
 	private MoveMembersRefactoring getMoveRefactoring(){
