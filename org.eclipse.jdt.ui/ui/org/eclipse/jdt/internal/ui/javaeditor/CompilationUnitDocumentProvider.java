@@ -691,23 +691,6 @@ public class CompilationUnitDocumentProvider extends FileDocumentProvider implem
 	}
 
 	/**
-	 * Returns all working copies manages by this document provider.
-	 * 
-	 * @return all managed working copies 
-	 */
-	public ICompilationUnit[] getAllWorkingCopies() {
-		List result= new ArrayList(10);
-		for (Iterator iter= getConnectedElements(); iter.hasNext();) {
-			ElementInfo element= getElementInfo(iter.next());
-			if (element instanceof CompilationUnitInfo) {
-				CompilationUnitInfo info= (CompilationUnitInfo)element;
-				result.add(info.fCopy);
-			}
-		}
-		return (ICompilationUnit[]) result.toArray(new ICompilationUnit[result.size()]);
-	}
-	
-	/**
 	 * Returns the preference whether handling temporary problems is enabled.
 	 */
 	protected boolean isHandlingTemporaryProblems() {
