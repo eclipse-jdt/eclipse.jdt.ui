@@ -221,6 +221,7 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 			result.merge(Checks.checkCompilationUnitName(getNameForNewCu()));
 			result.merge(checkConstructorParameterNames(new SubProgressMonitor(pm, 1)));
+			result.merge(checkTypeNameInPackage());
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1));
 			result.merge(validateModifiesFiles());
 			return result;
@@ -229,6 +230,14 @@ public class MoveInnerToTopRefactoring extends Refactoring{
 		} finally {
 			pm.done();
 		}	
+	}
+
+	private RefactoringStatus checkTypeNameInPackage() throws JavaModelException {
+		IType type= Checks.findTypeInPackage(getInputTypePackage(), fType.getElementName());
+		if (type == null || ! type.exists())
+			return null;
+		String message= RefactoringCoreMessages.getFormattedString("MoveInnerToTopRefactoring.type_exists", new String[]{fType.getElementName(), getInputTypePackage().getElementName()}); //$NON-NLS-1$
+		return RefactoringStatus.createFatalErrorStatus(message);
 	}
 
 	private RefactoringStatus checkConstructorParameterNames(IProgressMonitor pm) throws JavaModelException{
