@@ -2423,6 +2423,9 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.SPELLING_USER_DICTIONARY, ""); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.SPELLING_PROPOSAL_THRESHOLD, 20);
 		store.setDefault(PreferenceConstants.SPELLING_ENABLE_CONTENTASSIST, false);
+
+		// override default extended text editor prefs
+		store.setDefault(ExtendedTextEditorPreferenceConstants.EDITOR_USE_CUSTOM_CARETS, true);
 		
 		// work in progress
 		WorkInProgressPreferencePage.initDefaults(store);	
