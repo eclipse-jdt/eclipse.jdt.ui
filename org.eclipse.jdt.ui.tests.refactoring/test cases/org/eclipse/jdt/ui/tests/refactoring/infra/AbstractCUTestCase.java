@@ -93,10 +93,10 @@ public abstract class AbstractCUTestCase extends TestCase {
 		String[] refactoredCode= Strings.convertIntoLines(refactored.substring(index));
 		index= proofed.indexOf(';');
 		String[] proofedCode= Strings.convertIntoLines(proofed.substring(index));
-		assertEquals("Length difference", proofedCode.length, refactoredCode.length);
 		for (int i= 0; i < proofedCode.length; i++) {
 			assertEquals("Line " + (i + 1) + " different: ", proofedCode[i], refactoredCode[i]);
 		}
+		assertEquals("Length difference", proofedCode.length, refactoredCode.length);
 	}
 			
 }
