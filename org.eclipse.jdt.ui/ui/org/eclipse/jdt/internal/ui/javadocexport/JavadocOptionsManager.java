@@ -16,6 +16,7 @@ import java.util.StringTokenizer;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -38,7 +39,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -82,12 +83,14 @@ public class JavadocOptionsManager {
 	private boolean fNoDeprecatedlist;
 	private boolean fAuthor;
 	private boolean fVersion;
+	private boolean fUse;
 
 	public final static String PRIVATE= "private";
 	public final static String PROTECTED= "protected";
 	public final static String PACKAGE= "package";
 	public final static String PUBLIC= "public";
 
+	public final static String USE="use";
 	public final static String NOTREE= "notree";
 	public final static String NOINDEX= "noindex";
 	public final static String NONAVBAR= "nonavbar";
@@ -112,6 +115,7 @@ public class JavadocOptionsManager {
 	public final String NAME= "name";
 	public final String PATH= "path";
 	private final String FROMSTANDARD= "fromStandard";
+	private final String ANTPATH= "antpath";
 	
 	public JavadocOptionsManager(IDialogSettings settings, IWorkspaceRoot root, ISelection selection) {
 		this(null, settings, root, selection);	
@@ -154,6 +158,7 @@ public class JavadocOptionsManager {
 
 	if(settings!= null){
 		fPackages= new ArrayList();
+		
 		//getValidSelection will also find the project
 		IStructuredSelection selection= getValidSelection(sel);
 		fPackages= selection.toList();
@@ -175,11 +180,15 @@ public class JavadocOptionsManager {
 		}
 
 		//load a destination even if a custom doclet is being used
-		fDestination= settings.get(DESTINATION);		IPath path = null;				if ((fDestination == null) || fDestination.equals("")) {			path = null;			if (fProject != null) {				URL url = JavaDocLocations.getProjectJavadocLocation(fProject);				//uses default if source is has http protocol				if (url == null || !url.getProtocol().equals("file")) {					fDestination =						fProject							.getProject()							.getLocation()							.addTrailingSeparator()							.append("doc")							.toOSString();				} else {					//must do this to remove leading "/"					File file = new File(url.getFile());					IPath tpath = new Path(file.getPath());					fDestination = tpath.toOSString();				}			} else				fDestination = "";		}				if (fProject != null) {
-			path= fProject.getProject().getLocation();
-			fAntpath= path.addTrailingSeparator().append("javadoc.xml").toOSString();
-		} else
-			fAntpath= "";
+		fDestination= settings.get(DESTINATION);		IPath path = null;				if ((fDestination == null) || fDestination.equals("")) {			path = null;			if (fProject != null) {				URL url = JavaDocLocations.getProjectJavadocLocation(fProject);				//uses default if source is has http protocol				if (url == null || !url.getProtocol().equals("file")) {					fDestination =						fProject							.getProject()							.getLocation()							.addTrailingSeparator()							.append("doc")							.toOSString();				} else {					//must do this to remove leading "/"					File file = new File(url.getFile());					IPath tpath = new Path(file.getPath());					fDestination = tpath.toOSString();				}			} else				fDestination = "";		}		
+		fAntpath = settings.get(ANTPATH);
+		if (fAntpath == null) {
+			if (fProject != null) {
+				path = fProject.getProject().getLocation();
+				fAntpath = path.addTrailingSeparator().append("javadoc.xml").toOSString();
+			} else
+				fAntpath = "";
+		}
 					fTitle= settings.get(TITLE);		if(fTitle==null)			fTitle="";	
 		fStylesheet= settings.get(STYLESHEETFILE);
 		if (fStylesheet == null)
@@ -193,6 +202,7 @@ public class JavadocOptionsManager {
 		if (fOverview == null)
 			fOverview= "";
 
+		fUse= loadbutton(settings.get(USE));
 		fAuthor= loadbutton(settings.get(AUTHOR));
 		fVersion= loadbutton(settings.get(VERSION));
 		fNodeprecated= loadbutton(settings.get(NODEPRECATED));
@@ -239,6 +249,7 @@ public class JavadocOptionsManager {
 		fAdditionalParams= "";
 		fOverview= "";
 
+		fUse= true;
 		fAuthor= true;
 		fVersion= true;
 		fNodeprecated= false;
@@ -310,10 +321,26 @@ public class JavadocOptionsManager {
 		fPackages= new ArrayList();
 		if (fProject != null) {
 			try {
-				for (int i= 0; i < names.size(); i++) {
-					String name= (String) names.get(i);
-					IJavaElement el= JavaModelUtil.findTypeContainer(fProject, name);
-					fPackages.add(el);
+				for (int i = 0; i < names.size(); i++) {
+					String name = (String) names.get(i);
+
+					if (name.endsWith(".java")) {
+						IPath path = new Path(name);
+						IFile re = fRoot.getFileForLocation(path);
+
+						if (re != null && re.exists()) {
+							IJavaElement el = JavaCore.createCompilationUnitFrom(re);
+							if (el != null) {
+								ICompilationUnit cu = (ICompilationUnit) el;
+								fPackages.add(JavaModelUtil.findPrimaryType(cu));
+							}
+						}
+
+					} else {
+						IJavaElement el = JavaModelUtil.findTypeContainer(fProject, name);
+						fPackages.add(el);
+					}
+
 				}
 			} catch (JavaModelException e) {
 				JavaPlugin.logErrorMessage(e.getMessage());
@@ -337,6 +364,7 @@ public class JavadocOptionsManager {
 		fTitle= element.getAttribute(TITLE);		fAdditionalParams= element.getAttribute(EXTRAOPTIONS);
 		fOverview= element.getAttribute(OVERVIEW);
 
+		fUse= loadbutton(element.getAttribute(USE));
 		fAuthor= loadbutton(element.getAttribute(AUTHOR));
 		fVersion= loadbutton(element.getAttribute(VERSION));
 		fNodeprecated= loadbutton(element.getAttribute(NODEPRECATED));
@@ -414,6 +442,8 @@ public class JavadocOptionsManager {
 			return fAuthor;
 		else if (flag.equals(VERSION))
 			return fVersion;
+		else if(flag.equals(USE))
+			return fUse;
 		else if (flag.equals(NODEPRECATED))
 			return fNodeprecated;
 		else if (flag.equals(NODEPRECATEDLIST))
@@ -470,6 +500,8 @@ public class JavadocOptionsManager {
 		args.add("-" + fAccess);
 
 		if (fFromStandard) {
+			if(fUse)
+				args.add("-use");
 			if (fVersion)
 				args.add("-version");
 			if (fAuthor)
@@ -546,6 +578,7 @@ public class JavadocOptionsManager {
 		settings.put(DESTINATION, fDestination);
 		settings.put(VISIBILITY, fAccess);
 
+		settings.put(USE, fUse);
 		settings.put(AUTHOR, fAuthor);
 		settings.put(VERSION, fVersion);
 		settings.put(NODEPRECATED, fNodeprecated);
@@ -561,7 +594,9 @@ public class JavadocOptionsManager {
 			settings.put(OVERVIEW, fOverview);
 		if (!fStylesheet.equals(""))
 			settings.put(STYLESHEETFILE, fStylesheet);
-		if(!fTitle.equals(""))			settings.put(TITLE, fTitle);
+		if(!fTitle.equals(""))			settings.put(TITLE, fTitle);
+		if(!fAntpath.equals(""))
+			settings.put(ANTPATH, fAntpath);
 		return settings;
 	}
 
@@ -625,6 +660,8 @@ public class JavadocOptionsManager {
 
 		if (flag.equals(AUTHOR))
 			this.fAuthor= value;
+		else if(flag.equals(USE))
+			this.fUse= value;
 		else if (flag.equals(VERSION))
 			this.fVersion= value;
 		else if (flag.equals(NODEPRECATED))
@@ -727,10 +764,7 @@ public class JavadocOptionsManager {
 						if (cu.isWorkingCopy()) {
 							cu= (ICompilationUnit) cu.getOriginalElement();
 						}
-						IType primaryType= JavaModelUtil.findPrimaryType(cu);
-						if (primaryType != null) {
-							return primaryType;
-						}
+						return cu;
 					}
 			}
 		} catch (JavaModelException e) {

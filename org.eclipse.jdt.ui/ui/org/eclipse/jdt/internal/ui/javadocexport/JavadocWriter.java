@@ -101,6 +101,7 @@ public class JavadocWriter {
 
 		xmlJavadocDesc.setAttribute(store.DESTINATION, store.getDestination());
 		xmlJavadocDesc.setAttribute(store.VISIBILITY, store.getAccess());
+		xmlJavadocDesc.setAttribute(store.USE, booleanToString(store.getBoolean("use")));
 		xmlJavadocDesc.setAttribute(store.NOTREE, booleanToString(store.getBoolean("notree")));
 		xmlJavadocDesc.setAttribute(store.NONAVBAR, booleanToString(store.getBoolean("nonavbar")));
 		xmlJavadocDesc.setAttribute(store.NOINDEX, booleanToString(store.getBoolean("noindex")));

@@ -58,18 +58,8 @@ public class JavadocMemberContentProvider implements ITreeContentProvider {
 		try {
 			ArrayList primaries= new ArrayList();
 			if (inputElement instanceof IPackageFragment) {
-
 				ICompilationUnit[] cu= ((IPackageFragment) inputElement).getCompilationUnits();
-				for (int i= 0; i < cu.length; i++) {
-					IType type= JavaModelUtil.findPrimaryType(cu[i]);
-					if (type != null)
-						primaries.add(type);
-				}
-				return primaries.toArray();
-			} else if (inputElement instanceof ICompilationUnit) {
-				IType type= JavaModelUtil.findPrimaryType((ICompilationUnit) inputElement);
-				if (type != null)
-					return new Object[] { type };
+				return cu;
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);

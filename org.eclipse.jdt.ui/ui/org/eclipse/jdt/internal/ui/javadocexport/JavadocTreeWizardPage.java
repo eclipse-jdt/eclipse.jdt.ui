@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -33,11 +34,11 @@ import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -46,10 +47,10 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.core.JavaProject;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.jarpackager.CheckboxTreeAndListGroup;
 import org.eclipse.jdt.internal.ui.javadocexport.JavadocWizardPage.EnableSelectionAdapter;
 import org.eclipse.jdt.internal.ui.preferences.JavadocPreferencePage;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -58,7 +59,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	private JavadocProjectContentProvider fProjectContentProvider;
 	private JavaElementLabelProvider fProjectLabelProvider;
-	private JavadocCheckboxTreeAndListGroup fInputGroup;
+	private CheckboxTreeAndListGroup fInputGroup;
 
 	protected IWorkspaceRoot fRoot;
 	protected String fWorkspace;
@@ -88,6 +89,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	protected boolean docletselected;
 	
 	private JavadocOptionsManager fStore;
+	private List resources;
 
 	protected StatusInfo fDestinationStatus;
 	protected StatusInfo fDocletStatus;
@@ -150,7 +152,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		ITreeContentProvider treeContentProvider= new JavadocProjectContentProvider();
 		ITreeContentProvider listContentProvider= new JavadocMemberContentProvider();
 		fInputGroup=
-			new JavadocCheckboxTreeAndListGroup(
+			new CheckboxTreeAndListGroup(
 				c,
 				fStore.getRoot(),
 				treeContentProvider,
@@ -175,11 +177,12 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		} catch(JavaModelException e) {
 			JavaPlugin.logErrorMessage(e.getMessage());
 		}
+		
+
 		if (fStore.getJavaProject() != null) {
-			fInputGroup.getTreeViewer().expandToLevel(fStore.getJavaProject(), 4);
+			fInputGroup.expandTreeToLevel(fStore.getJavaProject(), 4);
 		}
-//		fInputGroup.aboutToOpen();
-//		fInputGroup.refresh();
+		fInputGroup.aboutToOpen();
 	}
 
 	private void createVisibilitySet(Composite composite) {
@@ -334,7 +337,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 	}
 
 	private String getDestinationText() {
-		Object[] els= fInputGroup.getTreeViewer().getCheckedElements();
+		Object[] els= fInputGroup.getAllCheckedTreeItems().toArray();
 
 		try {
 			for (int i= 0; i < els.length; i++) {
@@ -382,7 +385,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 		for (int i = 0; i < packagenames.length; i++) {
 			if(packagenames[i] instanceof IJavaElement) {
 					IJavaElement element = (IJavaElement)packagenames[i];
-					if (element instanceof IType) {
+					if (element instanceof ICompilationUnit) {
 						fInputGroup.initialCheckListItem(element);
 					} else
 						fInputGroup.initialCheckTreeItem(element);	
@@ -441,24 +444,53 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				
 			Iterator checkedElements= fInputGroup.getAllCheckedListItems();
 			List list= new ArrayList();
+			this.resources= new ArrayList();
 
 			while (checkedElements.hasNext()) {
-				Object element= checkedElements.next();
-				if (element instanceof IType) {
-					IType type= (IType) element;
-					IPackageFragment pack= type.getPackageFragment();
-					if (fInputGroup.getTreeViewer().getGrayed(pack) || pack.isDefaultPackage()) {
-						String qn=JavaModelUtil.getFullyQualifiedName(type);
-						list.add(qn);
+				Object element = checkedElements.next();
+				if (element instanceof ICompilationUnit) {
+					ICompilationUnit unit = (ICompilationUnit) element;
+					IJavaElement el = unit.getParent();
+					if (el instanceof IPackageFragment) {
+						IPackageFragment pack= (IPackageFragment)el;
+						if (fInputGroup.getGreyCheckedTreeItems(pack) || pack.isDefaultPackage()) {
+
+							try {
+								IResource re = unit.getCorrespondingResource();
+
+								//Create a list of resources for which Javadoc will be generated
+								this.resources.add(re);
+
+								IPath p = re.getLocation();
+								String qn = p.toOSString();
+
+								list.add(qn);
+							} catch (JavaModelException e) {
+								JavaPlugin.log(e);
+							}
+
+						}
 					}
 				}
 			}
-			Object[] checkedTreeElements= fInputGroup.getTreeViewer().getCheckedElements();
+			Object[] checkedTreeElements= fInputGroup.getAllCheckedTreeItems().toArray();
 			for (int i= 0; i < checkedTreeElements.length; i++) {
 				Object element= checkedTreeElements[i];
 				if (element instanceof IPackageFragment) {
 					IPackageFragment pack= (IPackageFragment) element;
-					if (!fInputGroup.getTreeViewer().getGrayed(pack) && !pack.isDefaultPackage()) {
+					if (!fInputGroup.getGreyCheckedTreeItems(pack) && !pack.isDefaultPackage()) {
+						
+						try {
+							ICompilationUnit[] units= pack.getCompilationUnits();
+							for (int j = 0; j < units.length; j++) {
+								ICompilationUnit un= units[j];
+								IResource re= un.getCorrespondingResource();
+								resources.add(re);
+							}
+						} catch(JavaModelException e) {
+							JavaPlugin.log(e);
+						}
+						
 						
 						String en= pack.getElementName();
 						list.add(en);
@@ -619,6 +651,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			return new Path(fDestinationText.getText());
 		}
 		return null;
+	}
+	
+	public List getResources() {
+		return resources;
 	}
 
 } //end Class

@@ -39,7 +39,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
  *	Combines a CheckboxTreeViewer and CheckboxListViewer.
  *	All viewer selection-driven interactions are handled within this viewer
  */
-class CheckboxTreeAndListGroup implements ICheckStateListener, ISelectionChangedListener, ITreeViewerListener {
+public class CheckboxTreeAndListGroup implements ICheckStateListener, ISelectionChangedListener, ITreeViewerListener {
 
 	private Object fRoot;
 	private Object fCurrentTreeSelection;
@@ -782,5 +782,13 @@ class CheckboxTreeAndListGroup implements ICheckStateListener, ISelectionChanged
 				fListViewer.setCheckedElements(((List) items.get(key)).toArray());
 			}
 		}
-	}			
+	}		
+	
+	public boolean getGreyCheckedTreeItems(Object object) {
+		return fTreeViewer.getGrayed(object);	
+	}	
+	
+	public void expandTreeToLevel(Object object, int level) {
+		fTreeViewer.expandToLevel(object, level);	
+	}
 }

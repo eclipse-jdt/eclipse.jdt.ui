@@ -42,6 +42,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	protected FlaggedButton fNavigatorCheck;
 	protected FlaggedButton fIndexCheck;
 	protected FlaggedButton fSeperatedIndexCheck;
+	protected FlaggedButton fUse;
 	protected Button fStyleSheetBrowseButton;
 	protected Button fStyleSheetButton;
 	protected Button fAntBrowseButton;
@@ -121,12 +122,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		createBasicOptionsGroup(fUpperComposite);
 		createTagOptionsGroup(fUpperComposite);
 		createStyleSheetGroup(fUpperComposite);
+		
 
 		//fSeparator= new Label(fUpperComposite, SWT.HORIZONTAL | SWT.SEPARATOR);
 		//fSeparator.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 4, 0));
 		//fSeparator.setVisible(false);
 
 		createExtraOptionsGroup(fLowerComposite);
+		createAntGroup(fLowerComposite);
 
 		setControl(fComposite);
 
@@ -138,6 +141,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 		fBasicOptionsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
 		fBasicOptionsGroup.setText("Basic Options");
 
+		fUse= new FlaggedButton(fBasicOptionsGroup, "Generate &use page", new GridData(GridData.FILL_HORIZONTAL), fStore.USE, true);
 		fHierarchyCheck= new FlaggedButton(fBasicOptionsGroup, "Ge&nerate hierarchy tree", new GridData(GridData.FILL_HORIZONTAL), fStore.NOTREE, false);
 		fNavigatorCheck= new FlaggedButton(fBasicOptionsGroup, "Genera&te navigator bar", new GridData(GridData.FILL_HORIZONTAL), fStore.NONAVBAR, false);
 
@@ -156,7 +160,7 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	private void createTagOptionsGroup(Composite composite) {
 		fTagsGroup= new Group(composite, SWT.SHADOW_ETCHED_IN);
 		fTagsGroup.setLayout(createGridLayout(1));
-		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 2, 0));
+		fTagsGroup.setLayoutData(createGridData(GridData.FILL_HORIZONTAL | GridData.FILL_HORIZONTAL, 2, 0));
 		fTagsGroup.setText("Document these tags");
 
 		fAuthorCheck= new FlaggedButton(fTagsGroup, "@&author", new GridData(GridData.FILL_HORIZONTAL), fStore.AUTHOR, true);
@@ -214,10 +218,14 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 	}
 
 	private void createExtraOptionsGroup(Composite composite) {
+		Composite c= new Composite(composite, SWT.NONE);
+		c.setLayout(createGridLayout(3));
+		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 3, 0));
+		((GridLayout) c.getLayout()).marginWidth= 0;
 
-		fOverViewButton= createButton(composite, SWT.CHECK, "&Overview:", createGridData(1));
-		fOverViewText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fOverViewBrowseButton= createButton(composite, SWT.PUSH, "Bro&wse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		fOverViewButton= createButton(c, SWT.CHECK, "&Overview:", createGridData(1));
+		fOverViewText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fOverViewBrowseButton= createButton(c, SWT.PUSH, "Bro&wse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
 		SWTUtil.setButtonDimensionHint(fOverViewBrowseButton);
 
 		String str= fStore.getOverview();
@@ -230,22 +238,13 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			fOverViewText.setText(str);
 		}
 
-		Label jdocLocationLabel= createLabel(composite, SWT.NONE, "Extra &Javadoc options (path names with white spaces must be enclosed in quotes):", createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0));
+		Label jdocLocationLabel= createLabel(composite, SWT.NONE, "Extra Javadoc options (path names with white spaces must be enclosed in quotes):", createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 3, 0));
 		fExtraOptionsText= createText(composite, SWT.MULTI | SWT.BORDER | SWT.WRAP, null, createGridData(GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 3, 0));
 		//fExtraOptionsText.setSize(convertWidthInCharsToPixels(60), convertHeightInCharsToPixels(10));
 
 		str= fStore.getAdditionalParams();
 		fExtraOptionsText.setText(str);
-
-		fAntButton= createButton(composite, SWT.CHECK, "&Ant script:", createGridData(1));
-		fAntText= createText(composite, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fAntText.setText(fStore.getAntpath());
-		fAntText.setEnabled(false);
-		fAntBrowseButton= createButton(composite, SWT.PUSH, "&Browse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
-		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
-		fAntBrowseButton.setEnabled(false);
-
-		fCheckbrowser= createButton(composite, SWT.CHECK, "O&pen generated index file in browser", createGridData(3));		
+		
 		
 		//Listeners
 		fOverViewButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fOverViewBrowseButton, fOverViewText }) {
@@ -266,6 +265,28 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 			}
 		});
 
+
+	}
+
+	private void createAntGroup(Composite composite) {
+		Composite c= new Composite(composite, SWT.NONE);
+		c.setLayout(createGridLayout(3));
+		c.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 3, 0));
+		((GridLayout) c.getLayout()).marginWidth= 0;
+		
+		fAntButton= createButton(c, SWT.CHECK, "Save the settings of this Javadoc export as an Ant Script:", createGridData(3));
+		Label AntLabel= createLabel(c, SWT.NONE, "&Ant Script: ", createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
+		fAntText= createText(c, SWT.SINGLE | SWT.BORDER, null, createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fAntText.setText(fStore.getAntpath());
+		fAntText.setEnabled(false);
+		fAntBrowseButton= createButton(c, SWT.PUSH, "&Browse...", createGridData(GridData.HORIZONTAL_ALIGN_END, 1, 0));
+		
+		
+		SWTUtil.setButtonDimensionHint(fAntBrowseButton);
+		fAntBrowseButton.setEnabled(false);
+		
+		fCheckbrowser= createButton(c, SWT.CHECK, "O&pen generated index file in browser", createGridData(3));		
+		
 		fAntButton.addSelectionListener(new ToggleSelectionAdapter(new Control[] { fAntText, fAntBrowseButton }) {
 			public void validate() {
 				doValidation(ANTSTATUS);
@@ -356,16 +377,22 @@ public class JavadocSpecificsWizardPage extends JavadocWizardPage {
 
 	protected void finish() {
 				if(fTitleButton.getSelection())			fStore.setTitle(fTitleText.getText());		else fStore.setTitle("");
-		Object[] buttons= fButtonsList.toArray();
-		for (int i= 0; i < buttons.length; i++) {
-			FlaggedButton button= (FlaggedButton) buttons[i];
-			if (button.getButton().getEnabled())
-				fStore.setBoolean(button.getFlag(), !(button.getButton().getSelection() ^ button.show()));
-			else
-				fStore.setBoolean(button.getFlag(), false == button.show());
-		}
 
-		//@ToDo		String str= fExtraOptionsText.getText();
+	//don't store the buttons if they are not enabled
+	//this will change when there is a single page aimed at the standard doclet
+		if (!fPredecessor.getCustom()) {
+			Object[] buttons = fButtonsList.toArray();
+			for (int i = 0; i < buttons.length; i++) {
+				FlaggedButton button = (FlaggedButton) buttons[i];
+				if (button.getButton().getEnabled())
+					fStore.setBoolean(
+						button.getFlag(),
+						!(button.getButton().getSelection() ^ button.show()));
+				else
+					fStore.setBoolean(button.getFlag(), false == button.show());
+			}
+		}
+		String str= fExtraOptionsText.getText();
 		if (str.length() > 0) 			fStore.setAdditionalParams(str);
 		else fStore.setAdditionalParams("");				if (fOverViewText.getEnabled())
 			fStore.setOverview(fOverViewText.getText());

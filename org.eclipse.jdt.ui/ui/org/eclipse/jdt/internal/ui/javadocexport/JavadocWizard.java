@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.MessageFormat;
+import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -26,6 +27,9 @@ import org.eclipse.debug.core.Launch;
 import org.eclipse.debug.core.model.IProcess;
 import org.eclipse.debug.ui.IDebugUIConstants;
 
+import org.eclipse.swt.widgets.Display;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -43,6 +47,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenExternalJavadocAction;
+import org.eclipse.jdt.internal.ui.jarpackager.ConfirmSaveModifiedResourcesDialog;
 
 public class JavadocWizard extends Wizard implements IExportWizard {
 
@@ -90,10 +95,12 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 	 * @see IWizard#performFinish()
 	 */
 	public boolean performFinish() {
-
+		
 		//writes the new settings to store
 		fJTWPage.finish();
 		fJSWPage.finish();
+		
+		checkPreconditions(fJTWPage.getResources());
 
 		fDestination= new Path(fStore.getDestination());
 		fDestination.toFile().mkdirs();
@@ -126,6 +133,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		}
 
 		String[] args= fStore.createArgumentArray();
+	
 		if (!executeJavadocGeneration(args))
 			return false;
 		
@@ -175,6 +183,57 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		return false;
 
 	}
+	
+	private void checkPreconditions(List resources) {
+		IFile[] unSavedFiles= ConfirmSaveModifiedResourcesDialog.getUnsavedFiles(resources);	
+		saveModifiedResourcesIfUserConfirms(unSavedFiles);
+	}
+	
+	/**
+	 * Asks to confirm to save the modified resources
+	 * and save them if OK is pressed.
+	 * 
+	 * @return true if user pressed OK and save was successful.
+	 */
+	private boolean saveModifiedResourcesIfUserConfirms(IFile[] dirtyFiles) {
+		if (confirmSaveModifiedResources(dirtyFiles))
+			return ConfirmSaveModifiedResourcesDialog.saveModifiedResources(getShell(), dirtyFiles);
+
+		// Report unsaved files
+		//@Change 
+		//for (int i= 0; i < dirtyFiles.length; i++)
+		//	System.out.println(dirtyFiles[i].getFullPath().toOSString());
+		return false;
+	}	
+
+	/**
+	 * Asks the user to confirm to save the modified resources.
+	 * 
+	 * @return true if user pressed OK.
+	 */
+	private boolean confirmSaveModifiedResources(IFile[] dirtyFiles) {
+		if (dirtyFiles == null || dirtyFiles.length == 0)
+			return true;
+
+		// Get display for further UI operations
+		Display display= getShell().getDisplay();
+		if (display == null || display.isDisposed())
+			return false;
+
+		// Ask user to confirm saving of all files
+		final ConfirmSaveModifiedResourcesDialog dlg= new ConfirmSaveModifiedResourcesDialog(getShell(), dirtyFiles);
+		final int[] intResult= new int[1];
+		Runnable runnable= new Runnable() {
+			public void run() {
+				intResult[0]= dlg.open();
+			}
+		};
+		display.syncExec(runnable);
+
+		return intResult[0] == IDialogConstants.OK_ID;
+	}
+
+
 
 	/*
 	 * @see IWizard#addPages()
