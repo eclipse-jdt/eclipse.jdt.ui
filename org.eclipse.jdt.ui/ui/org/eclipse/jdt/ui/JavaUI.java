@@ -33,11 +33,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.AbstractElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.launcher.MainTypeSelectionDialog;
-import org.eclipse.jdt.internal.ui.launcher.MultiMainTypeSelectionDialog;
 
 /**
  * Central access point for the Java UI plug-in (id <code>"org.eclipse.jdt.ui"</code>).

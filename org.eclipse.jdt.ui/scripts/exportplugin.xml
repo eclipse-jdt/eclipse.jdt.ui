@@ -22,17 +22,14 @@
 		<copy file="plugin.xml" todir="${dest}"/>
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy file="plugin.jars" todir="${dest}"/>
-		<copy file="snippetsupport.jar" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
 		<zip zipfile="${dest}/jdtsrc.zip">
 		    <fileset dir="core refactoring" />
 		    <fileset dir="ui refactoring" />
-		    <fileset dir="ui debug" />
 		    <fileset dir="ui" />
 		    <fileset dir="core codemanipulation" />
-		    <fileset dir="nls" />
   		</zip>		
 	</target>
 </project>

@@ -1,28 +1,24 @@
+package org.eclipse.jdt.internal.ui.dialogs;
+
 /*
  * (c) Copyright IBM Corp. 2000, 2001.
  * All Rights Reserved.
  */
-package org.eclipse.jdt.internal.ui.launcher;
  
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.operation.IRunnableContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.help.WorkbenchHelp;
-
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.TwoPaneElementSelector;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.MainMethodSearchEngine;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.help.WorkbenchHelp;
 
 /**
  * A dialog to select a type from a list of types. The dialog allows

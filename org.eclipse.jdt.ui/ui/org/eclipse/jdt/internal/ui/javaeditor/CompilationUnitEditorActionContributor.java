@@ -32,8 +32,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 	protected GotoErrorAction fPreviousError;
 	protected GotoErrorAction fNextError;
 	
-	protected RetargetTextEditorAction fDisplay;
-	protected RetargetTextEditorAction fInspect;
+	//protected RetargetTextEditorAction fDisplay;
+	//protected RetargetTextEditorAction fInspect;
 	
 	
 	public CompilationUnitEditorActionContributor() {
@@ -53,8 +53,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fNextError= new GotoErrorAction("NextError.", true); //$NON-NLS-1$
 		fNextError.setImageDescriptor(JavaPluginImages.DESC_TOOL_GOTO_NEXT_ERROR);
 		
-		fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
-		fInspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
+		//fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
+		//Inspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
 	}
 	
 	/**
@@ -74,8 +74,8 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fAddImportOnSelection);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fOrganizeImports);
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
+			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
+			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
 	}
 	
@@ -113,15 +113,15 @@ public class CompilationUnitEditorActionContributor extends BasicEditorActionCon
 		fPreviousError.setEditor(textEditor);
 		fNextError.setEditor(textEditor);
 		
-		IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
-		if (updateAction instanceof IUpdate) {
-			((IUpdate)updateAction).update();
-		}
-		fDisplay.setAction(updateAction); 
-		updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
-		if (updateAction instanceof IUpdate) {
-			((IUpdate)updateAction).update();
-		}
-		fInspect.setAction(updateAction);
+		//IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
+		//if (updateAction instanceof IUpdate) {
+			//((IUpdate)updateAction).update();
+		//}
+		//fDisplay.setAction(updateAction); 
+		//updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
+		//if (updateAction instanceof IUpdate) {
+			//((IUpdate)updateAction).update();
+		//}
+		//fInspect.setAction(updateAction);
 	}
 }

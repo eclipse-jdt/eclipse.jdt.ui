@@ -27,8 +27,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 	protected TogglePresentationAction fTogglePresentationAction;
 	protected RetargetTextEditorAction fShowJavaDoc;
 	
-	protected RetargetTextEditorAction fDisplay;
-	protected RetargetTextEditorAction fInspect;
+	//protected RetargetTextEditorAction fDisplay;
+	//protected RetargetTextEditorAction fInspect;
 	
 	/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 	protected ToggleTextHoverAction fToggleTextHover;
@@ -45,8 +45,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover= new ToggleTextHoverAction();
-		fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
-		fInspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
+		//fDisplay= new RetargetTextEditorAction(bundle, "DisplayAction."); //$NON-NLS-1$	
+		//fInspect= new RetargetTextEditorAction(bundle, "InpsectAction."); //$NON-NLS-1$
 	}
 	
 	/**
@@ -66,8 +66,8 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_OPEN, fShowJavaDoc);
 			
 			editMenu.add(new Separator(IContextMenuConstants.GROUP_ADDITIONS));	
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
+			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fInspect);		
+			//editMenu.appendToGroup(IContextMenuConstants.GROUP_ADDITIONS, fDisplay);
 		}
 	}
 	
@@ -103,15 +103,15 @@ public class ClassFileEditorActionContributor extends BasicTextEditorActionContr
 		/* 1GEYIIA: ITPJUI:WINNT - Hover Toggle not available for classfile editors */
 		fToggleTextHover.setEditor(textEditor);
 		
-		IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
-		if (updateAction instanceof IUpdate) {
-			((IUpdate)updateAction).update();
-		}
-		fDisplay.setAction(updateAction); 
-		updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
-		if (updateAction instanceof IUpdate) {
-			((IUpdate)updateAction).update();
-		}
-		fInspect.setAction(updateAction);
+		//IAction updateAction= getAction(textEditor, "Display"); //$NON-NLS-1$
+		//if (updateAction instanceof IUpdate) {
+		//	((IUpdate)updateAction).update();
+		//}
+		//fDisplay.setAction(updateAction); 
+		//updateAction= getAction(textEditor, "Inspect"); //$NON-NLS-1$
+		//if (updateAction instanceof IUpdate) {
+		//	((IUpdate)updateAction).update();
+		//}
+		//fInspect.setAction(updateAction);
 	}
 }

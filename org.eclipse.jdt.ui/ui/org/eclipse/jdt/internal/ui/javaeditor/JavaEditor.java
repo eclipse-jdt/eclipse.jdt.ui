@@ -14,7 +14,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.debug.ui.display.InspectAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.AddMethodEntryBreakpointAction;
 import org.eclipse.jdt.internal.ui.actions.AddWatchpointAction;
@@ -131,8 +130,6 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		addAction(menu, ITextEditorActionConstants.GROUP_FIND, "OpenSuperImplementation");
 		menu.appendToGroup(ITextEditorActionConstants.GROUP_FIND, new ShowInPackageViewAction());
 		
-		addAction(menu, "Inspect"); //$NON-NLS-1$
-		addAction(menu, "Display"); //$NON-NLS-1$
 		addAction(menu, "RunToLine"); //$NON-NLS-1$
 
 	}			
@@ -323,12 +320,7 @@ public abstract class JavaEditor extends AbstractTextEditor implements ISelectio
 		
 		setAction("ShowJavaDoc", new TextOperationAction(JavaEditorMessages.getResourceBundle(), "ShowJavaDoc.", this, ISourceViewer.INFORMATION));
 		
-		setAction("Display", new EditorDisplayAction(this, true)); //$NON-NLS-1$
 		setAction("RunToLine", new RunToLineAction(this)); //$NON-NLS-1$
-		setAction("Inspect", new InspectAction(this, true)); //$NON-NLS-1$
-		
-		markAsSelectionDependentAction("Display", true);
-		markAsSelectionDependentAction("Inspect", true);
 		
 		StructuredSelectionProvider provider= StructuredSelectionProvider.createFrom(getSite().getWorkbenchWindow().getSelectionService());
 		setAction("OpenSuperImplementation", new OpenSuperImplementationAction(provider)); //$NON-NLS-1$

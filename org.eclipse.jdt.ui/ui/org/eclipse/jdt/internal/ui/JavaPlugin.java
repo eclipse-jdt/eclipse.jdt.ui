@@ -47,7 +47,6 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.launcher.VMPreferencePage;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 import org.eclipse.jdt.internal.ui.preferences.ClasspathVariablesPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.CodeFormatterPreferencePage;
@@ -58,7 +57,6 @@ import org.eclipse.jdt.internal.ui.preferences.JavaDebugPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaEditorPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.TemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringPreferencePage;
-import org.eclipse.jdt.internal.ui.snippeteditor.SnippetFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
 import org.eclipse.jdt.launching.JavaRuntime;
@@ -74,7 +72,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	private CompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
-	private FileDocumentProvider fSnippetDocumentProvider;
 	private JavaTextTools fJavaTextTools;
 	private ProblemMarkerManager fProblemMarkerManager;
 	private ImageDescriptorRegistry fImageDescriptorRegistry;
@@ -224,12 +221,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fClassFileDocumentProvider == null)
 			fClassFileDocumentProvider= new ClassFileDocumentProvider();
 		return fClassFileDocumentProvider;
-	}
-	
-	public IDocumentProvider getSnippetDocumentProvider() {
-		if (fSnippetDocumentProvider == null)
-			fSnippetDocumentProvider= new SnippetFileDocumentProvider();
-		return fSnippetDocumentProvider;
 	}
 
 	public IWorkingCopyManager getWorkingCopyManager() {
