@@ -198,7 +198,7 @@ public class RemoteTestRunner implements TestListener {
 			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.classnamemissing")); //$NON-NLS-1$
 
 		if (fPort == -1)
-			throw new IllegalArgumentException(JUnitMessages.getString("RemoterTestRunner.error.portmissing")); //$NON-NLS-1$
+			throw new IllegalArgumentException(JUnitMessages.getString("RemoteTestRunner.error.portmissing")); //$NON-NLS-1$
 		if (fDebugMode)
 			System.out.println("keepalive "+fKeepAlive); //$NON-NLS-1$
 	}
