@@ -55,7 +55,7 @@ public class SemanticHighlightingTest extends TestCase {
 		
 		protected void setUp() throws Exception {
 			super.setUp();
-			EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
+			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, LINKED_FOLDER);
 			
 			IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 			if (!store.getBoolean(PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED))
