@@ -38,10 +38,8 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
@@ -57,6 +55,9 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.actions.ActionContext;
@@ -98,6 +99,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.ProblemsLabelDecorator.ProblemsLabelChangedEvent;
 import org.eclipse.jdt.ui.actions.CCPActionGroup;
+import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
@@ -106,6 +108,7 @@ import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -824,6 +827,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private CompositeActionGroup fActionGroups;
 
 	private IPropertyChangeListener fPropertyChangeListener;
+	/**
+	 * Custom filter action group.
+	 * @since 3.0
+	 */
+	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 	
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -961,18 +969,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fPostSelectionChangedListeners.remove(listener);	
 	}
 	
-	private void registerToolbarActions() {
+	private void registerToolbarActions(IActionBars actionBars) {
 		
-		IToolBarManager toolBarManager= getSite().getActionBars().getToolBarManager();
+		IToolBarManager toolBarManager= actionBars.getToolBarManager();
 		if (toolBarManager != null) {	
-			toolBarManager.add(new ClassOnlyAction());		
 			toolBarManager.add(new LexicalSortingAction());
 			
-			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "JavaOutlineViewer"); //$NON-NLS-1$
+			fMemberFilterActionGroup= new MemberFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage"); //$NON-NLS-1$
 			fMemberFilterActionGroup.contributeToToolBar(toolBarManager);
 
+			fCustomFiltersActionGroup.fillActionBars(actionBars);
+			
+			IMenuManager menu= actionBars.getMenuManager();
+			menu.add(new Separator("EndFilterGroup")); //$NON-NLS-1$
+			
 			fToggleLinkingAction= new ToggleLinkingAction(this);
-			toolBarManager.add(fToggleLinkingAction);
+			menu.add(new ClassOnlyAction());		
+			menu.add(fToggleLinkingAction);
 		}
 	}
 	
@@ -992,7 +1005,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		initDragAndDrop();
 		fOutlineViewer.setContentProvider(new ChildrenProvider());
 		fOutlineViewer.setLabelProvider(new DecoratingJavaLabelProvider(lprovider));
-		
 		
 		Object[] listeners= fSelectionChangedListeners.getListeners();
 		for (int i= 0; i < listeners.length; i++) {
@@ -1048,8 +1060,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
 			fOutlineViewer.addPostSelectionChangedListener(updater);
 		}
-		
-		registerToolbarActions();
+		// Custom filter group
+		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer);
+
+		registerToolbarActions(bars);
 				
 		fOutlineViewer.setInput(fInput);	
 	}
