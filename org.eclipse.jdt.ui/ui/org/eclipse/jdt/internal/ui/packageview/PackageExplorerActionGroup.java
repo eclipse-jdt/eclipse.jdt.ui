@@ -68,10 +68,8 @@ import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.MemberFilterActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
-import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.actions.ProjectActionGroup;
 import org.eclipse.jdt.ui.actions.RefactorActionGroup;
-import org.eclipse.jdt.ui.actions.RefreshAction;
 import org.eclipse.jdt.ui.actions.ShowActionGroup;
 
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;

@@ -13,7 +13,6 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
@@ -25,12 +24,8 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.SelectionProviderAction;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 
 /**
  * Show the current selection in the Navigator view 
