@@ -42,6 +42,14 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
  * </p>
  */
 public class JavaTextTools {
+	
+	private final static String[] LEGAL_CONTENT_TYPES= new String[] {
+		IJavaPartitions.JAVA_DOC,
+		IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+		IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+		IJavaPartitions.JAVA_STRING,
+		IJavaPartitions.JAVA_CHARACTER
+	};
 
 	/**
 	 * This tools' preference listener. 
@@ -69,7 +77,6 @@ public class JavaTextTools {
 	private JavaDocScanner fJavaDocScanner;
 	/** The Java partitions scanner. */
 	private FastJavaPartitionScanner fPartitionScanner;	
-	
 	/** The preference store. */
 	private IPreferenceStore fPreferenceStore;
 	/**
@@ -276,16 +283,7 @@ public class JavaTextTools {
 	 * @return a newly created Java document partitioner
 	 */
 	public IDocumentPartitioner createDocumentPartitioner() {
-		
-		String[] types= new String[] {
-			IJavaPartitions.JAVA_DOC,
-			IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
-			IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
-			IJavaPartitions.JAVA_STRING,
-			IJavaPartitions.JAVA_CHARACTER
-		};
-
-		return new DefaultPartitioner(getPartitionScanner(), types);
+		return new DefaultPartitioner(getPartitionScanner(), LEGAL_CONTENT_TYPES);
 	}
 	
 	/**
