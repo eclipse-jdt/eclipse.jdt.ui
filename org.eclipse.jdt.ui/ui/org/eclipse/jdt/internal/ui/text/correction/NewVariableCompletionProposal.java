@@ -162,7 +162,7 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 			FieldDeclaration newDecl= ast.newFieldDeclaration(fragment);
 			newDecl.setType(type);
 						
-			newDecl.setModifiers(evaluateFieldModifiers(astRoot));
+			newDecl.setModifiers(evaluateFieldModifiers(newTypeDecl));
 			if (fSenderBinding.isInterface()) {
 				fragment.setInitializer(ASTResolving.getInitExpression(type));
 			}
@@ -196,21 +196,17 @@ public class NewVariableCompletionProposal extends ASTRewriteCorrectionProposal 
 		return ast.newSimpleType(ast.newSimpleName("Object"));
 	}
 	
-	private int evaluateFieldModifiers(CompilationUnit cu) {
+	private int evaluateFieldModifiers(ASTNode newTypeDecl) {
 		if (fSenderBinding.isInterface()) {
-			// copy the modifiers for interface members
-			IVariableBinding[] fields= fSenderBinding.getDeclaredFields();
-			if (fields.length > 0) {
-				FieldDeclaration fieldDecl= (FieldDeclaration) cu.findDeclaringNode(fields[0]);
-				if (fieldDecl != null) {
-					return fieldDecl.getModifiers();
-				}
+			// for interface members copy the modifiers from an existing field
+			FieldDeclaration[] fieldDecls= ((TypeDeclaration) newTypeDecl).getFields();
+			if (fieldDecls.length > 0) {
+				return fieldDecls[0].getModifiers();
 			}
 			return 0;
 		}
 		int modifiers= 0;
-		ITypeBinding typeBinding= ASTResolving.getBindingOfParentType(fOriginalNode);
-		if (fSenderBinding == typeBinding) {
+		if (newTypeDecl.equals(ASTResolving.findParentType(fOriginalNode))) {
 			modifiers |= Modifier.PRIVATE;
 			if (ASTResolving.isInStaticContext(fOriginalNode)) {
 				modifiers |= Modifier.STATIC;

@@ -25,9 +25,16 @@ import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayCreation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
@@ -50,41 +57,72 @@ import org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard;
  */
 
 public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal {
-	
+
 	private Name fNode;
 	private ICompilationUnit fCompilationUnit;
 	private boolean fIsClass;
+	private IJavaElement fTypeContainer; // IType or IPackageFragment
 
 	private boolean fShowDialog;
 
-    public NewCUCompletionUsingWizardProposal(String name, ICompilationUnit cu, Name node, boolean isClass, int severity) {
-        super(name, null, severity, null);
-        
-        fCompilationUnit= cu;
-        fNode= node;
-        fIsClass= isClass;
-    	
-        if (isClass) {
-            setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
-        } else {
-            setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE));
-        }
-        fShowDialog= true;
-    }
-    
+	public NewCUCompletionUsingWizardProposal(ICompilationUnit cu, Name node, boolean isClass, IJavaElement typeContainer, int severity) {
+		super(null, null, severity, null);
+
+		fCompilationUnit= cu;
+		fNode= node;
+		fIsClass= isClass;
+		fTypeContainer= typeContainer;
+
+		String containerName= ASTResolving.getQualifier(node);
+		String typeName= ASTResolving.getSimpleName(node);
+		boolean isInnerType= typeContainer instanceof IType;
+		if (isClass) {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS));
+			if (isInnerType) {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerclass.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerclass.intype.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			} else {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createclass.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createclass.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			}
+		} else {
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE));
+			if (isInnerType) {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerinterface.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinnerinterface.intype.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			} else {
+				if (containerName.length() == 0) {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinterface.description", typeName)); //$NON-NLS-1$
+				} else {
+					setDisplayName(CorrectionMessages.getFormattedString("NewCUCompletionUsingWizardProposal.createinterface.inpackage.description", new String[] { typeName, containerName })); //$NON-NLS-1$
+				}
+			}
+		}
+		fShowDialog= true;
+	}
+
 	public void apply(IDocument document) {
 		NewElementWizard wizard= createWizard();
 		wizard.init(JavaPlugin.getDefault().getWorkbench(), new StructuredSelection(fCompilationUnit));
-		
+
 		if (fShowDialog) {
 			Shell shell= JavaPlugin.getActiveWorkbenchShell();
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			PixelConverter converter= new PixelConverter(shell);
-			
+
 			dialog.setMinimumPageSize(converter.convertWidthInCharsToPixels(70), converter.convertHeightInCharsToPixels(20));
 			dialog.create();
 			dialog.getShell().setText("New");
-			
+
 			configureWizardPage(wizard);
 			dialog.open();
 		} else {
@@ -93,7 +131,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 				NewTypeWizardPage page= configureWizardPage(wizard);
 				page.createType(null);
 			} catch (CoreException e) {
-				JavaPlugin.log(e);				
+				JavaPlugin.log(e);
 			} catch (InterruptedException e) {
 			}
 		}
@@ -110,69 +148,103 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	}
 
 	private NewTypeWizardPage configureWizardPage(NewElementWizard wizard) {
-        IWizardPage[] pages= wizard.getPages();
-        Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
+		IWizardPage[] pages= wizard.getPages();
+		Assert.isTrue(pages.length > 0 && pages[0] instanceof NewTypeWizardPage);
 
 		NewTypeWizardPage page= (NewTypeWizardPage) pages[0];
 		fillInWizardPageName(page);
 		fillInWizardPageSuperTypes(page);
 		return page;
 	}
-	
+
 	/**
 	 * Fill-in the "Package" and "Name" fields.
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageName(NewTypeWizardPage page) {
 		page.setTypeName(ASTResolving.getSimpleName(fNode), false);
-		if (fNode.isQualifiedName()) {
-			String packName= ASTResolving.getQualifier(fNode);
-			IPackageFragmentRoot root= (IPackageFragmentRoot) fCompilationUnit.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			page.setPackageFragment(root.getPackageFragment(packName), true);
+		
+		boolean isInEnclosingType= fTypeContainer instanceof IType;
+		if (isInEnclosingType) {
+			page.setEnclosingType((IType) fTypeContainer, true);
+		} else {
+			page.setPackageFragment((IPackageFragment) fTypeContainer, true);
 		}
-	}	
-	
+		page.setEnclosingTypeSelection(isInEnclosingType, true);
+	}
 
 	/**
 	 * Fill-in the "Super Class" and "Super Interfaces" fields.
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageSuperTypes(NewTypeWizardPage page) {
-        ITypeBinding type= ASTResolving.guessBindingForTypeReference(fNode, true);
-        if (type != null) {
-        	if (type.isArray()) {
-        		type= type.getElementType();
-        	}
-        	if (type.isTopLevel() || type.isMember()) {
-			    if (type.isClass() && fIsClass) {
-			        page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
-			    } else if (type.isInterface()) {
-			    	List superInterfaces = new ArrayList();
-			    	superInterfaces.add(Bindings.getFullyQualifiedName(type));
-			    	page.setSuperInterfaces(superInterfaces, true);
-			    }
-        	}
+		ITypeBinding type= getPossibleSuperTypeBinding(fNode);
+		type= ASTResolving.getTypeBinding(type);
+		if (type != null) {
+			if (type.isArray()) {
+				type= type.getElementType();
+			}
+			if (type.isTopLevel() || type.isMember()) {
+				if (type.isClass() && fIsClass) {
+					page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
+				} else if (type.isInterface()) {
+					List superInterfaces= new ArrayList();
+					superInterfaces.add(Bindings.getFullyQualifiedName(type));
+					page.setSuperInterfaces(superInterfaces, true);
+				}
+			}
 		}
 	}
+   	
+	private static ITypeBinding getPossibleSuperTypeBinding(ASTNode node) {
+		AST ast= node.getAST();
+		ASTNode parent= node.getParent();
+		while (parent instanceof Type) {
+			parent= parent.getParent();
+		}
+		switch (parent.getNodeType()) {
+			case ASTNode.METHOD_DECLARATION:
+				MethodDeclaration decl= (MethodDeclaration) parent;
+				if (decl.thrownExceptions().contains(node)) {
+					return ast.resolveWellKnownType("java.lang.Exception");
+				}
+				break;
+			case ASTNode.INSTANCEOF_EXPRESSION:
+				InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
+				return instanceofExpression.getLeftOperand().resolveTypeBinding();
+			case ASTNode.ARRAY_CREATION:
+				ArrayCreation creation= (ArrayCreation) parent;
+				if (creation.getInitializer() != null) {
+					return creation.getInitializer().resolveTypeBinding();
+				}
+				return ASTResolving.guessBindingForReference(parent);
+			case ASTNode.THROW_STATEMENT :
+				return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+			case ASTNode.TYPE_LITERAL:
+			case ASTNode.CLASS_INSTANCE_CREATION:
+			case ASTNode.CAST_EXPRESSION:
+				return ASTResolving.guessBindingForReference(parent);
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				ASTNode parentParent= parent.getParent();
+				if (parentParent.getNodeType() == ASTNode.CATCH_CLAUSE) {
+					return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
+				}
+				break;
+		}
+		return null;
+	}
+
+
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public String getAdditionalProposalInfo() {
-		StringBuffer buf= new StringBuffer();
-		buf.append("Open wizard to create ");
 		if (fIsClass) {
-			buf.append("class <b>");
+			return CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createclass.info"); //$NON-NLS-1$
 		} else {
-			buf.append("interface <b>");
+			return CorrectionMessages.getString("NewCUCompletionUsingWizardProposal.createinterface.info"); //$NON-NLS-1$
 		}
-		buf.append(ASTResolving.getSimpleName(fNode));
-		if (fNode.isQualifiedName()) {
-			buf.append("</b> in package <b>");
-			buf.append(ASTResolving.getQualifier(fNode));
-		}
-		buf.append("</b>");
-		return buf.toString();
 	}
 
 	/**
@@ -189,6 +261,14 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 */
 	public void setShowDialog(boolean showDialog) {
 		fShowDialog= showDialog;
+	}
+
+	/**
+	 * Returns <code>true</code> if is class.
+	 * @return boolean
+	 */
+	public boolean isClass() {
+		return fIsClass;
 	}
 
 }

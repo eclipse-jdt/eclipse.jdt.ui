@@ -198,17 +198,11 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 				case IProblem.UndefinedType:
 				case IProblem.FieldTypeNotFound:
 				case IProblem.ArgumentTypeNotFound:
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.ALL_TYPES, proposals);
-					break;
 				case IProblem.ReturnTypeNotFound:
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE, proposals);
-					break;
 				case IProblem.SuperclassNotFound:
 				case IProblem.ExceptionTypeNotFound:
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.CLASSES, proposals);
-					break;				
 				case IProblem.InterfaceNotFound: 
-					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, SimilarElementsRequestor.INTERFACES, proposals);
+					UnresolvedElementsSubProcessor.getTypeProposals(problemPos, proposals);
 					break;	
 				case IProblem.TypeMismatch:
 					LocalCorrectionsSubProcessor.addCastProposals(problemPos, proposals);

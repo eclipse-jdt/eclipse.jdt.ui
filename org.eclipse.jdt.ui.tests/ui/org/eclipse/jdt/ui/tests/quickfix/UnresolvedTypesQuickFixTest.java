@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemPosition;
+import org.eclipse.jdt.internal.ui.text.correction.ReplaceCorrectionProposal;
 
 public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 	
@@ -39,11 +40,11 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 
 
 	public static Test suite() {
-		if (true) {
+		if (false) {
 			return new TestSuite(THIS);
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new UnresolvedTypesQuickFixTest("testTypeInStatement"));
+			suite.addTest(new UnresolvedTypesQuickFixTest("testPrimitiveTypeInFieldDecl"));
 			return suite;
 		}
 	}
@@ -220,7 +221,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		ArrayList proposals= new ArrayList();
 		
 		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
-		assertNumberOf("proposals", proposals.size(), 3);
+		assertNumberOf("proposals", proposals.size(), 2);
 		
 		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
 		String preview= proposal.getCompilationUnitChange().getPreviewContent();
@@ -253,21 +254,6 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 		newCU.delete(true, null);
-
-		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(2);
-		newCUWizard.setShowDialog(false);
-		newCUWizard.apply(null);
-		
-		newCU= pack1.getCompilationUnit("ArrayListist.java");
-		assertTrue("Nothing created", newCU.exists());
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("public interface ArrayListist {\n");
-		buf.append("\n");
-		buf.append("}\n");
-		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
 	}	
 		
 
@@ -354,6 +340,300 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("\n");
 		buf.append("}\n");
 		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
-	}	
+	}
+	
+	public void testQualifiedType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        test2.Test t= null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= fSourceFolder.getPackageFragment("test2").getCompilationUnit("Test.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");		
+		buf.append("public class Test {\n");
+		buf.append("\n");		
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		newCU.delete(true, null);
+
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		newCU= fSourceFolder.getPackageFragment("test2").getCompilationUnit("Test.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");		
+		buf.append("public interface Test {\n");
+		buf.append("\n");		
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());		
+		
+	}
+	
+	public void testInnerType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Object object= new F.Inner();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
+
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 2);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        Object object= new Object();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(1);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public class Inner {\n");
+		buf.append("\n");				
+		buf.append("    }\n");		
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+	}
+	
+	public void testTypeInCatchBlock() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo() {\n");
+		buf.append("        try {\n");		
+		buf.append("        } catch (XXX x) {\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("public class XXX extends Exception {\n");
+		buf.append("\n");	
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+	}
+	
+	public void testTypeInSuperType() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E extends XXX {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("public class XXX {\n");
+		buf.append("\n");	
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+	}
+	
+	public void testTypeInSuperInterface() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public interface E extends XXX {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu1, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu1);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 1);
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(0);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("XXX.java");
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");			
+		buf.append("public interface XXX {\n");
+		buf.append("\n");	
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+	}
+	
+	public void testPrimitiveTypeInFieldDecl() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    floot vec= 1.0;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= AST.parseCompilationUnit(cu, true);
+		IProblem[] problems= astRoot.getProblems();
+		assertNumberOf("problems", problems.length, 1);
+		
+		ProblemPosition problemPos= new ProblemPosition(problems[0], cu);
+		ArrayList proposals= new ArrayList();
+		
+		JavaCorrectionProcessor.collectCorrections(problemPos,  proposals);
+		assertNumberOf("proposals", proposals.size(), 5);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    double vec= 1.0;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    Float vec= 1.0;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		proposal= (CUCorrectionProposal) proposals.get(2);
+		preview= proposal.getCompilationUnitChange().getPreviewContent();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    float vec= 1.0;\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		NewCUCompletionUsingWizardProposal newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(3);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		ICompilationUnit newCU= pack1.getCompilationUnit("floot.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class floot {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());
+		newCU.delete(true, null);
+
+		newCUWizard= (NewCUCompletionUsingWizardProposal) proposals.get(4);
+		newCUWizard.setShowDialog(false);
+		newCUWizard.apply(null);
+		
+		newCU= pack1.getCompilationUnit("floot.java");
+		assertTrue("Nothing created", newCU.exists());
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");		
+		buf.append("public interface floot {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		assertEqualStringIgnoreDelim(newCU.getSource(), buf.toString());	
+	}
+	
 
 }

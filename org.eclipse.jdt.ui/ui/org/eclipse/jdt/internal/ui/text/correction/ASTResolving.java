@@ -151,7 +151,7 @@ public class ASTResolving {
 			}
 			break;
 		case ASTNode.SUPER_METHOD_INVOCATION:
-			MethodInvocation superMethodInvocation= (MethodInvocation) parent;
+			SuperMethodInvocation superMethodInvocation= (SuperMethodInvocation) parent;
 			IMethodBinding superMethodBinding= ASTNodes.getMethodBinding(superMethodInvocation.getName());
 			if (superMethodBinding != null) {
 				return getParameterTypeBinding(node, superMethodInvocation.arguments(), superMethodBinding);
@@ -266,45 +266,24 @@ public class ASTResolving {
 		return null;
 	}
 	
-    public static ITypeBinding guessBindingForTypeReference(ASTNode node, boolean ignoreDeclarations) {
-    	return getTypeBinding(getPossibleTypeBinding(node, ignoreDeclarations));
+    public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
+    	return getTypeBinding(getPossibleTypeBinding(node));
     }
     	
-    private static ITypeBinding getPossibleTypeBinding(ASTNode node, boolean ignoreDeclarations) {
+    private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
     	AST ast= node.getAST();
     	ASTNode parent= node.getParent();
     	while (parent instanceof Type) {
     		parent= parent.getParent();
     	}
     	switch (parent.getNodeType()) {
-    	case ASTNode.METHOD_DECLARATION:
-			MethodDeclaration decl= (MethodDeclaration) parent;
-			if (decl.thrownExceptions().contains(node)) {
-				return ast.resolveWellKnownType("java.lang.Exception");
-			}
-			break;
-		case ASTNode.INSTANCEOF_EXPRESSION:
-			InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
-			return instanceofExpression.getLeftOperand().resolveTypeBinding();
     	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-    		if (ignoreDeclarations) {
-    			return null;
-    		}
     		return guessVariableType(((VariableDeclarationStatement) parent).fragments());
 		case ASTNode.FIELD_DECLARATION:
-    		if (ignoreDeclarations) {
-    			return null;
-    		}		
 			return guessVariableType(((FieldDeclaration) parent).fragments());
-		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
-    		if (ignoreDeclarations) {
-    			return null;
-    		}		
+		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:	
 			return guessVariableType(((VariableDeclarationExpression) parent).fragments());
 		case ASTNode.SINGLE_VARIABLE_DECLARATION:
-    		if (ignoreDeclarations) {
-    			return null;
-    		}		
 			SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
 			if (varDecl.getInitializer() != null) {
 				return varDecl.getInitializer().resolveTypeBinding();
@@ -316,12 +295,8 @@ public class ASTResolving {
 				return creation.getInitializer().resolveTypeBinding();
 			}
 			return getPossibleReferenceBinding(parent);
-        case ASTNode.CATCH_CLAUSE:
-        case ASTNode.THROW_STATEMENT:
-            return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
         case ASTNode.TYPE_LITERAL:
         case ASTNode.CLASS_INSTANCE_CREATION:
-        case ASTNode.CAST_EXPRESSION:
         	return getPossibleReferenceBinding(parent);
             					
      	}   	
@@ -549,9 +524,13 @@ public class ASTResolving {
 		return null;
 	}
 	
+	public static String getFullName(Name name) {
+		return ASTNodes.asString(name);
+	}
+	
 	public static String getQualifier(Name name) {
 		if (name.isQualifiedName()) {
-			return ASTNodes.asString(((QualifiedName) name).getQualifier());
+			return getFullName(((QualifiedName) name).getQualifier());
 		}
 		return "";
 	}

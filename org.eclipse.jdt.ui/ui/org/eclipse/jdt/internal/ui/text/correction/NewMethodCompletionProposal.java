@@ -76,7 +76,7 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 			} else {
 				methods= ((TypeDeclaration) newTypeDecl).bodyDeclarations();
 			}
-			MethodDeclaration newStub= getStub(newTypeDecl.getAST());
+			MethodDeclaration newStub= getStub(newTypeDecl);
 			
 			if (!fIsInDifferentCU) {
 				methods.add(findInsertIndex(methods, fNode.getStartPosition()), newStub);
@@ -95,11 +95,12 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		return fNode.getNodeType() != ASTNode.METHOD_INVOCATION && fNode.getNodeType() != ASTNode.SUPER_METHOD_INVOCATION;
 	}
 	
-	private MethodDeclaration getStub(AST ast) throws CoreException {
+	private MethodDeclaration getStub(ASTNode targetTypeDecl) throws CoreException {
+		AST ast= targetTypeDecl.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		
 		decl.setConstructor(isConstructor());
-		decl.setModifiers(evaluateModifiers());
+		decl.setModifiers(evaluateModifiers(targetTypeDecl));
 		decl.setName(ast.newSimpleName(getMethodName()));
 		
 		NameProposer nameProposer= new NameProposer();
@@ -132,6 +133,8 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 					body.statements().add(returnStatement);
 				}
 			}
+		} else {
+			body= ast.newBlock();
 		}
 		decl.setBody(body);
 
@@ -190,12 +193,12 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 		}
 	}
 	
-	private int evaluateModifiers() {
+	private int evaluateModifiers(ASTNode targetTypeDecl) {
 		if (fSenderBinding.isInterface()) {
-			// copy the modifiers for interface members
-			IMethodBinding[] methods= fSenderBinding.getDeclaredMethods();
-			if (methods.length > 0) {
-				return methods[0].getModifiers();
+			// for interface members copy the modifiers from an existing field
+			MethodDeclaration[] methodDecls= ((TypeDeclaration) targetTypeDecl).getMethods();
+			if (methodDecls.length > 0) {
+				return methodDecls[0].getModifiers();
 			}
 			return 0;
 		}
@@ -210,15 +213,14 @@ public class NewMethodCompletionProposal extends ASTRewriteCorrectionProposal {
 				modifiers |= Modifier.STATIC;
 			}
 
-			if (fIsInDifferentCU) {
-				modifiers |= Modifier.PUBLIC;
-			} else {
+			if (targetTypeDecl.equals(ASTResolving.findParentType(fNode))) {
 				modifiers |= Modifier.PRIVATE;
+			} else {
+				modifiers |= Modifier.PUBLIC;
 			}
 			return modifiers;
 		}
-		return Modifier.PRIVATE;
-		
+		return Modifier.PUBLIC;
 	}
 	
 	private Type evaluateMethodType(AST ast) throws CoreException {
