@@ -16,7 +16,7 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.ICodeCompletionRequestor;
+import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 /**
  * Bin to collect the proposal of the infrastructure on code assist in a java text.
  */
-public class ResultCollector implements ICodeCompletionRequestor {
+public class ResultCollector implements ICompletionRequestor {
 		
 	private class ProposalComparator implements Comparator {
 		public int compare(Object o1, Object o2) {

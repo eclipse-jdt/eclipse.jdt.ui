@@ -11,7 +11,7 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 
-import org.eclipse.jdt.core.ICodeCompletionRequestor;
+import org.eclipse.jdt.core.ICompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.core.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.JavaModelUtil;
 
-public class TemplateCollector implements ICodeCompletionRequestor {
+public class TemplateCollector implements ICompletionRequestor {
 
 	// general
 	private static final String FILE= "file"; //$NON-NLS-1$

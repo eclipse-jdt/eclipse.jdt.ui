@@ -54,8 +54,7 @@ class CustomSearchEngine extends SearchEngine {
 					scope, 
 					detailLevel, 
 					pathCollector, 
-					indexManager, 
-					progressMonitor),
+					indexManager),
 				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
 				progressMonitor);
 
