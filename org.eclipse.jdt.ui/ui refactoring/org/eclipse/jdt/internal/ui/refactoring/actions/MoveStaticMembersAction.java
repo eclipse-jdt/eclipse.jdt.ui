@@ -19,7 +19,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.structure.MoveMembersRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -32,17 +32,17 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
-public class MoveMembersAction extends SelectionDispatchAction{
+public class MoveStaticMembersAction extends SelectionDispatchAction{
 	
-	private MoveMembersRefactoring fRefactoring;
+	private MoveStaticMembersRefactoring fRefactoring;
 	private CompilationUnitEditor fEditor;
 
-	public MoveMembersAction(IWorkbenchSite site) {
+	public MoveStaticMembersAction(IWorkbenchSite site) {
 		super(site);
 		setText(RefactoringMessages.getString("RefactoringGroup.move_label"));//$NON-NLS-1$
 	}
 
-	public MoveMembersAction(CompilationUnitEditor editor) {
+	public MoveStaticMembersAction(CompilationUnitEditor editor) {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setEnabled(SelectionConverter.canOperateOn(fEditor));
@@ -108,11 +108,11 @@ public class MoveMembersAction extends SelectionDispatchAction{
 		return (elements[0] instanceof IMember) && shouldAcceptElements(elements);
 	}
 
-	private MoveMembersRefactoring createNewRefactoringInstance(Object[] elements){
+	private MoveStaticMembersRefactoring createNewRefactoringInstance(Object[] elements){
 		Set memberSet= new HashSet();
 		memberSet.addAll(Arrays.asList(elements));
 		IMember[] methods= (IMember[]) memberSet.toArray(new IMember[memberSet.size()]);
-		return new MoveMembersRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
+		return new MoveStaticMembersRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings());
 	}
 
 	private boolean shouldAcceptElements(Object[] elements) {

@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-public class MoveMembersRefactoring extends Refactoring {
+public class MoveStaticMembersRefactoring extends Refactoring {
 	
 	private IMember[] fMembers;
 	private IType fDestinationType;
@@ -56,7 +56,7 @@ public class MoveMembersRefactoring extends Refactoring {
 	private TextChangeManager fChangeManager;
 	private final ImportEditManager fImportManager;
 
-	public MoveMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
+	public MoveStaticMembersRefactoring(IMember[] elements, CodeGenerationSettings preferenceSettings){
 		Assert.isNotNull(elements);
 		Assert.isNotNull(preferenceSettings);
 		fMembers= (IMember[])SourceReferenceUtil.sortByOffset(elements);
