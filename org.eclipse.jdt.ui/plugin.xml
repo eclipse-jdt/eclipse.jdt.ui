@@ -327,23 +327,25 @@
          </description>
       </wizard>
       <wizard
-            javatype="true"
             name="%NewJavaClass.label"
             icon="icons/full/ctool16/newclass_wiz.gif"
             category="org.eclipse.jdt.ui.java"
-            class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard"
             id="org.eclipse.jdt.ui.wizards.NewClassCreationWizard">
+         <class class="org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard">
+            <parameter name="javatype" value="true"/>
+         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
          <description>
             %NewJavaClass.description
          </description>
       </wizard>
       <wizard
-            javatype="true"
             name="%NewJavaInterface.label"
             icon="icons/full/ctool16/newint_wiz.gif"
             category="org.eclipse.jdt.ui.java"
-            class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard"
             id="org.eclipse.jdt.ui.wizards.NewInterfaceCreationWizard">
+         <class class="org.eclipse.jdt.internal.ui.wizards.NewInterfaceCreationWizard">
+            <parameter name="javatype" value="true"/>
+         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
          <description>
             %NewJavaInterface.description
          </description>

@@ -147,12 +147,13 @@
             id="org.eclipse.jdt.junit">
       </category>
       <wizard
-            javatype="true"
             name="%TestCaseWizard.name"
             icon="icons/full/ctool16/new_testcase.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
-            class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
+         <class class="org.eclipse.jdt.internal.junit.wizards.NewTestCaseCreationWizard">
+            <parameter name="javatype" value="true"/>
+         </class> <!-- see bug 48164 for wrong pde compiler warnings --> 
          <description>
             %TestWizard.description
          </description>
