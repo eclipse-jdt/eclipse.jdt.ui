@@ -139,17 +139,9 @@ return ${name};
   <template description="convert collection to array" name="toarray" context="java"
   >(${type}[]) ${collection}.toArray(new ${type}[${collection}.size()]);</template>
 
-  <template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment">/*
- * (c) Copyright 2001 MyCorporation.
- * All Rights Reserved.
- */
- </template>
+  <template context="java" description="file comment used by the class and interface wizards" enabled="true" name="filecomment"></template>
  
-  <template context="java" description="type comment used by the class and interface wizards" enabled="true" name="typecomment">/**
- * @version 	1.0
- * @author
- */
- </template>
+  <template context="java" description="type comment used by the class and interface wizards" enabled="true" name="typecomment"></template>
 
   <template description="print to standard out" name="stdout" context="java"
   >System.out.println(${cursor});</template>
