@@ -78,7 +78,7 @@ public abstract class TextSelectionBasedRefactoringAction extends Action impleme
 			if (!canOperateOn()) {
 				MessageDialog.openInformation(JavaPlugin.getActiveWorkbenchShell(), 
 					getDialogTitle(),
-					"Cannot perform extract method on current text selection.");
+					"Cannot perform this refactoring on the current text selection.");
 				return;
 			}
 		} else {
