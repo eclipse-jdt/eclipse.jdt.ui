@@ -216,6 +216,18 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(5, 16, 5, 17, true, false, true, "CONSTANT");	
 	}
 	
+	public void test19() throws Exception {
+		helper1(5, 23, 5, 38, false, false, "CONSTANT");
+	}
+	
+	public void test20() throws Exception {
+		helper1(7, 19, 7, 28, false, false, "CONSTANT");
+	}
+	
+	public void test21() throws Exception {
+		helper1(4, 28, 4, 37, false, false, "CONSTANT");	
+	}
+	
 	// -- testing failing preconditions
 	public void testFail0() throws Exception{
 		failHelper1(8, 16, 8, 21, true, true, "CONSTANT");		
