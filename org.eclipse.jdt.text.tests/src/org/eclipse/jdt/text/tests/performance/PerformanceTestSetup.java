@@ -26,6 +26,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
+import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
@@ -57,16 +58,20 @@ public class PerformanceTestSetup extends TestSetup {
 		IWorkbenchWindow activeWindow= workbench.getActiveWorkbenchWindow();
 		IWorkbenchPage activePage= activeWindow.getActivePage();
 		
-		activePage.hideView(activePage.findViewReference(INTRO_VIEW));
+		IViewReference viewReference= activePage.findViewReference(INTRO_VIEW);
+		if (viewReference != null)
+			activePage.hideView(viewReference);
 		
 		workbench.showPerspective(PERSPECTIVE, activeWindow);
 		
-		boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
-		setUpProject();
-		ResourceTestHelper.fullBuild();
-		if (wasAutobuilding) {
-			ResourceTestHelper.enableAutoBuilding();
-			EditorTestHelper.joinJobs(2000, 30000, 1000);
+		if (!projectExists(PROJECT)) {
+			boolean wasAutobuilding= ResourceTestHelper.disableAutoBuilding();
+			setUpProject();
+			ResourceTestHelper.fullBuild();
+			if (wasAutobuilding) {
+				ResourceTestHelper.enableAutoBuilding();
+				EditorTestHelper.joinJobs(2000, 30000, 1000);
+			}
 		}
 	}
 	
@@ -111,5 +116,11 @@ public class PerformanceTestSetup extends TestSetup {
 		project.create(description, null);
 		project.open(null);
 		return project;
+	}
+	
+	private boolean projectExists(String projectName) {
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		IProject project= workspace.getRoot().getProject(projectName);
+		return project.exists();
 	}
 }
