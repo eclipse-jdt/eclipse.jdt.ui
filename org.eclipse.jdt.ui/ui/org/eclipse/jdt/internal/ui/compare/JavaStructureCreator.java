@@ -227,10 +227,11 @@ public class JavaStructureCreator implements IStructureCreator {
 						break;
 					default:
 						buf.append(b, scanner.startPosition, scanner.currentPosition - scanner.startPosition);
+						buf.append(' ');
 						break;
 					}
 				}
-				content= buf.toString();	// success! 
+				content= buf.toString();	// success!
 			} catch (InvalidInputException ex) {
 			}
 		}
