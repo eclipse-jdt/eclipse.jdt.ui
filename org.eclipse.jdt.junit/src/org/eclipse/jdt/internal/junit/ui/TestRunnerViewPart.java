@@ -75,10 +75,12 @@ import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
+import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.actions.ActionFactory;
@@ -217,9 +219,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private UpdateUIJob fUpdateJob;
 
 	private StopAction fStopAction;
+	protected boolean fPartIsVisible= false;
 
 
-	
 	private class StopAction extends Action {
 		public StopAction() {
 			setText(JUnitMessages.getString("TestRunnerViewPart.stopaction.text"));//$NON-NLS-1$
@@ -333,6 +335,32 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		}
 	}
 	
+	private IPartListener2 fPartListener= new IPartListener2() {
+		public void partActivated(IWorkbenchPartReference ref) {
+		}
+		public void partBroughtToTop(IWorkbenchPartReference ref) {
+		}
+	 	public void partInputChanged(IWorkbenchPartReference ref) {
+	 	}
+		public void partClosed(IWorkbenchPartReference ref) {
+		}
+		public void partDeactivated(IWorkbenchPartReference ref) {
+		}
+		public void partOpened(IWorkbenchPartReference ref) {
+		}
+		public void partVisible(IWorkbenchPartReference ref) {
+			if (ref != null && ref.getId() == getSite().getId()) {
+				fPartIsVisible= true;
+			}
+			
+		}
+		public void partHidden(IWorkbenchPartReference ref) {
+			if (ref != null && ref.getId() == getSite().getId()) {
+				fPartIsVisible= false;
+			}
+		}
+	};
+
 	public void init(IViewSite site, IMemento memento) throws PartInitException {
 		super.init(site, memento);
 		fMemento= memento;
@@ -727,6 +755,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		if (fProgressImages != null)
 			fProgressImages.dispose();
 		JUnitPlugin.getDefault().getPreferenceStore().removePropertyChangeListener(this);
+		getViewSite().getPage().removePartListener(fPartListener);
 		fTestRunOKIcon.dispose();
 		fTestRunFailIcon.dispose();
 		fStackViewIcon.dispose();
@@ -802,12 +831,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 	private void handleEndTest() {
 		//refreshCounters();
 		fProgressBar.step(fFailureCount+fErrorCount);
-		if (fShowOnErrorOnly) {
-			Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrorCount, fFailureCount);
-			if (progress != fViewImage) {
-				fViewImage= progress;
-				firePropertyChange(IWorkbenchPart.PROP_TITLE);
-			}
+		if (!fPartIsVisible) 
+			updateViewTitleProgress();
+	}
+
+	private void updateViewTitleProgress() {
+		Image progress= fProgressImages.getImage(fExecutedTests, fTestCount, fErrorCount, fFailureCount);
+		if (progress != fViewImage) {
+			fViewImage= progress;
+			firePropertyChange(IWorkbenchPart.PROP_TITLE);
 		}
 	}
 
@@ -839,7 +871,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 				if(testRunner == null) {
 					IWorkbenchPart activePart= page.getActivePart();
 					testRunner= (TestRunnerViewPart)page.showView(TestRunnerViewPart.NAME);
-					//restore focus stolen by the creation of the console
+					//restore focus 
 					page.activate(activePart);
 				} else {
 					page.bringToTop(testRunner);
@@ -1026,6 +1058,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3, I
 		fProgressImages= new ProgressImages();
 		WorkbenchHelp.setHelp(parent, IJUnitHelpContextIds.RESULTS_VIEW);
 		
+		getViewSite().getPage().addPartListener(fPartListener);
+
 		if (fMemento != null) {
 			restoreLayoutState(fMemento);
 		}
